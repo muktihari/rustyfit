@@ -5,8 +5,8 @@ edition = "2024"
 description = "This project hosts the Rust implementation for The Flexible and Interoperable Data Transfer (FIT) Protocol"
 authors = ["Hikmatulloh Hari Mukti <muktihaz@gmail.com>"]
 readme = "../README.md"
-license = "BSD 3-Clause"
-include = ["Cargo.toml", "src/**", "README.md", "LICENSE"]
+license-file = "../LICENSE"
+include = ["Cargo.toml", "src/**"]
 categories = ["encoding", "decoder", "encoder", "fit", "protocol"]
 repository = "github.com/muktihari/rustyfit"
 
