@@ -7,7 +7,7 @@ authors = ["Hikmatulloh Hari Mukti <muktihaz@gmail.com>"]
 readme = "../README.md"
 license-file = "../LICENSE"
 include = ["Cargo.toml", "src/**"]
-categories = ["encoding", "decoder", "encoder", "fit", "protocol"]
+categories = ["encoding", "parser-implementations"]
 repository = "https://github.com/muktihari/rustyfit"
 
 [dev-dependencies]
