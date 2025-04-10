@@ -1,0 +1,48 @@
+{{ define "typedef" }}
+
+#[repr(u8)]
+#[derive(Default, Debug, Clone, Copy)]
+pub enum Bool {
+    False = 0,
+    True = 1,
+    #[default]
+    Unset = 255,
+}
+
+impl From<u8> for Bool {
+    fn from(value: u8) -> Self {
+        match value {
+            0 => Bool::False,
+            1 => Bool::True,
+            _ => Bool::Unset
+        }
+    }
+}
+
+{{ range $_, $typ := .Types }}
+
+
+#[repr({{ $typ.Base }})]
+#[derive(Debug, Clone, Copy)]
+pub enum {{ $typ.TypeName }} {
+    {{ range .Constants -}} 
+    {{ .Name }} = {{ .Value }}, {{ .Comment }}
+    {{ end -}}
+    UserDefined({{ $typ.Base }}),
+}
+
+impl From<{{ $typ.Base }}> for {{ $typ.TypeName }} {
+    fn from(value: {{ $typ.Base }}) -> Self {
+        {{ if lt (len .Constants) 1 }} {{ $typ.TypeName }}::UserDefined(value) {{ else }}
+        match value {
+            {{ range .Constants -}}
+            {{ if not .IsDuplicate }} {{ .Value }} => {{ $typ.TypeName }}::{{ .Name }}, {{ end }}
+            {{ end -}}
+            _ => {{ $typ.TypeName }}::UserDefined(value),
+        }
+        {{ end }}
+    }
+}
+{{ end }}
+
+{{ end }}

@@ -1,0 +1,25 @@
+// Copyright 2023 The FIT SDK for Go Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
+package typedef
+
+type Data struct {
+	Types []Type
+}
+
+type Type struct {
+	TypeName  string
+	Base      string
+	Constants []Constant
+}
+
+type Constant struct {
+	Decorator   string
+	Name        string
+	Op          string
+	Value       string
+	String      string
+	Comment     string
+	IsDuplicate bool
+}

@@ -1,0 +1,251 @@
+# RustyFIT
+
+![GitHub Workflow Status](https://github.com/muktihari/rustyfit/workflows/CI/badge.svg)
+[![Profile Version](https://img.shields.io/badge/profile-v21.158-lightblue.svg?style=flat)](https://developer.garmin.com/fit/download)
+
+Rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) in Rust.
+
+## Current State
+
+This project serves as an exercise for me to learn Rust. I believe the fastest way to learn something new is by reinventing the wheel or rewriting something that already exists. Although this is a learning project, this library generally works, is usable, and quite fast.
+
+Missing features, test completeness, and more robust documentation may be added later through release iteration.
+
+## Usage
+
+### Decoding
+
+#### Decode
+
+Decoder's `decode` allows us to interact with FIT files directly through their original protocol messages' structure.
+
+```rust
+use rustyfit::{
+    Decoder,
+    profile::{mesgdef, typedef},
+};
+use std::{fs::File, io::BufReader};
+
+fn main() {
+    let name = "Activity.fit";
+    let f = File::open(name).unwrap();
+    let br = BufReader::new(f);
+    let mut dec = Decoder::new(br);
+
+    let fit = dec.decode().unwrap();
+
+    println!("file_header's data_size: {}", fit.file_header.data_size);
+    println!("messages count: {}", fit.messages.len());
+    for field in &fit.messages[0].fields {
+        if field.num == mesgdef::FileId::TYPE {
+            println!("file type: {}", typedef::File(field.value.as_u8()));
+        }
+    }
+    // # Output:
+    // file_header's data_size: 94080
+    // messages count: 3611
+    // file type: activity
+}
+
+```
+
+#### Decode with Closure
+
+Decoder's `decode_fn` allow us to retrieve message definition or message data event as soon as it is being decoded. This way, users can have fine-grained control on how to interact with the data.
+
+```rust
+use rustyfit::{Decoder, DecoderEvent, profile::typedef};
+use std::{fs::File, io::BufReader};
+
+fn main() {
+    let name = "Activity.fit";
+    let f = File::open(name).unwrap();
+    let br = BufReader::new(f);
+    let mut dec = Decoder::new(br);
+
+    let mut record_count = 0;
+    dec.decode_fn(|event| {
+        match event {
+            DecoderEvent::Message(mesg) => {
+                if mesg.num == typedef::MesgNum::RECORD {
+                    record_count += 1
+                }
+            },
+            DecoderEvent::MessageDefinition(_) => {}
+        };
+    })
+    .unwrap();
+
+    println!("Total records: {}", record_count);
+    // # Output
+    // Total records: 3601
+}
+
+```
+
+#### DecoderBuilder
+
+Create `Decoder` instance with options using `DecoderBuilder`.
+
+```rust
+let mut dec: Decoder = DecoderBuilder::new(br)
+        .checksum(false)
+        .expand_components(true)
+        .build();
+```
+
+### Encoding
+
+#### Encode
+
+Here is the example of manually encode FIT protocol using this library to give the idea how it works.
+
+```rust
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+};
+
+use rustyfit::{
+    Encoder,
+    profile::{
+        ProfileType, mesgdef,
+        typedef::{self},
+    },
+    proto::{FIT, Field, Message, Value},
+};
+
+fn main() {
+    let fout_name = "output.fit";
+    let fout = File::create(fout_name).unwrap();
+    let mut bw = BufWriter::new(fout);
+    let mut enc = Encoder::new(&mut bw);
+
+    let mut fit = FIT {
+        messages: vec![
+            Message {
+                num: typedef::MesgNum::FILE_ID,
+                fields: vec![
+                    Field {
+                        num: mesgdef::FileId::MANUFACTURER,
+                        base_type: typedef::FitBaseType::UINT16,
+                        profile_type: ProfileType::MANUFACTURER,
+                        value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
+                        is_expanded: false,
+                    },
+                    Field {
+                        num: mesgdef::FileId::PRODUCT,
+                        base_type: typedef::FitBaseType::UINT16,
+                        profile_type: ProfileType::UINT16,
+                        value: Value::Uint16(typedef::GarminProduct::FENIX8_SOLAR.0),
+                        is_expanded: false,
+                    },
+                    Field {
+                        num: mesgdef::FileId::TYPE,
+                        base_type: typedef::FitBaseType::UINT8,
+                        profile_type: ProfileType::UINT8,
+                        value: Value::Uint8(typedef::File::ACTIVITY.0),
+                        is_expanded: false,
+                    },
+                ],
+                ..Default::default()
+            },
+            Message {
+                num: typedef::MesgNum::RECORD,
+                fields: vec![
+                    Field {
+                        num: mesgdef::Record::DISTANCE,
+                        base_type: typedef::FitBaseType::UINT32,
+                        profile_type: ProfileType::UINT32,
+                        value: Value::Uint16(100 * 100), // 100 m
+                        is_expanded: false,
+                    },
+                    Field {
+                        num: mesgdef::Record::HEART_RATE,
+                        base_type: typedef::FitBaseType::UINT8,
+                        profile_type: ProfileType::UINT8,
+                        value: Value::Uint8(70), // 70 bpm
+                        is_expanded: false,
+                    },
+                    Field {
+                        num: mesgdef::Record::SPEED,
+                        base_type: typedef::FitBaseType::UINT16,
+                        profile_type: ProfileType::UINT16,
+                        value: Value::Uint16(2 * 1000), // 2 m/s
+                        is_expanded: false,
+                    },
+                ],
+                ..Default::default()
+            },
+        ],
+        ..Default::default()
+    };
+
+    enc.encode(&mut fit).unwrap();
+    bw.flush().unwrap();
+}
+
+```
+
+#### Encode using mesgdef module
+
+Alternatively, users can create messages using the mesgdef module for convenience.
+
+```rust
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+};
+
+use rustyfit::{
+    Encoder,
+    profile::{
+        mesgdef,
+        typedef::{self},
+    },
+    proto::{FIT, Message},
+};
+
+fn main() {
+    let fout_name = "output.fit";
+    let fout = File::create(fout_name).unwrap();
+    let mut bw = BufWriter::new(fout);
+    let mut enc = Encoder::new(&mut bw);
+
+    let mut fit = FIT {
+        messages: vec![
+            {
+                let mut file_id = mesgdef::FileId::new();
+                file_id.manufacturer = typedef::Manufacturer::GARMIN;
+                file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
+                file_id.r#type = typedef::File::ACTIVITY;
+                Message::from(file_id)
+            },
+            {
+                let mut record = mesgdef::Record::new();
+                record.distance = 100 * 100; // 100 m
+                record.heart_rate = 70; // 70 bpm
+                record.speed = 2 * 1000; // 2 m/s
+                Message::from(record)
+            },
+        ],
+        ..Default::default()
+    };
+
+    enc.encode(&mut fit).unwrap();
+    bw.flush().unwrap();
+}
+
+```
+
+#### EncoderBuilder
+
+Create `Encoder` instance with options using `EncoderBuilder`.
+
+```rust
+let mut enc: Encoder = EncoderBuilder::new(&mut bw)
+        .endianness(Endianness::BigEndian)
+        .protocol_version(ProtocolVersion::V2)
+        .header_option(HeaderOption::Compressed(3))
+        .build();
+```
