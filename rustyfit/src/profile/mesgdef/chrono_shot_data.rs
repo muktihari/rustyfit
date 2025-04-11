@@ -25,7 +25,7 @@ pub struct ChronoShotData {
 impl ChronoShotData {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const SHOT_SPEED: u8 = 0;
     /// Value's type: `u16`
     pub const SHOT_NUM: u8 = 1;
@@ -90,7 +90,6 @@ impl From<ChronoShotData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -101,7 +100,6 @@ impl From<ChronoShotData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -111,7 +109,6 @@ impl From<ChronoShotData> for Message {
         if m.shot_speed != u32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.shot_speed),
                 is_expanded: false,
@@ -121,7 +118,6 @@ impl From<ChronoShotData> for Message {
         if m.shot_num != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.shot_num),
                 is_expanded: false,

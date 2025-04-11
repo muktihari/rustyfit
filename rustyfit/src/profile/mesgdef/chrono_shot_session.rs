@@ -34,19 +34,19 @@ pub struct ChronoShotSession {
 impl ChronoShotSession {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const MIN_SPEED: u8 = 0;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 2;
     /// Value's type: `u16`
     pub const SHOT_COUNT: u8 = 3;
     /// Value's type: `u8`
     pub const PROJECTILE_TYPE: u8 = 4;
-    /// Value's type: `u32`; Scale: `10` ; Units: `gr`
+    /// Value's type: `u32`; Scale: `10`; Units: `gr`
     pub const GRAIN_WEIGHT: u8 = 5;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const STANDARD_DEVIATION: u8 = 6;
 
     /// Create new ChronoShotSession with all fields being set to its corresponding invalid value.
@@ -190,7 +190,6 @@ impl From<ChronoShotSession> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -201,7 +200,6 @@ impl From<ChronoShotSession> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -211,7 +209,6 @@ impl From<ChronoShotSession> for Message {
         if m.min_speed != u32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.min_speed),
                 is_expanded: false,
@@ -221,7 +218,6 @@ impl From<ChronoShotSession> for Message {
         if m.max_speed != u32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_speed),
                 is_expanded: false,
@@ -231,7 +227,6 @@ impl From<ChronoShotSession> for Message {
         if m.avg_speed != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_speed),
                 is_expanded: false,
@@ -241,7 +236,6 @@ impl From<ChronoShotSession> for Message {
         if m.shot_count != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.shot_count),
                 is_expanded: false,
@@ -251,7 +245,6 @@ impl From<ChronoShotSession> for Message {
         if m.projectile_type != typedef::ProjectileType(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::PROJECTILE_TYPE,
                 value: Value::Uint8(m.projectile_type.0),
                 is_expanded: false,
@@ -261,7 +254,6 @@ impl From<ChronoShotSession> for Message {
         if m.grain_weight != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.grain_weight),
                 is_expanded: false,
@@ -271,7 +263,6 @@ impl From<ChronoShotSession> for Message {
         if m.standard_deviation != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.standard_deviation),
                 is_expanded: false,

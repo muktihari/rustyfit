@@ -37,9 +37,9 @@ impl SdmProfile {
     pub const ENABLED: u8 = 0;
     /// Value's type: `u16`
     pub const SDM_ANT_ID: u8 = 1;
-    /// Value's type: `u16`; Scale: `10` ; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`
     pub const SDM_CAL_FACTOR: u8 = 2;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const ODOMETER: u8 = 3;
     /// Value's type: `u8`
     pub const SPEED_SOURCE: u8 = 4;
@@ -132,7 +132,6 @@ impl From<SdmProfile> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -143,7 +142,6 @@ impl From<SdmProfile> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -153,7 +151,6 @@ impl From<SdmProfile> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -163,7 +160,6 @@ impl From<SdmProfile> for Message {
         if m.sdm_ant_id != u16::MIN {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.sdm_ant_id),
                 is_expanded: false,
@@ -173,7 +169,6 @@ impl From<SdmProfile> for Message {
         if m.sdm_cal_factor != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.sdm_cal_factor),
                 is_expanded: false,
@@ -183,7 +178,6 @@ impl From<SdmProfile> for Message {
         if m.odometer != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.odometer),
                 is_expanded: false,
@@ -193,7 +187,6 @@ impl From<SdmProfile> for Message {
         if m.speed_source != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.speed_source.0),
                 is_expanded: false,
@@ -203,7 +196,6 @@ impl From<SdmProfile> for Message {
         if m.sdm_ant_id_trans_type != u8::MIN {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.sdm_ant_id_trans_type),
                 is_expanded: false,
@@ -213,7 +205,6 @@ impl From<SdmProfile> for Message {
         if m.odometer_rollover != u8::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.odometer_rollover),
                 is_expanded: false,

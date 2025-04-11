@@ -111,7 +111,6 @@ impl From<FieldDescription> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -122,7 +121,6 @@ impl From<FieldDescription> for Message {
         if m.developer_data_index != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.developer_data_index),
                 is_expanded: false,
@@ -132,7 +130,6 @@ impl From<FieldDescription> for Message {
         if m.field_definition_number != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_definition_number),
                 is_expanded: false,
@@ -142,7 +139,6 @@ impl From<FieldDescription> for Message {
         if m.fit_base_type_id != typedef::FitBaseType(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::FIT_BASE_TYPE,
                 value: Value::Uint8(m.fit_base_type_id.0),
                 is_expanded: false,
@@ -152,7 +148,6 @@ impl From<FieldDescription> for Message {
         if m.field_name != Vec::<String>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.field_name),
                 is_expanded: false,
@@ -162,7 +157,6 @@ impl From<FieldDescription> for Message {
         if m.array != u8::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.array),
                 is_expanded: false,
@@ -172,7 +166,6 @@ impl From<FieldDescription> for Message {
         if m.components != String::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.components),
                 is_expanded: false,
@@ -182,7 +175,6 @@ impl From<FieldDescription> for Message {
         if m.scale != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.scale),
                 is_expanded: false,
@@ -192,7 +184,6 @@ impl From<FieldDescription> for Message {
         if m.offset != i8::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.offset),
                 is_expanded: false,
@@ -202,7 +193,6 @@ impl From<FieldDescription> for Message {
         if m.units != Vec::<String>::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.units),
                 is_expanded: false,
@@ -212,7 +202,6 @@ impl From<FieldDescription> for Message {
         if m.bits != String::new() {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.bits),
                 is_expanded: false,
@@ -222,7 +211,6 @@ impl From<FieldDescription> for Message {
         if m.accumulate != String::new() {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.accumulate),
                 is_expanded: false,
@@ -232,7 +220,6 @@ impl From<FieldDescription> for Message {
         if m.fit_base_unit_id != typedef::FitBaseUnit(u16::MAX) {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::FIT_BASE_UNIT,
                 value: Value::Uint16(m.fit_base_unit_id.0),
                 is_expanded: false,
@@ -242,7 +229,6 @@ impl From<FieldDescription> for Message {
         if m.native_mesg_num != typedef::MesgNum(u16::MAX) {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.native_mesg_num.0),
                 is_expanded: false,
@@ -252,7 +238,6 @@ impl From<FieldDescription> for Message {
         if m.native_field_num != u8::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.native_field_num),
                 is_expanded: false,

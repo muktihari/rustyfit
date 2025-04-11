@@ -104,7 +104,6 @@ impl From<Totals> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -115,7 +114,6 @@ impl From<Totals> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -125,7 +123,6 @@ impl From<Totals> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -135,7 +132,6 @@ impl From<Totals> for Message {
         if m.timer_time != u32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.timer_time),
                 is_expanded: false,
@@ -145,7 +141,6 @@ impl From<Totals> for Message {
         if m.distance != u32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
@@ -155,7 +150,6 @@ impl From<Totals> for Message {
         if m.calories != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.calories),
                 is_expanded: false,
@@ -165,7 +159,6 @@ impl From<Totals> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -175,7 +168,6 @@ impl From<Totals> for Message {
         if m.elapsed_time != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.elapsed_time),
                 is_expanded: false,
@@ -185,7 +177,6 @@ impl From<Totals> for Message {
         if m.sessions != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.sessions),
                 is_expanded: false,
@@ -195,7 +186,6 @@ impl From<Totals> for Message {
         if m.active_time != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
@@ -205,7 +195,6 @@ impl From<Totals> for Message {
         if m.sport_index != u8::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sport_index),
                 is_expanded: false,

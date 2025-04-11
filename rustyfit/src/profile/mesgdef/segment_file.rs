@@ -111,7 +111,6 @@ impl From<SegmentFile> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -122,7 +121,6 @@ impl From<SegmentFile> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -132,7 +130,6 @@ impl From<SegmentFile> for Message {
         if m.file_uuid != String::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.file_uuid),
                 is_expanded: false,
@@ -142,7 +139,6 @@ impl From<SegmentFile> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -152,7 +148,6 @@ impl From<SegmentFile> for Message {
         if m.user_profile_primary_key != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.user_profile_primary_key),
                 is_expanded: false,
@@ -162,7 +157,6 @@ impl From<SegmentFile> for Message {
         if m.leader_type != Vec::<typedef::SegmentLeaderboardType>::new() {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
                 value: Value::VecUint8({
                     let mut v = Vec::with_capacity(m.leader_type.len());
@@ -178,7 +172,6 @@ impl From<SegmentFile> for Message {
         if m.leader_group_primary_key != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.leader_group_primary_key),
                 is_expanded: false,
@@ -188,7 +181,6 @@ impl From<SegmentFile> for Message {
         if m.leader_activity_id != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.leader_activity_id),
                 is_expanded: false,
@@ -198,7 +190,6 @@ impl From<SegmentFile> for Message {
         if m.leader_activity_id_string != Vec::<String>::new() {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.leader_activity_id_string),
                 is_expanded: false,
@@ -208,7 +199,6 @@ impl From<SegmentFile> for Message {
         if m.default_race_leader != u8::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_race_leader),
                 is_expanded: false,

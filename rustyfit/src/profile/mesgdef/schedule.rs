@@ -91,7 +91,6 @@ impl From<Schedule> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -102,7 +101,6 @@ impl From<Schedule> for Message {
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
@@ -112,7 +110,6 @@ impl From<Schedule> for Message {
         if m.product != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
@@ -122,7 +119,6 @@ impl From<Schedule> for Message {
         if m.serial_number != u32::MIN {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::UINT32Z,
                 value: Value::Uint32(m.serial_number),
                 is_expanded: false,
@@ -132,7 +128,6 @@ impl From<Schedule> for Message {
         if m.time_created != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.time_created.0),
                 is_expanded: false,
@@ -142,7 +137,6 @@ impl From<Schedule> for Message {
         if m.completed != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.completed.0),
                 is_expanded: false,
@@ -152,7 +146,6 @@ impl From<Schedule> for Message {
         if m.r#type != typedef::Schedule(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SCHEDULE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
@@ -162,7 +155,6 @@ impl From<Schedule> for Message {
         if m.scheduled_time != typedef::LocalDateTime(u32::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.scheduled_time.0),
                 is_expanded: false,

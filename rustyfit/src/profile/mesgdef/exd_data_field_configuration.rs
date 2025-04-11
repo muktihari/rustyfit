@@ -128,7 +128,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -140,7 +139,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.screen_index != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
@@ -150,7 +148,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.concept_field != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.concept_field),
                 is_expanded: false,
@@ -160,7 +157,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.field_id != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_id),
                 is_expanded: is_expanded(&state, 2),
@@ -170,7 +166,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.concept_count != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.concept_count),
                 is_expanded: is_expanded(&state, 3),
@@ -180,7 +175,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.display_type != typedef::ExdDisplayType(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EXD_DISPLAY_TYPE,
                 value: Value::Uint8(m.display_type.0),
                 is_expanded: false,
@@ -190,7 +184,6 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.title != [const { String::new() }; 32] {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(Vec::from(&m.title)),
                 is_expanded: false,

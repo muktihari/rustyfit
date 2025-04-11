@@ -73,7 +73,6 @@ impl From<MonitoringHrData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -84,7 +83,6 @@ impl From<MonitoringHrData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -94,7 +92,6 @@ impl From<MonitoringHrData> for Message {
         if m.resting_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resting_heart_rate),
                 is_expanded: false,
@@ -104,7 +101,6 @@ impl From<MonitoringHrData> for Message {
         if m.current_day_resting_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.current_day_resting_heart_rate),
                 is_expanded: false,

@@ -315,8 +315,7 @@ impl<R: Read> Decoder<R> {
             self.last_time_offset = time_offset;
 
             mesg.fields.push(Field {
-                num: 253,
-                base_type: FitBaseType::UINT32,
+                num: FIELD_NUM_TIMESTAMP,
                 profile_type: ProfileType::UINT32,
                 is_expanded: false,
                 value: Value::Uint32(self.timestamp),
@@ -342,7 +341,7 @@ impl<R: Read> Decoder<R> {
         // Now that all fields has been decoded, we need to expand all components and accumulate the accumulable values.
         for i in 0..mesg.fields.len() {
             let field = &mesg.fields[i];
-            if !field.value.is_valid(field.base_type) {
+            if !field.value.is_valid(field.profile_type.base_type()) {
                 continue;
             }
             let field_ref = match lookup::field_reference(mesg.num, field.num) {
@@ -390,7 +389,7 @@ impl<R: Read> Decoder<R> {
                 }
                 None => {
                     base_type = field_def.base_type;
-                    profile_type = ProfileType((base_type.0 & FitBaseType::NUM_MASK) as u16);
+                    profile_type = ProfileType::from(field_def.base_type);
                     accumulate = false;
                     array = match base_type {
                         FitBaseType::STRING => strcount(buf) > 1,
@@ -417,7 +416,6 @@ impl<R: Read> Decoder<R> {
 
             mesg.fields.push(Field {
                 num,
-                base_type,
                 profile_type,
                 is_expanded: false,
                 value,
@@ -436,7 +434,6 @@ impl<R: Read> Decoder<R> {
 
             let mut field = Field {
                 num: component.field_num,
-                base_type: field_ref.base_type,
                 profile_type: field_ref.profile_type,
                 is_expanded: true,
                 value: Value::Invalid,

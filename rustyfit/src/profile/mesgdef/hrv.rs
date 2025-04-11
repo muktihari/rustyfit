@@ -21,7 +21,7 @@ pub struct Hrv {
 }
 
 impl Hrv {
-    /// Value's type: `Vec<u16>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `s`
     pub const TIME: u8 = 0;
 
     /// Create new Hrv with all fields being set to its corresponding invalid value.
@@ -93,7 +93,6 @@ impl From<Hrv> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -104,7 +103,6 @@ impl From<Hrv> for Message {
         if m.time != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.time),
                 is_expanded: false,

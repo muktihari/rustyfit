@@ -78,7 +78,6 @@ impl From<HrmProfile> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -89,7 +88,6 @@ impl From<HrmProfile> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -99,7 +97,6 @@ impl From<HrmProfile> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -109,7 +106,6 @@ impl From<HrmProfile> for Message {
         if m.hrm_ant_id != u16::MIN {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.hrm_ant_id),
                 is_expanded: false,
@@ -119,7 +115,6 @@ impl From<HrmProfile> for Message {
         if m.log_hrv != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.log_hrv.0),
                 is_expanded: false,
@@ -129,7 +124,6 @@ impl From<HrmProfile> for Message {
         if m.hrm_ant_id_trans_type != u8::MIN {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.hrm_ant_id_trans_type),
                 is_expanded: false,

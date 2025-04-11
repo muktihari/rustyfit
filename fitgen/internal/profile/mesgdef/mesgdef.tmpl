@@ -49,9 +49,9 @@ pub struct {{ .Name }} {
 impl {{ .Name }} {
     {{ range .Fields -}}
     /// Value's type: {{ if gt .FixedArraySize 0 -}} `[{{ .BaseType0 }}; {{ .FixedArraySize }}]` {{- else if .Array -}} `Vec<{{ .BaseType0 }}>` {{- else -}} `{{ .BaseType0 }}` {{- end }}
-    {{- if ne .Scale 1.0 }}; Scale: `{{ .Scale }}` {{ end }} 
-    {{- if ne .Offset 0.0 }}; Offset: `{{ .Offset }}` {{ end }}
-    {{- if ne .Units "" }}; Units: `{{ .Units }}` {{ end }}
+    {{- if ne .Scale 1.0 }}; Scale: `{{ .Scale }}` {{- end }} 
+    {{- if ne .Offset 0.0 }}; Offset: `{{ .Offset }}` {{- end }}
+    {{- if ne .Units "" }}; Units: `{{ .Units }}` {{- end }}
     pub const {{ .NameUpperCase }}: u8 = {{ .Num }};
     {{ end }}
     /// Create new {{ .Name }} with all fields being set to its corresponding invalid value.
@@ -213,7 +213,6 @@ impl From<{{ .Name }}> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -226,7 +225,6 @@ impl From<{{ .Name }}> for Message {
         if m.{{ .Name }} != {{ .InvalidValue }} {
             arr[len] = Field {
                 num: {{ .Num }},
-                base_type: typedef::FitBaseType::{{ .BaseType }},
                 profile_type: {{ .ProfileType }},
                 value: {{ .ProtoValue }},
                 {{ if .CanExpand }} is_expanded: is_expanded(&state, {{ .Num }}), {{ else }} is_expanded: false, {{ end }}

@@ -235,9 +235,6 @@ pub struct Field {
     /// Defined in the Global FIT profile for the specified FIT message, otherwise
     /// its a manufaturer specific number (defined by manufacturer). (255 == invalid)
     pub num: u8,
-    /// Type is defined type that serves as an abstraction layer above base types (primitive-types),
-    /// e.g. DateTime is a time representation in uint32.
-    pub base_type: FitBaseType,
     /// BaseType is the base of the ProfileType. E.g. ProfileType::DateTime -> FitBaseType::Uint32.
     pub profile_type: ProfileType,
     /// Value
@@ -258,7 +255,8 @@ pub struct FieldReference<'a> {
     /// Type is defined type that serves as an abstraction layer above base types (primitive-types),
     /// e.g. DateTime is a time representation in uint32.
     pub base_type: FitBaseType,
-    /// BaseType is the base of the ProfileType. E.g. ProfileType::DateTime -> FitBaseType::Uint32.
+    /// ProfileType represents more than just a type of Value. E.g. ProfileType::DateTime -> FitBaseType::Uint32.
+    /// When an u32 value having ProfileType::DateTime as type, the value represents time.
     pub profile_type: ProfileType,
     /// Flag whether the value of this field is an array
     pub array: bool,
@@ -1197,11 +1195,11 @@ impl ProtocolValidator {
                 return Err(ProtocolError::ProtocolViolationDeveloperData);
             }
             for field in &mesg.fields {
-                if field.base_type.0 & FitBaseType::NUM_MASK
+                if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
                     > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
                 {
                     return Err(ProtocolError::ProtocolViolationUnsupportedBaseType(
-                        field.base_type,
+                        field.profile_type.base_type(),
                     ));
                 }
             }

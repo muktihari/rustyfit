@@ -47,7 +47,7 @@ pub struct DiveApneaAlarm {
 impl DiveApneaAlarm {
     /// Value's type: `u16`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const DEPTH: u8 = 0;
     /// Value's type: `i32`; Units: `s`
     pub const TIME: u8 = 1;
@@ -69,7 +69,7 @@ impl DiveApneaAlarm {
     pub const TRIGGER_ON_ASCENT: u8 = 9;
     /// Value's type: `u8`
     pub const REPEATING: u8 = 10;
-    /// Value's type: `i32`; Scale: `1000` ; Units: `mps`
+    /// Value's type: `i32`; Scale: `1000`; Units: `mps`
     pub const SPEED: u8 = 11;
 
     /// Create new DiveApneaAlarm with all fields being set to its corresponding invalid value.
@@ -170,7 +170,6 @@ impl From<DiveApneaAlarm> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -181,7 +180,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -191,7 +189,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.depth != u32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.depth),
                 is_expanded: false,
@@ -201,7 +198,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.time != i32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.time),
                 is_expanded: false,
@@ -211,7 +207,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -221,7 +216,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.alarm_type != typedef::DiveAlarmType(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DIVE_ALARM_TYPE,
                 value: Value::Uint8(m.alarm_type.0),
                 is_expanded: false,
@@ -231,7 +225,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.sound != typedef::Tone(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::TONE,
                 value: Value::Uint8(m.sound.0),
                 is_expanded: false,
@@ -241,7 +234,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.dive_types != Vec::<typedef::SubSport>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::VecUint8({
                     let mut v = Vec::with_capacity(m.dive_types.len());
@@ -257,7 +249,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.id != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.id),
                 is_expanded: false,
@@ -267,7 +258,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.popup_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.popup_enabled.0),
                 is_expanded: false,
@@ -277,7 +267,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.trigger_on_descent != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.trigger_on_descent.0),
                 is_expanded: false,
@@ -287,7 +276,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.trigger_on_ascent != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.trigger_on_ascent.0),
                 is_expanded: false,
@@ -297,7 +285,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.repeating != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.repeating.0),
                 is_expanded: false,
@@ -307,7 +294,6 @@ impl From<DiveApneaAlarm> for Message {
         if m.speed != i32::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.speed),
                 is_expanded: false,

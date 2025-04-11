@@ -103,7 +103,6 @@ impl From<SegmentId> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -114,7 +113,6 @@ impl From<SegmentId> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
@@ -124,7 +122,6 @@ impl From<SegmentId> for Message {
         if m.uuid != String::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.uuid),
                 is_expanded: false,
@@ -134,7 +131,6 @@ impl From<SegmentId> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -144,7 +140,6 @@ impl From<SegmentId> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -154,7 +149,6 @@ impl From<SegmentId> for Message {
         if m.user_profile_primary_key != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.user_profile_primary_key),
                 is_expanded: false,
@@ -164,7 +158,6 @@ impl From<SegmentId> for Message {
         if m.device_id != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.device_id),
                 is_expanded: false,
@@ -174,7 +167,6 @@ impl From<SegmentId> for Message {
         if m.default_race_leader != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_race_leader),
                 is_expanded: false,
@@ -184,7 +176,6 @@ impl From<SegmentId> for Message {
         if m.delete_status != typedef::SegmentDeleteStatus(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SEGMENT_DELETE_STATUS,
                 value: Value::Uint8(m.delete_status.0),
                 is_expanded: false,
@@ -194,7 +185,6 @@ impl From<SegmentId> for Message {
         if m.selection_type != typedef::SegmentSelectionType(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SEGMENT_SELECTION_TYPE,
                 value: Value::Uint8(m.selection_type.0),
                 is_expanded: false,

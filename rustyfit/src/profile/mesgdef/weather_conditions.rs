@@ -58,7 +58,7 @@ impl WeatherConditions {
     pub const CONDITION: u8 = 2;
     /// Value's type: `u16`; Units: `degrees`
     pub const WIND_DIRECTION: u8 = 3;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const WIND_SPEED: u8 = 4;
     /// Value's type: `u8`
     pub const PRECIPITATION_PROBABILITY: u8 = 5;
@@ -154,7 +154,6 @@ impl From<WeatherConditions> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -165,7 +164,6 @@ impl From<WeatherConditions> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -175,7 +173,6 @@ impl From<WeatherConditions> for Message {
         if m.weather_report != typedef::WeatherReport(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WEATHER_REPORT,
                 value: Value::Uint8(m.weather_report.0),
                 is_expanded: false,
@@ -185,7 +182,6 @@ impl From<WeatherConditions> for Message {
         if m.temperature != i8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.temperature),
                 is_expanded: false,
@@ -195,7 +191,6 @@ impl From<WeatherConditions> for Message {
         if m.condition != typedef::WeatherStatus(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WEATHER_STATUS,
                 value: Value::Uint8(m.condition.0),
                 is_expanded: false,
@@ -205,7 +200,6 @@ impl From<WeatherConditions> for Message {
         if m.wind_direction != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.wind_direction),
                 is_expanded: false,
@@ -215,7 +209,6 @@ impl From<WeatherConditions> for Message {
         if m.wind_speed != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.wind_speed),
                 is_expanded: false,
@@ -225,7 +218,6 @@ impl From<WeatherConditions> for Message {
         if m.precipitation_probability != u8::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.precipitation_probability),
                 is_expanded: false,
@@ -235,7 +227,6 @@ impl From<WeatherConditions> for Message {
         if m.temperature_feels_like != i8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.temperature_feels_like),
                 is_expanded: false,
@@ -245,7 +236,6 @@ impl From<WeatherConditions> for Message {
         if m.relative_humidity != u8::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.relative_humidity),
                 is_expanded: false,
@@ -255,7 +245,6 @@ impl From<WeatherConditions> for Message {
         if m.location != String::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.location),
                 is_expanded: false,
@@ -265,7 +254,6 @@ impl From<WeatherConditions> for Message {
         if m.observed_at_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.observed_at_time.0),
                 is_expanded: false,
@@ -275,7 +263,6 @@ impl From<WeatherConditions> for Message {
         if m.observed_location_lat != i32::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.observed_location_lat),
                 is_expanded: false,
@@ -285,7 +272,6 @@ impl From<WeatherConditions> for Message {
         if m.observed_location_long != i32::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.observed_location_long),
                 is_expanded: false,
@@ -295,7 +281,6 @@ impl From<WeatherConditions> for Message {
         if m.day_of_week != typedef::DayOfWeek(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DAY_OF_WEEK,
                 value: Value::Uint8(m.day_of_week.0),
                 is_expanded: false,
@@ -305,7 +290,6 @@ impl From<WeatherConditions> for Message {
         if m.high_temperature != i8::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.high_temperature),
                 is_expanded: false,
@@ -315,7 +299,6 @@ impl From<WeatherConditions> for Message {
         if m.low_temperature != i8::MAX {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.low_temperature),
                 is_expanded: false,

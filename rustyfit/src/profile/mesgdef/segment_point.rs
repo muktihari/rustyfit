@@ -45,13 +45,13 @@ impl SegmentPoint {
     pub const POSITION_LAT: u8 = 1;
     /// Value's type: `i32`; Units: `semicircles`
     pub const POSITION_LONG: u8 = 2;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const DISTANCE: u8 = 3;
-    /// Value's type: `u16`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ALTITUDE: u8 = 4;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const LEADER_TIME: u8 = 5;
-    /// Value's type: `u32`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 6;
 
     /// Create new SegmentPoint with all fields being set to its corresponding invalid value.
@@ -215,7 +215,6 @@ impl From<SegmentPoint> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -227,7 +226,6 @@ impl From<SegmentPoint> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -237,7 +235,6 @@ impl From<SegmentPoint> for Message {
         if m.position_lat != i32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
@@ -247,7 +244,6 @@ impl From<SegmentPoint> for Message {
         if m.position_long != i32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
@@ -257,7 +253,6 @@ impl From<SegmentPoint> for Message {
         if m.distance != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
@@ -267,7 +262,6 @@ impl From<SegmentPoint> for Message {
         if m.altitude != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.altitude),
                 is_expanded: false,
@@ -277,7 +271,6 @@ impl From<SegmentPoint> for Message {
         if m.leader_time != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.leader_time),
                 is_expanded: false,
@@ -287,7 +280,6 @@ impl From<SegmentPoint> for Message {
         if m.enhanced_altitude != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_altitude),
                 is_expanded: is_expanded(&state, 6),

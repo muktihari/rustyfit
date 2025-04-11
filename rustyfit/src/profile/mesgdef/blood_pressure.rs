@@ -111,7 +111,6 @@ impl From<BloodPressure> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -122,7 +121,6 @@ impl From<BloodPressure> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -132,7 +130,6 @@ impl From<BloodPressure> for Message {
         if m.systolic_pressure != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.systolic_pressure),
                 is_expanded: false,
@@ -142,7 +139,6 @@ impl From<BloodPressure> for Message {
         if m.diastolic_pressure != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.diastolic_pressure),
                 is_expanded: false,
@@ -152,7 +148,6 @@ impl From<BloodPressure> for Message {
         if m.mean_arterial_pressure != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.mean_arterial_pressure),
                 is_expanded: false,
@@ -162,7 +157,6 @@ impl From<BloodPressure> for Message {
         if m.map_3_sample_mean != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.map_3_sample_mean),
                 is_expanded: false,
@@ -172,7 +166,6 @@ impl From<BloodPressure> for Message {
         if m.map_morning_values != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.map_morning_values),
                 is_expanded: false,
@@ -182,7 +175,6 @@ impl From<BloodPressure> for Message {
         if m.map_evening_values != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.map_evening_values),
                 is_expanded: false,
@@ -192,7 +184,6 @@ impl From<BloodPressure> for Message {
         if m.heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
@@ -202,7 +193,6 @@ impl From<BloodPressure> for Message {
         if m.heart_rate_type != typedef::HrType(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::HR_TYPE,
                 value: Value::Uint8(m.heart_rate_type.0),
                 is_expanded: false,
@@ -212,7 +202,6 @@ impl From<BloodPressure> for Message {
         if m.status != typedef::BpStatus(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BP_STATUS,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,
@@ -222,7 +211,6 @@ impl From<BloodPressure> for Message {
         if m.user_profile_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.user_profile_index.0),
                 is_expanded: false,

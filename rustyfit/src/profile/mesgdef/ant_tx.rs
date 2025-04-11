@@ -36,7 +36,7 @@ pub struct AntTx {
 impl AntTx {
     /// Value's type: `u32`; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768` ; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
     /// Value's type: `u8`
     pub const MESG_ID: u8 = 1;
@@ -139,7 +139,6 @@ impl From<AntTx> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -151,7 +150,6 @@ impl From<AntTx> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -161,7 +159,6 @@ impl From<AntTx> for Message {
         if m.fractional_timestamp != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
                 is_expanded: false,
@@ -171,7 +168,6 @@ impl From<AntTx> for Message {
         if m.mesg_id != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.mesg_id),
                 is_expanded: false,
@@ -181,7 +177,6 @@ impl From<AntTx> for Message {
         if m.mesg_data != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.mesg_data),
                 is_expanded: false,
@@ -191,7 +186,6 @@ impl From<AntTx> for Message {
         if m.channel_number != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.channel_number),
                 is_expanded: is_expanded(&state, 3),
@@ -201,7 +195,6 @@ impl From<AntTx> for Message {
         if m.data != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.data),
                 is_expanded: is_expanded(&state, 4),

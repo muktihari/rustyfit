@@ -78,7 +78,6 @@ impl From<MesgCapabilities> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -89,7 +88,6 @@ impl From<MesgCapabilities> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -99,7 +97,6 @@ impl From<MesgCapabilities> for Message {
         if m.file != typedef::File(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::FILE,
                 value: Value::Uint8(m.file.0),
                 is_expanded: false,
@@ -109,7 +106,6 @@ impl From<MesgCapabilities> for Message {
         if m.mesg_num != typedef::MesgNum(u16::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.mesg_num.0),
                 is_expanded: false,
@@ -119,7 +115,6 @@ impl From<MesgCapabilities> for Message {
         if m.count_type != typedef::MesgCount(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::MESG_COUNT,
                 value: Value::Uint8(m.count_type.0),
                 is_expanded: false,
@@ -129,7 +124,6 @@ impl From<MesgCapabilities> for Message {
         if m.count != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.count),
                 is_expanded: false,

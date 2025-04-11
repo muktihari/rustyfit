@@ -13,202 +13,399 @@ pub const PROFILE_VERSION: u16 = 21158;
 pub struct ProfileType(pub u16);
 
 impl ProfileType {
+    /// FitBaseType::ENUM
     pub const ENUM: ProfileType = ProfileType(0x0000);
+    /// FitBaseType::SINT8
     pub const SINT8: ProfileType = ProfileType(0x0001);
+    /// FitBaseType::UINT8
     pub const UINT8: ProfileType = ProfileType(0x0002);
+    /// FitBaseType::SINT16
     pub const SINT16: ProfileType = ProfileType(0x0003);
+    /// FitBaseType::UINT16
     pub const UINT16: ProfileType = ProfileType(0x0004);
+    /// FitBaseType::SINT32
     pub const SINT32: ProfileType = ProfileType(0x0005);
+    /// FitBaseType::UINT32
     pub const UINT32: ProfileType = ProfileType(0x0006);
+    /// FitBaseType::STRING
     pub const STRING: ProfileType = ProfileType(0x0007);
+    /// FitBaseType::FLOAT32
     pub const FLOAT32: ProfileType = ProfileType(0x0008);
+    /// FitBaseType::FLOAT64
     pub const FLOAT64: ProfileType = ProfileType(0x0009);
+    /// FitBaseType::UINT8Z
     pub const UINT8Z: ProfileType = ProfileType(0x000A);
+    /// FitBaseType::UINT16Z
     pub const UINT16Z: ProfileType = ProfileType(0x000B);
+    /// FitBaseType::UINT32Z
     pub const UINT32Z: ProfileType = ProfileType(0x000C);
+    /// FitBaseType::BYTE
     pub const BYTE: ProfileType = ProfileType(0x000D);
+    /// FitBaseType::SINT64
     pub const SINT64: ProfileType = ProfileType(0x000E);
+    /// FitBaseType::UINT64
     pub const UINT64: ProfileType = ProfileType(0x000F);
+    /// FitBaseType::UINT64Z
     pub const UINT64Z: ProfileType = ProfileType(0x0010);
+    /// FitBaseType::ENUM
     pub const BOOL: ProfileType = ProfileType(0x0020);
+    /// FitBaseType::ENUM
     pub const FILE: ProfileType = ProfileType(0x0040);
+    /// FitBaseType::UINT16
     pub const MESG_NUM: ProfileType = ProfileType(0x0064);
+    /// FitBaseType::UINT8
     pub const CHECKSUM: ProfileType = ProfileType(0x0082);
+    /// FitBaseType::UINT8Z
     pub const FILE_FLAGS: ProfileType = ProfileType(0x00AA);
+    /// FitBaseType::ENUM
     pub const MESG_COUNT: ProfileType = ProfileType(0x00C0);
+    /// FitBaseType::UINT32
     pub const DATE_TIME: ProfileType = ProfileType(0x00E6);
+    /// FitBaseType::UINT32
     pub const LOCAL_DATE_TIME: ProfileType = ProfileType(0x0106);
+    /// FitBaseType::UINT16
     pub const MESSAGE_INDEX: ProfileType = ProfileType(0x0124);
+    /// FitBaseType::UINT8
     pub const DEVICE_INDEX: ProfileType = ProfileType(0x0142);
+    /// FitBaseType::ENUM
     pub const GENDER: ProfileType = ProfileType(0x0160);
+    /// FitBaseType::ENUM
     pub const LANGUAGE: ProfileType = ProfileType(0x0180);
+    /// FitBaseType::UINT8Z
     pub const LANGUAGE_BITS_0: ProfileType = ProfileType(0x01AA);
+    /// FitBaseType::UINT8Z
     pub const LANGUAGE_BITS_1: ProfileType = ProfileType(0x01CA);
+    /// FitBaseType::UINT8Z
     pub const LANGUAGE_BITS_2: ProfileType = ProfileType(0x01EA);
+    /// FitBaseType::UINT8Z
     pub const LANGUAGE_BITS_3: ProfileType = ProfileType(0x020A);
+    /// FitBaseType::UINT8Z
     pub const LANGUAGE_BITS_4: ProfileType = ProfileType(0x022A);
+    /// FitBaseType::ENUM
     pub const TIME_ZONE: ProfileType = ProfileType(0x0240);
+    /// FitBaseType::ENUM
     pub const DISPLAY_MEASURE: ProfileType = ProfileType(0x0260);
+    /// FitBaseType::ENUM
     pub const DISPLAY_HEART: ProfileType = ProfileType(0x0280);
+    /// FitBaseType::ENUM
     pub const DISPLAY_POWER: ProfileType = ProfileType(0x02A0);
+    /// FitBaseType::ENUM
     pub const DISPLAY_POSITION: ProfileType = ProfileType(0x02C0);
+    /// FitBaseType::ENUM
     pub const SWITCH: ProfileType = ProfileType(0x02E0);
+    /// FitBaseType::ENUM
     pub const SPORT: ProfileType = ProfileType(0x0300);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_0: ProfileType = ProfileType(0x032A);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_1: ProfileType = ProfileType(0x034A);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_2: ProfileType = ProfileType(0x036A);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_3: ProfileType = ProfileType(0x038A);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_4: ProfileType = ProfileType(0x03AA);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_5: ProfileType = ProfileType(0x03CA);
+    /// FitBaseType::UINT8Z
     pub const SPORT_BITS_6: ProfileType = ProfileType(0x03EA);
+    /// FitBaseType::ENUM
     pub const SUB_SPORT: ProfileType = ProfileType(0x0400);
+    /// FitBaseType::ENUM
     pub const SPORT_EVENT: ProfileType = ProfileType(0x0420);
+    /// FitBaseType::ENUM
     pub const ACTIVITY: ProfileType = ProfileType(0x0440);
+    /// FitBaseType::ENUM
     pub const INTENSITY: ProfileType = ProfileType(0x0460);
+    /// FitBaseType::ENUM
     pub const SESSION_TRIGGER: ProfileType = ProfileType(0x0480);
+    /// FitBaseType::ENUM
     pub const AUTOLAP_TRIGGER: ProfileType = ProfileType(0x04A0);
+    /// FitBaseType::ENUM
     pub const LAP_TRIGGER: ProfileType = ProfileType(0x04C0);
+    /// FitBaseType::ENUM
     pub const TIME_MODE: ProfileType = ProfileType(0x04E0);
+    /// FitBaseType::ENUM
     pub const BACKLIGHT_MODE: ProfileType = ProfileType(0x0500);
+    /// FitBaseType::ENUM
     pub const DATE_MODE: ProfileType = ProfileType(0x0520);
+    /// FitBaseType::UINT8
     pub const BACKLIGHT_TIMEOUT: ProfileType = ProfileType(0x0542);
+    /// FitBaseType::ENUM
     pub const EVENT: ProfileType = ProfileType(0x0560);
+    /// FitBaseType::ENUM
     pub const EVENT_TYPE: ProfileType = ProfileType(0x0580);
+    /// FitBaseType::ENUM
     pub const TIMER_TRIGGER: ProfileType = ProfileType(0x05A0);
+    /// FitBaseType::ENUM
     pub const FITNESS_EQUIPMENT_STATE: ProfileType = ProfileType(0x05C0);
+    /// FitBaseType::ENUM
     pub const TONE: ProfileType = ProfileType(0x05E0);
+    /// FitBaseType::ENUM
     pub const AUTOSCROLL: ProfileType = ProfileType(0x0600);
+    /// FitBaseType::ENUM
     pub const ACTIVITY_CLASS: ProfileType = ProfileType(0x0620);
+    /// FitBaseType::ENUM
     pub const HR_ZONE_CALC: ProfileType = ProfileType(0x0640);
+    /// FitBaseType::ENUM
     pub const PWR_ZONE_CALC: ProfileType = ProfileType(0x0660);
+    /// FitBaseType::ENUM
     pub const WKT_STEP_DURATION: ProfileType = ProfileType(0x0680);
+    /// FitBaseType::ENUM
     pub const WKT_STEP_TARGET: ProfileType = ProfileType(0x06A0);
+    /// FitBaseType::ENUM
     pub const GOAL: ProfileType = ProfileType(0x06C0);
+    /// FitBaseType::ENUM
     pub const GOAL_RECURRENCE: ProfileType = ProfileType(0x06E0);
+    /// FitBaseType::ENUM
     pub const GOAL_SOURCE: ProfileType = ProfileType(0x0700);
+    /// FitBaseType::ENUM
     pub const SCHEDULE: ProfileType = ProfileType(0x0720);
+    /// FitBaseType::ENUM
     pub const COURSE_POINT: ProfileType = ProfileType(0x0740);
+    /// FitBaseType::UINT16
     pub const MANUFACTURER: ProfileType = ProfileType(0x0764);
+    /// FitBaseType::UINT16
     pub const GARMIN_PRODUCT: ProfileType = ProfileType(0x0784);
+    /// FitBaseType::UINT8
     pub const ANTPLUS_DEVICE_TYPE: ProfileType = ProfileType(0x07A2);
+    /// FitBaseType::ENUM
     pub const ANT_NETWORK: ProfileType = ProfileType(0x07C0);
+    /// FitBaseType::UINT32Z
     pub const WORKOUT_CAPABILITIES: ProfileType = ProfileType(0x07EC);
+    /// FitBaseType::UINT8
     pub const BATTERY_STATUS: ProfileType = ProfileType(0x0802);
+    /// FitBaseType::ENUM
     pub const HR_TYPE: ProfileType = ProfileType(0x0820);
+    /// FitBaseType::UINT32Z
     pub const COURSE_CAPABILITIES: ProfileType = ProfileType(0x084C);
+    /// FitBaseType::UINT16
     pub const WEIGHT: ProfileType = ProfileType(0x0864);
+    /// FitBaseType::UINT32
     pub const WORKOUT_HR: ProfileType = ProfileType(0x0886);
+    /// FitBaseType::UINT32
     pub const WORKOUT_POWER: ProfileType = ProfileType(0x08A6);
+    /// FitBaseType::ENUM
     pub const BP_STATUS: ProfileType = ProfileType(0x08C0);
+    /// FitBaseType::UINT16
     pub const USER_LOCAL_ID: ProfileType = ProfileType(0x08E4);
+    /// FitBaseType::ENUM
     pub const SWIM_STROKE: ProfileType = ProfileType(0x0900);
+    /// FitBaseType::ENUM
     pub const ACTIVITY_TYPE: ProfileType = ProfileType(0x0920);
+    /// FitBaseType::ENUM
     pub const ACTIVITY_SUBTYPE: ProfileType = ProfileType(0x0940);
+    /// FitBaseType::ENUM
     pub const ACTIVITY_LEVEL: ProfileType = ProfileType(0x0960);
+    /// FitBaseType::ENUM
     pub const SIDE: ProfileType = ProfileType(0x0980);
+    /// FitBaseType::UINT8
     pub const LEFT_RIGHT_BALANCE: ProfileType = ProfileType(0x09A2);
+    /// FitBaseType::UINT16
     pub const LEFT_RIGHT_BALANCE_100: ProfileType = ProfileType(0x09C4);
+    /// FitBaseType::ENUM
     pub const LENGTH_TYPE: ProfileType = ProfileType(0x09E0);
+    /// FitBaseType::ENUM
     pub const DAY_OF_WEEK: ProfileType = ProfileType(0x0A00);
+    /// FitBaseType::UINT32Z
     pub const CONNECTIVITY_CAPABILITIES: ProfileType = ProfileType(0x0A2C);
+    /// FitBaseType::ENUM
     pub const WEATHER_REPORT: ProfileType = ProfileType(0x0A40);
+    /// FitBaseType::ENUM
     pub const WEATHER_STATUS: ProfileType = ProfileType(0x0A60);
+    /// FitBaseType::ENUM
     pub const WEATHER_SEVERITY: ProfileType = ProfileType(0x0A80);
+    /// FitBaseType::ENUM
     pub const WEATHER_SEVERE_TYPE: ProfileType = ProfileType(0x0AA0);
+    /// FitBaseType::UINT32
     pub const TIME_INTO_DAY: ProfileType = ProfileType(0x0AC6);
+    /// FitBaseType::UINT32
     pub const LOCALTIME_INTO_DAY: ProfileType = ProfileType(0x0AE6);
+    /// FitBaseType::ENUM
     pub const STROKE_TYPE: ProfileType = ProfileType(0x0B00);
+    /// FitBaseType::ENUM
     pub const BODY_LOCATION: ProfileType = ProfileType(0x0B20);
+    /// FitBaseType::ENUM
     pub const SEGMENT_LAP_STATUS: ProfileType = ProfileType(0x0B40);
+    /// FitBaseType::ENUM
     pub const SEGMENT_LEADERBOARD_TYPE: ProfileType = ProfileType(0x0B60);
+    /// FitBaseType::ENUM
     pub const SEGMENT_DELETE_STATUS: ProfileType = ProfileType(0x0B80);
+    /// FitBaseType::ENUM
     pub const SEGMENT_SELECTION_TYPE: ProfileType = ProfileType(0x0BA0);
+    /// FitBaseType::ENUM
     pub const SOURCE_TYPE: ProfileType = ProfileType(0x0BC0);
+    /// FitBaseType::UINT8
     pub const LOCAL_DEVICE_TYPE: ProfileType = ProfileType(0x0BE2);
+    /// FitBaseType::UINT8
     pub const BLE_DEVICE_TYPE: ProfileType = ProfileType(0x0C02);
+    /// FitBaseType::UINT32Z
     pub const ANT_CHANNEL_ID: ProfileType = ProfileType(0x0C2C);
+    /// FitBaseType::ENUM
     pub const DISPLAY_ORIENTATION: ProfileType = ProfileType(0x0C40);
+    /// FitBaseType::ENUM
     pub const WORKOUT_EQUIPMENT: ProfileType = ProfileType(0x0C60);
+    /// FitBaseType::ENUM
     pub const WATCHFACE_MODE: ProfileType = ProfileType(0x0C80);
+    /// FitBaseType::ENUM
     pub const DIGITAL_WATCHFACE_LAYOUT: ProfileType = ProfileType(0x0CA0);
+    /// FitBaseType::ENUM
     pub const ANALOG_WATCHFACE_LAYOUT: ProfileType = ProfileType(0x0CC0);
+    /// FitBaseType::ENUM
     pub const RIDER_POSITION_TYPE: ProfileType = ProfileType(0x0CE0);
+    /// FitBaseType::ENUM
     pub const POWER_PHASE_TYPE: ProfileType = ProfileType(0x0D00);
+    /// FitBaseType::ENUM
     pub const CAMERA_EVENT_TYPE: ProfileType = ProfileType(0x0D20);
+    /// FitBaseType::ENUM
     pub const SENSOR_TYPE: ProfileType = ProfileType(0x0D40);
+    /// FitBaseType::ENUM
     pub const BIKE_LIGHT_NETWORK_CONFIG_TYPE: ProfileType = ProfileType(0x0D60);
+    /// FitBaseType::UINT16
     pub const COMM_TIMEOUT_TYPE: ProfileType = ProfileType(0x0D84);
+    /// FitBaseType::ENUM
     pub const CAMERA_ORIENTATION_TYPE: ProfileType = ProfileType(0x0DA0);
+    /// FitBaseType::ENUM
     pub const ATTITUDE_STAGE: ProfileType = ProfileType(0x0DC0);
+    /// FitBaseType::UINT16
     pub const ATTITUDE_VALIDITY: ProfileType = ProfileType(0x0DE4);
+    /// FitBaseType::ENUM
     pub const AUTO_SYNC_FREQUENCY: ProfileType = ProfileType(0x0E00);
+    /// FitBaseType::ENUM
     pub const EXD_LAYOUT: ProfileType = ProfileType(0x0E20);
+    /// FitBaseType::ENUM
     pub const EXD_DISPLAY_TYPE: ProfileType = ProfileType(0x0E40);
+    /// FitBaseType::ENUM
     pub const EXD_DATA_UNITS: ProfileType = ProfileType(0x0E60);
+    /// FitBaseType::ENUM
     pub const EXD_QUALIFIERS: ProfileType = ProfileType(0x0E80);
+    /// FitBaseType::ENUM
     pub const EXD_DESCRIPTORS: ProfileType = ProfileType(0x0EA0);
+    /// FitBaseType::UINT32
     pub const AUTO_ACTIVITY_DETECT: ProfileType = ProfileType(0x0EC6);
+    /// FitBaseType::UINT32Z
     pub const SUPPORTED_EXD_SCREEN_LAYOUTS: ProfileType = ProfileType(0x0EEC);
+    /// FitBaseType::UINT8
     pub const FIT_BASE_TYPE: ProfileType = ProfileType(0x0F02);
+    /// FitBaseType::ENUM
     pub const TURN_TYPE: ProfileType = ProfileType(0x0F20);
+    /// FitBaseType::UINT8
     pub const BIKE_LIGHT_BEAM_ANGLE_MODE: ProfileType = ProfileType(0x0F42);
+    /// FitBaseType::UINT16
     pub const FIT_BASE_UNIT: ProfileType = ProfileType(0x0F64);
+    /// FitBaseType::UINT8
     pub const SET_TYPE: ProfileType = ProfileType(0x0F82);
+    /// FitBaseType::ENUM
     pub const MAX_MET_CATEGORY: ProfileType = ProfileType(0x0FA0);
+    /// FitBaseType::UINT16
     pub const EXERCISE_CATEGORY: ProfileType = ProfileType(0x0FC4);
+    /// FitBaseType::UINT16
     pub const BENCH_PRESS_EXERCISE_NAME: ProfileType = ProfileType(0x0FE4);
+    /// FitBaseType::UINT16
     pub const CALF_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x1004);
+    /// FitBaseType::UINT16
     pub const CARDIO_EXERCISE_NAME: ProfileType = ProfileType(0x1024);
+    /// FitBaseType::UINT16
     pub const CARRY_EXERCISE_NAME: ProfileType = ProfileType(0x1044);
+    /// FitBaseType::UINT16
     pub const CHOP_EXERCISE_NAME: ProfileType = ProfileType(0x1064);
+    /// FitBaseType::UINT16
     pub const CORE_EXERCISE_NAME: ProfileType = ProfileType(0x1084);
+    /// FitBaseType::UINT16
     pub const CRUNCH_EXERCISE_NAME: ProfileType = ProfileType(0x10A4);
+    /// FitBaseType::UINT16
     pub const CURL_EXERCISE_NAME: ProfileType = ProfileType(0x10C4);
+    /// FitBaseType::UINT16
     pub const DEADLIFT_EXERCISE_NAME: ProfileType = ProfileType(0x10E4);
+    /// FitBaseType::UINT16
     pub const FLYE_EXERCISE_NAME: ProfileType = ProfileType(0x1104);
+    /// FitBaseType::UINT16
     pub const HIP_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x1124);
+    /// FitBaseType::UINT16
     pub const HIP_STABILITY_EXERCISE_NAME: ProfileType = ProfileType(0x1144);
+    /// FitBaseType::UINT16
     pub const HIP_SWING_EXERCISE_NAME: ProfileType = ProfileType(0x1164);
+    /// FitBaseType::UINT16
     pub const HYPEREXTENSION_EXERCISE_NAME: ProfileType = ProfileType(0x1184);
+    /// FitBaseType::UINT16
     pub const LATERAL_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x11A4);
+    /// FitBaseType::UINT16
     pub const LEG_CURL_EXERCISE_NAME: ProfileType = ProfileType(0x11C4);
+    /// FitBaseType::UINT16
     pub const LEG_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x11E4);
+    /// FitBaseType::UINT16
     pub const LUNGE_EXERCISE_NAME: ProfileType = ProfileType(0x1204);
+    /// FitBaseType::UINT16
     pub const OLYMPIC_LIFT_EXERCISE_NAME: ProfileType = ProfileType(0x1224);
+    /// FitBaseType::UINT16
     pub const PLANK_EXERCISE_NAME: ProfileType = ProfileType(0x1244);
+    /// FitBaseType::UINT16
     pub const PLYO_EXERCISE_NAME: ProfileType = ProfileType(0x1264);
+    /// FitBaseType::UINT16
     pub const PULL_UP_EXERCISE_NAME: ProfileType = ProfileType(0x1284);
+    /// FitBaseType::UINT16
     pub const PUSH_UP_EXERCISE_NAME: ProfileType = ProfileType(0x12A4);
+    /// FitBaseType::UINT16
     pub const ROW_EXERCISE_NAME: ProfileType = ProfileType(0x12C4);
+    /// FitBaseType::UINT16
     pub const SHOULDER_PRESS_EXERCISE_NAME: ProfileType = ProfileType(0x12E4);
+    /// FitBaseType::UINT16
     pub const SHOULDER_STABILITY_EXERCISE_NAME: ProfileType = ProfileType(0x1304);
+    /// FitBaseType::UINT16
     pub const SHRUG_EXERCISE_NAME: ProfileType = ProfileType(0x1324);
+    /// FitBaseType::UINT16
     pub const SIT_UP_EXERCISE_NAME: ProfileType = ProfileType(0x1344);
+    /// FitBaseType::UINT16
     pub const SQUAT_EXERCISE_NAME: ProfileType = ProfileType(0x1364);
+    /// FitBaseType::UINT16
     pub const TOTAL_BODY_EXERCISE_NAME: ProfileType = ProfileType(0x1384);
+    /// FitBaseType::UINT16
     pub const TRICEPS_EXTENSION_EXERCISE_NAME: ProfileType = ProfileType(0x13A4);
+    /// FitBaseType::UINT16
     pub const WARM_UP_EXERCISE_NAME: ProfileType = ProfileType(0x13C4);
+    /// FitBaseType::UINT16
     pub const RUN_EXERCISE_NAME: ProfileType = ProfileType(0x13E4);
+    /// FitBaseType::ENUM
     pub const WATER_TYPE: ProfileType = ProfileType(0x1400);
+    /// FitBaseType::ENUM
     pub const TISSUE_MODEL_TYPE: ProfileType = ProfileType(0x1420);
+    /// FitBaseType::ENUM
     pub const DIVE_GAS_STATUS: ProfileType = ProfileType(0x1440);
+    /// FitBaseType::ENUM
     pub const DIVE_ALERT: ProfileType = ProfileType(0x1460);
+    /// FitBaseType::ENUM
     pub const DIVE_ALARM_TYPE: ProfileType = ProfileType(0x1480);
+    /// FitBaseType::ENUM
     pub const DIVE_BACKLIGHT_MODE: ProfileType = ProfileType(0x14A0);
+    /// FitBaseType::ENUM
     pub const SLEEP_LEVEL: ProfileType = ProfileType(0x14C0);
+    /// FitBaseType::ENUM
     pub const SPO2_MEASUREMENT_TYPE: ProfileType = ProfileType(0x14E0);
+    /// FitBaseType::ENUM
     pub const CCR_SETPOINT_SWITCH_MODE: ProfileType = ProfileType(0x1500);
+    /// FitBaseType::ENUM
     pub const DIVE_GAS_MODE: ProfileType = ProfileType(0x1520);
+    /// FitBaseType::ENUM
     pub const PROJECTILE_TYPE: ProfileType = ProfileType(0x1540);
+    /// FitBaseType::UINT16
     pub const FAVERO_PRODUCT: ProfileType = ProfileType(0x1564);
+    /// FitBaseType::ENUM
     pub const SPLIT_TYPE: ProfileType = ProfileType(0x1580);
+    /// FitBaseType::ENUM
     pub const CLIMB_PRO_EVENT: ProfileType = ProfileType(0x15A0);
+    /// FitBaseType::ENUM
     pub const GAS_CONSUMPTION_RATE_TYPE: ProfileType = ProfileType(0x15C0);
+    /// FitBaseType::ENUM
     pub const TAP_SENSITIVITY: ProfileType = ProfileType(0x15E0);
+    /// FitBaseType::ENUM
     pub const RADAR_THREAT_LEVEL_TYPE: ProfileType = ProfileType(0x1600);
+    /// FitBaseType::ENUM
     pub const MAX_MET_SPEED_SOURCE: ProfileType = ProfileType(0x1620);
+    /// FitBaseType::ENUM
     pub const MAX_MET_HEART_RATE_SOURCE: ProfileType = ProfileType(0x1640);
+    /// FitBaseType::ENUM
     pub const HRV_STATUS: ProfileType = ProfileType(0x1660);
+    /// FitBaseType::ENUM
     pub const NO_FLY_TIME_MODE: ProfileType = ProfileType(0x1680);
 
     const BASE_TYPES: [FitBaseType; 17] = [
@@ -266,7 +463,7 @@ impl fmt::Display for ProfileType {
             0x000E => write!(f, "sint64"),
             0x000F => write!(f, "uint64"),
             0x0010 => write!(f, "uint64z"),
-            0x0020 => write!(f, ""),
+            0x0020 => write!(f, "bool"),
             0x0040 => write!(f, "file"),
             0x0064 => write!(f, "mesg_num"),
             0x0082 => write!(f, "checksum"),
@@ -448,5 +645,11 @@ impl fmt::Display for ProfileType {
             0x1680 => write!(f, "no_fly_time_mode"),
             _ => write!(f, "unknown({})", self.0),
         }
+    }
+}
+
+impl From<FitBaseType> for ProfileType {
+    fn from(base_type: FitBaseType) -> ProfileType {
+        ProfileType((base_type.0 & FitBaseType::NUM_MASK) as u16)
     }
 }

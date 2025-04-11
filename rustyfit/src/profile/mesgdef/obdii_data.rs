@@ -103,7 +103,6 @@ impl From<ObdiiData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -114,7 +113,6 @@ impl From<ObdiiData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -124,7 +122,6 @@ impl From<ObdiiData> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -134,7 +131,6 @@ impl From<ObdiiData> for Message {
         if m.time_offset != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.time_offset),
                 is_expanded: false,
@@ -144,7 +140,6 @@ impl From<ObdiiData> for Message {
         if m.pid != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.pid),
                 is_expanded: false,
@@ -154,7 +149,6 @@ impl From<ObdiiData> for Message {
         if m.raw_data != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.raw_data),
                 is_expanded: false,
@@ -164,7 +158,6 @@ impl From<ObdiiData> for Message {
         if m.pid_data_size != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.pid_data_size),
                 is_expanded: false,
@@ -174,7 +167,6 @@ impl From<ObdiiData> for Message {
         if m.system_time != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.system_time),
                 is_expanded: false,
@@ -184,7 +176,6 @@ impl From<ObdiiData> for Message {
         if m.start_timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
@@ -194,7 +185,6 @@ impl From<ObdiiData> for Message {
         if m.start_timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_timestamp_ms),
                 is_expanded: false,

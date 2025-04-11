@@ -31,7 +31,7 @@ pub struct Activity {
 impl Activity {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 0;
     /// Value's type: `u16`
     pub const NUM_SESSIONS: u8 = 1;
@@ -111,7 +111,6 @@ impl From<Activity> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -122,7 +121,6 @@ impl From<Activity> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -132,7 +130,6 @@ impl From<Activity> for Message {
         if m.total_timer_time != u32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
@@ -142,7 +139,6 @@ impl From<Activity> for Message {
         if m.num_sessions != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_sessions),
                 is_expanded: false,
@@ -152,7 +148,6 @@ impl From<Activity> for Message {
         if m.r#type != typedef::Activity(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
@@ -162,7 +157,6 @@ impl From<Activity> for Message {
         if m.event != typedef::Event(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
@@ -172,7 +166,6 @@ impl From<Activity> for Message {
         if m.event_type != typedef::EventType(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT_TYPE,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
@@ -182,7 +175,6 @@ impl From<Activity> for Message {
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
@@ -192,7 +184,6 @@ impl From<Activity> for Message {
         if m.event_group != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,

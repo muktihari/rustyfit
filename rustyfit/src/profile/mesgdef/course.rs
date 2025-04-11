@@ -74,7 +74,6 @@ impl From<Course> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -85,7 +84,6 @@ impl From<Course> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -95,7 +93,6 @@ impl From<Course> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
@@ -105,7 +102,6 @@ impl From<Course> for Message {
         if m.capabilities != typedef::CourseCapabilities(u32::MIN) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::COURSE_CAPABILITIES,
                 value: Value::Uint32(m.capabilities.0),
                 is_expanded: false,
@@ -115,7 +111,6 @@ impl From<Course> for Message {
         if m.sub_sport != typedef::SubSport(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,

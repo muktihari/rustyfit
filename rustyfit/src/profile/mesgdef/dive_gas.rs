@@ -80,7 +80,6 @@ impl From<DiveGas> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -91,7 +90,6 @@ impl From<DiveGas> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -101,7 +99,6 @@ impl From<DiveGas> for Message {
         if m.helium_content != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.helium_content),
                 is_expanded: false,
@@ -111,7 +108,6 @@ impl From<DiveGas> for Message {
         if m.oxygen_content != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.oxygen_content),
                 is_expanded: false,
@@ -121,7 +117,6 @@ impl From<DiveGas> for Message {
         if m.status != typedef::DiveGasStatus(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DIVE_GAS_STATUS,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,
@@ -131,7 +126,6 @@ impl From<DiveGas> for Message {
         if m.mode != typedef::DiveGasMode(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DIVE_GAS_MODE,
                 value: Value::Uint8(m.mode.0),
                 is_expanded: false,

@@ -88,7 +88,6 @@ impl From<OneDSensorCalibration> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -99,7 +98,6 @@ impl From<OneDSensorCalibration> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -109,7 +107,6 @@ impl From<OneDSensorCalibration> for Message {
         if m.sensor_type != typedef::SensorType(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SENSOR_TYPE,
                 value: Value::Uint8(m.sensor_type.0),
                 is_expanded: false,
@@ -119,7 +116,6 @@ impl From<OneDSensorCalibration> for Message {
         if m.calibration_factor != u32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.calibration_factor),
                 is_expanded: false,
@@ -129,7 +125,6 @@ impl From<OneDSensorCalibration> for Message {
         if m.calibration_divisor != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.calibration_divisor),
                 is_expanded: false,
@@ -139,7 +134,6 @@ impl From<OneDSensorCalibration> for Message {
         if m.level_shift != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.level_shift),
                 is_expanded: false,
@@ -149,7 +143,6 @@ impl From<OneDSensorCalibration> for Message {
         if m.offset_cal != i32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.offset_cal),
                 is_expanded: false,

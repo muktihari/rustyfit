@@ -50,13 +50,13 @@ impl SplitSummary {
     pub const SPLIT_TYPE: u8 = 0;
     /// Value's type: `u16`
     pub const NUM_SPLITS: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 4;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const TOTAL_DISTANCE: u8 = 5;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 6;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 7;
     /// Value's type: `u16`; Units: `m`
     pub const TOTAL_ASCENT: u8 = 8;
@@ -66,11 +66,11 @@ impl SplitSummary {
     pub const AVG_HEART_RATE: u8 = 10;
     /// Value's type: `u8`; Units: `bpm`
     pub const MAX_HEART_RATE: u8 = 11;
-    /// Value's type: `i32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`
     pub const AVG_VERT_SPEED: u8 = 12;
     /// Value's type: `u32`; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 13;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 77;
 
     /// Create new SplitSummary with all fields being set to its corresponding invalid value.
@@ -239,7 +239,6 @@ impl From<SplitSummary> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -250,7 +249,6 @@ impl From<SplitSummary> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -260,7 +258,6 @@ impl From<SplitSummary> for Message {
         if m.split_type != typedef::SplitType(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPLIT_TYPE,
                 value: Value::Uint8(m.split_type.0),
                 is_expanded: false,
@@ -270,7 +267,6 @@ impl From<SplitSummary> for Message {
         if m.num_splits != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_splits),
                 is_expanded: false,
@@ -280,7 +276,6 @@ impl From<SplitSummary> for Message {
         if m.total_timer_time != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
@@ -290,7 +285,6 @@ impl From<SplitSummary> for Message {
         if m.total_distance != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_distance),
                 is_expanded: false,
@@ -300,7 +294,6 @@ impl From<SplitSummary> for Message {
         if m.avg_speed != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_speed),
                 is_expanded: false,
@@ -310,7 +303,6 @@ impl From<SplitSummary> for Message {
         if m.max_speed != u32::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_speed),
                 is_expanded: false,
@@ -320,7 +312,6 @@ impl From<SplitSummary> for Message {
         if m.total_ascent != u16::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_ascent),
                 is_expanded: false,
@@ -330,7 +321,6 @@ impl From<SplitSummary> for Message {
         if m.total_descent != u16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_descent),
                 is_expanded: false,
@@ -340,7 +330,6 @@ impl From<SplitSummary> for Message {
         if m.avg_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_heart_rate),
                 is_expanded: false,
@@ -350,7 +339,6 @@ impl From<SplitSummary> for Message {
         if m.max_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
@@ -360,7 +348,6 @@ impl From<SplitSummary> for Message {
         if m.avg_vert_speed != i32::MAX {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.avg_vert_speed),
                 is_expanded: false,
@@ -370,7 +357,6 @@ impl From<SplitSummary> for Message {
         if m.total_calories != u32::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_calories),
                 is_expanded: false,
@@ -380,7 +366,6 @@ impl From<SplitSummary> for Message {
         if m.total_moving_time != u32::MAX {
             arr[len] = Field {
                 num: 77,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_moving_time),
                 is_expanded: false,

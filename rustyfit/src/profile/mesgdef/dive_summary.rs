@@ -68,9 +68,9 @@ impl DiveSummary {
     pub const REFERENCE_MESG: u8 = 0;
     /// Value's type: `u16`
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const AVG_DEPTH: u8 = 2;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const MAX_DEPTH: u8 = 3;
     /// Value's type: `u32`; Units: `s`
     pub const SURFACE_INTERVAL: u8 = 4;
@@ -86,27 +86,27 @@ impl DiveSummary {
     pub const O2_TOXICITY: u8 = 9;
     /// Value's type: `u32`
     pub const DIVE_NUMBER: u8 = 10;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const BOTTOM_TIME: u8 = 11;
-    /// Value's type: `u16`; Scale: `100` ; Units: `bar/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`
     pub const AVG_PRESSURE_SAC: u8 = 12;
-    /// Value's type: `u16`; Scale: `100` ; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
     pub const AVG_VOLUME_SAC: u8 = 13;
-    /// Value's type: `u16`; Scale: `100` ; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
     pub const AVG_RMV: u8 = 14;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const DESCENT_TIME: u8 = 15;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const ASCENT_TIME: u8 = 16;
-    /// Value's type: `i32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`
     pub const AVG_ASCENT_RATE: u8 = 17;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const AVG_DESCENT_RATE: u8 = 22;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const MAX_ASCENT_RATE: u8 = 23;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const MAX_DESCENT_RATE: u8 = 24;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const HANG_TIME: u8 = 25;
 
     /// Create new DiveSummary with all fields being set to its corresponding invalid value.
@@ -417,7 +417,6 @@ impl From<DiveSummary> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -428,7 +427,6 @@ impl From<DiveSummary> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -438,7 +436,6 @@ impl From<DiveSummary> for Message {
         if m.reference_mesg != typedef::MesgNum(u16::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.reference_mesg.0),
                 is_expanded: false,
@@ -448,7 +445,6 @@ impl From<DiveSummary> for Message {
         if m.reference_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.reference_index.0),
                 is_expanded: false,
@@ -458,7 +454,6 @@ impl From<DiveSummary> for Message {
         if m.avg_depth != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_depth),
                 is_expanded: false,
@@ -468,7 +463,6 @@ impl From<DiveSummary> for Message {
         if m.max_depth != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_depth),
                 is_expanded: false,
@@ -478,7 +472,6 @@ impl From<DiveSummary> for Message {
         if m.surface_interval != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.surface_interval),
                 is_expanded: false,
@@ -488,7 +481,6 @@ impl From<DiveSummary> for Message {
         if m.start_cns != u8::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.start_cns),
                 is_expanded: false,
@@ -498,7 +490,6 @@ impl From<DiveSummary> for Message {
         if m.end_cns != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.end_cns),
                 is_expanded: false,
@@ -508,7 +499,6 @@ impl From<DiveSummary> for Message {
         if m.start_n2 != u16::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_n2),
                 is_expanded: false,
@@ -518,7 +508,6 @@ impl From<DiveSummary> for Message {
         if m.end_n2 != u16::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.end_n2),
                 is_expanded: false,
@@ -528,7 +517,6 @@ impl From<DiveSummary> for Message {
         if m.o2_toxicity != u16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.o2_toxicity),
                 is_expanded: false,
@@ -538,7 +526,6 @@ impl From<DiveSummary> for Message {
         if m.dive_number != u32::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.dive_number),
                 is_expanded: false,
@@ -548,7 +535,6 @@ impl From<DiveSummary> for Message {
         if m.bottom_time != u32::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.bottom_time),
                 is_expanded: false,
@@ -558,7 +544,6 @@ impl From<DiveSummary> for Message {
         if m.avg_pressure_sac != u16::MAX {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_pressure_sac),
                 is_expanded: false,
@@ -568,7 +553,6 @@ impl From<DiveSummary> for Message {
         if m.avg_volume_sac != u16::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_volume_sac),
                 is_expanded: false,
@@ -578,7 +562,6 @@ impl From<DiveSummary> for Message {
         if m.avg_rmv != u16::MAX {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_rmv),
                 is_expanded: false,
@@ -588,7 +571,6 @@ impl From<DiveSummary> for Message {
         if m.descent_time != u32::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.descent_time),
                 is_expanded: false,
@@ -598,7 +580,6 @@ impl From<DiveSummary> for Message {
         if m.ascent_time != u32::MAX {
             arr[len] = Field {
                 num: 16,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ascent_time),
                 is_expanded: false,
@@ -608,7 +589,6 @@ impl From<DiveSummary> for Message {
         if m.avg_ascent_rate != i32::MAX {
             arr[len] = Field {
                 num: 17,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.avg_ascent_rate),
                 is_expanded: false,
@@ -618,7 +598,6 @@ impl From<DiveSummary> for Message {
         if m.avg_descent_rate != u32::MAX {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_descent_rate),
                 is_expanded: false,
@@ -628,7 +607,6 @@ impl From<DiveSummary> for Message {
         if m.max_ascent_rate != u32::MAX {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_ascent_rate),
                 is_expanded: false,
@@ -638,7 +616,6 @@ impl From<DiveSummary> for Message {
         if m.max_descent_rate != u32::MAX {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_descent_rate),
                 is_expanded: false,
@@ -648,7 +625,6 @@ impl From<DiveSummary> for Message {
         if m.hang_time != u32::MAX {
             arr[len] = Field {
                 num: 25,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.hang_time),
                 is_expanded: false,

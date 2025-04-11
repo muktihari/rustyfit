@@ -36,9 +36,9 @@ impl MonitoringInfo {
     pub const LOCAL_TIMESTAMP: u8 = 0;
     /// Value's type: `Vec<u8>`
     pub const ACTIVITY_TYPE: u8 = 1;
-    /// Value's type: `Vec<u16>`; Scale: `5000` ; Units: `m/cycle`
+    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `m/cycle`
     pub const CYCLES_TO_DISTANCE: u8 = 3;
-    /// Value's type: `Vec<u16>`; Scale: `5000` ; Units: `kcal/cycle`
+    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `kcal/cycle`
     pub const CYCLES_TO_CALORIES: u8 = 4;
     /// Value's type: `u16`; Units: `kcal / day`
     pub const RESTING_METABOLIC_RATE: u8 = 5;
@@ -156,7 +156,6 @@ impl From<MonitoringInfo> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -167,7 +166,6 @@ impl From<MonitoringInfo> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -177,7 +175,6 @@ impl From<MonitoringInfo> for Message {
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
@@ -187,7 +184,6 @@ impl From<MonitoringInfo> for Message {
         if m.activity_type != Vec::<typedef::ActivityType>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::VecUint8({
                     let mut v = Vec::with_capacity(m.activity_type.len());
@@ -203,7 +199,6 @@ impl From<MonitoringInfo> for Message {
         if m.cycles_to_distance != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.cycles_to_distance),
                 is_expanded: false,
@@ -213,7 +208,6 @@ impl From<MonitoringInfo> for Message {
         if m.cycles_to_calories != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.cycles_to_calories),
                 is_expanded: false,
@@ -223,7 +217,6 @@ impl From<MonitoringInfo> for Message {
         if m.resting_metabolic_rate != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.resting_metabolic_rate),
                 is_expanded: false,

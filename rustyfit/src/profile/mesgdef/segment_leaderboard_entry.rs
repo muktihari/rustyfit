@@ -42,7 +42,7 @@ impl SegmentLeaderboardEntry {
     pub const GROUP_PRIMARY_KEY: u8 = 2;
     /// Value's type: `u32`
     pub const ACTIVITY_ID: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const SEGMENT_TIME: u8 = 4;
     /// Value's type: `String`
     pub const ACTIVITY_ID_STRING: u8 = 5;
@@ -111,7 +111,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -122,7 +121,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -132,7 +130,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
@@ -142,7 +139,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.r#type != typedef::SegmentLeaderboardType(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
@@ -152,7 +148,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.group_primary_key != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.group_primary_key),
                 is_expanded: false,
@@ -162,7 +157,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.activity_id != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.activity_id),
                 is_expanded: false,
@@ -172,7 +166,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.segment_time != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.segment_time),
                 is_expanded: false,
@@ -182,7 +175,6 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.activity_id_string != String::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.activity_id_string),
                 is_expanded: false,

@@ -37,7 +37,7 @@ impl WorkoutSession {
     pub const NUM_VALID_STEPS: u8 = 2;
     /// Value's type: `u16`
     pub const FIRST_STEP_INDEX: u8 = 3;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`
     pub const POOL_LENGTH: u8 = 4;
     /// Value's type: `u8`
     pub const POOL_LENGTH_UNIT: u8 = 5;
@@ -106,7 +106,6 @@ impl From<WorkoutSession> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -117,7 +116,6 @@ impl From<WorkoutSession> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -127,7 +125,6 @@ impl From<WorkoutSession> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -137,7 +134,6 @@ impl From<WorkoutSession> for Message {
         if m.sub_sport != typedef::SubSport(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
@@ -147,7 +143,6 @@ impl From<WorkoutSession> for Message {
         if m.num_valid_steps != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_valid_steps),
                 is_expanded: false,
@@ -157,7 +152,6 @@ impl From<WorkoutSession> for Message {
         if m.first_step_index != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.first_step_index),
                 is_expanded: false,
@@ -167,7 +161,6 @@ impl From<WorkoutSession> for Message {
         if m.pool_length != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pool_length),
                 is_expanded: false,
@@ -177,7 +170,6 @@ impl From<WorkoutSession> for Message {
         if m.pool_length_unit != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.pool_length_unit.0),
                 is_expanded: false,

@@ -39,13 +39,13 @@ pub struct Hr {
 impl Hr {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768` ; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `u8`; Scale: `256` ; Units: `s`
+    /// Value's type: `u8`; Scale: `256`; Units: `s`
     pub const TIME256: u8 = 1;
     /// Value's type: `Vec<u8>`; Units: `bpm`
     pub const FILTERED_BPM: u8 = 6;
-    /// Value's type: `Vec<u32>`; Scale: `1024` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1024`; Units: `s`
     pub const EVENT_TIMESTAMP: u8 = 9;
     /// Value's type: `Vec<u8>`; Units: `s`
     pub const EVENT_TIMESTAMP_12: u8 = 10;
@@ -191,7 +191,6 @@ impl From<Hr> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -203,7 +202,6 @@ impl From<Hr> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -213,7 +211,6 @@ impl From<Hr> for Message {
         if m.fractional_timestamp != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
                 is_expanded: is_expanded(&state, 0),
@@ -223,7 +220,6 @@ impl From<Hr> for Message {
         if m.time256 != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.time256),
                 is_expanded: false,
@@ -233,7 +229,6 @@ impl From<Hr> for Message {
         if m.filtered_bpm != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.filtered_bpm),
                 is_expanded: false,
@@ -243,7 +238,6 @@ impl From<Hr> for Message {
         if m.event_timestamp != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.event_timestamp),
                 is_expanded: is_expanded(&state, 9),
@@ -253,7 +247,6 @@ impl From<Hr> for Message {
         if m.event_timestamp_12 != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.event_timestamp_12),
                 is_expanded: false,

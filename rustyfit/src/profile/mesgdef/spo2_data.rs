@@ -77,7 +77,6 @@ impl From<Spo2Data> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -88,7 +87,6 @@ impl From<Spo2Data> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -98,7 +96,6 @@ impl From<Spo2Data> for Message {
         if m.reading_spo2 != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.reading_spo2),
                 is_expanded: false,
@@ -108,7 +105,6 @@ impl From<Spo2Data> for Message {
         if m.reading_confidence != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.reading_confidence),
                 is_expanded: false,
@@ -118,7 +114,6 @@ impl From<Spo2Data> for Message {
         if m.mode != typedef::Spo2MeasurementType(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPO2_MEASUREMENT_TYPE,
                 value: Value::Uint8(m.mode.0),
                 is_expanded: false,

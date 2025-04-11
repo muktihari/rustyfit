@@ -34,7 +34,7 @@ pub struct MaxMetData {
 impl MaxMetData {
     /// Value's type: `u32`
     pub const UPDATE_TIME: u8 = 0;
-    /// Value's type: `u16`; Scale: `10` ; Units: `mL/kg/min`
+    /// Value's type: `u16`; Scale: `10`; Units: `mL/kg/min`
     pub const VO2_MAX: u8 = 2;
     /// Value's type: `u8`
     pub const SPORT: u8 = 5;
@@ -114,7 +114,6 @@ impl From<MaxMetData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -125,7 +124,6 @@ impl From<MaxMetData> for Message {
         if m.update_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.update_time.0),
                 is_expanded: false,
@@ -135,7 +133,6 @@ impl From<MaxMetData> for Message {
         if m.vo2_max != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vo2_max),
                 is_expanded: false,
@@ -145,7 +142,6 @@ impl From<MaxMetData> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -155,7 +151,6 @@ impl From<MaxMetData> for Message {
         if m.sub_sport != typedef::SubSport(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
@@ -165,7 +160,6 @@ impl From<MaxMetData> for Message {
         if m.max_met_category != typedef::MaxMetCategory(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::MAX_MET_CATEGORY,
                 value: Value::Uint8(m.max_met_category.0),
                 is_expanded: false,
@@ -175,7 +169,6 @@ impl From<MaxMetData> for Message {
         if m.calibrated_data != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.calibrated_data.0),
                 is_expanded: false,
@@ -185,7 +178,6 @@ impl From<MaxMetData> for Message {
         if m.hr_source != typedef::MaxMetHeartRateSource(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::MAX_MET_HEART_RATE_SOURCE,
                 value: Value::Uint8(m.hr_source.0),
                 is_expanded: false,
@@ -195,7 +187,6 @@ impl From<MaxMetData> for Message {
         if m.speed_source != typedef::MaxMetSpeedSource(u8::MAX) {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::MAX_MET_SPEED_SOURCE,
                 value: Value::Uint8(m.speed_source.0),
                 is_expanded: false,

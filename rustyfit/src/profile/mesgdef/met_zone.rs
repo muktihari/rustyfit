@@ -29,9 +29,9 @@ impl MetZone {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u8`
     pub const HIGH_BPM: u8 = 1;
-    /// Value's type: `u16`; Scale: `10` ; Units: `kcal / min`
+    /// Value's type: `u16`; Scale: `10`; Units: `kcal / min`
     pub const CALORIES: u8 = 2;
-    /// Value's type: `u8`; Scale: `10` ; Units: `kcal / min`
+    /// Value's type: `u8`; Scale: `10`; Units: `kcal / min`
     pub const FAT_CALORIES: u8 = 3;
 
     /// Create new MetZone with all fields being set to its corresponding invalid value.
@@ -114,7 +114,6 @@ impl From<MetZone> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -125,7 +124,6 @@ impl From<MetZone> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -135,7 +133,6 @@ impl From<MetZone> for Message {
         if m.high_bpm != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.high_bpm),
                 is_expanded: false,
@@ -145,7 +142,6 @@ impl From<MetZone> for Message {
         if m.calories != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.calories),
                 is_expanded: false,
@@ -155,7 +151,6 @@ impl From<MetZone> for Message {
         if m.fat_calories != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.fat_calories),
                 is_expanded: false,

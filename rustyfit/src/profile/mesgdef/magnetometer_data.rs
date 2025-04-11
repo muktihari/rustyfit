@@ -103,7 +103,6 @@ impl From<MagnetometerData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -114,7 +113,6 @@ impl From<MagnetometerData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -124,7 +122,6 @@ impl From<MagnetometerData> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -134,7 +131,6 @@ impl From<MagnetometerData> for Message {
         if m.sample_time_offset != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.sample_time_offset),
                 is_expanded: false,
@@ -144,7 +140,6 @@ impl From<MagnetometerData> for Message {
         if m.mag_x != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.mag_x),
                 is_expanded: false,
@@ -154,7 +149,6 @@ impl From<MagnetometerData> for Message {
         if m.mag_y != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.mag_y),
                 is_expanded: false,
@@ -164,7 +158,6 @@ impl From<MagnetometerData> for Message {
         if m.mag_z != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.mag_z),
                 is_expanded: false,
@@ -174,7 +167,6 @@ impl From<MagnetometerData> for Message {
         if m.calibrated_mag_x != Vec::<f32>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_mag_x),
                 is_expanded: false,
@@ -184,7 +176,6 @@ impl From<MagnetometerData> for Message {
         if m.calibrated_mag_y != Vec::<f32>::new() {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_mag_y),
                 is_expanded: false,
@@ -194,7 +185,6 @@ impl From<MagnetometerData> for Message {
         if m.calibrated_mag_z != Vec::<f32>::new() {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_mag_z),
                 is_expanded: false,

@@ -29,7 +29,7 @@ impl HsaWristTemperatureData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u16>`; Scale: `1000` ; Units: `degC`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `degC`
     pub const VALUE: u8 = 1;
 
     /// Create new HsaWristTemperatureData with all fields being set to its corresponding invalid value.
@@ -103,7 +103,6 @@ impl From<HsaWristTemperatureData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -114,7 +113,6 @@ impl From<HsaWristTemperatureData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -124,7 +122,6 @@ impl From<HsaWristTemperatureData> for Message {
         if m.processing_interval != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.processing_interval),
                 is_expanded: false,
@@ -134,7 +131,6 @@ impl From<HsaWristTemperatureData> for Message {
         if m.value != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.value),
                 is_expanded: false,

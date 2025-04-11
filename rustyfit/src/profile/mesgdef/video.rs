@@ -71,7 +71,6 @@ impl From<Video> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -82,7 +81,6 @@ impl From<Video> for Message {
         if m.url != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.url),
                 is_expanded: false,
@@ -92,7 +90,6 @@ impl From<Video> for Message {
         if m.hosting_provider != String::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.hosting_provider),
                 is_expanded: false,
@@ -102,7 +99,6 @@ impl From<Video> for Message {
         if m.duration != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,

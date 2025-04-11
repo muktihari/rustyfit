@@ -35,11 +35,11 @@ pub struct TimestampCorrelation {
 impl TimestampCorrelation {
     /// Value's type: `u32`; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768` ; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
     /// Value's type: `u32`; Units: `s`
     pub const SYSTEM_TIMESTAMP: u8 = 1;
-    /// Value's type: `u16`; Scale: `32768` ; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`
     pub const FRACTIONAL_SYSTEM_TIMESTAMP: u8 = 2;
     /// Value's type: `u32`; Units: `s`
     pub const LOCAL_TIMESTAMP: u8 = 3;
@@ -131,7 +131,6 @@ impl From<TimestampCorrelation> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -142,7 +141,6 @@ impl From<TimestampCorrelation> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -152,7 +150,6 @@ impl From<TimestampCorrelation> for Message {
         if m.fractional_timestamp != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
                 is_expanded: false,
@@ -162,7 +159,6 @@ impl From<TimestampCorrelation> for Message {
         if m.system_timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.system_timestamp.0),
                 is_expanded: false,
@@ -172,7 +168,6 @@ impl From<TimestampCorrelation> for Message {
         if m.fractional_system_timestamp != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.fractional_system_timestamp),
                 is_expanded: false,
@@ -182,7 +177,6 @@ impl From<TimestampCorrelation> for Message {
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
@@ -192,7 +186,6 @@ impl From<TimestampCorrelation> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -202,7 +195,6 @@ impl From<TimestampCorrelation> for Message {
         if m.system_timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.system_timestamp_ms),
                 is_expanded: false,
