@@ -82,9 +82,9 @@ fn main() {
 
     // # Output
     // session:
-    //  start_time: 974894402
-    //  sport: running
-    //  num_laps: 53
+    //  start_time: 995749880
+    //  sport: stand_up_paddleboarding
+    //  num_laps: 1
 }
 
 ```
