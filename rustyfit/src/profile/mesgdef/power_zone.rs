@@ -71,7 +71,6 @@ impl From<PowerZone> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -82,7 +81,6 @@ impl From<PowerZone> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -92,7 +90,6 @@ impl From<PowerZone> for Message {
         if m.high_value != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.high_value),
                 is_expanded: false,
@@ -102,7 +99,6 @@ impl From<PowerZone> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,

@@ -1,11 +1,11 @@
 [package]
 name = "rustyfit"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 description = "This project hosts the Rust implementation for The Flexible and Interoperable Data Transfer (FIT) Protocol"
 authors = ["Hikmatulloh Hari Mukti <muktihaz@gmail.com>"]
 readme = "../README.md"
-license-file = "../LICENSE"
+license-file = "../LICENSE-BSD-3-CLAUSE"
 include = ["Cargo.toml", "src/**"]
 categories = ["encoding", "parser-implementations"]
 repository = "https://github.com/muktihari/rustyfit"
@@ -15,4 +15,12 @@ criterion = { version = "0.5.1" }
 
 [[bench]]
 name = "bench_main"
+harness = false
+
+[[bench]]
+name = "decoder"
+harness = false
+
+[[bench]]
+name = "encoder"
 harness = false

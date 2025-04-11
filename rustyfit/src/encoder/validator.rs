@@ -47,11 +47,12 @@ impl MessageValidator {
                 continue;
             }
 
-            if self.omit_invalid_value && !field.value.is_valid(field.base_type) {
+            let base_type = field.profile_type.base_type();
+            if self.omit_invalid_value && !field.value.is_valid(base_type) {
                 continue;
             }
 
-            if let Err(err) = self.value_integrity(&field.value, field.base_type) {
+            if let Err(err) = self.value_integrity(&field.value, base_type) {
                 return Err(MessageValidatorError::ValueIntegrity(
                     err,
                     format!("fields[{}], num: {}", i, field.num),

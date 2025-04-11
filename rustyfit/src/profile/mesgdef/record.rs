@@ -195,31 +195,31 @@ impl Record {
     pub const POSITION_LAT: u8 = 0;
     /// Value's type: `i32`; Units: `semicircles`
     pub const POSITION_LONG: u8 = 1;
-    /// Value's type: `u16`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ALTITUDE: u8 = 2;
     /// Value's type: `u8`; Units: `bpm`
     pub const HEART_RATE: u8 = 3;
     /// Value's type: `u8`; Units: `rpm`
     pub const CADENCE: u8 = 4;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const DISTANCE: u8 = 5;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const SPEED: u8 = 6;
     /// Value's type: `u16`; Units: `watts`
     pub const POWER: u8 = 7;
     /// Value's type: `[u8; 3]`; Units: `m/s,m`
     pub const COMPRESSED_SPEED_DISTANCE: u8 = 8;
-    /// Value's type: `i16`; Scale: `100` ; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`
     pub const GRADE: u8 = 9;
     /// Value's type: `u8`
     pub const RESISTANCE: u8 = 10;
-    /// Value's type: `i32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `s`
     pub const TIME_FROM_COURSE: u8 = 11;
-    /// Value's type: `u8`; Scale: `100` ; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`
     pub const CYCLE_LENGTH: u8 = 12;
     /// Value's type: `i8`; Units: `C`
     pub const TEMPERATURE: u8 = 13;
-    /// Value's type: `Vec<u8>`; Scale: `16` ; Units: `m/s`
+    /// Value's type: `Vec<u8>`; Scale: `16`; Units: `m/s`
     pub const SPEED_1S: u8 = 17;
     /// Value's type: `u8`; Units: `cycles`
     pub const CYCLES: u8 = 18;
@@ -233,51 +233,51 @@ impl Record {
     pub const LEFT_RIGHT_BALANCE: u8 = 30;
     /// Value's type: `u8`; Units: `m`
     pub const GPS_ACCURACY: u8 = 31;
-    /// Value's type: `i16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
     pub const VERTICAL_SPEED: u8 = 32;
     /// Value's type: `u16`; Units: `kcal`
     pub const CALORIES: u8 = 33;
-    /// Value's type: `u16`; Scale: `10` ; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`
     pub const VERTICAL_OSCILLATION: u8 = 39;
-    /// Value's type: `u16`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`
     pub const STANCE_TIME_PERCENT: u8 = 40;
-    /// Value's type: `u16`; Scale: `10` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `10`; Units: `ms`
     pub const STANCE_TIME: u8 = 41;
     /// Value's type: `u8`
     pub const ACTIVITY_TYPE: u8 = 42;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const LEFT_TORQUE_EFFECTIVENESS: u8 = 43;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const RIGHT_TORQUE_EFFECTIVENESS: u8 = 44;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const LEFT_PEDAL_SMOOTHNESS: u8 = 45;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const RIGHT_PEDAL_SMOOTHNESS: u8 = 46;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const COMBINED_PEDAL_SMOOTHNESS: u8 = 47;
-    /// Value's type: `u8`; Scale: `128` ; Units: `s`
+    /// Value's type: `u8`; Scale: `128`; Units: `s`
     pub const TIME128: u8 = 48;
     /// Value's type: `u8`
     pub const STROKE_TYPE: u8 = 49;
     /// Value's type: `u8`
     pub const ZONE: u8 = 50;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `100`; Units: `m/s`
     pub const BALL_SPEED: u8 = 51;
-    /// Value's type: `u16`; Scale: `256` ; Units: `rpm`
+    /// Value's type: `u16`; Scale: `256`; Units: `rpm`
     pub const CADENCE256: u8 = 52;
-    /// Value's type: `u8`; Scale: `128` ; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
     pub const FRACTIONAL_CADENCE: u8 = 53;
-    /// Value's type: `u16`; Scale: `100` ; Units: `g/dL`
+    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`
     pub const TOTAL_HEMOGLOBIN_CONC: u8 = 54;
-    /// Value's type: `u16`; Scale: `100` ; Units: `g/dL`
+    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`
     pub const TOTAL_HEMOGLOBIN_CONC_MIN: u8 = 55;
-    /// Value's type: `u16`; Scale: `100` ; Units: `g/dL`
+    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`
     pub const TOTAL_HEMOGLOBIN_CONC_MAX: u8 = 56;
-    /// Value's type: `u16`; Scale: `10` ; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`
     pub const SATURATED_HEMOGLOBIN_PERCENT: u8 = 57;
-    /// Value's type: `u16`; Scale: `10` ; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`
     pub const SATURATED_HEMOGLOBIN_PERCENT_MIN: u8 = 58;
-    /// Value's type: `u16`; Scale: `10` ; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`
     pub const SATURATED_HEMOGLOBIN_PERCENT_MAX: u8 = 59;
     /// Value's type: `u8`
     pub const DEVICE_INDEX: u8 = 62;
@@ -285,35 +285,35 @@ impl Record {
     pub const LEFT_PCO: u8 = 67;
     /// Value's type: `i8`; Units: `mm`
     pub const RIGHT_PCO: u8 = 68;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const LEFT_POWER_PHASE: u8 = 69;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const LEFT_POWER_PHASE_PEAK: u8 = 70;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const RIGHT_POWER_PHASE: u8 = 71;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const RIGHT_POWER_PHASE_PEAK: u8 = 72;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_SPEED: u8 = 73;
-    /// Value's type: `u32`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 78;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const BATTERY_SOC: u8 = 81;
     /// Value's type: `u16`; Units: `watts`
     pub const MOTOR_POWER: u8 = 82;
-    /// Value's type: `u16`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`
     pub const VERTICAL_RATIO: u8 = 83;
-    /// Value's type: `u16`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`
     pub const STANCE_TIME_BALANCE: u8 = 84;
-    /// Value's type: `u16`; Scale: `10` ; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`
     pub const STEP_LENGTH: u8 = 85;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`
     pub const CYCLE_LENGTH16: u8 = 87;
     /// Value's type: `u32`; Units: `Pa`
     pub const ABSOLUTE_PRESSURE: u8 = 91;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const DEPTH: u8 = 92;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const NEXT_STOP_DEPTH: u8 = 93;
     /// Value's type: `u32`; Units: `s`
     pub const NEXT_STOP_TIME: u8 = 94;
@@ -327,7 +327,7 @@ impl Record {
     pub const N2_LOAD: u8 = 98;
     /// Value's type: `u8`; Units: `s`
     pub const RESPIRATION_RATE: u8 = 99;
-    /// Value's type: `u16`; Scale: `100` ; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_RESPIRATION_RATE: u8 = 108;
     /// Value's type: `f32`
     pub const GRIT: u8 = 114;
@@ -345,17 +345,17 @@ impl Record {
     pub const EBIKE_ASSIST_LEVEL_PERCENT: u8 = 120;
     /// Value's type: `u32`; Units: `s`
     pub const AIR_TIME_REMAINING: u8 = 123;
-    /// Value's type: `u16`; Scale: `100` ; Units: `bar/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`
     pub const PRESSURE_SAC: u8 = 124;
-    /// Value's type: `u16`; Scale: `100` ; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
     pub const VOLUME_SAC: u8 = 125;
-    /// Value's type: `u16`; Scale: `100` ; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
     pub const RMV: u8 = 126;
-    /// Value's type: `i32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`
     pub const ASCENT_RATE: u8 = 127;
-    /// Value's type: `u8`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`
     pub const PO2: u8 = 129;
-    /// Value's type: `u16`; Scale: `100` ; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`
     pub const CORE_TEMPERATURE: u8 = 139;
 
     /// Create new Record with all fields being set to its corresponding invalid value.
@@ -1466,7 +1466,6 @@ impl From<Record> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -1478,7 +1477,6 @@ impl From<Record> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -1488,7 +1486,6 @@ impl From<Record> for Message {
         if m.position_lat != i32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
@@ -1498,7 +1495,6 @@ impl From<Record> for Message {
         if m.position_long != i32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
@@ -1508,7 +1504,6 @@ impl From<Record> for Message {
         if m.altitude != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.altitude),
                 is_expanded: false,
@@ -1518,7 +1513,6 @@ impl From<Record> for Message {
         if m.heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
@@ -1528,7 +1522,6 @@ impl From<Record> for Message {
         if m.cadence != u8::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cadence),
                 is_expanded: false,
@@ -1538,7 +1531,6 @@ impl From<Record> for Message {
         if m.distance != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: is_expanded(&state, 5),
@@ -1548,7 +1540,6 @@ impl From<Record> for Message {
         if m.speed != u16::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.speed),
                 is_expanded: is_expanded(&state, 6),
@@ -1558,7 +1549,6 @@ impl From<Record> for Message {
         if m.power != u16::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.power),
                 is_expanded: false,
@@ -1568,7 +1558,6 @@ impl From<Record> for Message {
         if m.compressed_speed_distance != [u8::MAX; 3] {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(Vec::from(&m.compressed_speed_distance)),
                 is_expanded: false,
@@ -1578,7 +1567,6 @@ impl From<Record> for Message {
         if m.grade != i16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.grade),
                 is_expanded: false,
@@ -1588,7 +1576,6 @@ impl From<Record> for Message {
         if m.resistance != u8::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resistance),
                 is_expanded: false,
@@ -1598,7 +1585,6 @@ impl From<Record> for Message {
         if m.time_from_course != i32::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.time_from_course),
                 is_expanded: false,
@@ -1608,7 +1594,6 @@ impl From<Record> for Message {
         if m.cycle_length != u8::MAX {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cycle_length),
                 is_expanded: false,
@@ -1618,7 +1603,6 @@ impl From<Record> for Message {
         if m.temperature != i8::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.temperature),
                 is_expanded: false,
@@ -1628,7 +1612,6 @@ impl From<Record> for Message {
         if m.speed_1s != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 17,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.speed_1s),
                 is_expanded: false,
@@ -1638,7 +1621,6 @@ impl From<Record> for Message {
         if m.cycles != u8::MAX {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cycles),
                 is_expanded: false,
@@ -1648,7 +1630,6 @@ impl From<Record> for Message {
         if m.total_cycles != u32::MAX {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_cycles),
                 is_expanded: is_expanded(&state, 19),
@@ -1658,7 +1639,6 @@ impl From<Record> for Message {
         if m.compressed_accumulated_power != u16::MAX {
             arr[len] = Field {
                 num: 28,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.compressed_accumulated_power),
                 is_expanded: false,
@@ -1668,7 +1648,6 @@ impl From<Record> for Message {
         if m.accumulated_power != u32::MAX {
             arr[len] = Field {
                 num: 29,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.accumulated_power),
                 is_expanded: is_expanded(&state, 29),
@@ -1678,7 +1657,6 @@ impl From<Record> for Message {
         if m.left_right_balance != typedef::LeftRightBalance(u8::MAX) {
             arr[len] = Field {
                 num: 30,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::LEFT_RIGHT_BALANCE,
                 value: Value::Uint8(m.left_right_balance.0),
                 is_expanded: false,
@@ -1688,7 +1666,6 @@ impl From<Record> for Message {
         if m.gps_accuracy != u8::MAX {
             arr[len] = Field {
                 num: 31,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gps_accuracy),
                 is_expanded: false,
@@ -1698,7 +1675,6 @@ impl From<Record> for Message {
         if m.vertical_speed != i16::MAX {
             arr[len] = Field {
                 num: 32,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.vertical_speed),
                 is_expanded: false,
@@ -1708,7 +1684,6 @@ impl From<Record> for Message {
         if m.calories != u16::MAX {
             arr[len] = Field {
                 num: 33,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.calories),
                 is_expanded: false,
@@ -1718,7 +1693,6 @@ impl From<Record> for Message {
         if m.vertical_oscillation != u16::MAX {
             arr[len] = Field {
                 num: 39,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vertical_oscillation),
                 is_expanded: false,
@@ -1728,7 +1702,6 @@ impl From<Record> for Message {
         if m.stance_time_percent != u16::MAX {
             arr[len] = Field {
                 num: 40,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stance_time_percent),
                 is_expanded: false,
@@ -1738,7 +1711,6 @@ impl From<Record> for Message {
         if m.stance_time != u16::MAX {
             arr[len] = Field {
                 num: 41,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stance_time),
                 is_expanded: false,
@@ -1748,7 +1720,6 @@ impl From<Record> for Message {
         if m.activity_type != typedef::ActivityType(u8::MAX) {
             arr[len] = Field {
                 num: 42,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: false,
@@ -1758,7 +1729,6 @@ impl From<Record> for Message {
         if m.left_torque_effectiveness != u8::MAX {
             arr[len] = Field {
                 num: 43,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.left_torque_effectiveness),
                 is_expanded: false,
@@ -1768,7 +1738,6 @@ impl From<Record> for Message {
         if m.right_torque_effectiveness != u8::MAX {
             arr[len] = Field {
                 num: 44,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.right_torque_effectiveness),
                 is_expanded: false,
@@ -1778,7 +1747,6 @@ impl From<Record> for Message {
         if m.left_pedal_smoothness != u8::MAX {
             arr[len] = Field {
                 num: 45,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.left_pedal_smoothness),
                 is_expanded: false,
@@ -1788,7 +1756,6 @@ impl From<Record> for Message {
         if m.right_pedal_smoothness != u8::MAX {
             arr[len] = Field {
                 num: 46,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.right_pedal_smoothness),
                 is_expanded: false,
@@ -1798,7 +1765,6 @@ impl From<Record> for Message {
         if m.combined_pedal_smoothness != u8::MAX {
             arr[len] = Field {
                 num: 47,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.combined_pedal_smoothness),
                 is_expanded: false,
@@ -1808,7 +1774,6 @@ impl From<Record> for Message {
         if m.time128 != u8::MAX {
             arr[len] = Field {
                 num: 48,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.time128),
                 is_expanded: false,
@@ -1818,7 +1783,6 @@ impl From<Record> for Message {
         if m.stroke_type != typedef::StrokeType(u8::MAX) {
             arr[len] = Field {
                 num: 49,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::STROKE_TYPE,
                 value: Value::Uint8(m.stroke_type.0),
                 is_expanded: false,
@@ -1828,7 +1792,6 @@ impl From<Record> for Message {
         if m.zone != u8::MAX {
             arr[len] = Field {
                 num: 50,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.zone),
                 is_expanded: false,
@@ -1838,7 +1801,6 @@ impl From<Record> for Message {
         if m.ball_speed != u16::MAX {
             arr[len] = Field {
                 num: 51,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.ball_speed),
                 is_expanded: false,
@@ -1848,7 +1810,6 @@ impl From<Record> for Message {
         if m.cadence256 != u16::MAX {
             arr[len] = Field {
                 num: 52,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.cadence256),
                 is_expanded: false,
@@ -1858,7 +1819,6 @@ impl From<Record> for Message {
         if m.fractional_cadence != u8::MAX {
             arr[len] = Field {
                 num: 53,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.fractional_cadence),
                 is_expanded: false,
@@ -1868,7 +1828,6 @@ impl From<Record> for Message {
         if m.total_hemoglobin_conc != u16::MAX {
             arr[len] = Field {
                 num: 54,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_hemoglobin_conc),
                 is_expanded: false,
@@ -1878,7 +1837,6 @@ impl From<Record> for Message {
         if m.total_hemoglobin_conc_min != u16::MAX {
             arr[len] = Field {
                 num: 55,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_hemoglobin_conc_min),
                 is_expanded: false,
@@ -1888,7 +1846,6 @@ impl From<Record> for Message {
         if m.total_hemoglobin_conc_max != u16::MAX {
             arr[len] = Field {
                 num: 56,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_hemoglobin_conc_max),
                 is_expanded: false,
@@ -1898,7 +1855,6 @@ impl From<Record> for Message {
         if m.saturated_hemoglobin_percent != u16::MAX {
             arr[len] = Field {
                 num: 57,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.saturated_hemoglobin_percent),
                 is_expanded: false,
@@ -1908,7 +1864,6 @@ impl From<Record> for Message {
         if m.saturated_hemoglobin_percent_min != u16::MAX {
             arr[len] = Field {
                 num: 58,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.saturated_hemoglobin_percent_min),
                 is_expanded: false,
@@ -1918,7 +1873,6 @@ impl From<Record> for Message {
         if m.saturated_hemoglobin_percent_max != u16::MAX {
             arr[len] = Field {
                 num: 59,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.saturated_hemoglobin_percent_max),
                 is_expanded: false,
@@ -1928,7 +1882,6 @@ impl From<Record> for Message {
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
             arr[len] = Field {
                 num: 62,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
@@ -1938,7 +1891,6 @@ impl From<Record> for Message {
         if m.left_pco != i8::MAX {
             arr[len] = Field {
                 num: 67,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.left_pco),
                 is_expanded: false,
@@ -1948,7 +1900,6 @@ impl From<Record> for Message {
         if m.right_pco != i8::MAX {
             arr[len] = Field {
                 num: 68,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.right_pco),
                 is_expanded: false,
@@ -1958,7 +1909,6 @@ impl From<Record> for Message {
         if m.left_power_phase != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 69,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.left_power_phase),
                 is_expanded: false,
@@ -1968,7 +1918,6 @@ impl From<Record> for Message {
         if m.left_power_phase_peak != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 70,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.left_power_phase_peak),
                 is_expanded: false,
@@ -1978,7 +1927,6 @@ impl From<Record> for Message {
         if m.right_power_phase != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 71,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.right_power_phase),
                 is_expanded: false,
@@ -1988,7 +1936,6 @@ impl From<Record> for Message {
         if m.right_power_phase_peak != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 72,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.right_power_phase_peak),
                 is_expanded: false,
@@ -1998,7 +1945,6 @@ impl From<Record> for Message {
         if m.enhanced_speed != u32::MAX {
             arr[len] = Field {
                 num: 73,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_speed),
                 is_expanded: is_expanded(&state, 73),
@@ -2008,7 +1954,6 @@ impl From<Record> for Message {
         if m.enhanced_altitude != u32::MAX {
             arr[len] = Field {
                 num: 78,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_altitude),
                 is_expanded: is_expanded(&state, 78),
@@ -2018,7 +1963,6 @@ impl From<Record> for Message {
         if m.battery_soc != u8::MAX {
             arr[len] = Field {
                 num: 81,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.battery_soc),
                 is_expanded: false,
@@ -2028,7 +1972,6 @@ impl From<Record> for Message {
         if m.motor_power != u16::MAX {
             arr[len] = Field {
                 num: 82,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.motor_power),
                 is_expanded: false,
@@ -2038,7 +1981,6 @@ impl From<Record> for Message {
         if m.vertical_ratio != u16::MAX {
             arr[len] = Field {
                 num: 83,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vertical_ratio),
                 is_expanded: false,
@@ -2048,7 +1990,6 @@ impl From<Record> for Message {
         if m.stance_time_balance != u16::MAX {
             arr[len] = Field {
                 num: 84,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stance_time_balance),
                 is_expanded: false,
@@ -2058,7 +1999,6 @@ impl From<Record> for Message {
         if m.step_length != u16::MAX {
             arr[len] = Field {
                 num: 85,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.step_length),
                 is_expanded: false,
@@ -2068,7 +2008,6 @@ impl From<Record> for Message {
         if m.cycle_length16 != u16::MAX {
             arr[len] = Field {
                 num: 87,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.cycle_length16),
                 is_expanded: false,
@@ -2078,7 +2017,6 @@ impl From<Record> for Message {
         if m.absolute_pressure != u32::MAX {
             arr[len] = Field {
                 num: 91,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.absolute_pressure),
                 is_expanded: false,
@@ -2088,7 +2026,6 @@ impl From<Record> for Message {
         if m.depth != u32::MAX {
             arr[len] = Field {
                 num: 92,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.depth),
                 is_expanded: false,
@@ -2098,7 +2035,6 @@ impl From<Record> for Message {
         if m.next_stop_depth != u32::MAX {
             arr[len] = Field {
                 num: 93,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.next_stop_depth),
                 is_expanded: false,
@@ -2108,7 +2044,6 @@ impl From<Record> for Message {
         if m.next_stop_time != u32::MAX {
             arr[len] = Field {
                 num: 94,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.next_stop_time),
                 is_expanded: false,
@@ -2118,7 +2053,6 @@ impl From<Record> for Message {
         if m.time_to_surface != u32::MAX {
             arr[len] = Field {
                 num: 95,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.time_to_surface),
                 is_expanded: false,
@@ -2128,7 +2062,6 @@ impl From<Record> for Message {
         if m.ndl_time != u32::MAX {
             arr[len] = Field {
                 num: 96,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ndl_time),
                 is_expanded: false,
@@ -2138,7 +2071,6 @@ impl From<Record> for Message {
         if m.cns_load != u8::MAX {
             arr[len] = Field {
                 num: 97,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cns_load),
                 is_expanded: false,
@@ -2148,7 +2080,6 @@ impl From<Record> for Message {
         if m.n2_load != u16::MAX {
             arr[len] = Field {
                 num: 98,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.n2_load),
                 is_expanded: false,
@@ -2158,7 +2089,6 @@ impl From<Record> for Message {
         if m.respiration_rate != u8::MAX {
             arr[len] = Field {
                 num: 99,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.respiration_rate),
                 is_expanded: false,
@@ -2168,7 +2098,6 @@ impl From<Record> for Message {
         if m.enhanced_respiration_rate != u16::MAX {
             arr[len] = Field {
                 num: 108,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_respiration_rate),
                 is_expanded: is_expanded(&state, 108),
@@ -2178,7 +2107,6 @@ impl From<Record> for Message {
         if m.grit != f32::MAX {
             arr[len] = Field {
                 num: 114,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.grit),
                 is_expanded: false,
@@ -2188,7 +2116,6 @@ impl From<Record> for Message {
         if m.flow != f32::MAX {
             arr[len] = Field {
                 num: 115,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.flow),
                 is_expanded: false,
@@ -2198,7 +2125,6 @@ impl From<Record> for Message {
         if m.current_stress != u16::MAX {
             arr[len] = Field {
                 num: 116,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.current_stress),
                 is_expanded: false,
@@ -2208,7 +2134,6 @@ impl From<Record> for Message {
         if m.ebike_travel_range != u16::MAX {
             arr[len] = Field {
                 num: 117,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.ebike_travel_range),
                 is_expanded: false,
@@ -2218,7 +2143,6 @@ impl From<Record> for Message {
         if m.ebike_battery_level != u8::MAX {
             arr[len] = Field {
                 num: 118,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ebike_battery_level),
                 is_expanded: false,
@@ -2228,7 +2152,6 @@ impl From<Record> for Message {
         if m.ebike_assist_mode != u8::MAX {
             arr[len] = Field {
                 num: 119,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ebike_assist_mode),
                 is_expanded: false,
@@ -2238,7 +2161,6 @@ impl From<Record> for Message {
         if m.ebike_assist_level_percent != u8::MAX {
             arr[len] = Field {
                 num: 120,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ebike_assist_level_percent),
                 is_expanded: false,
@@ -2248,7 +2170,6 @@ impl From<Record> for Message {
         if m.air_time_remaining != u32::MAX {
             arr[len] = Field {
                 num: 123,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.air_time_remaining),
                 is_expanded: false,
@@ -2258,7 +2179,6 @@ impl From<Record> for Message {
         if m.pressure_sac != u16::MAX {
             arr[len] = Field {
                 num: 124,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pressure_sac),
                 is_expanded: false,
@@ -2268,7 +2188,6 @@ impl From<Record> for Message {
         if m.volume_sac != u16::MAX {
             arr[len] = Field {
                 num: 125,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.volume_sac),
                 is_expanded: false,
@@ -2278,7 +2197,6 @@ impl From<Record> for Message {
         if m.rmv != u16::MAX {
             arr[len] = Field {
                 num: 126,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.rmv),
                 is_expanded: false,
@@ -2288,7 +2206,6 @@ impl From<Record> for Message {
         if m.ascent_rate != i32::MAX {
             arr[len] = Field {
                 num: 127,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.ascent_rate),
                 is_expanded: false,
@@ -2298,7 +2215,6 @@ impl From<Record> for Message {
         if m.po2 != u8::MAX {
             arr[len] = Field {
                 num: 129,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2),
                 is_expanded: false,
@@ -2308,7 +2224,6 @@ impl From<Record> for Message {
         if m.core_temperature != u16::MAX {
             arr[len] = Field {
                 num: 139,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.core_temperature),
                 is_expanded: false,

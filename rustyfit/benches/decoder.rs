@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use criterion::{Criterion, black_box};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use rustyfit::{Decoder, DecoderBuilder};
 
 const TEST_FILE: &str = "tests/data/large.fit";
@@ -42,3 +42,6 @@ pub fn bench_decode(c: &mut Criterion) {
         })
     });
 }
+
+criterion_group!(benches, bench_decode);
+criterion_main!(benches);

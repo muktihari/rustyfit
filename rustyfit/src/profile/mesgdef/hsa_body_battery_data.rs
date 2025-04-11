@@ -83,7 +83,6 @@ impl From<HsaBodyBatteryData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -94,7 +93,6 @@ impl From<HsaBodyBatteryData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -104,7 +102,6 @@ impl From<HsaBodyBatteryData> for Message {
         if m.processing_interval != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.processing_interval),
                 is_expanded: false,
@@ -114,7 +111,6 @@ impl From<HsaBodyBatteryData> for Message {
         if m.level != Vec::<i8>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::VecInt8(m.level),
                 is_expanded: false,
@@ -124,7 +120,6 @@ impl From<HsaBodyBatteryData> for Message {
         if m.charged != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.charged),
                 is_expanded: false,
@@ -134,7 +129,6 @@ impl From<HsaBodyBatteryData> for Message {
         if m.uncharged != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.uncharged),
                 is_expanded: false,

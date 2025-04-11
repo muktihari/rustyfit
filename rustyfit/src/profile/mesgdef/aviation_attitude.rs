@@ -47,21 +47,21 @@ impl AviationAttitude {
     pub const TIMESTAMP_MS: u8 = 0;
     /// Value's type: `Vec<u32>`; Units: `ms`
     pub const SYSTEM_TIME: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `10430.38` ; Units: `radians`
+    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`
     pub const PITCH: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `10430.38` ; Units: `radians`
+    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`
     pub const ROLL: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `100` ; Units: `m/s^2`
+    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`
     pub const ACCEL_LATERAL: u8 = 4;
-    /// Value's type: `Vec<i16>`; Scale: `100` ; Units: `m/s^2`
+    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`
     pub const ACCEL_NORMAL: u8 = 5;
-    /// Value's type: `Vec<i16>`; Scale: `1024` ; Units: `radians/second`
+    /// Value's type: `Vec<i16>`; Scale: `1024`; Units: `radians/second`
     pub const TURN_RATE: u8 = 6;
     /// Value's type: `Vec<u8>`
     pub const STAGE: u8 = 7;
     /// Value's type: `Vec<u8>`; Units: `%`
     pub const ATTITUDE_STAGE_COMPLETE: u8 = 8;
-    /// Value's type: `Vec<u16>`; Scale: `10430.38` ; Units: `radians`
+    /// Value's type: `Vec<u16>`; Scale: `10430.38`; Units: `radians`
     pub const TRACK: u8 = 9;
     /// Value's type: `Vec<u16>`
     pub const VALIDITY: u8 = 10;
@@ -314,7 +314,6 @@ impl From<AviationAttitude> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -325,7 +324,6 @@ impl From<AviationAttitude> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -335,7 +333,6 @@ impl From<AviationAttitude> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -345,7 +342,6 @@ impl From<AviationAttitude> for Message {
         if m.system_time != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.system_time),
                 is_expanded: false,
@@ -355,7 +351,6 @@ impl From<AviationAttitude> for Message {
         if m.pitch != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.pitch),
                 is_expanded: false,
@@ -365,7 +360,6 @@ impl From<AviationAttitude> for Message {
         if m.roll != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.roll),
                 is_expanded: false,
@@ -375,7 +369,6 @@ impl From<AviationAttitude> for Message {
         if m.accel_lateral != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_lateral),
                 is_expanded: false,
@@ -385,7 +378,6 @@ impl From<AviationAttitude> for Message {
         if m.accel_normal != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_normal),
                 is_expanded: false,
@@ -395,7 +387,6 @@ impl From<AviationAttitude> for Message {
         if m.turn_rate != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.turn_rate),
                 is_expanded: false,
@@ -405,7 +396,6 @@ impl From<AviationAttitude> for Message {
         if m.stage != Vec::<typedef::AttitudeStage>::new() {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ATTITUDE_STAGE,
                 value: Value::VecUint8({
                     let mut v = Vec::with_capacity(m.stage.len());
@@ -421,7 +411,6 @@ impl From<AviationAttitude> for Message {
         if m.attitude_stage_complete != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.attitude_stage_complete),
                 is_expanded: false,
@@ -431,7 +420,6 @@ impl From<AviationAttitude> for Message {
         if m.track != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.track),
                 is_expanded: false,
@@ -441,7 +429,6 @@ impl From<AviationAttitude> for Message {
         if m.validity != Vec::<typedef::AttitudeValidity>::new() {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::ATTITUDE_VALIDITY,
                 value: Value::VecUint16({
                     let mut v = Vec::with_capacity(m.validity.len());

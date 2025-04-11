@@ -138,7 +138,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -150,7 +149,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.screen_index != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
@@ -160,7 +158,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.concept_field != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.concept_field),
                 is_expanded: false,
@@ -170,7 +167,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.field_id != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_id),
                 is_expanded: is_expanded(&state, 2),
@@ -180,7 +176,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.concept_index != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.concept_index),
                 is_expanded: is_expanded(&state, 3),
@@ -190,7 +185,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.data_page != u8::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.data_page),
                 is_expanded: false,
@@ -200,7 +194,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.concept_key != u8::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.concept_key),
                 is_expanded: false,
@@ -210,7 +203,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.scaling != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.scaling),
                 is_expanded: false,
@@ -220,7 +212,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.data_units != typedef::ExdDataUnits(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EXD_DATA_UNITS,
                 value: Value::Uint8(m.data_units.0),
                 is_expanded: false,
@@ -230,7 +221,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.qualifier != typedef::ExdQualifiers(u8::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EXD_QUALIFIERS,
                 value: Value::Uint8(m.qualifier.0),
                 is_expanded: false,
@@ -240,7 +230,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.descriptor != typedef::ExdDescriptors(u8::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EXD_DESCRIPTORS,
                 value: Value::Uint8(m.descriptor.0),
                 is_expanded: false,
@@ -250,7 +239,6 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.is_signed != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.is_signed.0),
                 is_expanded: false,

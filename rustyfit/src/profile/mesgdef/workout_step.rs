@@ -65,7 +65,7 @@ impl WorkoutStep {
     pub const EXERCISE_CATEGORY: u8 = 10;
     /// Value's type: `u16`
     pub const EXERCISE_NAME: u8 = 11;
-    /// Value's type: `u16`; Scale: `100` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`
     pub const EXERCISE_WEIGHT: u8 = 12;
     /// Value's type: `u16`
     pub const WEIGHT_DISPLAY_UNIT: u8 = 13;
@@ -154,7 +154,6 @@ impl From<WorkoutStep> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -165,7 +164,6 @@ impl From<WorkoutStep> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -175,7 +173,6 @@ impl From<WorkoutStep> for Message {
         if m.wkt_step_name != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.wkt_step_name),
                 is_expanded: false,
@@ -185,7 +182,6 @@ impl From<WorkoutStep> for Message {
         if m.duration_type != typedef::WktStepDuration(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WKT_STEP_DURATION,
                 value: Value::Uint8(m.duration_type.0),
                 is_expanded: false,
@@ -195,7 +191,6 @@ impl From<WorkoutStep> for Message {
         if m.duration_value != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration_value),
                 is_expanded: false,
@@ -205,7 +200,6 @@ impl From<WorkoutStep> for Message {
         if m.target_type != typedef::WktStepTarget(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WKT_STEP_TARGET,
                 value: Value::Uint8(m.target_type.0),
                 is_expanded: false,
@@ -215,7 +209,6 @@ impl From<WorkoutStep> for Message {
         if m.target_value != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.target_value),
                 is_expanded: false,
@@ -225,7 +218,6 @@ impl From<WorkoutStep> for Message {
         if m.custom_target_value_low != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.custom_target_value_low),
                 is_expanded: false,
@@ -235,7 +227,6 @@ impl From<WorkoutStep> for Message {
         if m.custom_target_value_high != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.custom_target_value_high),
                 is_expanded: false,
@@ -245,7 +236,6 @@ impl From<WorkoutStep> for Message {
         if m.intensity != typedef::Intensity(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::INTENSITY,
                 value: Value::Uint8(m.intensity.0),
                 is_expanded: false,
@@ -255,7 +245,6 @@ impl From<WorkoutStep> for Message {
         if m.notes != String::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.notes),
                 is_expanded: false,
@@ -265,7 +254,6 @@ impl From<WorkoutStep> for Message {
         if m.equipment != typedef::WorkoutEquipment(u8::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WORKOUT_EQUIPMENT,
                 value: Value::Uint8(m.equipment.0),
                 is_expanded: false,
@@ -275,7 +263,6 @@ impl From<WorkoutStep> for Message {
         if m.exercise_category != typedef::ExerciseCategory(u16::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
                 value: Value::Uint16(m.exercise_category.0),
                 is_expanded: false,
@@ -285,7 +272,6 @@ impl From<WorkoutStep> for Message {
         if m.exercise_name != u16::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.exercise_name),
                 is_expanded: false,
@@ -295,7 +281,6 @@ impl From<WorkoutStep> for Message {
         if m.exercise_weight != u16::MAX {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.exercise_weight),
                 is_expanded: false,
@@ -305,7 +290,6 @@ impl From<WorkoutStep> for Message {
         if m.weight_display_unit != typedef::FitBaseUnit(u16::MAX) {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::FIT_BASE_UNIT,
                 value: Value::Uint16(m.weight_display_unit.0),
                 is_expanded: false,
@@ -315,7 +299,6 @@ impl From<WorkoutStep> for Message {
         if m.secondary_target_type != typedef::WktStepTarget(u8::MAX) {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WKT_STEP_TARGET,
                 value: Value::Uint8(m.secondary_target_type.0),
                 is_expanded: false,
@@ -325,7 +308,6 @@ impl From<WorkoutStep> for Message {
         if m.secondary_target_value != u32::MAX {
             arr[len] = Field {
                 num: 20,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.secondary_target_value),
                 is_expanded: false,
@@ -335,7 +317,6 @@ impl From<WorkoutStep> for Message {
         if m.secondary_custom_target_value_low != u32::MAX {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.secondary_custom_target_value_low),
                 is_expanded: false,
@@ -345,7 +326,6 @@ impl From<WorkoutStep> for Message {
         if m.secondary_custom_target_value_high != u32::MAX {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.secondary_custom_target_value_high),
                 is_expanded: false,

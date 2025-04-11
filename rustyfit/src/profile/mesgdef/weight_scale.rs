@@ -47,23 +47,23 @@ pub struct WeightScale {
 impl WeightScale {
     /// Value's type: `u32`; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `100` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`
     pub const WEIGHT: u8 = 0;
-    /// Value's type: `u16`; Scale: `100` ; Units: `%`
+    /// Value's type: `u16`; Scale: `100`; Units: `%`
     pub const PERCENT_FAT: u8 = 1;
-    /// Value's type: `u16`; Scale: `100` ; Units: `%`
+    /// Value's type: `u16`; Scale: `100`; Units: `%`
     pub const PERCENT_HYDRATION: u8 = 2;
-    /// Value's type: `u16`; Scale: `100` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`
     pub const VISCERAL_FAT_MASS: u8 = 3;
-    /// Value's type: `u16`; Scale: `100` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`
     pub const BONE_MASS: u8 = 4;
-    /// Value's type: `u16`; Scale: `100` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`
     pub const MUSCLE_MASS: u8 = 5;
-    /// Value's type: `u16`; Scale: `4` ; Units: `kcal/day`
+    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`
     pub const BASAL_MET: u8 = 7;
     /// Value's type: `u8`
     pub const PHYSIQUE_RATING: u8 = 8;
-    /// Value's type: `u16`; Scale: `4` ; Units: `kcal/day`
+    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`
     pub const ACTIVE_MET: u8 = 9;
     /// Value's type: `u8`; Units: `years`
     pub const METABOLIC_AGE: u8 = 10;
@@ -71,7 +71,7 @@ impl WeightScale {
     pub const VISCERAL_FAT_RATING: u8 = 11;
     /// Value's type: `u16`
     pub const USER_PROFILE_INDEX: u8 = 12;
-    /// Value's type: `u16`; Scale: `10` ; Units: `kg/m^2`
+    /// Value's type: `u16`; Scale: `10`; Units: `kg/m^2`
     pub const BMI: u8 = 13;
 
     /// Create new WeightScale with all fields being set to its corresponding invalid value.
@@ -297,7 +297,6 @@ impl From<WeightScale> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -308,7 +307,6 @@ impl From<WeightScale> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -318,7 +316,6 @@ impl From<WeightScale> for Message {
         if m.weight != typedef::Weight(u16::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::WEIGHT,
                 value: Value::Uint16(m.weight.0),
                 is_expanded: false,
@@ -328,7 +325,6 @@ impl From<WeightScale> for Message {
         if m.percent_fat != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.percent_fat),
                 is_expanded: false,
@@ -338,7 +334,6 @@ impl From<WeightScale> for Message {
         if m.percent_hydration != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.percent_hydration),
                 is_expanded: false,
@@ -348,7 +343,6 @@ impl From<WeightScale> for Message {
         if m.visceral_fat_mass != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.visceral_fat_mass),
                 is_expanded: false,
@@ -358,7 +352,6 @@ impl From<WeightScale> for Message {
         if m.bone_mass != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.bone_mass),
                 is_expanded: false,
@@ -368,7 +361,6 @@ impl From<WeightScale> for Message {
         if m.muscle_mass != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.muscle_mass),
                 is_expanded: false,
@@ -378,7 +370,6 @@ impl From<WeightScale> for Message {
         if m.basal_met != u16::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.basal_met),
                 is_expanded: false,
@@ -388,7 +379,6 @@ impl From<WeightScale> for Message {
         if m.physique_rating != u8::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.physique_rating),
                 is_expanded: false,
@@ -398,7 +388,6 @@ impl From<WeightScale> for Message {
         if m.active_met != u16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.active_met),
                 is_expanded: false,
@@ -408,7 +397,6 @@ impl From<WeightScale> for Message {
         if m.metabolic_age != u8::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.metabolic_age),
                 is_expanded: false,
@@ -418,7 +406,6 @@ impl From<WeightScale> for Message {
         if m.visceral_fat_rating != u8::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.visceral_fat_rating),
                 is_expanded: false,
@@ -428,7 +415,6 @@ impl From<WeightScale> for Message {
         if m.user_profile_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.user_profile_index.0),
                 is_expanded: false,
@@ -438,7 +424,6 @@ impl From<WeightScale> for Message {
         if m.bmi != u16::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.bmi),
                 is_expanded: false,

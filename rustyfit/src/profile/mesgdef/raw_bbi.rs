@@ -123,7 +123,6 @@ impl From<RawBbi> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -135,7 +134,6 @@ impl From<RawBbi> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -145,7 +143,6 @@ impl From<RawBbi> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -155,7 +152,6 @@ impl From<RawBbi> for Message {
         if m.data != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.data),
                 is_expanded: false,
@@ -165,7 +161,6 @@ impl From<RawBbi> for Message {
         if m.time != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.time),
                 is_expanded: is_expanded(&state, 2),
@@ -175,7 +170,6 @@ impl From<RawBbi> for Message {
         if m.quality != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.quality),
                 is_expanded: is_expanded(&state, 3),
@@ -185,7 +179,6 @@ impl From<RawBbi> for Message {
         if m.gap != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.gap),
                 is_expanded: is_expanded(&state, 4),

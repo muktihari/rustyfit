@@ -70,7 +70,6 @@ impl From<WatchfaceSettings> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -81,7 +80,6 @@ impl From<WatchfaceSettings> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -91,7 +89,6 @@ impl From<WatchfaceSettings> for Message {
         if m.mode != typedef::WatchfaceMode(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WATCHFACE_MODE,
                 value: Value::Uint8(m.mode.0),
                 is_expanded: false,
@@ -101,7 +98,6 @@ impl From<WatchfaceSettings> for Message {
         if m.layout != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.layout),
                 is_expanded: false,

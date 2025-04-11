@@ -61,9 +61,9 @@ impl Jump {
     pub const POSITION_LAT: u8 = 5;
     /// Value's type: `i32`; Units: `semicircles`
     pub const POSITION_LONG: u8 = 6;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const SPEED: u8 = 7;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_SPEED: u8 = 8;
 
     /// Create new Jump with all fields being set to its corresponding invalid value.
@@ -181,7 +181,6 @@ impl From<Jump> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -193,7 +192,6 @@ impl From<Jump> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -203,7 +201,6 @@ impl From<Jump> for Message {
         if m.distance != f32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.distance),
                 is_expanded: false,
@@ -213,7 +210,6 @@ impl From<Jump> for Message {
         if m.height != f32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.height),
                 is_expanded: false,
@@ -223,7 +219,6 @@ impl From<Jump> for Message {
         if m.rotations != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.rotations),
                 is_expanded: false,
@@ -233,7 +228,6 @@ impl From<Jump> for Message {
         if m.hang_time != f32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.hang_time),
                 is_expanded: false,
@@ -243,7 +237,6 @@ impl From<Jump> for Message {
         if m.score != f32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.score),
                 is_expanded: false,
@@ -253,7 +246,6 @@ impl From<Jump> for Message {
         if m.position_lat != i32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
@@ -263,7 +255,6 @@ impl From<Jump> for Message {
         if m.position_long != i32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
@@ -273,7 +264,6 @@ impl From<Jump> for Message {
         if m.speed != u16::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.speed),
                 is_expanded: false,
@@ -283,7 +273,6 @@ impl From<Jump> for Message {
         if m.enhanced_speed != u32::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_speed),
                 is_expanded: is_expanded(&state, 8),

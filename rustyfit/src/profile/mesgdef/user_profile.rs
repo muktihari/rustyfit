@@ -69,9 +69,9 @@ impl UserProfile {
     pub const GENDER: u8 = 1;
     /// Value's type: `u8`; Units: `years`
     pub const AGE: u8 = 2;
-    /// Value's type: `u8`; Scale: `100` ; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`
     pub const HEIGHT: u8 = 3;
-    /// Value's type: `u16`; Scale: `10` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `10`; Units: `kg`
     pub const WEIGHT: u8 = 4;
     /// Value's type: `u8`
     pub const LANGUAGE: u8 = 5;
@@ -111,9 +111,9 @@ impl UserProfile {
     pub const SLEEP_TIME: u8 = 29;
     /// Value's type: `u8`
     pub const HEIGHT_SETTING: u8 = 30;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`
     pub const USER_RUNNING_STEP_LENGTH: u8 = 31;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`
     pub const USER_WALKING_STEP_LENGTH: u8 = 32;
     /// Value's type: `u8`
     pub const DEPTH_SETTING: u8 = 47;
@@ -272,7 +272,6 @@ impl From<UserProfile> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -283,7 +282,6 @@ impl From<UserProfile> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -293,7 +291,6 @@ impl From<UserProfile> for Message {
         if m.friendly_name != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.friendly_name),
                 is_expanded: false,
@@ -303,7 +300,6 @@ impl From<UserProfile> for Message {
         if m.gender != typedef::Gender(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::GENDER,
                 value: Value::Uint8(m.gender.0),
                 is_expanded: false,
@@ -313,7 +309,6 @@ impl From<UserProfile> for Message {
         if m.age != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.age),
                 is_expanded: false,
@@ -323,7 +318,6 @@ impl From<UserProfile> for Message {
         if m.height != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.height),
                 is_expanded: false,
@@ -333,7 +327,6 @@ impl From<UserProfile> for Message {
         if m.weight != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.weight),
                 is_expanded: false,
@@ -343,7 +336,6 @@ impl From<UserProfile> for Message {
         if m.language != typedef::Language(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::LANGUAGE,
                 value: Value::Uint8(m.language.0),
                 is_expanded: false,
@@ -353,7 +345,6 @@ impl From<UserProfile> for Message {
         if m.elev_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.elev_setting.0),
                 is_expanded: false,
@@ -363,7 +354,6 @@ impl From<UserProfile> for Message {
         if m.weight_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.weight_setting.0),
                 is_expanded: false,
@@ -373,7 +363,6 @@ impl From<UserProfile> for Message {
         if m.resting_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resting_heart_rate),
                 is_expanded: false,
@@ -383,7 +372,6 @@ impl From<UserProfile> for Message {
         if m.default_max_running_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_max_running_heart_rate),
                 is_expanded: false,
@@ -393,7 +381,6 @@ impl From<UserProfile> for Message {
         if m.default_max_biking_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_max_biking_heart_rate),
                 is_expanded: false,
@@ -403,7 +390,6 @@ impl From<UserProfile> for Message {
         if m.default_max_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_max_heart_rate),
                 is_expanded: false,
@@ -413,7 +399,6 @@ impl From<UserProfile> for Message {
         if m.hr_setting != typedef::DisplayHeart(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_HEART,
                 value: Value::Uint8(m.hr_setting.0),
                 is_expanded: false,
@@ -423,7 +408,6 @@ impl From<UserProfile> for Message {
         if m.speed_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.speed_setting.0),
                 is_expanded: false,
@@ -433,7 +417,6 @@ impl From<UserProfile> for Message {
         if m.dist_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.dist_setting.0),
                 is_expanded: false,
@@ -443,7 +426,6 @@ impl From<UserProfile> for Message {
         if m.power_setting != typedef::DisplayPower(u8::MAX) {
             arr[len] = Field {
                 num: 16,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_POWER,
                 value: Value::Uint8(m.power_setting.0),
                 is_expanded: false,
@@ -453,7 +435,6 @@ impl From<UserProfile> for Message {
         if m.activity_class != typedef::ActivityClass(u8::MAX) {
             arr[len] = Field {
                 num: 17,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_CLASS,
                 value: Value::Uint8(m.activity_class.0),
                 is_expanded: false,
@@ -463,7 +444,6 @@ impl From<UserProfile> for Message {
         if m.position_setting != typedef::DisplayPosition(u8::MAX) {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_POSITION,
                 value: Value::Uint8(m.position_setting.0),
                 is_expanded: false,
@@ -473,7 +453,6 @@ impl From<UserProfile> for Message {
         if m.temperature_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.temperature_setting.0),
                 is_expanded: false,
@@ -483,7 +462,6 @@ impl From<UserProfile> for Message {
         if m.local_id != typedef::UserLocalId(u16::MAX) {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::USER_LOCAL_ID,
                 value: Value::Uint16(m.local_id.0),
                 is_expanded: false,
@@ -493,7 +471,6 @@ impl From<UserProfile> for Message {
         if m.global_id != [u8::MAX; 6] {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(Vec::from(&m.global_id)),
                 is_expanded: false,
@@ -503,7 +480,6 @@ impl From<UserProfile> for Message {
         if m.wake_time != typedef::LocaltimeIntoDay(u32::MAX) {
             arr[len] = Field {
                 num: 28,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCALTIME_INTO_DAY,
                 value: Value::Uint32(m.wake_time.0),
                 is_expanded: false,
@@ -513,7 +489,6 @@ impl From<UserProfile> for Message {
         if m.sleep_time != typedef::LocaltimeIntoDay(u32::MAX) {
             arr[len] = Field {
                 num: 29,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCALTIME_INTO_DAY,
                 value: Value::Uint32(m.sleep_time.0),
                 is_expanded: false,
@@ -523,7 +498,6 @@ impl From<UserProfile> for Message {
         if m.height_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 30,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.height_setting.0),
                 is_expanded: false,
@@ -533,7 +507,6 @@ impl From<UserProfile> for Message {
         if m.user_running_step_length != u16::MAX {
             arr[len] = Field {
                 num: 31,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.user_running_step_length),
                 is_expanded: false,
@@ -543,7 +516,6 @@ impl From<UserProfile> for Message {
         if m.user_walking_step_length != u16::MAX {
             arr[len] = Field {
                 num: 32,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.user_walking_step_length),
                 is_expanded: false,
@@ -553,7 +525,6 @@ impl From<UserProfile> for Message {
         if m.depth_setting != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 47,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.depth_setting.0),
                 is_expanded: false,
@@ -563,7 +534,6 @@ impl From<UserProfile> for Message {
         if m.dive_count != u32::MAX {
             arr[len] = Field {
                 num: 49,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.dive_count),
                 is_expanded: false,

@@ -1,6 +1,6 @@
 use std::io::Cursor;
 
-use criterion::{Criterion, black_box};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use rustyfit::{Decoder, Encoder, EncoderBuilder, HeaderOption};
 
 const TEST_FILE: &str = "tests/data/large.fit";
@@ -40,3 +40,6 @@ pub fn bench_encode(c: &mut Criterion) {
         })
     });
 }
+
+criterion_group!(benches, bench_encode);
+criterion_main!(benches);

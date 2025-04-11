@@ -78,7 +78,6 @@ impl From<ZonesTarget> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -89,7 +88,6 @@ impl From<ZonesTarget> for Message {
         if m.max_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
@@ -99,7 +97,6 @@ impl From<ZonesTarget> for Message {
         if m.threshold_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.threshold_heart_rate),
                 is_expanded: false,
@@ -109,7 +106,6 @@ impl From<ZonesTarget> for Message {
         if m.functional_threshold_power != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.functional_threshold_power),
                 is_expanded: false,
@@ -119,7 +115,6 @@ impl From<ZonesTarget> for Message {
         if m.hr_calc_type != typedef::HrZoneCalc(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::HR_ZONE_CALC,
                 value: Value::Uint8(m.hr_calc_type.0),
                 is_expanded: false,
@@ -129,7 +124,6 @@ impl From<ZonesTarget> for Message {
         if m.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::PWR_ZONE_CALC,
                 value: Value::Uint8(m.pwr_calc_type.0),
                 is_expanded: false,

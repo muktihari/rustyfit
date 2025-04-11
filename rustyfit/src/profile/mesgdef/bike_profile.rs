@@ -70,7 +70,7 @@ impl BikeProfile {
     pub const SPORT: u8 = 1;
     /// Value's type: `u8`
     pub const SUB_SPORT: u8 = 2;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const ODOMETER: u8 = 3;
     /// Value's type: `u16`
     pub const BIKE_SPD_ANT_ID: u8 = 4;
@@ -80,13 +80,13 @@ impl BikeProfile {
     pub const BIKE_SPDCAD_ANT_ID: u8 = 6;
     /// Value's type: `u16`
     pub const BIKE_POWER_ANT_ID: u8 = 7;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`
     pub const CUSTOM_WHEELSIZE: u8 = 8;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`
     pub const AUTO_WHEELSIZE: u8 = 9;
-    /// Value's type: `u16`; Scale: `10` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `10`; Units: `kg`
     pub const BIKE_WEIGHT: u8 = 10;
-    /// Value's type: `u16`; Scale: `10` ; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`
     pub const POWER_CAL_FACTOR: u8 = 11;
     /// Value's type: `u8`
     pub const AUTO_WHEEL_CAL: u8 = 12;
@@ -102,7 +102,7 @@ impl BikeProfile {
     pub const SPDCAD_ENABLED: u8 = 17;
     /// Value's type: `u8`
     pub const POWER_ENABLED: u8 = 18;
-    /// Value's type: `u8`; Scale: `2` ; Offset: `-110` ; Units: `mm`
+    /// Value's type: `u8`; Scale: `2`; Offset: `-110`; Units: `mm`
     pub const CRANK_LENGTH: u8 = 19;
     /// Value's type: `u8`
     pub const ENABLED: u8 = 20;
@@ -311,7 +311,6 @@ impl From<BikeProfile> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -322,7 +321,6 @@ impl From<BikeProfile> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -332,7 +330,6 @@ impl From<BikeProfile> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
@@ -342,7 +339,6 @@ impl From<BikeProfile> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -352,7 +348,6 @@ impl From<BikeProfile> for Message {
         if m.sub_sport != typedef::SubSport(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
@@ -362,7 +357,6 @@ impl From<BikeProfile> for Message {
         if m.odometer != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.odometer),
                 is_expanded: false,
@@ -372,7 +366,6 @@ impl From<BikeProfile> for Message {
         if m.bike_spd_ant_id != u16::MIN {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_spd_ant_id),
                 is_expanded: false,
@@ -382,7 +375,6 @@ impl From<BikeProfile> for Message {
         if m.bike_cad_ant_id != u16::MIN {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_cad_ant_id),
                 is_expanded: false,
@@ -392,7 +384,6 @@ impl From<BikeProfile> for Message {
         if m.bike_spdcad_ant_id != u16::MIN {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_spdcad_ant_id),
                 is_expanded: false,
@@ -402,7 +393,6 @@ impl From<BikeProfile> for Message {
         if m.bike_power_ant_id != u16::MIN {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_power_ant_id),
                 is_expanded: false,
@@ -412,7 +402,6 @@ impl From<BikeProfile> for Message {
         if m.custom_wheelsize != u16::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.custom_wheelsize),
                 is_expanded: false,
@@ -422,7 +411,6 @@ impl From<BikeProfile> for Message {
         if m.auto_wheelsize != u16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.auto_wheelsize),
                 is_expanded: false,
@@ -432,7 +420,6 @@ impl From<BikeProfile> for Message {
         if m.bike_weight != u16::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.bike_weight),
                 is_expanded: false,
@@ -442,7 +429,6 @@ impl From<BikeProfile> for Message {
         if m.power_cal_factor != u16::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.power_cal_factor),
                 is_expanded: false,
@@ -452,7 +438,6 @@ impl From<BikeProfile> for Message {
         if m.auto_wheel_cal != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.auto_wheel_cal.0),
                 is_expanded: false,
@@ -462,7 +447,6 @@ impl From<BikeProfile> for Message {
         if m.auto_power_zero != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.auto_power_zero.0),
                 is_expanded: false,
@@ -472,7 +456,6 @@ impl From<BikeProfile> for Message {
         if m.id != u8::MAX {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.id),
                 is_expanded: false,
@@ -482,7 +465,6 @@ impl From<BikeProfile> for Message {
         if m.spd_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.spd_enabled.0),
                 is_expanded: false,
@@ -492,7 +474,6 @@ impl From<BikeProfile> for Message {
         if m.cad_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 16,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.cad_enabled.0),
                 is_expanded: false,
@@ -502,7 +483,6 @@ impl From<BikeProfile> for Message {
         if m.spdcad_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 17,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.spdcad_enabled.0),
                 is_expanded: false,
@@ -512,7 +492,6 @@ impl From<BikeProfile> for Message {
         if m.power_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.power_enabled.0),
                 is_expanded: false,
@@ -522,7 +501,6 @@ impl From<BikeProfile> for Message {
         if m.crank_length != u8::MAX {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.crank_length),
                 is_expanded: false,
@@ -532,7 +510,6 @@ impl From<BikeProfile> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 20,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -542,7 +519,6 @@ impl From<BikeProfile> for Message {
         if m.bike_spd_ant_id_trans_type != u8::MIN {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_spd_ant_id_trans_type),
                 is_expanded: false,
@@ -552,7 +528,6 @@ impl From<BikeProfile> for Message {
         if m.bike_cad_ant_id_trans_type != u8::MIN {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_cad_ant_id_trans_type),
                 is_expanded: false,
@@ -562,7 +537,6 @@ impl From<BikeProfile> for Message {
         if m.bike_spdcad_ant_id_trans_type != u8::MIN {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_spdcad_ant_id_trans_type),
                 is_expanded: false,
@@ -572,7 +546,6 @@ impl From<BikeProfile> for Message {
         if m.bike_power_ant_id_trans_type != u8::MIN {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_power_ant_id_trans_type),
                 is_expanded: false,
@@ -582,7 +555,6 @@ impl From<BikeProfile> for Message {
         if m.odometer_rollover != u8::MAX {
             arr[len] = Field {
                 num: 37,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.odometer_rollover),
                 is_expanded: false,
@@ -592,7 +564,6 @@ impl From<BikeProfile> for Message {
         if m.front_gear_num != u8::MIN {
             arr[len] = Field {
                 num: 38,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.front_gear_num),
                 is_expanded: false,
@@ -602,7 +573,6 @@ impl From<BikeProfile> for Message {
         if m.front_gear != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 39,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.front_gear),
                 is_expanded: false,
@@ -612,7 +582,6 @@ impl From<BikeProfile> for Message {
         if m.rear_gear_num != u8::MIN {
             arr[len] = Field {
                 num: 40,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.rear_gear_num),
                 is_expanded: false,
@@ -622,7 +591,6 @@ impl From<BikeProfile> for Message {
         if m.rear_gear != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 41,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.rear_gear),
                 is_expanded: false,
@@ -632,7 +600,6 @@ impl From<BikeProfile> for Message {
         if m.shimano_di2_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 44,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.shimano_di2_enabled.0),
                 is_expanded: false,

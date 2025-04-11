@@ -87,11 +87,11 @@ impl Monitoring {
     pub const DEVICE_INDEX: u8 = 0;
     /// Value's type: `u16`; Units: `kcal`
     pub const CALORIES: u8 = 1;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const DISTANCE: u8 = 2;
-    /// Value's type: `u32`; Scale: `2` ; Units: `cycles`
+    /// Value's type: `u32`; Scale: `2`; Units: `cycles`
     pub const CYCLES: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 4;
     /// Value's type: `u8`
     pub const ACTIVITY_TYPE: u8 = 5;
@@ -107,11 +107,11 @@ impl Monitoring {
     pub const ACTIVE_TIME_16: u8 = 10;
     /// Value's type: `u32`
     pub const LOCAL_TIMESTAMP: u8 = 11;
-    /// Value's type: `i16`; Scale: `100` ; Units: `C`
+    /// Value's type: `i16`; Scale: `100`; Units: `C`
     pub const TEMPERATURE: u8 = 12;
-    /// Value's type: `i16`; Scale: `100` ; Units: `C`
+    /// Value's type: `i16`; Scale: `100`; Units: `C`
     pub const TEMPERATURE_MIN: u8 = 14;
-    /// Value's type: `i16`; Scale: `100` ; Units: `C`
+    /// Value's type: `i16`; Scale: `100`; Units: `C`
     pub const TEMPERATURE_MAX: u8 = 15;
     /// Value's type: `[u16; 8]`; Units: `minutes`
     pub const ACTIVITY_TIME: u8 = 16;
@@ -131,9 +131,9 @@ impl Monitoring {
     pub const DURATION_MIN: u8 = 29;
     /// Value's type: `u32`; Units: `s`
     pub const DURATION: u8 = 30;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const ASCENT: u8 = 31;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const DESCENT: u8 = 32;
     /// Value's type: `u16`; Units: `minutes`
     pub const MODERATE_ACTIVITY_MINUTES: u8 = 33;
@@ -416,7 +416,6 @@ impl From<Monitoring> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -428,7 +427,6 @@ impl From<Monitoring> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -438,7 +436,6 @@ impl From<Monitoring> for Message {
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
@@ -448,7 +445,6 @@ impl From<Monitoring> for Message {
         if m.calories != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.calories),
                 is_expanded: false,
@@ -458,7 +454,6 @@ impl From<Monitoring> for Message {
         if m.distance != u32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
@@ -468,7 +463,6 @@ impl From<Monitoring> for Message {
         if m.cycles != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.cycles),
                 is_expanded: false,
@@ -478,7 +472,6 @@ impl From<Monitoring> for Message {
         if m.active_time != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
@@ -488,7 +481,6 @@ impl From<Monitoring> for Message {
         if m.activity_type != typedef::ActivityType(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: is_expanded(&state, 5),
@@ -498,7 +490,6 @@ impl From<Monitoring> for Message {
         if m.activity_subtype != typedef::ActivitySubtype(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_SUBTYPE,
                 value: Value::Uint8(m.activity_subtype.0),
                 is_expanded: false,
@@ -508,7 +499,6 @@ impl From<Monitoring> for Message {
         if m.activity_level != typedef::ActivityLevel(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_LEVEL,
                 value: Value::Uint8(m.activity_level.0),
                 is_expanded: false,
@@ -518,7 +508,6 @@ impl From<Monitoring> for Message {
         if m.distance_16 != u16::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.distance_16),
                 is_expanded: false,
@@ -528,7 +517,6 @@ impl From<Monitoring> for Message {
         if m.cycles_16 != u16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.cycles_16),
                 is_expanded: false,
@@ -538,7 +526,6 @@ impl From<Monitoring> for Message {
         if m.active_time_16 != u16::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.active_time_16),
                 is_expanded: false,
@@ -548,7 +535,6 @@ impl From<Monitoring> for Message {
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
@@ -558,7 +544,6 @@ impl From<Monitoring> for Message {
         if m.temperature != i16::MAX {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.temperature),
                 is_expanded: false,
@@ -568,7 +553,6 @@ impl From<Monitoring> for Message {
         if m.temperature_min != i16::MAX {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.temperature_min),
                 is_expanded: false,
@@ -578,7 +562,6 @@ impl From<Monitoring> for Message {
         if m.temperature_max != i16::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.temperature_max),
                 is_expanded: false,
@@ -588,7 +571,6 @@ impl From<Monitoring> for Message {
         if m.activity_time != [u16::MAX; 8] {
             arr[len] = Field {
                 num: 16,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(Vec::from(&m.activity_time)),
                 is_expanded: false,
@@ -598,7 +580,6 @@ impl From<Monitoring> for Message {
         if m.active_calories != u16::MAX {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.active_calories),
                 is_expanded: false,
@@ -608,7 +589,6 @@ impl From<Monitoring> for Message {
         if m.current_activity_type_intensity != u8::MAX {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.current_activity_type_intensity),
                 is_expanded: false,
@@ -618,7 +598,6 @@ impl From<Monitoring> for Message {
         if m.timestamp_min_8 != u8::MAX {
             arr[len] = Field {
                 num: 25,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.timestamp_min_8),
                 is_expanded: false,
@@ -628,7 +607,6 @@ impl From<Monitoring> for Message {
         if m.timestamp_16 != u16::MAX {
             arr[len] = Field {
                 num: 26,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_16),
                 is_expanded: false,
@@ -638,7 +616,6 @@ impl From<Monitoring> for Message {
         if m.heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 27,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
@@ -648,7 +625,6 @@ impl From<Monitoring> for Message {
         if m.intensity != u8::MAX {
             arr[len] = Field {
                 num: 28,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.intensity),
                 is_expanded: is_expanded(&state, 28),
@@ -658,7 +634,6 @@ impl From<Monitoring> for Message {
         if m.duration_min != u16::MAX {
             arr[len] = Field {
                 num: 29,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.duration_min),
                 is_expanded: false,
@@ -668,7 +643,6 @@ impl From<Monitoring> for Message {
         if m.duration != u32::MAX {
             arr[len] = Field {
                 num: 30,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
@@ -678,7 +652,6 @@ impl From<Monitoring> for Message {
         if m.ascent != u32::MAX {
             arr[len] = Field {
                 num: 31,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ascent),
                 is_expanded: false,
@@ -688,7 +661,6 @@ impl From<Monitoring> for Message {
         if m.descent != u32::MAX {
             arr[len] = Field {
                 num: 32,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.descent),
                 is_expanded: false,
@@ -698,7 +670,6 @@ impl From<Monitoring> for Message {
         if m.moderate_activity_minutes != u16::MAX {
             arr[len] = Field {
                 num: 33,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.moderate_activity_minutes),
                 is_expanded: false,
@@ -708,7 +679,6 @@ impl From<Monitoring> for Message {
         if m.vigorous_activity_minutes != u16::MAX {
             arr[len] = Field {
                 num: 34,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vigorous_activity_minutes),
                 is_expanded: false,

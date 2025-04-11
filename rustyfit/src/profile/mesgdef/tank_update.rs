@@ -28,7 +28,7 @@ impl TankUpdate {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u32`
     pub const SENSOR: u8 = 0;
-    /// Value's type: `u16`; Scale: `100` ; Units: `bar`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar`
     pub const PRESSURE: u8 = 1;
 
     /// Create new TankUpdate with all fields being set to its corresponding invalid value.
@@ -91,7 +91,6 @@ impl From<TankUpdate> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -102,7 +101,6 @@ impl From<TankUpdate> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -112,7 +110,6 @@ impl From<TankUpdate> for Message {
         if m.sensor != typedef::AntChannelId(u32::MIN) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::ANT_CHANNEL_ID,
                 value: Value::Uint32(m.sensor.0),
                 is_expanded: false,
@@ -122,7 +119,6 @@ impl From<TankUpdate> for Message {
         if m.pressure != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pressure),
                 is_expanded: false,

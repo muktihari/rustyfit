@@ -75,7 +75,6 @@ impl From<ExdScreenConfiguration> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -86,7 +85,6 @@ impl From<ExdScreenConfiguration> for Message {
         if m.screen_index != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
@@ -96,7 +94,6 @@ impl From<ExdScreenConfiguration> for Message {
         if m.field_count != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_count),
                 is_expanded: false,
@@ -106,7 +103,6 @@ impl From<ExdScreenConfiguration> for Message {
         if m.layout != typedef::ExdLayout(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EXD_LAYOUT,
                 value: Value::Uint8(m.layout.0),
                 is_expanded: false,
@@ -116,7 +112,6 @@ impl From<ExdScreenConfiguration> for Message {
         if m.screen_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.screen_enabled.0),
                 is_expanded: false,

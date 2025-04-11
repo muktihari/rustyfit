@@ -83,7 +83,6 @@ impl From<FileCapabilities> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -94,7 +93,6 @@ impl From<FileCapabilities> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -104,7 +102,6 @@ impl From<FileCapabilities> for Message {
         if m.r#type != typedef::File(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::FILE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
@@ -114,7 +111,6 @@ impl From<FileCapabilities> for Message {
         if m.flags != typedef::FileFlags(u8::MIN) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::FILE_FLAGS,
                 value: Value::Uint8(m.flags.0),
                 is_expanded: false,
@@ -124,7 +120,6 @@ impl From<FileCapabilities> for Message {
         if m.directory != String::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.directory),
                 is_expanded: false,
@@ -134,7 +129,6 @@ impl From<FileCapabilities> for Message {
         if m.max_count != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_count),
                 is_expanded: false,
@@ -144,7 +138,6 @@ impl From<FileCapabilities> for Message {
         if m.max_size != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_size),
                 is_expanded: false,

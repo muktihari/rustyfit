@@ -67,7 +67,6 @@ impl From<StressLevel> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -78,7 +77,6 @@ impl From<StressLevel> for Message {
         if m.stress_level_value != i16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.stress_level_value),
                 is_expanded: false,
@@ -88,7 +86,6 @@ impl From<StressLevel> for Message {
         if m.stress_level_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.stress_level_time.0),
                 is_expanded: false,

@@ -35,17 +35,17 @@ pub struct HrvStatusSummary {
 impl HrvStatusSummary {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `128` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`
     pub const WEEKLY_AVERAGE: u8 = 0;
-    /// Value's type: `u16`; Scale: `128` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`
     pub const LAST_NIGHT_AVERAGE: u8 = 1;
-    /// Value's type: `u16`; Scale: `128` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`
     pub const LAST_NIGHT_5_MIN_HIGH: u8 = 2;
-    /// Value's type: `u16`; Scale: `128` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`
     pub const BASELINE_LOW_UPPER: u8 = 3;
-    /// Value's type: `u16`; Scale: `128` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`
     pub const BASELINE_BALANCED_LOWER: u8 = 4;
-    /// Value's type: `u16`; Scale: `128` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`
     pub const BASELINE_BALANCED_UPPER: u8 = 5;
     /// Value's type: `u8`
     pub const STATUS: u8 = 6;
@@ -210,7 +210,6 @@ impl From<HrvStatusSummary> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -221,7 +220,6 @@ impl From<HrvStatusSummary> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -231,7 +229,6 @@ impl From<HrvStatusSummary> for Message {
         if m.weekly_average != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.weekly_average),
                 is_expanded: false,
@@ -241,7 +238,6 @@ impl From<HrvStatusSummary> for Message {
         if m.last_night_average != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.last_night_average),
                 is_expanded: false,
@@ -251,7 +247,6 @@ impl From<HrvStatusSummary> for Message {
         if m.last_night_5_min_high != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.last_night_5_min_high),
                 is_expanded: false,
@@ -261,7 +256,6 @@ impl From<HrvStatusSummary> for Message {
         if m.baseline_low_upper != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.baseline_low_upper),
                 is_expanded: false,
@@ -271,7 +265,6 @@ impl From<HrvStatusSummary> for Message {
         if m.baseline_balanced_lower != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.baseline_balanced_lower),
                 is_expanded: false,
@@ -281,7 +274,6 @@ impl From<HrvStatusSummary> for Message {
         if m.baseline_balanced_upper != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.baseline_balanced_upper),
                 is_expanded: false,
@@ -291,7 +283,6 @@ impl From<HrvStatusSummary> for Message {
         if m.status != typedef::HrvStatus(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::HRV_STATUS,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,

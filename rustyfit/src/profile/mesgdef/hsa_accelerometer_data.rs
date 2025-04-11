@@ -39,11 +39,11 @@ impl HsaAccelerometerData {
     pub const TIMESTAMP_MS: u8 = 0;
     /// Value's type: `u16`; Units: `ms`
     pub const SAMPLING_INTERVAL: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `1.024` ; Units: `mG`
+    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `1.024` ; Units: `mG`
+    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `1.024` ; Units: `mG`
+    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`
     pub const ACCEL_Z: u8 = 4;
     /// Value's type: `u32`
     pub const TIMESTAMP_32K: u8 = 5;
@@ -183,7 +183,6 @@ impl From<HsaAccelerometerData> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -194,7 +193,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -204,7 +202,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -214,7 +211,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.sampling_interval != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.sampling_interval),
                 is_expanded: false,
@@ -224,7 +220,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.accel_x != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_x),
                 is_expanded: false,
@@ -234,7 +229,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.accel_y != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_y),
                 is_expanded: false,
@@ -244,7 +238,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.accel_z != Vec::<i16>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_z),
                 is_expanded: false,
@@ -254,7 +247,6 @@ impl From<HsaAccelerometerData> for Message {
         if m.timestamp_32k != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.timestamp_32k),
                 is_expanded: false,

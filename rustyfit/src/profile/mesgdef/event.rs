@@ -92,9 +92,9 @@ impl Event {
     pub const RADAR_THREAT_LEVEL_MAX: u8 = 21;
     /// Value's type: `u8`
     pub const RADAR_THREAT_COUNT: u8 = 22;
-    /// Value's type: `u8`; Scale: `10` ; Units: `m/s`
+    /// Value's type: `u8`; Scale: `10`; Units: `m/s`
     pub const RADAR_THREAT_AVG_APPROACH_SPEED: u8 = 23;
-    /// Value's type: `u8`; Scale: `10` ; Units: `m/s`
+    /// Value's type: `u8`; Scale: `10`; Units: `m/s`
     pub const RADAR_THREAT_MAX_APPROACH_SPEED: u8 = 24;
 
     /// Create new Event with all fields being set to its corresponding invalid value.
@@ -221,7 +221,6 @@ impl From<Event> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -233,7 +232,6 @@ impl From<Event> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -243,7 +241,6 @@ impl From<Event> for Message {
         if m.event != typedef::Event(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
@@ -253,7 +250,6 @@ impl From<Event> for Message {
         if m.event_type != typedef::EventType(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT_TYPE,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
@@ -263,7 +259,6 @@ impl From<Event> for Message {
         if m.data16 != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.data16),
                 is_expanded: false,
@@ -273,7 +268,6 @@ impl From<Event> for Message {
         if m.data != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.data),
                 is_expanded: is_expanded(&state, 3),
@@ -283,7 +277,6 @@ impl From<Event> for Message {
         if m.event_group != u8::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
@@ -293,7 +286,6 @@ impl From<Event> for Message {
         if m.score != u16::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.score),
                 is_expanded: is_expanded(&state, 7),
@@ -303,7 +295,6 @@ impl From<Event> for Message {
         if m.opponent_score != u16::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: is_expanded(&state, 8),
@@ -313,7 +304,6 @@ impl From<Event> for Message {
         if m.front_gear_num != u8::MIN {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.front_gear_num),
                 is_expanded: is_expanded(&state, 9),
@@ -323,7 +313,6 @@ impl From<Event> for Message {
         if m.front_gear != u8::MIN {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.front_gear),
                 is_expanded: is_expanded(&state, 10),
@@ -333,7 +322,6 @@ impl From<Event> for Message {
         if m.rear_gear_num != u8::MIN {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.rear_gear_num),
                 is_expanded: is_expanded(&state, 11),
@@ -343,7 +331,6 @@ impl From<Event> for Message {
         if m.rear_gear != u8::MIN {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.rear_gear),
                 is_expanded: is_expanded(&state, 12),
@@ -353,7 +340,6 @@ impl From<Event> for Message {
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
@@ -363,7 +349,6 @@ impl From<Event> for Message {
         if m.activity_type != typedef::ActivityType(u8::MAX) {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: false,
@@ -373,7 +358,6 @@ impl From<Event> for Message {
         if m.start_timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
@@ -383,7 +367,6 @@ impl From<Event> for Message {
         if m.radar_threat_level_max != typedef::RadarThreatLevelType(u8::MAX) {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::RADAR_THREAT_LEVEL_TYPE,
                 value: Value::Uint8(m.radar_threat_level_max.0),
                 is_expanded: is_expanded(&state, 21),
@@ -393,7 +376,6 @@ impl From<Event> for Message {
         if m.radar_threat_count != u8::MAX {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.radar_threat_count),
                 is_expanded: is_expanded(&state, 22),
@@ -403,7 +385,6 @@ impl From<Event> for Message {
         if m.radar_threat_avg_approach_speed != u8::MAX {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.radar_threat_avg_approach_speed),
                 is_expanded: is_expanded(&state, 23),
@@ -413,7 +394,6 @@ impl From<Event> for Message {
         if m.radar_threat_max_approach_speed != u8::MAX {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.radar_threat_max_approach_speed),
                 is_expanded: is_expanded(&state, 24),

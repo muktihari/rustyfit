@@ -24,7 +24,7 @@ pub struct RespirationRate {
 impl RespirationRate {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `i16`; Scale: `100` ; Units: `breaths/min`
+    /// Value's type: `i16`; Scale: `100`; Units: `breaths/min`
     pub const RESPIRATION_RATE: u8 = 0;
 
     /// Create new RespirationRate with all fields being set to its corresponding invalid value.
@@ -86,7 +86,6 @@ impl From<RespirationRate> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -97,7 +96,6 @@ impl From<RespirationRate> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -107,7 +105,6 @@ impl From<RespirationRate> for Message {
         if m.respiration_rate != i16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.respiration_rate),
                 is_expanded: false,

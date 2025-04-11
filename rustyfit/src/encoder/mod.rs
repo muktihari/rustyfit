@@ -337,7 +337,7 @@ impl<W: Write + Seek> Encoder<W> {
             mesg_def.field_definitions.push(FieldDefinition {
                 num: field.num,
                 size: field.value.size() as u8,
-                base_type: field.base_type,
+                base_type: field.profile_type.base_type(),
             });
         }
 

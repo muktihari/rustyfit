@@ -78,7 +78,6 @@ impl From<AntChannelId> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -89,7 +88,6 @@ impl From<AntChannelId> for Message {
         if m.channel_number != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.channel_number),
                 is_expanded: false,
@@ -99,7 +97,6 @@ impl From<AntChannelId> for Message {
         if m.device_type != u8::MIN {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.device_type),
                 is_expanded: false,
@@ -109,7 +106,6 @@ impl From<AntChannelId> for Message {
         if m.device_number != u16::MIN {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.device_number),
                 is_expanded: false,
@@ -119,7 +115,6 @@ impl From<AntChannelId> for Message {
         if m.transmission_type != u8::MIN {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.transmission_type),
                 is_expanded: false,
@@ -129,7 +124,6 @@ impl From<AntChannelId> for Message {
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,

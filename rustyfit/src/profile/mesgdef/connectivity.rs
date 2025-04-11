@@ -113,7 +113,6 @@ impl From<Connectivity> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -124,7 +123,6 @@ impl From<Connectivity> for Message {
         if m.bluetooth_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.bluetooth_enabled.0),
                 is_expanded: false,
@@ -134,7 +132,6 @@ impl From<Connectivity> for Message {
         if m.bluetooth_le_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.bluetooth_le_enabled.0),
                 is_expanded: false,
@@ -144,7 +141,6 @@ impl From<Connectivity> for Message {
         if m.ant_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.ant_enabled.0),
                 is_expanded: false,
@@ -154,7 +150,6 @@ impl From<Connectivity> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
@@ -164,7 +159,6 @@ impl From<Connectivity> for Message {
         if m.live_tracking_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.live_tracking_enabled.0),
                 is_expanded: false,
@@ -174,7 +168,6 @@ impl From<Connectivity> for Message {
         if m.weather_conditions_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.weather_conditions_enabled.0),
                 is_expanded: false,
@@ -184,7 +177,6 @@ impl From<Connectivity> for Message {
         if m.weather_alerts_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.weather_alerts_enabled.0),
                 is_expanded: false,
@@ -194,7 +186,6 @@ impl From<Connectivity> for Message {
         if m.auto_activity_upload_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.auto_activity_upload_enabled.0),
                 is_expanded: false,
@@ -204,7 +195,6 @@ impl From<Connectivity> for Message {
         if m.course_download_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.course_download_enabled.0),
                 is_expanded: false,
@@ -214,7 +204,6 @@ impl From<Connectivity> for Message {
         if m.workout_download_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.workout_download_enabled.0),
                 is_expanded: false,
@@ -224,7 +213,6 @@ impl From<Connectivity> for Message {
         if m.gps_ephemeris_download_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.gps_ephemeris_download_enabled.0),
                 is_expanded: false,
@@ -234,7 +222,6 @@ impl From<Connectivity> for Message {
         if m.incident_detection_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.incident_detection_enabled.0),
                 is_expanded: false,
@@ -244,7 +231,6 @@ impl From<Connectivity> for Message {
         if m.grouptrack_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.grouptrack_enabled.0),
                 is_expanded: false,

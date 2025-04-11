@@ -110,7 +110,6 @@ impl From<Goal> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -121,7 +120,6 @@ impl From<Goal> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -131,7 +129,6 @@ impl From<Goal> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -141,7 +138,6 @@ impl From<Goal> for Message {
         if m.sub_sport != typedef::SubSport(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
@@ -151,7 +147,6 @@ impl From<Goal> for Message {
         if m.start_date != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_date.0),
                 is_expanded: false,
@@ -161,7 +156,6 @@ impl From<Goal> for Message {
         if m.end_date != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.end_date.0),
                 is_expanded: false,
@@ -171,7 +165,6 @@ impl From<Goal> for Message {
         if m.r#type != typedef::Goal(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::GOAL,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
@@ -181,7 +174,6 @@ impl From<Goal> for Message {
         if m.value != u32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.value),
                 is_expanded: false,
@@ -191,7 +183,6 @@ impl From<Goal> for Message {
         if m.repeat != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.repeat.0),
                 is_expanded: false,
@@ -201,7 +192,6 @@ impl From<Goal> for Message {
         if m.target_value != u32::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.target_value),
                 is_expanded: false,
@@ -211,7 +201,6 @@ impl From<Goal> for Message {
         if m.recurrence != typedef::GoalRecurrence(u8::MAX) {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::GOAL_RECURRENCE,
                 value: Value::Uint8(m.recurrence.0),
                 is_expanded: false,
@@ -221,7 +210,6 @@ impl From<Goal> for Message {
         if m.recurrence_value != u16::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.recurrence_value),
                 is_expanded: false,
@@ -231,7 +219,6 @@ impl From<Goal> for Message {
         if m.enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
@@ -241,7 +228,6 @@ impl From<Goal> for Message {
         if m.source != typedef::GoalSource(u8::MAX) {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::GOAL_SOURCE,
                 value: Value::Uint8(m.source.0),
                 is_expanded: false,

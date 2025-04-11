@@ -88,7 +88,6 @@ impl From<MemoGlob> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -99,7 +98,6 @@ impl From<MemoGlob> for Message {
         if m.part_index != u32::MAX {
             arr[len] = Field {
                 num: 250,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.part_index),
                 is_expanded: false,
@@ -109,7 +107,6 @@ impl From<MemoGlob> for Message {
         if m.memo != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.memo),
                 is_expanded: false,
@@ -119,7 +116,6 @@ impl From<MemoGlob> for Message {
         if m.mesg_num != typedef::MesgNum(u16::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.mesg_num.0),
                 is_expanded: false,
@@ -129,7 +125,6 @@ impl From<MemoGlob> for Message {
         if m.parent_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.parent_index.0),
                 is_expanded: false,
@@ -139,7 +134,6 @@ impl From<MemoGlob> for Message {
         if m.field_num != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_num),
                 is_expanded: false,
@@ -149,7 +143,6 @@ impl From<MemoGlob> for Message {
         if m.data != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.data),
                 is_expanded: false,

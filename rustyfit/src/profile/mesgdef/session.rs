@@ -337,11 +337,11 @@ impl Session {
     pub const SPORT: u8 = 5;
     /// Value's type: `u8`
     pub const SUB_SPORT: u8 = 6;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_ELAPSED_TIME: u8 = 7;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 8;
-    /// Value's type: `u32`; Scale: `100` ; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const TOTAL_DISTANCE: u8 = 9;
     /// Value's type: `u32`; Units: `cycles`
     pub const TOTAL_CYCLES: u8 = 10;
@@ -349,9 +349,9 @@ impl Session {
     pub const TOTAL_CALORIES: u8 = 11;
     /// Value's type: `u16`; Units: `kcal`
     pub const TOTAL_FAT_CALORIES: u8 = 13;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 14;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 15;
     /// Value's type: `u8`; Units: `bpm`
     pub const AVG_HEART_RATE: u8 = 16;
@@ -391,9 +391,9 @@ impl Session {
     pub const NUM_LENGTHS: u8 = 33;
     /// Value's type: `u16`; Units: `watts`
     pub const NORMALIZED_POWER: u8 = 34;
-    /// Value's type: `u16`; Scale: `10` ; Units: `tss`
+    /// Value's type: `u16`; Scale: `10`; Units: `tss`
     pub const TRAINING_STRESS_SCORE: u8 = 35;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `if`
+    /// Value's type: `u16`; Scale: `1000`; Units: `if`
     pub const INTENSITY_FACTOR: u8 = 36;
     /// Value's type: `u16`
     pub const LEFT_RIGHT_BALANCE: u8 = 37;
@@ -401,13 +401,13 @@ impl Session {
     pub const END_POSITION_LAT: u8 = 38;
     /// Value's type: `i32`; Units: `semicircles`
     pub const END_POSITION_LONG: u8 = 39;
-    /// Value's type: `u32`; Scale: `10` ; Units: `strokes/lap`
+    /// Value's type: `u32`; Scale: `10`; Units: `strokes/lap`
     pub const AVG_STROKE_COUNT: u8 = 41;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`
     pub const AVG_STROKE_DISTANCE: u8 = 42;
     /// Value's type: `u8`; Units: `swim_stroke`
     pub const SWIM_STROKE: u8 = 43;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`
     pub const POOL_LENGTH: u8 = 44;
     /// Value's type: `u16`; Units: `watts`
     pub const THRESHOLD_POWER: u8 = 45;
@@ -417,51 +417,51 @@ impl Session {
     pub const NUM_ACTIVE_LENGTHS: u8 = 47;
     /// Value's type: `u32`; Units: `J`
     pub const TOTAL_WORK: u8 = 48;
-    /// Value's type: `u16`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
     pub const AVG_ALTITUDE: u8 = 49;
-    /// Value's type: `u16`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
     pub const MAX_ALTITUDE: u8 = 50;
     /// Value's type: `u8`; Units: `m`
     pub const GPS_ACCURACY: u8 = 51;
-    /// Value's type: `i16`; Scale: `100` ; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`
     pub const AVG_GRADE: u8 = 52;
-    /// Value's type: `i16`; Scale: `100` ; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`
     pub const AVG_POS_GRADE: u8 = 53;
-    /// Value's type: `i16`; Scale: `100` ; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`
     pub const AVG_NEG_GRADE: u8 = 54;
-    /// Value's type: `i16`; Scale: `100` ; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`
     pub const MAX_POS_GRADE: u8 = 55;
-    /// Value's type: `i16`; Scale: `100` ; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`
     pub const MAX_NEG_GRADE: u8 = 56;
     /// Value's type: `i8`; Units: `C`
     pub const AVG_TEMPERATURE: u8 = 57;
     /// Value's type: `i8`; Units: `C`
     pub const MAX_TEMPERATURE: u8 = 58;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 59;
-    /// Value's type: `i16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
     pub const AVG_POS_VERTICAL_SPEED: u8 = 60;
-    /// Value's type: `i16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
     pub const AVG_NEG_VERTICAL_SPEED: u8 = 61;
-    /// Value's type: `i16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
     pub const MAX_POS_VERTICAL_SPEED: u8 = 62;
-    /// Value's type: `i16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
     pub const MAX_NEG_VERTICAL_SPEED: u8 = 63;
     /// Value's type: `u8`; Units: `bpm`
     pub const MIN_HEART_RATE: u8 = 64;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 65;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 66;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 67;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 68;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const AVG_LAP_TIME: u8 = 69;
     /// Value's type: `u16`
     pub const BEST_LAP_INDEX: u8 = 70;
-    /// Value's type: `u16`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
     pub const MIN_ALTITUDE: u8 = 71;
     /// Value's type: `u16`
     pub const PLAYER_SCORE: u8 = 82;
@@ -473,49 +473,49 @@ impl Session {
     pub const STROKE_COUNT: u8 = 85;
     /// Value's type: `Vec<u16>`; Units: `counts`
     pub const ZONE_COUNT: u8 = 86;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `100`; Units: `m/s`
     pub const MAX_BALL_SPEED: u8 = 87;
-    /// Value's type: `u16`; Scale: `100` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `100`; Units: `m/s`
     pub const AVG_BALL_SPEED: u8 = 88;
-    /// Value's type: `u16`; Scale: `10` ; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`
     pub const AVG_VERTICAL_OSCILLATION: u8 = 89;
-    /// Value's type: `u16`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`
     pub const AVG_STANCE_TIME_PERCENT: u8 = 90;
-    /// Value's type: `u16`; Scale: `10` ; Units: `ms`
+    /// Value's type: `u16`; Scale: `10`; Units: `ms`
     pub const AVG_STANCE_TIME: u8 = 91;
-    /// Value's type: `u8`; Scale: `128` ; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
     pub const AVG_FRACTIONAL_CADENCE: u8 = 92;
-    /// Value's type: `u8`; Scale: `128` ; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
     pub const MAX_FRACTIONAL_CADENCE: u8 = 93;
-    /// Value's type: `u8`; Scale: `128` ; Units: `cycles`
+    /// Value's type: `u8`; Scale: `128`; Units: `cycles`
     pub const TOTAL_FRACTIONAL_CYCLES: u8 = 94;
-    /// Value's type: `Vec<u16>`; Scale: `100` ; Units: `g/dL`
+    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`
     pub const AVG_TOTAL_HEMOGLOBIN_CONC: u8 = 95;
-    /// Value's type: `Vec<u16>`; Scale: `100` ; Units: `g/dL`
+    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`
     pub const MIN_TOTAL_HEMOGLOBIN_CONC: u8 = 96;
-    /// Value's type: `Vec<u16>`; Scale: `100` ; Units: `g/dL`
+    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`
     pub const MAX_TOTAL_HEMOGLOBIN_CONC: u8 = 97;
-    /// Value's type: `Vec<u16>`; Scale: `10` ; Units: `%`
+    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`
     pub const AVG_SATURATED_HEMOGLOBIN_PERCENT: u8 = 98;
-    /// Value's type: `Vec<u16>`; Scale: `10` ; Units: `%`
+    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`
     pub const MIN_SATURATED_HEMOGLOBIN_PERCENT: u8 = 99;
-    /// Value's type: `Vec<u16>`; Scale: `10` ; Units: `%`
+    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`
     pub const MAX_SATURATED_HEMOGLOBIN_PERCENT: u8 = 100;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 101;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const AVG_RIGHT_TORQUE_EFFECTIVENESS: u8 = 102;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const AVG_LEFT_PEDAL_SMOOTHNESS: u8 = 103;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 104;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 105;
     /// Value's type: `String`
     pub const SPORT_PROFILE_NAME: u8 = 110;
     /// Value's type: `u8`
     pub const SPORT_INDEX: u8 = 111;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TIME_STANDING: u8 = 112;
     /// Value's type: `u16`
     pub const STAND_COUNT: u8 = 113;
@@ -523,13 +523,13 @@ impl Session {
     pub const AVG_LEFT_PCO: u8 = 114;
     /// Value's type: `i8`; Units: `mm`
     pub const AVG_RIGHT_PCO: u8 = 115;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE: u8 = 116;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 117;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 118;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111` ; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 119;
     /// Value's type: `Vec<u16>`; Units: `watts`
     pub const AVG_POWER_POSITION: u8 = 120;
@@ -539,35 +539,35 @@ impl Session {
     pub const AVG_CADENCE_POSITION: u8 = 122;
     /// Value's type: `Vec<u8>`; Units: `rpm`
     pub const MAX_CADENCE_POSITION: u8 = 123;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_AVG_SPEED: u8 = 124;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_MAX_SPEED: u8 = 125;
-    /// Value's type: `u32`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_AVG_ALTITUDE: u8 = 126;
-    /// Value's type: `u32`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_MIN_ALTITUDE: u8 = 127;
-    /// Value's type: `u32`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_MAX_ALTITUDE: u8 = 128;
     /// Value's type: `u16`; Units: `watts`
     pub const AVG_LEV_MOTOR_POWER: u8 = 129;
     /// Value's type: `u16`; Units: `watts`
     pub const MAX_LEV_MOTOR_POWER: u8 = 130;
-    /// Value's type: `u8`; Scale: `2` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`
     pub const LEV_BATTERY_CONSUMPTION: u8 = 131;
-    /// Value's type: `u16`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`
     pub const AVG_VERTICAL_RATIO: u8 = 132;
-    /// Value's type: `u16`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`
     pub const AVG_STANCE_TIME_BALANCE: u8 = 133;
-    /// Value's type: `u16`; Scale: `10` ; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`
     pub const AVG_STEP_LENGTH: u8 = 134;
     /// Value's type: `u8`; Scale: `10`
     pub const TOTAL_ANAEROBIC_TRAINING_EFFECT: u8 = 137;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const AVG_VAM: u8 = 139;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const AVG_DEPTH: u8 = 140;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const MAX_DEPTH: u8 = 141;
     /// Value's type: `u32`; Units: `s`
     pub const SURFACE_INTERVAL: u8 = 142;
@@ -593,9 +593,9 @@ impl Session {
     pub const DIVE_NUMBER: u8 = 156;
     /// Value's type: `i32`; Scale: `65536`
     pub const TRAINING_LOAD_PEAK: u8 = 168;
-    /// Value's type: `u16`; Scale: `100` ; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_AVG_RESPIRATION_RATE: u8 = 169;
-    /// Value's type: `u16`; Scale: `100` ; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_MAX_RESPIRATION_RATE: u8 = 170;
     /// Value's type: `u16`; Scale: `100`
     pub const ENHANCED_MIN_RESPIRATION_RATE: u8 = 180;
@@ -621,15 +621,15 @@ impl Session {
     pub const SDRR_HRV: u8 = 197;
     /// Value's type: `u8`; Units: `mS`
     pub const RMSSD_HRV: u8 = 198;
-    /// Value's type: `u8`; Scale: `100` ; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`
     pub const TOTAL_FRACTIONAL_ASCENT: u8 = 199;
-    /// Value's type: `u8`; Scale: `100` ; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`
     pub const TOTAL_FRACTIONAL_DESCENT: u8 = 200;
-    /// Value's type: `u16`; Scale: `100` ; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`
     pub const AVG_CORE_TEMPERATURE: u8 = 208;
-    /// Value's type: `u16`; Scale: `100` ; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`
     pub const MIN_CORE_TEMPERATURE: u8 = 209;
-    /// Value's type: `u16`; Scale: `100` ; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`
     pub const MAX_CORE_TEMPERATURE: u8 = 210;
 
     /// Create new Session with all fields being set to its corresponding invalid value.
@@ -2434,7 +2434,6 @@ impl From<Session> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -2446,7 +2445,6 @@ impl From<Session> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -2456,7 +2454,6 @@ impl From<Session> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -2466,7 +2463,6 @@ impl From<Session> for Message {
         if m.event != typedef::Event(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
@@ -2476,7 +2472,6 @@ impl From<Session> for Message {
         if m.event_type != typedef::EventType(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT_TYPE,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
@@ -2486,7 +2481,6 @@ impl From<Session> for Message {
         if m.start_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
@@ -2496,7 +2490,6 @@ impl From<Session> for Message {
         if m.start_position_lat != i32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.start_position_lat),
                 is_expanded: false,
@@ -2506,7 +2499,6 @@ impl From<Session> for Message {
         if m.start_position_long != i32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.start_position_long),
                 is_expanded: false,
@@ -2516,7 +2508,6 @@ impl From<Session> for Message {
         if m.sport != typedef::Sport(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
@@ -2526,7 +2517,6 @@ impl From<Session> for Message {
         if m.sub_sport != typedef::SubSport(u8::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
@@ -2536,7 +2526,6 @@ impl From<Session> for Message {
         if m.total_elapsed_time != u32::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_elapsed_time),
                 is_expanded: false,
@@ -2546,7 +2535,6 @@ impl From<Session> for Message {
         if m.total_timer_time != u32::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
@@ -2556,7 +2544,6 @@ impl From<Session> for Message {
         if m.total_distance != u32::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_distance),
                 is_expanded: false,
@@ -2566,7 +2553,6 @@ impl From<Session> for Message {
         if m.total_cycles != u32::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_cycles),
                 is_expanded: false,
@@ -2576,7 +2562,6 @@ impl From<Session> for Message {
         if m.total_calories != u16::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_calories),
                 is_expanded: false,
@@ -2586,7 +2571,6 @@ impl From<Session> for Message {
         if m.total_fat_calories != u16::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_fat_calories),
                 is_expanded: false,
@@ -2596,7 +2580,6 @@ impl From<Session> for Message {
         if m.avg_speed != u16::MAX {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_speed),
                 is_expanded: false,
@@ -2606,7 +2589,6 @@ impl From<Session> for Message {
         if m.max_speed != u16::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_speed),
                 is_expanded: false,
@@ -2616,7 +2598,6 @@ impl From<Session> for Message {
         if m.avg_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 16,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_heart_rate),
                 is_expanded: false,
@@ -2626,7 +2607,6 @@ impl From<Session> for Message {
         if m.max_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 17,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
@@ -2636,7 +2616,6 @@ impl From<Session> for Message {
         if m.avg_cadence != u8::MAX {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_cadence),
                 is_expanded: false,
@@ -2646,7 +2625,6 @@ impl From<Session> for Message {
         if m.max_cadence != u8::MAX {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_cadence),
                 is_expanded: false,
@@ -2656,7 +2634,6 @@ impl From<Session> for Message {
         if m.avg_power != u16::MAX {
             arr[len] = Field {
                 num: 20,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_power),
                 is_expanded: false,
@@ -2666,7 +2643,6 @@ impl From<Session> for Message {
         if m.max_power != u16::MAX {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_power),
                 is_expanded: false,
@@ -2676,7 +2652,6 @@ impl From<Session> for Message {
         if m.total_ascent != u16::MAX {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_ascent),
                 is_expanded: false,
@@ -2686,7 +2661,6 @@ impl From<Session> for Message {
         if m.total_descent != u16::MAX {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_descent),
                 is_expanded: false,
@@ -2696,7 +2670,6 @@ impl From<Session> for Message {
         if m.total_training_effect != u8::MAX {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.total_training_effect),
                 is_expanded: false,
@@ -2706,7 +2679,6 @@ impl From<Session> for Message {
         if m.first_lap_index != u16::MAX {
             arr[len] = Field {
                 num: 25,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.first_lap_index),
                 is_expanded: false,
@@ -2716,7 +2688,6 @@ impl From<Session> for Message {
         if m.num_laps != u16::MAX {
             arr[len] = Field {
                 num: 26,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_laps),
                 is_expanded: false,
@@ -2726,7 +2697,6 @@ impl From<Session> for Message {
         if m.event_group != u8::MAX {
             arr[len] = Field {
                 num: 27,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
@@ -2736,7 +2706,6 @@ impl From<Session> for Message {
         if m.trigger != typedef::SessionTrigger(u8::MAX) {
             arr[len] = Field {
                 num: 28,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SESSION_TRIGGER,
                 value: Value::Uint8(m.trigger.0),
                 is_expanded: false,
@@ -2746,7 +2715,6 @@ impl From<Session> for Message {
         if m.nec_lat != i32::MAX {
             arr[len] = Field {
                 num: 29,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.nec_lat),
                 is_expanded: false,
@@ -2756,7 +2724,6 @@ impl From<Session> for Message {
         if m.nec_long != i32::MAX {
             arr[len] = Field {
                 num: 30,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.nec_long),
                 is_expanded: false,
@@ -2766,7 +2733,6 @@ impl From<Session> for Message {
         if m.swc_lat != i32::MAX {
             arr[len] = Field {
                 num: 31,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.swc_lat),
                 is_expanded: false,
@@ -2776,7 +2742,6 @@ impl From<Session> for Message {
         if m.swc_long != i32::MAX {
             arr[len] = Field {
                 num: 32,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.swc_long),
                 is_expanded: false,
@@ -2786,7 +2751,6 @@ impl From<Session> for Message {
         if m.num_lengths != u16::MAX {
             arr[len] = Field {
                 num: 33,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_lengths),
                 is_expanded: false,
@@ -2796,7 +2760,6 @@ impl From<Session> for Message {
         if m.normalized_power != u16::MAX {
             arr[len] = Field {
                 num: 34,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.normalized_power),
                 is_expanded: false,
@@ -2806,7 +2769,6 @@ impl From<Session> for Message {
         if m.training_stress_score != u16::MAX {
             arr[len] = Field {
                 num: 35,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.training_stress_score),
                 is_expanded: false,
@@ -2816,7 +2778,6 @@ impl From<Session> for Message {
         if m.intensity_factor != u16::MAX {
             arr[len] = Field {
                 num: 36,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.intensity_factor),
                 is_expanded: false,
@@ -2826,7 +2787,6 @@ impl From<Session> for Message {
         if m.left_right_balance != typedef::LeftRightBalance100(u16::MAX) {
             arr[len] = Field {
                 num: 37,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::LEFT_RIGHT_BALANCE_100,
                 value: Value::Uint16(m.left_right_balance.0),
                 is_expanded: false,
@@ -2836,7 +2796,6 @@ impl From<Session> for Message {
         if m.end_position_lat != i32::MAX {
             arr[len] = Field {
                 num: 38,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.end_position_lat),
                 is_expanded: false,
@@ -2846,7 +2805,6 @@ impl From<Session> for Message {
         if m.end_position_long != i32::MAX {
             arr[len] = Field {
                 num: 39,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.end_position_long),
                 is_expanded: false,
@@ -2856,7 +2814,6 @@ impl From<Session> for Message {
         if m.avg_stroke_count != u32::MAX {
             arr[len] = Field {
                 num: 41,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_stroke_count),
                 is_expanded: false,
@@ -2866,7 +2823,6 @@ impl From<Session> for Message {
         if m.avg_stroke_distance != u16::MAX {
             arr[len] = Field {
                 num: 42,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_stroke_distance),
                 is_expanded: false,
@@ -2876,7 +2832,6 @@ impl From<Session> for Message {
         if m.swim_stroke != typedef::SwimStroke(u8::MAX) {
             arr[len] = Field {
                 num: 43,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SWIM_STROKE,
                 value: Value::Uint8(m.swim_stroke.0),
                 is_expanded: false,
@@ -2886,7 +2841,6 @@ impl From<Session> for Message {
         if m.pool_length != u16::MAX {
             arr[len] = Field {
                 num: 44,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pool_length),
                 is_expanded: false,
@@ -2896,7 +2850,6 @@ impl From<Session> for Message {
         if m.threshold_power != u16::MAX {
             arr[len] = Field {
                 num: 45,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.threshold_power),
                 is_expanded: false,
@@ -2906,7 +2859,6 @@ impl From<Session> for Message {
         if m.pool_length_unit != typedef::DisplayMeasure(u8::MAX) {
             arr[len] = Field {
                 num: 46,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.pool_length_unit.0),
                 is_expanded: false,
@@ -2916,7 +2868,6 @@ impl From<Session> for Message {
         if m.num_active_lengths != u16::MAX {
             arr[len] = Field {
                 num: 47,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_active_lengths),
                 is_expanded: false,
@@ -2926,7 +2877,6 @@ impl From<Session> for Message {
         if m.total_work != u32::MAX {
             arr[len] = Field {
                 num: 48,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_work),
                 is_expanded: false,
@@ -2936,7 +2886,6 @@ impl From<Session> for Message {
         if m.avg_altitude != u16::MAX {
             arr[len] = Field {
                 num: 49,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_altitude),
                 is_expanded: false,
@@ -2946,7 +2895,6 @@ impl From<Session> for Message {
         if m.max_altitude != u16::MAX {
             arr[len] = Field {
                 num: 50,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_altitude),
                 is_expanded: false,
@@ -2956,7 +2904,6 @@ impl From<Session> for Message {
         if m.gps_accuracy != u8::MAX {
             arr[len] = Field {
                 num: 51,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gps_accuracy),
                 is_expanded: false,
@@ -2966,7 +2913,6 @@ impl From<Session> for Message {
         if m.avg_grade != i16::MAX {
             arr[len] = Field {
                 num: 52,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.avg_grade),
                 is_expanded: false,
@@ -2976,7 +2922,6 @@ impl From<Session> for Message {
         if m.avg_pos_grade != i16::MAX {
             arr[len] = Field {
                 num: 53,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.avg_pos_grade),
                 is_expanded: false,
@@ -2986,7 +2931,6 @@ impl From<Session> for Message {
         if m.avg_neg_grade != i16::MAX {
             arr[len] = Field {
                 num: 54,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.avg_neg_grade),
                 is_expanded: false,
@@ -2996,7 +2940,6 @@ impl From<Session> for Message {
         if m.max_pos_grade != i16::MAX {
             arr[len] = Field {
                 num: 55,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.max_pos_grade),
                 is_expanded: false,
@@ -3006,7 +2949,6 @@ impl From<Session> for Message {
         if m.max_neg_grade != i16::MAX {
             arr[len] = Field {
                 num: 56,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.max_neg_grade),
                 is_expanded: false,
@@ -3016,7 +2958,6 @@ impl From<Session> for Message {
         if m.avg_temperature != i8::MAX {
             arr[len] = Field {
                 num: 57,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.avg_temperature),
                 is_expanded: false,
@@ -3026,7 +2967,6 @@ impl From<Session> for Message {
         if m.max_temperature != i8::MAX {
             arr[len] = Field {
                 num: 58,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.max_temperature),
                 is_expanded: false,
@@ -3036,7 +2976,6 @@ impl From<Session> for Message {
         if m.total_moving_time != u32::MAX {
             arr[len] = Field {
                 num: 59,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_moving_time),
                 is_expanded: false,
@@ -3046,7 +2985,6 @@ impl From<Session> for Message {
         if m.avg_pos_vertical_speed != i16::MAX {
             arr[len] = Field {
                 num: 60,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.avg_pos_vertical_speed),
                 is_expanded: false,
@@ -3056,7 +2994,6 @@ impl From<Session> for Message {
         if m.avg_neg_vertical_speed != i16::MAX {
             arr[len] = Field {
                 num: 61,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.avg_neg_vertical_speed),
                 is_expanded: false,
@@ -3066,7 +3003,6 @@ impl From<Session> for Message {
         if m.max_pos_vertical_speed != i16::MAX {
             arr[len] = Field {
                 num: 62,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.max_pos_vertical_speed),
                 is_expanded: false,
@@ -3076,7 +3012,6 @@ impl From<Session> for Message {
         if m.max_neg_vertical_speed != i16::MAX {
             arr[len] = Field {
                 num: 63,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.max_neg_vertical_speed),
                 is_expanded: false,
@@ -3086,7 +3021,6 @@ impl From<Session> for Message {
         if m.min_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 64,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.min_heart_rate),
                 is_expanded: false,
@@ -3096,7 +3030,6 @@ impl From<Session> for Message {
         if m.time_in_hr_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 65,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_hr_zone),
                 is_expanded: false,
@@ -3106,7 +3039,6 @@ impl From<Session> for Message {
         if m.time_in_speed_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 66,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_speed_zone),
                 is_expanded: false,
@@ -3116,7 +3048,6 @@ impl From<Session> for Message {
         if m.time_in_cadence_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 67,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_cadence_zone),
                 is_expanded: false,
@@ -3126,7 +3057,6 @@ impl From<Session> for Message {
         if m.time_in_power_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 68,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_power_zone),
                 is_expanded: false,
@@ -3136,7 +3066,6 @@ impl From<Session> for Message {
         if m.avg_lap_time != u32::MAX {
             arr[len] = Field {
                 num: 69,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_lap_time),
                 is_expanded: false,
@@ -3146,7 +3075,6 @@ impl From<Session> for Message {
         if m.best_lap_index != u16::MAX {
             arr[len] = Field {
                 num: 70,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.best_lap_index),
                 is_expanded: false,
@@ -3156,7 +3084,6 @@ impl From<Session> for Message {
         if m.min_altitude != u16::MAX {
             arr[len] = Field {
                 num: 71,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.min_altitude),
                 is_expanded: false,
@@ -3166,7 +3093,6 @@ impl From<Session> for Message {
         if m.player_score != u16::MAX {
             arr[len] = Field {
                 num: 82,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.player_score),
                 is_expanded: false,
@@ -3176,7 +3102,6 @@ impl From<Session> for Message {
         if m.opponent_score != u16::MAX {
             arr[len] = Field {
                 num: 83,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: false,
@@ -3186,7 +3111,6 @@ impl From<Session> for Message {
         if m.opponent_name != String::new() {
             arr[len] = Field {
                 num: 84,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.opponent_name),
                 is_expanded: false,
@@ -3196,7 +3120,6 @@ impl From<Session> for Message {
         if m.stroke_count != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 85,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.stroke_count),
                 is_expanded: false,
@@ -3206,7 +3129,6 @@ impl From<Session> for Message {
         if m.zone_count != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 86,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.zone_count),
                 is_expanded: false,
@@ -3216,7 +3138,6 @@ impl From<Session> for Message {
         if m.max_ball_speed != u16::MAX {
             arr[len] = Field {
                 num: 87,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_ball_speed),
                 is_expanded: false,
@@ -3226,7 +3147,6 @@ impl From<Session> for Message {
         if m.avg_ball_speed != u16::MAX {
             arr[len] = Field {
                 num: 88,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_ball_speed),
                 is_expanded: false,
@@ -3236,7 +3156,6 @@ impl From<Session> for Message {
         if m.avg_vertical_oscillation != u16::MAX {
             arr[len] = Field {
                 num: 89,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_vertical_oscillation),
                 is_expanded: false,
@@ -3246,7 +3165,6 @@ impl From<Session> for Message {
         if m.avg_stance_time_percent != u16::MAX {
             arr[len] = Field {
                 num: 90,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_stance_time_percent),
                 is_expanded: false,
@@ -3256,7 +3174,6 @@ impl From<Session> for Message {
         if m.avg_stance_time != u16::MAX {
             arr[len] = Field {
                 num: 91,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_stance_time),
                 is_expanded: false,
@@ -3266,7 +3183,6 @@ impl From<Session> for Message {
         if m.avg_fractional_cadence != u8::MAX {
             arr[len] = Field {
                 num: 92,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_fractional_cadence),
                 is_expanded: false,
@@ -3276,7 +3192,6 @@ impl From<Session> for Message {
         if m.max_fractional_cadence != u8::MAX {
             arr[len] = Field {
                 num: 93,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_fractional_cadence),
                 is_expanded: false,
@@ -3286,7 +3201,6 @@ impl From<Session> for Message {
         if m.total_fractional_cycles != u8::MAX {
             arr[len] = Field {
                 num: 94,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.total_fractional_cycles),
                 is_expanded: false,
@@ -3296,7 +3210,6 @@ impl From<Session> for Message {
         if m.avg_total_hemoglobin_conc != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 95,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.avg_total_hemoglobin_conc),
                 is_expanded: false,
@@ -3306,7 +3219,6 @@ impl From<Session> for Message {
         if m.min_total_hemoglobin_conc != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 96,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.min_total_hemoglobin_conc),
                 is_expanded: false,
@@ -3316,7 +3228,6 @@ impl From<Session> for Message {
         if m.max_total_hemoglobin_conc != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 97,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.max_total_hemoglobin_conc),
                 is_expanded: false,
@@ -3326,7 +3237,6 @@ impl From<Session> for Message {
         if m.avg_saturated_hemoglobin_percent != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 98,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.avg_saturated_hemoglobin_percent),
                 is_expanded: false,
@@ -3336,7 +3246,6 @@ impl From<Session> for Message {
         if m.min_saturated_hemoglobin_percent != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 99,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.min_saturated_hemoglobin_percent),
                 is_expanded: false,
@@ -3346,7 +3255,6 @@ impl From<Session> for Message {
         if m.max_saturated_hemoglobin_percent != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 100,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.max_saturated_hemoglobin_percent),
                 is_expanded: false,
@@ -3356,7 +3264,6 @@ impl From<Session> for Message {
         if m.avg_left_torque_effectiveness != u8::MAX {
             arr[len] = Field {
                 num: 101,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_left_torque_effectiveness),
                 is_expanded: false,
@@ -3366,7 +3273,6 @@ impl From<Session> for Message {
         if m.avg_right_torque_effectiveness != u8::MAX {
             arr[len] = Field {
                 num: 102,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_right_torque_effectiveness),
                 is_expanded: false,
@@ -3376,7 +3282,6 @@ impl From<Session> for Message {
         if m.avg_left_pedal_smoothness != u8::MAX {
             arr[len] = Field {
                 num: 103,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_left_pedal_smoothness),
                 is_expanded: false,
@@ -3386,7 +3291,6 @@ impl From<Session> for Message {
         if m.avg_right_pedal_smoothness != u8::MAX {
             arr[len] = Field {
                 num: 104,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_right_pedal_smoothness),
                 is_expanded: false,
@@ -3396,7 +3300,6 @@ impl From<Session> for Message {
         if m.avg_combined_pedal_smoothness != u8::MAX {
             arr[len] = Field {
                 num: 105,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_combined_pedal_smoothness),
                 is_expanded: false,
@@ -3406,7 +3309,6 @@ impl From<Session> for Message {
         if m.sport_profile_name != String::new() {
             arr[len] = Field {
                 num: 110,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.sport_profile_name),
                 is_expanded: false,
@@ -3416,7 +3318,6 @@ impl From<Session> for Message {
         if m.sport_index != u8::MAX {
             arr[len] = Field {
                 num: 111,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sport_index),
                 is_expanded: false,
@@ -3426,7 +3327,6 @@ impl From<Session> for Message {
         if m.time_standing != u32::MAX {
             arr[len] = Field {
                 num: 112,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.time_standing),
                 is_expanded: false,
@@ -3436,7 +3336,6 @@ impl From<Session> for Message {
         if m.stand_count != u16::MAX {
             arr[len] = Field {
                 num: 113,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stand_count),
                 is_expanded: false,
@@ -3446,7 +3345,6 @@ impl From<Session> for Message {
         if m.avg_left_pco != i8::MAX {
             arr[len] = Field {
                 num: 114,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.avg_left_pco),
                 is_expanded: false,
@@ -3456,7 +3354,6 @@ impl From<Session> for Message {
         if m.avg_right_pco != i8::MAX {
             arr[len] = Field {
                 num: 115,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.avg_right_pco),
                 is_expanded: false,
@@ -3466,7 +3363,6 @@ impl From<Session> for Message {
         if m.avg_left_power_phase != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 116,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.avg_left_power_phase),
                 is_expanded: false,
@@ -3476,7 +3372,6 @@ impl From<Session> for Message {
         if m.avg_left_power_phase_peak != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 117,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.avg_left_power_phase_peak),
                 is_expanded: false,
@@ -3486,7 +3381,6 @@ impl From<Session> for Message {
         if m.avg_right_power_phase != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 118,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.avg_right_power_phase),
                 is_expanded: false,
@@ -3496,7 +3390,6 @@ impl From<Session> for Message {
         if m.avg_right_power_phase_peak != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 119,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.avg_right_power_phase_peak),
                 is_expanded: false,
@@ -3506,7 +3399,6 @@ impl From<Session> for Message {
         if m.avg_power_position != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 120,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.avg_power_position),
                 is_expanded: false,
@@ -3516,7 +3408,6 @@ impl From<Session> for Message {
         if m.max_power_position != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 121,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.max_power_position),
                 is_expanded: false,
@@ -3526,7 +3417,6 @@ impl From<Session> for Message {
         if m.avg_cadence_position != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 122,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.avg_cadence_position),
                 is_expanded: false,
@@ -3536,7 +3426,6 @@ impl From<Session> for Message {
         if m.max_cadence_position != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 123,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.max_cadence_position),
                 is_expanded: false,
@@ -3546,7 +3435,6 @@ impl From<Session> for Message {
         if m.enhanced_avg_speed != u32::MAX {
             arr[len] = Field {
                 num: 124,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_avg_speed),
                 is_expanded: is_expanded(&state, 124),
@@ -3556,7 +3444,6 @@ impl From<Session> for Message {
         if m.enhanced_max_speed != u32::MAX {
             arr[len] = Field {
                 num: 125,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_max_speed),
                 is_expanded: is_expanded(&state, 125),
@@ -3566,7 +3453,6 @@ impl From<Session> for Message {
         if m.enhanced_avg_altitude != u32::MAX {
             arr[len] = Field {
                 num: 126,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_avg_altitude),
                 is_expanded: is_expanded(&state, 126),
@@ -3576,7 +3462,6 @@ impl From<Session> for Message {
         if m.enhanced_min_altitude != u32::MAX {
             arr[len] = Field {
                 num: 127,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_min_altitude),
                 is_expanded: is_expanded(&state, 127),
@@ -3586,7 +3471,6 @@ impl From<Session> for Message {
         if m.enhanced_max_altitude != u32::MAX {
             arr[len] = Field {
                 num: 128,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_max_altitude),
                 is_expanded: is_expanded(&state, 128),
@@ -3596,7 +3480,6 @@ impl From<Session> for Message {
         if m.avg_lev_motor_power != u16::MAX {
             arr[len] = Field {
                 num: 129,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_lev_motor_power),
                 is_expanded: false,
@@ -3606,7 +3489,6 @@ impl From<Session> for Message {
         if m.max_lev_motor_power != u16::MAX {
             arr[len] = Field {
                 num: 130,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_lev_motor_power),
                 is_expanded: false,
@@ -3616,7 +3498,6 @@ impl From<Session> for Message {
         if m.lev_battery_consumption != u8::MAX {
             arr[len] = Field {
                 num: 131,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.lev_battery_consumption),
                 is_expanded: false,
@@ -3626,7 +3507,6 @@ impl From<Session> for Message {
         if m.avg_vertical_ratio != u16::MAX {
             arr[len] = Field {
                 num: 132,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_vertical_ratio),
                 is_expanded: false,
@@ -3636,7 +3516,6 @@ impl From<Session> for Message {
         if m.avg_stance_time_balance != u16::MAX {
             arr[len] = Field {
                 num: 133,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_stance_time_balance),
                 is_expanded: false,
@@ -3646,7 +3525,6 @@ impl From<Session> for Message {
         if m.avg_step_length != u16::MAX {
             arr[len] = Field {
                 num: 134,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_step_length),
                 is_expanded: false,
@@ -3656,7 +3534,6 @@ impl From<Session> for Message {
         if m.total_anaerobic_training_effect != u8::MAX {
             arr[len] = Field {
                 num: 137,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.total_anaerobic_training_effect),
                 is_expanded: false,
@@ -3666,7 +3543,6 @@ impl From<Session> for Message {
         if m.avg_vam != u16::MAX {
             arr[len] = Field {
                 num: 139,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_vam),
                 is_expanded: false,
@@ -3676,7 +3552,6 @@ impl From<Session> for Message {
         if m.avg_depth != u32::MAX {
             arr[len] = Field {
                 num: 140,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_depth),
                 is_expanded: false,
@@ -3686,7 +3561,6 @@ impl From<Session> for Message {
         if m.max_depth != u32::MAX {
             arr[len] = Field {
                 num: 141,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_depth),
                 is_expanded: false,
@@ -3696,7 +3570,6 @@ impl From<Session> for Message {
         if m.surface_interval != u32::MAX {
             arr[len] = Field {
                 num: 142,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.surface_interval),
                 is_expanded: false,
@@ -3706,7 +3579,6 @@ impl From<Session> for Message {
         if m.start_cns != u8::MAX {
             arr[len] = Field {
                 num: 143,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.start_cns),
                 is_expanded: false,
@@ -3716,7 +3588,6 @@ impl From<Session> for Message {
         if m.end_cns != u8::MAX {
             arr[len] = Field {
                 num: 144,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.end_cns),
                 is_expanded: false,
@@ -3726,7 +3597,6 @@ impl From<Session> for Message {
         if m.start_n2 != u16::MAX {
             arr[len] = Field {
                 num: 145,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_n2),
                 is_expanded: false,
@@ -3736,7 +3606,6 @@ impl From<Session> for Message {
         if m.end_n2 != u16::MAX {
             arr[len] = Field {
                 num: 146,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.end_n2),
                 is_expanded: false,
@@ -3746,7 +3615,6 @@ impl From<Session> for Message {
         if m.avg_respiration_rate != u8::MAX {
             arr[len] = Field {
                 num: 147,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_respiration_rate),
                 is_expanded: false,
@@ -3756,7 +3624,6 @@ impl From<Session> for Message {
         if m.max_respiration_rate != u8::MAX {
             arr[len] = Field {
                 num: 148,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_respiration_rate),
                 is_expanded: false,
@@ -3766,7 +3633,6 @@ impl From<Session> for Message {
         if m.min_respiration_rate != u8::MAX {
             arr[len] = Field {
                 num: 149,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.min_respiration_rate),
                 is_expanded: false,
@@ -3776,7 +3642,6 @@ impl From<Session> for Message {
         if m.min_temperature != i8::MAX {
             arr[len] = Field {
                 num: 150,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.min_temperature),
                 is_expanded: false,
@@ -3786,7 +3651,6 @@ impl From<Session> for Message {
         if m.o2_toxicity != u16::MAX {
             arr[len] = Field {
                 num: 155,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.o2_toxicity),
                 is_expanded: false,
@@ -3796,7 +3660,6 @@ impl From<Session> for Message {
         if m.dive_number != u32::MAX {
             arr[len] = Field {
                 num: 156,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.dive_number),
                 is_expanded: false,
@@ -3806,7 +3669,6 @@ impl From<Session> for Message {
         if m.training_load_peak != i32::MAX {
             arr[len] = Field {
                 num: 168,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.training_load_peak),
                 is_expanded: false,
@@ -3816,7 +3678,6 @@ impl From<Session> for Message {
         if m.enhanced_avg_respiration_rate != u16::MAX {
             arr[len] = Field {
                 num: 169,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_avg_respiration_rate),
                 is_expanded: is_expanded(&state, 169),
@@ -3826,7 +3687,6 @@ impl From<Session> for Message {
         if m.enhanced_max_respiration_rate != u16::MAX {
             arr[len] = Field {
                 num: 170,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_max_respiration_rate),
                 is_expanded: is_expanded(&state, 170),
@@ -3836,7 +3696,6 @@ impl From<Session> for Message {
         if m.enhanced_min_respiration_rate != u16::MAX {
             arr[len] = Field {
                 num: 180,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_min_respiration_rate),
                 is_expanded: is_expanded(&state, 180),
@@ -3846,7 +3705,6 @@ impl From<Session> for Message {
         if m.total_grit != f32::MAX {
             arr[len] = Field {
                 num: 181,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.total_grit),
                 is_expanded: false,
@@ -3856,7 +3714,6 @@ impl From<Session> for Message {
         if m.total_flow != f32::MAX {
             arr[len] = Field {
                 num: 182,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.total_flow),
                 is_expanded: false,
@@ -3866,7 +3723,6 @@ impl From<Session> for Message {
         if m.jump_count != u16::MAX {
             arr[len] = Field {
                 num: 183,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.jump_count),
                 is_expanded: false,
@@ -3876,7 +3732,6 @@ impl From<Session> for Message {
         if m.avg_grit != f32::MAX {
             arr[len] = Field {
                 num: 186,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.avg_grit),
                 is_expanded: false,
@@ -3886,7 +3741,6 @@ impl From<Session> for Message {
         if m.avg_flow != f32::MAX {
             arr[len] = Field {
                 num: 187,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.avg_flow),
                 is_expanded: false,
@@ -3896,7 +3750,6 @@ impl From<Session> for Message {
         if m.workout_feel != u8::MAX {
             arr[len] = Field {
                 num: 192,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.workout_feel),
                 is_expanded: false,
@@ -3906,7 +3759,6 @@ impl From<Session> for Message {
         if m.workout_rpe != u8::MAX {
             arr[len] = Field {
                 num: 193,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.workout_rpe),
                 is_expanded: false,
@@ -3916,7 +3768,6 @@ impl From<Session> for Message {
         if m.avg_spo2 != u8::MAX {
             arr[len] = Field {
                 num: 194,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_spo2),
                 is_expanded: false,
@@ -3926,7 +3777,6 @@ impl From<Session> for Message {
         if m.avg_stress != u8::MAX {
             arr[len] = Field {
                 num: 195,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_stress),
                 is_expanded: false,
@@ -3936,7 +3786,6 @@ impl From<Session> for Message {
         if m.sdrr_hrv != u8::MAX {
             arr[len] = Field {
                 num: 197,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sdrr_hrv),
                 is_expanded: false,
@@ -3946,7 +3795,6 @@ impl From<Session> for Message {
         if m.rmssd_hrv != u8::MAX {
             arr[len] = Field {
                 num: 198,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.rmssd_hrv),
                 is_expanded: false,
@@ -3956,7 +3804,6 @@ impl From<Session> for Message {
         if m.total_fractional_ascent != u8::MAX {
             arr[len] = Field {
                 num: 199,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.total_fractional_ascent),
                 is_expanded: false,
@@ -3966,7 +3813,6 @@ impl From<Session> for Message {
         if m.total_fractional_descent != u8::MAX {
             arr[len] = Field {
                 num: 200,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.total_fractional_descent),
                 is_expanded: false,
@@ -3976,7 +3822,6 @@ impl From<Session> for Message {
         if m.avg_core_temperature != u16::MAX {
             arr[len] = Field {
                 num: 208,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_core_temperature),
                 is_expanded: false,
@@ -3986,7 +3831,6 @@ impl From<Session> for Message {
         if m.min_core_temperature != u16::MAX {
             arr[len] = Field {
                 num: 209,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.min_core_temperature),
                 is_expanded: false,
@@ -3996,7 +3840,6 @@ impl From<Session> for Message {
         if m.max_core_temperature != u16::MAX {
             arr[len] = Field {
                 num: 210,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_core_temperature),
                 is_expanded: false,

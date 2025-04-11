@@ -64,7 +64,7 @@ impl DeviceInfo {
     pub const HARDWARE_VERSION: u8 = 6;
     /// Value's type: `u32`; Units: `s`
     pub const CUM_OPERATING_TIME: u8 = 7;
-    /// Value's type: `u16`; Scale: `256` ; Units: `V`
+    /// Value's type: `u16`; Scale: `256`; Units: `V`
     pub const BATTERY_VOLTAGE: u8 = 10;
     /// Value's type: `u8`
     pub const BATTERY_STATUS: u8 = 11;
@@ -180,7 +180,6 @@ impl From<DeviceInfo> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -191,7 +190,6 @@ impl From<DeviceInfo> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -201,7 +199,6 @@ impl From<DeviceInfo> for Message {
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
@@ -211,7 +208,6 @@ impl From<DeviceInfo> for Message {
         if m.device_type != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.device_type),
                 is_expanded: false,
@@ -221,7 +217,6 @@ impl From<DeviceInfo> for Message {
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
@@ -231,7 +226,6 @@ impl From<DeviceInfo> for Message {
         if m.serial_number != u32::MIN {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::UINT32Z,
                 value: Value::Uint32(m.serial_number),
                 is_expanded: false,
@@ -241,7 +235,6 @@ impl From<DeviceInfo> for Message {
         if m.product != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
@@ -251,7 +244,6 @@ impl From<DeviceInfo> for Message {
         if m.software_version != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.software_version),
                 is_expanded: false,
@@ -261,7 +253,6 @@ impl From<DeviceInfo> for Message {
         if m.hardware_version != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.hardware_version),
                 is_expanded: false,
@@ -271,7 +262,6 @@ impl From<DeviceInfo> for Message {
         if m.cum_operating_time != u32::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.cum_operating_time),
                 is_expanded: false,
@@ -281,7 +271,6 @@ impl From<DeviceInfo> for Message {
         if m.battery_voltage != u16::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.battery_voltage),
                 is_expanded: false,
@@ -291,7 +280,6 @@ impl From<DeviceInfo> for Message {
         if m.battery_status != typedef::BatteryStatus(u8::MAX) {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::BATTERY_STATUS,
                 value: Value::Uint8(m.battery_status.0),
                 is_expanded: false,
@@ -301,7 +289,6 @@ impl From<DeviceInfo> for Message {
         if m.sensor_position != typedef::BodyLocation(u8::MAX) {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BODY_LOCATION,
                 value: Value::Uint8(m.sensor_position.0),
                 is_expanded: false,
@@ -311,7 +298,6 @@ impl From<DeviceInfo> for Message {
         if m.descriptor != String::new() {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.descriptor),
                 is_expanded: false,
@@ -321,7 +307,6 @@ impl From<DeviceInfo> for Message {
         if m.ant_transmission_type != u8::MIN {
             arr[len] = Field {
                 num: 20,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.ant_transmission_type),
                 is_expanded: false,
@@ -331,7 +316,6 @@ impl From<DeviceInfo> for Message {
         if m.ant_device_number != u16::MIN {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT16Z,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.ant_device_number),
                 is_expanded: false,
@@ -341,7 +325,6 @@ impl From<DeviceInfo> for Message {
         if m.ant_network != typedef::AntNetwork(u8::MAX) {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::ANT_NETWORK,
                 value: Value::Uint8(m.ant_network.0),
                 is_expanded: false,
@@ -351,7 +334,6 @@ impl From<DeviceInfo> for Message {
         if m.source_type != typedef::SourceType(u8::MAX) {
             arr[len] = Field {
                 num: 25,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SOURCE_TYPE,
                 value: Value::Uint8(m.source_type.0),
                 is_expanded: false,
@@ -361,7 +343,6 @@ impl From<DeviceInfo> for Message {
         if m.product_name != String::new() {
             arr[len] = Field {
                 num: 27,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.product_name),
                 is_expanded: false,
@@ -371,7 +352,6 @@ impl From<DeviceInfo> for Message {
         if m.battery_level != u8::MAX {
             arr[len] = Field {
                 num: 32,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.battery_level),
                 is_expanded: false,

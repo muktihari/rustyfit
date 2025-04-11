@@ -81,7 +81,6 @@ impl From<SkinTempOvernight> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -92,7 +91,6 @@ impl From<SkinTempOvernight> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -102,7 +100,6 @@ impl From<SkinTempOvernight> for Message {
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
@@ -112,7 +109,6 @@ impl From<SkinTempOvernight> for Message {
         if m.average_deviation != f32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.average_deviation),
                 is_expanded: false,
@@ -122,7 +118,6 @@ impl From<SkinTempOvernight> for Message {
         if m.average_7_day_deviation != f32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.average_7_day_deviation),
                 is_expanded: false,
@@ -132,7 +127,6 @@ impl From<SkinTempOvernight> for Message {
         if m.nightly_value != f32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.nightly_value),
                 is_expanded: false,

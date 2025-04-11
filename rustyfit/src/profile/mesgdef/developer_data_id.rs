@@ -75,7 +75,6 @@ impl From<DeveloperDataId> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -86,7 +85,6 @@ impl From<DeveloperDataId> for Message {
         if m.developer_id != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.developer_id),
                 is_expanded: false,
@@ -96,7 +94,6 @@ impl From<DeveloperDataId> for Message {
         if m.application_id != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::BYTE,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.application_id),
                 is_expanded: false,
@@ -106,7 +103,6 @@ impl From<DeveloperDataId> for Message {
         if m.manufacturer_id != typedef::Manufacturer(u16::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer_id.0),
                 is_expanded: false,
@@ -116,7 +112,6 @@ impl From<DeveloperDataId> for Message {
         if m.developer_data_index != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.developer_data_index),
                 is_expanded: false,
@@ -126,7 +121,6 @@ impl From<DeveloperDataId> for Message {
         if m.application_version != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.application_version),
                 is_expanded: false,

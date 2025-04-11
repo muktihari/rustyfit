@@ -29,7 +29,7 @@ impl DeviceAuxBatteryInfo {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u8`
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u16`; Scale: `256` ; Units: `V`
+    /// Value's type: `u16`; Scale: `256`; Units: `V`
     pub const BATTERY_VOLTAGE: u8 = 1;
     /// Value's type: `u8`
     pub const BATTERY_STATUS: u8 = 2;
@@ -98,7 +98,6 @@ impl From<DeviceAuxBatteryInfo> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -109,7 +108,6 @@ impl From<DeviceAuxBatteryInfo> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -119,7 +117,6 @@ impl From<DeviceAuxBatteryInfo> for Message {
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
@@ -129,7 +126,6 @@ impl From<DeviceAuxBatteryInfo> for Message {
         if m.battery_voltage != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.battery_voltage),
                 is_expanded: false,
@@ -139,7 +135,6 @@ impl From<DeviceAuxBatteryInfo> for Message {
         if m.battery_status != typedef::BatteryStatus(u8::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::BATTERY_STATUS,
                 value: Value::Uint8(m.battery_status.0),
                 is_expanded: false,
@@ -149,7 +144,6 @@ impl From<DeviceAuxBatteryInfo> for Message {
         if m.battery_identifier != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.battery_identifier),
                 is_expanded: false,

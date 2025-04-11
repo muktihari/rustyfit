@@ -67,7 +67,6 @@ impl From<SleepLevel> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -78,7 +77,6 @@ impl From<SleepLevel> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -88,7 +86,6 @@ impl From<SleepLevel> for Message {
         if m.sleep_level != typedef::SleepLevel(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SLEEP_LEVEL,
                 value: Value::Uint8(m.sleep_level.0),
                 is_expanded: false,

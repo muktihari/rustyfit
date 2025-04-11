@@ -69,13 +69,13 @@ impl Length {
     pub const EVENT_TYPE: u8 = 1;
     /// Value's type: `u32`
     pub const START_TIME: u8 = 2;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_ELAPSED_TIME: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 4;
     /// Value's type: `u16`; Units: `strokes`
     pub const TOTAL_STROKES: u8 = 5;
-    /// Value's type: `u16`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 6;
     /// Value's type: `u8`; Units: `swim_stroke`
     pub const SWIM_STROKE: u8 = 7;
@@ -95,9 +95,9 @@ impl Length {
     pub const STROKE_COUNT: u8 = 20;
     /// Value's type: `Vec<u16>`; Units: `counts`
     pub const ZONE_COUNT: u8 = 21;
-    /// Value's type: `u16`; Scale: `100` ; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_AVG_RESPIRATION_RATE: u8 = 22;
-    /// Value's type: `u16`; Scale: `100` ; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_MAX_RESPIRATION_RATE: u8 = 23;
     /// Value's type: `u8`
     pub const AVG_RESPIRATION_RATE: u8 = 24;
@@ -288,7 +288,6 @@ impl From<Length> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -300,7 +299,6 @@ impl From<Length> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -310,7 +308,6 @@ impl From<Length> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -320,7 +317,6 @@ impl From<Length> for Message {
         if m.event != typedef::Event(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
@@ -330,7 +326,6 @@ impl From<Length> for Message {
         if m.event_type != typedef::EventType(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::EVENT_TYPE,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
@@ -340,7 +335,6 @@ impl From<Length> for Message {
         if m.start_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
@@ -350,7 +344,6 @@ impl From<Length> for Message {
         if m.total_elapsed_time != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_elapsed_time),
                 is_expanded: false,
@@ -360,7 +353,6 @@ impl From<Length> for Message {
         if m.total_timer_time != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
@@ -370,7 +362,6 @@ impl From<Length> for Message {
         if m.total_strokes != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_strokes),
                 is_expanded: false,
@@ -380,7 +371,6 @@ impl From<Length> for Message {
         if m.avg_speed != u16::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_speed),
                 is_expanded: false,
@@ -390,7 +380,6 @@ impl From<Length> for Message {
         if m.swim_stroke != typedef::SwimStroke(u8::MAX) {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SWIM_STROKE,
                 value: Value::Uint8(m.swim_stroke.0),
                 is_expanded: false,
@@ -400,7 +389,6 @@ impl From<Length> for Message {
         if m.avg_swimming_cadence != u8::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_swimming_cadence),
                 is_expanded: false,
@@ -410,7 +398,6 @@ impl From<Length> for Message {
         if m.event_group != u8::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
@@ -420,7 +407,6 @@ impl From<Length> for Message {
         if m.total_calories != u16::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_calories),
                 is_expanded: false,
@@ -430,7 +416,6 @@ impl From<Length> for Message {
         if m.length_type != typedef::LengthType(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::LENGTH_TYPE,
                 value: Value::Uint8(m.length_type.0),
                 is_expanded: false,
@@ -440,7 +425,6 @@ impl From<Length> for Message {
         if m.player_score != u16::MAX {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.player_score),
                 is_expanded: false,
@@ -450,7 +434,6 @@ impl From<Length> for Message {
         if m.opponent_score != u16::MAX {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: false,
@@ -460,7 +443,6 @@ impl From<Length> for Message {
         if m.stroke_count != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 20,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.stroke_count),
                 is_expanded: false,
@@ -470,7 +452,6 @@ impl From<Length> for Message {
         if m.zone_count != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.zone_count),
                 is_expanded: false,
@@ -480,7 +461,6 @@ impl From<Length> for Message {
         if m.enhanced_avg_respiration_rate != u16::MAX {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_avg_respiration_rate),
                 is_expanded: is_expanded(&state, 22),
@@ -490,7 +470,6 @@ impl From<Length> for Message {
         if m.enhanced_max_respiration_rate != u16::MAX {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_max_respiration_rate),
                 is_expanded: is_expanded(&state, 23),
@@ -500,7 +479,6 @@ impl From<Length> for Message {
         if m.avg_respiration_rate != u8::MAX {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_respiration_rate),
                 is_expanded: false,
@@ -510,7 +488,6 @@ impl From<Length> for Message {
         if m.max_respiration_rate != u8::MAX {
             arr[len] = Field {
                 num: 25,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_respiration_rate),
                 is_expanded: false,

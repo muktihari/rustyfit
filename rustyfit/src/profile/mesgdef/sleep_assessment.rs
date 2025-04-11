@@ -147,7 +147,6 @@ impl From<SleepAssessment> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -158,7 +157,6 @@ impl From<SleepAssessment> for Message {
         if m.combined_awake_score != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.combined_awake_score),
                 is_expanded: false,
@@ -168,7 +166,6 @@ impl From<SleepAssessment> for Message {
         if m.awake_time_score != u8::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.awake_time_score),
                 is_expanded: false,
@@ -178,7 +175,6 @@ impl From<SleepAssessment> for Message {
         if m.awakenings_count_score != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.awakenings_count_score),
                 is_expanded: false,
@@ -188,7 +184,6 @@ impl From<SleepAssessment> for Message {
         if m.deep_sleep_score != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.deep_sleep_score),
                 is_expanded: false,
@@ -198,7 +193,6 @@ impl From<SleepAssessment> for Message {
         if m.sleep_duration_score != u8::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_duration_score),
                 is_expanded: false,
@@ -208,7 +202,6 @@ impl From<SleepAssessment> for Message {
         if m.light_sleep_score != u8::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.light_sleep_score),
                 is_expanded: false,
@@ -218,7 +211,6 @@ impl From<SleepAssessment> for Message {
         if m.overall_sleep_score != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.overall_sleep_score),
                 is_expanded: false,
@@ -228,7 +220,6 @@ impl From<SleepAssessment> for Message {
         if m.sleep_quality_score != u8::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_quality_score),
                 is_expanded: false,
@@ -238,7 +229,6 @@ impl From<SleepAssessment> for Message {
         if m.sleep_recovery_score != u8::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_recovery_score),
                 is_expanded: false,
@@ -248,7 +238,6 @@ impl From<SleepAssessment> for Message {
         if m.rem_sleep_score != u8::MAX {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.rem_sleep_score),
                 is_expanded: false,
@@ -258,7 +247,6 @@ impl From<SleepAssessment> for Message {
         if m.sleep_restlessness_score != u8::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_restlessness_score),
                 is_expanded: false,
@@ -268,7 +256,6 @@ impl From<SleepAssessment> for Message {
         if m.awakenings_count != u8::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.awakenings_count),
                 is_expanded: false,
@@ -278,7 +265,6 @@ impl From<SleepAssessment> for Message {
         if m.interruptions_score != u8::MAX {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.interruptions_score),
                 is_expanded: false,
@@ -288,7 +274,6 @@ impl From<SleepAssessment> for Message {
         if m.average_stress_during_sleep != u16::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.average_stress_during_sleep),
                 is_expanded: false,

@@ -85,7 +85,6 @@ impl From<Capabilities> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -96,7 +95,6 @@ impl From<Capabilities> for Message {
         if m.languages != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.languages),
                 is_expanded: false,
@@ -106,7 +104,6 @@ impl From<Capabilities> for Message {
         if m.sports != Vec::<typedef::SportBits0>::new() {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT8Z,
                 profile_type: ProfileType::SPORT_BITS_0,
                 value: Value::VecUint8({
                     let mut v = Vec::with_capacity(m.sports.len());
@@ -122,7 +119,6 @@ impl From<Capabilities> for Message {
         if m.workouts_supported != typedef::WorkoutCapabilities(u32::MIN) {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::WORKOUT_CAPABILITIES,
                 value: Value::Uint32(m.workouts_supported.0),
                 is_expanded: false,
@@ -132,7 +128,6 @@ impl From<Capabilities> for Message {
         if m.connectivity_supported != typedef::ConnectivityCapabilities(u32::MIN) {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::CONNECTIVITY_CAPABILITIES,
                 value: Value::Uint32(m.connectivity_supported.0),
                 is_expanded: false,

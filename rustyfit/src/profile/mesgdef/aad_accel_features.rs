@@ -40,7 +40,7 @@ impl AadAccelFeatures {
     pub const ZERO_CROSS_CNT: u8 = 2;
     /// Value's type: `u8`
     pub const INSTANCE: u8 = 3;
-    /// Value's type: `u16`; Scale: `25` ; Units: `s`
+    /// Value's type: `u16`; Scale: `25`; Units: `s`
     pub const TIME_ABOVE_THRESHOLD: u8 = 4;
 
     /// Create new AadAccelFeatures with all fields being set to its corresponding invalid value.
@@ -106,7 +106,6 @@ impl From<AadAccelFeatures> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -117,7 +116,6 @@ impl From<AadAccelFeatures> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -127,7 +125,6 @@ impl From<AadAccelFeatures> for Message {
         if m.time != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.time),
                 is_expanded: false,
@@ -137,7 +134,6 @@ impl From<AadAccelFeatures> for Message {
         if m.energy_total != u32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.energy_total),
                 is_expanded: false,
@@ -147,7 +143,6 @@ impl From<AadAccelFeatures> for Message {
         if m.zero_cross_cnt != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.zero_cross_cnt),
                 is_expanded: false,
@@ -157,7 +152,6 @@ impl From<AadAccelFeatures> for Message {
         if m.instance != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.instance),
                 is_expanded: false,
@@ -167,7 +161,6 @@ impl From<AadAccelFeatures> for Message {
         if m.time_above_threshold != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.time_above_threshold),
                 is_expanded: false,

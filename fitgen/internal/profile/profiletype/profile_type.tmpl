@@ -19,6 +19,7 @@ pub struct ProfileType(pub u16);
 
 impl ProfileType {
     {{ range .Constants -}}
+    /// {{ .BaseType }}
     pub const {{ .Name }}: ProfileType = ProfileType({{ .Value }});
     {{ end }}
 
@@ -65,6 +66,12 @@ impl fmt::Display for ProfileType {
             {{ end -}}
             _ => write!(f, "unknown({})", self.0),
         }
+    }
+}
+
+impl From<FitBaseType> for ProfileType {
+    fn from(base_type: FitBaseType) -> ProfileType {
+        ProfileType((base_type.0 & FitBaseType::NUM_MASK) as u16)
     }
 }
 

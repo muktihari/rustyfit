@@ -80,7 +80,6 @@ impl From<CameraEvent> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -91,7 +90,6 @@ impl From<CameraEvent> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -101,7 +99,6 @@ impl From<CameraEvent> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -111,7 +108,6 @@ impl From<CameraEvent> for Message {
         if m.camera_event_type != typedef::CameraEventType(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::CAMERA_EVENT_TYPE,
                 value: Value::Uint8(m.camera_event_type.0),
                 is_expanded: false,
@@ -121,7 +117,6 @@ impl From<CameraEvent> for Message {
         if m.camera_file_uuid != String::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.camera_file_uuid),
                 is_expanded: false,
@@ -131,7 +126,6 @@ impl From<CameraEvent> for Message {
         if m.camera_orientation != typedef::CameraOrientationType(u8::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::CAMERA_ORIENTATION_TYPE,
                 value: Value::Uint8(m.camera_orientation.0),
                 is_expanded: false,

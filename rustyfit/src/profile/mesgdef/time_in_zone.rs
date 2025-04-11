@@ -51,17 +51,17 @@ impl TimeInZone {
     pub const REFERENCE_MESG: u8 = 0;
     /// Value's type: `u16`
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 2;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 3;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 4;
-    /// Value's type: `Vec<u32>`; Scale: `1000` ; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 5;
     /// Value's type: `Vec<u8>`; Units: `bpm`
     pub const HR_ZONE_HIGH_BOUNDARY: u8 = 6;
-    /// Value's type: `Vec<u16>`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `m/s`
     pub const SPEED_ZONE_HIGH_BOUNDARY: u8 = 7;
     /// Value's type: `Vec<u8>`; Units: `rpm`
     pub const CADENCE_ZONE_HIGH_BOUNDARY: u8 = 8;
@@ -285,7 +285,6 @@ impl From<TimeInZone> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -296,7 +295,6 @@ impl From<TimeInZone> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -306,7 +304,6 @@ impl From<TimeInZone> for Message {
         if m.reference_mesg != typedef::MesgNum(u16::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.reference_mesg.0),
                 is_expanded: false,
@@ -316,7 +313,6 @@ impl From<TimeInZone> for Message {
         if m.reference_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.reference_index.0),
                 is_expanded: false,
@@ -326,7 +322,6 @@ impl From<TimeInZone> for Message {
         if m.time_in_hr_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_hr_zone),
                 is_expanded: false,
@@ -336,7 +331,6 @@ impl From<TimeInZone> for Message {
         if m.time_in_speed_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_speed_zone),
                 is_expanded: false,
@@ -346,7 +340,6 @@ impl From<TimeInZone> for Message {
         if m.time_in_cadence_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_cadence_zone),
                 is_expanded: false,
@@ -356,7 +349,6 @@ impl From<TimeInZone> for Message {
         if m.time_in_power_zone != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_power_zone),
                 is_expanded: false,
@@ -366,7 +358,6 @@ impl From<TimeInZone> for Message {
         if m.hr_zone_high_boundary != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.hr_zone_high_boundary),
                 is_expanded: false,
@@ -376,7 +367,6 @@ impl From<TimeInZone> for Message {
         if m.speed_zone_high_boundary != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.speed_zone_high_boundary),
                 is_expanded: false,
@@ -386,7 +376,6 @@ impl From<TimeInZone> for Message {
         if m.cadence_zone_high_boundary != Vec::<u8>::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.cadence_zone_high_boundary),
                 is_expanded: false,
@@ -396,7 +385,6 @@ impl From<TimeInZone> for Message {
         if m.power_zone_high_boundary != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.power_zone_high_boundary),
                 is_expanded: false,
@@ -406,7 +394,6 @@ impl From<TimeInZone> for Message {
         if m.hr_calc_type != typedef::HrZoneCalc(u8::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::HR_ZONE_CALC,
                 value: Value::Uint8(m.hr_calc_type.0),
                 is_expanded: false,
@@ -416,7 +403,6 @@ impl From<TimeInZone> for Message {
         if m.max_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
@@ -426,7 +412,6 @@ impl From<TimeInZone> for Message {
         if m.resting_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resting_heart_rate),
                 is_expanded: false,
@@ -436,7 +421,6 @@ impl From<TimeInZone> for Message {
         if m.threshold_heart_rate != u8::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.threshold_heart_rate),
                 is_expanded: false,
@@ -446,7 +430,6 @@ impl From<TimeInZone> for Message {
         if m.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX) {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::PWR_ZONE_CALC,
                 value: Value::Uint8(m.pwr_calc_type.0),
                 is_expanded: false,
@@ -456,7 +439,6 @@ impl From<TimeInZone> for Message {
         if m.functional_threshold_power != u16::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.functional_threshold_power),
                 is_expanded: false,

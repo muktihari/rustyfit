@@ -90,11 +90,11 @@ impl DiveSettings {
     pub const WATER_TYPE: u8 = 4;
     /// Value's type: `f32`; Units: `kg/m^3`
     pub const WATER_DENSITY: u8 = 5;
-    /// Value's type: `u8`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`
     pub const PO2_WARN: u8 = 6;
-    /// Value's type: `u8`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`
     pub const PO2_CRITICAL: u8 = 7;
-    /// Value's type: `u8`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`
     pub const PO2_DECO: u8 = 8;
     /// Value's type: `u8`
     pub const SAFETY_STOP_ENABLED: u8 = 9;
@@ -124,15 +124,15 @@ impl DiveSettings {
     pub const TRAVEL_GAS: u8 = 21;
     /// Value's type: `u8`
     pub const CCR_LOW_SETPOINT_SWITCH_MODE: u8 = 22;
-    /// Value's type: `u8`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`
     pub const CCR_LOW_SETPOINT: u8 = 23;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const CCR_LOW_SETPOINT_DEPTH: u8 = 24;
     /// Value's type: `u8`
     pub const CCR_HIGH_SETPOINT_SWITCH_MODE: u8 = 25;
-    /// Value's type: `u8`; Scale: `100` ; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`
     pub const CCR_HIGH_SETPOINT: u8 = 26;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`
     pub const CCR_HIGH_SETPOINT_DEPTH: u8 = 27;
     /// Value's type: `u8`
     pub const GAS_CONSUMPTION_DISPLAY: u8 = 29;
@@ -370,7 +370,6 @@ impl From<DiveSettings> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -381,7 +380,6 @@ impl From<DiveSettings> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -391,7 +389,6 @@ impl From<DiveSettings> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -401,7 +398,6 @@ impl From<DiveSettings> for Message {
         if m.name != String::new() {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
@@ -411,7 +407,6 @@ impl From<DiveSettings> for Message {
         if m.model != typedef::TissueModelType(u8::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::TISSUE_MODEL_TYPE,
                 value: Value::Uint8(m.model.0),
                 is_expanded: false,
@@ -421,7 +416,6 @@ impl From<DiveSettings> for Message {
         if m.gf_low != u8::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gf_low),
                 is_expanded: false,
@@ -431,7 +425,6 @@ impl From<DiveSettings> for Message {
         if m.gf_high != u8::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gf_high),
                 is_expanded: false,
@@ -441,7 +434,6 @@ impl From<DiveSettings> for Message {
         if m.water_type != typedef::WaterType(u8::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::WATER_TYPE,
                 value: Value::Uint8(m.water_type.0),
                 is_expanded: false,
@@ -451,7 +443,6 @@ impl From<DiveSettings> for Message {
         if m.water_density != f32::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.water_density),
                 is_expanded: false,
@@ -461,7 +452,6 @@ impl From<DiveSettings> for Message {
         if m.po2_warn != u8::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2_warn),
                 is_expanded: false,
@@ -471,7 +461,6 @@ impl From<DiveSettings> for Message {
         if m.po2_critical != u8::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2_critical),
                 is_expanded: false,
@@ -481,7 +470,6 @@ impl From<DiveSettings> for Message {
         if m.po2_deco != u8::MAX {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2_deco),
                 is_expanded: false,
@@ -491,7 +479,6 @@ impl From<DiveSettings> for Message {
         if m.safety_stop_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.safety_stop_enabled.0),
                 is_expanded: false,
@@ -501,7 +488,6 @@ impl From<DiveSettings> for Message {
         if m.bottom_depth != f32::MAX {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::FLOAT32,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.bottom_depth),
                 is_expanded: false,
@@ -511,7 +497,6 @@ impl From<DiveSettings> for Message {
         if m.bottom_time != u32::MAX {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.bottom_time),
                 is_expanded: false,
@@ -521,7 +506,6 @@ impl From<DiveSettings> for Message {
         if m.apnea_countdown_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.apnea_countdown_enabled.0),
                 is_expanded: false,
@@ -531,7 +515,6 @@ impl From<DiveSettings> for Message {
         if m.apnea_countdown_time != u32::MAX {
             arr[len] = Field {
                 num: 13,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.apnea_countdown_time),
                 is_expanded: false,
@@ -541,7 +524,6 @@ impl From<DiveSettings> for Message {
         if m.backlight_mode != typedef::DiveBacklightMode(u8::MAX) {
             arr[len] = Field {
                 num: 14,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DIVE_BACKLIGHT_MODE,
                 value: Value::Uint8(m.backlight_mode.0),
                 is_expanded: false,
@@ -551,7 +533,6 @@ impl From<DiveSettings> for Message {
         if m.backlight_brightness != u8::MAX {
             arr[len] = Field {
                 num: 15,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.backlight_brightness),
                 is_expanded: false,
@@ -561,7 +542,6 @@ impl From<DiveSettings> for Message {
         if m.backlight_timeout != typedef::BacklightTimeout(u8::MAX) {
             arr[len] = Field {
                 num: 16,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::BACKLIGHT_TIMEOUT,
                 value: Value::Uint8(m.backlight_timeout.0),
                 is_expanded: false,
@@ -571,7 +551,6 @@ impl From<DiveSettings> for Message {
         if m.repeat_dive_interval != u16::MAX {
             arr[len] = Field {
                 num: 17,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.repeat_dive_interval),
                 is_expanded: false,
@@ -581,7 +560,6 @@ impl From<DiveSettings> for Message {
         if m.safety_stop_time != u16::MAX {
             arr[len] = Field {
                 num: 18,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.safety_stop_time),
                 is_expanded: false,
@@ -591,7 +569,6 @@ impl From<DiveSettings> for Message {
         if m.heart_rate_source_type != typedef::SourceType(u8::MAX) {
             arr[len] = Field {
                 num: 19,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SOURCE_TYPE,
                 value: Value::Uint8(m.heart_rate_source_type.0),
                 is_expanded: false,
@@ -601,7 +578,6 @@ impl From<DiveSettings> for Message {
         if m.heart_rate_source != u8::MAX {
             arr[len] = Field {
                 num: 20,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate_source),
                 is_expanded: false,
@@ -611,7 +587,6 @@ impl From<DiveSettings> for Message {
         if m.travel_gas != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 21,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.travel_gas.0),
                 is_expanded: false,
@@ -621,7 +596,6 @@ impl From<DiveSettings> for Message {
         if m.ccr_low_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX) {
             arr[len] = Field {
                 num: 22,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
                 value: Value::Uint8(m.ccr_low_setpoint_switch_mode.0),
                 is_expanded: false,
@@ -631,7 +605,6 @@ impl From<DiveSettings> for Message {
         if m.ccr_low_setpoint != u8::MAX {
             arr[len] = Field {
                 num: 23,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ccr_low_setpoint),
                 is_expanded: false,
@@ -641,7 +614,6 @@ impl From<DiveSettings> for Message {
         if m.ccr_low_setpoint_depth != u32::MAX {
             arr[len] = Field {
                 num: 24,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ccr_low_setpoint_depth),
                 is_expanded: false,
@@ -651,7 +623,6 @@ impl From<DiveSettings> for Message {
         if m.ccr_high_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX) {
             arr[len] = Field {
                 num: 25,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
                 value: Value::Uint8(m.ccr_high_setpoint_switch_mode.0),
                 is_expanded: false,
@@ -661,7 +632,6 @@ impl From<DiveSettings> for Message {
         if m.ccr_high_setpoint != u8::MAX {
             arr[len] = Field {
                 num: 26,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ccr_high_setpoint),
                 is_expanded: false,
@@ -671,7 +641,6 @@ impl From<DiveSettings> for Message {
         if m.ccr_high_setpoint_depth != u32::MAX {
             arr[len] = Field {
                 num: 27,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ccr_high_setpoint_depth),
                 is_expanded: false,
@@ -681,7 +650,6 @@ impl From<DiveSettings> for Message {
         if m.gas_consumption_display != typedef::GasConsumptionRateType(u8::MAX) {
             arr[len] = Field {
                 num: 29,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::GAS_CONSUMPTION_RATE_TYPE,
                 value: Value::Uint8(m.gas_consumption_display.0),
                 is_expanded: false,
@@ -691,7 +659,6 @@ impl From<DiveSettings> for Message {
         if m.up_key_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 30,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.up_key_enabled.0),
                 is_expanded: false,
@@ -701,7 +668,6 @@ impl From<DiveSettings> for Message {
         if m.dive_sounds != typedef::Tone(u8::MAX) {
             arr[len] = Field {
                 num: 35,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::TONE,
                 value: Value::Uint8(m.dive_sounds.0),
                 is_expanded: false,
@@ -711,7 +677,6 @@ impl From<DiveSettings> for Message {
         if m.last_stop_multiple != u8::MAX {
             arr[len] = Field {
                 num: 36,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.last_stop_multiple),
                 is_expanded: false,
@@ -721,7 +686,6 @@ impl From<DiveSettings> for Message {
         if m.no_fly_time_mode != typedef::NoFlyTimeMode(u8::MAX) {
             arr[len] = Field {
                 num: 37,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::NO_FLY_TIME_MODE,
                 value: Value::Uint8(m.no_fly_time_mode.0),
                 is_expanded: false,

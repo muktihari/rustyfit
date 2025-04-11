@@ -88,7 +88,6 @@ impl From<VideoClip> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -99,7 +98,6 @@ impl From<VideoClip> for Message {
         if m.clip_number != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.clip_number),
                 is_expanded: false,
@@ -109,7 +107,6 @@ impl From<VideoClip> for Message {
         if m.start_timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
@@ -119,7 +116,6 @@ impl From<VideoClip> for Message {
         if m.start_timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_timestamp_ms),
                 is_expanded: false,
@@ -129,7 +125,6 @@ impl From<VideoClip> for Message {
         if m.end_timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.end_timestamp.0),
                 is_expanded: false,
@@ -139,7 +134,6 @@ impl From<VideoClip> for Message {
         if m.end_timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.end_timestamp_ms),
                 is_expanded: false,
@@ -149,7 +143,6 @@ impl From<VideoClip> for Message {
         if m.clip_start != u32::MAX {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.clip_start),
                 is_expanded: false,
@@ -159,7 +152,6 @@ impl From<VideoClip> for Message {
         if m.clip_end != u32::MAX {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.clip_end),
                 is_expanded: false,

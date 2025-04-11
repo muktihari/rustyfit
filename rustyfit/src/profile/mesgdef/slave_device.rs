@@ -66,7 +66,6 @@ impl From<SlaveDevice> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -77,7 +76,6 @@ impl From<SlaveDevice> for Message {
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
@@ -87,7 +85,6 @@ impl From<SlaveDevice> for Message {
         if m.product != u16::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,

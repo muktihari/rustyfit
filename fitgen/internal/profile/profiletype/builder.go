@@ -50,30 +50,33 @@ func (b *Builder) Build() ([]generator.Data, error) {
 func (b *Builder) buildProfile() generator.Data {
 	constants := make([]Constant, 0, len(b.types))
 
-	const typ = "u16"
-
 	for _, t := range b.types {
 		if t.Name == "fit_base_type" { // special types to be included, mapping to itself (profile.Uint8 == basetype.Uint8)
 			for _, v := range t.Values {
 				constantName := strings.ToUpper(v.Name)
 				constants = append(constants, Constant{
-					Name:   constantName,
-					Type:   typ,
-					Value:  fmt.Sprintf("0x%.4X", uint(basetype.FromString(v.Name)&basetype.BaseTypeNumMask)),
-					String: v.Name,
+					Name:     constantName,
+					BaseType: fmt.Sprintf("FitBaseType::%s", constantName),
+					Value:    fmt.Sprintf("0x%.4X", uint(basetype.FromString(v.Name)&basetype.BaseTypeNumMask)),
+					String:   v.Name,
 				})
 			}
-			constants = append(constants, Constant{Name: "BOOL", Type: typ, Value: fmt.Sprintf("0x%.4X", 1<<5)})
+			constants = append(constants, Constant{
+				Name:     "BOOL",
+				BaseType: "FitBaseType::ENUM",
+				Value:    fmt.Sprintf("0x%.4X", 1<<5),
+				String:   "bool"},
+			)
 			break
 		}
 	}
 
 	for i, t := range b.types {
 		constants = append(constants, Constant{
-			Name:   strings.ToUpper(t.Name),
-			Type:   typ,
-			Value:  fmt.Sprintf("0x%.4X", (uint64(i+2)<<5)|uint64(basetype.FromString(t.BaseType)&basetype.BaseTypeNumMask)),
-			String: t.Name,
+			Name:     strings.ToUpper(t.Name),
+			BaseType: fmt.Sprintf("FitBaseType::%s", strings.ToUpper(t.BaseType)),
+			Value:    fmt.Sprintf("0x%.4X", (uint64(i+2)<<5)|uint64(basetype.FromString(t.BaseType)&basetype.BaseTypeNumMask)),
+			String:   t.Name,
 		})
 	}
 

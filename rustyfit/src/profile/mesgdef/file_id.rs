@@ -86,7 +86,6 @@ impl From<FileId> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -97,7 +96,6 @@ impl From<FileId> for Message {
         if m.r#type != typedef::File(u8::MAX) {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::FILE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
@@ -107,7 +105,6 @@ impl From<FileId> for Message {
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
@@ -117,7 +114,6 @@ impl From<FileId> for Message {
         if m.product != u16::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
@@ -127,7 +123,6 @@ impl From<FileId> for Message {
         if m.serial_number != u32::MIN {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32Z,
                 profile_type: ProfileType::UINT32Z,
                 value: Value::Uint32(m.serial_number),
                 is_expanded: false,
@@ -137,7 +132,6 @@ impl From<FileId> for Message {
         if m.time_created != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.time_created.0),
                 is_expanded: false,
@@ -147,7 +141,6 @@ impl From<FileId> for Message {
         if m.number != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.number),
                 is_expanded: false,
@@ -157,7 +150,6 @@ impl From<FileId> for Message {
         if m.product_name != String::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::STRING,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.product_name),
                 is_expanded: false,

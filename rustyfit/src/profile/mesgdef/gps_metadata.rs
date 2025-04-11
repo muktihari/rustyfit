@@ -45,15 +45,15 @@ impl GpsMetadata {
     pub const POSITION_LAT: u8 = 1;
     /// Value's type: `i32`; Units: `semicircles`
     pub const POSITION_LONG: u8 = 2;
-    /// Value's type: `u32`; Scale: `5` ; Offset: `500` ; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_SPEED: u8 = 4;
-    /// Value's type: `u16`; Scale: `100` ; Units: `degrees`
+    /// Value's type: `u16`; Scale: `100`; Units: `degrees`
     pub const HEADING: u8 = 5;
     /// Value's type: `u32`; Units: `s`
     pub const UTC_TIMESTAMP: u8 = 6;
-    /// Value's type: `[i16; 3]`; Scale: `100` ; Units: `m/s`
+    /// Value's type: `[i16; 3]`; Scale: `100`; Units: `m/s`
     pub const VELOCITY: u8 = 7;
 
     /// Create new GpsMetadata with all fields being set to its corresponding invalid value.
@@ -194,7 +194,6 @@ impl From<GpsMetadata> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -205,7 +204,6 @@ impl From<GpsMetadata> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 253,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -215,7 +213,6 @@ impl From<GpsMetadata> for Message {
         if m.timestamp_ms != u16::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
@@ -225,7 +222,6 @@ impl From<GpsMetadata> for Message {
         if m.position_lat != i32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
@@ -235,7 +231,6 @@ impl From<GpsMetadata> for Message {
         if m.position_long != i32::MAX {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::SINT32,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
@@ -245,7 +240,6 @@ impl From<GpsMetadata> for Message {
         if m.enhanced_altitude != u32::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_altitude),
                 is_expanded: false,
@@ -255,7 +249,6 @@ impl From<GpsMetadata> for Message {
         if m.enhanced_speed != u32::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_speed),
                 is_expanded: false,
@@ -265,7 +258,6 @@ impl From<GpsMetadata> for Message {
         if m.heading != u16::MAX {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.heading),
                 is_expanded: false,
@@ -275,7 +267,6 @@ impl From<GpsMetadata> for Message {
         if m.utc_timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.utc_timestamp.0),
                 is_expanded: false,
@@ -285,7 +276,6 @@ impl From<GpsMetadata> for Message {
         if m.velocity != [i16::MAX; 3] {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::SINT16,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(Vec::from(&m.velocity)),
                 is_expanded: false,

@@ -72,7 +72,7 @@ impl DeviceSettings {
     pub const TIME_OFFSET: u8 = 2;
     /// Value's type: `Vec<u8>`
     pub const TIME_MODE: u8 = 4;
-    /// Value's type: `Vec<i8>`; Scale: `4` ; Units: `hr`
+    /// Value's type: `Vec<i8>`; Scale: `4`; Units: `hr`
     pub const TIME_ZONE_OFFSET: u8 = 5;
     /// Value's type: `u8`
     pub const BACKLIGHT_MODE: u8 = 12;
@@ -214,7 +214,6 @@ impl From<DeviceSettings> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -225,7 +224,6 @@ impl From<DeviceSettings> for Message {
         if m.active_time_zone != u8::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.active_time_zone),
                 is_expanded: false,
@@ -235,7 +233,6 @@ impl From<DeviceSettings> for Message {
         if m.utc_offset != u32::MAX {
             arr[len] = Field {
                 num: 1,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.utc_offset),
                 is_expanded: false,
@@ -245,7 +242,6 @@ impl From<DeviceSettings> for Message {
         if m.time_offset != Vec::<u32>::new() {
             arr[len] = Field {
                 num: 2,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_offset),
                 is_expanded: false,
@@ -255,7 +251,6 @@ impl From<DeviceSettings> for Message {
         if m.time_mode != Vec::<typedef::TimeMode>::new() {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::TIME_MODE,
                 value: Value::VecUint8({
                     let mut v = Vec::with_capacity(m.time_mode.len());
@@ -271,7 +266,6 @@ impl From<DeviceSettings> for Message {
         if m.time_zone_offset != Vec::<i8>::new() {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::SINT8,
                 profile_type: ProfileType::SINT8,
                 value: Value::VecInt8(m.time_zone_offset),
                 is_expanded: false,
@@ -281,7 +275,6 @@ impl From<DeviceSettings> for Message {
         if m.backlight_mode != typedef::BacklightMode(u8::MAX) {
             arr[len] = Field {
                 num: 12,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BACKLIGHT_MODE,
                 value: Value::Uint8(m.backlight_mode.0),
                 is_expanded: false,
@@ -291,7 +284,6 @@ impl From<DeviceSettings> for Message {
         if m.activity_tracker_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 36,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.activity_tracker_enabled.0),
                 is_expanded: false,
@@ -301,7 +293,6 @@ impl From<DeviceSettings> for Message {
         if m.clock_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 39,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.clock_time.0),
                 is_expanded: false,
@@ -311,7 +302,6 @@ impl From<DeviceSettings> for Message {
         if m.pages_enabled != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 40,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.pages_enabled),
                 is_expanded: false,
@@ -321,7 +311,6 @@ impl From<DeviceSettings> for Message {
         if m.move_alert_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 46,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.move_alert_enabled.0),
                 is_expanded: false,
@@ -331,7 +320,6 @@ impl From<DeviceSettings> for Message {
         if m.date_mode != typedef::DateMode(u8::MAX) {
             arr[len] = Field {
                 num: 47,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DATE_MODE,
                 value: Value::Uint8(m.date_mode.0),
                 is_expanded: false,
@@ -341,7 +329,6 @@ impl From<DeviceSettings> for Message {
         if m.display_orientation != typedef::DisplayOrientation(u8::MAX) {
             arr[len] = Field {
                 num: 55,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_ORIENTATION,
                 value: Value::Uint8(m.display_orientation.0),
                 is_expanded: false,
@@ -351,7 +338,6 @@ impl From<DeviceSettings> for Message {
         if m.mounting_side != typedef::Side(u8::MAX) {
             arr[len] = Field {
                 num: 56,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SIDE,
                 value: Value::Uint8(m.mounting_side.0),
                 is_expanded: false,
@@ -361,7 +347,6 @@ impl From<DeviceSettings> for Message {
         if m.default_page != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 57,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.default_page),
                 is_expanded: false,
@@ -371,7 +356,6 @@ impl From<DeviceSettings> for Message {
         if m.autosync_min_steps != u16::MAX {
             arr[len] = Field {
                 num: 58,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.autosync_min_steps),
                 is_expanded: false,
@@ -381,7 +365,6 @@ impl From<DeviceSettings> for Message {
         if m.autosync_min_time != u16::MAX {
             arr[len] = Field {
                 num: 59,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.autosync_min_time),
                 is_expanded: false,
@@ -391,7 +374,6 @@ impl From<DeviceSettings> for Message {
         if m.lactate_threshold_autodetect_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 80,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.lactate_threshold_autodetect_enabled.0),
                 is_expanded: false,
@@ -401,7 +383,6 @@ impl From<DeviceSettings> for Message {
         if m.ble_auto_upload_enabled != typedef::Bool(u8::MAX) {
             arr[len] = Field {
                 num: 86,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.ble_auto_upload_enabled.0),
                 is_expanded: false,
@@ -411,7 +392,6 @@ impl From<DeviceSettings> for Message {
         if m.auto_sync_frequency != typedef::AutoSyncFrequency(u8::MAX) {
             arr[len] = Field {
                 num: 89,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::AUTO_SYNC_FREQUENCY,
                 value: Value::Uint8(m.auto_sync_frequency.0),
                 is_expanded: false,
@@ -421,7 +401,6 @@ impl From<DeviceSettings> for Message {
         if m.auto_activity_detect != typedef::AutoActivityDetect(u32::MAX) {
             arr[len] = Field {
                 num: 90,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::AUTO_ACTIVITY_DETECT,
                 value: Value::Uint32(m.auto_activity_detect.0),
                 is_expanded: false,
@@ -431,7 +410,6 @@ impl From<DeviceSettings> for Message {
         if m.number_of_screens != u8::MAX {
             arr[len] = Field {
                 num: 94,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.number_of_screens),
                 is_expanded: false,
@@ -441,7 +419,6 @@ impl From<DeviceSettings> for Message {
         if m.smart_notification_display_orientation != typedef::DisplayOrientation(u8::MAX) {
             arr[len] = Field {
                 num: 95,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::DISPLAY_ORIENTATION,
                 value: Value::Uint8(m.smart_notification_display_orientation.0),
                 is_expanded: false,
@@ -451,7 +428,6 @@ impl From<DeviceSettings> for Message {
         if m.tap_interface != typedef::Switch(u8::MAX) {
             arr[len] = Field {
                 num: 134,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::SWITCH,
                 value: Value::Uint8(m.tap_interface.0),
                 is_expanded: false,
@@ -461,7 +437,6 @@ impl From<DeviceSettings> for Message {
         if m.tap_sensitivity != typedef::TapSensitivity(u8::MAX) {
             arr[len] = Field {
                 num: 174,
-                base_type: typedef::FitBaseType::ENUM,
                 profile_type: ProfileType::TAP_SENSITIVITY,
                 value: Value::Uint8(m.tap_sensitivity.0),
                 is_expanded: false,

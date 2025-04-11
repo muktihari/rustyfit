@@ -38,11 +38,11 @@ pub struct Set {
 impl Set {
     /// Value's type: `u32`
     pub const TIMESTAMP: u8 = 254;
-    /// Value's type: `u32`; Scale: `1000` ; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const DURATION: u8 = 0;
     /// Value's type: `u16`
     pub const REPETITIONS: u8 = 3;
-    /// Value's type: `u16`; Scale: `16` ; Units: `kg`
+    /// Value's type: `u16`; Scale: `16`; Units: `kg`
     pub const WEIGHT: u8 = 4;
     /// Value's type: `u8`
     pub const SET_TYPE: u8 = 5;
@@ -155,7 +155,6 @@ impl From<Set> for Message {
         let mut arr = [const {
             Field {
                 num: 0,
-                base_type: typedef::FitBaseType(0),
                 profile_type: ProfileType(0),
                 value: Value::Invalid,
                 is_expanded: false,
@@ -166,7 +165,6 @@ impl From<Set> for Message {
         if m.timestamp != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 254,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
@@ -176,7 +174,6 @@ impl From<Set> for Message {
         if m.duration != u32::MAX {
             arr[len] = Field {
                 num: 0,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
@@ -186,7 +183,6 @@ impl From<Set> for Message {
         if m.repetitions != u16::MAX {
             arr[len] = Field {
                 num: 3,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.repetitions),
                 is_expanded: false,
@@ -196,7 +192,6 @@ impl From<Set> for Message {
         if m.weight != u16::MAX {
             arr[len] = Field {
                 num: 4,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.weight),
                 is_expanded: false,
@@ -206,7 +201,6 @@ impl From<Set> for Message {
         if m.set_type != typedef::SetType(u8::MAX) {
             arr[len] = Field {
                 num: 5,
-                base_type: typedef::FitBaseType::UINT8,
                 profile_type: ProfileType::SET_TYPE,
                 value: Value::Uint8(m.set_type.0),
                 is_expanded: false,
@@ -216,7 +210,6 @@ impl From<Set> for Message {
         if m.start_time != typedef::DateTime(u32::MAX) {
             arr[len] = Field {
                 num: 6,
-                base_type: typedef::FitBaseType::UINT32,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
@@ -226,7 +219,6 @@ impl From<Set> for Message {
         if m.category != Vec::<typedef::ExerciseCategory>::new() {
             arr[len] = Field {
                 num: 7,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
                 value: Value::VecUint16({
                     let mut v = Vec::with_capacity(m.category.len());
@@ -242,7 +234,6 @@ impl From<Set> for Message {
         if m.category_subtype != Vec::<u16>::new() {
             arr[len] = Field {
                 num: 8,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.category_subtype),
                 is_expanded: false,
@@ -252,7 +243,6 @@ impl From<Set> for Message {
         if m.weight_display_unit != typedef::FitBaseUnit(u16::MAX) {
             arr[len] = Field {
                 num: 9,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::FIT_BASE_UNIT,
                 value: Value::Uint16(m.weight_display_unit.0),
                 is_expanded: false,
@@ -262,7 +252,6 @@ impl From<Set> for Message {
         if m.message_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 10,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
@@ -272,7 +261,6 @@ impl From<Set> for Message {
         if m.wkt_step_index != typedef::MessageIndex(u16::MAX) {
             arr[len] = Field {
                 num: 11,
-                base_type: typedef::FitBaseType::UINT16,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.wkt_step_index.0),
                 is_expanded: false,
