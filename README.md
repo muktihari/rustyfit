@@ -2,6 +2,7 @@
 
 ![GitHub Workflow Status](https://github.com/muktihari/rustyfit/workflows/CI/badge.svg)
 [![Crates.io Version](https://img.shields.io/crates/v/rustyfit.svg)](https://crates.io/crates/rustyfit)
+[![Crates.io Downloads](https://img.shields.io/crates/d/rustyfit.svg)](https://crates.io/crates/rustyfit)
 [![Profile Version](https://img.shields.io/badge/profile-v21.158-lightblue.svg?style=flat)](https://developer.garmin.com/fit/download)
 
 Rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) in Rust.
@@ -37,7 +38,7 @@ fn main() {
 
     println!("file_header's data_size: {}", fit.file_header.data_size);
     println!("messages count: {}", fit.messages.len());
-    for field in &fit.messages[0].fields {
+    for field in &fit.messages[0].fields { // first message: file_id
         if field.num == mesgdef::FileId::TYPE {
             println!("file type: {}", typedef::File(field.value.as_u8()));
         }
@@ -55,7 +56,7 @@ fn main() {
 Decoder's `decode_fn` allow us to retrieve message definition or message data event as soon as it is being decoded. This way, users can have fine-grained control on how to interact with the data.
 
 ```rust
-use rustyfit::{Decoder, DecoderEvent, profile::typedef};
+use rustyfit::{Decoder, DecoderEvent,profile::{mesgdef, typedef}};
 use std::{fs::File, io::BufReader};
 
 fn main() {
@@ -64,22 +65,26 @@ fn main() {
     let br = BufReader::new(f);
     let mut dec = Decoder::new(br);
 
-    let mut record_count = 0;
-    dec.decode_fn(|event| {
-        match event {
-            DecoderEvent::Message(mesg) => {
-                if mesg.num == typedef::MesgNum::RECORD {
-                    record_count += 1
-                }
-            },
-            DecoderEvent::MessageDefinition(_) => {}
-        };
+    dec.decode_fn(|event| match event {
+        DecoderEvent::Message(mesg) => {
+            if mesg.num == typedef::MesgNum::SESSION {
+                // Convert mesg into Session struct
+                let ses = mesgdef::Session::from(mesg);
+                println!(
+                    "session:\n start_time: {}\n sport: {}\n num_laps: {}",
+                    ses.start_time.0, ses.sport, ses.num_laps
+                );
+            }
+        }
+        DecoderEvent::MessageDefinition(_) => {}
     })
     .unwrap();
 
-    println!("Total records: {}", record_count);
     // # Output
-    // Total records: 3601
+    // session:
+    //  start_time: 974894402
+    //  sport: running
+    //  num_laps: 53
 }
 
 ```
@@ -91,7 +96,7 @@ Create `Decoder` instance with options using `DecoderBuilder`.
 ```rust
 let mut dec: Decoder = DecoderBuilder::new(br)
         .checksum(false)
-        .expand_components(true)
+        .expand_components(false)
         .build();
 ```
 
@@ -129,21 +134,18 @@ fn main() {
                 fields: vec![
                     Field {
                         num: mesgdef::FileId::MANUFACTURER,
-                        base_type: typedef::FitBaseType::UINT16,
                         profile_type: ProfileType::MANUFACTURER,
                         value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
                         is_expanded: false,
                     },
                     Field {
                         num: mesgdef::FileId::PRODUCT,
-                        base_type: typedef::FitBaseType::UINT16,
                         profile_type: ProfileType::UINT16,
                         value: Value::Uint16(typedef::GarminProduct::FENIX8_SOLAR.0),
                         is_expanded: false,
                     },
                     Field {
                         num: mesgdef::FileId::TYPE,
-                        base_type: typedef::FitBaseType::UINT8,
                         profile_type: ProfileType::UINT8,
                         value: Value::Uint8(typedef::File::ACTIVITY.0),
                         is_expanded: false,
@@ -156,21 +158,18 @@ fn main() {
                 fields: vec![
                     Field {
                         num: mesgdef::Record::DISTANCE,
-                        base_type: typedef::FitBaseType::UINT32,
                         profile_type: ProfileType::UINT32,
                         value: Value::Uint16(100 * 100), // 100 m
                         is_expanded: false,
                     },
                     Field {
                         num: mesgdef::Record::HEART_RATE,
-                        base_type: typedef::FitBaseType::UINT8,
                         profile_type: ProfileType::UINT8,
                         value: Value::Uint8(70), // 70 bpm
                         is_expanded: false,
                     },
                     Field {
                         num: mesgdef::Record::SPEED,
-                        base_type: typedef::FitBaseType::UINT16,
                         profile_type: ProfileType::UINT16,
                         value: Value::Uint16(2 * 1000), // 2 m/s
                         is_expanded: false,
@@ -248,5 +247,6 @@ let mut enc: Encoder = EncoderBuilder::new(&mut bw)
         .endianness(Endianness::BigEndian)
         .protocol_version(ProtocolVersion::V2)
         .header_option(HeaderOption::Compressed(3))
+        .omit_invalid_value(false)
         .build();
 ```
