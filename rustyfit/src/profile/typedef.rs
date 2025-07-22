@@ -117,6 +117,7 @@ impl MesgNum {
     pub const POWER_ZONE: MesgNum = MesgNum(9);
     pub const MET_ZONE: MesgNum = MesgNum(10);
     pub const SPORT: MesgNum = MesgNum(12);
+    pub const TRAINING_SETTINGS: MesgNum = MesgNum(13);
     pub const GOAL: MesgNum = MesgNum(15);
     pub const SESSION: MesgNum = MesgNum(18);
     pub const LAP: MesgNum = MesgNum(19);
@@ -253,6 +254,7 @@ impl fmt::Display for MesgNum {
             9 => write!(f, "power_zone"),
             10 => write!(f, "met_zone"),
             12 => write!(f, "sport"),
+            13 => write!(f, "training_settings"),
             15 => write!(f, "goal"),
             18 => write!(f, "session"),
             19 => write!(f, "lap"),
@@ -3232,6 +3234,7 @@ impl Manufacturer {
     pub const MYZONE: Manufacturer = Manufacturer(150);
     pub const ABAWO: Manufacturer = Manufacturer(151);
     pub const BAFANG: Manufacturer = Manufacturer(152);
+    pub const LUHONG_TECHNOLOGY: Manufacturer = Manufacturer(153);
     pub const DEVELOPMENT: Manufacturer = Manufacturer(255);
     pub const HEALTHANDLIFE: Manufacturer = Manufacturer(257);
     pub const LEZYNE: Manufacturer = Manufacturer(258);
@@ -3314,6 +3317,9 @@ impl Manufacturer {
     pub const EO_SWIMBETTER: Manufacturer = Manufacturer(330);
     pub const MYWHOOSH: Manufacturer = Manufacturer(331);
     pub const RAVEMEN: Manufacturer = Manufacturer(332);
+    pub const TEKTRO_RACING_PRODUCTS: Manufacturer = Manufacturer(333);
+    pub const DARAD_INNOVATION_CORPORATION: Manufacturer = Manufacturer(334);
+    pub const CYCLOPTIM: Manufacturer = Manufacturer(335);
     pub const ACTIGRAPHCORP: Manufacturer = Manufacturer(5759);
 }
 
@@ -3476,6 +3482,7 @@ impl fmt::Display for Manufacturer {
             150 => write!(f, "myzone"),
             151 => write!(f, "abawo"),
             152 => write!(f, "bafang"),
+            153 => write!(f, "luhong_technology"),
             255 => write!(f, "development"),
             257 => write!(f, "healthandlife"),
             258 => write!(f, "lezyne"),
@@ -3553,6 +3560,9 @@ impl fmt::Display for Manufacturer {
             330 => write!(f, "eo_swimbetter"),
             331 => write!(f, "mywhoosh"),
             332 => write!(f, "ravemen"),
+            333 => write!(f, "tektro_racing_products"),
+            334 => write!(f, "darad_innovation_corporation"),
+            335 => write!(f, "cycloptim"),
             5759 => write!(f, "actigraphcorp"),
             _ => write!(f, "unknown({})", self.0),
         }
@@ -3821,6 +3831,8 @@ impl GarminProduct {
     pub const GPSMAP66: GarminProduct = GarminProduct(3028);
     pub const APPROACH_S10: GarminProduct = GarminProduct(3049);
     pub const VIVOACTIVE3M_L: GarminProduct = GarminProduct(3066);
+    pub const FR245: GarminProduct = GarminProduct(3076);
+    pub const FR245_MUSIC: GarminProduct = GarminProduct(3077);
     pub const APPROACH_G80: GarminProduct = GarminProduct(3085);
     pub const EDGE_130_ASIA: GarminProduct = GarminProduct(3092);
     pub const EDGE_1030_BONTRAGER: GarminProduct = GarminProduct(3095);
@@ -3853,6 +3865,7 @@ impl GarminProduct {
     pub const MARQ_EXPEDITION: GarminProduct = GarminProduct(3250);
     pub const MARQ_ATHLETE: GarminProduct = GarminProduct(3251);
     pub const DESCENT_MK2: GarminProduct = GarminProduct(3258);
+    pub const FR45: GarminProduct = GarminProduct(3282);
     pub const GPSMAP66I: GarminProduct = GarminProduct(3284);
     pub const FENIX6S_SPORT: GarminProduct = GarminProduct(3287);
     pub const FENIX6S: GarminProduct = GarminProduct(3288);
@@ -3905,6 +3918,8 @@ impl GarminProduct {
     /// Rally 100/200 Power Meter Series
     pub const RALLY_200: GarminProduct = GarminProduct(3578);
     pub const FR745: GarminProduct = GarminProduct(3589);
+    pub const VENUSQ_MUSIC: GarminProduct = GarminProduct(3596);
+    pub const VENUSQ_MUSIC_V2: GarminProduct = GarminProduct(3599);
     pub const VENUSQ: GarminProduct = GarminProduct(3600);
     pub const LILY: GarminProduct = GarminProduct(3615);
     pub const MARQ_ADVENTURER: GarminProduct = GarminProduct(3624);
@@ -3930,9 +3945,11 @@ impl GarminProduct {
     pub const EDGE_1040: GarminProduct = GarminProduct(3843);
     pub const MARQ_GOLFER_ASIA: GarminProduct = GarminProduct(3850);
     pub const VENU2_PLUS: GarminProduct = GarminProduct(3851);
+    /// Airoha AG3335M Family
     pub const GNSS: GarminProduct = GarminProduct(3865);
     pub const FR55: GarminProduct = GarminProduct(3869);
     pub const INSTINCT_2: GarminProduct = GarminProduct(3888);
+    pub const INSTINCT_2S: GarminProduct = GarminProduct(3889);
     pub const FENIX7S: GarminProduct = GarminProduct(3905);
     pub const FENIX7: GarminProduct = GarminProduct(3906);
     pub const FENIX7X: GarminProduct = GarminProduct(3907);
@@ -4032,7 +4049,20 @@ impl GarminProduct {
     pub const FENIX8: GarminProduct = GarminProduct(4536);
     pub const D2_MACH1_PRO: GarminProduct = GarminProduct(4556);
     pub const ENDURO3: GarminProduct = GarminProduct(4575);
+    pub const INSTINCTE_40MM: GarminProduct = GarminProduct(4583);
+    pub const INSTINCTE_45MM: GarminProduct = GarminProduct(4584);
+    pub const INSTINCT3_SOLAR_45MM: GarminProduct = GarminProduct(4585);
+    pub const INSTINCT3_AMOLED_45MM: GarminProduct = GarminProduct(4586);
+    pub const INSTINCT3_AMOLED_50MM: GarminProduct = GarminProduct(4587);
+    pub const DESCENT_G2: GarminProduct = GarminProduct(4588);
+    pub const HRM_200: GarminProduct = GarminProduct(4606);
+    pub const VIVOACTIVE6: GarminProduct = GarminProduct(4625);
+    pub const APPROACHS44: GarminProduct = GarminProduct(4647);
+    pub const APPROACHS50: GarminProduct = GarminProduct(4656);
     pub const FENIX_E: GarminProduct = GarminProduct(4666);
+    pub const INSTINCT3_SOLAR_50MM: GarminProduct = GarminProduct(4759);
+    pub const TACTIX8_AMOLED: GarminProduct = GarminProduct(4775);
+    pub const TACTIX8_SOLAR: GarminProduct = GarminProduct(4776);
     /// SDM4 footpod
     pub const SDM4: GarminProduct = GarminProduct(10007);
     pub const EDGE_REMOTE: GarminProduct = GarminProduct(10014);
@@ -4297,6 +4327,8 @@ impl fmt::Display for GarminProduct {
             3028 => write!(f, "gpsmap66"),
             3049 => write!(f, "approach_s10"),
             3066 => write!(f, "vivoactive3m_l"),
+            3076 => write!(f, "fr245"),
+            3077 => write!(f, "fr245_music"),
             3085 => write!(f, "approach_g80"),
             3092 => write!(f, "edge_130_asia"),
             3095 => write!(f, "edge_1030_bontrager"),
@@ -4327,6 +4359,7 @@ impl fmt::Display for GarminProduct {
             3250 => write!(f, "marq_expedition"),
             3251 => write!(f, "marq_athlete"),
             3258 => write!(f, "descent_mk2"),
+            3282 => write!(f, "fr45"),
             3284 => write!(f, "gpsmap66i"),
             3287 => write!(f, "fenix6S_sport"),
             3288 => write!(f, "fenix6S"),
@@ -4376,6 +4409,8 @@ impl fmt::Display for GarminProduct {
             3570 => write!(f, "edge_1030_plus"),
             3578 => write!(f, "rally_200"),
             3589 => write!(f, "fr745"),
+            3596 => write!(f, "venusq_music"),
+            3599 => write!(f, "venusq_music_v2"),
             3600 => write!(f, "venusq"),
             3615 => write!(f, "lily"),
             3624 => write!(f, "marq_adventurer"),
@@ -4403,6 +4438,7 @@ impl fmt::Display for GarminProduct {
             3865 => write!(f, "gnss"),
             3869 => write!(f, "fr55"),
             3888 => write!(f, "instinct_2"),
+            3889 => write!(f, "instinct_2s"),
             3905 => write!(f, "fenix7s"),
             3906 => write!(f, "fenix7"),
             3907 => write!(f, "fenix7x"),
@@ -4488,7 +4524,20 @@ impl fmt::Display for GarminProduct {
             4536 => write!(f, "fenix8"),
             4556 => write!(f, "d2_mach1_pro"),
             4575 => write!(f, "enduro3"),
+            4583 => write!(f, "instinctE_40mm"),
+            4584 => write!(f, "instinctE_45mm"),
+            4585 => write!(f, "instinct3_solar_45mm"),
+            4586 => write!(f, "instinct3_amoled_45mm"),
+            4587 => write!(f, "instinct3_amoled_50mm"),
+            4588 => write!(f, "descent_g2"),
+            4606 => write!(f, "hrm_200"),
+            4625 => write!(f, "vivoactive6"),
+            4647 => write!(f, "approachS44"),
+            4656 => write!(f, "approachS50"),
             4666 => write!(f, "fenix_e"),
+            4759 => write!(f, "instinct3_solar_50mm"),
+            4775 => write!(f, "tactix8_amoled"),
+            4776 => write!(f, "tactix8_solar"),
             10007 => write!(f, "sdm4"),
             10014 => write!(f, "edge_remote"),
             20533 => write!(f, "tacx_training_app_win"),
@@ -4903,6 +4952,10 @@ impl SwimStroke {
     pub const MIXED: SwimStroke = SwimStroke(5);
     /// IM is a mixed interval containing the same number of lengths for each of: Butterfly, Backstroke, Breaststroke, Freestyle, swam in that order.
     pub const IM: SwimStroke = SwimStroke(6);
+    /// For repeated workout steps, a new individual medly stroke is used for each round.
+    pub const IM_BY_ROUND: SwimStroke = SwimStroke(7);
+    /// Reverse IM Order
+    pub const RIMO: SwimStroke = SwimStroke(8);
 }
 
 impl Default for SwimStroke {
@@ -4921,6 +4974,8 @@ impl fmt::Display for SwimStroke {
             4 => write!(f, "drill"),
             5 => write!(f, "mixed"),
             6 => write!(f, "im"),
+            7 => write!(f, "im_by_round"),
+            8 => write!(f, "rimo"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -7438,6 +7493,26 @@ impl ExerciseCategory {
     pub const TRICEPS_EXTENSION: ExerciseCategory = ExerciseCategory(30);
     pub const WARM_UP: ExerciseCategory = ExerciseCategory(31);
     pub const RUN: ExerciseCategory = ExerciseCategory(32);
+    pub const BIKE: ExerciseCategory = ExerciseCategory(33);
+    /// Exercises within workouts that use GPS/sensors rather than rep counting
+    pub const CARDIO_SENSORS: ExerciseCategory = ExerciseCategory(34);
+    pub const MOVE: ExerciseCategory = ExerciseCategory(35);
+    pub const POSE: ExerciseCategory = ExerciseCategory(36);
+    pub const BANDED_EXERCISES: ExerciseCategory = ExerciseCategory(37);
+    pub const BATTLE_ROPE: ExerciseCategory = ExerciseCategory(38);
+    pub const ELLIPTICAL: ExerciseCategory = ExerciseCategory(39);
+    pub const FLOOR_CLIMB: ExerciseCategory = ExerciseCategory(40);
+    pub const INDOOR_BIKE: ExerciseCategory = ExerciseCategory(41);
+    pub const INDOOR_ROW: ExerciseCategory = ExerciseCategory(42);
+    pub const LADDER: ExerciseCategory = ExerciseCategory(43);
+    pub const SANDBAG: ExerciseCategory = ExerciseCategory(44);
+    pub const SLED: ExerciseCategory = ExerciseCategory(45);
+    pub const SLEDGE_HAMMER: ExerciseCategory = ExerciseCategory(46);
+    pub const STAIR_STEPPER: ExerciseCategory = ExerciseCategory(47);
+    pub const SUSPENSION: ExerciseCategory = ExerciseCategory(49);
+    pub const TIRE: ExerciseCategory = ExerciseCategory(50);
+    pub const RUN_INDOOR: ExerciseCategory = ExerciseCategory(52);
+    pub const BIKE_OUTDOOR: ExerciseCategory = ExerciseCategory(53);
     pub const UNKNOWN: ExerciseCategory = ExerciseCategory(65534);
 }
 
@@ -7483,6 +7558,25 @@ impl fmt::Display for ExerciseCategory {
             30 => write!(f, "triceps_extension"),
             31 => write!(f, "warm_up"),
             32 => write!(f, "run"),
+            33 => write!(f, "bike"),
+            34 => write!(f, "cardio_sensors"),
+            35 => write!(f, "move"),
+            36 => write!(f, "pose"),
+            37 => write!(f, "banded_exercises"),
+            38 => write!(f, "battle_rope"),
+            39 => write!(f, "elliptical"),
+            40 => write!(f, "floor_climb"),
+            41 => write!(f, "indoor_bike"),
+            42 => write!(f, "indoor_row"),
+            43 => write!(f, "ladder"),
+            44 => write!(f, "sandbag"),
+            45 => write!(f, "sled"),
+            46 => write!(f, "sledge_hammer"),
+            47 => write!(f, "stair_stepper"),
+            49 => write!(f, "suspension"),
+            50 => write!(f, "tire"),
+            52 => write!(f, "run_indoor"),
+            53 => write!(f, "bike_outdoor"),
             65534 => write!(f, "unknown"),
             _ => write!(f, "unknown({})", self.0),
         }
@@ -7660,6 +7754,27 @@ impl CardioExerciseName {
     pub const WEIGHTED_SQUAT_JACKS: CardioExerciseName = CardioExerciseName(19);
     pub const TRIPLE_UNDER: CardioExerciseName = CardioExerciseName(20);
     pub const WEIGHTED_TRIPLE_UNDER: CardioExerciseName = CardioExerciseName(21);
+    pub const ELLIPTICAL: CardioExerciseName = CardioExerciseName(22);
+    pub const SPINNING: CardioExerciseName = CardioExerciseName(23);
+    pub const POLE_PADDLE_FORWARD_WHEELCHAIR: CardioExerciseName = CardioExerciseName(24);
+    pub const POLE_PADDLE_BACKWARD_WHEELCHAIR: CardioExerciseName = CardioExerciseName(25);
+    pub const POLE_HANDCYCLE_FORWARD_WHEELCHAIR: CardioExerciseName = CardioExerciseName(26);
+    pub const POLE_HANDCYCLE_BACKWARD_WHEELCHAIR: CardioExerciseName = CardioExerciseName(27);
+    pub const POLE_RAINBOW_WHEELCHAIR: CardioExerciseName = CardioExerciseName(28);
+    pub const DOUBLE_PUNCH_FORWARD_WHEELCHAIR: CardioExerciseName = CardioExerciseName(29);
+    pub const DOUBLE_PUNCH_DOWN_WHEELCHAIR: CardioExerciseName = CardioExerciseName(30);
+    pub const DOUBLE_PUNCH_SIDEWAYS_WHEELCHAIR: CardioExerciseName = CardioExerciseName(31);
+    pub const DOUBLE_PUNCH_UP_WHEELCHAIR: CardioExerciseName = CardioExerciseName(32);
+    pub const SIT_SKI_WHEELCHAIR: CardioExerciseName = CardioExerciseName(33);
+    pub const SITTING_JACKS_WHEELCHAIR: CardioExerciseName = CardioExerciseName(34);
+    pub const PUNCH_FORWARD_WHEELCHAIR: CardioExerciseName = CardioExerciseName(35);
+    pub const PUNCH_DOWN_WHEELCHAIR: CardioExerciseName = CardioExerciseName(36);
+    pub const PUNCH_SIDEWAYS_WHEELCHAIR: CardioExerciseName = CardioExerciseName(37);
+    pub const PUNCH_UP_WHEELCHAIR: CardioExerciseName = CardioExerciseName(38);
+    pub const PUNCH_BAG_WHEELCHAIR: CardioExerciseName = CardioExerciseName(39);
+    pub const POLE_DD_FF_UU_WHEELCHAIR: CardioExerciseName = CardioExerciseName(40);
+    pub const BUTTERFLY_ARMS_WHEELCHAIR: CardioExerciseName = CardioExerciseName(41);
+    pub const PUNCH: CardioExerciseName = CardioExerciseName(42);
 }
 
 impl Default for CardioExerciseName {
@@ -7693,6 +7808,27 @@ impl fmt::Display for CardioExerciseName {
             19 => write!(f, "weighted_squat_jacks"),
             20 => write!(f, "triple_under"),
             21 => write!(f, "weighted_triple_under"),
+            22 => write!(f, "elliptical"),
+            23 => write!(f, "spinning"),
+            24 => write!(f, "pole_paddle_forward_wheelchair"),
+            25 => write!(f, "pole_paddle_backward_wheelchair"),
+            26 => write!(f, "pole_handcycle_forward_wheelchair"),
+            27 => write!(f, "pole_handcycle_backward_wheelchair"),
+            28 => write!(f, "pole_rainbow_wheelchair"),
+            29 => write!(f, "double_punch_forward_wheelchair"),
+            30 => write!(f, "double_punch_down_wheelchair"),
+            31 => write!(f, "double_punch_sideways_wheelchair"),
+            32 => write!(f, "double_punch_up_wheelchair"),
+            33 => write!(f, "sit_ski_wheelchair"),
+            34 => write!(f, "sitting_jacks_wheelchair"),
+            35 => write!(f, "punch_forward_wheelchair"),
+            36 => write!(f, "punch_down_wheelchair"),
+            37 => write!(f, "punch_sideways_wheelchair"),
+            38 => write!(f, "punch_up_wheelchair"),
+            39 => write!(f, "punch_bag_wheelchair"),
+            40 => write!(f, "pole_dd_ff_uu_wheelchair"),
+            41 => write!(f, "butterfly_arms_wheelchair"),
+            42 => write!(f, "punch"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -7707,6 +7843,10 @@ impl CarryExerciseName {
     pub const FARMERS_WALK_ON_TOES: CarryExerciseName = CarryExerciseName(2);
     pub const HEX_DUMBBELL_HOLD: CarryExerciseName = CarryExerciseName(3);
     pub const OVERHEAD_CARRY: CarryExerciseName = CarryExerciseName(4);
+    pub const DUMBBELL_WAITER_CARRY: CarryExerciseName = CarryExerciseName(5);
+    pub const FARMERS_CARRY_WALK_LUNGE: CarryExerciseName = CarryExerciseName(6);
+    pub const FARMERS_CARRY: CarryExerciseName = CarryExerciseName(7);
+    pub const FARMERS_CARRY_ON_TOES: CarryExerciseName = CarryExerciseName(8);
 }
 
 impl Default for CarryExerciseName {
@@ -7723,6 +7863,10 @@ impl fmt::Display for CarryExerciseName {
             2 => write!(f, "farmers_walk_on_toes"),
             3 => write!(f, "hex_dumbbell_hold"),
             4 => write!(f, "overhead_carry"),
+            5 => write!(f, "dumbbell_waiter_carry"),
+            6 => write!(f, "farmers_carry_walk_lunge"),
+            7 => write!(f, "farmers_carry"),
+            8 => write!(f, "farmers_carry_on_toes"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -7874,6 +8018,27 @@ impl CoreExerciseName {
     pub const SWIMMING: CoreExerciseName = CoreExerciseName(70);
     pub const TEASER: CoreExerciseName = CoreExerciseName(71);
     pub const THE_HUNDRED: CoreExerciseName = CoreExerciseName(72);
+    pub const BICEP_CURL_WITH_LEG_EXTENSION_WITH_WEIGHTS: CoreExerciseName = CoreExerciseName(73);
+    pub const HANGING_L_SIT: CoreExerciseName = CoreExerciseName(75);
+    pub const LOWER_LIFT_WITH_WEIGHTS: CoreExerciseName = CoreExerciseName(77);
+    pub const RING_L_SIT: CoreExerciseName = CoreExerciseName(79);
+    pub const ROWING_1_WITH_WEIGHTS: CoreExerciseName = CoreExerciseName(80);
+    pub const ROWING_2_WITH_WEIGHTS: CoreExerciseName = CoreExerciseName(81);
+    pub const SCISSORS_WITH_WEIGHTS: CoreExerciseName = CoreExerciseName(82);
+    pub const SINGLE_LEG_STRETCH_WITH_WEIGHTS: CoreExerciseName = CoreExerciseName(83);
+    pub const TOES_TO_ELBOWS: CoreExerciseName = CoreExerciseName(84);
+    pub const WEIGHTED_CRISS_CROSS: CoreExerciseName = CoreExerciseName(85);
+    pub const WEIGHTED_DOUBLE_LEG_STRETCH: CoreExerciseName = CoreExerciseName(86);
+    pub const WEIGHTED_THE_HUNDRED: CoreExerciseName = CoreExerciseName(87);
+    pub const L_SIT: CoreExerciseName = CoreExerciseName(88);
+    pub const TURKISH_GET_UP: CoreExerciseName = CoreExerciseName(89);
+    pub const WEIGHTED_RING_L_SIT: CoreExerciseName = CoreExerciseName(90);
+    pub const WEIGHTED_HANGING_L_SIT: CoreExerciseName = CoreExerciseName(91);
+    pub const WEIGHTED_L_SIT: CoreExerciseName = CoreExerciseName(92);
+    pub const SIDE_BEND_LOW_WHEELCHAIR: CoreExerciseName = CoreExerciseName(93);
+    pub const SIDE_BEND_MID_WHEELCHAIR: CoreExerciseName = CoreExerciseName(94);
+    pub const SIDE_BEND_HIGH_WHEELCHAIR: CoreExerciseName = CoreExerciseName(95);
+    pub const SEATED_SIDE_BEND: CoreExerciseName = CoreExerciseName(96);
 }
 
 impl Default for CoreExerciseName {
@@ -7958,6 +8123,27 @@ impl fmt::Display for CoreExerciseName {
             70 => write!(f, "swimming"),
             71 => write!(f, "teaser"),
             72 => write!(f, "the_hundred"),
+            73 => write!(f, "bicep_curl_with_leg_extension_with_weights"),
+            75 => write!(f, "hanging_l_sit"),
+            77 => write!(f, "lower_lift_with_weights"),
+            79 => write!(f, "ring_l_sit"),
+            80 => write!(f, "rowing_1_with_weights"),
+            81 => write!(f, "rowing_2_with_weights"),
+            82 => write!(f, "scissors_with_weights"),
+            83 => write!(f, "single_leg_stretch_with_weights"),
+            84 => write!(f, "toes_to_elbows"),
+            85 => write!(f, "weighted_criss_cross"),
+            86 => write!(f, "weighted_double_leg_stretch"),
+            87 => write!(f, "weighted_the_hundred"),
+            88 => write!(f, "l_sit"),
+            89 => write!(f, "turkish_get_up"),
+            90 => write!(f, "weighted_ring_l_sit"),
+            91 => write!(f, "weighted_hanging_l_sit"),
+            92 => write!(f, "weighted_l_sit"),
+            93 => write!(f, "side_bend_low_wheelchair"),
+            94 => write!(f, "side_bend_mid_wheelchair"),
+            95 => write!(f, "side_bend_high_wheelchair"),
+            96 => write!(f, "seated_side_bend"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8058,6 +8244,7 @@ impl CrunchExerciseName {
     pub const WEIGHTED_TOES_TO_BAR: CrunchExerciseName = CrunchExerciseName(82);
     pub const CRUNCH: CrunchExerciseName = CrunchExerciseName(83);
     pub const STRAIGHT_LEG_CRUNCH_WITH_BALL: CrunchExerciseName = CrunchExerciseName(84);
+    pub const LEG_CLIMB_CRUNCH: CrunchExerciseName = CrunchExerciseName(86);
 }
 
 impl Default for CrunchExerciseName {
@@ -8154,6 +8341,7 @@ impl fmt::Display for CrunchExerciseName {
             82 => write!(f, "weighted_toes_to_bar"),
             83 => write!(f, "crunch"),
             84 => write!(f, "straight_leg_crunch_with_ball"),
+            86 => write!(f, "leg_climb_crunch"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8209,6 +8397,13 @@ impl CurlExerciseName {
     pub const SWISS_BALL_EZ_BAR_PREACHER_CURL: CurlExerciseName = CurlExerciseName(41);
     pub const TWISTING_STANDING_DUMBBELL_BICEPS_CURL: CurlExerciseName = CurlExerciseName(42);
     pub const WIDE_GRIP_EZ_BAR_BICEPS_CURL: CurlExerciseName = CurlExerciseName(43);
+    pub const ONE_ARM_CONCENTRATION_CURL: CurlExerciseName = CurlExerciseName(44);
+    pub const STANDING_ZOTTMAN_BICEPS_CURL: CurlExerciseName = CurlExerciseName(45);
+    pub const DUMBBELL_BICEPS_CURL: CurlExerciseName = CurlExerciseName(46);
+    pub const DRAG_CURL_WHEELCHAIR: CurlExerciseName = CurlExerciseName(47);
+    pub const DUMBBELL_BICEPS_CURL_WHEELCHAIR: CurlExerciseName = CurlExerciseName(48);
+    pub const BOTTLE_CURL: CurlExerciseName = CurlExerciseName(49);
+    pub const SEATED_BOTTLE_CURL: CurlExerciseName = CurlExerciseName(50);
 }
 
 impl Default for CurlExerciseName {
@@ -8264,6 +8459,13 @@ impl fmt::Display for CurlExerciseName {
             41 => write!(f, "swiss_ball_ez_bar_preacher_curl"),
             42 => write!(f, "twisting_standing_dumbbell_biceps_curl"),
             43 => write!(f, "wide_grip_ez_bar_biceps_curl"),
+            44 => write!(f, "one_arm_concentration_curl"),
+            45 => write!(f, "standing_zottman_biceps_curl"),
+            46 => write!(f, "dumbbell_biceps_curl"),
+            47 => write!(f, "drag_curl_wheelchair"),
+            48 => write!(f, "dumbbell_biceps_curl_wheelchair"),
+            49 => write!(f, "bottle_curl"),
+            50 => write!(f, "seated_bottle_curl"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8295,6 +8497,11 @@ impl DeadliftExerciseName {
     pub const SUMO_DEADLIFT_HIGH_PULL: DeadliftExerciseName = DeadliftExerciseName(16);
     pub const TRAP_BAR_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(17);
     pub const WIDE_GRIP_BARBELL_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(18);
+    pub const KETTLEBELL_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(20);
+    pub const KETTLEBELL_SUMO_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(21);
+    pub const ROMANIAN_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(23);
+    pub const SINGLE_LEG_ROMANIAN_DEADLIFT_CIRCUIT: DeadliftExerciseName = DeadliftExerciseName(24);
+    pub const STRAIGHT_LEG_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(25);
 }
 
 impl Default for DeadliftExerciseName {
@@ -8325,6 +8532,11 @@ impl fmt::Display for DeadliftExerciseName {
             16 => write!(f, "sumo_deadlift_high_pull"),
             17 => write!(f, "trap_bar_deadlift"),
             18 => write!(f, "wide_grip_barbell_deadlift"),
+            20 => write!(f, "kettlebell_deadlift"),
+            21 => write!(f, "kettlebell_sumo_deadlift"),
+            23 => write!(f, "romanian_deadlift"),
+            24 => write!(f, "single_leg_romanian_deadlift_circuit"),
+            25 => write!(f, "straight_leg_deadlift"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8344,6 +8556,9 @@ impl FlyeExerciseName {
     pub const SWISS_BALL_DUMBBELL_FLYE: FlyeExerciseName = FlyeExerciseName(7);
     pub const ARM_ROTATIONS: FlyeExerciseName = FlyeExerciseName(8);
     pub const HUG_A_TREE: FlyeExerciseName = FlyeExerciseName(9);
+    pub const FACE_DOWN_INCLINE_REVERSE_FLYE: FlyeExerciseName = FlyeExerciseName(10);
+    pub const INCLINE_REVERSE_FLYE: FlyeExerciseName = FlyeExerciseName(11);
+    pub const REAR_DELT_FLY_WHEELCHAIR: FlyeExerciseName = FlyeExerciseName(12);
 }
 
 impl Default for FlyeExerciseName {
@@ -8365,6 +8580,9 @@ impl fmt::Display for FlyeExerciseName {
             7 => write!(f, "swiss_ball_dumbbell_flye"),
             8 => write!(f, "arm_rotations"),
             9 => write!(f, "hug_a_tree"),
+            10 => write!(f, "face_down_incline_reverse_flye"),
+            11 => write!(f, "incline_reverse_flye"),
+            12 => write!(f, "rear_delt_fly_wheelchair"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8560,6 +8778,7 @@ impl HipStabilityExerciseName {
     pub const SUPINE_HIP_INTERNAL_ROTATION: HipStabilityExerciseName = HipStabilityExerciseName(32);
     pub const WEIGHTED_SUPINE_HIP_INTERNAL_ROTATION: HipStabilityExerciseName =
         HipStabilityExerciseName(33);
+    pub const LYING_ABDUCTION_STRETCH: HipStabilityExerciseName = HipStabilityExerciseName(34);
 }
 
 impl Default for HipStabilityExerciseName {
@@ -8605,6 +8824,7 @@ impl fmt::Display for HipStabilityExerciseName {
             31 => write!(f, "weighted_standing_rear_leg_raise"),
             32 => write!(f, "supine_hip_internal_rotation"),
             33 => write!(f, "weighted_supine_hip_internal_rotation"),
+            34 => write!(f, "lying_abduction_stretch"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8617,6 +8837,7 @@ impl HipSwingExerciseName {
     pub const SINGLE_ARM_KETTLEBELL_SWING: HipSwingExerciseName = HipSwingExerciseName(0);
     pub const SINGLE_ARM_DUMBBELL_SWING: HipSwingExerciseName = HipSwingExerciseName(1);
     pub const STEP_OUT_SWING: HipSwingExerciseName = HipSwingExerciseName(2);
+    pub const ONE_ARM_SWING: HipSwingExerciseName = HipSwingExerciseName(3);
 }
 
 impl Default for HipSwingExerciseName {
@@ -8631,6 +8852,7 @@ impl fmt::Display for HipSwingExerciseName {
             0 => write!(f, "single_arm_kettlebell_swing"),
             1 => write!(f, "single_arm_dumbbell_swing"),
             2 => write!(f, "step_out_swing"),
+            3 => write!(f, "one_arm_swing"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8799,6 +9021,17 @@ impl LateralRaiseExerciseName {
     pub const WEIGHTED_WALL_SLIDE: LateralRaiseExerciseName = LateralRaiseExerciseName(31);
     pub const ARM_CIRCLES: LateralRaiseExerciseName = LateralRaiseExerciseName(32);
     pub const SHAVING_THE_HEAD: LateralRaiseExerciseName = LateralRaiseExerciseName(33);
+    pub const DUMBBELL_LATERAL_RAISE: LateralRaiseExerciseName = LateralRaiseExerciseName(34);
+    pub const RING_DIP_KIPPING: LateralRaiseExerciseName = LateralRaiseExerciseName(36);
+    pub const WALL_WALK: LateralRaiseExerciseName = LateralRaiseExerciseName(37);
+    pub const DUMBBELL_FRONT_RAISE_WHEELCHAIR: LateralRaiseExerciseName =
+        LateralRaiseExerciseName(38);
+    pub const DUMBBELL_LATERAL_RAISE_WHEELCHAIR: LateralRaiseExerciseName =
+        LateralRaiseExerciseName(39);
+    pub const POLE_DOUBLE_ARM_OVERHEAD_AND_FORWARD_WHEELCHAIR: LateralRaiseExerciseName =
+        LateralRaiseExerciseName(40);
+    pub const POLE_STRAIGHT_ARM_OVERHEAD_WHEELCHAIR: LateralRaiseExerciseName =
+        LateralRaiseExerciseName(41);
 }
 
 impl Default for LateralRaiseExerciseName {
@@ -8844,6 +9077,13 @@ impl fmt::Display for LateralRaiseExerciseName {
             31 => write!(f, "weighted_wall_slide"),
             32 => write!(f, "arm_circles"),
             33 => write!(f, "shaving_the_head"),
+            34 => write!(f, "dumbbell_lateral_raise"),
+            36 => write!(f, "ring_dip_kipping"),
+            37 => write!(f, "wall_walk"),
+            38 => write!(f, "dumbbell_front_raise_wheelchair"),
+            39 => write!(f, "dumbbell_lateral_raise_wheelchair"),
+            40 => write!(f, "pole_double_arm_overhead_and_forward_wheelchair"),
+            41 => write!(f, "pole_straight_arm_overhead_wheelchair"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -8865,6 +9105,8 @@ impl LegCurlExerciseName {
     pub const STAGGERED_STANCE_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(9);
     pub const SWISS_BALL_HIP_RAISE_AND_LEG_CURL: LegCurlExerciseName = LegCurlExerciseName(10);
     pub const ZERCHER_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(11);
+    pub const BAND_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(12);
+    pub const BAR_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(13);
 }
 
 impl Default for LegCurlExerciseName {
@@ -8888,6 +9130,8 @@ impl fmt::Display for LegCurlExerciseName {
             9 => write!(f, "staggered_stance_good_morning"),
             10 => write!(f, "swiss_ball_hip_raise_and_leg_curl"),
             11 => write!(f, "zercher_good_morning"),
+            12 => write!(f, "band_good_morning"),
+            13 => write!(f, "bar_good_morning"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9046,6 +9290,16 @@ impl LungeExerciseName {
     pub const WALKING_LUNGE: LungeExerciseName = LungeExerciseName(78);
     pub const WEIGHTED_WALKING_LUNGE: LungeExerciseName = LungeExerciseName(79);
     pub const WIDE_GRIP_OVERHEAD_BARBELL_SPLIT_SQUAT: LungeExerciseName = LungeExerciseName(80);
+    pub const ALTERNATING_DUMBBELL_LUNGE: LungeExerciseName = LungeExerciseName(81);
+    pub const DUMBBELL_REVERSE_LUNGE: LungeExerciseName = LungeExerciseName(82);
+    pub const OVERHEAD_DUMBBELL_LUNGE: LungeExerciseName = LungeExerciseName(83);
+    pub const SCISSOR_POWER_SWITCH: LungeExerciseName = LungeExerciseName(84);
+    pub const DUMBBELL_OVERHEAD_WALKING_LUNGE: LungeExerciseName = LungeExerciseName(85);
+    pub const CURTSY_LUNGE: LungeExerciseName = LungeExerciseName(86);
+    pub const WEIGHTED_CURTSY_LUNGE: LungeExerciseName = LungeExerciseName(87);
+    pub const WEIGHTED_SHIFTING_SIDE_LUNGE: LungeExerciseName = LungeExerciseName(88);
+    pub const WEIGHTED_SIDE_LUNGE_AND_PRESS: LungeExerciseName = LungeExerciseName(89);
+    pub const WEIGHTED_SIDE_LUNGE_JUMP_OFF: LungeExerciseName = LungeExerciseName(90);
 }
 
 impl Default for LungeExerciseName {
@@ -9138,6 +9392,16 @@ impl fmt::Display for LungeExerciseName {
             78 => write!(f, "walking_lunge"),
             79 => write!(f, "weighted_walking_lunge"),
             80 => write!(f, "wide_grip_overhead_barbell_split_squat"),
+            81 => write!(f, "alternating_dumbbell_lunge"),
+            82 => write!(f, "dumbbell_reverse_lunge"),
+            83 => write!(f, "overhead_dumbbell_lunge"),
+            84 => write!(f, "scissor_power_switch"),
+            85 => write!(f, "dumbbell_overhead_walking_lunge"),
+            86 => write!(f, "curtsy_lunge"),
+            87 => write!(f, "weighted_curtsy_lunge"),
+            88 => write!(f, "weighted_shifting_side_lunge"),
+            89 => write!(f, "weighted_side_lunge_and_press"),
+            90 => write!(f, "weighted_side_lunge_jump_off"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9168,6 +9432,16 @@ impl OlympicLiftExerciseName {
     pub const SINGLE_ARM_KETTLEBELL_SNATCH: OlympicLiftExerciseName = OlympicLiftExerciseName(18);
     pub const SPLIT_JERK: OlympicLiftExerciseName = OlympicLiftExerciseName(19);
     pub const SQUAT_CLEAN_AND_JERK: OlympicLiftExerciseName = OlympicLiftExerciseName(20);
+    pub const DUMBBELL_HANG_SNATCH: OlympicLiftExerciseName = OlympicLiftExerciseName(21);
+    pub const DUMBBELL_POWER_CLEAN_AND_JERK: OlympicLiftExerciseName = OlympicLiftExerciseName(22);
+    pub const DUMBBELL_POWER_CLEAN_AND_PUSH_PRESS: OlympicLiftExerciseName =
+        OlympicLiftExerciseName(23);
+    pub const DUMBBELL_POWER_CLEAN_AND_STRICT_PRESS: OlympicLiftExerciseName =
+        OlympicLiftExerciseName(24);
+    pub const DUMBBELL_SNATCH: OlympicLiftExerciseName = OlympicLiftExerciseName(25);
+    pub const MEDICINE_BALL_CLEAN: OlympicLiftExerciseName = OlympicLiftExerciseName(26);
+    pub const CLEAN_AND_PRESS: OlympicLiftExerciseName = OlympicLiftExerciseName(27);
+    pub const SNATCH: OlympicLiftExerciseName = OlympicLiftExerciseName(28);
 }
 
 impl Default for OlympicLiftExerciseName {
@@ -9200,6 +9474,14 @@ impl fmt::Display for OlympicLiftExerciseName {
             18 => write!(f, "single_arm_kettlebell_snatch"),
             19 => write!(f, "split_jerk"),
             20 => write!(f, "squat_clean_and_jerk"),
+            21 => write!(f, "dumbbell_hang_snatch"),
+            22 => write!(f, "dumbbell_power_clean_and_jerk"),
+            23 => write!(f, "dumbbell_power_clean_and_push_press"),
+            24 => write!(f, "dumbbell_power_clean_and_strict_press"),
+            25 => write!(f, "dumbbell_snatch"),
+            26 => write!(f, "medicine_ball_clean"),
+            27 => write!(f, "clean_and_press"),
+            28 => write!(f, "snatch"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9357,6 +9639,7 @@ impl PlankExerciseName {
     pub const PLANK_WITH_ARM_VARIATIONS: PlankExerciseName = PlankExerciseName(132);
     pub const PLANK_WITH_LEG_LIFT: PlankExerciseName = PlankExerciseName(133);
     pub const REVERSE_PLANK_WITH_LEG_PULL: PlankExerciseName = PlankExerciseName(134);
+    pub const RING_PLANK_SPRAWLS: PlankExerciseName = PlankExerciseName(135);
 }
 
 impl Default for PlankExerciseName {
@@ -9506,6 +9789,7 @@ impl fmt::Display for PlankExerciseName {
             132 => write!(f, "plank_with_arm_variations"),
             133 => write!(f, "plank_with_leg_lift"),
             134 => write!(f, "reverse_plank_with_leg_pull"),
+            135 => write!(f, "ring_plank_sprawls"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9548,6 +9832,11 @@ impl PlyoExerciseName {
     pub const WEIGHTED_SQUAT_JUMP_ONTO_BOX: PlyoExerciseName = PlyoExerciseName(30);
     pub const SQUAT_JUMPS_IN_AND_OUT: PlyoExerciseName = PlyoExerciseName(31);
     pub const WEIGHTED_SQUAT_JUMPS_IN_AND_OUT: PlyoExerciseName = PlyoExerciseName(32);
+    pub const BOX_JUMP: PlyoExerciseName = PlyoExerciseName(33);
+    pub const BOX_JUMP_OVERS: PlyoExerciseName = PlyoExerciseName(34);
+    pub const BOX_JUMP_OVERS_OVER_THE_BOX: PlyoExerciseName = PlyoExerciseName(35);
+    pub const STAR_JUMP_SQUATS: PlyoExerciseName = PlyoExerciseName(36);
+    pub const JUMP_SQUAT: PlyoExerciseName = PlyoExerciseName(37);
 }
 
 impl Default for PlyoExerciseName {
@@ -9592,6 +9881,11 @@ impl fmt::Display for PlyoExerciseName {
             30 => write!(f, "weighted_squat_jump_onto_box"),
             31 => write!(f, "squat_jumps_in_and_out"),
             32 => write!(f, "weighted_squat_jumps_in_and_out"),
+            33 => write!(f, "box_jump"),
+            34 => write!(f, "box_jump_overs"),
+            35 => write!(f, "box_jump_overs_over_the_box"),
+            36 => write!(f, "star_jump_squats"),
+            37 => write!(f, "jump_squat"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9640,6 +9934,13 @@ impl PullUpExerciseName {
     pub const SUSPENDED_CHIN_UP: PullUpExerciseName = PullUpExerciseName(36);
     pub const WEIGHTED_SUSPENDED_CHIN_UP: PullUpExerciseName = PullUpExerciseName(37);
     pub const PULL_UP: PullUpExerciseName = PullUpExerciseName(38);
+    pub const CHIN_UP: PullUpExerciseName = PullUpExerciseName(39);
+    pub const NEUTRAL_GRIP_CHIN_UP: PullUpExerciseName = PullUpExerciseName(40);
+    pub const WEIGHTED_CHIN_UP: PullUpExerciseName = PullUpExerciseName(41);
+    pub const BAND_ASSISTED_PULL_UP: PullUpExerciseName = PullUpExerciseName(42);
+    pub const NEUTRAL_GRIP_PULL_UP: PullUpExerciseName = PullUpExerciseName(43);
+    pub const WEIGHTED_NEUTRAL_GRIP_CHIN_UP: PullUpExerciseName = PullUpExerciseName(44);
+    pub const WEIGHTED_NEUTRAL_GRIP_PULL_UP: PullUpExerciseName = PullUpExerciseName(45);
 }
 
 impl Default for PullUpExerciseName {
@@ -9690,6 +9991,13 @@ impl fmt::Display for PullUpExerciseName {
             36 => write!(f, "suspended_chin_up"),
             37 => write!(f, "weighted_suspended_chin_up"),
             38 => write!(f, "pull_up"),
+            39 => write!(f, "chin_up"),
+            40 => write!(f, "neutral_grip_chin_up"),
+            41 => write!(f, "weighted_chin_up"),
+            42 => write!(f, "band_assisted_pull_up"),
+            43 => write!(f, "neutral_grip_pull_up"),
+            44 => write!(f, "weighted_neutral_grip_chin_up"),
+            45 => write!(f, "weighted_neutral_grip_pull_up"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9783,6 +10091,18 @@ impl PushUpExerciseName {
     pub const WEIGHTED_RING_PUSH_UP: PushUpExerciseName = PushUpExerciseName(76);
     pub const PUSH_UP: PushUpExerciseName = PushUpExerciseName(77);
     pub const PILATES_PUSHUP: PushUpExerciseName = PushUpExerciseName(78);
+    pub const DYNAMIC_PUSH_UP: PushUpExerciseName = PushUpExerciseName(79);
+    pub const KIPPING_HANDSTAND_PUSH_UP: PushUpExerciseName = PushUpExerciseName(80);
+    pub const SHOULDER_TAPPING_PUSH_UP: PushUpExerciseName = PushUpExerciseName(81);
+    pub const BICEPS_PUSH_UP: PushUpExerciseName = PushUpExerciseName(82);
+    pub const HINDU_PUSH_UP: PushUpExerciseName = PushUpExerciseName(83);
+    pub const PIKE_PUSH_UP: PushUpExerciseName = PushUpExerciseName(84);
+    pub const WIDE_GRIP_PUSH_UP: PushUpExerciseName = PushUpExerciseName(85);
+    pub const WEIGHTED_BICEPS_PUSH_UP: PushUpExerciseName = PushUpExerciseName(86);
+    pub const WEIGHTED_HINDU_PUSH_UP: PushUpExerciseName = PushUpExerciseName(87);
+    pub const WEIGHTED_PIKE_PUSH_UP: PushUpExerciseName = PushUpExerciseName(88);
+    pub const KIPPING_PARALLETTE_HANDSTAND_PUSH_UP: PushUpExerciseName = PushUpExerciseName(89);
+    pub const WALL_PUSH_UP: PushUpExerciseName = PushUpExerciseName(90);
 }
 
 impl Default for PushUpExerciseName {
@@ -9873,6 +10193,18 @@ impl fmt::Display for PushUpExerciseName {
             76 => write!(f, "weighted_ring_push_up"),
             77 => write!(f, "push_up"),
             78 => write!(f, "pilates_pushup"),
+            79 => write!(f, "dynamic_push_up"),
+            80 => write!(f, "kipping_handstand_push_up"),
+            81 => write!(f, "shoulder_tapping_push_up"),
+            82 => write!(f, "biceps_push_up"),
+            83 => write!(f, "hindu_push_up"),
+            84 => write!(f, "pike_push_up"),
+            85 => write!(f, "wide_grip_push_up"),
+            86 => write!(f, "weighted_biceps_push_up"),
+            87 => write!(f, "weighted_hindu_push_up"),
+            88 => write!(f, "weighted_pike_push_up"),
+            89 => write!(f, "kipping_parallette_handstand_push_up"),
+            90 => write!(f, "wall_push_up"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -9917,6 +10249,25 @@ impl RowExerciseName {
     pub const UNDERHAND_GRIP_CABLE_ROW: RowExerciseName = RowExerciseName(31);
     pub const V_GRIP_CABLE_ROW: RowExerciseName = RowExerciseName(32);
     pub const WIDE_GRIP_SEATED_CABLE_ROW: RowExerciseName = RowExerciseName(33);
+    pub const ALTERNATING_DUMBBELL_ROW: RowExerciseName = RowExerciseName(34);
+    pub const INVERTED_ROW: RowExerciseName = RowExerciseName(35);
+    pub const ROW: RowExerciseName = RowExerciseName(36);
+    pub const WEIGHTED_ROW: RowExerciseName = RowExerciseName(37);
+    pub const INDOOR_ROW: RowExerciseName = RowExerciseName(38);
+    pub const BANDED_FACE_PULLS: RowExerciseName = RowExerciseName(39);
+    pub const CHEST_SUPPORTED_DUMBBELL_ROW: RowExerciseName = RowExerciseName(40);
+    pub const DECLINE_RING_ROW: RowExerciseName = RowExerciseName(41);
+    pub const ELEVATED_RING_ROW: RowExerciseName = RowExerciseName(42);
+    pub const RDL_BENT_OVER_ROW_WITH_BARBELL_DUMBBELL: RowExerciseName = RowExerciseName(43);
+    pub const RING_ROW: RowExerciseName = RowExerciseName(44);
+    pub const BARBELL_ROW: RowExerciseName = RowExerciseName(45);
+    pub const BENT_OVER_ROW_WITH_BARBELL: RowExerciseName = RowExerciseName(46);
+    pub const BENT_OVER_ROW_WITH_DUMBELL: RowExerciseName = RowExerciseName(47);
+    pub const SEATED_UNDERHAND_GRIP_CABLE_ROW: RowExerciseName = RowExerciseName(48);
+    pub const TRX_INVERTED_ROW: RowExerciseName = RowExerciseName(49);
+    pub const WEIGHTED_INVERTED_ROW: RowExerciseName = RowExerciseName(50);
+    pub const WEIGHTED_TRX_INVERTED_ROW: RowExerciseName = RowExerciseName(51);
+    pub const DUMBBELL_ROW_WHEELCHAIR: RowExerciseName = RowExerciseName(52);
 }
 
 impl Default for RowExerciseName {
@@ -9962,6 +10313,25 @@ impl fmt::Display for RowExerciseName {
             31 => write!(f, "underhand_grip_cable_row"),
             32 => write!(f, "v_grip_cable_row"),
             33 => write!(f, "wide_grip_seated_cable_row"),
+            34 => write!(f, "alternating_dumbbell_row"),
+            35 => write!(f, "inverted_row"),
+            36 => write!(f, "row"),
+            37 => write!(f, "weighted_row"),
+            38 => write!(f, "indoor_row"),
+            39 => write!(f, "banded_face_pulls"),
+            40 => write!(f, "chest_supported_dumbbell_row"),
+            41 => write!(f, "decline_ring_row"),
+            42 => write!(f, "elevated_ring_row"),
+            43 => write!(f, "rdl_bent_over_row_with_barbell_dumbbell"),
+            44 => write!(f, "ring_row"),
+            45 => write!(f, "barbell_row"),
+            46 => write!(f, "bent_over_row_with_barbell"),
+            47 => write!(f, "bent_over_row_with_dumbell"),
+            48 => write!(f, "seated_underhand_grip_cable_row"),
+            49 => write!(f, "trx_inverted_row"),
+            50 => write!(f, "weighted_inverted_row"),
+            51 => write!(f, "weighted_trx_inverted_row"),
+            52 => write!(f, "dumbbell_row_wheelchair"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10009,6 +10379,15 @@ impl ShoulderPressExerciseName {
     pub const SWISS_BALL_DUMBBELL_SHOULDER_PRESS: ShoulderPressExerciseName =
         ShoulderPressExerciseName(22);
     pub const WEIGHT_PLATE_FRONT_RAISE: ShoulderPressExerciseName = ShoulderPressExerciseName(23);
+    pub const DUMBBELL_SHOULDER_PRESS: ShoulderPressExerciseName = ShoulderPressExerciseName(24);
+    pub const MILITARY_PRESS: ShoulderPressExerciseName = ShoulderPressExerciseName(25);
+    pub const STRICT_PRESS: ShoulderPressExerciseName = ShoulderPressExerciseName(27);
+    pub const DUMBBELL_FRONT_RAISE: ShoulderPressExerciseName = ShoulderPressExerciseName(28);
+    pub const DUMBBELL_CURL_TO_OVERHEAD_PRESS_WHEELCHAIR: ShoulderPressExerciseName =
+        ShoulderPressExerciseName(29);
+    pub const ARNOLD_PRESS_WHEELCHAIR: ShoulderPressExerciseName = ShoulderPressExerciseName(30);
+    pub const OVERHEAD_DUMBBELL_PRESS_WHEELCHAIR: ShoulderPressExerciseName =
+        ShoulderPressExerciseName(31);
 }
 
 impl Default for ShoulderPressExerciseName {
@@ -10044,6 +10423,13 @@ impl fmt::Display for ShoulderPressExerciseName {
             21 => write!(f, "split_stance_hammer_curl_to_press"),
             22 => write!(f, "swiss_ball_dumbbell_shoulder_press"),
             23 => write!(f, "weight_plate_front_raise"),
+            24 => write!(f, "dumbbell_shoulder_press"),
+            25 => write!(f, "military_press"),
+            27 => write!(f, "strict_press"),
+            28 => write!(f, "dumbbell_front_raise"),
+            29 => write!(f, "dumbbell_curl_to_overhead_press_wheelchair"),
+            30 => write!(f, "arnold_press_wheelchair"),
+            31 => write!(f, "overhead_dumbbell_press_wheelchair"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10106,6 +10492,12 @@ impl ShoulderStabilityExerciseName {
     pub const SWISS_BALL_Y_RAISE: ShoulderStabilityExerciseName = ShoulderStabilityExerciseName(31);
     pub const WEIGHTED_SWISS_BALL_Y_RAISE: ShoulderStabilityExerciseName =
         ShoulderStabilityExerciseName(32);
+    pub const CABLE_INTERNAL_ROTATION: ShoulderStabilityExerciseName =
+        ShoulderStabilityExerciseName(33);
+    pub const LYING_INTERNAL_ROTATION: ShoulderStabilityExerciseName =
+        ShoulderStabilityExerciseName(34);
+    pub const SEATED_DUMBBELL_INTERNAL_ROTATION: ShoulderStabilityExerciseName =
+        ShoulderStabilityExerciseName(35);
 }
 
 impl Default for ShoulderStabilityExerciseName {
@@ -10150,6 +10542,9 @@ impl fmt::Display for ShoulderStabilityExerciseName {
             30 => write!(f, "weighted_swiss_ball_w_raise"),
             31 => write!(f, "swiss_ball_y_raise"),
             32 => write!(f, "weighted_swiss_ball_y_raise"),
+            33 => write!(f, "cable_internal_rotation"),
+            34 => write!(f, "lying_internal_rotation"),
+            35 => write!(f, "seated_dumbbell_internal_rotation"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10176,6 +10571,14 @@ impl ShrugExerciseName {
     pub const SERRATUS_SHRUG: ShrugExerciseName = ShrugExerciseName(14);
     pub const WEIGHTED_SERRATUS_SHRUG: ShrugExerciseName = ShrugExerciseName(15);
     pub const WIDE_GRIP_JUMP_SHRUG: ShrugExerciseName = ShrugExerciseName(16);
+    pub const WIDE_GRIP_BARBELL_SHRUG: ShrugExerciseName = ShrugExerciseName(17);
+    pub const BEHIND_THE_BACK_SHRUG: ShrugExerciseName = ShrugExerciseName(18);
+    pub const DUMBBELL_SHRUG_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(19);
+    pub const SHRUG_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(20);
+    pub const SHRUG_ARM_DOWN_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(21);
+    pub const SHRUG_ARM_MID_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(22);
+    pub const SHRUG_ARM_UP_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(23);
+    pub const UPRIGHT_ROW: ShrugExerciseName = ShrugExerciseName(24);
 }
 
 impl Default for ShrugExerciseName {
@@ -10204,6 +10607,14 @@ impl fmt::Display for ShrugExerciseName {
             14 => write!(f, "serratus_shrug"),
             15 => write!(f, "weighted_serratus_shrug"),
             16 => write!(f, "wide_grip_jump_shrug"),
+            17 => write!(f, "wide_grip_barbell_shrug"),
+            18 => write!(f, "behind_the_back_shrug"),
+            19 => write!(f, "dumbbell_shrug_wheelchair"),
+            20 => write!(f, "shrug_wheelchair"),
+            21 => write!(f, "shrug_arm_down_wheelchair"),
+            22 => write!(f, "shrug_arm_mid_wheelchair"),
+            23 => write!(f, "shrug_arm_up_wheelchair"),
+            24 => write!(f, "upright_row"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10251,6 +10662,9 @@ impl SitUpExerciseName {
     pub const X_ABS: SitUpExerciseName = SitUpExerciseName(35);
     pub const WEIGHTED_X_ABS: SitUpExerciseName = SitUpExerciseName(36);
     pub const SIT_UP: SitUpExerciseName = SitUpExerciseName(37);
+    pub const GHD_SIT_UPS: SitUpExerciseName = SitUpExerciseName(38);
+    pub const SIT_UP_TURKISH_GET_UP: SitUpExerciseName = SitUpExerciseName(39);
+    pub const RUSSIAN_TWIST_ON_SWISS_BALL: SitUpExerciseName = SitUpExerciseName(40);
 }
 
 impl Default for SitUpExerciseName {
@@ -10300,6 +10714,9 @@ impl fmt::Display for SitUpExerciseName {
             35 => write!(f, "x_abs"),
             36 => write!(f, "weighted_x_abs"),
             37 => write!(f, "sit_up"),
+            38 => write!(f, "ghd_sit_ups"),
+            39 => write!(f, "sit_up_turkish_get_up"),
+            40 => write!(f, "russian_twist_on_swiss_ball"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10404,6 +10821,15 @@ impl SquatExerciseName {
         SquatExerciseName(90);
     pub const RELEVE_STRAIGHT_LEG_AND_KNEE_BENT_WITH_ONE_LEG_VARIATION: SquatExerciseName =
         SquatExerciseName(91);
+    pub const ALTERNATING_BOX_DUMBBELL_STEP_UPS: SquatExerciseName = SquatExerciseName(92);
+    pub const DUMBBELL_OVERHEAD_SQUAT_SINGLE_ARM: SquatExerciseName = SquatExerciseName(93);
+    pub const DUMBBELL_SQUAT_SNATCH: SquatExerciseName = SquatExerciseName(94);
+    pub const MEDICINE_BALL_SQUAT: SquatExerciseName = SquatExerciseName(95);
+    pub const WALL_BALL_SQUAT_AND_PRESS: SquatExerciseName = SquatExerciseName(97);
+    pub const SQUAT_AMERICAN_SWING: SquatExerciseName = SquatExerciseName(98);
+    pub const AIR_SQUAT: SquatExerciseName = SquatExerciseName(100);
+    pub const DUMBBELL_THRUSTERS: SquatExerciseName = SquatExerciseName(101);
+    pub const OVERHEAD_BARBELL_SQUAT: SquatExerciseName = SquatExerciseName(102);
 }
 
 impl Default for SquatExerciseName {
@@ -10510,6 +10936,15 @@ impl fmt::Display for SquatExerciseName {
                 f,
                 "releve_straight_leg_and_knee_bent_with_one_leg_variation"
             ),
+            92 => write!(f, "alternating_box_dumbbell_step_ups"),
+            93 => write!(f, "dumbbell_overhead_squat_single_arm"),
+            94 => write!(f, "dumbbell_squat_snatch"),
+            95 => write!(f, "medicine_ball_squat"),
+            97 => write!(f, "wall_ball_squat_and_press"),
+            98 => write!(f, "squat_american_swing"),
+            100 => write!(f, "air_squat"),
+            101 => write!(f, "dumbbell_thrusters"),
+            102 => write!(f, "overhead_barbell_squat"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10533,6 +10968,14 @@ impl TotalBodyExerciseName {
     pub const STANDING_T_ROTATION_BALANCE: TotalBodyExerciseName = TotalBodyExerciseName(11);
     pub const WEIGHTED_STANDING_T_ROTATION_BALANCE: TotalBodyExerciseName =
         TotalBodyExerciseName(12);
+    pub const BARBELL_BURPEE: TotalBodyExerciseName = TotalBodyExerciseName(13);
+    pub const BURPEE_BOX_JUMP_OVER_YES_LITERALLY_JUMPING_OVER_THE_BOX: TotalBodyExerciseName =
+        TotalBodyExerciseName(15);
+    pub const BURPEE_BOX_JUMP_STEP_UP_OVER: TotalBodyExerciseName = TotalBodyExerciseName(16);
+    pub const LATERAL_BARBELL_BURPEE: TotalBodyExerciseName = TotalBodyExerciseName(17);
+    pub const TOTAL_BODY_BURPEE_OVER_BAR: TotalBodyExerciseName = TotalBodyExerciseName(18);
+    pub const BURPEE_BOX_JUMP_OVER: TotalBodyExerciseName = TotalBodyExerciseName(19);
+    pub const BURPEE_WHEELCHAIR: TotalBodyExerciseName = TotalBodyExerciseName(20);
 }
 
 impl Default for TotalBodyExerciseName {
@@ -10557,6 +11000,464 @@ impl fmt::Display for TotalBodyExerciseName {
             10 => write!(f, "weighted_squat_plank_push_up"),
             11 => write!(f, "standing_t_rotation_balance"),
             12 => write!(f, "weighted_standing_t_rotation_balance"),
+            13 => write!(f, "barbell_burpee"),
+            15 => write!(f, "burpee_box_jump_over_yes_literally_jumping_over_the_box"),
+            16 => write!(f, "burpee_box_jump_step_up_over"),
+            17 => write!(f, "lateral_barbell_burpee"),
+            18 => write!(f, "total_body_burpee_over_bar"),
+            19 => write!(f, "burpee_box_jump_over"),
+            20 => write!(f, "burpee_wheelchair"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct MoveExerciseName(pub u16);
+
+impl MoveExerciseName {
+    pub const ARCH_AND_CURL: MoveExerciseName = MoveExerciseName(0);
+    pub const ARM_CIRCLES_WITH_BALL_BAND_AND_WEIGHT: MoveExerciseName = MoveExerciseName(1);
+    pub const ARM_STRETCH: MoveExerciseName = MoveExerciseName(2);
+    pub const BACK_MASSAGE: MoveExerciseName = MoveExerciseName(3);
+    pub const BELLY_BREATHING: MoveExerciseName = MoveExerciseName(4);
+    pub const BRIDGE_WITH_BALL: MoveExerciseName = MoveExerciseName(5);
+    pub const DIAMOND_LEG_CRUNCH: MoveExerciseName = MoveExerciseName(6);
+    pub const DIAMOND_LEG_LIFT: MoveExerciseName = MoveExerciseName(7);
+    pub const EIGHT_POINT_SHOULDER_OPENER: MoveExerciseName = MoveExerciseName(8);
+    pub const FOOT_ROLLING: MoveExerciseName = MoveExerciseName(9);
+    pub const FOOTWORK: MoveExerciseName = MoveExerciseName(10);
+    pub const FOOTWORK_ON_DISC: MoveExerciseName = MoveExerciseName(11);
+    pub const FORWARD_FOLD: MoveExerciseName = MoveExerciseName(12);
+    pub const FROG_WITH_BAND: MoveExerciseName = MoveExerciseName(13);
+    pub const HALF_ROLL_UP: MoveExerciseName = MoveExerciseName(14);
+    pub const HAMSTRING_CURL: MoveExerciseName = MoveExerciseName(15);
+    pub const HAMSTRING_STRETCH: MoveExerciseName = MoveExerciseName(16);
+    pub const HIP_STRETCH: MoveExerciseName = MoveExerciseName(17);
+    pub const HUG_A_TREE_WITH_BALL_BAND_AND_WEIGHT: MoveExerciseName = MoveExerciseName(18);
+    pub const KNEE_CIRCLES: MoveExerciseName = MoveExerciseName(19);
+    pub const KNEE_FOLDS_ON_DISC: MoveExerciseName = MoveExerciseName(20);
+    pub const LATERAL_FLEXION: MoveExerciseName = MoveExerciseName(21);
+    pub const LEG_STRETCH_WITH_BAND: MoveExerciseName = MoveExerciseName(22);
+    pub const LEG_STRETCH_WITH_LEG_CIRCLES: MoveExerciseName = MoveExerciseName(23);
+    pub const LOWER_LIFT_ON_DISC: MoveExerciseName = MoveExerciseName(24);
+    pub const LUNGE_SQUAT: MoveExerciseName = MoveExerciseName(25);
+    pub const LUNGES_WITH_KNEE_LIFT: MoveExerciseName = MoveExerciseName(26);
+    pub const MERMAID_STRETCH: MoveExerciseName = MoveExerciseName(27);
+    pub const NEUTRAL_PELVIC_POSITION: MoveExerciseName = MoveExerciseName(28);
+    pub const PELVIC_CLOCKS_ON_DISC: MoveExerciseName = MoveExerciseName(29);
+    pub const PILATES_PLIE_SQUATS_PARALLEL_TURNED_OUT_FLAT_AND_HEELS_WITH_CHAIR: MoveExerciseName =
+        MoveExerciseName(30);
+    pub const PIRIFORMIS_STRETCH: MoveExerciseName = MoveExerciseName(31);
+    pub const PLANK_KNEE_CROSSES: MoveExerciseName = MoveExerciseName(32);
+    pub const PLANK_KNEE_PULLS: MoveExerciseName = MoveExerciseName(33);
+    pub const PLANK_UP_DOWNS: MoveExerciseName = MoveExerciseName(34);
+    pub const PRAYER_MUDRA: MoveExerciseName = MoveExerciseName(35);
+    pub const PSOAS_LUNGE_STRETCH: MoveExerciseName = MoveExerciseName(36);
+    pub const RIBCAGE_BREATHING: MoveExerciseName = MoveExerciseName(37);
+    pub const ROLL_DOWN: MoveExerciseName = MoveExerciseName(38);
+    pub const ROLL_UP_WITH_WEIGHT_AND_BAND: MoveExerciseName = MoveExerciseName(39);
+    pub const SAW: MoveExerciseName = MoveExerciseName(40);
+    pub const SCAPULAR_STABILIZATION: MoveExerciseName = MoveExerciseName(41);
+    pub const SCISSORS_ON_DISC: MoveExerciseName = MoveExerciseName(42);
+    pub const SEATED_HIP_STRETCHUP: MoveExerciseName = MoveExerciseName(43);
+    pub const SEATED_TWIST: MoveExerciseName = MoveExerciseName(44);
+    pub const SHAVING_THE_HEAD_WITH_BALL_BAND_AND_WEIGHT: MoveExerciseName = MoveExerciseName(45);
+    pub const SPINAL_TWIST: MoveExerciseName = MoveExerciseName(46);
+    pub const SPINAL_TWIST_STRETCH: MoveExerciseName = MoveExerciseName(47);
+    pub const SPINE_STRETCH_FORWARD: MoveExerciseName = MoveExerciseName(48);
+    pub const SQUAT_OPEN_ARM_TWIST_POSE: MoveExerciseName = MoveExerciseName(49);
+    pub const SQUATS_WITH_BALL: MoveExerciseName = MoveExerciseName(50);
+    pub const STAND_AND_HANG: MoveExerciseName = MoveExerciseName(51);
+    pub const STANDING_SIDE_STRETCH: MoveExerciseName = MoveExerciseName(52);
+    pub const STANDING_SINGLE_LEG_FORWARD_BEND_WITH_IT_BAND_OPENER: MoveExerciseName =
+        MoveExerciseName(53);
+    pub const STRAIGHT_LEG_CRUNCH_WITH_LEG_LIFT: MoveExerciseName = MoveExerciseName(54);
+    pub const STRAIGHT_LEG_CRUNCH_WITH_LEG_LIFT_WITH_BALL: MoveExerciseName = MoveExerciseName(55);
+    pub const STRAIGHT_LEG_CRUNCH_WITH_LEGS_CROSSED: MoveExerciseName = MoveExerciseName(56);
+    pub const STRAIGHT_LEG_CRUNCH_WITH_LEGS_CROSSED_WITH_BALL: MoveExerciseName =
+        MoveExerciseName(57);
+    pub const STRAIGHT_LEG_DIAGONAL_CRUNCH: MoveExerciseName = MoveExerciseName(58);
+    pub const STRAIGHT_LEG_DIAGONAL_CRUNCH_WITH_BALL: MoveExerciseName = MoveExerciseName(59);
+    pub const TAILBONE_CURL: MoveExerciseName = MoveExerciseName(60);
+    pub const THROAT_LOCK: MoveExerciseName = MoveExerciseName(61);
+    pub const TICK_TOCK_SIDE_ROLL: MoveExerciseName = MoveExerciseName(62);
+    pub const TWIST: MoveExerciseName = MoveExerciseName(63);
+    pub const V_LEG_CRUNCHES: MoveExerciseName = MoveExerciseName(64);
+    pub const V_SIT: MoveExerciseName = MoveExerciseName(65);
+    pub const FORWARD_FOLD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(66);
+    pub const FORWARD_FOLD_PLUS_WHEELCHAIR: MoveExerciseName = MoveExerciseName(67);
+    pub const ARM_CIRCLES_LOW_FORWARD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(68);
+    pub const ARM_CIRCLES_MID_FORWARD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(69);
+    pub const ARM_CIRCLES_HIGH_FORWARD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(70);
+    pub const ARM_CIRCLES_LOW_BACKWARD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(71);
+    pub const ARM_CIRCLES_MID_BACKWARD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(72);
+    pub const ARM_CIRCLES_HIGH_BACKWARD_WHEELCHAIR: MoveExerciseName = MoveExerciseName(73);
+    pub const CORE_TWISTS_WHEELCHAIR: MoveExerciseName = MoveExerciseName(74);
+    pub const ARM_RAISE_WHEELCHAIR: MoveExerciseName = MoveExerciseName(75);
+    pub const CHEST_EXPAND_WHEELCHAIR: MoveExerciseName = MoveExerciseName(76);
+    pub const ARM_EXTEND_WHEELCHAIR: MoveExerciseName = MoveExerciseName(77);
+    pub const FORWARD_BEND_WHEELCHAIR: MoveExerciseName = MoveExerciseName(78);
+    pub const TOE_TOUCH_WHEELCHAIR: MoveExerciseName = MoveExerciseName(79);
+    pub const EXTENDED_TOE_TOUCH_WHEELCHAIR: MoveExerciseName = MoveExerciseName(80);
+    pub const SEATED_ARM_CIRCLES: MoveExerciseName = MoveExerciseName(81);
+    pub const TRUNK_ROTATIONS: MoveExerciseName = MoveExerciseName(82);
+    pub const SEATED_TRUNK_ROTATIONS: MoveExerciseName = MoveExerciseName(83);
+    pub const TOE_TOUCH: MoveExerciseName = MoveExerciseName(84);
+}
+
+impl Default for MoveExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for MoveExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "arch_and_curl"),
+            1 => write!(f, "arm_circles_with_ball_band_and_weight"),
+            2 => write!(f, "arm_stretch"),
+            3 => write!(f, "back_massage"),
+            4 => write!(f, "belly_breathing"),
+            5 => write!(f, "bridge_with_ball"),
+            6 => write!(f, "diamond_leg_crunch"),
+            7 => write!(f, "diamond_leg_lift"),
+            8 => write!(f, "eight_point_shoulder_opener"),
+            9 => write!(f, "foot_rolling"),
+            10 => write!(f, "footwork"),
+            11 => write!(f, "footwork_on_disc"),
+            12 => write!(f, "forward_fold"),
+            13 => write!(f, "frog_with_band"),
+            14 => write!(f, "half_roll_up"),
+            15 => write!(f, "hamstring_curl"),
+            16 => write!(f, "hamstring_stretch"),
+            17 => write!(f, "hip_stretch"),
+            18 => write!(f, "hug_a_tree_with_ball_band_and_weight"),
+            19 => write!(f, "knee_circles"),
+            20 => write!(f, "knee_folds_on_disc"),
+            21 => write!(f, "lateral_flexion"),
+            22 => write!(f, "leg_stretch_with_band"),
+            23 => write!(f, "leg_stretch_with_leg_circles"),
+            24 => write!(f, "lower_lift_on_disc"),
+            25 => write!(f, "lunge_squat"),
+            26 => write!(f, "lunges_with_knee_lift"),
+            27 => write!(f, "mermaid_stretch"),
+            28 => write!(f, "neutral_pelvic_position"),
+            29 => write!(f, "pelvic_clocks_on_disc"),
+            30 => write!(
+                f,
+                "pilates_plie_squats_parallel_turned_out_flat_and_heels_with_chair"
+            ),
+            31 => write!(f, "piriformis_stretch"),
+            32 => write!(f, "plank_knee_crosses"),
+            33 => write!(f, "plank_knee_pulls"),
+            34 => write!(f, "plank_up_downs"),
+            35 => write!(f, "prayer_mudra"),
+            36 => write!(f, "psoas_lunge_stretch"),
+            37 => write!(f, "ribcage_breathing"),
+            38 => write!(f, "roll_down"),
+            39 => write!(f, "roll_up_with_weight_and_band"),
+            40 => write!(f, "saw"),
+            41 => write!(f, "scapular_stabilization"),
+            42 => write!(f, "scissors_on_disc"),
+            43 => write!(f, "seated_hip_stretchup"),
+            44 => write!(f, "seated_twist"),
+            45 => write!(f, "shaving_the_head_with_ball_band_and_weight"),
+            46 => write!(f, "spinal_twist"),
+            47 => write!(f, "spinal_twist_stretch"),
+            48 => write!(f, "spine_stretch_forward"),
+            49 => write!(f, "squat_open_arm_twist_pose"),
+            50 => write!(f, "squats_with_ball"),
+            51 => write!(f, "stand_and_hang"),
+            52 => write!(f, "standing_side_stretch"),
+            53 => write!(f, "standing_single_leg_forward_bend_with_it_band_opener"),
+            54 => write!(f, "straight_leg_crunch_with_leg_lift"),
+            55 => write!(f, "straight_leg_crunch_with_leg_lift_with_ball"),
+            56 => write!(f, "straight_leg_crunch_with_legs_crossed"),
+            57 => write!(f, "straight_leg_crunch_with_legs_crossed_with_ball"),
+            58 => write!(f, "straight_leg_diagonal_crunch"),
+            59 => write!(f, "straight_leg_diagonal_crunch_with_ball"),
+            60 => write!(f, "tailbone_curl"),
+            61 => write!(f, "throat_lock"),
+            62 => write!(f, "tick_tock_side_roll"),
+            63 => write!(f, "twist"),
+            64 => write!(f, "v_leg_crunches"),
+            65 => write!(f, "v_sit"),
+            66 => write!(f, "forward_fold_wheelchair"),
+            67 => write!(f, "forward_fold_plus_wheelchair"),
+            68 => write!(f, "arm_circles_low_forward_wheelchair"),
+            69 => write!(f, "arm_circles_mid_forward_wheelchair"),
+            70 => write!(f, "arm_circles_high_forward_wheelchair"),
+            71 => write!(f, "arm_circles_low_backward_wheelchair"),
+            72 => write!(f, "arm_circles_mid_backward_wheelchair"),
+            73 => write!(f, "arm_circles_high_backward_wheelchair"),
+            74 => write!(f, "core_twists_wheelchair"),
+            75 => write!(f, "arm_raise_wheelchair"),
+            76 => write!(f, "chest_expand_wheelchair"),
+            77 => write!(f, "arm_extend_wheelchair"),
+            78 => write!(f, "forward_bend_wheelchair"),
+            79 => write!(f, "toe_touch_wheelchair"),
+            80 => write!(f, "extended_toe_touch_wheelchair"),
+            81 => write!(f, "seated_arm_circles"),
+            82 => write!(f, "trunk_rotations"),
+            83 => write!(f, "seated_trunk_rotations"),
+            84 => write!(f, "toe_touch"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct PoseExerciseName(pub u16);
+
+impl PoseExerciseName {
+    pub const ALL_FOURS: PoseExerciseName = PoseExerciseName(0);
+    pub const ANKLE_TO_KNEE: PoseExerciseName = PoseExerciseName(1);
+    pub const BABY_COBRA: PoseExerciseName = PoseExerciseName(2);
+    pub const BOAT: PoseExerciseName = PoseExerciseName(3);
+    pub const BOUND_ANGLE: PoseExerciseName = PoseExerciseName(4);
+    pub const BOUND_SEATED_SINGLE_LEG_FORWARD_BEND: PoseExerciseName = PoseExerciseName(5);
+    pub const BOW: PoseExerciseName = PoseExerciseName(6);
+    pub const BOWED_HALF_MOON: PoseExerciseName = PoseExerciseName(7);
+    pub const BRIDGE: PoseExerciseName = PoseExerciseName(8);
+    pub const CAT: PoseExerciseName = PoseExerciseName(9);
+    pub const CHAIR: PoseExerciseName = PoseExerciseName(10);
+    pub const CHILDS: PoseExerciseName = PoseExerciseName(11);
+    pub const CORPSE: PoseExerciseName = PoseExerciseName(12);
+    pub const COW_FACE: PoseExerciseName = PoseExerciseName(13);
+    pub const COW: PoseExerciseName = PoseExerciseName(14);
+    pub const DEVOTIONAL_WARRIOR: PoseExerciseName = PoseExerciseName(15);
+    pub const DOLPHIN_PLANK: PoseExerciseName = PoseExerciseName(16);
+    pub const DOLPHIN: PoseExerciseName = PoseExerciseName(17);
+    pub const DOWN_DOG_KNEE_TO_NOSE: PoseExerciseName = PoseExerciseName(18);
+    pub const DOWN_DOG_SPLIT: PoseExerciseName = PoseExerciseName(19);
+    pub const DOWN_DOG_SPLIT_OPEN_HIP_BENT_KNEE: PoseExerciseName = PoseExerciseName(20);
+    pub const DOWNWARD_FACING_DOG: PoseExerciseName = PoseExerciseName(21);
+    pub const EAGLE: PoseExerciseName = PoseExerciseName(22);
+    pub const EASY_SEATED: PoseExerciseName = PoseExerciseName(23);
+    pub const EXTENDED_PUPPY: PoseExerciseName = PoseExerciseName(24);
+    pub const EXTENDED_SIDE_ANGLE: PoseExerciseName = PoseExerciseName(25);
+    pub const FISH: PoseExerciseName = PoseExerciseName(26);
+    pub const FOUR_LIMBED_STAFF: PoseExerciseName = PoseExerciseName(27);
+    pub const FULL_SPLIT: PoseExerciseName = PoseExerciseName(28);
+    pub const GATE: PoseExerciseName = PoseExerciseName(29);
+    pub const HALF_CHAIR_HALF_ANKLE_TO_KNEE: PoseExerciseName = PoseExerciseName(30);
+    pub const HALF_MOON: PoseExerciseName = PoseExerciseName(31);
+    pub const HEAD_TO_KNEE: PoseExerciseName = PoseExerciseName(32);
+    pub const HERON: PoseExerciseName = PoseExerciseName(33);
+    pub const HEROS: PoseExerciseName = PoseExerciseName(34);
+    pub const HIGH_LUNGE: PoseExerciseName = PoseExerciseName(35);
+    pub const KNEES_CHEST_CHIN: PoseExerciseName = PoseExerciseName(36);
+    pub const LIZARD: PoseExerciseName = PoseExerciseName(37);
+    pub const LOCUST: PoseExerciseName = PoseExerciseName(38);
+    pub const LOW_LUNGE: PoseExerciseName = PoseExerciseName(39);
+    pub const LOW_LUNGE_TWIST: PoseExerciseName = PoseExerciseName(40);
+    pub const LOW_LUNGE_WITH_KNEE_DOWN: PoseExerciseName = PoseExerciseName(41);
+    pub const MERMAID: PoseExerciseName = PoseExerciseName(42);
+    pub const MOUNTAIN: PoseExerciseName = PoseExerciseName(43);
+    pub const ONE_LEGGED_DOWNWARD_FACING_POSE_OPEN_HIP_BENT_KNEE: PoseExerciseName =
+        PoseExerciseName(44);
+    pub const ONE_LEGGED_PIGEON: PoseExerciseName = PoseExerciseName(45);
+    pub const PEACEFUL_WARRIOR: PoseExerciseName = PoseExerciseName(46);
+    pub const PLANK: PoseExerciseName = PoseExerciseName(47);
+    pub const PLOW: PoseExerciseName = PoseExerciseName(48);
+    pub const RECLINED_HAND_TO_FOOT: PoseExerciseName = PoseExerciseName(49);
+    pub const REVOLVED_HALF_MOON: PoseExerciseName = PoseExerciseName(50);
+    pub const REVOLVED_HEAD_TO_KNEE: PoseExerciseName = PoseExerciseName(51);
+    pub const REVOLVED_TRIANGLE: PoseExerciseName = PoseExerciseName(52);
+    pub const RUNNERS_LUNGE: PoseExerciseName = PoseExerciseName(53);
+    pub const SEATED_EASY_SIDE_BEND: PoseExerciseName = PoseExerciseName(54);
+    pub const SEATED_EASY_TWIST: PoseExerciseName = PoseExerciseName(55);
+    pub const SEATED_LONG_LEG_FORWARD_BEND: PoseExerciseName = PoseExerciseName(56);
+    pub const SEATED_WIDE_LEG_FORWARD_BEND: PoseExerciseName = PoseExerciseName(57);
+    pub const SHOULDER_STAND: PoseExerciseName = PoseExerciseName(58);
+    pub const SIDE_BOAT: PoseExerciseName = PoseExerciseName(59);
+    pub const SIDE_PLANK: PoseExerciseName = PoseExerciseName(60);
+    pub const SPHINX: PoseExerciseName = PoseExerciseName(61);
+    pub const SQUAT_OPEN_ARM_TWIST: PoseExerciseName = PoseExerciseName(62);
+    pub const SQUAT_PALM_PRESS: PoseExerciseName = PoseExerciseName(63);
+    pub const STAFF: PoseExerciseName = PoseExerciseName(64);
+    pub const STANDING_ARMS_UP: PoseExerciseName = PoseExerciseName(65);
+    pub const STANDING_FORWARD_BEND_HALFWAY_UP: PoseExerciseName = PoseExerciseName(66);
+    pub const STANDING_FORWARD_BEND: PoseExerciseName = PoseExerciseName(67);
+    pub const STANDING_SIDE_OPENER: PoseExerciseName = PoseExerciseName(68);
+    pub const STANDING_SINGLE_LEG_FORWARD_BEND: PoseExerciseName = PoseExerciseName(69);
+    pub const STANDING_SPLIT: PoseExerciseName = PoseExerciseName(70);
+    pub const STANDING_WIDE_LEG_FORWARD_BEND: PoseExerciseName = PoseExerciseName(71);
+    pub const STANDING_WIDE_LEG_FORWARD_BEND_WITH_TWIST: PoseExerciseName = PoseExerciseName(72);
+    pub const SUPINE_SPINAL_TWIST: PoseExerciseName = PoseExerciseName(73);
+    pub const TABLE_TOP: PoseExerciseName = PoseExerciseName(74);
+    pub const THREAD_THE_NEEDLE: PoseExerciseName = PoseExerciseName(75);
+    pub const THUNDERBOLT: PoseExerciseName = PoseExerciseName(76);
+    pub const THUNDERBOLT_POSE_BOTH_SIDES_ARM_STRETCH: PoseExerciseName = PoseExerciseName(77);
+    pub const TREE: PoseExerciseName = PoseExerciseName(78);
+    pub const TRIANGLE: PoseExerciseName = PoseExerciseName(79);
+    pub const UP_DOG: PoseExerciseName = PoseExerciseName(80);
+    pub const UPWARD_FACING_PLANK: PoseExerciseName = PoseExerciseName(81);
+    pub const WARRIOR_ONE: PoseExerciseName = PoseExerciseName(82);
+    pub const WARRIOR_THREE: PoseExerciseName = PoseExerciseName(83);
+    pub const WARRIOR_TWO: PoseExerciseName = PoseExerciseName(84);
+    pub const WHEEL: PoseExerciseName = PoseExerciseName(85);
+    pub const WIDE_SIDE_LUNGE: PoseExerciseName = PoseExerciseName(86);
+    pub const DEEP_BREATHING_WHEELCHAIR: PoseExerciseName = PoseExerciseName(87);
+    pub const DEEP_BREATHING_LOW_WHEELCHAIR: PoseExerciseName = PoseExerciseName(88);
+    pub const DEEP_BREATHING_MID_WHEELCHAIR: PoseExerciseName = PoseExerciseName(89);
+    pub const DEEP_BREATHING_HIGH_WHEELCHAIR: PoseExerciseName = PoseExerciseName(90);
+    pub const PRAYER_WHEELCHAIR: PoseExerciseName = PoseExerciseName(91);
+    pub const OVERHEAD_PRAYER_WHEELCHAIR: PoseExerciseName = PoseExerciseName(92);
+    pub const CACTUS_WHEELCHAIR: PoseExerciseName = PoseExerciseName(93);
+    pub const BREATHING_PUNCHES_WHEELCHAIR: PoseExerciseName = PoseExerciseName(94);
+    pub const BREATHING_PUNCHES_EXTENDED_WHEELCHAIR: PoseExerciseName = PoseExerciseName(95);
+    pub const BREATHING_PUNCHES_OVERHEAD_WHEELCHAIR: PoseExerciseName = PoseExerciseName(96);
+    pub const BREATHING_PUNCHES_OVERHEAD_AND_DOWN_WHEELCHAIR: PoseExerciseName =
+        PoseExerciseName(97);
+    pub const BREATHING_PUNCHES_SIDE_WHEELCHAIR: PoseExerciseName = PoseExerciseName(98);
+    pub const BREATHING_PUNCHES_EXTENDED_SIDE_WHEELCHAIR: PoseExerciseName = PoseExerciseName(99);
+    pub const BREATHING_PUNCHES_OVERHEAD_SIDE_WHEELCHAIR: PoseExerciseName = PoseExerciseName(100);
+    pub const BREATHING_PUNCHES_OVERHEAD_AND_DOWN_SIDE_WHEELCHAIR: PoseExerciseName =
+        PoseExerciseName(101);
+    pub const LEFT_HAND_BACK_WHEELCHAIR: PoseExerciseName = PoseExerciseName(102);
+    pub const TRIANGLE_WHEELCHAIR: PoseExerciseName = PoseExerciseName(103);
+    pub const THREAD_THE_NEEDLE_WHEELCHAIR: PoseExerciseName = PoseExerciseName(104);
+    pub const NECK_FLEXION_AND_EXTENSION_WHEELCHAIR: PoseExerciseName = PoseExerciseName(105);
+    pub const NECK_LATERAL_FLEXION_WHEELCHAIR: PoseExerciseName = PoseExerciseName(106);
+    pub const SPINE_FLEXION_AND_EXTENSION_WHEELCHAIR: PoseExerciseName = PoseExerciseName(107);
+    pub const SPINE_ROTATION_WHEELCHAIR: PoseExerciseName = PoseExerciseName(108);
+    pub const SPINE_LATERAL_FLEXION_WHEELCHAIR: PoseExerciseName = PoseExerciseName(109);
+    pub const ALTERNATIVE_SKIING_WHEELCHAIR: PoseExerciseName = PoseExerciseName(110);
+    pub const REACH_FORWARD_WHEELCHAIR: PoseExerciseName = PoseExerciseName(111);
+    pub const WARRIOR_WHEELCHAIR: PoseExerciseName = PoseExerciseName(112);
+    pub const REVERSE_WARRIOR_WHEELCHAIR: PoseExerciseName = PoseExerciseName(113);
+    pub const DOWNWARD_FACING_DOG_TO_COBRA: PoseExerciseName = PoseExerciseName(114);
+    pub const SEATED_CAT_COW: PoseExerciseName = PoseExerciseName(115);
+}
+
+impl Default for PoseExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for PoseExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "all_fours"),
+            1 => write!(f, "ankle_to_knee"),
+            2 => write!(f, "baby_cobra"),
+            3 => write!(f, "boat"),
+            4 => write!(f, "bound_angle"),
+            5 => write!(f, "bound_seated_single_leg_forward_bend"),
+            6 => write!(f, "bow"),
+            7 => write!(f, "bowed_half_moon"),
+            8 => write!(f, "bridge"),
+            9 => write!(f, "cat"),
+            10 => write!(f, "chair"),
+            11 => write!(f, "childs"),
+            12 => write!(f, "corpse"),
+            13 => write!(f, "cow_face"),
+            14 => write!(f, "cow"),
+            15 => write!(f, "devotional_warrior"),
+            16 => write!(f, "dolphin_plank"),
+            17 => write!(f, "dolphin"),
+            18 => write!(f, "down_dog_knee_to_nose"),
+            19 => write!(f, "down_dog_split"),
+            20 => write!(f, "down_dog_split_open_hip_bent_knee"),
+            21 => write!(f, "downward_facing_dog"),
+            22 => write!(f, "eagle"),
+            23 => write!(f, "easy_seated"),
+            24 => write!(f, "extended_puppy"),
+            25 => write!(f, "extended_side_angle"),
+            26 => write!(f, "fish"),
+            27 => write!(f, "four_limbed_staff"),
+            28 => write!(f, "full_split"),
+            29 => write!(f, "gate"),
+            30 => write!(f, "half_chair_half_ankle_to_knee"),
+            31 => write!(f, "half_moon"),
+            32 => write!(f, "head_to_knee"),
+            33 => write!(f, "heron"),
+            34 => write!(f, "heros"),
+            35 => write!(f, "high_lunge"),
+            36 => write!(f, "knees_chest_chin"),
+            37 => write!(f, "lizard"),
+            38 => write!(f, "locust"),
+            39 => write!(f, "low_lunge"),
+            40 => write!(f, "low_lunge_twist"),
+            41 => write!(f, "low_lunge_with_knee_down"),
+            42 => write!(f, "mermaid"),
+            43 => write!(f, "mountain"),
+            44 => write!(f, "one_legged_downward_facing_pose_open_hip_bent_knee"),
+            45 => write!(f, "one_legged_pigeon"),
+            46 => write!(f, "peaceful_warrior"),
+            47 => write!(f, "plank"),
+            48 => write!(f, "plow"),
+            49 => write!(f, "reclined_hand_to_foot"),
+            50 => write!(f, "revolved_half_moon"),
+            51 => write!(f, "revolved_head_to_knee"),
+            52 => write!(f, "revolved_triangle"),
+            53 => write!(f, "runners_lunge"),
+            54 => write!(f, "seated_easy_side_bend"),
+            55 => write!(f, "seated_easy_twist"),
+            56 => write!(f, "seated_long_leg_forward_bend"),
+            57 => write!(f, "seated_wide_leg_forward_bend"),
+            58 => write!(f, "shoulder_stand"),
+            59 => write!(f, "side_boat"),
+            60 => write!(f, "side_plank"),
+            61 => write!(f, "sphinx"),
+            62 => write!(f, "squat_open_arm_twist"),
+            63 => write!(f, "squat_palm_press"),
+            64 => write!(f, "staff"),
+            65 => write!(f, "standing_arms_up"),
+            66 => write!(f, "standing_forward_bend_halfway_up"),
+            67 => write!(f, "standing_forward_bend"),
+            68 => write!(f, "standing_side_opener"),
+            69 => write!(f, "standing_single_leg_forward_bend"),
+            70 => write!(f, "standing_split"),
+            71 => write!(f, "standing_wide_leg_forward_bend"),
+            72 => write!(f, "standing_wide_leg_forward_bend_with_twist"),
+            73 => write!(f, "supine_spinal_twist"),
+            74 => write!(f, "table_top"),
+            75 => write!(f, "thread_the_needle"),
+            76 => write!(f, "thunderbolt"),
+            77 => write!(f, "thunderbolt_pose_both_sides_arm_stretch"),
+            78 => write!(f, "tree"),
+            79 => write!(f, "triangle"),
+            80 => write!(f, "up_dog"),
+            81 => write!(f, "upward_facing_plank"),
+            82 => write!(f, "warrior_one"),
+            83 => write!(f, "warrior_three"),
+            84 => write!(f, "warrior_two"),
+            85 => write!(f, "wheel"),
+            86 => write!(f, "wide_side_lunge"),
+            87 => write!(f, "deep_breathing_wheelchair"),
+            88 => write!(f, "deep_breathing_low_wheelchair"),
+            89 => write!(f, "deep_breathing_mid_wheelchair"),
+            90 => write!(f, "deep_breathing_high_wheelchair"),
+            91 => write!(f, "prayer_wheelchair"),
+            92 => write!(f, "overhead_prayer_wheelchair"),
+            93 => write!(f, "cactus_wheelchair"),
+            94 => write!(f, "breathing_punches_wheelchair"),
+            95 => write!(f, "breathing_punches_extended_wheelchair"),
+            96 => write!(f, "breathing_punches_overhead_wheelchair"),
+            97 => write!(f, "breathing_punches_overhead_and_down_wheelchair"),
+            98 => write!(f, "breathing_punches_side_wheelchair"),
+            99 => write!(f, "breathing_punches_extended_side_wheelchair"),
+            100 => write!(f, "breathing_punches_overhead_side_wheelchair"),
+            101 => write!(f, "breathing_punches_overhead_and_down_side_wheelchair"),
+            102 => write!(f, "left_hand_back_wheelchair"),
+            103 => write!(f, "triangle_wheelchair"),
+            104 => write!(f, "thread_the_needle_wheelchair"),
+            105 => write!(f, "neck_flexion_and_extension_wheelchair"),
+            106 => write!(f, "neck_lateral_flexion_wheelchair"),
+            107 => write!(f, "spine_flexion_and_extension_wheelchair"),
+            108 => write!(f, "spine_rotation_wheelchair"),
+            109 => write!(f, "spine_lateral_flexion_wheelchair"),
+            110 => write!(f, "alternative_skiing_wheelchair"),
+            111 => write!(f, "reach_forward_wheelchair"),
+            112 => write!(f, "warrior_wheelchair"),
+            113 => write!(f, "reverse_warrior_wheelchair"),
+            114 => write!(f, "downward_facing_dog_to_cobra"),
+            115 => write!(f, "seated_cat_cow"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10635,6 +11536,13 @@ impl TricepsExtensionExerciseName {
         TricepsExtensionExerciseName(38);
     pub const TRICEPS_PRESSDOWN: TricepsExtensionExerciseName = TricepsExtensionExerciseName(39);
     pub const WEIGHTED_DIP: TricepsExtensionExerciseName = TricepsExtensionExerciseName(40);
+    pub const ALTERNATING_DUMBBELL_LYING_TRICEPS_EXTENSION: TricepsExtensionExerciseName =
+        TricepsExtensionExerciseName(41);
+    pub const TRICEPS_PRESS: TricepsExtensionExerciseName = TricepsExtensionExerciseName(42);
+    pub const DUMBBELL_KICKBACK_WHEELCHAIR: TricepsExtensionExerciseName =
+        TricepsExtensionExerciseName(43);
+    pub const OVERHEAD_DUMBBELL_TRICEPS_EXTENSION_WHEELCHAIR: TricepsExtensionExerciseName =
+        TricepsExtensionExerciseName(44);
 }
 
 impl Default for TricepsExtensionExerciseName {
@@ -10687,6 +11595,10 @@ impl fmt::Display for TricepsExtensionExerciseName {
             38 => write!(f, "triceps_extension_on_floor"),
             39 => write!(f, "triceps_pressdown"),
             40 => write!(f, "weighted_dip"),
+            41 => write!(f, "alternating_dumbbell_lying_triceps_extension"),
+            42 => write!(f, "triceps_press"),
+            43 => write!(f, "dumbbell_kickback_wheelchair"),
+            44 => write!(f, "overhead_dumbbell_triceps_extension_wheelchair"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10728,6 +11640,67 @@ impl WarmUpExerciseName {
     pub const WALKING_LEG_CRADLES: WarmUpExerciseName = WarmUpExerciseName(28);
     pub const WALKOUT: WarmUpExerciseName = WarmUpExerciseName(29);
     pub const WALKOUT_FROM_PUSH_UP_POSITION: WarmUpExerciseName = WarmUpExerciseName(30);
+    pub const BICEPS_STRETCH: WarmUpExerciseName = WarmUpExerciseName(31);
+    pub const GLUTES_STRETCH: WarmUpExerciseName = WarmUpExerciseName(32);
+    pub const STANDING_HAMSTRING_STRETCH: WarmUpExerciseName = WarmUpExerciseName(33);
+    pub const STRETCH_90_90: WarmUpExerciseName = WarmUpExerciseName(34);
+    pub const STRETCH_ABS: WarmUpExerciseName = WarmUpExerciseName(35);
+    pub const STRETCH_BUTTERFLY: WarmUpExerciseName = WarmUpExerciseName(36);
+    pub const STRETCH_CALF: WarmUpExerciseName = WarmUpExerciseName(37);
+    pub const STRETCH_CAT_COW: WarmUpExerciseName = WarmUpExerciseName(38);
+    pub const STRETCH_CHILDS_POSE: WarmUpExerciseName = WarmUpExerciseName(39);
+    pub const STRETCH_COBRA: WarmUpExerciseName = WarmUpExerciseName(40);
+    pub const STRETCH_FOREARMS: WarmUpExerciseName = WarmUpExerciseName(41);
+    pub const STRETCH_FORWARD_GLUTES: WarmUpExerciseName = WarmUpExerciseName(42);
+    pub const STRETCH_FRONT_SPLIT: WarmUpExerciseName = WarmUpExerciseName(43);
+    pub const STRETCH_HAMSTRING: WarmUpExerciseName = WarmUpExerciseName(44);
+    pub const STRETCH_HIP_FLEXOR_AND_QUAD: WarmUpExerciseName = WarmUpExerciseName(45);
+    pub const STRETCH_LAT: WarmUpExerciseName = WarmUpExerciseName(46);
+    pub const STRETCH_LEVATOR_SCAPULAE: WarmUpExerciseName = WarmUpExerciseName(47);
+    pub const STRETCH_LUNGE_WITH_SPINAL_TWIST: WarmUpExerciseName = WarmUpExerciseName(48);
+    pub const STRETCH_LUNGING_HIP_FLEXOR: WarmUpExerciseName = WarmUpExerciseName(49);
+    pub const STRETCH_LYING_ABDUCTION: WarmUpExerciseName = WarmUpExerciseName(50);
+    pub const STRETCH_LYING_IT_BAND: WarmUpExerciseName = WarmUpExerciseName(51);
+    pub const STRETCH_LYING_KNEE_TO_CHEST: WarmUpExerciseName = WarmUpExerciseName(52);
+    pub const STRETCH_LYING_PIRIFORMIS: WarmUpExerciseName = WarmUpExerciseName(53);
+    pub const STRETCH_LYING_SPINAL_TWIST: WarmUpExerciseName = WarmUpExerciseName(54);
+    pub const STRETCH_NECK: WarmUpExerciseName = WarmUpExerciseName(55);
+    pub const STRETCH_OBLIQUES: WarmUpExerciseName = WarmUpExerciseName(56);
+    pub const STRETCH_OVER_UNDER_SHOULDER: WarmUpExerciseName = WarmUpExerciseName(57);
+    pub const STRETCH_PECTORAL: WarmUpExerciseName = WarmUpExerciseName(58);
+    pub const STRETCH_PIGEON_POSE: WarmUpExerciseName = WarmUpExerciseName(59);
+    pub const STRETCH_PIRIFORMIS: WarmUpExerciseName = WarmUpExerciseName(60);
+    pub const STRETCH_QUAD: WarmUpExerciseName = WarmUpExerciseName(61);
+    pub const STRETCH_SCORPION: WarmUpExerciseName = WarmUpExerciseName(62);
+    pub const STRETCH_SHOULDER: WarmUpExerciseName = WarmUpExerciseName(63);
+    pub const STRETCH_SIDE: WarmUpExerciseName = WarmUpExerciseName(64);
+    pub const STRETCH_SIDE_LUNGE: WarmUpExerciseName = WarmUpExerciseName(65);
+    pub const STRETCH_SIDE_SPLIT: WarmUpExerciseName = WarmUpExerciseName(66);
+    pub const STRETCH_STANDING_IT_BAND: WarmUpExerciseName = WarmUpExerciseName(67);
+    pub const STRETCH_STRADDLE: WarmUpExerciseName = WarmUpExerciseName(68);
+    pub const STRETCH_TRICEPS: WarmUpExerciseName = WarmUpExerciseName(69);
+    pub const STRETCH_WALL_CHEST_AND_SHOULDER: WarmUpExerciseName = WarmUpExerciseName(70);
+    pub const NECK_ROTATIONS_WHEELCHAIR: WarmUpExerciseName = WarmUpExerciseName(71);
+    pub const HALF_KNEELING_ARM_ROTATION: WarmUpExerciseName = WarmUpExerciseName(72);
+    pub const THREE_WAY_ANKLE_MOBILIZATION: WarmUpExerciseName = WarmUpExerciseName(73);
+    /// 90_90_hip_switch
+    pub const NINETY_NINETY_HIP_SWITCH: WarmUpExerciseName = WarmUpExerciseName(74);
+    pub const ACTIVE_FROG: WarmUpExerciseName = WarmUpExerciseName(75);
+    pub const SHOULDER_SWEEPS: WarmUpExerciseName = WarmUpExerciseName(76);
+    pub const ANKLE_LUNGES: WarmUpExerciseName = WarmUpExerciseName(77);
+    pub const BACK_ROLL_FOAM_ROLLER: WarmUpExerciseName = WarmUpExerciseName(78);
+    pub const BEAR_CRAWL: WarmUpExerciseName = WarmUpExerciseName(79);
+    pub const LATISSIMUS_DORSI_FOAM_ROLL: WarmUpExerciseName = WarmUpExerciseName(80);
+    pub const REVERSE_T_HIP_OPENER: WarmUpExerciseName = WarmUpExerciseName(81);
+    pub const SHOULDER_ROLLS: WarmUpExerciseName = WarmUpExerciseName(82);
+    pub const CHEST_OPENERS: WarmUpExerciseName = WarmUpExerciseName(83);
+    pub const TRICEPS_STRETCH: WarmUpExerciseName = WarmUpExerciseName(84);
+    pub const UPPER_BACK_STRETCH: WarmUpExerciseName = WarmUpExerciseName(85);
+    pub const HIP_CIRCLES: WarmUpExerciseName = WarmUpExerciseName(86);
+    pub const ANKLE_STRETCH: WarmUpExerciseName = WarmUpExerciseName(87);
+    pub const MARCHING_IN_PLACE: WarmUpExerciseName = WarmUpExerciseName(88);
+    pub const TRICEPS_STRETCH_WHEELCHAIR: WarmUpExerciseName = WarmUpExerciseName(89);
+    pub const UPPER_BACK_STRETCH_WHEELCHAIR: WarmUpExerciseName = WarmUpExerciseName(90);
 }
 
 impl Default for WarmUpExerciseName {
@@ -10770,6 +11743,66 @@ impl fmt::Display for WarmUpExerciseName {
             28 => write!(f, "walking_leg_cradles"),
             29 => write!(f, "walkout"),
             30 => write!(f, "walkout_from_push_up_position"),
+            31 => write!(f, "biceps_stretch"),
+            32 => write!(f, "glutes_stretch"),
+            33 => write!(f, "standing_hamstring_stretch"),
+            34 => write!(f, "stretch_90_90"),
+            35 => write!(f, "stretch_abs"),
+            36 => write!(f, "stretch_butterfly"),
+            37 => write!(f, "stretch_calf"),
+            38 => write!(f, "stretch_cat_cow"),
+            39 => write!(f, "stretch_childs_pose"),
+            40 => write!(f, "stretch_cobra"),
+            41 => write!(f, "stretch_forearms"),
+            42 => write!(f, "stretch_forward_glutes"),
+            43 => write!(f, "stretch_front_split"),
+            44 => write!(f, "stretch_hamstring"),
+            45 => write!(f, "stretch_hip_flexor_and_quad"),
+            46 => write!(f, "stretch_lat"),
+            47 => write!(f, "stretch_levator_scapulae"),
+            48 => write!(f, "stretch_lunge_with_spinal_twist"),
+            49 => write!(f, "stretch_lunging_hip_flexor"),
+            50 => write!(f, "stretch_lying_abduction"),
+            51 => write!(f, "stretch_lying_it_band"),
+            52 => write!(f, "stretch_lying_knee_to_chest"),
+            53 => write!(f, "stretch_lying_piriformis"),
+            54 => write!(f, "stretch_lying_spinal_twist"),
+            55 => write!(f, "stretch_neck"),
+            56 => write!(f, "stretch_obliques"),
+            57 => write!(f, "stretch_over_under_shoulder"),
+            58 => write!(f, "stretch_pectoral"),
+            59 => write!(f, "stretch_pigeon_pose"),
+            60 => write!(f, "stretch_piriformis"),
+            61 => write!(f, "stretch_quad"),
+            62 => write!(f, "stretch_scorpion"),
+            63 => write!(f, "stretch_shoulder"),
+            64 => write!(f, "stretch_side"),
+            65 => write!(f, "stretch_side_lunge"),
+            66 => write!(f, "stretch_side_split"),
+            67 => write!(f, "stretch_standing_it_band"),
+            68 => write!(f, "stretch_straddle"),
+            69 => write!(f, "stretch_triceps"),
+            70 => write!(f, "stretch_wall_chest_and_shoulder"),
+            71 => write!(f, "neck_rotations_wheelchair"),
+            72 => write!(f, "half_kneeling_arm_rotation"),
+            73 => write!(f, "three_way_ankle_mobilization"),
+            74 => write!(f, "ninety_ninety_hip_switch"),
+            75 => write!(f, "active_frog"),
+            76 => write!(f, "shoulder_sweeps"),
+            77 => write!(f, "ankle_lunges"),
+            78 => write!(f, "back_roll_foam_roller"),
+            79 => write!(f, "bear_crawl"),
+            80 => write!(f, "latissimus_dorsi_foam_roll"),
+            81 => write!(f, "reverse_t_hip_opener"),
+            82 => write!(f, "shoulder_rolls"),
+            83 => write!(f, "chest_openers"),
+            84 => write!(f, "triceps_stretch"),
+            85 => write!(f, "upper_back_stretch"),
+            86 => write!(f, "hip_circles"),
+            87 => write!(f, "ankle_stretch"),
+            88 => write!(f, "marching_in_place"),
+            89 => write!(f, "triceps_stretch_wheelchair"),
+            90 => write!(f, "upper_back_stretch_wheelchair"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
@@ -10783,6 +11816,9 @@ impl RunExerciseName {
     pub const WALK: RunExerciseName = RunExerciseName(1);
     pub const JOG: RunExerciseName = RunExerciseName(2);
     pub const SPRINT: RunExerciseName = RunExerciseName(3);
+    pub const RUN_OR_WALK: RunExerciseName = RunExerciseName(4);
+    pub const SPEED_WALK: RunExerciseName = RunExerciseName(5);
+    pub const WARM_UP: RunExerciseName = RunExerciseName(6);
 }
 
 impl Default for RunExerciseName {
@@ -10798,6 +11834,677 @@ impl fmt::Display for RunExerciseName {
             1 => write!(f, "walk"),
             2 => write!(f, "jog"),
             3 => write!(f, "sprint"),
+            4 => write!(f, "run_or_walk"),
+            5 => write!(f, "speed_walk"),
+            6 => write!(f, "warm_up"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BikeExerciseName(pub u16);
+
+impl BikeExerciseName {
+    pub const BIKE: BikeExerciseName = BikeExerciseName(0);
+    pub const RIDE: BikeExerciseName = BikeExerciseName(1);
+    pub const SPRINT: BikeExerciseName = BikeExerciseName(2);
+}
+
+impl Default for BikeExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for BikeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "bike"),
+            1 => write!(f, "ride"),
+            2 => write!(f, "sprint"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BandedExercisesExerciseName(pub u16);
+
+impl BandedExercisesExerciseName {
+    pub const AB_TWIST: BandedExercisesExerciseName = BandedExercisesExerciseName(1);
+    pub const BACK_EXTENSION: BandedExercisesExerciseName = BandedExercisesExerciseName(2);
+    pub const BICYCLE_CRUNCH: BandedExercisesExerciseName = BandedExercisesExerciseName(3);
+    pub const CALF_RAISES: BandedExercisesExerciseName = BandedExercisesExerciseName(4);
+    pub const CHEST_PRESS: BandedExercisesExerciseName = BandedExercisesExerciseName(5);
+    pub const CLAM_SHELLS: BandedExercisesExerciseName = BandedExercisesExerciseName(6);
+    pub const CURL: BandedExercisesExerciseName = BandedExercisesExerciseName(7);
+    pub const DEADBUG: BandedExercisesExerciseName = BandedExercisesExerciseName(8);
+    pub const DEADLIFT: BandedExercisesExerciseName = BandedExercisesExerciseName(9);
+    pub const DONKEY_KICK: BandedExercisesExerciseName = BandedExercisesExerciseName(10);
+    pub const EXTERNAL_ROTATION: BandedExercisesExerciseName = BandedExercisesExerciseName(11);
+    pub const EXTERNAL_ROTATION_AT_90_DEGREE_ABDUCTION: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(12);
+    pub const FACE_PULL: BandedExercisesExerciseName = BandedExercisesExerciseName(13);
+    pub const FIRE_HYDRANT: BandedExercisesExerciseName = BandedExercisesExerciseName(14);
+    pub const FLY: BandedExercisesExerciseName = BandedExercisesExerciseName(15);
+    pub const FRONT_RAISE: BandedExercisesExerciseName = BandedExercisesExerciseName(16);
+    pub const GLUTE_BRIDGE: BandedExercisesExerciseName = BandedExercisesExerciseName(17);
+    pub const HAMSTRING_CURLS: BandedExercisesExerciseName = BandedExercisesExerciseName(18);
+    pub const HIGH_PLANK_LEG_LIFTS: BandedExercisesExerciseName = BandedExercisesExerciseName(19);
+    pub const HIP_EXTENSION: BandedExercisesExerciseName = BandedExercisesExerciseName(20);
+    pub const INTERNAL_ROTATION: BandedExercisesExerciseName = BandedExercisesExerciseName(21);
+    pub const JUMPING_JACK: BandedExercisesExerciseName = BandedExercisesExerciseName(22);
+    pub const KNEELING_CRUNCH: BandedExercisesExerciseName = BandedExercisesExerciseName(23);
+    pub const LATERAL_BAND_WALKS: BandedExercisesExerciseName = BandedExercisesExerciseName(24);
+    pub const LATERAL_RAISE: BandedExercisesExerciseName = BandedExercisesExerciseName(25);
+    pub const LATPULL: BandedExercisesExerciseName = BandedExercisesExerciseName(26);
+    pub const LEG_ABDUCTION: BandedExercisesExerciseName = BandedExercisesExerciseName(27);
+    pub const LEG_ADDUCTION: BandedExercisesExerciseName = BandedExercisesExerciseName(28);
+    pub const LEG_EXTENSION: BandedExercisesExerciseName = BandedExercisesExerciseName(29);
+    pub const LUNGE: BandedExercisesExerciseName = BandedExercisesExerciseName(30);
+    pub const PLANK: BandedExercisesExerciseName = BandedExercisesExerciseName(31);
+    pub const PULL_APART: BandedExercisesExerciseName = BandedExercisesExerciseName(32);
+    pub const PUSH_UPS: BandedExercisesExerciseName = BandedExercisesExerciseName(33);
+    pub const REVERSE_CRUNCH: BandedExercisesExerciseName = BandedExercisesExerciseName(34);
+    pub const ROW: BandedExercisesExerciseName = BandedExercisesExerciseName(35);
+    pub const SHOULDER_ABDUCTION: BandedExercisesExerciseName = BandedExercisesExerciseName(36);
+    pub const SHOULDER_EXTENSION: BandedExercisesExerciseName = BandedExercisesExerciseName(37);
+    pub const SHOULDER_EXTERNAL_ROTATION: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(38);
+    pub const SHOULDER_FLEXION_TO_90_DEGREES: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(39);
+    pub const SIDE_PLANK_LEG_LIFTS: BandedExercisesExerciseName = BandedExercisesExerciseName(40);
+    pub const SIDE_RAISE: BandedExercisesExerciseName = BandedExercisesExerciseName(41);
+    pub const SQUAT: BandedExercisesExerciseName = BandedExercisesExerciseName(42);
+    pub const SQUAT_TO_PRESS: BandedExercisesExerciseName = BandedExercisesExerciseName(43);
+    pub const TRICEP_EXTENSION: BandedExercisesExerciseName = BandedExercisesExerciseName(44);
+    pub const TRICEP_KICKBACK: BandedExercisesExerciseName = BandedExercisesExerciseName(45);
+    pub const UPRIGHT_ROW: BandedExercisesExerciseName = BandedExercisesExerciseName(46);
+    pub const WALL_CRAWL_WITH_EXTERNAL_ROTATION: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(47);
+    pub const LATERAL_RAISE_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(49);
+    pub const TRICEPS_EXTENSION_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(50);
+    pub const CHEST_FLY_INCLINE_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(51);
+    pub const CHEST_FLY_DECLINE_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(52);
+    pub const PULL_DOWN_WHEELCHAIR: BandedExercisesExerciseName = BandedExercisesExerciseName(53);
+    pub const STRAIGHT_ARM_PULL_DOWN_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(54);
+    pub const CURL_WHEELCHAIR: BandedExercisesExerciseName = BandedExercisesExerciseName(55);
+    pub const OVERHEAD_CURL_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(56);
+    pub const FACE_PULL_WHEELCHAIR: BandedExercisesExerciseName = BandedExercisesExerciseName(57);
+    pub const AROUND_THE_WORLD_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(58);
+    pub const PULL_APART_WHEELCHAIR: BandedExercisesExerciseName = BandedExercisesExerciseName(59);
+    pub const SIDE_CURL_WHEELCHAIR: BandedExercisesExerciseName = BandedExercisesExerciseName(60);
+    pub const OVERHEAD_PRESS_WHEELCHAIR: BandedExercisesExerciseName =
+        BandedExercisesExerciseName(61);
+}
+
+impl Default for BandedExercisesExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for BandedExercisesExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "ab_twist"),
+            2 => write!(f, "back_extension"),
+            3 => write!(f, "bicycle_crunch"),
+            4 => write!(f, "calf_raises"),
+            5 => write!(f, "chest_press"),
+            6 => write!(f, "clam_shells"),
+            7 => write!(f, "curl"),
+            8 => write!(f, "deadbug"),
+            9 => write!(f, "deadlift"),
+            10 => write!(f, "donkey_kick"),
+            11 => write!(f, "external_rotation"),
+            12 => write!(f, "external_rotation_at_90_degree_abduction"),
+            13 => write!(f, "face_pull"),
+            14 => write!(f, "fire_hydrant"),
+            15 => write!(f, "fly"),
+            16 => write!(f, "front_raise"),
+            17 => write!(f, "glute_bridge"),
+            18 => write!(f, "hamstring_curls"),
+            19 => write!(f, "high_plank_leg_lifts"),
+            20 => write!(f, "hip_extension"),
+            21 => write!(f, "internal_rotation"),
+            22 => write!(f, "jumping_jack"),
+            23 => write!(f, "kneeling_crunch"),
+            24 => write!(f, "lateral_band_walks"),
+            25 => write!(f, "lateral_raise"),
+            26 => write!(f, "latpull"),
+            27 => write!(f, "leg_abduction"),
+            28 => write!(f, "leg_adduction"),
+            29 => write!(f, "leg_extension"),
+            30 => write!(f, "lunge"),
+            31 => write!(f, "plank"),
+            32 => write!(f, "pull_apart"),
+            33 => write!(f, "push_ups"),
+            34 => write!(f, "reverse_crunch"),
+            35 => write!(f, "row"),
+            36 => write!(f, "shoulder_abduction"),
+            37 => write!(f, "shoulder_extension"),
+            38 => write!(f, "shoulder_external_rotation"),
+            39 => write!(f, "shoulder_flexion_to_90_degrees"),
+            40 => write!(f, "side_plank_leg_lifts"),
+            41 => write!(f, "side_raise"),
+            42 => write!(f, "squat"),
+            43 => write!(f, "squat_to_press"),
+            44 => write!(f, "tricep_extension"),
+            45 => write!(f, "tricep_kickback"),
+            46 => write!(f, "upright_row"),
+            47 => write!(f, "wall_crawl_with_external_rotation"),
+            49 => write!(f, "lateral_raise_wheelchair"),
+            50 => write!(f, "triceps_extension_wheelchair"),
+            51 => write!(f, "chest_fly_incline_wheelchair"),
+            52 => write!(f, "chest_fly_decline_wheelchair"),
+            53 => write!(f, "pull_down_wheelchair"),
+            54 => write!(f, "straight_arm_pull_down_wheelchair"),
+            55 => write!(f, "curl_wheelchair"),
+            56 => write!(f, "overhead_curl_wheelchair"),
+            57 => write!(f, "face_pull_wheelchair"),
+            58 => write!(f, "around_the_world_wheelchair"),
+            59 => write!(f, "pull_apart_wheelchair"),
+            60 => write!(f, "side_curl_wheelchair"),
+            61 => write!(f, "overhead_press_wheelchair"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BattleRopeExerciseName(pub u16);
+
+impl BattleRopeExerciseName {
+    pub const ALTERNATING_FIGURE_EIGHT: BattleRopeExerciseName = BattleRopeExerciseName(0);
+    pub const ALTERNATING_JUMP_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(1);
+    pub const ALTERNATING_KNEELING_TO_STANDING_WAVE: BattleRopeExerciseName =
+        BattleRopeExerciseName(2);
+    pub const ALTERNATING_LUNGE_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(3);
+    pub const ALTERNATING_SQUAT_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(4);
+    pub const ALTERNATING_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(5);
+    pub const ALTERNATING_WAVE_WITH_LATERAL_SHUFFLE: BattleRopeExerciseName =
+        BattleRopeExerciseName(6);
+    pub const CLAP_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(7);
+    pub const DOUBLE_ARM_FIGURE_EIGHT: BattleRopeExerciseName = BattleRopeExerciseName(8);
+    pub const DOUBLE_ARM_SIDE_TO_SIDE_SNAKE: BattleRopeExerciseName = BattleRopeExerciseName(9);
+    pub const DOUBLE_ARM_SIDE_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(10);
+    pub const DOUBLE_ARM_SLAM: BattleRopeExerciseName = BattleRopeExerciseName(11);
+    pub const DOUBLE_ARM_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(12);
+    pub const GRAPPLER_TOSS: BattleRopeExerciseName = BattleRopeExerciseName(13);
+    pub const HIP_TOSS: BattleRopeExerciseName = BattleRopeExerciseName(14);
+    pub const IN_AND_OUT_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(15);
+    pub const INSIDE_CIRCLE: BattleRopeExerciseName = BattleRopeExerciseName(16);
+    pub const JUMPING_JACKS: BattleRopeExerciseName = BattleRopeExerciseName(17);
+    pub const OUTSIDE_CIRCLE: BattleRopeExerciseName = BattleRopeExerciseName(18);
+    pub const RAINBOW: BattleRopeExerciseName = BattleRopeExerciseName(19);
+    pub const SIDE_PLANK_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(20);
+    pub const SIDEWINDER: BattleRopeExerciseName = BattleRopeExerciseName(21);
+    pub const SITTING_RUSSIAN_TWIST: BattleRopeExerciseName = BattleRopeExerciseName(22);
+    pub const SNAKE_WAVE: BattleRopeExerciseName = BattleRopeExerciseName(23);
+    pub const SPLIT_JACK: BattleRopeExerciseName = BattleRopeExerciseName(24);
+    pub const STAGE_COACH: BattleRopeExerciseName = BattleRopeExerciseName(25);
+    pub const ULTIMATE_WARRIOR: BattleRopeExerciseName = BattleRopeExerciseName(26);
+    pub const UPPER_CUTS: BattleRopeExerciseName = BattleRopeExerciseName(27);
+}
+
+impl Default for BattleRopeExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for BattleRopeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "alternating_figure_eight"),
+            1 => write!(f, "alternating_jump_wave"),
+            2 => write!(f, "alternating_kneeling_to_standing_wave"),
+            3 => write!(f, "alternating_lunge_wave"),
+            4 => write!(f, "alternating_squat_wave"),
+            5 => write!(f, "alternating_wave"),
+            6 => write!(f, "alternating_wave_with_lateral_shuffle"),
+            7 => write!(f, "clap_wave"),
+            8 => write!(f, "double_arm_figure_eight"),
+            9 => write!(f, "double_arm_side_to_side_snake"),
+            10 => write!(f, "double_arm_side_wave"),
+            11 => write!(f, "double_arm_slam"),
+            12 => write!(f, "double_arm_wave"),
+            13 => write!(f, "grappler_toss"),
+            14 => write!(f, "hip_toss"),
+            15 => write!(f, "in_and_out_wave"),
+            16 => write!(f, "inside_circle"),
+            17 => write!(f, "jumping_jacks"),
+            18 => write!(f, "outside_circle"),
+            19 => write!(f, "rainbow"),
+            20 => write!(f, "side_plank_wave"),
+            21 => write!(f, "sidewinder"),
+            22 => write!(f, "sitting_russian_twist"),
+            23 => write!(f, "snake_wave"),
+            24 => write!(f, "split_jack"),
+            25 => write!(f, "stage_coach"),
+            26 => write!(f, "ultimate_warrior"),
+            27 => write!(f, "upper_cuts"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct EllipticalExerciseName(pub u16);
+
+impl EllipticalExerciseName {
+    pub const ELLIPTICAL: EllipticalExerciseName = EllipticalExerciseName(0);
+}
+
+impl Default for EllipticalExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for EllipticalExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "elliptical"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct FloorClimbExerciseName(pub u16);
+
+impl FloorClimbExerciseName {
+    pub const FLOOR_CLIMB: FloorClimbExerciseName = FloorClimbExerciseName(0);
+}
+
+impl Default for FloorClimbExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for FloorClimbExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "floor_climb"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct IndoorBikeExerciseName(pub u16);
+
+impl IndoorBikeExerciseName {
+    pub const AIR_BIKE: IndoorBikeExerciseName = IndoorBikeExerciseName(0);
+    pub const ASSAULT_BIKE: IndoorBikeExerciseName = IndoorBikeExerciseName(1);
+    pub const STATIONARY_BIKE: IndoorBikeExerciseName = IndoorBikeExerciseName(3);
+}
+
+impl Default for IndoorBikeExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for IndoorBikeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "air_bike"),
+            1 => write!(f, "assault_bike"),
+            3 => write!(f, "stationary_bike"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct IndoorRowExerciseName(pub u16);
+
+impl IndoorRowExerciseName {
+    pub const ROWING_MACHINE: IndoorRowExerciseName = IndoorRowExerciseName(0);
+}
+
+impl Default for IndoorRowExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for IndoorRowExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "rowing_machine"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct LadderExerciseName(pub u16);
+
+impl LadderExerciseName {
+    pub const AGILITY: LadderExerciseName = LadderExerciseName(0);
+    pub const SPEED: LadderExerciseName = LadderExerciseName(1);
+}
+
+impl Default for LadderExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for LadderExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "agility"),
+            1 => write!(f, "speed"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SandbagExerciseName(pub u16);
+
+impl SandbagExerciseName {
+    pub const AROUND_THE_WORLD: SandbagExerciseName = SandbagExerciseName(0);
+    pub const BACK_SQUAT: SandbagExerciseName = SandbagExerciseName(1);
+    pub const BEAR_CRAWL_PULL_THROUGH: SandbagExerciseName = SandbagExerciseName(2);
+    pub const BEAR_HUG_SQUAT: SandbagExerciseName = SandbagExerciseName(3);
+    pub const CLEAN: SandbagExerciseName = SandbagExerciseName(4);
+    pub const CLEAN_AND_PRESS: SandbagExerciseName = SandbagExerciseName(5);
+    pub const CURL: SandbagExerciseName = SandbagExerciseName(6);
+    pub const FRONT_CARRY: SandbagExerciseName = SandbagExerciseName(7);
+    pub const FRONT_SQUAT: SandbagExerciseName = SandbagExerciseName(8);
+    pub const LUNGE: SandbagExerciseName = SandbagExerciseName(9);
+    pub const OVERHEAD_PRESS: SandbagExerciseName = SandbagExerciseName(10);
+    pub const PLANK_PULL_THROUGH: SandbagExerciseName = SandbagExerciseName(11);
+    pub const ROTATIONAL_LUNGE: SandbagExerciseName = SandbagExerciseName(12);
+    pub const ROW: SandbagExerciseName = SandbagExerciseName(13);
+    pub const RUSSIAN_TWIST: SandbagExerciseName = SandbagExerciseName(14);
+    pub const SHOULDERING: SandbagExerciseName = SandbagExerciseName(15);
+    pub const SHOVELING: SandbagExerciseName = SandbagExerciseName(16);
+    pub const SIDE_LUNGE: SandbagExerciseName = SandbagExerciseName(17);
+    pub const SPRINT: SandbagExerciseName = SandbagExerciseName(18);
+    pub const ZERCHER_SQUAT: SandbagExerciseName = SandbagExerciseName(19);
+}
+
+impl Default for SandbagExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for SandbagExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "around_the_world"),
+            1 => write!(f, "back_squat"),
+            2 => write!(f, "bear_crawl_pull_through"),
+            3 => write!(f, "bear_hug_squat"),
+            4 => write!(f, "clean"),
+            5 => write!(f, "clean_and_press"),
+            6 => write!(f, "curl"),
+            7 => write!(f, "front_carry"),
+            8 => write!(f, "front_squat"),
+            9 => write!(f, "lunge"),
+            10 => write!(f, "overhead_press"),
+            11 => write!(f, "plank_pull_through"),
+            12 => write!(f, "rotational_lunge"),
+            13 => write!(f, "row"),
+            14 => write!(f, "russian_twist"),
+            15 => write!(f, "shouldering"),
+            16 => write!(f, "shoveling"),
+            17 => write!(f, "side_lunge"),
+            18 => write!(f, "sprint"),
+            19 => write!(f, "zercher_squat"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SledExerciseName(pub u16);
+
+impl SledExerciseName {
+    pub const BACKWARD_DRAG: SledExerciseName = SledExerciseName(0);
+    pub const CHEST_PRESS: SledExerciseName = SledExerciseName(1);
+    pub const FORWARD_DRAG: SledExerciseName = SledExerciseName(2);
+    pub const LOW_PUSH: SledExerciseName = SledExerciseName(3);
+    pub const PUSH: SledExerciseName = SledExerciseName(4);
+    pub const ROW: SledExerciseName = SledExerciseName(5);
+}
+
+impl Default for SledExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for SledExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "backward_drag"),
+            1 => write!(f, "chest_press"),
+            2 => write!(f, "forward_drag"),
+            3 => write!(f, "low_push"),
+            4 => write!(f, "push"),
+            5 => write!(f, "row"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SledgeHammerExerciseName(pub u16);
+
+impl SledgeHammerExerciseName {
+    pub const LATERAL_SWING: SledgeHammerExerciseName = SledgeHammerExerciseName(0);
+    pub const HAMMER_SLAM: SledgeHammerExerciseName = SledgeHammerExerciseName(1);
+}
+
+impl Default for SledgeHammerExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for SledgeHammerExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "lateral_swing"),
+            1 => write!(f, "hammer_slam"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct StairStepperExerciseName(pub u16);
+
+impl StairStepperExerciseName {
+    pub const STAIR_STEPPER: StairStepperExerciseName = StairStepperExerciseName(0);
+}
+
+impl Default for StairStepperExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for StairStepperExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "stair_stepper"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct SuspensionExerciseName(pub u16);
+
+impl SuspensionExerciseName {
+    pub const CHEST_FLY: SuspensionExerciseName = SuspensionExerciseName(0);
+    pub const CHEST_PRESS: SuspensionExerciseName = SuspensionExerciseName(1);
+    pub const CRUNCH: SuspensionExerciseName = SuspensionExerciseName(2);
+    pub const CURL: SuspensionExerciseName = SuspensionExerciseName(3);
+    pub const DIP: SuspensionExerciseName = SuspensionExerciseName(4);
+    pub const FACE_PULL: SuspensionExerciseName = SuspensionExerciseName(5);
+    pub const GLUTE_BRIDGE: SuspensionExerciseName = SuspensionExerciseName(6);
+    pub const HAMSTRING_CURL: SuspensionExerciseName = SuspensionExerciseName(7);
+    pub const HIP_DROP: SuspensionExerciseName = SuspensionExerciseName(8);
+    pub const INVERTED_ROW: SuspensionExerciseName = SuspensionExerciseName(9);
+    pub const KNEE_DRIVE_JUMP: SuspensionExerciseName = SuspensionExerciseName(10);
+    pub const KNEE_TO_CHEST: SuspensionExerciseName = SuspensionExerciseName(11);
+    pub const LAT_PULLOVER: SuspensionExerciseName = SuspensionExerciseName(12);
+    pub const LUNGE: SuspensionExerciseName = SuspensionExerciseName(13);
+    pub const MOUNTAIN_CLIMBER: SuspensionExerciseName = SuspensionExerciseName(14);
+    pub const PENDULUM: SuspensionExerciseName = SuspensionExerciseName(15);
+    pub const PIKE: SuspensionExerciseName = SuspensionExerciseName(16);
+    pub const PLANK: SuspensionExerciseName = SuspensionExerciseName(17);
+    pub const POWER_PULL: SuspensionExerciseName = SuspensionExerciseName(18);
+    pub const PULL_UP: SuspensionExerciseName = SuspensionExerciseName(19);
+    pub const PUSH_UP: SuspensionExerciseName = SuspensionExerciseName(20);
+    pub const REVERSE_MOUNTAIN_CLIMBER: SuspensionExerciseName = SuspensionExerciseName(21);
+    pub const REVERSE_PLANK: SuspensionExerciseName = SuspensionExerciseName(22);
+    pub const ROLLOUT: SuspensionExerciseName = SuspensionExerciseName(23);
+    pub const ROW: SuspensionExerciseName = SuspensionExerciseName(24);
+    pub const SIDE_LUNGE: SuspensionExerciseName = SuspensionExerciseName(25);
+    pub const SIDE_PLANK: SuspensionExerciseName = SuspensionExerciseName(26);
+    pub const SINGLE_LEG_DEADLIFT: SuspensionExerciseName = SuspensionExerciseName(27);
+    pub const SINGLE_LEG_SQUAT: SuspensionExerciseName = SuspensionExerciseName(28);
+    pub const SIT_UP: SuspensionExerciseName = SuspensionExerciseName(29);
+    pub const SPLIT: SuspensionExerciseName = SuspensionExerciseName(30);
+    pub const SQUAT: SuspensionExerciseName = SuspensionExerciseName(31);
+    pub const SQUAT_JUMP: SuspensionExerciseName = SuspensionExerciseName(32);
+    pub const TRICEP_PRESS: SuspensionExerciseName = SuspensionExerciseName(33);
+    pub const Y_FLY: SuspensionExerciseName = SuspensionExerciseName(34);
+}
+
+impl Default for SuspensionExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for SuspensionExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "chest_fly"),
+            1 => write!(f, "chest_press"),
+            2 => write!(f, "crunch"),
+            3 => write!(f, "curl"),
+            4 => write!(f, "dip"),
+            5 => write!(f, "face_pull"),
+            6 => write!(f, "glute_bridge"),
+            7 => write!(f, "hamstring_curl"),
+            8 => write!(f, "hip_drop"),
+            9 => write!(f, "inverted_row"),
+            10 => write!(f, "knee_drive_jump"),
+            11 => write!(f, "knee_to_chest"),
+            12 => write!(f, "lat_pullover"),
+            13 => write!(f, "lunge"),
+            14 => write!(f, "mountain_climber"),
+            15 => write!(f, "pendulum"),
+            16 => write!(f, "pike"),
+            17 => write!(f, "plank"),
+            18 => write!(f, "power_pull"),
+            19 => write!(f, "pull_up"),
+            20 => write!(f, "push_up"),
+            21 => write!(f, "reverse_mountain_climber"),
+            22 => write!(f, "reverse_plank"),
+            23 => write!(f, "rollout"),
+            24 => write!(f, "row"),
+            25 => write!(f, "side_lunge"),
+            26 => write!(f, "side_plank"),
+            27 => write!(f, "single_leg_deadlift"),
+            28 => write!(f, "single_leg_squat"),
+            29 => write!(f, "sit_up"),
+            30 => write!(f, "split"),
+            31 => write!(f, "squat"),
+            32 => write!(f, "squat_jump"),
+            33 => write!(f, "tricep_press"),
+            34 => write!(f, "y_fly"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct TireExerciseName(pub u16);
+
+impl TireExerciseName {
+    pub const FLIP: TireExerciseName = TireExerciseName(0);
+}
+
+impl Default for TireExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for TireExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "flip"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct BikeOutdoorExerciseName(pub u16);
+
+impl BikeOutdoorExerciseName {
+    pub const BIKE: BikeOutdoorExerciseName = BikeOutdoorExerciseName(0);
+}
+
+impl Default for BikeOutdoorExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for BikeOutdoorExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "bike"),
+            _ => write!(f, "unknown({})", self.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct RunIndoorExerciseName(pub u16);
+
+impl RunIndoorExerciseName {
+    pub const INDOOR_TRACK_RUN: RunIndoorExerciseName = RunIndoorExerciseName(0);
+    pub const TREADMILL: RunIndoorExerciseName = RunIndoorExerciseName(1);
+}
+
+impl Default for RunIndoorExerciseName {
+    fn default() -> Self {
+        Self(u16::MAX)
+    }
+}
+
+impl fmt::Display for RunIndoorExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "indoor_track_run"),
+            1 => write!(f, "treadmill"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
