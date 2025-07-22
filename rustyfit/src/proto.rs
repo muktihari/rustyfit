@@ -947,7 +947,7 @@ impl Value {
 
     /// Checks whether Value holds any representation of invalid value based on base_type.
     /// An array is invalid when all elements represent invalid value.
-    pub fn is_valid(&self, base_type: FitBaseType) -> bool {
+    pub(crate) fn is_valid(&self, base_type: FitBaseType) -> bool {
         match self {
             Value::Int8(v) => *v != i8::MAX,
             Value::Uint8(v) => match base_type {
@@ -967,7 +967,7 @@ impl Value {
                 FitBaseType::UINT32Z => *v != 0,
                 _ => false,
             },
-            Value::String(v) => !v.is_empty(),
+            Value::String(v) => !v.is_empty() && v.as_str() != "\x00",
             Value::Float32(v) => f32::to_bits(*v) != u32::MAX,
             Value::Float64(v) => f64::to_bits(*v) != u64::MAX,
             Value::Int64(v) => *v != i64::MAX,
@@ -984,14 +984,25 @@ impl Value {
                 }
                 false
             }
-            Value::VecUint8(v) => {
-                for &x in v {
-                    if x != u8::MAX {
-                        return true;
+            Value::VecUint8(v) => match base_type {
+                FitBaseType::UINT8 => {
+                    for &x in v {
+                        if x != u8::MAX {
+                            return true;
+                        }
                     }
+                    false
                 }
-                false
-            }
+                FitBaseType::UINT8Z => {
+                    for &x in v {
+                        if x != u8::MIN {
+                            return true;
+                        }
+                    }
+                    false
+                }
+                _ => false,
+            },
             Value::VecInt16(v) => {
                 for &x in v {
                     if x != i16::MAX {
@@ -1000,14 +1011,25 @@ impl Value {
                 }
                 false
             }
-            Value::VecUint16(v) => {
-                for &x in v {
-                    if x != u16::MAX {
-                        return true;
+            Value::VecUint16(v) => match base_type {
+                FitBaseType::UINT16 => {
+                    for &x in v {
+                        if x != u16::MAX {
+                            return true;
+                        }
                     }
+                    false
                 }
-                false
-            }
+                FitBaseType::UINT16Z => {
+                    for &x in v {
+                        if x != u16::MIN {
+                            return true;
+                        }
+                    }
+                    false
+                }
+                _ => false,
+            },
             Value::VecInt32(v) => {
                 for &x in v {
                     if x != i32::MAX {
@@ -1016,17 +1038,28 @@ impl Value {
                 }
                 false
             }
-            Value::VecUint32(v) => {
-                for &x in v {
-                    if x != u32::MAX {
-                        return true;
+            Value::VecUint32(v) => match base_type {
+                FitBaseType::UINT32 => {
+                    for &x in v {
+                        if x != u32::MAX {
+                            return true;
+                        }
                     }
+                    false
                 }
-                false
-            }
+                FitBaseType::UINT32Z => {
+                    for &x in v {
+                        if x != u32::MIN {
+                            return true;
+                        }
+                    }
+                    false
+                }
+                _ => false,
+            },
             Value::VecString(v) => {
                 for x in v {
-                    if !x.is_empty() {
+                    if !x.is_empty() && x.as_str() != "\x00" {
                         return true;
                     }
                 }
@@ -1034,7 +1067,7 @@ impl Value {
             }
             Value::VecFloat32(v) => {
                 for &x in v {
-                    if x != f32::MAX {
+                    if x.to_bits() != u32::MAX {
                         return true;
                     }
                 }
@@ -1042,7 +1075,7 @@ impl Value {
             }
             Value::VecFloat64(v) => {
                 for &x in v {
-                    if x != f64::MAX {
+                    if x.to_bits() != u64::MAX {
                         return true;
                     }
                 }
@@ -1056,20 +1089,31 @@ impl Value {
                 }
                 false
             }
-            Value::VecUint64(v) => {
-                for &x in v {
-                    if x != u64::MAX {
-                        return true;
+            Value::VecUint64(v) => match base_type {
+                FitBaseType::UINT64 => {
+                    for &x in v {
+                        if x != u64::MAX {
+                            return true;
+                        }
                     }
+                    false
                 }
-                false
-            }
+                FitBaseType::UINT64Z => {
+                    for &x in v {
+                        if x != u64::MIN {
+                            return true;
+                        }
+                    }
+                    false
+                }
+                _ => false,
+            },
             Value::Invalid => false,
         }
     }
 
     /// Checks whether Value's type is align with given basetype.
-    pub fn is_align(&self, base_type: FitBaseType) -> bool {
+    pub(crate) fn is_align(&self, base_type: FitBaseType) -> bool {
         match self {
             Value::Int8(_) => base_type == FitBaseType::SINT8,
             Value::Uint8(_) => {
@@ -1121,7 +1165,7 @@ impl Value {
 
     /// Returns the size of Value in binary from. For every string in Value,
     /// if the last index of the string is not '\x00', size += 1.
-    pub fn size(&self) -> usize {
+    pub(crate) fn size(&self) -> usize {
         match self {
             Value::Int8(_) | Value::Uint8(_) => 1,
             Value::Int16(_) | Value::Uint16(_) => 2,
@@ -1228,35 +1272,368 @@ pub(crate) fn strcount(s: &[u8]) -> u8 {
 }
 
 #[cfg(test)]
-#[test]
-fn test_strcount() {
-    #[derive(Default, Clone, Copy)]
-    struct Case {
-        input: &'static str,
-        expected: u8,
+mod tests {
+    use crate::{
+        profile::typedef::FitBaseType,
+        proto::{Value, strcount},
+    };
+
+    #[test]
+    fn test_strcount() {
+        #[derive(Default, Clone, Copy)]
+        struct Case {
+            input: &'static str,
+            expected: u8,
+        }
+
+        let tt = [
+            Case {
+                input: "Open Water",
+                expected: 1,
+            },
+            Case {
+                input: "Open Water\x00",
+                expected: 1,
+            },
+            Case {
+                input: "Open Water\x00\x00",
+                expected: 1,
+            },
+            Case {
+                input: "Open\x00Water\x00",
+                expected: 2,
+            },
+        ];
+
+        for (i, tc) in tt.iter().enumerate() {
+            let v = strcount(tc.input.as_bytes());
+            assert_eq!(v, tc.expected, "index {} input \"{}\"", i, tc.input);
+        }
     }
 
-    let tt = [
-        Case {
-            input: "Open Water",
-            expected: 1,
-        },
-        Case {
-            input: "Open Water\x00",
-            expected: 1,
-        },
-        Case {
-            input: "Open Water\x00\x00",
-            expected: 1,
-        },
-        Case {
-            input: "Open\x00Water\x00",
-            expected: 2,
-        },
-    ];
+    #[test]
+    fn test_value_is_valid() {
+        struct Case {
+            value: Value,
+            base_type: FitBaseType,
+            is_valid: bool,
+        }
 
-    for (i, tc) in tt.iter().enumerate() {
-        let v = strcount(tc.input.as_bytes());
-        assert_eq!(v, tc.expected, "index {} input \"{}\"", i, tc.input);
+        let tt = [
+            Case {
+                value: Value::Int8(i8::MIN),
+                base_type: FitBaseType::SINT8,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Int8(i8::MAX),
+                base_type: FitBaseType::SINT8,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint8(u8::MIN),
+                base_type: FitBaseType::UINT8,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Uint8(u8::MAX),
+                base_type: FitBaseType::UINT8,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint8(u8::MIN),
+                base_type: FitBaseType::UINT8Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint8(u8::MAX),
+                base_type: FitBaseType::UINT8Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Int16(i16::MIN),
+                base_type: FitBaseType::SINT16,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Int16(i16::MAX),
+                base_type: FitBaseType::SINT16,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint16(u16::MIN),
+                base_type: FitBaseType::UINT16,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Uint16(u16::MAX),
+                base_type: FitBaseType::UINT16,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint16(u16::MIN),
+                base_type: FitBaseType::UINT16Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint16(u16::MAX),
+                base_type: FitBaseType::UINT16Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Int32(i32::MIN),
+                base_type: FitBaseType::SINT32,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Int32(i32::MAX),
+                base_type: FitBaseType::SINT32,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint32(u32::MIN),
+                base_type: FitBaseType::UINT32,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Uint32(u32::MAX),
+                base_type: FitBaseType::UINT32,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint32(u32::MIN),
+                base_type: FitBaseType::UINT32Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint32(u32::MAX),
+                base_type: FitBaseType::UINT32Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Float32(f32::MIN),
+                base_type: FitBaseType::FLOAT32,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Float32(f32::from_bits(u32::MAX)),
+                base_type: FitBaseType::FLOAT32,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Float64(f64::MIN),
+                base_type: FitBaseType::FLOAT64,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Float64(f64::from_bits(u64::MAX)),
+                base_type: FitBaseType::FLOAT64,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Int64(i64::MIN),
+                base_type: FitBaseType::SINT64,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Int64(i64::MAX),
+                base_type: FitBaseType::SINT64,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint64(u64::MIN),
+                base_type: FitBaseType::UINT64,
+                is_valid: true,
+            },
+            Case {
+                value: Value::Uint64(u64::MAX),
+                base_type: FitBaseType::UINT64,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint64(u64::MIN),
+                base_type: FitBaseType::UINT64Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::Uint64(u64::MAX),
+                base_type: FitBaseType::UINT64Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::String("rustyfit".to_string()),
+                base_type: FitBaseType::STRING,
+                is_valid: true,
+            },
+            Case {
+                value: Value::String("".to_string()),
+                base_type: FitBaseType::STRING,
+                is_valid: false,
+            },
+            Case {
+                value: Value::String("\x00".to_string()),
+                base_type: FitBaseType::STRING,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecInt8(vec![0i8, 1i8]),
+                base_type: FitBaseType::SINT8,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecInt8(vec![i8::MAX, i8::MAX]),
+                base_type: FitBaseType::SINT8,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint8(vec![0u8, 1u8]),
+                base_type: FitBaseType::UINT8,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint8(vec![0u8, 1u8]),
+                base_type: FitBaseType::UINT8Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint8(vec![u8::MAX, u8::MAX]),
+                base_type: FitBaseType::UINT8,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint8(vec![u8::MIN, u8::MIN]),
+                base_type: FitBaseType::UINT8Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecInt16(vec![0i16, 1i16]),
+                base_type: FitBaseType::SINT16,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecInt16(vec![i16::MAX, i16::MAX]),
+                base_type: FitBaseType::SINT16,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint16(vec![0u16, 1u16]),
+                base_type: FitBaseType::UINT16,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint16(vec![0u16, 1u16]),
+                base_type: FitBaseType::UINT16Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint16(vec![u16::MAX, u16::MAX]),
+                base_type: FitBaseType::UINT16,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint16(vec![u16::MIN, u16::MIN]),
+                base_type: FitBaseType::UINT16Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecInt32(vec![0i32, 1i32]),
+                base_type: FitBaseType::SINT32,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecInt32(vec![i32::MAX, i32::MAX]),
+                base_type: FitBaseType::SINT32,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint32(vec![0u32, 1u32]),
+                base_type: FitBaseType::UINT32,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint32(vec![0u32, 1u32]),
+                base_type: FitBaseType::UINT32Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint32(vec![u32::MAX, u32::MAX]),
+                base_type: FitBaseType::UINT32,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint32(vec![u32::MIN, u32::MIN]),
+                base_type: FitBaseType::UINT32Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecFloat32(vec![0f32, 1f32]),
+                base_type: FitBaseType::FLOAT32,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecFloat32(vec![f32::from_bits(u32::MAX), f32::from_bits(u32::MAX)]),
+                base_type: FitBaseType::FLOAT32,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecFloat64(vec![0f64, 1f64]),
+                base_type: FitBaseType::FLOAT64,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecFloat64(vec![f64::from_bits(u64::MAX), f64::from_bits(u64::MAX)]),
+                base_type: FitBaseType::FLOAT64,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecInt64(vec![0i64, 1i64]),
+                base_type: FitBaseType::SINT64,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecInt64(vec![i64::MAX, i64::MAX]),
+                base_type: FitBaseType::SINT64,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint64(vec![0u64, 1u64]),
+                base_type: FitBaseType::UINT64,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint64(vec![0u64, 1u64]),
+                base_type: FitBaseType::UINT64Z,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecUint64(vec![u64::MAX, u64::MAX]),
+                base_type: FitBaseType::UINT64,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecUint64(vec![u64::MIN, u64::MIN]),
+                base_type: FitBaseType::UINT64Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::VecString(vec!["rustyfit".to_string(), "rustyfit".to_string()]),
+                base_type: FitBaseType::STRING,
+                is_valid: true,
+            },
+            Case {
+                value: Value::VecString(vec!["\x00".to_string(), "\x00".to_string()]),
+                base_type: FitBaseType::STRING,
+                is_valid: false,
+            },
+        ];
+
+        for (i, tc) in tt.iter().enumerate() {
+            let is_valid = tc.value.is_valid(tc.base_type);
+            assert_eq!(
+                tc.is_valid, is_valid,
+                "{}: {:?} | {}",
+                i, tc.value, tc.base_type,
+            );
+        }
     }
 }
