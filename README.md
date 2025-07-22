@@ -3,7 +3,7 @@
 ![GitHub Workflow Status](https://github.com/muktihari/rustyfit/workflows/CI/badge.svg)
 [![Crates.io Version](https://img.shields.io/crates/v/rustyfit.svg)](https://crates.io/crates/rustyfit)
 [![Crates.io Downloads](https://img.shields.io/crates/d/rustyfit.svg)](https://crates.io/crates/rustyfit)
-[![Profile Version](https://img.shields.io/badge/profile-v21.158-lightblue.svg?style=flat)](https://developer.garmin.com/fit/download)
+[![Profile Version](https://img.shields.io/badge/profile-v21.171-lightblue.svg?style=flat)](https://developer.garmin.com/fit/download)
 
 Rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) in Rust.
 
@@ -124,8 +124,8 @@ use rustyfit::{
 fn main() {
     let fout_name = "output.fit";
     let fout = File::create(fout_name).unwrap();
-    let mut bw = BufWriter::new(fout);
-    let mut enc = Encoder::new(&mut bw);
+    let bw = BufWriter::new(fout);
+    let mut enc = Encoder::new(bw);
 
     let mut fit = FIT {
         messages: vec![
@@ -209,8 +209,8 @@ use rustyfit::{
 fn main() {
     let fout_name = "output.fit";
     let fout = File::create(fout_name).unwrap();
-    let mut bw = BufWriter::new(fout);
-    let mut enc = Encoder::new(&mut bw);
+    let bw = BufWriter::new(fout);
+    let mut enc = Encoder::new(bw);
 
     let mut fit = FIT {
         messages: vec![

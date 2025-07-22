@@ -7,7 +7,7 @@
 use crate::profile::typedef::FitBaseType;
 use std::fmt;
 
-pub const PROFILE_VERSION: u16 = 21158;
+pub const PROFILE_VERSION: u16 = 21171;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ProfileType(pub u16);
@@ -360,53 +360,89 @@ impl ProfileType {
     /// FitBaseType::UINT16
     pub const TOTAL_BODY_EXERCISE_NAME: ProfileType = ProfileType(0x1384);
     /// FitBaseType::UINT16
-    pub const TRICEPS_EXTENSION_EXERCISE_NAME: ProfileType = ProfileType(0x13A4);
+    pub const MOVE_EXERCISE_NAME: ProfileType = ProfileType(0x13A4);
     /// FitBaseType::UINT16
-    pub const WARM_UP_EXERCISE_NAME: ProfileType = ProfileType(0x13C4);
+    pub const POSE_EXERCISE_NAME: ProfileType = ProfileType(0x13C4);
     /// FitBaseType::UINT16
-    pub const RUN_EXERCISE_NAME: ProfileType = ProfileType(0x13E4);
-    /// FitBaseType::ENUM
-    pub const WATER_TYPE: ProfileType = ProfileType(0x1400);
-    /// FitBaseType::ENUM
-    pub const TISSUE_MODEL_TYPE: ProfileType = ProfileType(0x1420);
-    /// FitBaseType::ENUM
-    pub const DIVE_GAS_STATUS: ProfileType = ProfileType(0x1440);
-    /// FitBaseType::ENUM
-    pub const DIVE_ALERT: ProfileType = ProfileType(0x1460);
-    /// FitBaseType::ENUM
-    pub const DIVE_ALARM_TYPE: ProfileType = ProfileType(0x1480);
-    /// FitBaseType::ENUM
-    pub const DIVE_BACKLIGHT_MODE: ProfileType = ProfileType(0x14A0);
-    /// FitBaseType::ENUM
-    pub const SLEEP_LEVEL: ProfileType = ProfileType(0x14C0);
-    /// FitBaseType::ENUM
-    pub const SPO2_MEASUREMENT_TYPE: ProfileType = ProfileType(0x14E0);
-    /// FitBaseType::ENUM
-    pub const CCR_SETPOINT_SWITCH_MODE: ProfileType = ProfileType(0x1500);
-    /// FitBaseType::ENUM
-    pub const DIVE_GAS_MODE: ProfileType = ProfileType(0x1520);
-    /// FitBaseType::ENUM
-    pub const PROJECTILE_TYPE: ProfileType = ProfileType(0x1540);
+    pub const TRICEPS_EXTENSION_EXERCISE_NAME: ProfileType = ProfileType(0x13E4);
     /// FitBaseType::UINT16
-    pub const FAVERO_PRODUCT: ProfileType = ProfileType(0x1564);
+    pub const WARM_UP_EXERCISE_NAME: ProfileType = ProfileType(0x1404);
+    /// FitBaseType::UINT16
+    pub const RUN_EXERCISE_NAME: ProfileType = ProfileType(0x1424);
+    /// FitBaseType::UINT16
+    pub const BIKE_EXERCISE_NAME: ProfileType = ProfileType(0x1444);
+    /// FitBaseType::UINT16
+    pub const BANDED_EXERCISES_EXERCISE_NAME: ProfileType = ProfileType(0x1464);
+    /// FitBaseType::UINT16
+    pub const BATTLE_ROPE_EXERCISE_NAME: ProfileType = ProfileType(0x1484);
+    /// FitBaseType::UINT16
+    pub const ELLIPTICAL_EXERCISE_NAME: ProfileType = ProfileType(0x14A4);
+    /// FitBaseType::UINT16
+    pub const FLOOR_CLIMB_EXERCISE_NAME: ProfileType = ProfileType(0x14C4);
+    /// FitBaseType::UINT16
+    pub const INDOOR_BIKE_EXERCISE_NAME: ProfileType = ProfileType(0x14E4);
+    /// FitBaseType::UINT16
+    pub const INDOOR_ROW_EXERCISE_NAME: ProfileType = ProfileType(0x1504);
+    /// FitBaseType::UINT16
+    pub const LADDER_EXERCISE_NAME: ProfileType = ProfileType(0x1524);
+    /// FitBaseType::UINT16
+    pub const SANDBAG_EXERCISE_NAME: ProfileType = ProfileType(0x1544);
+    /// FitBaseType::UINT16
+    pub const SLED_EXERCISE_NAME: ProfileType = ProfileType(0x1564);
+    /// FitBaseType::UINT16
+    pub const SLEDGE_HAMMER_EXERCISE_NAME: ProfileType = ProfileType(0x1584);
+    /// FitBaseType::UINT16
+    pub const STAIR_STEPPER_EXERCISE_NAME: ProfileType = ProfileType(0x15A4);
+    /// FitBaseType::UINT16
+    pub const SUSPENSION_EXERCISE_NAME: ProfileType = ProfileType(0x15C4);
+    /// FitBaseType::UINT16
+    pub const TIRE_EXERCISE_NAME: ProfileType = ProfileType(0x15E4);
+    /// FitBaseType::UINT16
+    pub const BIKE_OUTDOOR_EXERCISE_NAME: ProfileType = ProfileType(0x1604);
+    /// FitBaseType::UINT16
+    pub const RUN_INDOOR_EXERCISE_NAME: ProfileType = ProfileType(0x1624);
     /// FitBaseType::ENUM
-    pub const SPLIT_TYPE: ProfileType = ProfileType(0x1580);
+    pub const WATER_TYPE: ProfileType = ProfileType(0x1640);
     /// FitBaseType::ENUM
-    pub const CLIMB_PRO_EVENT: ProfileType = ProfileType(0x15A0);
+    pub const TISSUE_MODEL_TYPE: ProfileType = ProfileType(0x1660);
     /// FitBaseType::ENUM
-    pub const GAS_CONSUMPTION_RATE_TYPE: ProfileType = ProfileType(0x15C0);
+    pub const DIVE_GAS_STATUS: ProfileType = ProfileType(0x1680);
     /// FitBaseType::ENUM
-    pub const TAP_SENSITIVITY: ProfileType = ProfileType(0x15E0);
+    pub const DIVE_ALERT: ProfileType = ProfileType(0x16A0);
     /// FitBaseType::ENUM
-    pub const RADAR_THREAT_LEVEL_TYPE: ProfileType = ProfileType(0x1600);
+    pub const DIVE_ALARM_TYPE: ProfileType = ProfileType(0x16C0);
     /// FitBaseType::ENUM
-    pub const MAX_MET_SPEED_SOURCE: ProfileType = ProfileType(0x1620);
+    pub const DIVE_BACKLIGHT_MODE: ProfileType = ProfileType(0x16E0);
     /// FitBaseType::ENUM
-    pub const MAX_MET_HEART_RATE_SOURCE: ProfileType = ProfileType(0x1640);
+    pub const SLEEP_LEVEL: ProfileType = ProfileType(0x1700);
     /// FitBaseType::ENUM
-    pub const HRV_STATUS: ProfileType = ProfileType(0x1660);
+    pub const SPO2_MEASUREMENT_TYPE: ProfileType = ProfileType(0x1720);
     /// FitBaseType::ENUM
-    pub const NO_FLY_TIME_MODE: ProfileType = ProfileType(0x1680);
+    pub const CCR_SETPOINT_SWITCH_MODE: ProfileType = ProfileType(0x1740);
+    /// FitBaseType::ENUM
+    pub const DIVE_GAS_MODE: ProfileType = ProfileType(0x1760);
+    /// FitBaseType::ENUM
+    pub const PROJECTILE_TYPE: ProfileType = ProfileType(0x1780);
+    /// FitBaseType::UINT16
+    pub const FAVERO_PRODUCT: ProfileType = ProfileType(0x17A4);
+    /// FitBaseType::ENUM
+    pub const SPLIT_TYPE: ProfileType = ProfileType(0x17C0);
+    /// FitBaseType::ENUM
+    pub const CLIMB_PRO_EVENT: ProfileType = ProfileType(0x17E0);
+    /// FitBaseType::ENUM
+    pub const GAS_CONSUMPTION_RATE_TYPE: ProfileType = ProfileType(0x1800);
+    /// FitBaseType::ENUM
+    pub const TAP_SENSITIVITY: ProfileType = ProfileType(0x1820);
+    /// FitBaseType::ENUM
+    pub const RADAR_THREAT_LEVEL_TYPE: ProfileType = ProfileType(0x1840);
+    /// FitBaseType::ENUM
+    pub const MAX_MET_SPEED_SOURCE: ProfileType = ProfileType(0x1860);
+    /// FitBaseType::ENUM
+    pub const MAX_MET_HEART_RATE_SOURCE: ProfileType = ProfileType(0x1880);
+    /// FitBaseType::ENUM
+    pub const HRV_STATUS: ProfileType = ProfileType(0x18A0);
+    /// FitBaseType::ENUM
+    pub const NO_FLY_TIME_MODE: ProfileType = ProfileType(0x18C0);
 
     const BASE_TYPES: [FitBaseType; 17] = [
         FitBaseType::ENUM,
@@ -619,30 +655,48 @@ impl fmt::Display for ProfileType {
             0x1344 => write!(f, "sit_up_exercise_name"),
             0x1364 => write!(f, "squat_exercise_name"),
             0x1384 => write!(f, "total_body_exercise_name"),
-            0x13A4 => write!(f, "triceps_extension_exercise_name"),
-            0x13C4 => write!(f, "warm_up_exercise_name"),
-            0x13E4 => write!(f, "run_exercise_name"),
-            0x1400 => write!(f, "water_type"),
-            0x1420 => write!(f, "tissue_model_type"),
-            0x1440 => write!(f, "dive_gas_status"),
-            0x1460 => write!(f, "dive_alert"),
-            0x1480 => write!(f, "dive_alarm_type"),
-            0x14A0 => write!(f, "dive_backlight_mode"),
-            0x14C0 => write!(f, "sleep_level"),
-            0x14E0 => write!(f, "spo2_measurement_type"),
-            0x1500 => write!(f, "ccr_setpoint_switch_mode"),
-            0x1520 => write!(f, "dive_gas_mode"),
-            0x1540 => write!(f, "projectile_type"),
-            0x1564 => write!(f, "favero_product"),
-            0x1580 => write!(f, "split_type"),
-            0x15A0 => write!(f, "climb_pro_event"),
-            0x15C0 => write!(f, "gas_consumption_rate_type"),
-            0x15E0 => write!(f, "tap_sensitivity"),
-            0x1600 => write!(f, "radar_threat_level_type"),
-            0x1620 => write!(f, "max_met_speed_source"),
-            0x1640 => write!(f, "max_met_heart_rate_source"),
-            0x1660 => write!(f, "hrv_status"),
-            0x1680 => write!(f, "no_fly_time_mode"),
+            0x13A4 => write!(f, "move_exercise_name"),
+            0x13C4 => write!(f, "pose_exercise_name"),
+            0x13E4 => write!(f, "triceps_extension_exercise_name"),
+            0x1404 => write!(f, "warm_up_exercise_name"),
+            0x1424 => write!(f, "run_exercise_name"),
+            0x1444 => write!(f, "bike_exercise_name"),
+            0x1464 => write!(f, "banded_exercises_exercise_name"),
+            0x1484 => write!(f, "battle_rope_exercise_name"),
+            0x14A4 => write!(f, "elliptical_exercise_name"),
+            0x14C4 => write!(f, "floor_climb_exercise_name"),
+            0x14E4 => write!(f, "indoor_bike_exercise_name"),
+            0x1504 => write!(f, "indoor_row_exercise_name"),
+            0x1524 => write!(f, "ladder_exercise_name"),
+            0x1544 => write!(f, "sandbag_exercise_name"),
+            0x1564 => write!(f, "sled_exercise_name"),
+            0x1584 => write!(f, "sledge_hammer_exercise_name"),
+            0x15A4 => write!(f, "stair_stepper_exercise_name"),
+            0x15C4 => write!(f, "suspension_exercise_name"),
+            0x15E4 => write!(f, "tire_exercise_name"),
+            0x1604 => write!(f, "bike_outdoor_exercise_name"),
+            0x1624 => write!(f, "run_indoor_exercise_name"),
+            0x1640 => write!(f, "water_type"),
+            0x1660 => write!(f, "tissue_model_type"),
+            0x1680 => write!(f, "dive_gas_status"),
+            0x16A0 => write!(f, "dive_alert"),
+            0x16C0 => write!(f, "dive_alarm_type"),
+            0x16E0 => write!(f, "dive_backlight_mode"),
+            0x1700 => write!(f, "sleep_level"),
+            0x1720 => write!(f, "spo2_measurement_type"),
+            0x1740 => write!(f, "ccr_setpoint_switch_mode"),
+            0x1760 => write!(f, "dive_gas_mode"),
+            0x1780 => write!(f, "projectile_type"),
+            0x17A4 => write!(f, "favero_product"),
+            0x17C0 => write!(f, "split_type"),
+            0x17E0 => write!(f, "climb_pro_event"),
+            0x1800 => write!(f, "gas_consumption_rate_type"),
+            0x1820 => write!(f, "tap_sensitivity"),
+            0x1840 => write!(f, "radar_threat_level_type"),
+            0x1860 => write!(f, "max_met_speed_source"),
+            0x1880 => write!(f, "max_met_heart_rate_source"),
+            0x18A0 => write!(f, "hrv_status"),
+            0x18C0 => write!(f, "no_fly_time_mode"),
             _ => write!(f, "unknown({})", self.0),
         }
     }
