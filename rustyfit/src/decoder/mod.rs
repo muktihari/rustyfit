@@ -427,6 +427,17 @@ impl<R: Read> Decoder<R> {
 
     fn expand_components(&mut self, mesg: &mut Message, bits: &mut Bits, components: &[Component]) {
         for component in components {
+            let mut val = match bits.pull(component.bits) {
+                Some(v) => v,
+                None => break,
+            };
+
+            if component.accumulate {
+                val =
+                    self.accumulator
+                        .accumulate(mesg.num, component.field_num, val, component.bits);
+            }
+
             let field_ref = match lookup::field_reference(mesg.num, component.field_num) {
                 Some(v) => v,
                 None => continue,
@@ -438,17 +449,6 @@ impl<R: Read> Decoder<R> {
                 is_expanded: true,
                 value: Value::Invalid,
             };
-
-            let mut val = bits.pull(component.bits);
-            if val == 0 && components.len() > 1 {
-                break;
-            }
-
-            if component.accumulate {
-                val = self
-                    .accumulator
-                    .accumulate(mesg.num, field.num, val, component.bits)
-            }
 
             let scaled_val = val as f64 / component.scale - component.offset;
             val = ((scaled_val + field_ref.offset) * field_ref.scale) as u32;
