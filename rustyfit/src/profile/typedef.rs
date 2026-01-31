@@ -255,6 +255,8 @@ impl MesgNum {
     pub const SKIN_TEMP_OVERNIGHT: MesgNum = MesgNum(398);
     /// Message number for the HSA wrist temperature data message
     pub const HSA_WRIST_TEMPERATURE_DATA: MesgNum = MesgNum(409);
+    pub const SLEEP_DISRUPTION_SEVERITY_PERIOD: MesgNum = MesgNum(470);
+    pub const SLEEP_DISRUPTION_OVERNIGHT_SEVERITY: MesgNum = MesgNum(471);
     /// 0xFF00 - 0xFFFE reserved for manufacturer specific messages
     pub const MFG_RANGE_MIN: MesgNum = MesgNum(0xFF00);
     /// 0xFF00 - 0xFFFE reserved for manufacturer specific messages
@@ -391,6 +393,8 @@ impl fmt::Display for MesgNum {
             393 => write!(f, "dive_apnea_alarm"),
             398 => write!(f, "skin_temp_overnight"),
             409 => write!(f, "hsa_wrist_temperature_data"),
+            470 => write!(f, "sleep_disruption_severity_period"),
+            471 => write!(f, "sleep_disruption_overnight_severity"),
             0xFF00 => write!(f, "mfg_range_min"),
             0xFFFE => write!(f, "mfg_range_max"),
             _ => write!(f, "MesgNum({})", self.0),
@@ -522,6 +526,8 @@ impl fmt::Debug for MesgNum {
             393 => write!(f, "MesgNum::DIVE_APNEA_ALARM(393)"),
             398 => write!(f, "MesgNum::SKIN_TEMP_OVERNIGHT(398)"),
             409 => write!(f, "MesgNum::HSA_WRIST_TEMPERATURE_DATA(409)"),
+            470 => write!(f, "MesgNum::SLEEP_DISRUPTION_SEVERITY_PERIOD(470)"),
+            471 => write!(f, "MesgNum::SLEEP_DISRUPTION_OVERNIGHT_SEVERITY(471)"),
             0xFF00 => write!(f, "MesgNum::MFG_RANGE_MIN(0xFF00)"),
             0xFFFE => write!(f, "MesgNum::MFG_RANGE_MAX(0xFFFE)"),
             _ => write!(f, "MesgNum({})", self.0),
@@ -4638,6 +4644,7 @@ impl Manufacturer {
     pub const TEKTRO_RACING_PRODUCTS: Manufacturer = Manufacturer(333);
     pub const DARAD_INNOVATION_CORPORATION: Manufacturer = Manufacturer(334);
     pub const CYCLOPTIM: Manufacturer = Manufacturer(335);
+    pub const RUNNA: Manufacturer = Manufacturer(337);
     pub const ACTIGRAPHCORP: Manufacturer = Manufacturer(5759);
 }
 
@@ -4881,6 +4888,7 @@ impl fmt::Display for Manufacturer {
             333 => write!(f, "tektro_racing_products"),
             334 => write!(f, "darad_innovation_corporation"),
             335 => write!(f, "cycloptim"),
+            337 => write!(f, "runna"),
             5759 => write!(f, "actigraphcorp"),
             _ => write!(f, "Manufacturer({})", self.0),
         }
@@ -5121,6 +5129,7 @@ impl fmt::Debug for Manufacturer {
             333 => write!(f, "Manufacturer::TEKTRO_RACING_PRODUCTS(333)"),
             334 => write!(f, "Manufacturer::DARAD_INNOVATION_CORPORATION(334)"),
             335 => write!(f, "Manufacturer::CYCLOPTIM(335)"),
+            337 => write!(f, "Manufacturer::RUNNA(337)"),
             5759 => write!(f, "Manufacturer::ACTIGRAPHCORP(5759)"),
             _ => write!(f, "Manufacturer({})", self.0),
         }
@@ -5601,6 +5610,8 @@ impl GarminProduct {
     pub const MARQ_GEN2_COMMANDER: GarminProduct = GarminProduct(4472);
     /// aka the Lily 2 Active
     pub const LILY_ATHLETE: GarminProduct = GarminProduct(4477);
+    /// Rally 110/210
+    pub const RALLY_X10: GarminProduct = GarminProduct(4525);
     pub const FENIX8_SOLAR: GarminProduct = GarminProduct(4532);
     pub const FENIX8_SOLAR_LARGE: GarminProduct = GarminProduct(4533);
     pub const FENIX8_SMALL: GarminProduct = GarminProduct(4534);
@@ -5613,14 +5624,25 @@ impl GarminProduct {
     pub const INSTINCT3_AMOLED_45MM: GarminProduct = GarminProduct(4586);
     pub const INSTINCT3_AMOLED_50MM: GarminProduct = GarminProduct(4587);
     pub const DESCENT_G2: GarminProduct = GarminProduct(4588);
+    pub const VENU_X1: GarminProduct = GarminProduct(4603);
     pub const HRM_200: GarminProduct = GarminProduct(4606);
     pub const VIVOACTIVE6: GarminProduct = GarminProduct(4625);
+    pub const FENIX8_PRO: GarminProduct = GarminProduct(4631);
+    pub const EDGE_550: GarminProduct = GarminProduct(4633);
+    pub const EDGE_850: GarminProduct = GarminProduct(4634);
+    pub const VENU4: GarminProduct = GarminProduct(4643);
+    pub const VENU4S: GarminProduct = GarminProduct(4644);
     pub const APPROACHS44: GarminProduct = GarminProduct(4647);
+    pub const EDGE_MTB: GarminProduct = GarminProduct(4655);
     pub const APPROACHS50: GarminProduct = GarminProduct(4656);
     pub const FENIX_E: GarminProduct = GarminProduct(4666);
+    pub const BOUNCE2: GarminProduct = GarminProduct(4745);
     pub const INSTINCT3_SOLAR_50MM: GarminProduct = GarminProduct(4759);
     pub const TACTIX8_AMOLED: GarminProduct = GarminProduct(4775);
     pub const TACTIX8_SOLAR: GarminProduct = GarminProduct(4776);
+    pub const D2_MACH2: GarminProduct = GarminProduct(4879);
+    pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
+    pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
     /// SDM4 footpod
     pub const SDM4: GarminProduct = GarminProduct(10007);
     pub const EDGE_REMOTE: GarminProduct = GarminProduct(10014);
@@ -6076,6 +6098,7 @@ impl fmt::Display for GarminProduct {
             4446 => write!(f, "hrm_fit"),
             4472 => write!(f, "marq_gen2_commander"),
             4477 => write!(f, "lily_athlete"),
+            4525 => write!(f, "rally_x10"),
             4532 => write!(f, "fenix8_solar"),
             4533 => write!(f, "fenix8_solar_large"),
             4534 => write!(f, "fenix8_small"),
@@ -6088,14 +6111,25 @@ impl fmt::Display for GarminProduct {
             4586 => write!(f, "instinct3_amoled_45mm"),
             4587 => write!(f, "instinct3_amoled_50mm"),
             4588 => write!(f, "descent_g2"),
+            4603 => write!(f, "venu_x1"),
             4606 => write!(f, "hrm_200"),
             4625 => write!(f, "vivoactive6"),
+            4631 => write!(f, "fenix8_pro"),
+            4633 => write!(f, "edge_550"),
+            4634 => write!(f, "edge_850"),
+            4643 => write!(f, "venu4"),
+            4644 => write!(f, "venu4s"),
             4647 => write!(f, "approachS44"),
+            4655 => write!(f, "edge_mtb"),
             4656 => write!(f, "approachS50"),
             4666 => write!(f, "fenix_e"),
+            4745 => write!(f, "bounce2"),
             4759 => write!(f, "instinct3_solar_50mm"),
             4775 => write!(f, "tactix8_amoled"),
             4776 => write!(f, "tactix8_solar"),
+            4879 => write!(f, "d2_mach2"),
+            4678 => write!(f, "instinct_crossover_amoled"),
+            4944 => write!(f, "d2_air_x15"),
             10007 => write!(f, "sdm4"),
             10014 => write!(f, "edge_remote"),
             20533 => write!(f, "tacx_training_app_win"),
@@ -6546,6 +6580,7 @@ impl fmt::Debug for GarminProduct {
             4446 => write!(f, "GarminProduct::HRM_FIT(4446)"),
             4472 => write!(f, "GarminProduct::MARQ_GEN2_COMMANDER(4472)"),
             4477 => write!(f, "GarminProduct::LILY_ATHLETE(4477)"),
+            4525 => write!(f, "GarminProduct::RALLY_X10(4525)"),
             4532 => write!(f, "GarminProduct::FENIX8_SOLAR(4532)"),
             4533 => write!(f, "GarminProduct::FENIX8_SOLAR_LARGE(4533)"),
             4534 => write!(f, "GarminProduct::FENIX8_SMALL(4534)"),
@@ -6558,14 +6593,25 @@ impl fmt::Debug for GarminProduct {
             4586 => write!(f, "GarminProduct::INSTINCT3_AMOLED_45MM(4586)"),
             4587 => write!(f, "GarminProduct::INSTINCT3_AMOLED_50MM(4587)"),
             4588 => write!(f, "GarminProduct::DESCENT_G2(4588)"),
+            4603 => write!(f, "GarminProduct::VENU_X1(4603)"),
             4606 => write!(f, "GarminProduct::HRM_200(4606)"),
             4625 => write!(f, "GarminProduct::VIVOACTIVE6(4625)"),
+            4631 => write!(f, "GarminProduct::FENIX8_PRO(4631)"),
+            4633 => write!(f, "GarminProduct::EDGE_550(4633)"),
+            4634 => write!(f, "GarminProduct::EDGE_850(4634)"),
+            4643 => write!(f, "GarminProduct::VENU4(4643)"),
+            4644 => write!(f, "GarminProduct::VENU4S(4644)"),
             4647 => write!(f, "GarminProduct::APPROACHS44(4647)"),
+            4655 => write!(f, "GarminProduct::EDGE_MTB(4655)"),
             4656 => write!(f, "GarminProduct::APPROACHS50(4656)"),
             4666 => write!(f, "GarminProduct::FENIX_E(4666)"),
+            4745 => write!(f, "GarminProduct::BOUNCE2(4745)"),
             4759 => write!(f, "GarminProduct::INSTINCT3_SOLAR_50MM(4759)"),
             4775 => write!(f, "GarminProduct::TACTIX8_AMOLED(4775)"),
             4776 => write!(f, "GarminProduct::TACTIX8_SOLAR(4776)"),
+            4879 => write!(f, "GarminProduct::D2_MACH2(4879)"),
+            4678 => write!(f, "GarminProduct::INSTINCT_CROSSOVER_AMOLED(4678)"),
+            4944 => write!(f, "GarminProduct::D2_AIR_X15(4944)"),
             10007 => write!(f, "GarminProduct::SDM4(10007)"),
             10014 => write!(f, "GarminProduct::EDGE_REMOTE(10014)"),
             20533 => write!(f, "GarminProduct::TACX_TRAINING_APP_WIN(20533)"),
@@ -20104,6 +20150,46 @@ impl fmt::Debug for RadarThreatLevelType {
             2 => write!(f, "RadarThreatLevelType::THREAT_APPROACHING(2)"),
             3 => write!(f, "RadarThreatLevelType::THREAT_APPROACHING_FAST(3)"),
             _ => write!(f, "RadarThreatLevelType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct SleepDisruptionSeverity(pub u8);
+
+impl SleepDisruptionSeverity {
+    pub const NONE: SleepDisruptionSeverity = SleepDisruptionSeverity(0);
+    pub const LOW: SleepDisruptionSeverity = SleepDisruptionSeverity(1);
+    pub const MEDIUM: SleepDisruptionSeverity = SleepDisruptionSeverity(2);
+    pub const HIGH: SleepDisruptionSeverity = SleepDisruptionSeverity(3);
+}
+
+impl Default for SleepDisruptionSeverity {
+    fn default() -> Self {
+        Self(u8::MAX)
+    }
+}
+
+impl fmt::Display for SleepDisruptionSeverity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "none"),
+            1 => write!(f, "low"),
+            2 => write!(f, "medium"),
+            3 => write!(f, "high"),
+            _ => write!(f, "SleepDisruptionSeverity({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for SleepDisruptionSeverity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SleepDisruptionSeverity::NONE(0)"),
+            1 => write!(f, "SleepDisruptionSeverity::LOW(1)"),
+            2 => write!(f, "SleepDisruptionSeverity::MEDIUM(2)"),
+            3 => write!(f, "SleepDisruptionSeverity::HIGH(3)"),
+            _ => write!(f, "SleepDisruptionSeverity({})", self.0),
         }
     }
 }

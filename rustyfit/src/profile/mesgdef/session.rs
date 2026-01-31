@@ -23,7 +23,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 pub struct Session {
     /// Selected bit is set for the current session.
     pub message_index: typedef::MessageIndex,
-    /// Units: s; Sesson end time.
+    /// Units: s
     pub timestamp: typedef::DateTime,
     /// session
     pub event: typedef::Event,

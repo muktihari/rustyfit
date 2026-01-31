@@ -20,7 +20,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 /// Lap is a Lap message.
 pub struct Lap {
     pub message_index: typedef::MessageIndex,
-    /// Units: s; Lap end time.
+    /// Units: s
     pub timestamp: typedef::DateTime,
     pub event: typedef::Event,
     pub event_type: typedef::EventType,
