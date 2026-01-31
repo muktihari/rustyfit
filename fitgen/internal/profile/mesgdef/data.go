@@ -19,6 +19,7 @@ type Message struct {
 	NameSnakeCase     string
 	Fields            []Field
 	DynamicFields     []DynamicField
+	StateSize         byte
 	MaxFieldNum       byte
 	MaxFieldExpandNum byte
 }

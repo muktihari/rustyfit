@@ -14,7 +14,7 @@ use std::fmt;
 
 pub const PROFILE_VERSION: u16 = {{ .VersionData.Version }};
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct ProfileType(pub u16);
 
 impl ProfileType {
@@ -64,7 +64,18 @@ impl fmt::Display for ProfileType {
             {{ range .Constants -}}
             {{ .Value }} => write!(f, "{{ .String }}"),
             {{ end -}}
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ProfileType({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for ProfileType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            {{ range .Constants -}}
+            {{ .Value }} => write!(f, "ProfileType::{{ .Name }}({{ .Value }})"),
+            {{ end -}}
+            _ => write!(f, "ProfileType({})", self.0),
         }
     }
 }

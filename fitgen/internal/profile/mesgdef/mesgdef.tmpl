@@ -17,9 +17,13 @@ use crate::proto::*;
 
 {{ if gt .MaxFieldExpandNum 1 -}}
 fn is_expanded(state: &[u8], num: u8) -> bool {
-    let pos = num / 8;
-    let bit = 1u8 << (num - (8 * pos));
-    state[pos as usize] & bit == bit
+    match num {
+        {{ $first := true -}}
+        {{ range .Fields -}} {{ if .CanExpand }} {{ if $first }} {{ .Num }} {{ $first = not $first }} {{ else }} | {{ .Num }} {{ end }} {{ end }} {{ end }} => {
+            (state[num as usize >> 3] >> (num & 7)) & 1 == 1
+        },
+        _ => false,
+    }
 }
 {{ end }}
 
@@ -36,7 +40,7 @@ pub struct {{ .Name }} {
 	{{ end -}}
 
 	{{ if gt .MaxFieldExpandNum 1 -}}
-	state: [u8; {{ byteDiv .MaxFieldExpandNum 8 | byteAdd 1 }}], // Used for tracking expanded fields.
+	state: [u8; {{ .StateSize }}], // Used for tracking expanded fields.
 	{{ end -}}
 	/// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
 	pub unknown_fields: Vec<Field>,
@@ -142,24 +146,21 @@ impl {{ .Name }} {
     pub fn mark_as_expanded(&mut self, num: u8, flag: bool) -> bool {
         match num {
             {{ $first := true -}}
-            {{ range .Fields -}} {{ if .CanExpand }} {{ if $first }} {{ .Num }} {{ $first = not $first }} {{ else }} | {{ .Num }} {{ end }} {{ end }} {{ end }} => {},
-            _ => return false,
-        };
-        let pos = num / 8;
-        let bit = 1u8 << (num - (8 * pos));
-        self.state[pos as usize] &= !bit;
-        if flag {
-            self.state[pos as usize] |= bit;
+            {{ range .Fields -}} {{ if .CanExpand }} {{ if $first }} {{ .Num }} {{ $first = not $first }} {{ else }} | {{ .Num }} {{ end }} {{ end }} {{ end }} => {
+                if flag {
+                    self.state[num as usize >> 3] |= 1 << (num & 7)
+                } else {
+                    self.state[num as usize >> 3] &= !(1 << (num & 7))
+                }
+                true
+            },
+            _ => false,
         }
-        true
     }
 
     /// checks whether given field's num is a field generated through a component expansion.
-    pub fn is_expanded(&self, num: u8) -> bool {
-        if num/8 < self.state.len() as u8 {
-            return is_expanded(&self.state, num)
-        }
-        false
+    pub fn is_expanded(&self, num: u8) -> bool { 
+        is_expanded(&self.state, num)
     }
     {{ end }}
 }
@@ -175,7 +176,7 @@ impl From<&Message> for {{ .Name }} {
     fn from(mesg: &Message) -> Self {
         let mut vals: [&Value; {{ .MaxFieldNum }}] = [const { &Value::Invalid }; {{ .MaxFieldNum }}];
         {{ if gt .MaxFieldExpandNum 1 -}}
-		let mut state = [0u8; {{ byteDiv .MaxFieldExpandNum 8 | byteAdd 1 }}];
+		let mut state = [0u8; {{ .StateSize }}];
 		{{ end -}}
         let mut unknown_fields: Vec<Field> = Vec::new();
 
@@ -185,9 +186,8 @@ impl From<&Message> for {{ .Name }} {
                 continue;
             }
 			{{ if gt .MaxFieldExpandNum 1 -}}
-			if field.num < {{ .MaxFieldExpandNum }} && field.is_expanded {
-				let pos: u8 = field.num/8;
-				state[pos as usize] |= 1 << (field.num - (8 * pos));
+			if field.is_expanded && field.num < {{ .MaxFieldExpandNum }} {
+				state[field.num as usize >> 3] |= 1 << (field.num & 7)
 			}
 			{{ end -}}
 			vals[field.num as usize] = &field.value;
