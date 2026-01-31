@@ -22,7 +22,7 @@ impl Bool {
     pub const TRUE: Bool = Bool(1);
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct File(pub u8);
 
 impl File {
@@ -96,12 +96,40 @@ impl fmt::Display for File {
             40 => write!(f, "exd_configuration"),
             0xF7 => write!(f, "mfg_range_min"),
             0xFE => write!(f, "mfg_range_max"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "File({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for File {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "File::DEVICE(1)"),
+            2 => write!(f, "File::SETTINGS(2)"),
+            3 => write!(f, "File::SPORT(3)"),
+            4 => write!(f, "File::ACTIVITY(4)"),
+            5 => write!(f, "File::WORKOUT(5)"),
+            6 => write!(f, "File::COURSE(6)"),
+            7 => write!(f, "File::SCHEDULES(7)"),
+            9 => write!(f, "File::WEIGHT(9)"),
+            10 => write!(f, "File::TOTALS(10)"),
+            11 => write!(f, "File::GOALS(11)"),
+            14 => write!(f, "File::BLOOD_PRESSURE(14)"),
+            15 => write!(f, "File::MONITORING_A(15)"),
+            20 => write!(f, "File::ACTIVITY_SUMMARY(20)"),
+            28 => write!(f, "File::MONITORING_DAILY(28)"),
+            32 => write!(f, "File::MONITORING_B(32)"),
+            34 => write!(f, "File::SEGMENT(34)"),
+            35 => write!(f, "File::SEGMENT_LIST(35)"),
+            40 => write!(f, "File::EXD_CONFIGURATION(40)"),
+            0xF7 => write!(f, "File::MFG_RANGE_MIN(0xF7)"),
+            0xFE => write!(f, "File::MFG_RANGE_MAX(0xFE)"),
+            _ => write!(f, "File({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MesgNum(pub u16);
 
 impl MesgNum {
@@ -227,6 +255,8 @@ impl MesgNum {
     pub const SKIN_TEMP_OVERNIGHT: MesgNum = MesgNum(398);
     /// Message number for the HSA wrist temperature data message
     pub const HSA_WRIST_TEMPERATURE_DATA: MesgNum = MesgNum(409);
+    pub const SLEEP_DISRUPTION_SEVERITY_PERIOD: MesgNum = MesgNum(470);
+    pub const SLEEP_DISRUPTION_OVERNIGHT_SEVERITY: MesgNum = MesgNum(471);
     /// 0xFF00 - 0xFFFE reserved for manufacturer specific messages
     pub const MFG_RANGE_MIN: MesgNum = MesgNum(0xFF00);
     /// 0xFF00 - 0xFFFE reserved for manufacturer specific messages
@@ -363,14 +393,149 @@ impl fmt::Display for MesgNum {
             393 => write!(f, "dive_apnea_alarm"),
             398 => write!(f, "skin_temp_overnight"),
             409 => write!(f, "hsa_wrist_temperature_data"),
+            470 => write!(f, "sleep_disruption_severity_period"),
+            471 => write!(f, "sleep_disruption_overnight_severity"),
             0xFF00 => write!(f, "mfg_range_min"),
             0xFFFE => write!(f, "mfg_range_max"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MesgNum({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MesgNum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "MesgNum::FILE_ID(0)"),
+            1 => write!(f, "MesgNum::CAPABILITIES(1)"),
+            2 => write!(f, "MesgNum::DEVICE_SETTINGS(2)"),
+            3 => write!(f, "MesgNum::USER_PROFILE(3)"),
+            4 => write!(f, "MesgNum::HRM_PROFILE(4)"),
+            5 => write!(f, "MesgNum::SDM_PROFILE(5)"),
+            6 => write!(f, "MesgNum::BIKE_PROFILE(6)"),
+            7 => write!(f, "MesgNum::ZONES_TARGET(7)"),
+            8 => write!(f, "MesgNum::HR_ZONE(8)"),
+            9 => write!(f, "MesgNum::POWER_ZONE(9)"),
+            10 => write!(f, "MesgNum::MET_ZONE(10)"),
+            12 => write!(f, "MesgNum::SPORT(12)"),
+            13 => write!(f, "MesgNum::TRAINING_SETTINGS(13)"),
+            15 => write!(f, "MesgNum::GOAL(15)"),
+            18 => write!(f, "MesgNum::SESSION(18)"),
+            19 => write!(f, "MesgNum::LAP(19)"),
+            20 => write!(f, "MesgNum::RECORD(20)"),
+            21 => write!(f, "MesgNum::EVENT(21)"),
+            23 => write!(f, "MesgNum::DEVICE_INFO(23)"),
+            26 => write!(f, "MesgNum::WORKOUT(26)"),
+            27 => write!(f, "MesgNum::WORKOUT_STEP(27)"),
+            28 => write!(f, "MesgNum::SCHEDULE(28)"),
+            30 => write!(f, "MesgNum::WEIGHT_SCALE(30)"),
+            31 => write!(f, "MesgNum::COURSE(31)"),
+            32 => write!(f, "MesgNum::COURSE_POINT(32)"),
+            33 => write!(f, "MesgNum::TOTALS(33)"),
+            34 => write!(f, "MesgNum::ACTIVITY(34)"),
+            35 => write!(f, "MesgNum::SOFTWARE(35)"),
+            37 => write!(f, "MesgNum::FILE_CAPABILITIES(37)"),
+            38 => write!(f, "MesgNum::MESG_CAPABILITIES(38)"),
+            39 => write!(f, "MesgNum::FIELD_CAPABILITIES(39)"),
+            49 => write!(f, "MesgNum::FILE_CREATOR(49)"),
+            51 => write!(f, "MesgNum::BLOOD_PRESSURE(51)"),
+            53 => write!(f, "MesgNum::SPEED_ZONE(53)"),
+            55 => write!(f, "MesgNum::MONITORING(55)"),
+            72 => write!(f, "MesgNum::TRAINING_FILE(72)"),
+            78 => write!(f, "MesgNum::HRV(78)"),
+            80 => write!(f, "MesgNum::ANT_RX(80)"),
+            81 => write!(f, "MesgNum::ANT_TX(81)"),
+            82 => write!(f, "MesgNum::ANT_CHANNEL_ID(82)"),
+            101 => write!(f, "MesgNum::LENGTH(101)"),
+            103 => write!(f, "MesgNum::MONITORING_INFO(103)"),
+            105 => write!(f, "MesgNum::PAD(105)"),
+            106 => write!(f, "MesgNum::SLAVE_DEVICE(106)"),
+            127 => write!(f, "MesgNum::CONNECTIVITY(127)"),
+            128 => write!(f, "MesgNum::WEATHER_CONDITIONS(128)"),
+            129 => write!(f, "MesgNum::WEATHER_ALERT(129)"),
+            131 => write!(f, "MesgNum::CADENCE_ZONE(131)"),
+            132 => write!(f, "MesgNum::HR(132)"),
+            142 => write!(f, "MesgNum::SEGMENT_LAP(142)"),
+            145 => write!(f, "MesgNum::MEMO_GLOB(145)"),
+            148 => write!(f, "MesgNum::SEGMENT_ID(148)"),
+            149 => write!(f, "MesgNum::SEGMENT_LEADERBOARD_ENTRY(149)"),
+            150 => write!(f, "MesgNum::SEGMENT_POINT(150)"),
+            151 => write!(f, "MesgNum::SEGMENT_FILE(151)"),
+            158 => write!(f, "MesgNum::WORKOUT_SESSION(158)"),
+            159 => write!(f, "MesgNum::WATCHFACE_SETTINGS(159)"),
+            160 => write!(f, "MesgNum::GPS_METADATA(160)"),
+            161 => write!(f, "MesgNum::CAMERA_EVENT(161)"),
+            162 => write!(f, "MesgNum::TIMESTAMP_CORRELATION(162)"),
+            164 => write!(f, "MesgNum::GYROSCOPE_DATA(164)"),
+            165 => write!(f, "MesgNum::ACCELEROMETER_DATA(165)"),
+            167 => write!(f, "MesgNum::THREE_D_SENSOR_CALIBRATION(167)"),
+            169 => write!(f, "MesgNum::VIDEO_FRAME(169)"),
+            174 => write!(f, "MesgNum::OBDII_DATA(174)"),
+            177 => write!(f, "MesgNum::NMEA_SENTENCE(177)"),
+            178 => write!(f, "MesgNum::AVIATION_ATTITUDE(178)"),
+            184 => write!(f, "MesgNum::VIDEO(184)"),
+            185 => write!(f, "MesgNum::VIDEO_TITLE(185)"),
+            186 => write!(f, "MesgNum::VIDEO_DESCRIPTION(186)"),
+            187 => write!(f, "MesgNum::VIDEO_CLIP(187)"),
+            188 => write!(f, "MesgNum::OHR_SETTINGS(188)"),
+            200 => write!(f, "MesgNum::EXD_SCREEN_CONFIGURATION(200)"),
+            201 => write!(f, "MesgNum::EXD_DATA_FIELD_CONFIGURATION(201)"),
+            202 => write!(f, "MesgNum::EXD_DATA_CONCEPT_CONFIGURATION(202)"),
+            206 => write!(f, "MesgNum::FIELD_DESCRIPTION(206)"),
+            207 => write!(f, "MesgNum::DEVELOPER_DATA_ID(207)"),
+            208 => write!(f, "MesgNum::MAGNETOMETER_DATA(208)"),
+            209 => write!(f, "MesgNum::BAROMETER_DATA(209)"),
+            210 => write!(f, "MesgNum::ONE_D_SENSOR_CALIBRATION(210)"),
+            211 => write!(f, "MesgNum::MONITORING_HR_DATA(211)"),
+            216 => write!(f, "MesgNum::TIME_IN_ZONE(216)"),
+            225 => write!(f, "MesgNum::SET(225)"),
+            227 => write!(f, "MesgNum::STRESS_LEVEL(227)"),
+            229 => write!(f, "MesgNum::MAX_MET_DATA(229)"),
+            258 => write!(f, "MesgNum::DIVE_SETTINGS(258)"),
+            259 => write!(f, "MesgNum::DIVE_GAS(259)"),
+            262 => write!(f, "MesgNum::DIVE_ALARM(262)"),
+            264 => write!(f, "MesgNum::EXERCISE_TITLE(264)"),
+            268 => write!(f, "MesgNum::DIVE_SUMMARY(268)"),
+            269 => write!(f, "MesgNum::SPO2_DATA(269)"),
+            275 => write!(f, "MesgNum::SLEEP_LEVEL(275)"),
+            285 => write!(f, "MesgNum::JUMP(285)"),
+            289 => write!(f, "MesgNum::AAD_ACCEL_FEATURES(289)"),
+            290 => write!(f, "MesgNum::BEAT_INTERVALS(290)"),
+            297 => write!(f, "MesgNum::RESPIRATION_RATE(297)"),
+            302 => write!(f, "MesgNum::HSA_ACCELEROMETER_DATA(302)"),
+            304 => write!(f, "MesgNum::HSA_STEP_DATA(304)"),
+            305 => write!(f, "MesgNum::HSA_SPO2_DATA(305)"),
+            306 => write!(f, "MesgNum::HSA_STRESS_DATA(306)"),
+            307 => write!(f, "MesgNum::HSA_RESPIRATION_DATA(307)"),
+            308 => write!(f, "MesgNum::HSA_HEART_RATE_DATA(308)"),
+            312 => write!(f, "MesgNum::SPLIT(312)"),
+            313 => write!(f, "MesgNum::SPLIT_SUMMARY(313)"),
+            314 => write!(f, "MesgNum::HSA_BODY_BATTERY_DATA(314)"),
+            315 => write!(f, "MesgNum::HSA_EVENT(315)"),
+            317 => write!(f, "MesgNum::CLIMB_PRO(317)"),
+            319 => write!(f, "MesgNum::TANK_UPDATE(319)"),
+            323 => write!(f, "MesgNum::TANK_SUMMARY(323)"),
+            346 => write!(f, "MesgNum::SLEEP_ASSESSMENT(346)"),
+            370 => write!(f, "MesgNum::HRV_STATUS_SUMMARY(370)"),
+            371 => write!(f, "MesgNum::HRV_VALUE(371)"),
+            372 => write!(f, "MesgNum::RAW_BBI(372)"),
+            375 => write!(f, "MesgNum::DEVICE_AUX_BATTERY_INFO(375)"),
+            376 => write!(f, "MesgNum::HSA_GYROSCOPE_DATA(376)"),
+            387 => write!(f, "MesgNum::CHRONO_SHOT_SESSION(387)"),
+            388 => write!(f, "MesgNum::CHRONO_SHOT_DATA(388)"),
+            389 => write!(f, "MesgNum::HSA_CONFIGURATION_DATA(389)"),
+            393 => write!(f, "MesgNum::DIVE_APNEA_ALARM(393)"),
+            398 => write!(f, "MesgNum::SKIN_TEMP_OVERNIGHT(398)"),
+            409 => write!(f, "MesgNum::HSA_WRIST_TEMPERATURE_DATA(409)"),
+            470 => write!(f, "MesgNum::SLEEP_DISRUPTION_SEVERITY_PERIOD(470)"),
+            471 => write!(f, "MesgNum::SLEEP_DISRUPTION_OVERNIGHT_SEVERITY(471)"),
+            0xFF00 => write!(f, "MesgNum::MFG_RANGE_MIN(0xFF00)"),
+            0xFFFE => write!(f, "MesgNum::MFG_RANGE_MAX(0xFFFE)"),
+            _ => write!(f, "MesgNum({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Checksum(pub u8);
 
 impl Checksum {
@@ -391,12 +556,22 @@ impl fmt::Display for Checksum {
         match self.0 {
             0 => write!(f, "clear"),
             1 => write!(f, "ok"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Checksum({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Checksum {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Checksum::CLEAR(0)"),
+            1 => write!(f, "Checksum::OK(1)"),
+            _ => write!(f, "Checksum({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FileFlags(pub u8);
 
 impl FileFlags {
@@ -407,7 +582,7 @@ impl FileFlags {
 
 impl Default for FileFlags {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -417,12 +592,23 @@ impl fmt::Display for FileFlags {
             0x02 => write!(f, "read"),
             0x04 => write!(f, "write"),
             0x08 => write!(f, "erase"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FileFlags({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FileFlags {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x02 => write!(f, "FileFlags::READ(0x02)"),
+            0x04 => write!(f, "FileFlags::WRITE(0x04)"),
+            0x08 => write!(f, "FileFlags::ERASE(0x08)"),
+            _ => write!(f, "FileFlags({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MesgCount(pub u8);
 
 impl MesgCount {
@@ -443,12 +629,23 @@ impl fmt::Display for MesgCount {
             0 => write!(f, "num_per_file"),
             1 => write!(f, "max_per_file"),
             2 => write!(f, "max_per_file_type"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MesgCount({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MesgCount {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "MesgCount::NUM_PER_FILE(0)"),
+            1 => write!(f, "MesgCount::MAX_PER_FILE(1)"),
+            2 => write!(f, "MesgCount::MAX_PER_FILE_TYPE(2)"),
+            _ => write!(f, "MesgCount({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DateTime(pub u32);
 
 impl DateTime {
@@ -466,12 +663,21 @@ impl fmt::Display for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0x10000000 => write!(f, "min"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DateTime({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DateTime {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x10000000 => write!(f, "DateTime::MIN(0x10000000)"),
+            _ => write!(f, "DateTime({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LocalDateTime(pub u32);
 
 impl LocalDateTime {
@@ -489,12 +695,21 @@ impl fmt::Display for LocalDateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0x10000000 => write!(f, "min"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LocalDateTime({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LocalDateTime {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x10000000 => write!(f, "LocalDateTime::MIN(0x10000000)"),
+            _ => write!(f, "LocalDateTime({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MessageIndex(pub u16);
 
 impl MessageIndex {
@@ -518,12 +733,23 @@ impl fmt::Display for MessageIndex {
             0x8000 => write!(f, "selected"),
             0x7000 => write!(f, "reserved"),
             0x0FFF => write!(f, "mask"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MessageIndex({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MessageIndex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x8000 => write!(f, "MessageIndex::SELECTED(0x8000)"),
+            0x7000 => write!(f, "MessageIndex::RESERVED(0x7000)"),
+            0x0FFF => write!(f, "MessageIndex::MASK(0x0FFF)"),
+            _ => write!(f, "MessageIndex({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DeviceIndex(pub u8);
 
 impl DeviceIndex {
@@ -541,12 +767,21 @@ impl fmt::Display for DeviceIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "creator"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DeviceIndex({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DeviceIndex {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DeviceIndex::CREATOR(0)"),
+            _ => write!(f, "DeviceIndex({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Gender(pub u8);
 
 impl Gender {
@@ -565,12 +800,22 @@ impl fmt::Display for Gender {
         match self.0 {
             0 => write!(f, "female"),
             1 => write!(f, "male"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Gender({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Gender {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Gender::FEMALE(0)"),
+            1 => write!(f, "Gender::MALE(1)"),
+            _ => write!(f, "Gender({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Language(pub u8);
 
 impl Language {
@@ -663,12 +908,59 @@ impl fmt::Display for Language {
             36 => write!(f, "burmese"),
             37 => write!(f, "mongolian"),
             254 => write!(f, "custom"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Language({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Language {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Language::ENGLISH(0)"),
+            1 => write!(f, "Language::FRENCH(1)"),
+            2 => write!(f, "Language::ITALIAN(2)"),
+            3 => write!(f, "Language::GERMAN(3)"),
+            4 => write!(f, "Language::SPANISH(4)"),
+            5 => write!(f, "Language::CROATIAN(5)"),
+            6 => write!(f, "Language::CZECH(6)"),
+            7 => write!(f, "Language::DANISH(7)"),
+            8 => write!(f, "Language::DUTCH(8)"),
+            9 => write!(f, "Language::FINNISH(9)"),
+            10 => write!(f, "Language::GREEK(10)"),
+            11 => write!(f, "Language::HUNGARIAN(11)"),
+            12 => write!(f, "Language::NORWEGIAN(12)"),
+            13 => write!(f, "Language::POLISH(13)"),
+            14 => write!(f, "Language::PORTUGUESE(14)"),
+            15 => write!(f, "Language::SLOVAKIAN(15)"),
+            16 => write!(f, "Language::SLOVENIAN(16)"),
+            17 => write!(f, "Language::SWEDISH(17)"),
+            18 => write!(f, "Language::RUSSIAN(18)"),
+            19 => write!(f, "Language::TURKISH(19)"),
+            20 => write!(f, "Language::LATVIAN(20)"),
+            21 => write!(f, "Language::UKRAINIAN(21)"),
+            22 => write!(f, "Language::ARABIC(22)"),
+            23 => write!(f, "Language::FARSI(23)"),
+            24 => write!(f, "Language::BULGARIAN(24)"),
+            25 => write!(f, "Language::ROMANIAN(25)"),
+            26 => write!(f, "Language::CHINESE(26)"),
+            27 => write!(f, "Language::JAPANESE(27)"),
+            28 => write!(f, "Language::KOREAN(28)"),
+            29 => write!(f, "Language::TAIWANESE(29)"),
+            30 => write!(f, "Language::THAI(30)"),
+            31 => write!(f, "Language::HEBREW(31)"),
+            32 => write!(f, "Language::BRAZILIAN_PORTUGUESE(32)"),
+            33 => write!(f, "Language::INDONESIAN(33)"),
+            34 => write!(f, "Language::MALAYSIAN(34)"),
+            35 => write!(f, "Language::VIETNAMESE(35)"),
+            36 => write!(f, "Language::BURMESE(36)"),
+            37 => write!(f, "Language::MONGOLIAN(37)"),
+            254 => write!(f, "Language::CUSTOM(254)"),
+            _ => write!(f, "Language({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LanguageBits0(pub u8);
 
 impl LanguageBits0 {
@@ -684,7 +976,7 @@ impl LanguageBits0 {
 
 impl Default for LanguageBits0 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -699,12 +991,28 @@ impl fmt::Display for LanguageBits0 {
             0x20 => write!(f, "croatian"),
             0x40 => write!(f, "czech"),
             0x80 => write!(f, "danish"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LanguageBits0({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LanguageBits0 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "LanguageBits0::ENGLISH(0x01)"),
+            0x02 => write!(f, "LanguageBits0::FRENCH(0x02)"),
+            0x04 => write!(f, "LanguageBits0::ITALIAN(0x04)"),
+            0x08 => write!(f, "LanguageBits0::GERMAN(0x08)"),
+            0x10 => write!(f, "LanguageBits0::SPANISH(0x10)"),
+            0x20 => write!(f, "LanguageBits0::CROATIAN(0x20)"),
+            0x40 => write!(f, "LanguageBits0::CZECH(0x40)"),
+            0x80 => write!(f, "LanguageBits0::DANISH(0x80)"),
+            _ => write!(f, "LanguageBits0({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LanguageBits1(pub u8);
 
 impl LanguageBits1 {
@@ -720,7 +1028,7 @@ impl LanguageBits1 {
 
 impl Default for LanguageBits1 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -735,12 +1043,28 @@ impl fmt::Display for LanguageBits1 {
             0x20 => write!(f, "polish"),
             0x40 => write!(f, "portuguese"),
             0x80 => write!(f, "slovakian"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LanguageBits1({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LanguageBits1 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "LanguageBits1::DUTCH(0x01)"),
+            0x02 => write!(f, "LanguageBits1::FINNISH(0x02)"),
+            0x04 => write!(f, "LanguageBits1::GREEK(0x04)"),
+            0x08 => write!(f, "LanguageBits1::HUNGARIAN(0x08)"),
+            0x10 => write!(f, "LanguageBits1::NORWEGIAN(0x10)"),
+            0x20 => write!(f, "LanguageBits1::POLISH(0x20)"),
+            0x40 => write!(f, "LanguageBits1::PORTUGUESE(0x40)"),
+            0x80 => write!(f, "LanguageBits1::SLOVAKIAN(0x80)"),
+            _ => write!(f, "LanguageBits1({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LanguageBits2(pub u8);
 
 impl LanguageBits2 {
@@ -756,7 +1080,7 @@ impl LanguageBits2 {
 
 impl Default for LanguageBits2 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -771,12 +1095,28 @@ impl fmt::Display for LanguageBits2 {
             0x20 => write!(f, "ukrainian"),
             0x40 => write!(f, "arabic"),
             0x80 => write!(f, "farsi"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LanguageBits2({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LanguageBits2 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "LanguageBits2::SLOVENIAN(0x01)"),
+            0x02 => write!(f, "LanguageBits2::SWEDISH(0x02)"),
+            0x04 => write!(f, "LanguageBits2::RUSSIAN(0x04)"),
+            0x08 => write!(f, "LanguageBits2::TURKISH(0x08)"),
+            0x10 => write!(f, "LanguageBits2::LATVIAN(0x10)"),
+            0x20 => write!(f, "LanguageBits2::UKRAINIAN(0x20)"),
+            0x40 => write!(f, "LanguageBits2::ARABIC(0x40)"),
+            0x80 => write!(f, "LanguageBits2::FARSI(0x80)"),
+            _ => write!(f, "LanguageBits2({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LanguageBits3(pub u8);
 
 impl LanguageBits3 {
@@ -792,7 +1132,7 @@ impl LanguageBits3 {
 
 impl Default for LanguageBits3 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -807,12 +1147,28 @@ impl fmt::Display for LanguageBits3 {
             0x20 => write!(f, "taiwanese"),
             0x40 => write!(f, "thai"),
             0x80 => write!(f, "hebrew"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LanguageBits3({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LanguageBits3 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "LanguageBits3::BULGARIAN(0x01)"),
+            0x02 => write!(f, "LanguageBits3::ROMANIAN(0x02)"),
+            0x04 => write!(f, "LanguageBits3::CHINESE(0x04)"),
+            0x08 => write!(f, "LanguageBits3::JAPANESE(0x08)"),
+            0x10 => write!(f, "LanguageBits3::KOREAN(0x10)"),
+            0x20 => write!(f, "LanguageBits3::TAIWANESE(0x20)"),
+            0x40 => write!(f, "LanguageBits3::THAI(0x40)"),
+            0x80 => write!(f, "LanguageBits3::HEBREW(0x80)"),
+            _ => write!(f, "LanguageBits3({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LanguageBits4(pub u8);
 
 impl LanguageBits4 {
@@ -826,7 +1182,7 @@ impl LanguageBits4 {
 
 impl Default for LanguageBits4 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -839,12 +1195,26 @@ impl fmt::Display for LanguageBits4 {
             0x08 => write!(f, "vietnamese"),
             0x10 => write!(f, "burmese"),
             0x20 => write!(f, "mongolian"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LanguageBits4({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LanguageBits4 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "LanguageBits4::BRAZILIAN_PORTUGUESE(0x01)"),
+            0x02 => write!(f, "LanguageBits4::INDONESIAN(0x02)"),
+            0x04 => write!(f, "LanguageBits4::MALAYSIAN(0x04)"),
+            0x08 => write!(f, "LanguageBits4::VIETNAMESE(0x08)"),
+            0x10 => write!(f, "LanguageBits4::BURMESE(0x10)"),
+            0x20 => write!(f, "LanguageBits4::MONGOLIAN(0x20)"),
+            _ => write!(f, "LanguageBits4({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TimeZone(pub u8);
 
 impl TimeZone {
@@ -1071,12 +1441,126 @@ impl fmt::Display for TimeZone {
             103 => write!(f, "santiago"),
             253 => write!(f, "manual"),
             254 => write!(f, "automatic"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TimeZone({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TimeZone {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TimeZone::ALMATY(0)"),
+            1 => write!(f, "TimeZone::BANGKOK(1)"),
+            2 => write!(f, "TimeZone::BOMBAY(2)"),
+            3 => write!(f, "TimeZone::BRASILIA(3)"),
+            4 => write!(f, "TimeZone::CAIRO(4)"),
+            5 => write!(f, "TimeZone::CAPE_VERDE_IS(5)"),
+            6 => write!(f, "TimeZone::DARWIN(6)"),
+            7 => write!(f, "TimeZone::ENIWETOK(7)"),
+            8 => write!(f, "TimeZone::FIJI(8)"),
+            9 => write!(f, "TimeZone::HONG_KONG(9)"),
+            10 => write!(f, "TimeZone::ISLAMABAD(10)"),
+            11 => write!(f, "TimeZone::KABUL(11)"),
+            12 => write!(f, "TimeZone::MAGADAN(12)"),
+            13 => write!(f, "TimeZone::MID_ATLANTIC(13)"),
+            14 => write!(f, "TimeZone::MOSCOW(14)"),
+            15 => write!(f, "TimeZone::MUSCAT(15)"),
+            16 => write!(f, "TimeZone::NEWFOUNDLAND(16)"),
+            17 => write!(f, "TimeZone::SAMOA(17)"),
+            18 => write!(f, "TimeZone::SYDNEY(18)"),
+            19 => write!(f, "TimeZone::TEHRAN(19)"),
+            20 => write!(f, "TimeZone::TOKYO(20)"),
+            21 => write!(f, "TimeZone::US_ALASKA(21)"),
+            22 => write!(f, "TimeZone::US_ATLANTIC(22)"),
+            23 => write!(f, "TimeZone::US_CENTRAL(23)"),
+            24 => write!(f, "TimeZone::US_EASTERN(24)"),
+            25 => write!(f, "TimeZone::US_HAWAII(25)"),
+            26 => write!(f, "TimeZone::US_MOUNTAIN(26)"),
+            27 => write!(f, "TimeZone::US_PACIFIC(27)"),
+            28 => write!(f, "TimeZone::OTHER(28)"),
+            29 => write!(f, "TimeZone::AUCKLAND(29)"),
+            30 => write!(f, "TimeZone::KATHMANDU(30)"),
+            31 => write!(f, "TimeZone::EUROPE_WESTERN_WET(31)"),
+            32 => write!(f, "TimeZone::EUROPE_CENTRAL_CET(32)"),
+            33 => write!(f, "TimeZone::EUROPE_EASTERN_EET(33)"),
+            34 => write!(f, "TimeZone::JAKARTA(34)"),
+            35 => write!(f, "TimeZone::PERTH(35)"),
+            36 => write!(f, "TimeZone::ADELAIDE(36)"),
+            37 => write!(f, "TimeZone::BRISBANE(37)"),
+            38 => write!(f, "TimeZone::TASMANIA(38)"),
+            39 => write!(f, "TimeZone::ICELAND(39)"),
+            40 => write!(f, "TimeZone::AMSTERDAM(40)"),
+            41 => write!(f, "TimeZone::ATHENS(41)"),
+            42 => write!(f, "TimeZone::BARCELONA(42)"),
+            43 => write!(f, "TimeZone::BERLIN(43)"),
+            44 => write!(f, "TimeZone::BRUSSELS(44)"),
+            45 => write!(f, "TimeZone::BUDAPEST(45)"),
+            46 => write!(f, "TimeZone::COPENHAGEN(46)"),
+            47 => write!(f, "TimeZone::DUBLIN(47)"),
+            48 => write!(f, "TimeZone::HELSINKI(48)"),
+            49 => write!(f, "TimeZone::LISBON(49)"),
+            50 => write!(f, "TimeZone::LONDON(50)"),
+            51 => write!(f, "TimeZone::MADRID(51)"),
+            52 => write!(f, "TimeZone::MUNICH(52)"),
+            53 => write!(f, "TimeZone::OSLO(53)"),
+            54 => write!(f, "TimeZone::PARIS(54)"),
+            55 => write!(f, "TimeZone::PRAGUE(55)"),
+            56 => write!(f, "TimeZone::REYKJAVIK(56)"),
+            57 => write!(f, "TimeZone::ROME(57)"),
+            58 => write!(f, "TimeZone::STOCKHOLM(58)"),
+            59 => write!(f, "TimeZone::VIENNA(59)"),
+            60 => write!(f, "TimeZone::WARSAW(60)"),
+            61 => write!(f, "TimeZone::ZURICH(61)"),
+            62 => write!(f, "TimeZone::QUEBEC(62)"),
+            63 => write!(f, "TimeZone::ONTARIO(63)"),
+            64 => write!(f, "TimeZone::MANITOBA(64)"),
+            65 => write!(f, "TimeZone::SASKATCHEWAN(65)"),
+            66 => write!(f, "TimeZone::ALBERTA(66)"),
+            67 => write!(f, "TimeZone::BRITISH_COLUMBIA(67)"),
+            68 => write!(f, "TimeZone::BOISE(68)"),
+            69 => write!(f, "TimeZone::BOSTON(69)"),
+            70 => write!(f, "TimeZone::CHICAGO(70)"),
+            71 => write!(f, "TimeZone::DALLAS(71)"),
+            72 => write!(f, "TimeZone::DENVER(72)"),
+            73 => write!(f, "TimeZone::KANSAS_CITY(73)"),
+            74 => write!(f, "TimeZone::LAS_VEGAS(74)"),
+            75 => write!(f, "TimeZone::LOS_ANGELES(75)"),
+            76 => write!(f, "TimeZone::MIAMI(76)"),
+            77 => write!(f, "TimeZone::MINNEAPOLIS(77)"),
+            78 => write!(f, "TimeZone::NEW_YORK(78)"),
+            79 => write!(f, "TimeZone::NEW_ORLEANS(79)"),
+            80 => write!(f, "TimeZone::PHOENIX(80)"),
+            81 => write!(f, "TimeZone::SANTA_FE(81)"),
+            82 => write!(f, "TimeZone::SEATTLE(82)"),
+            83 => write!(f, "TimeZone::WASHINGTON_DC(83)"),
+            84 => write!(f, "TimeZone::US_ARIZONA(84)"),
+            85 => write!(f, "TimeZone::CHITA(85)"),
+            86 => write!(f, "TimeZone::EKATERINBURG(86)"),
+            87 => write!(f, "TimeZone::IRKUTSK(87)"),
+            88 => write!(f, "TimeZone::KALININGRAD(88)"),
+            89 => write!(f, "TimeZone::KRASNOYARSK(89)"),
+            90 => write!(f, "TimeZone::NOVOSIBIRSK(90)"),
+            91 => write!(f, "TimeZone::PETROPAVLOVSK_KAMCHATSKIY(91)"),
+            92 => write!(f, "TimeZone::SAMARA(92)"),
+            93 => write!(f, "TimeZone::VLADIVOSTOK(93)"),
+            94 => write!(f, "TimeZone::MEXICO_CENTRAL(94)"),
+            95 => write!(f, "TimeZone::MEXICO_MOUNTAIN(95)"),
+            96 => write!(f, "TimeZone::MEXICO_PACIFIC(96)"),
+            97 => write!(f, "TimeZone::CAPE_TOWN(97)"),
+            98 => write!(f, "TimeZone::WINKHOEK(98)"),
+            99 => write!(f, "TimeZone::LAGOS(99)"),
+            100 => write!(f, "TimeZone::RIYAHD(100)"),
+            101 => write!(f, "TimeZone::VENEZUELA(101)"),
+            102 => write!(f, "TimeZone::AUSTRALIA_LH(102)"),
+            103 => write!(f, "TimeZone::SANTIAGO(103)"),
+            253 => write!(f, "TimeZone::MANUAL(253)"),
+            254 => write!(f, "TimeZone::AUTOMATIC(254)"),
+            _ => write!(f, "TimeZone({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DisplayMeasure(pub u8);
 
 impl DisplayMeasure {
@@ -1097,12 +1581,23 @@ impl fmt::Display for DisplayMeasure {
             0 => write!(f, "metric"),
             1 => write!(f, "statute"),
             2 => write!(f, "nautical"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DisplayMeasure({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DisplayMeasure {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DisplayMeasure::METRIC(0)"),
+            1 => write!(f, "DisplayMeasure::STATUTE(1)"),
+            2 => write!(f, "DisplayMeasure::NAUTICAL(2)"),
+            _ => write!(f, "DisplayMeasure({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DisplayHeart(pub u8);
 
 impl DisplayHeart {
@@ -1123,12 +1618,23 @@ impl fmt::Display for DisplayHeart {
             0 => write!(f, "bpm"),
             1 => write!(f, "max"),
             2 => write!(f, "reserve"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DisplayHeart({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DisplayHeart {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DisplayHeart::BPM(0)"),
+            1 => write!(f, "DisplayHeart::MAX(1)"),
+            2 => write!(f, "DisplayHeart::RESERVE(2)"),
+            _ => write!(f, "DisplayHeart({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DisplayPower(pub u8);
 
 impl DisplayPower {
@@ -1147,12 +1653,22 @@ impl fmt::Display for DisplayPower {
         match self.0 {
             0 => write!(f, "watts"),
             1 => write!(f, "percent_ftp"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DisplayPower({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DisplayPower {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DisplayPower::WATTS(0)"),
+            1 => write!(f, "DisplayPower::PERCENT_FTP(1)"),
+            _ => write!(f, "DisplayPower({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DisplayPosition(pub u8);
 
 impl DisplayPosition {
@@ -1293,12 +1809,62 @@ impl fmt::Display for DisplayPosition {
             39 => write!(f, "estonian_grid"),
             40 => write!(f, "latvian_grid"),
             41 => write!(f, "swedish_ref_99_grid"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DisplayPosition({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DisplayPosition {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DisplayPosition::DEGREE(0)"),
+            1 => write!(f, "DisplayPosition::DEGREE_MINUTE(1)"),
+            2 => write!(f, "DisplayPosition::DEGREE_MINUTE_SECOND(2)"),
+            3 => write!(f, "DisplayPosition::AUSTRIAN_GRID(3)"),
+            4 => write!(f, "DisplayPosition::BRITISH_GRID(4)"),
+            5 => write!(f, "DisplayPosition::DUTCH_GRID(5)"),
+            6 => write!(f, "DisplayPosition::HUNGARIAN_GRID(6)"),
+            7 => write!(f, "DisplayPosition::FINNISH_GRID(7)"),
+            8 => write!(f, "DisplayPosition::GERMAN_GRID(8)"),
+            9 => write!(f, "DisplayPosition::ICELANDIC_GRID(9)"),
+            10 => write!(f, "DisplayPosition::INDONESIAN_EQUATORIAL(10)"),
+            11 => write!(f, "DisplayPosition::INDONESIAN_IRIAN(11)"),
+            12 => write!(f, "DisplayPosition::INDONESIAN_SOUTHERN(12)"),
+            13 => write!(f, "DisplayPosition::INDIA_ZONE_0(13)"),
+            14 => write!(f, "DisplayPosition::INDIA_ZONE_IA(14)"),
+            15 => write!(f, "DisplayPosition::INDIA_ZONE_IB(15)"),
+            16 => write!(f, "DisplayPosition::INDIA_ZONE_IIA(16)"),
+            17 => write!(f, "DisplayPosition::INDIA_ZONE_IIB(17)"),
+            18 => write!(f, "DisplayPosition::INDIA_ZONE_IIIA(18)"),
+            19 => write!(f, "DisplayPosition::INDIA_ZONE_IIIB(19)"),
+            20 => write!(f, "DisplayPosition::INDIA_ZONE_IVA(20)"),
+            21 => write!(f, "DisplayPosition::INDIA_ZONE_IVB(21)"),
+            22 => write!(f, "DisplayPosition::IRISH_TRANSVERSE(22)"),
+            23 => write!(f, "DisplayPosition::IRISH_GRID(23)"),
+            24 => write!(f, "DisplayPosition::LORAN(24)"),
+            25 => write!(f, "DisplayPosition::MAIDENHEAD_GRID(25)"),
+            26 => write!(f, "DisplayPosition::MGRS_GRID(26)"),
+            27 => write!(f, "DisplayPosition::NEW_ZEALAND_GRID(27)"),
+            28 => write!(f, "DisplayPosition::NEW_ZEALAND_TRANSVERSE(28)"),
+            29 => write!(f, "DisplayPosition::QATAR_GRID(29)"),
+            30 => write!(f, "DisplayPosition::MODIFIED_SWEDISH_GRID(30)"),
+            31 => write!(f, "DisplayPosition::SWEDISH_GRID(31)"),
+            32 => write!(f, "DisplayPosition::SOUTH_AFRICAN_GRID(32)"),
+            33 => write!(f, "DisplayPosition::SWISS_GRID(33)"),
+            34 => write!(f, "DisplayPosition::TAIWAN_GRID(34)"),
+            35 => write!(f, "DisplayPosition::UNITED_STATES_GRID(35)"),
+            36 => write!(f, "DisplayPosition::UTM_UPS_GRID(36)"),
+            37 => write!(f, "DisplayPosition::WEST_MALAYAN(37)"),
+            38 => write!(f, "DisplayPosition::BORNEO_RSO(38)"),
+            39 => write!(f, "DisplayPosition::ESTONIAN_GRID(39)"),
+            40 => write!(f, "DisplayPosition::LATVIAN_GRID(40)"),
+            41 => write!(f, "DisplayPosition::SWEDISH_REF_99_GRID(41)"),
+            _ => write!(f, "DisplayPosition({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Switch(pub u8);
 
 impl Switch {
@@ -1319,12 +1885,23 @@ impl fmt::Display for Switch {
             0 => write!(f, "off"),
             1 => write!(f, "on"),
             2 => write!(f, "auto"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Switch({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Switch {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Switch::OFF(0)"),
+            1 => write!(f, "Switch::ON(1)"),
+            2 => write!(f, "Switch::AUTO(2)"),
+            _ => write!(f, "Switch({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Sport(pub u8);
 
 impl Sport {
@@ -1479,12 +2056,89 @@ impl fmt::Display for Sport {
             83 => write!(f, "dance"),
             84 => write!(f, "jump_rope"),
             254 => write!(f, "all"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Sport({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Sport {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Sport::GENERIC(0)"),
+            1 => write!(f, "Sport::RUNNING(1)"),
+            2 => write!(f, "Sport::CYCLING(2)"),
+            3 => write!(f, "Sport::TRANSITION(3)"),
+            4 => write!(f, "Sport::FITNESS_EQUIPMENT(4)"),
+            5 => write!(f, "Sport::SWIMMING(5)"),
+            6 => write!(f, "Sport::BASKETBALL(6)"),
+            7 => write!(f, "Sport::SOCCER(7)"),
+            8 => write!(f, "Sport::TENNIS(8)"),
+            9 => write!(f, "Sport::AMERICAN_FOOTBALL(9)"),
+            10 => write!(f, "Sport::TRAINING(10)"),
+            11 => write!(f, "Sport::WALKING(11)"),
+            12 => write!(f, "Sport::CROSS_COUNTRY_SKIING(12)"),
+            13 => write!(f, "Sport::ALPINE_SKIING(13)"),
+            14 => write!(f, "Sport::SNOWBOARDING(14)"),
+            15 => write!(f, "Sport::ROWING(15)"),
+            16 => write!(f, "Sport::MOUNTAINEERING(16)"),
+            17 => write!(f, "Sport::HIKING(17)"),
+            18 => write!(f, "Sport::MULTISPORT(18)"),
+            19 => write!(f, "Sport::PADDLING(19)"),
+            20 => write!(f, "Sport::FLYING(20)"),
+            21 => write!(f, "Sport::E_BIKING(21)"),
+            22 => write!(f, "Sport::MOTORCYCLING(22)"),
+            23 => write!(f, "Sport::BOATING(23)"),
+            24 => write!(f, "Sport::DRIVING(24)"),
+            25 => write!(f, "Sport::GOLF(25)"),
+            26 => write!(f, "Sport::HANG_GLIDING(26)"),
+            27 => write!(f, "Sport::HORSEBACK_RIDING(27)"),
+            28 => write!(f, "Sport::HUNTING(28)"),
+            29 => write!(f, "Sport::FISHING(29)"),
+            30 => write!(f, "Sport::INLINE_SKATING(30)"),
+            31 => write!(f, "Sport::ROCK_CLIMBING(31)"),
+            32 => write!(f, "Sport::SAILING(32)"),
+            33 => write!(f, "Sport::ICE_SKATING(33)"),
+            34 => write!(f, "Sport::SKY_DIVING(34)"),
+            35 => write!(f, "Sport::SNOWSHOEING(35)"),
+            36 => write!(f, "Sport::SNOWMOBILING(36)"),
+            37 => write!(f, "Sport::STAND_UP_PADDLEBOARDING(37)"),
+            38 => write!(f, "Sport::SURFING(38)"),
+            39 => write!(f, "Sport::WAKEBOARDING(39)"),
+            40 => write!(f, "Sport::WATER_SKIING(40)"),
+            41 => write!(f, "Sport::KAYAKING(41)"),
+            42 => write!(f, "Sport::RAFTING(42)"),
+            43 => write!(f, "Sport::WINDSURFING(43)"),
+            44 => write!(f, "Sport::KITESURFING(44)"),
+            45 => write!(f, "Sport::TACTICAL(45)"),
+            46 => write!(f, "Sport::JUMPMASTER(46)"),
+            47 => write!(f, "Sport::BOXING(47)"),
+            48 => write!(f, "Sport::FLOOR_CLIMBING(48)"),
+            49 => write!(f, "Sport::BASEBALL(49)"),
+            53 => write!(f, "Sport::DIVING(53)"),
+            62 => write!(f, "Sport::HIIT(62)"),
+            64 => write!(f, "Sport::RACKET(64)"),
+            65 => write!(f, "Sport::WHEELCHAIR_PUSH_WALK(65)"),
+            66 => write!(f, "Sport::WHEELCHAIR_PUSH_RUN(66)"),
+            67 => write!(f, "Sport::MEDITATION(67)"),
+            69 => write!(f, "Sport::DISC_GOLF(69)"),
+            71 => write!(f, "Sport::CRICKET(71)"),
+            72 => write!(f, "Sport::RUGBY(72)"),
+            73 => write!(f, "Sport::HOCKEY(73)"),
+            74 => write!(f, "Sport::LACROSSE(74)"),
+            75 => write!(f, "Sport::VOLLEYBALL(75)"),
+            76 => write!(f, "Sport::WATER_TUBING(76)"),
+            77 => write!(f, "Sport::WAKESURFING(77)"),
+            80 => write!(f, "Sport::MIXED_MARTIAL_ARTS(80)"),
+            82 => write!(f, "Sport::SNORKELING(82)"),
+            83 => write!(f, "Sport::DANCE(83)"),
+            84 => write!(f, "Sport::JUMP_ROPE(84)"),
+            254 => write!(f, "Sport::ALL(254)"),
+            _ => write!(f, "Sport({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits0(pub u8);
 
 impl SportBits0 {
@@ -1501,7 +2155,7 @@ impl SportBits0 {
 
 impl Default for SportBits0 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1516,12 +2170,28 @@ impl fmt::Display for SportBits0 {
             0x20 => write!(f, "swimming"),
             0x40 => write!(f, "basketball"),
             0x80 => write!(f, "soccer"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits0({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits0 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits0::GENERIC(0x01)"),
+            0x02 => write!(f, "SportBits0::RUNNING(0x02)"),
+            0x04 => write!(f, "SportBits0::CYCLING(0x04)"),
+            0x08 => write!(f, "SportBits0::TRANSITION(0x08)"),
+            0x10 => write!(f, "SportBits0::FITNESS_EQUIPMENT(0x10)"),
+            0x20 => write!(f, "SportBits0::SWIMMING(0x20)"),
+            0x40 => write!(f, "SportBits0::BASKETBALL(0x40)"),
+            0x80 => write!(f, "SportBits0::SOCCER(0x80)"),
+            _ => write!(f, "SportBits0({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits1(pub u8);
 
 impl SportBits1 {
@@ -1537,7 +2207,7 @@ impl SportBits1 {
 
 impl Default for SportBits1 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1552,12 +2222,28 @@ impl fmt::Display for SportBits1 {
             0x20 => write!(f, "alpine_skiing"),
             0x40 => write!(f, "snowboarding"),
             0x80 => write!(f, "rowing"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits1({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits1 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits1::TENNIS(0x01)"),
+            0x02 => write!(f, "SportBits1::AMERICAN_FOOTBALL(0x02)"),
+            0x04 => write!(f, "SportBits1::TRAINING(0x04)"),
+            0x08 => write!(f, "SportBits1::WALKING(0x08)"),
+            0x10 => write!(f, "SportBits1::CROSS_COUNTRY_SKIING(0x10)"),
+            0x20 => write!(f, "SportBits1::ALPINE_SKIING(0x20)"),
+            0x40 => write!(f, "SportBits1::SNOWBOARDING(0x40)"),
+            0x80 => write!(f, "SportBits1::ROWING(0x80)"),
+            _ => write!(f, "SportBits1({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits2(pub u8);
 
 impl SportBits2 {
@@ -1573,7 +2259,7 @@ impl SportBits2 {
 
 impl Default for SportBits2 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1588,12 +2274,28 @@ impl fmt::Display for SportBits2 {
             0x20 => write!(f, "e_biking"),
             0x40 => write!(f, "motorcycling"),
             0x80 => write!(f, "boating"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits2({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits2 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits2::MOUNTAINEERING(0x01)"),
+            0x02 => write!(f, "SportBits2::HIKING(0x02)"),
+            0x04 => write!(f, "SportBits2::MULTISPORT(0x04)"),
+            0x08 => write!(f, "SportBits2::PADDLING(0x08)"),
+            0x10 => write!(f, "SportBits2::FLYING(0x10)"),
+            0x20 => write!(f, "SportBits2::E_BIKING(0x20)"),
+            0x40 => write!(f, "SportBits2::MOTORCYCLING(0x40)"),
+            0x80 => write!(f, "SportBits2::BOATING(0x80)"),
+            _ => write!(f, "SportBits2({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits3(pub u8);
 
 impl SportBits3 {
@@ -1609,7 +2311,7 @@ impl SportBits3 {
 
 impl Default for SportBits3 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1624,12 +2326,28 @@ impl fmt::Display for SportBits3 {
             0x20 => write!(f, "fishing"),
             0x40 => write!(f, "inline_skating"),
             0x80 => write!(f, "rock_climbing"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits3({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits3 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits3::DRIVING(0x01)"),
+            0x02 => write!(f, "SportBits3::GOLF(0x02)"),
+            0x04 => write!(f, "SportBits3::HANG_GLIDING(0x04)"),
+            0x08 => write!(f, "SportBits3::HORSEBACK_RIDING(0x08)"),
+            0x10 => write!(f, "SportBits3::HUNTING(0x10)"),
+            0x20 => write!(f, "SportBits3::FISHING(0x20)"),
+            0x40 => write!(f, "SportBits3::INLINE_SKATING(0x40)"),
+            0x80 => write!(f, "SportBits3::ROCK_CLIMBING(0x80)"),
+            _ => write!(f, "SportBits3({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits4(pub u8);
 
 impl SportBits4 {
@@ -1645,7 +2363,7 @@ impl SportBits4 {
 
 impl Default for SportBits4 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1660,12 +2378,28 @@ impl fmt::Display for SportBits4 {
             0x20 => write!(f, "stand_up_paddleboarding"),
             0x40 => write!(f, "surfing"),
             0x80 => write!(f, "wakeboarding"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits4({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits4 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits4::SAILING(0x01)"),
+            0x02 => write!(f, "SportBits4::ICE_SKATING(0x02)"),
+            0x04 => write!(f, "SportBits4::SKY_DIVING(0x04)"),
+            0x08 => write!(f, "SportBits4::SNOWSHOEING(0x08)"),
+            0x10 => write!(f, "SportBits4::SNOWMOBILING(0x10)"),
+            0x20 => write!(f, "SportBits4::STAND_UP_PADDLEBOARDING(0x20)"),
+            0x40 => write!(f, "SportBits4::SURFING(0x40)"),
+            0x80 => write!(f, "SportBits4::WAKEBOARDING(0x80)"),
+            _ => write!(f, "SportBits4({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits5(pub u8);
 
 impl SportBits5 {
@@ -1681,7 +2415,7 @@ impl SportBits5 {
 
 impl Default for SportBits5 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1696,12 +2430,28 @@ impl fmt::Display for SportBits5 {
             0x20 => write!(f, "tactical"),
             0x40 => write!(f, "jumpmaster"),
             0x80 => write!(f, "boxing"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits5({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits5 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits5::WATER_SKIING(0x01)"),
+            0x02 => write!(f, "SportBits5::KAYAKING(0x02)"),
+            0x04 => write!(f, "SportBits5::RAFTING(0x04)"),
+            0x08 => write!(f, "SportBits5::WINDSURFING(0x08)"),
+            0x10 => write!(f, "SportBits5::KITESURFING(0x10)"),
+            0x20 => write!(f, "SportBits5::TACTICAL(0x20)"),
+            0x40 => write!(f, "SportBits5::JUMPMASTER(0x40)"),
+            0x80 => write!(f, "SportBits5::BOXING(0x80)"),
+            _ => write!(f, "SportBits5({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportBits6(pub u8);
 
 impl SportBits6 {
@@ -1710,7 +2460,7 @@ impl SportBits6 {
 
 impl Default for SportBits6 {
     fn default() -> Self {
-        Self(u8::MAX)
+        Self(u8::MIN)
     }
 }
 
@@ -1718,12 +2468,21 @@ impl fmt::Display for SportBits6 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0x01 => write!(f, "floor_climbing"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportBits6({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportBits6 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x01 => write!(f, "SportBits6::FLOOR_CLIMBING(0x01)"),
+            _ => write!(f, "SportBits6({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SubSport(pub u8);
 
 impl SubSport {
@@ -1990,12 +2749,109 @@ impl fmt::Display for SubSport {
             118 => write!(f, "fly_vfr"),
             119 => write!(f, "fly_ifr"),
             254 => write!(f, "all"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SubSport({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SubSport {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SubSport::GENERIC(0)"),
+            1 => write!(f, "SubSport::TREADMILL(1)"),
+            2 => write!(f, "SubSport::STREET(2)"),
+            3 => write!(f, "SubSport::TRAIL(3)"),
+            4 => write!(f, "SubSport::TRACK(4)"),
+            5 => write!(f, "SubSport::SPIN(5)"),
+            6 => write!(f, "SubSport::INDOOR_CYCLING(6)"),
+            7 => write!(f, "SubSport::ROAD(7)"),
+            8 => write!(f, "SubSport::MOUNTAIN(8)"),
+            9 => write!(f, "SubSport::DOWNHILL(9)"),
+            10 => write!(f, "SubSport::RECUMBENT(10)"),
+            11 => write!(f, "SubSport::CYCLOCROSS(11)"),
+            12 => write!(f, "SubSport::HAND_CYCLING(12)"),
+            13 => write!(f, "SubSport::TRACK_CYCLING(13)"),
+            14 => write!(f, "SubSport::INDOOR_ROWING(14)"),
+            15 => write!(f, "SubSport::ELLIPTICAL(15)"),
+            16 => write!(f, "SubSport::STAIR_CLIMBING(16)"),
+            17 => write!(f, "SubSport::LAP_SWIMMING(17)"),
+            18 => write!(f, "SubSport::OPEN_WATER(18)"),
+            19 => write!(f, "SubSport::FLEXIBILITY_TRAINING(19)"),
+            20 => write!(f, "SubSport::STRENGTH_TRAINING(20)"),
+            21 => write!(f, "SubSport::WARM_UP(21)"),
+            22 => write!(f, "SubSport::MATCH(22)"),
+            23 => write!(f, "SubSport::EXERCISE(23)"),
+            24 => write!(f, "SubSport::CHALLENGE(24)"),
+            25 => write!(f, "SubSport::INDOOR_SKIING(25)"),
+            26 => write!(f, "SubSport::CARDIO_TRAINING(26)"),
+            27 => write!(f, "SubSport::INDOOR_WALKING(27)"),
+            28 => write!(f, "SubSport::E_BIKE_FITNESS(28)"),
+            29 => write!(f, "SubSport::BMX(29)"),
+            30 => write!(f, "SubSport::CASUAL_WALKING(30)"),
+            31 => write!(f, "SubSport::SPEED_WALKING(31)"),
+            32 => write!(f, "SubSport::BIKE_TO_RUN_TRANSITION(32)"),
+            33 => write!(f, "SubSport::RUN_TO_BIKE_TRANSITION(33)"),
+            34 => write!(f, "SubSport::SWIM_TO_BIKE_TRANSITION(34)"),
+            35 => write!(f, "SubSport::ATV(35)"),
+            36 => write!(f, "SubSport::MOTOCROSS(36)"),
+            37 => write!(f, "SubSport::BACKCOUNTRY(37)"),
+            38 => write!(f, "SubSport::RESORT(38)"),
+            39 => write!(f, "SubSport::RC_DRONE(39)"),
+            40 => write!(f, "SubSport::WINGSUIT(40)"),
+            41 => write!(f, "SubSport::WHITEWATER(41)"),
+            42 => write!(f, "SubSport::SKATE_SKIING(42)"),
+            43 => write!(f, "SubSport::YOGA(43)"),
+            44 => write!(f, "SubSport::PILATES(44)"),
+            45 => write!(f, "SubSport::INDOOR_RUNNING(45)"),
+            46 => write!(f, "SubSport::GRAVEL_CYCLING(46)"),
+            47 => write!(f, "SubSport::E_BIKE_MOUNTAIN(47)"),
+            48 => write!(f, "SubSport::COMMUTING(48)"),
+            49 => write!(f, "SubSport::MIXED_SURFACE(49)"),
+            50 => write!(f, "SubSport::NAVIGATE(50)"),
+            51 => write!(f, "SubSport::TRACK_ME(51)"),
+            52 => write!(f, "SubSport::MAP(52)"),
+            53 => write!(f, "SubSport::SINGLE_GAS_DIVING(53)"),
+            54 => write!(f, "SubSport::MULTI_GAS_DIVING(54)"),
+            55 => write!(f, "SubSport::GAUGE_DIVING(55)"),
+            56 => write!(f, "SubSport::APNEA_DIVING(56)"),
+            57 => write!(f, "SubSport::APNEA_HUNTING(57)"),
+            58 => write!(f, "SubSport::VIRTUAL_ACTIVITY(58)"),
+            59 => write!(f, "SubSport::OBSTACLE(59)"),
+            62 => write!(f, "SubSport::BREATHING(62)"),
+            65 => write!(f, "SubSport::SAIL_RACE(65)"),
+            67 => write!(f, "SubSport::ULTRA(67)"),
+            68 => write!(f, "SubSport::INDOOR_CLIMBING(68)"),
+            69 => write!(f, "SubSport::BOULDERING(69)"),
+            70 => write!(f, "SubSport::HIIT(70)"),
+            73 => write!(f, "SubSport::AMRAP(73)"),
+            74 => write!(f, "SubSport::EMOM(74)"),
+            75 => write!(f, "SubSport::TABATA(75)"),
+            84 => write!(f, "SubSport::PICKLEBALL(84)"),
+            85 => write!(f, "SubSport::PADEL(85)"),
+            86 => write!(f, "SubSport::INDOOR_WHEELCHAIR_WALK(86)"),
+            87 => write!(f, "SubSport::INDOOR_WHEELCHAIR_RUN(87)"),
+            88 => write!(f, "SubSport::INDOOR_HAND_CYCLING(88)"),
+            94 => write!(f, "SubSport::SQUASH(94)"),
+            95 => write!(f, "SubSport::BADMINTON(95)"),
+            96 => write!(f, "SubSport::RACQUETBALL(96)"),
+            97 => write!(f, "SubSport::TABLE_TENNIS(97)"),
+            110 => write!(f, "SubSport::FLY_CANOPY(110)"),
+            111 => write!(f, "SubSport::FLY_PARAGLIDE(111)"),
+            112 => write!(f, "SubSport::FLY_PARAMOTOR(112)"),
+            113 => write!(f, "SubSport::FLY_PRESSURIZED(113)"),
+            114 => write!(f, "SubSport::FLY_NAVIGATE(114)"),
+            115 => write!(f, "SubSport::FLY_TIMER(115)"),
+            116 => write!(f, "SubSport::FLY_ALTIMETER(116)"),
+            117 => write!(f, "SubSport::FLY_WX(117)"),
+            118 => write!(f, "SubSport::FLY_VFR(118)"),
+            119 => write!(f, "SubSport::FLY_IFR(119)"),
+            254 => write!(f, "SubSport::ALL(254)"),
+            _ => write!(f, "SubSport({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SportEvent(pub u8);
 
 impl SportEvent {
@@ -2028,12 +2884,29 @@ impl fmt::Display for SportEvent {
             6 => write!(f, "training"),
             7 => write!(f, "transportation"),
             8 => write!(f, "touring"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SportEvent({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SportEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SportEvent::UNCATEGORIZED(0)"),
+            1 => write!(f, "SportEvent::GEOCACHING(1)"),
+            2 => write!(f, "SportEvent::FITNESS(2)"),
+            3 => write!(f, "SportEvent::RECREATION(3)"),
+            4 => write!(f, "SportEvent::RACE(4)"),
+            5 => write!(f, "SportEvent::SPECIAL_EVENT(5)"),
+            6 => write!(f, "SportEvent::TRAINING(6)"),
+            7 => write!(f, "SportEvent::TRANSPORTATION(7)"),
+            8 => write!(f, "SportEvent::TOURING(8)"),
+            _ => write!(f, "SportEvent({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Activity(pub u8);
 
 impl Activity {
@@ -2052,12 +2925,22 @@ impl fmt::Display for Activity {
         match self.0 {
             0 => write!(f, "manual"),
             1 => write!(f, "auto_multi_sport"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Activity({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Activity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Activity::MANUAL(0)"),
+            1 => write!(f, "Activity::AUTO_MULTI_SPORT(1)"),
+            _ => write!(f, "Activity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Intensity(pub u8);
 
 impl Intensity {
@@ -2086,12 +2969,27 @@ impl fmt::Display for Intensity {
             4 => write!(f, "recovery"),
             5 => write!(f, "interval"),
             6 => write!(f, "other"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Intensity({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Intensity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Intensity::ACTIVE(0)"),
+            1 => write!(f, "Intensity::REST(1)"),
+            2 => write!(f, "Intensity::WARMUP(2)"),
+            3 => write!(f, "Intensity::COOLDOWN(3)"),
+            4 => write!(f, "Intensity::RECOVERY(4)"),
+            5 => write!(f, "Intensity::INTERVAL(5)"),
+            6 => write!(f, "Intensity::OTHER(6)"),
+            _ => write!(f, "Intensity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SessionTrigger(pub u8);
 
 impl SessionTrigger {
@@ -2117,12 +3015,24 @@ impl fmt::Display for SessionTrigger {
             1 => write!(f, "manual"),
             2 => write!(f, "auto_multi_sport"),
             3 => write!(f, "fitness_equipment"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SessionTrigger({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SessionTrigger {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SessionTrigger::ACTIVITY_END(0)"),
+            1 => write!(f, "SessionTrigger::MANUAL(1)"),
+            2 => write!(f, "SessionTrigger::AUTO_MULTI_SPORT(2)"),
+            3 => write!(f, "SessionTrigger::FITNESS_EQUIPMENT(3)"),
+            _ => write!(f, "SessionTrigger({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AutolapTrigger(pub u8);
 
 impl AutolapTrigger {
@@ -2153,12 +3063,28 @@ impl fmt::Display for AutolapTrigger {
             5 => write!(f, "position_marked"),
             6 => write!(f, "off"),
             13 => write!(f, "auto_select"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AutolapTrigger({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AutolapTrigger {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "AutolapTrigger::TIME(0)"),
+            1 => write!(f, "AutolapTrigger::DISTANCE(1)"),
+            2 => write!(f, "AutolapTrigger::POSITION_START(2)"),
+            3 => write!(f, "AutolapTrigger::POSITION_LAP(3)"),
+            4 => write!(f, "AutolapTrigger::POSITION_WAYPOINT(4)"),
+            5 => write!(f, "AutolapTrigger::POSITION_MARKED(5)"),
+            6 => write!(f, "AutolapTrigger::OFF(6)"),
+            13 => write!(f, "AutolapTrigger::AUTO_SELECT(13)"),
+            _ => write!(f, "AutolapTrigger({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LapTrigger(pub u8);
 
 impl LapTrigger {
@@ -2191,12 +3117,29 @@ impl fmt::Display for LapTrigger {
             6 => write!(f, "position_marked"),
             7 => write!(f, "session_end"),
             8 => write!(f, "fitness_equipment"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LapTrigger({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LapTrigger {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LapTrigger::MANUAL(0)"),
+            1 => write!(f, "LapTrigger::TIME(1)"),
+            2 => write!(f, "LapTrigger::DISTANCE(2)"),
+            3 => write!(f, "LapTrigger::POSITION_START(3)"),
+            4 => write!(f, "LapTrigger::POSITION_LAP(4)"),
+            5 => write!(f, "LapTrigger::POSITION_WAYPOINT(5)"),
+            6 => write!(f, "LapTrigger::POSITION_MARKED(6)"),
+            7 => write!(f, "LapTrigger::SESSION_END(7)"),
+            8 => write!(f, "LapTrigger::FITNESS_EQUIPMENT(8)"),
+            _ => write!(f, "LapTrigger({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TimeMode(pub u8);
 
 impl TimeMode {
@@ -2225,12 +3168,26 @@ impl fmt::Display for TimeMode {
             3 => write!(f, "hour_12_with_seconds"),
             4 => write!(f, "hour_24_with_seconds"),
             5 => write!(f, "utc"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TimeMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TimeMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TimeMode::HOUR12(0)"),
+            1 => write!(f, "TimeMode::HOUR24(1)"),
+            2 => write!(f, "TimeMode::MILITARY(2)"),
+            3 => write!(f, "TimeMode::HOUR_12_WITH_SECONDS(3)"),
+            4 => write!(f, "TimeMode::HOUR_24_WITH_SECONDS(4)"),
+            5 => write!(f, "TimeMode::UTC(5)"),
+            _ => write!(f, "TimeMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BacklightMode(pub u8);
 
 impl BacklightMode {
@@ -2259,12 +3216,30 @@ impl fmt::Display for BacklightMode {
             4 => write!(f, "smart_notifications"),
             5 => write!(f, "key_and_messages_night"),
             6 => write!(f, "key_and_messages_and_smart_notifications"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BacklightMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BacklightMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BacklightMode::OFF(0)"),
+            1 => write!(f, "BacklightMode::MANUAL(1)"),
+            2 => write!(f, "BacklightMode::KEY_AND_MESSAGES(2)"),
+            3 => write!(f, "BacklightMode::AUTO_BRIGHTNESS(3)"),
+            4 => write!(f, "BacklightMode::SMART_NOTIFICATIONS(4)"),
+            5 => write!(f, "BacklightMode::KEY_AND_MESSAGES_NIGHT(5)"),
+            6 => write!(
+                f,
+                "BacklightMode::KEY_AND_MESSAGES_AND_SMART_NOTIFICATIONS(6)"
+            ),
+            _ => write!(f, "BacklightMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DateMode(pub u8);
 
 impl DateMode {
@@ -2283,12 +3258,22 @@ impl fmt::Display for DateMode {
         match self.0 {
             0 => write!(f, "day_month"),
             1 => write!(f, "month_day"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DateMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DateMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DateMode::DAY_MONTH(0)"),
+            1 => write!(f, "DateMode::MONTH_DAY(1)"),
+            _ => write!(f, "DateMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BacklightTimeout(pub u8);
 
 impl BacklightTimeout {
@@ -2306,12 +3291,21 @@ impl fmt::Display for BacklightTimeout {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "infinite"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BacklightTimeout({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BacklightTimeout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BacklightTimeout::INFINITE(0)"),
+            _ => write!(f, "BacklightTimeout({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Event(pub u8);
 
 impl Event {
@@ -2464,12 +3458,66 @@ impl fmt::Display for Event {
             76 => write!(f, "tank_battery_low"),
             81 => write!(f, "tank_pod_connected"),
             82 => write!(f, "tank_pod_disconnected"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Event({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Event {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Event::TIMER(0)"),
+            3 => write!(f, "Event::WORKOUT(3)"),
+            4 => write!(f, "Event::WORKOUT_STEP(4)"),
+            5 => write!(f, "Event::POWER_DOWN(5)"),
+            6 => write!(f, "Event::POWER_UP(6)"),
+            7 => write!(f, "Event::OFF_COURSE(7)"),
+            8 => write!(f, "Event::SESSION(8)"),
+            9 => write!(f, "Event::LAP(9)"),
+            10 => write!(f, "Event::COURSE_POINT(10)"),
+            11 => write!(f, "Event::BATTERY(11)"),
+            12 => write!(f, "Event::VIRTUAL_PARTNER_PACE(12)"),
+            13 => write!(f, "Event::HR_HIGH_ALERT(13)"),
+            14 => write!(f, "Event::HR_LOW_ALERT(14)"),
+            15 => write!(f, "Event::SPEED_HIGH_ALERT(15)"),
+            16 => write!(f, "Event::SPEED_LOW_ALERT(16)"),
+            17 => write!(f, "Event::CAD_HIGH_ALERT(17)"),
+            18 => write!(f, "Event::CAD_LOW_ALERT(18)"),
+            19 => write!(f, "Event::POWER_HIGH_ALERT(19)"),
+            20 => write!(f, "Event::POWER_LOW_ALERT(20)"),
+            21 => write!(f, "Event::RECOVERY_HR(21)"),
+            22 => write!(f, "Event::BATTERY_LOW(22)"),
+            23 => write!(f, "Event::TIME_DURATION_ALERT(23)"),
+            24 => write!(f, "Event::DISTANCE_DURATION_ALERT(24)"),
+            25 => write!(f, "Event::CALORIE_DURATION_ALERT(25)"),
+            26 => write!(f, "Event::ACTIVITY(26)"),
+            27 => write!(f, "Event::FITNESS_EQUIPMENT(27)"),
+            28 => write!(f, "Event::LENGTH(28)"),
+            32 => write!(f, "Event::USER_MARKER(32)"),
+            33 => write!(f, "Event::SPORT_POINT(33)"),
+            36 => write!(f, "Event::CALIBRATION(36)"),
+            42 => write!(f, "Event::FRONT_GEAR_CHANGE(42)"),
+            43 => write!(f, "Event::REAR_GEAR_CHANGE(43)"),
+            44 => write!(f, "Event::RIDER_POSITION_CHANGE(44)"),
+            45 => write!(f, "Event::ELEV_HIGH_ALERT(45)"),
+            46 => write!(f, "Event::ELEV_LOW_ALERT(46)"),
+            47 => write!(f, "Event::COMM_TIMEOUT(47)"),
+            54 => write!(f, "Event::AUTO_ACTIVITY_DETECT(54)"),
+            56 => write!(f, "Event::DIVE_ALERT(56)"),
+            57 => write!(f, "Event::DIVE_GAS_SWITCHED(57)"),
+            71 => write!(f, "Event::TANK_PRESSURE_RESERVE(71)"),
+            72 => write!(f, "Event::TANK_PRESSURE_CRITICAL(72)"),
+            73 => write!(f, "Event::TANK_LOST(73)"),
+            75 => write!(f, "Event::RADAR_THREAT_ALERT(75)"),
+            76 => write!(f, "Event::TANK_BATTERY_LOW(76)"),
+            81 => write!(f, "Event::TANK_POD_CONNECTED(81)"),
+            82 => write!(f, "Event::TANK_POD_DISCONNECTED(82)"),
+            _ => write!(f, "Event({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct EventType(pub u8);
 
 impl EventType {
@@ -2504,12 +3552,30 @@ impl fmt::Display for EventType {
             7 => write!(f, "end_all_depreciated"),
             8 => write!(f, "stop_disable"),
             9 => write!(f, "stop_disable_all"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "EventType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for EventType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "EventType::START(0)"),
+            1 => write!(f, "EventType::STOP(1)"),
+            2 => write!(f, "EventType::CONSECUTIVE_DEPRECIATED(2)"),
+            3 => write!(f, "EventType::MARKER(3)"),
+            4 => write!(f, "EventType::STOP_ALL(4)"),
+            5 => write!(f, "EventType::BEGIN_DEPRECIATED(5)"),
+            6 => write!(f, "EventType::END_DEPRECIATED(6)"),
+            7 => write!(f, "EventType::END_ALL_DEPRECIATED(7)"),
+            8 => write!(f, "EventType::STOP_DISABLE(8)"),
+            9 => write!(f, "EventType::STOP_DISABLE_ALL(9)"),
+            _ => write!(f, "EventType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TimerTrigger(pub u8);
 
 impl TimerTrigger {
@@ -2530,12 +3596,23 @@ impl fmt::Display for TimerTrigger {
             0 => write!(f, "manual"),
             1 => write!(f, "auto"),
             2 => write!(f, "fitness_equipment"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TimerTrigger({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TimerTrigger {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TimerTrigger::MANUAL(0)"),
+            1 => write!(f, "TimerTrigger::AUTO(1)"),
+            2 => write!(f, "TimerTrigger::FITNESS_EQUIPMENT(2)"),
+            _ => write!(f, "TimerTrigger({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FitnessEquipmentState(pub u8);
 
 impl FitnessEquipmentState {
@@ -2559,12 +3636,24 @@ impl fmt::Display for FitnessEquipmentState {
             1 => write!(f, "in_use"),
             2 => write!(f, "paused"),
             3 => write!(f, "unknown"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FitnessEquipmentState({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FitnessEquipmentState {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "FitnessEquipmentState::READY(0)"),
+            1 => write!(f, "FitnessEquipmentState::IN_USE(1)"),
+            2 => write!(f, "FitnessEquipmentState::PAUSED(2)"),
+            3 => write!(f, "FitnessEquipmentState::UNKNOWN(3)"),
+            _ => write!(f, "FitnessEquipmentState({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Tone(pub u8);
 
 impl Tone {
@@ -2587,12 +3676,24 @@ impl fmt::Display for Tone {
             1 => write!(f, "tone"),
             2 => write!(f, "vibrate"),
             3 => write!(f, "tone_and_vibrate"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Tone({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Tone {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Tone::OFF(0)"),
+            1 => write!(f, "Tone::TONE(1)"),
+            2 => write!(f, "Tone::VIBRATE(2)"),
+            3 => write!(f, "Tone::TONE_AND_VIBRATE(3)"),
+            _ => write!(f, "Tone({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Autoscroll(pub u8);
 
 impl Autoscroll {
@@ -2615,12 +3716,24 @@ impl fmt::Display for Autoscroll {
             1 => write!(f, "slow"),
             2 => write!(f, "medium"),
             3 => write!(f, "fast"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Autoscroll({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Autoscroll {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Autoscroll::NONE(0)"),
+            1 => write!(f, "Autoscroll::SLOW(1)"),
+            2 => write!(f, "Autoscroll::MEDIUM(2)"),
+            3 => write!(f, "Autoscroll::FAST(3)"),
+            _ => write!(f, "Autoscroll({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ActivityClass(pub u8);
 
 impl ActivityClass {
@@ -2642,12 +3755,23 @@ impl fmt::Display for ActivityClass {
             0x7F => write!(f, "level"),
             100 => write!(f, "level_max"),
             0x80 => write!(f, "athlete"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ActivityClass({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ActivityClass {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x7F => write!(f, "ActivityClass::LEVEL(0x7F)"),
+            100 => write!(f, "ActivityClass::LEVEL_MAX(100)"),
+            0x80 => write!(f, "ActivityClass::ATHLETE(0x80)"),
+            _ => write!(f, "ActivityClass({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HrZoneCalc(pub u8);
 
 impl HrZoneCalc {
@@ -2670,12 +3794,24 @@ impl fmt::Display for HrZoneCalc {
             1 => write!(f, "percent_max_hr"),
             2 => write!(f, "percent_hrr"),
             3 => write!(f, "percent_lthr"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HrZoneCalc({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HrZoneCalc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "HrZoneCalc::CUSTOM(0)"),
+            1 => write!(f, "HrZoneCalc::PERCENT_MAX_HR(1)"),
+            2 => write!(f, "HrZoneCalc::PERCENT_HRR(2)"),
+            3 => write!(f, "HrZoneCalc::PERCENT_LTHR(3)"),
+            _ => write!(f, "HrZoneCalc({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PwrZoneCalc(pub u8);
 
 impl PwrZoneCalc {
@@ -2694,12 +3830,22 @@ impl fmt::Display for PwrZoneCalc {
         match self.0 {
             0 => write!(f, "custom"),
             1 => write!(f, "percent_ftp"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PwrZoneCalc({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PwrZoneCalc {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PwrZoneCalc::CUSTOM(0)"),
+            1 => write!(f, "PwrZoneCalc::PERCENT_FTP(1)"),
+            _ => write!(f, "PwrZoneCalc({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WktStepDuration(pub u8);
 
 impl WktStepDuration {
@@ -2776,12 +3922,57 @@ impl fmt::Display for WktStepDuration {
             28 => write!(f, "repetition_time"),
             29 => write!(f, "reps"),
             31 => write!(f, "time_only"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WktStepDuration({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WktStepDuration {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WktStepDuration::TIME(0)"),
+            1 => write!(f, "WktStepDuration::DISTANCE(1)"),
+            2 => write!(f, "WktStepDuration::HR_LESS_THAN(2)"),
+            3 => write!(f, "WktStepDuration::HR_GREATER_THAN(3)"),
+            4 => write!(f, "WktStepDuration::CALORIES(4)"),
+            5 => write!(f, "WktStepDuration::OPEN(5)"),
+            6 => write!(f, "WktStepDuration::REPEAT_UNTIL_STEPS_CMPLT(6)"),
+            7 => write!(f, "WktStepDuration::REPEAT_UNTIL_TIME(7)"),
+            8 => write!(f, "WktStepDuration::REPEAT_UNTIL_DISTANCE(8)"),
+            9 => write!(f, "WktStepDuration::REPEAT_UNTIL_CALORIES(9)"),
+            10 => write!(f, "WktStepDuration::REPEAT_UNTIL_HR_LESS_THAN(10)"),
+            11 => write!(f, "WktStepDuration::REPEAT_UNTIL_HR_GREATER_THAN(11)"),
+            12 => write!(f, "WktStepDuration::REPEAT_UNTIL_POWER_LESS_THAN(12)"),
+            13 => write!(f, "WktStepDuration::REPEAT_UNTIL_POWER_GREATER_THAN(13)"),
+            14 => write!(f, "WktStepDuration::POWER_LESS_THAN(14)"),
+            15 => write!(f, "WktStepDuration::POWER_GREATER_THAN(15)"),
+            16 => write!(f, "WktStepDuration::TRAINING_PEAKS_TSS(16)"),
+            17 => write!(
+                f,
+                "WktStepDuration::REPEAT_UNTIL_POWER_LAST_LAP_LESS_THAN(17)"
+            ),
+            18 => write!(
+                f,
+                "WktStepDuration::REPEAT_UNTIL_MAX_POWER_LAST_LAP_LESS_THAN(18)"
+            ),
+            19 => write!(f, "WktStepDuration::POWER_3S_LESS_THAN(19)"),
+            20 => write!(f, "WktStepDuration::POWER_10S_LESS_THAN(20)"),
+            21 => write!(f, "WktStepDuration::POWER_30S_LESS_THAN(21)"),
+            22 => write!(f, "WktStepDuration::POWER_3S_GREATER_THAN(22)"),
+            23 => write!(f, "WktStepDuration::POWER_10S_GREATER_THAN(23)"),
+            24 => write!(f, "WktStepDuration::POWER_30S_GREATER_THAN(24)"),
+            25 => write!(f, "WktStepDuration::POWER_LAP_LESS_THAN(25)"),
+            26 => write!(f, "WktStepDuration::POWER_LAP_GREATER_THAN(26)"),
+            27 => write!(f, "WktStepDuration::REPEAT_UNTIL_TRAINING_PEAKS_TSS(27)"),
+            28 => write!(f, "WktStepDuration::REPETITION_TIME(28)"),
+            29 => write!(f, "WktStepDuration::REPS(29)"),
+            31 => write!(f, "WktStepDuration::TIME_ONLY(31)"),
+            _ => write!(f, "WktStepDuration({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WktStepTarget(pub u8);
 
 impl WktStepTarget {
@@ -2824,12 +4015,34 @@ impl fmt::Display for WktStepTarget {
             11 => write!(f, "swim_stroke"),
             12 => write!(f, "speed_lap"),
             13 => write!(f, "heart_rate_lap"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WktStepTarget({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WktStepTarget {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WktStepTarget::SPEED(0)"),
+            1 => write!(f, "WktStepTarget::HEART_RATE(1)"),
+            2 => write!(f, "WktStepTarget::OPEN(2)"),
+            3 => write!(f, "WktStepTarget::CADENCE(3)"),
+            4 => write!(f, "WktStepTarget::POWER(4)"),
+            5 => write!(f, "WktStepTarget::GRADE(5)"),
+            6 => write!(f, "WktStepTarget::RESISTANCE(6)"),
+            7 => write!(f, "WktStepTarget::POWER_3S(7)"),
+            8 => write!(f, "WktStepTarget::POWER_10S(8)"),
+            9 => write!(f, "WktStepTarget::POWER_30S(9)"),
+            10 => write!(f, "WktStepTarget::POWER_LAP(10)"),
+            11 => write!(f, "WktStepTarget::SWIM_STROKE(11)"),
+            12 => write!(f, "WktStepTarget::SPEED_LAP(12)"),
+            13 => write!(f, "WktStepTarget::HEART_RATE_LAP(13)"),
+            _ => write!(f, "WktStepTarget({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Goal(pub u8);
 
 impl Goal {
@@ -2858,12 +4071,27 @@ impl fmt::Display for Goal {
             4 => write!(f, "steps"),
             5 => write!(f, "ascent"),
             6 => write!(f, "active_minutes"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Goal({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Goal {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Goal::TIME(0)"),
+            1 => write!(f, "Goal::DISTANCE(1)"),
+            2 => write!(f, "Goal::CALORIES(2)"),
+            3 => write!(f, "Goal::FREQUENCY(3)"),
+            4 => write!(f, "Goal::STEPS(4)"),
+            5 => write!(f, "Goal::ASCENT(5)"),
+            6 => write!(f, "Goal::ACTIVE_MINUTES(6)"),
+            _ => write!(f, "Goal({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct GoalRecurrence(pub u8);
 
 impl GoalRecurrence {
@@ -2890,12 +4118,26 @@ impl fmt::Display for GoalRecurrence {
             3 => write!(f, "monthly"),
             4 => write!(f, "yearly"),
             5 => write!(f, "custom"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "GoalRecurrence({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for GoalRecurrence {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "GoalRecurrence::OFF(0)"),
+            1 => write!(f, "GoalRecurrence::DAILY(1)"),
+            2 => write!(f, "GoalRecurrence::WEEKLY(2)"),
+            3 => write!(f, "GoalRecurrence::MONTHLY(3)"),
+            4 => write!(f, "GoalRecurrence::YEARLY(4)"),
+            5 => write!(f, "GoalRecurrence::CUSTOM(5)"),
+            _ => write!(f, "GoalRecurrence({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct GoalSource(pub u8);
 
 impl GoalSource {
@@ -2919,12 +4161,23 @@ impl fmt::Display for GoalSource {
             0 => write!(f, "auto"),
             1 => write!(f, "community"),
             2 => write!(f, "user"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "GoalSource({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for GoalSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "GoalSource::AUTO(0)"),
+            1 => write!(f, "GoalSource::COMMUNITY(1)"),
+            2 => write!(f, "GoalSource::USER(2)"),
+            _ => write!(f, "GoalSource({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Schedule(pub u8);
 
 impl Schedule {
@@ -2943,12 +4196,22 @@ impl fmt::Display for Schedule {
         match self.0 {
             0 => write!(f, "workout"),
             1 => write!(f, "course"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Schedule({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Schedule {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Schedule::WORKOUT(0)"),
+            1 => write!(f, "Schedule::COURSE(1)"),
+            _ => write!(f, "Schedule({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CoursePoint(pub u8);
 
 impl CoursePoint {
@@ -3070,12 +4333,73 @@ impl fmt::Display for CoursePoint {
             51 => write!(f, "transport"),
             52 => write!(f, "alert"),
             53 => write!(f, "info"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CoursePoint({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CoursePoint {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CoursePoint::GENERIC(0)"),
+            1 => write!(f, "CoursePoint::SUMMIT(1)"),
+            2 => write!(f, "CoursePoint::VALLEY(2)"),
+            3 => write!(f, "CoursePoint::WATER(3)"),
+            4 => write!(f, "CoursePoint::FOOD(4)"),
+            5 => write!(f, "CoursePoint::DANGER(5)"),
+            6 => write!(f, "CoursePoint::LEFT(6)"),
+            7 => write!(f, "CoursePoint::RIGHT(7)"),
+            8 => write!(f, "CoursePoint::STRAIGHT(8)"),
+            9 => write!(f, "CoursePoint::FIRST_AID(9)"),
+            10 => write!(f, "CoursePoint::FOURTH_CATEGORY(10)"),
+            11 => write!(f, "CoursePoint::THIRD_CATEGORY(11)"),
+            12 => write!(f, "CoursePoint::SECOND_CATEGORY(12)"),
+            13 => write!(f, "CoursePoint::FIRST_CATEGORY(13)"),
+            14 => write!(f, "CoursePoint::HORS_CATEGORY(14)"),
+            15 => write!(f, "CoursePoint::SPRINT(15)"),
+            16 => write!(f, "CoursePoint::LEFT_FORK(16)"),
+            17 => write!(f, "CoursePoint::RIGHT_FORK(17)"),
+            18 => write!(f, "CoursePoint::MIDDLE_FORK(18)"),
+            19 => write!(f, "CoursePoint::SLIGHT_LEFT(19)"),
+            20 => write!(f, "CoursePoint::SHARP_LEFT(20)"),
+            21 => write!(f, "CoursePoint::SLIGHT_RIGHT(21)"),
+            22 => write!(f, "CoursePoint::SHARP_RIGHT(22)"),
+            23 => write!(f, "CoursePoint::U_TURN(23)"),
+            24 => write!(f, "CoursePoint::SEGMENT_START(24)"),
+            25 => write!(f, "CoursePoint::SEGMENT_END(25)"),
+            27 => write!(f, "CoursePoint::CAMPSITE(27)"),
+            28 => write!(f, "CoursePoint::AID_STATION(28)"),
+            29 => write!(f, "CoursePoint::REST_AREA(29)"),
+            30 => write!(f, "CoursePoint::GENERAL_DISTANCE(30)"),
+            31 => write!(f, "CoursePoint::SERVICE(31)"),
+            32 => write!(f, "CoursePoint::ENERGY_GEL(32)"),
+            33 => write!(f, "CoursePoint::SPORTS_DRINK(33)"),
+            34 => write!(f, "CoursePoint::MILE_MARKER(34)"),
+            35 => write!(f, "CoursePoint::CHECKPOINT(35)"),
+            36 => write!(f, "CoursePoint::SHELTER(36)"),
+            37 => write!(f, "CoursePoint::MEETING_SPOT(37)"),
+            38 => write!(f, "CoursePoint::OVERLOOK(38)"),
+            39 => write!(f, "CoursePoint::TOILET(39)"),
+            40 => write!(f, "CoursePoint::SHOWER(40)"),
+            41 => write!(f, "CoursePoint::GEAR(41)"),
+            42 => write!(f, "CoursePoint::SHARP_CURVE(42)"),
+            43 => write!(f, "CoursePoint::STEEP_INCLINE(43)"),
+            44 => write!(f, "CoursePoint::TUNNEL(44)"),
+            45 => write!(f, "CoursePoint::BRIDGE(45)"),
+            46 => write!(f, "CoursePoint::OBSTACLE(46)"),
+            47 => write!(f, "CoursePoint::CROSSING(47)"),
+            48 => write!(f, "CoursePoint::STORE(48)"),
+            49 => write!(f, "CoursePoint::TRANSITION(49)"),
+            50 => write!(f, "CoursePoint::NAVAID(50)"),
+            51 => write!(f, "CoursePoint::TRANSPORT(51)"),
+            52 => write!(f, "CoursePoint::ALERT(52)"),
+            53 => write!(f, "CoursePoint::INFO(53)"),
+            _ => write!(f, "CoursePoint({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Manufacturer(pub u16);
 
 impl Manufacturer {
@@ -3320,6 +4644,7 @@ impl Manufacturer {
     pub const TEKTRO_RACING_PRODUCTS: Manufacturer = Manufacturer(333);
     pub const DARAD_INNOVATION_CORPORATION: Manufacturer = Manufacturer(334);
     pub const CYCLOPTIM: Manufacturer = Manufacturer(335);
+    pub const RUNNA: Manufacturer = Manufacturer(337);
     pub const ACTIGRAPHCORP: Manufacturer = Manufacturer(5759);
 }
 
@@ -3563,13 +4888,255 @@ impl fmt::Display for Manufacturer {
             333 => write!(f, "tektro_racing_products"),
             334 => write!(f, "darad_innovation_corporation"),
             335 => write!(f, "cycloptim"),
+            337 => write!(f, "runna"),
             5759 => write!(f, "actigraphcorp"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Manufacturer({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Manufacturer {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "Manufacturer::GARMIN(1)"),
+            2 => write!(f, "Manufacturer::GARMIN_FR405_ANTFS(2)"),
+            3 => write!(f, "Manufacturer::ZEPHYR(3)"),
+            4 => write!(f, "Manufacturer::DAYTON(4)"),
+            5 => write!(f, "Manufacturer::IDT(5)"),
+            6 => write!(f, "Manufacturer::SRM(6)"),
+            7 => write!(f, "Manufacturer::QUARQ(7)"),
+            8 => write!(f, "Manufacturer::IBIKE(8)"),
+            9 => write!(f, "Manufacturer::SARIS(9)"),
+            10 => write!(f, "Manufacturer::SPARK_HK(10)"),
+            11 => write!(f, "Manufacturer::TANITA(11)"),
+            12 => write!(f, "Manufacturer::ECHOWELL(12)"),
+            13 => write!(f, "Manufacturer::DYNASTREAM_OEM(13)"),
+            14 => write!(f, "Manufacturer::NAUTILUS(14)"),
+            15 => write!(f, "Manufacturer::DYNASTREAM(15)"),
+            16 => write!(f, "Manufacturer::TIMEX(16)"),
+            17 => write!(f, "Manufacturer::METRIGEAR(17)"),
+            18 => write!(f, "Manufacturer::XELIC(18)"),
+            19 => write!(f, "Manufacturer::BEURER(19)"),
+            20 => write!(f, "Manufacturer::CARDIOSPORT(20)"),
+            21 => write!(f, "Manufacturer::A_AND_D(21)"),
+            22 => write!(f, "Manufacturer::HMM(22)"),
+            23 => write!(f, "Manufacturer::SUUNTO(23)"),
+            24 => write!(f, "Manufacturer::THITA_ELEKTRONIK(24)"),
+            25 => write!(f, "Manufacturer::GPULSE(25)"),
+            26 => write!(f, "Manufacturer::CLEAN_MOBILE(26)"),
+            27 => write!(f, "Manufacturer::PEDAL_BRAIN(27)"),
+            28 => write!(f, "Manufacturer::PEAKSWARE(28)"),
+            29 => write!(f, "Manufacturer::SAXONAR(29)"),
+            30 => write!(f, "Manufacturer::LEMOND_FITNESS(30)"),
+            31 => write!(f, "Manufacturer::DEXCOM(31)"),
+            32 => write!(f, "Manufacturer::WAHOO_FITNESS(32)"),
+            33 => write!(f, "Manufacturer::OCTANE_FITNESS(33)"),
+            34 => write!(f, "Manufacturer::ARCHINOETICS(34)"),
+            35 => write!(f, "Manufacturer::THE_HURT_BOX(35)"),
+            36 => write!(f, "Manufacturer::CITIZEN_SYSTEMS(36)"),
+            37 => write!(f, "Manufacturer::MAGELLAN(37)"),
+            38 => write!(f, "Manufacturer::OSYNCE(38)"),
+            39 => write!(f, "Manufacturer::HOLUX(39)"),
+            40 => write!(f, "Manufacturer::CONCEPT2(40)"),
+            41 => write!(f, "Manufacturer::SHIMANO(41)"),
+            42 => write!(f, "Manufacturer::ONE_GIANT_LEAP(42)"),
+            43 => write!(f, "Manufacturer::ACE_SENSOR(43)"),
+            44 => write!(f, "Manufacturer::BRIM_BROTHERS(44)"),
+            45 => write!(f, "Manufacturer::XPLOVA(45)"),
+            46 => write!(f, "Manufacturer::PERCEPTION_DIGITAL(46)"),
+            47 => write!(f, "Manufacturer::BF1SYSTEMS(47)"),
+            48 => write!(f, "Manufacturer::PIONEER(48)"),
+            49 => write!(f, "Manufacturer::SPANTEC(49)"),
+            50 => write!(f, "Manufacturer::METALOGICS(50)"),
+            51 => write!(f, "Manufacturer::_4IIIIS(51)"),
+            52 => write!(f, "Manufacturer::SEIKO_EPSON(52)"),
+            53 => write!(f, "Manufacturer::SEIKO_EPSON_OEM(53)"),
+            54 => write!(f, "Manufacturer::IFOR_POWELL(54)"),
+            55 => write!(f, "Manufacturer::MAXWELL_GUIDER(55)"),
+            56 => write!(f, "Manufacturer::STAR_TRAC(56)"),
+            57 => write!(f, "Manufacturer::BREAKAWAY(57)"),
+            58 => write!(f, "Manufacturer::ALATECH_TECHNOLOGY_LTD(58)"),
+            59 => write!(f, "Manufacturer::MIO_TECHNOLOGY_EUROPE(59)"),
+            60 => write!(f, "Manufacturer::ROTOR(60)"),
+            61 => write!(f, "Manufacturer::GEONAUTE(61)"),
+            62 => write!(f, "Manufacturer::ID_BIKE(62)"),
+            63 => write!(f, "Manufacturer::SPECIALIZED(63)"),
+            64 => write!(f, "Manufacturer::WTEK(64)"),
+            65 => write!(f, "Manufacturer::PHYSICAL_ENTERPRISES(65)"),
+            66 => write!(f, "Manufacturer::NORTH_POLE_ENGINEERING(66)"),
+            67 => write!(f, "Manufacturer::BKOOL(67)"),
+            68 => write!(f, "Manufacturer::CATEYE(68)"),
+            69 => write!(f, "Manufacturer::STAGES_CYCLING(69)"),
+            70 => write!(f, "Manufacturer::SIGMASPORT(70)"),
+            71 => write!(f, "Manufacturer::TOMTOM(71)"),
+            72 => write!(f, "Manufacturer::PERIPEDAL(72)"),
+            73 => write!(f, "Manufacturer::WATTBIKE(73)"),
+            76 => write!(f, "Manufacturer::MOXY(76)"),
+            77 => write!(f, "Manufacturer::CICLOSPORT(77)"),
+            78 => write!(f, "Manufacturer::POWERBAHN(78)"),
+            79 => write!(f, "Manufacturer::ACORN_PROJECTS_APS(79)"),
+            80 => write!(f, "Manufacturer::LIFEBEAM(80)"),
+            81 => write!(f, "Manufacturer::BONTRAGER(81)"),
+            82 => write!(f, "Manufacturer::WELLGO(82)"),
+            83 => write!(f, "Manufacturer::SCOSCHE(83)"),
+            84 => write!(f, "Manufacturer::MAGURA(84)"),
+            85 => write!(f, "Manufacturer::WOODWAY(85)"),
+            86 => write!(f, "Manufacturer::ELITE(86)"),
+            87 => write!(f, "Manufacturer::NIELSEN_KELLERMAN(87)"),
+            88 => write!(f, "Manufacturer::DK_CITY(88)"),
+            89 => write!(f, "Manufacturer::TACX(89)"),
+            90 => write!(f, "Manufacturer::DIRECTION_TECHNOLOGY(90)"),
+            91 => write!(f, "Manufacturer::MAGTONIC(91)"),
+            92 => write!(f, "Manufacturer::_1PARTCARBON(92)"),
+            93 => write!(f, "Manufacturer::INSIDE_RIDE_TECHNOLOGIES(93)"),
+            94 => write!(f, "Manufacturer::SOUND_OF_MOTION(94)"),
+            95 => write!(f, "Manufacturer::STRYD(95)"),
+            96 => write!(f, "Manufacturer::ICG(96)"),
+            97 => write!(f, "Manufacturer::MIPULSE(97)"),
+            98 => write!(f, "Manufacturer::BSX_ATHLETICS(98)"),
+            99 => write!(f, "Manufacturer::LOOK(99)"),
+            100 => write!(f, "Manufacturer::CAMPAGNOLO_SRL(100)"),
+            101 => write!(f, "Manufacturer::BODY_BIKE_SMART(101)"),
+            102 => write!(f, "Manufacturer::PRAXISWORKS(102)"),
+            103 => write!(f, "Manufacturer::LIMITS_TECHNOLOGY(103)"),
+            104 => write!(f, "Manufacturer::TOPACTION_TECHNOLOGY(104)"),
+            105 => write!(f, "Manufacturer::COSINUSS(105)"),
+            106 => write!(f, "Manufacturer::FITCARE(106)"),
+            107 => write!(f, "Manufacturer::MAGENE(107)"),
+            108 => write!(f, "Manufacturer::GIANT_MANUFACTURING_CO(108)"),
+            109 => write!(f, "Manufacturer::TIGRASPORT(109)"),
+            110 => write!(f, "Manufacturer::SALUTRON(110)"),
+            111 => write!(f, "Manufacturer::TECHNOGYM(111)"),
+            112 => write!(f, "Manufacturer::BRYTON_SENSORS(112)"),
+            113 => write!(f, "Manufacturer::LATITUDE_LIMITED(113)"),
+            114 => write!(f, "Manufacturer::SOARING_TECHNOLOGY(114)"),
+            115 => write!(f, "Manufacturer::IGPSPORT(115)"),
+            116 => write!(f, "Manufacturer::THINKRIDER(116)"),
+            117 => write!(f, "Manufacturer::GOPHER_SPORT(117)"),
+            118 => write!(f, "Manufacturer::WATERROWER(118)"),
+            119 => write!(f, "Manufacturer::ORANGETHEORY(119)"),
+            120 => write!(f, "Manufacturer::INPEAK(120)"),
+            121 => write!(f, "Manufacturer::KINETIC(121)"),
+            122 => write!(f, "Manufacturer::JOHNSON_HEALTH_TECH(122)"),
+            123 => write!(f, "Manufacturer::POLAR_ELECTRO(123)"),
+            124 => write!(f, "Manufacturer::SEESENSE(124)"),
+            125 => write!(f, "Manufacturer::NCI_TECHNOLOGY(125)"),
+            126 => write!(f, "Manufacturer::IQSQUARE(126)"),
+            127 => write!(f, "Manufacturer::LEOMO(127)"),
+            128 => write!(f, "Manufacturer::IFIT_COM(128)"),
+            129 => write!(f, "Manufacturer::COROS_BYTE(129)"),
+            130 => write!(f, "Manufacturer::VERSA_DESIGN(130)"),
+            131 => write!(f, "Manufacturer::CHILEAF(131)"),
+            132 => write!(f, "Manufacturer::CYCPLUS(132)"),
+            133 => write!(f, "Manufacturer::GRAVAA_BYTE(133)"),
+            134 => write!(f, "Manufacturer::SIGEYI(134)"),
+            135 => write!(f, "Manufacturer::COOSPO(135)"),
+            136 => write!(f, "Manufacturer::GEOID(136)"),
+            137 => write!(f, "Manufacturer::BOSCH(137)"),
+            138 => write!(f, "Manufacturer::KYTO(138)"),
+            139 => write!(f, "Manufacturer::KINETIC_SPORTS(139)"),
+            140 => write!(f, "Manufacturer::DECATHLON_BYTE(140)"),
+            141 => write!(f, "Manufacturer::TQ_SYSTEMS(141)"),
+            142 => write!(f, "Manufacturer::TAG_HEUER(142)"),
+            143 => write!(f, "Manufacturer::KEISER_FITNESS(143)"),
+            144 => write!(f, "Manufacturer::ZWIFT_BYTE(144)"),
+            145 => write!(f, "Manufacturer::PORSCHE_EP(145)"),
+            146 => write!(f, "Manufacturer::BLACKBIRD(146)"),
+            147 => write!(f, "Manufacturer::MEILAN_BYTE(147)"),
+            148 => write!(f, "Manufacturer::EZON(148)"),
+            149 => write!(f, "Manufacturer::LAISI(149)"),
+            150 => write!(f, "Manufacturer::MYZONE(150)"),
+            151 => write!(f, "Manufacturer::ABAWO(151)"),
+            152 => write!(f, "Manufacturer::BAFANG(152)"),
+            153 => write!(f, "Manufacturer::LUHONG_TECHNOLOGY(153)"),
+            255 => write!(f, "Manufacturer::DEVELOPMENT(255)"),
+            257 => write!(f, "Manufacturer::HEALTHANDLIFE(257)"),
+            258 => write!(f, "Manufacturer::LEZYNE(258)"),
+            259 => write!(f, "Manufacturer::SCRIBE_LABS(259)"),
+            260 => write!(f, "Manufacturer::ZWIFT(260)"),
+            261 => write!(f, "Manufacturer::WATTEAM(261)"),
+            262 => write!(f, "Manufacturer::RECON(262)"),
+            263 => write!(f, "Manufacturer::FAVERO_ELECTRONICS(263)"),
+            264 => write!(f, "Manufacturer::DYNOVELO(264)"),
+            265 => write!(f, "Manufacturer::STRAVA(265)"),
+            266 => write!(f, "Manufacturer::PRECOR(266)"),
+            267 => write!(f, "Manufacturer::BRYTON(267)"),
+            268 => write!(f, "Manufacturer::SRAM(268)"),
+            269 => write!(f, "Manufacturer::NAVMAN(269)"),
+            270 => write!(f, "Manufacturer::COBI(270)"),
+            271 => write!(f, "Manufacturer::SPIVI(271)"),
+            272 => write!(f, "Manufacturer::MIO_MAGELLAN(272)"),
+            273 => write!(f, "Manufacturer::EVESPORTS(273)"),
+            274 => write!(f, "Manufacturer::SENSITIVUS_GAUGE(274)"),
+            275 => write!(f, "Manufacturer::PODOON(275)"),
+            276 => write!(f, "Manufacturer::LIFE_TIME_FITNESS(276)"),
+            277 => write!(f, "Manufacturer::FALCO_E_MOTORS(277)"),
+            278 => write!(f, "Manufacturer::MINOURA(278)"),
+            279 => write!(f, "Manufacturer::CYCLIQ(279)"),
+            280 => write!(f, "Manufacturer::LUXOTTICA(280)"),
+            281 => write!(f, "Manufacturer::TRAINER_ROAD(281)"),
+            282 => write!(f, "Manufacturer::THE_SUFFERFEST(282)"),
+            283 => write!(f, "Manufacturer::FULLSPEEDAHEAD(283)"),
+            284 => write!(f, "Manufacturer::VIRTUALTRAINING(284)"),
+            285 => write!(f, "Manufacturer::FEEDBACKSPORTS(285)"),
+            286 => write!(f, "Manufacturer::OMATA(286)"),
+            287 => write!(f, "Manufacturer::VDO(287)"),
+            288 => write!(f, "Manufacturer::MAGNETICDAYS(288)"),
+            289 => write!(f, "Manufacturer::HAMMERHEAD(289)"),
+            290 => write!(f, "Manufacturer::KINETIC_BY_KURT(290)"),
+            291 => write!(f, "Manufacturer::SHAPELOG(291)"),
+            292 => write!(f, "Manufacturer::DABUZIDUO(292)"),
+            293 => write!(f, "Manufacturer::JETBLACK(293)"),
+            294 => write!(f, "Manufacturer::COROS(294)"),
+            295 => write!(f, "Manufacturer::VIRTUGO(295)"),
+            296 => write!(f, "Manufacturer::VELOSENSE(296)"),
+            297 => write!(f, "Manufacturer::CYCLIGENTINC(297)"),
+            298 => write!(f, "Manufacturer::TRAILFORKS(298)"),
+            299 => write!(f, "Manufacturer::MAHLE_EBIKEMOTION(299)"),
+            300 => write!(f, "Manufacturer::NURVV(300)"),
+            301 => write!(f, "Manufacturer::MICROPROGRAM(301)"),
+            302 => write!(f, "Manufacturer::ZONE5CLOUD(302)"),
+            303 => write!(f, "Manufacturer::GREENTEG(303)"),
+            304 => write!(f, "Manufacturer::YAMAHA_MOTORS(304)"),
+            305 => write!(f, "Manufacturer::WHOOP(305)"),
+            306 => write!(f, "Manufacturer::GRAVAA(306)"),
+            307 => write!(f, "Manufacturer::ONELAP(307)"),
+            308 => write!(f, "Manufacturer::MONARK_EXERCISE(308)"),
+            309 => write!(f, "Manufacturer::FORM(309)"),
+            310 => write!(f, "Manufacturer::DECATHLON(310)"),
+            311 => write!(f, "Manufacturer::SYNCROS(311)"),
+            312 => write!(f, "Manufacturer::HEATUP(312)"),
+            313 => write!(f, "Manufacturer::CANNONDALE(313)"),
+            314 => write!(f, "Manufacturer::TRUE_FITNESS(314)"),
+            315 => write!(f, "Manufacturer::RGT_CYCLING(315)"),
+            316 => write!(f, "Manufacturer::VASA(316)"),
+            317 => write!(f, "Manufacturer::RACE_REPUBLIC(317)"),
+            318 => write!(f, "Manufacturer::FAZUA(318)"),
+            319 => write!(f, "Manufacturer::OREKA_TRAINING(319)"),
+            320 => write!(f, "Manufacturer::LSEC(320)"),
+            321 => write!(f, "Manufacturer::LULULEMON_STUDIO(321)"),
+            322 => write!(f, "Manufacturer::SHANYUE(322)"),
+            323 => write!(f, "Manufacturer::SPINNING_MDA(323)"),
+            324 => write!(f, "Manufacturer::HILLDATING(324)"),
+            325 => write!(f, "Manufacturer::AERO_SENSOR(325)"),
+            326 => write!(f, "Manufacturer::NIKE(326)"),
+            327 => write!(f, "Manufacturer::MAGICSHINE(327)"),
+            328 => write!(f, "Manufacturer::ICTRAINER(328)"),
+            329 => write!(f, "Manufacturer::ABSOLUTE_CYCLING(329)"),
+            330 => write!(f, "Manufacturer::EO_SWIMBETTER(330)"),
+            331 => write!(f, "Manufacturer::MYWHOOSH(331)"),
+            332 => write!(f, "Manufacturer::RAVEMEN(332)"),
+            333 => write!(f, "Manufacturer::TEKTRO_RACING_PRODUCTS(333)"),
+            334 => write!(f, "Manufacturer::DARAD_INNOVATION_CORPORATION(334)"),
+            335 => write!(f, "Manufacturer::CYCLOPTIM(335)"),
+            337 => write!(f, "Manufacturer::RUNNA(337)"),
+            5759 => write!(f, "Manufacturer::ACTIGRAPHCORP(5759)"),
+            _ => write!(f, "Manufacturer({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct GarminProduct(pub u16);
 
 impl GarminProduct {
@@ -4043,6 +5610,8 @@ impl GarminProduct {
     pub const MARQ_GEN2_COMMANDER: GarminProduct = GarminProduct(4472);
     /// aka the Lily 2 Active
     pub const LILY_ATHLETE: GarminProduct = GarminProduct(4477);
+    /// Rally 110/210
+    pub const RALLY_X10: GarminProduct = GarminProduct(4525);
     pub const FENIX8_SOLAR: GarminProduct = GarminProduct(4532);
     pub const FENIX8_SOLAR_LARGE: GarminProduct = GarminProduct(4533);
     pub const FENIX8_SMALL: GarminProduct = GarminProduct(4534);
@@ -4055,14 +5624,25 @@ impl GarminProduct {
     pub const INSTINCT3_AMOLED_45MM: GarminProduct = GarminProduct(4586);
     pub const INSTINCT3_AMOLED_50MM: GarminProduct = GarminProduct(4587);
     pub const DESCENT_G2: GarminProduct = GarminProduct(4588);
+    pub const VENU_X1: GarminProduct = GarminProduct(4603);
     pub const HRM_200: GarminProduct = GarminProduct(4606);
     pub const VIVOACTIVE6: GarminProduct = GarminProduct(4625);
+    pub const FENIX8_PRO: GarminProduct = GarminProduct(4631);
+    pub const EDGE_550: GarminProduct = GarminProduct(4633);
+    pub const EDGE_850: GarminProduct = GarminProduct(4634);
+    pub const VENU4: GarminProduct = GarminProduct(4643);
+    pub const VENU4S: GarminProduct = GarminProduct(4644);
     pub const APPROACHS44: GarminProduct = GarminProduct(4647);
+    pub const EDGE_MTB: GarminProduct = GarminProduct(4655);
     pub const APPROACHS50: GarminProduct = GarminProduct(4656);
     pub const FENIX_E: GarminProduct = GarminProduct(4666);
+    pub const BOUNCE2: GarminProduct = GarminProduct(4745);
     pub const INSTINCT3_SOLAR_50MM: GarminProduct = GarminProduct(4759);
     pub const TACTIX8_AMOLED: GarminProduct = GarminProduct(4775);
     pub const TACTIX8_SOLAR: GarminProduct = GarminProduct(4776);
+    pub const D2_MACH2: GarminProduct = GarminProduct(4879);
+    pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
+    pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
     /// SDM4 footpod
     pub const SDM4: GarminProduct = GarminProduct(10007);
     pub const EDGE_REMOTE: GarminProduct = GarminProduct(10014);
@@ -4518,6 +6098,7 @@ impl fmt::Display for GarminProduct {
             4446 => write!(f, "hrm_fit"),
             4472 => write!(f, "marq_gen2_commander"),
             4477 => write!(f, "lily_athlete"),
+            4525 => write!(f, "rally_x10"),
             4532 => write!(f, "fenix8_solar"),
             4533 => write!(f, "fenix8_solar_large"),
             4534 => write!(f, "fenix8_small"),
@@ -4530,14 +6111,25 @@ impl fmt::Display for GarminProduct {
             4586 => write!(f, "instinct3_amoled_45mm"),
             4587 => write!(f, "instinct3_amoled_50mm"),
             4588 => write!(f, "descent_g2"),
+            4603 => write!(f, "venu_x1"),
             4606 => write!(f, "hrm_200"),
             4625 => write!(f, "vivoactive6"),
+            4631 => write!(f, "fenix8_pro"),
+            4633 => write!(f, "edge_550"),
+            4634 => write!(f, "edge_850"),
+            4643 => write!(f, "venu4"),
+            4644 => write!(f, "venu4s"),
             4647 => write!(f, "approachS44"),
+            4655 => write!(f, "edge_mtb"),
             4656 => write!(f, "approachS50"),
             4666 => write!(f, "fenix_e"),
+            4745 => write!(f, "bounce2"),
             4759 => write!(f, "instinct3_solar_50mm"),
             4775 => write!(f, "tactix8_amoled"),
             4776 => write!(f, "tactix8_solar"),
+            4879 => write!(f, "d2_mach2"),
+            4678 => write!(f, "instinct_crossover_amoled"),
+            4944 => write!(f, "d2_air_x15"),
             10007 => write!(f, "sdm4"),
             10014 => write!(f, "edge_remote"),
             20533 => write!(f, "tacx_training_app_win"),
@@ -4550,12 +6142,494 @@ impl fmt::Display for GarminProduct {
             65531 => write!(f, "connectiq_simulator"),
             65532 => write!(f, "android_antplus_plugin"),
             65534 => write!(f, "connect"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "GarminProduct({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for GarminProduct {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "GarminProduct::HRM1(1)"),
+            2 => write!(f, "GarminProduct::AXH01(2)"),
+            3 => write!(f, "GarminProduct::AXB01(3)"),
+            4 => write!(f, "GarminProduct::AXB02(4)"),
+            5 => write!(f, "GarminProduct::HRM2SS(5)"),
+            6 => write!(f, "GarminProduct::DSI_ALF02(6)"),
+            7 => write!(f, "GarminProduct::HRM3SS(7)"),
+            8 => write!(f, "GarminProduct::HRM_RUN_SINGLE_BYTE_PRODUCT_ID(8)"),
+            9 => write!(f, "GarminProduct::BSM(9)"),
+            10 => write!(f, "GarminProduct::BCM(10)"),
+            11 => write!(f, "GarminProduct::AXS01(11)"),
+            12 => write!(f, "GarminProduct::HRM_TRI_SINGLE_BYTE_PRODUCT_ID(12)"),
+            13 => write!(f, "GarminProduct::HRM4_RUN_SINGLE_BYTE_PRODUCT_ID(13)"),
+            14 => write!(f, "GarminProduct::FR225_SINGLE_BYTE_PRODUCT_ID(14)"),
+            15 => write!(f, "GarminProduct::GEN3_BSM_SINGLE_BYTE_PRODUCT_ID(15)"),
+            16 => write!(f, "GarminProduct::GEN3_BCM_SINGLE_BYTE_PRODUCT_ID(16)"),
+            22 => write!(f, "GarminProduct::HRM_FIT_SINGLE_BYTE_PRODUCT_ID(22)"),
+            255 => write!(f, "GarminProduct::OHR(255)"),
+            473 => write!(f, "GarminProduct::FR301_CHINA(473)"),
+            474 => write!(f, "GarminProduct::FR301_JAPAN(474)"),
+            475 => write!(f, "GarminProduct::FR301_KOREA(475)"),
+            494 => write!(f, "GarminProduct::FR301_TAIWAN(494)"),
+            717 => write!(f, "GarminProduct::FR405(717)"),
+            782 => write!(f, "GarminProduct::FR50(782)"),
+            987 => write!(f, "GarminProduct::FR405_JAPAN(987)"),
+            988 => write!(f, "GarminProduct::FR60(988)"),
+            1011 => write!(f, "GarminProduct::DSI_ALF01(1011)"),
+            1018 => write!(f, "GarminProduct::FR310XT(1018)"),
+            1036 => write!(f, "GarminProduct::EDGE500(1036)"),
+            1124 => write!(f, "GarminProduct::FR110(1124)"),
+            1169 => write!(f, "GarminProduct::EDGE800(1169)"),
+            1199 => write!(f, "GarminProduct::EDGE500_TAIWAN(1199)"),
+            1213 => write!(f, "GarminProduct::EDGE500_JAPAN(1213)"),
+            1253 => write!(f, "GarminProduct::CHIRP(1253)"),
+            1274 => write!(f, "GarminProduct::FR110_JAPAN(1274)"),
+            1325 => write!(f, "GarminProduct::EDGE200(1325)"),
+            1328 => write!(f, "GarminProduct::FR910XT(1328)"),
+            1333 => write!(f, "GarminProduct::EDGE800_TAIWAN(1333)"),
+            1334 => write!(f, "GarminProduct::EDGE800_JAPAN(1334)"),
+            1341 => write!(f, "GarminProduct::ALF04(1341)"),
+            1345 => write!(f, "GarminProduct::FR610(1345)"),
+            1360 => write!(f, "GarminProduct::FR210_JAPAN(1360)"),
+            1380 => write!(f, "GarminProduct::VECTOR_SS(1380)"),
+            1381 => write!(f, "GarminProduct::VECTOR_CP(1381)"),
+            1386 => write!(f, "GarminProduct::EDGE800_CHINA(1386)"),
+            1387 => write!(f, "GarminProduct::EDGE500_CHINA(1387)"),
+            1405 => write!(f, "GarminProduct::APPROACH_G10(1405)"),
+            1410 => write!(f, "GarminProduct::FR610_JAPAN(1410)"),
+            1422 => write!(f, "GarminProduct::EDGE500_KOREA(1422)"),
+            1436 => write!(f, "GarminProduct::FR70(1436)"),
+            1446 => write!(f, "GarminProduct::FR310XT_4T(1446)"),
+            1461 => write!(f, "GarminProduct::AMX(1461)"),
+            1482 => write!(f, "GarminProduct::FR10(1482)"),
+            1497 => write!(f, "GarminProduct::EDGE800_KOREA(1497)"),
+            1499 => write!(f, "GarminProduct::SWIM(1499)"),
+            1537 => write!(f, "GarminProduct::FR910XT_CHINA(1537)"),
+            1551 => write!(f, "GarminProduct::FENIX(1551)"),
+            1555 => write!(f, "GarminProduct::EDGE200_TAIWAN(1555)"),
+            1561 => write!(f, "GarminProduct::EDGE510(1561)"),
+            1567 => write!(f, "GarminProduct::EDGE810(1567)"),
+            1570 => write!(f, "GarminProduct::TEMPE(1570)"),
+            1600 => write!(f, "GarminProduct::FR910XT_JAPAN(1600)"),
+            1623 => write!(f, "GarminProduct::FR620(1623)"),
+            1632 => write!(f, "GarminProduct::FR220(1632)"),
+            1664 => write!(f, "GarminProduct::FR910XT_KOREA(1664)"),
+            1688 => write!(f, "GarminProduct::FR10_JAPAN(1688)"),
+            1721 => write!(f, "GarminProduct::EDGE810_JAPAN(1721)"),
+            1735 => write!(f, "GarminProduct::VIRB_ELITE(1735)"),
+            1736 => write!(f, "GarminProduct::EDGE_TOURING(1736)"),
+            1742 => write!(f, "GarminProduct::EDGE510_JAPAN(1742)"),
+            1743 => write!(f, "GarminProduct::HRM_TRI(1743)"),
+            1752 => write!(f, "GarminProduct::HRM_RUN(1752)"),
+            1765 => write!(f, "GarminProduct::FR920XT(1765)"),
+            1821 => write!(f, "GarminProduct::EDGE510_ASIA(1821)"),
+            1822 => write!(f, "GarminProduct::EDGE810_CHINA(1822)"),
+            1823 => write!(f, "GarminProduct::EDGE810_TAIWAN(1823)"),
+            1836 => write!(f, "GarminProduct::EDGE1000(1836)"),
+            1837 => write!(f, "GarminProduct::VIVO_FIT(1837)"),
+            1853 => write!(f, "GarminProduct::VIRB_REMOTE(1853)"),
+            1885 => write!(f, "GarminProduct::VIVO_KI(1885)"),
+            1903 => write!(f, "GarminProduct::FR15(1903)"),
+            1907 => write!(f, "GarminProduct::VIVO_ACTIVE(1907)"),
+            1918 => write!(f, "GarminProduct::EDGE510_KOREA(1918)"),
+            1928 => write!(f, "GarminProduct::FR620_JAPAN(1928)"),
+            1929 => write!(f, "GarminProduct::FR620_CHINA(1929)"),
+            1930 => write!(f, "GarminProduct::FR220_JAPAN(1930)"),
+            1931 => write!(f, "GarminProduct::FR220_CHINA(1931)"),
+            1936 => write!(f, "GarminProduct::APPROACH_S6(1936)"),
+            1956 => write!(f, "GarminProduct::VIVO_SMART(1956)"),
+            1967 => write!(f, "GarminProduct::FENIX2(1967)"),
+            1988 => write!(f, "GarminProduct::EPIX(1988)"),
+            2050 => write!(f, "GarminProduct::FENIX3(2050)"),
+            2052 => write!(f, "GarminProduct::EDGE1000_TAIWAN(2052)"),
+            2053 => write!(f, "GarminProduct::EDGE1000_JAPAN(2053)"),
+            2061 => write!(f, "GarminProduct::FR15_JAPAN(2061)"),
+            2067 => write!(f, "GarminProduct::EDGE520(2067)"),
+            2070 => write!(f, "GarminProduct::EDGE1000_CHINA(2070)"),
+            2072 => write!(f, "GarminProduct::FR620_RUSSIA(2072)"),
+            2073 => write!(f, "GarminProduct::FR220_RUSSIA(2073)"),
+            2079 => write!(f, "GarminProduct::VECTOR_S(2079)"),
+            2100 => write!(f, "GarminProduct::EDGE1000_KOREA(2100)"),
+            2130 => write!(f, "GarminProduct::FR920XT_TAIWAN(2130)"),
+            2131 => write!(f, "GarminProduct::FR920XT_CHINA(2131)"),
+            2132 => write!(f, "GarminProduct::FR920XT_JAPAN(2132)"),
+            2134 => write!(f, "GarminProduct::VIRBX(2134)"),
+            2135 => write!(f, "GarminProduct::VIVO_SMART_APAC(2135)"),
+            2140 => write!(f, "GarminProduct::ETREX_TOUCH(2140)"),
+            2147 => write!(f, "GarminProduct::EDGE25(2147)"),
+            2148 => write!(f, "GarminProduct::FR25(2148)"),
+            2150 => write!(f, "GarminProduct::VIVO_FIT2(2150)"),
+            2153 => write!(f, "GarminProduct::FR225(2153)"),
+            2156 => write!(f, "GarminProduct::FR630(2156)"),
+            2157 => write!(f, "GarminProduct::FR230(2157)"),
+            2158 => write!(f, "GarminProduct::FR735XT(2158)"),
+            2160 => write!(f, "GarminProduct::VIVO_ACTIVE_APAC(2160)"),
+            2161 => write!(f, "GarminProduct::VECTOR_2(2161)"),
+            2162 => write!(f, "GarminProduct::VECTOR_2S(2162)"),
+            2172 => write!(f, "GarminProduct::VIRBXE(2172)"),
+            2173 => write!(f, "GarminProduct::FR620_TAIWAN(2173)"),
+            2174 => write!(f, "GarminProduct::FR220_TAIWAN(2174)"),
+            2175 => write!(f, "GarminProduct::TRUSWING(2175)"),
+            2187 => write!(f, "GarminProduct::D2AIRVENU(2187)"),
+            2188 => write!(f, "GarminProduct::FENIX3_CHINA(2188)"),
+            2189 => write!(f, "GarminProduct::FENIX3_TWN(2189)"),
+            2192 => write!(f, "GarminProduct::VARIA_HEADLIGHT(2192)"),
+            2193 => write!(f, "GarminProduct::VARIA_TAILLIGHT_OLD(2193)"),
+            2204 => write!(f, "GarminProduct::EDGE_EXPLORE_1000(2204)"),
+            2219 => write!(f, "GarminProduct::FR225_ASIA(2219)"),
+            2225 => write!(f, "GarminProduct::VARIA_RADAR_TAILLIGHT(2225)"),
+            2226 => write!(f, "GarminProduct::VARIA_RADAR_DISPLAY(2226)"),
+            2238 => write!(f, "GarminProduct::EDGE20(2238)"),
+            2260 => write!(f, "GarminProduct::EDGE520_ASIA(2260)"),
+            2261 => write!(f, "GarminProduct::EDGE520_JAPAN(2261)"),
+            2262 => write!(f, "GarminProduct::D2_BRAVO(2262)"),
+            2266 => write!(f, "GarminProduct::APPROACH_S20(2266)"),
+            2271 => write!(f, "GarminProduct::VIVO_SMART2(2271)"),
+            2274 => write!(f, "GarminProduct::EDGE1000_THAI(2274)"),
+            2276 => write!(f, "GarminProduct::VARIA_REMOTE(2276)"),
+            2288 => write!(f, "GarminProduct::EDGE25_ASIA(2288)"),
+            2289 => write!(f, "GarminProduct::EDGE25_JPN(2289)"),
+            2290 => write!(f, "GarminProduct::EDGE20_ASIA(2290)"),
+            2292 => write!(f, "GarminProduct::APPROACH_X40(2292)"),
+            2293 => write!(f, "GarminProduct::FENIX3_JAPAN(2293)"),
+            2294 => write!(f, "GarminProduct::VIVO_SMART_EMEA(2294)"),
+            2310 => write!(f, "GarminProduct::FR630_ASIA(2310)"),
+            2311 => write!(f, "GarminProduct::FR630_JPN(2311)"),
+            2313 => write!(f, "GarminProduct::FR230_JPN(2313)"),
+            2327 => write!(f, "GarminProduct::HRM4_RUN(2327)"),
+            2332 => write!(f, "GarminProduct::EPIX_JAPAN(2332)"),
+            2337 => write!(f, "GarminProduct::VIVO_ACTIVE_HR(2337)"),
+            2347 => write!(f, "GarminProduct::VIVO_SMART_GPS_HR(2347)"),
+            2348 => write!(f, "GarminProduct::VIVO_SMART_HR(2348)"),
+            2361 => write!(f, "GarminProduct::VIVO_SMART_HR_ASIA(2361)"),
+            2362 => write!(f, "GarminProduct::VIVO_SMART_GPS_HR_ASIA(2362)"),
+            2368 => write!(f, "GarminProduct::VIVO_MOVE(2368)"),
+            2379 => write!(f, "GarminProduct::VARIA_TAILLIGHT(2379)"),
+            2396 => write!(f, "GarminProduct::FR235_ASIA(2396)"),
+            2397 => write!(f, "GarminProduct::FR235_JAPAN(2397)"),
+            2398 => write!(f, "GarminProduct::VARIA_VISION(2398)"),
+            2406 => write!(f, "GarminProduct::VIVO_FIT3(2406)"),
+            2407 => write!(f, "GarminProduct::FENIX3_KOREA(2407)"),
+            2408 => write!(f, "GarminProduct::FENIX3_SEA(2408)"),
+            2413 => write!(f, "GarminProduct::FENIX3_HR(2413)"),
+            2417 => write!(f, "GarminProduct::VIRB_ULTRA_30(2417)"),
+            2429 => write!(f, "GarminProduct::INDEX_SMART_SCALE(2429)"),
+            2431 => write!(f, "GarminProduct::FR235(2431)"),
+            2432 => write!(f, "GarminProduct::FENIX3_CHRONOS(2432)"),
+            2441 => write!(f, "GarminProduct::OREGON7XX(2441)"),
+            2444 => write!(f, "GarminProduct::RINO7XX(2444)"),
+            2457 => write!(f, "GarminProduct::EPIX_KOREA(2457)"),
+            2473 => write!(f, "GarminProduct::FENIX3_HR_CHN(2473)"),
+            2474 => write!(f, "GarminProduct::FENIX3_HR_TWN(2474)"),
+            2475 => write!(f, "GarminProduct::FENIX3_HR_JPN(2475)"),
+            2476 => write!(f, "GarminProduct::FENIX3_HR_SEA(2476)"),
+            2477 => write!(f, "GarminProduct::FENIX3_HR_KOR(2477)"),
+            2496 => write!(f, "GarminProduct::NAUTIX(2496)"),
+            2497 => write!(f, "GarminProduct::VIVO_ACTIVE_HR_APAC(2497)"),
+            2503 => write!(f, "GarminProduct::FR35(2503)"),
+            2512 => write!(f, "GarminProduct::OREGON7XX_WW(2512)"),
+            2530 => write!(f, "GarminProduct::EDGE_820(2530)"),
+            2531 => write!(f, "GarminProduct::EDGE_EXPLORE_820(2531)"),
+            2533 => write!(f, "GarminProduct::FR735XT_APAC(2533)"),
+            2534 => write!(f, "GarminProduct::FR735XT_JAPAN(2534)"),
+            2544 => write!(f, "GarminProduct::FENIX5S(2544)"),
+            2547 => write!(f, "GarminProduct::D2_BRAVO_TITANIUM(2547)"),
+            2567 => write!(f, "GarminProduct::VARIA_UT800(2567)"),
+            2593 => write!(f, "GarminProduct::RUNNING_DYNAMICS_POD(2593)"),
+            2599 => write!(f, "GarminProduct::EDGE_820_CHINA(2599)"),
+            2600 => write!(f, "GarminProduct::EDGE_820_JAPAN(2600)"),
+            2604 => write!(f, "GarminProduct::FENIX5X(2604)"),
+            2606 => write!(f, "GarminProduct::VIVO_FIT_JR(2606)"),
+            2622 => write!(f, "GarminProduct::VIVO_SMART3(2622)"),
+            2623 => write!(f, "GarminProduct::VIVO_SPORT(2623)"),
+            2628 => write!(f, "GarminProduct::EDGE_820_TAIWAN(2628)"),
+            2629 => write!(f, "GarminProduct::EDGE_820_KOREA(2629)"),
+            2630 => write!(f, "GarminProduct::EDGE_820_SEA(2630)"),
+            2650 => write!(f, "GarminProduct::FR35_HEBREW(2650)"),
+            2656 => write!(f, "GarminProduct::APPROACH_S60(2656)"),
+            2667 => write!(f, "GarminProduct::FR35_APAC(2667)"),
+            2668 => write!(f, "GarminProduct::FR35_JAPAN(2668)"),
+            2675 => write!(f, "GarminProduct::FENIX3_CHRONOS_ASIA(2675)"),
+            2687 => write!(f, "GarminProduct::VIRB_360(2687)"),
+            2691 => write!(f, "GarminProduct::FR935(2691)"),
+            2697 => write!(f, "GarminProduct::FENIX5(2697)"),
+            2700 => write!(f, "GarminProduct::VIVOACTIVE3(2700)"),
+            2733 => write!(f, "GarminProduct::FR235_CHINA_NFC(2733)"),
+            2769 => write!(f, "GarminProduct::FORETREX_601_701(2769)"),
+            2772 => write!(f, "GarminProduct::VIVO_MOVE_HR(2772)"),
+            2713 => write!(f, "GarminProduct::EDGE_1030(2713)"),
+            2727 => write!(f, "GarminProduct::FR35_SEA(2727)"),
+            2787 => write!(f, "GarminProduct::VECTOR_3(2787)"),
+            2796 => write!(f, "GarminProduct::FENIX5_ASIA(2796)"),
+            2797 => write!(f, "GarminProduct::FENIX5S_ASIA(2797)"),
+            2798 => write!(f, "GarminProduct::FENIX5X_ASIA(2798)"),
+            2806 => write!(f, "GarminProduct::APPROACH_Z80(2806)"),
+            2814 => write!(f, "GarminProduct::FR35_KOREA(2814)"),
+            2819 => write!(f, "GarminProduct::D2CHARLIE(2819)"),
+            2831 => write!(f, "GarminProduct::VIVO_SMART3_APAC(2831)"),
+            2832 => write!(f, "GarminProduct::VIVO_SPORT_APAC(2832)"),
+            2833 => write!(f, "GarminProduct::FR935_ASIA(2833)"),
+            2859 => write!(f, "GarminProduct::DESCENT(2859)"),
+            2878 => write!(f, "GarminProduct::VIVO_FIT4(2878)"),
+            2886 => write!(f, "GarminProduct::FR645(2886)"),
+            2888 => write!(f, "GarminProduct::FR645M(2888)"),
+            2891 => write!(f, "GarminProduct::FR30(2891)"),
+            2900 => write!(f, "GarminProduct::FENIX5S_PLUS(2900)"),
+            2909 => write!(f, "GarminProduct::EDGE_130(2909)"),
+            2924 => write!(f, "GarminProduct::EDGE_1030_ASIA(2924)"),
+            2927 => write!(f, "GarminProduct::VIVOSMART_4(2927)"),
+            2945 => write!(f, "GarminProduct::VIVO_MOVE_HR_ASIA(2945)"),
+            2962 => write!(f, "GarminProduct::APPROACH_X10(2962)"),
+            2977 => write!(f, "GarminProduct::FR30_ASIA(2977)"),
+            2988 => write!(f, "GarminProduct::VIVOACTIVE3M_W(2988)"),
+            3003 => write!(f, "GarminProduct::FR645_ASIA(3003)"),
+            3004 => write!(f, "GarminProduct::FR645M_ASIA(3004)"),
+            3011 => write!(f, "GarminProduct::EDGE_EXPLORE(3011)"),
+            3028 => write!(f, "GarminProduct::GPSMAP66(3028)"),
+            3049 => write!(f, "GarminProduct::APPROACH_S10(3049)"),
+            3066 => write!(f, "GarminProduct::VIVOACTIVE3M_L(3066)"),
+            3076 => write!(f, "GarminProduct::FR245(3076)"),
+            3077 => write!(f, "GarminProduct::FR245_MUSIC(3077)"),
+            3085 => write!(f, "GarminProduct::APPROACH_G80(3085)"),
+            3092 => write!(f, "GarminProduct::EDGE_130_ASIA(3092)"),
+            3095 => write!(f, "GarminProduct::EDGE_1030_BONTRAGER(3095)"),
+            3110 => write!(f, "GarminProduct::FENIX5_PLUS(3110)"),
+            3111 => write!(f, "GarminProduct::FENIX5X_PLUS(3111)"),
+            3112 => write!(f, "GarminProduct::EDGE_520_PLUS(3112)"),
+            3113 => write!(f, "GarminProduct::FR945(3113)"),
+            3121 => write!(f, "GarminProduct::EDGE_530(3121)"),
+            3122 => write!(f, "GarminProduct::EDGE_830(3122)"),
+            3126 => write!(f, "GarminProduct::INSTINCT_ESPORTS(3126)"),
+            3134 => write!(f, "GarminProduct::FENIX5S_PLUS_APAC(3134)"),
+            3135 => write!(f, "GarminProduct::FENIX5X_PLUS_APAC(3135)"),
+            3142 => write!(f, "GarminProduct::EDGE_520_PLUS_APAC(3142)"),
+            3143 => write!(f, "GarminProduct::DESCENT_T1(3143)"),
+            3144 => write!(f, "GarminProduct::FR235L_ASIA(3144)"),
+            3145 => write!(f, "GarminProduct::FR245_ASIA(3145)"),
+            3163 => write!(f, "GarminProduct::VIVO_ACTIVE3M_APAC(3163)"),
+            3192 => write!(f, "GarminProduct::GEN3_BSM(3192)"),
+            3193 => write!(f, "GarminProduct::GEN3_BCM(3193)"),
+            3218 => write!(f, "GarminProduct::VIVO_SMART4_ASIA(3218)"),
+            3224 => write!(f, "GarminProduct::VIVOACTIVE4_SMALL(3224)"),
+            3225 => write!(f, "GarminProduct::VIVOACTIVE4_LARGE(3225)"),
+            3226 => write!(f, "GarminProduct::VENU(3226)"),
+            3246 => write!(f, "GarminProduct::MARQ_DRIVER(3246)"),
+            3247 => write!(f, "GarminProduct::MARQ_AVIATOR(3247)"),
+            3248 => write!(f, "GarminProduct::MARQ_CAPTAIN(3248)"),
+            3249 => write!(f, "GarminProduct::MARQ_COMMANDER(3249)"),
+            3250 => write!(f, "GarminProduct::MARQ_EXPEDITION(3250)"),
+            3251 => write!(f, "GarminProduct::MARQ_ATHLETE(3251)"),
+            3258 => write!(f, "GarminProduct::DESCENT_MK2(3258)"),
+            3282 => write!(f, "GarminProduct::FR45(3282)"),
+            3284 => write!(f, "GarminProduct::GPSMAP66I(3284)"),
+            3287 => write!(f, "GarminProduct::FENIX6S_SPORT(3287)"),
+            3288 => write!(f, "GarminProduct::FENIX6S(3288)"),
+            3289 => write!(f, "GarminProduct::FENIX6_SPORT(3289)"),
+            3290 => write!(f, "GarminProduct::FENIX6(3290)"),
+            3291 => write!(f, "GarminProduct::FENIX6X(3291)"),
+            3299 => write!(f, "GarminProduct::HRM_DUAL(3299)"),
+            3300 => write!(f, "GarminProduct::HRM_PRO(3300)"),
+            3308 => write!(f, "GarminProduct::VIVO_MOVE3_PREMIUM(3308)"),
+            3314 => write!(f, "GarminProduct::APPROACH_S40(3314)"),
+            3321 => write!(f, "GarminProduct::FR245M_ASIA(3321)"),
+            3349 => write!(f, "GarminProduct::EDGE_530_APAC(3349)"),
+            3350 => write!(f, "GarminProduct::EDGE_830_APAC(3350)"),
+            3378 => write!(f, "GarminProduct::VIVO_MOVE3(3378)"),
+            3387 => write!(f, "GarminProduct::VIVO_ACTIVE4_SMALL_ASIA(3387)"),
+            3388 => write!(f, "GarminProduct::VIVO_ACTIVE4_LARGE_ASIA(3388)"),
+            3389 => write!(f, "GarminProduct::VIVO_ACTIVE4_OLED_ASIA(3389)"),
+            3405 => write!(f, "GarminProduct::SWIM2(3405)"),
+            3420 => write!(f, "GarminProduct::MARQ_DRIVER_ASIA(3420)"),
+            3421 => write!(f, "GarminProduct::MARQ_AVIATOR_ASIA(3421)"),
+            3422 => write!(f, "GarminProduct::VIVO_MOVE3_ASIA(3422)"),
+            3441 => write!(f, "GarminProduct::FR945_ASIA(3441)"),
+            3446 => write!(f, "GarminProduct::VIVO_ACTIVE3T_CHN(3446)"),
+            3448 => write!(f, "GarminProduct::MARQ_CAPTAIN_ASIA(3448)"),
+            3449 => write!(f, "GarminProduct::MARQ_COMMANDER_ASIA(3449)"),
+            3450 => write!(f, "GarminProduct::MARQ_EXPEDITION_ASIA(3450)"),
+            3451 => write!(f, "GarminProduct::MARQ_ATHLETE_ASIA(3451)"),
+            3461 => write!(f, "GarminProduct::INDEX_SMART_SCALE_2(3461)"),
+            3466 => write!(f, "GarminProduct::INSTINCT_SOLAR(3466)"),
+            3469 => write!(f, "GarminProduct::FR45_ASIA(3469)"),
+            3473 => write!(f, "GarminProduct::VIVOACTIVE3_DAIMLER(3473)"),
+            3498 => write!(f, "GarminProduct::LEGACY_REY(3498)"),
+            3499 => write!(f, "GarminProduct::LEGACY_DARTH_VADER(3499)"),
+            3500 => write!(f, "GarminProduct::LEGACY_CAPTAIN_MARVEL(3500)"),
+            3501 => write!(f, "GarminProduct::LEGACY_FIRST_AVENGER(3501)"),
+            3512 => write!(f, "GarminProduct::FENIX6S_SPORT_ASIA(3512)"),
+            3513 => write!(f, "GarminProduct::FENIX6S_ASIA(3513)"),
+            3514 => write!(f, "GarminProduct::FENIX6_SPORT_ASIA(3514)"),
+            3515 => write!(f, "GarminProduct::FENIX6_ASIA(3515)"),
+            3516 => write!(f, "GarminProduct::FENIX6X_ASIA(3516)"),
+            3535 => write!(f, "GarminProduct::LEGACY_CAPTAIN_MARVEL_ASIA(3535)"),
+            3536 => write!(f, "GarminProduct::LEGACY_FIRST_AVENGER_ASIA(3536)"),
+            3537 => write!(f, "GarminProduct::LEGACY_REY_ASIA(3537)"),
+            3538 => write!(f, "GarminProduct::LEGACY_DARTH_VADER_ASIA(3538)"),
+            3542 => write!(f, "GarminProduct::DESCENT_MK2S(3542)"),
+            3558 => write!(f, "GarminProduct::EDGE_130_PLUS(3558)"),
+            3570 => write!(f, "GarminProduct::EDGE_1030_PLUS(3570)"),
+            3578 => write!(f, "GarminProduct::RALLY_200(3578)"),
+            3589 => write!(f, "GarminProduct::FR745(3589)"),
+            3596 => write!(f, "GarminProduct::VENUSQ_MUSIC(3596)"),
+            3599 => write!(f, "GarminProduct::VENUSQ_MUSIC_V2(3599)"),
+            3600 => write!(f, "GarminProduct::VENUSQ(3600)"),
+            3615 => write!(f, "GarminProduct::LILY(3615)"),
+            3624 => write!(f, "GarminProduct::MARQ_ADVENTURER(3624)"),
+            3638 => write!(f, "GarminProduct::ENDURO(3638)"),
+            3639 => write!(f, "GarminProduct::SWIM2_APAC(3639)"),
+            3648 => write!(f, "GarminProduct::MARQ_ADVENTURER_ASIA(3648)"),
+            3652 => write!(f, "GarminProduct::FR945_LTE(3652)"),
+            3702 => write!(f, "GarminProduct::DESCENT_MK2_ASIA(3702)"),
+            3703 => write!(f, "GarminProduct::VENU2(3703)"),
+            3704 => write!(f, "GarminProduct::VENU2S(3704)"),
+            3737 => write!(f, "GarminProduct::VENU_DAIMLER_ASIA(3737)"),
+            3739 => write!(f, "GarminProduct::MARQ_GOLFER(3739)"),
+            3740 => write!(f, "GarminProduct::VENU_DAIMLER(3740)"),
+            3794 => write!(f, "GarminProduct::FR745_ASIA(3794)"),
+            3808 => write!(f, "GarminProduct::VARIA_RCT715(3808)"),
+            3809 => write!(f, "GarminProduct::LILY_ASIA(3809)"),
+            3812 => write!(f, "GarminProduct::EDGE_1030_PLUS_ASIA(3812)"),
+            3813 => write!(f, "GarminProduct::EDGE_130_PLUS_ASIA(3813)"),
+            3823 => write!(f, "GarminProduct::APPROACH_S12(3823)"),
+            3872 => write!(f, "GarminProduct::ENDURO_ASIA(3872)"),
+            3837 => write!(f, "GarminProduct::VENUSQ_ASIA(3837)"),
+            3843 => write!(f, "GarminProduct::EDGE_1040(3843)"),
+            3850 => write!(f, "GarminProduct::MARQ_GOLFER_ASIA(3850)"),
+            3851 => write!(f, "GarminProduct::VENU2_PLUS(3851)"),
+            3865 => write!(f, "GarminProduct::GNSS(3865)"),
+            3869 => write!(f, "GarminProduct::FR55(3869)"),
+            3888 => write!(f, "GarminProduct::INSTINCT_2(3888)"),
+            3889 => write!(f, "GarminProduct::INSTINCT_2S(3889)"),
+            3905 => write!(f, "GarminProduct::FENIX7S(3905)"),
+            3906 => write!(f, "GarminProduct::FENIX7(3906)"),
+            3907 => write!(f, "GarminProduct::FENIX7X(3907)"),
+            3908 => write!(f, "GarminProduct::FENIX7S_APAC(3908)"),
+            3909 => write!(f, "GarminProduct::FENIX7_APAC(3909)"),
+            3910 => write!(f, "GarminProduct::FENIX7X_APAC(3910)"),
+            3927 => write!(f, "GarminProduct::APPROACH_G12( 3927)"),
+            3930 => write!(f, "GarminProduct::DESCENT_MK2S_ASIA(3930)"),
+            3934 => write!(f, "GarminProduct::APPROACH_S42(3934)"),
+            3943 => write!(f, "GarminProduct::EPIX_GEN2(3943)"),
+            3944 => write!(f, "GarminProduct::EPIX_GEN2_APAC(3944)"),
+            3949 => write!(f, "GarminProduct::VENU2S_ASIA(3949)"),
+            3950 => write!(f, "GarminProduct::VENU2_ASIA(3950)"),
+            3978 => write!(f, "GarminProduct::FR945_LTE_ASIA(3978)"),
+            3982 => write!(f, "GarminProduct::VIVO_MOVE_SPORT(3982)"),
+            3983 => write!(f, "GarminProduct::VIVOMOVE_TREND(3983)"),
+            3986 => write!(f, "GarminProduct::APPROACH_S12_ASIA(3986)"),
+            3990 => write!(f, "GarminProduct::FR255_MUSIC(3990)"),
+            3991 => write!(f, "GarminProduct::FR255_SMALL_MUSIC(3991)"),
+            3992 => write!(f, "GarminProduct::FR255(3992)"),
+            3993 => write!(f, "GarminProduct::FR255_SMALL(3993)"),
+            4001 => write!(f, "GarminProduct::APPROACH_G12_ASIA( 4001)"),
+            4002 => write!(f, "GarminProduct::APPROACH_S42_ASIA(4002)"),
+            4005 => write!(f, "GarminProduct::DESCENT_G1(4005)"),
+            4017 => write!(f, "GarminProduct::VENU2_PLUS_ASIA(4017)"),
+            4024 => write!(f, "GarminProduct::FR955(4024)"),
+            4033 => write!(f, "GarminProduct::FR55_ASIA(4033)"),
+            4061 => write!(f, "GarminProduct::EDGE_540(4061)"),
+            4062 => write!(f, "GarminProduct::EDGE_840(4062)"),
+            4063 => write!(f, "GarminProduct::VIVOSMART_5(4063)"),
+            4071 => write!(f, "GarminProduct::INSTINCT_2_ASIA(4071)"),
+            4105 => write!(f, "GarminProduct::MARQ_GEN2(4105)"),
+            4115 => write!(f, "GarminProduct::VENUSQ2(4115)"),
+            4116 => write!(f, "GarminProduct::VENUSQ2MUSIC(4116)"),
+            4124 => write!(f, "GarminProduct::MARQ_GEN2_AVIATOR(4124)"),
+            4125 => write!(f, "GarminProduct::D2_AIR_X10(4125)"),
+            4130 => write!(f, "GarminProduct::HRM_PRO_PLUS(4130)"),
+            4132 => write!(f, "GarminProduct::DESCENT_G1_ASIA(4132)"),
+            4135 => write!(f, "GarminProduct::TACTIX7(4135)"),
+            4155 => write!(f, "GarminProduct::INSTINCT_CROSSOVER(4155)"),
+            4169 => write!(f, "GarminProduct::EDGE_EXPLORE2(4169)"),
+            4222 => write!(f, "GarminProduct::DESCENT_MK3(4222)"),
+            4223 => write!(f, "GarminProduct::DESCENT_MK3I(4223)"),
+            4233 => write!(f, "GarminProduct::APPROACH_S70(4233)"),
+            4257 => write!(f, "GarminProduct::FR265_LARGE(4257)"),
+            4258 => write!(f, "GarminProduct::FR265_SMALL(4258)"),
+            4260 => write!(f, "GarminProduct::VENU3(4260)"),
+            4261 => write!(f, "GarminProduct::VENU3S(4261)"),
+            4265 => write!(f, "GarminProduct::TACX_NEO_SMART(4265)"),
+            4266 => write!(f, "GarminProduct::TACX_NEO2_SMART(4266)"),
+            4267 => write!(f, "GarminProduct::TACX_NEO2_T_SMART(4267)"),
+            4268 => write!(f, "GarminProduct::TACX_NEO_SMART_BIKE(4268)"),
+            4269 => write!(f, "GarminProduct::TACX_SATORI_SMART(4269)"),
+            4270 => write!(f, "GarminProduct::TACX_FLOW_SMART(4270)"),
+            4271 => write!(f, "GarminProduct::TACX_VORTEX_SMART(4271)"),
+            4272 => write!(f, "GarminProduct::TACX_BUSHIDO_SMART(4272)"),
+            4273 => write!(f, "GarminProduct::TACX_GENIUS_SMART(4273)"),
+            4274 => write!(f, "GarminProduct::TACX_FLUX_FLUX_S_SMART(4274)"),
+            4275 => write!(f, "GarminProduct::TACX_FLUX2_SMART(4275)"),
+            4276 => write!(f, "GarminProduct::TACX_MAGNUM(4276)"),
+            4305 => write!(f, "GarminProduct::EDGE_1040_ASIA(4305)"),
+            4312 => write!(f, "GarminProduct::EPIX_GEN2_PRO_42(4312)"),
+            4313 => write!(f, "GarminProduct::EPIX_GEN2_PRO_47(4313)"),
+            4314 => write!(f, "GarminProduct::EPIX_GEN2_PRO_51(4314)"),
+            4315 => write!(f, "GarminProduct::FR965(4315)"),
+            4341 => write!(f, "GarminProduct::ENDURO2(4341)"),
+            4374 => write!(f, "GarminProduct::FENIX7S_PRO_SOLAR(4374)"),
+            4375 => write!(f, "GarminProduct::FENIX7_PRO_SOLAR(4375)"),
+            4376 => write!(f, "GarminProduct::FENIX7X_PRO_SOLAR(4376)"),
+            4380 => write!(f, "GarminProduct::LILY2(4380)"),
+            4394 => write!(f, "GarminProduct::INSTINCT_2X(4394)"),
+            4426 => write!(f, "GarminProduct::VIVOACTIVE5(4426)"),
+            4432 => write!(f, "GarminProduct::FR165(4432)"),
+            4433 => write!(f, "GarminProduct::FR165_MUSIC(4433)"),
+            4440 => write!(f, "GarminProduct::EDGE_1050(4440)"),
+            4442 => write!(f, "GarminProduct::DESCENT_T2(4442)"),
+            4446 => write!(f, "GarminProduct::HRM_FIT(4446)"),
+            4472 => write!(f, "GarminProduct::MARQ_GEN2_COMMANDER(4472)"),
+            4477 => write!(f, "GarminProduct::LILY_ATHLETE(4477)"),
+            4525 => write!(f, "GarminProduct::RALLY_X10(4525)"),
+            4532 => write!(f, "GarminProduct::FENIX8_SOLAR(4532)"),
+            4533 => write!(f, "GarminProduct::FENIX8_SOLAR_LARGE(4533)"),
+            4534 => write!(f, "GarminProduct::FENIX8_SMALL(4534)"),
+            4536 => write!(f, "GarminProduct::FENIX8(4536)"),
+            4556 => write!(f, "GarminProduct::D2_MACH1_PRO(4556)"),
+            4575 => write!(f, "GarminProduct::ENDURO3(4575)"),
+            4583 => write!(f, "GarminProduct::INSTINCTE_40MM(4583)"),
+            4584 => write!(f, "GarminProduct::INSTINCTE_45MM(4584)"),
+            4585 => write!(f, "GarminProduct::INSTINCT3_SOLAR_45MM(4585)"),
+            4586 => write!(f, "GarminProduct::INSTINCT3_AMOLED_45MM(4586)"),
+            4587 => write!(f, "GarminProduct::INSTINCT3_AMOLED_50MM(4587)"),
+            4588 => write!(f, "GarminProduct::DESCENT_G2(4588)"),
+            4603 => write!(f, "GarminProduct::VENU_X1(4603)"),
+            4606 => write!(f, "GarminProduct::HRM_200(4606)"),
+            4625 => write!(f, "GarminProduct::VIVOACTIVE6(4625)"),
+            4631 => write!(f, "GarminProduct::FENIX8_PRO(4631)"),
+            4633 => write!(f, "GarminProduct::EDGE_550(4633)"),
+            4634 => write!(f, "GarminProduct::EDGE_850(4634)"),
+            4643 => write!(f, "GarminProduct::VENU4(4643)"),
+            4644 => write!(f, "GarminProduct::VENU4S(4644)"),
+            4647 => write!(f, "GarminProduct::APPROACHS44(4647)"),
+            4655 => write!(f, "GarminProduct::EDGE_MTB(4655)"),
+            4656 => write!(f, "GarminProduct::APPROACHS50(4656)"),
+            4666 => write!(f, "GarminProduct::FENIX_E(4666)"),
+            4745 => write!(f, "GarminProduct::BOUNCE2(4745)"),
+            4759 => write!(f, "GarminProduct::INSTINCT3_SOLAR_50MM(4759)"),
+            4775 => write!(f, "GarminProduct::TACTIX8_AMOLED(4775)"),
+            4776 => write!(f, "GarminProduct::TACTIX8_SOLAR(4776)"),
+            4879 => write!(f, "GarminProduct::D2_MACH2(4879)"),
+            4678 => write!(f, "GarminProduct::INSTINCT_CROSSOVER_AMOLED(4678)"),
+            4944 => write!(f, "GarminProduct::D2_AIR_X15(4944)"),
+            10007 => write!(f, "GarminProduct::SDM4(10007)"),
+            10014 => write!(f, "GarminProduct::EDGE_REMOTE(10014)"),
+            20533 => write!(f, "GarminProduct::TACX_TRAINING_APP_WIN(20533)"),
+            20534 => write!(f, "GarminProduct::TACX_TRAINING_APP_MAC(20534)"),
+            20565 => write!(f, "GarminProduct::TACX_TRAINING_APP_MAC_CATALYST(20565)"),
+            20119 => write!(f, "GarminProduct::TRAINING_CENTER(20119)"),
+            30045 => write!(f, "GarminProduct::TACX_TRAINING_APP_ANDROID(30045)"),
+            30046 => write!(f, "GarminProduct::TACX_TRAINING_APP_IOS(30046)"),
+            30047 => write!(f, "GarminProduct::TACX_TRAINING_APP_LEGACY(30047)"),
+            65531 => write!(f, "GarminProduct::CONNECTIQ_SIMULATOR(65531)"),
+            65532 => write!(f, "GarminProduct::ANDROID_ANTPLUS_PLUGIN(65532)"),
+            65534 => write!(f, "GarminProduct::CONNECT(65534)"),
+            _ => write!(f, "GarminProduct({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AntplusDeviceType(pub u8);
 
 impl AntplusDeviceType {
@@ -4620,12 +6694,45 @@ impl fmt::Display for AntplusDeviceType {
             122 => write!(f, "bike_cadence"),
             123 => write!(f, "bike_speed"),
             124 => write!(f, "stride_speed_distance"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AntplusDeviceType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AntplusDeviceType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "AntplusDeviceType::ANTFS(1)"),
+            11 => write!(f, "AntplusDeviceType::BIKE_POWER(11)"),
+            12 => write!(f, "AntplusDeviceType::ENVIRONMENT_SENSOR_LEGACY(12)"),
+            15 => write!(f, "AntplusDeviceType::MULTI_SPORT_SPEED_DISTANCE(15)"),
+            16 => write!(f, "AntplusDeviceType::CONTROL(16)"),
+            17 => write!(f, "AntplusDeviceType::FITNESS_EQUIPMENT(17)"),
+            18 => write!(f, "AntplusDeviceType::BLOOD_PRESSURE(18)"),
+            19 => write!(f, "AntplusDeviceType::GEOCACHE_NODE(19)"),
+            20 => write!(f, "AntplusDeviceType::LIGHT_ELECTRIC_VEHICLE(20)"),
+            25 => write!(f, "AntplusDeviceType::ENV_SENSOR(25)"),
+            26 => write!(f, "AntplusDeviceType::RACQUET(26)"),
+            27 => write!(f, "AntplusDeviceType::CONTROL_HUB(27)"),
+            31 => write!(f, "AntplusDeviceType::MUSCLE_OXYGEN(31)"),
+            34 => write!(f, "AntplusDeviceType::SHIFTING(34)"),
+            35 => write!(f, "AntplusDeviceType::BIKE_LIGHT_MAIN(35)"),
+            36 => write!(f, "AntplusDeviceType::BIKE_LIGHT_SHARED(36)"),
+            38 => write!(f, "AntplusDeviceType::EXD(38)"),
+            40 => write!(f, "AntplusDeviceType::BIKE_RADAR(40)"),
+            46 => write!(f, "AntplusDeviceType::BIKE_AERO(46)"),
+            119 => write!(f, "AntplusDeviceType::WEIGHT_SCALE(119)"),
+            120 => write!(f, "AntplusDeviceType::HEART_RATE(120)"),
+            121 => write!(f, "AntplusDeviceType::BIKE_SPEED_CADENCE(121)"),
+            122 => write!(f, "AntplusDeviceType::BIKE_CADENCE(122)"),
+            123 => write!(f, "AntplusDeviceType::BIKE_SPEED(123)"),
+            124 => write!(f, "AntplusDeviceType::STRIDE_SPEED_DISTANCE(124)"),
+            _ => write!(f, "AntplusDeviceType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AntNetwork(pub u8);
 
 impl AntNetwork {
@@ -4648,12 +6755,24 @@ impl fmt::Display for AntNetwork {
             1 => write!(f, "antplus"),
             2 => write!(f, "antfs"),
             3 => write!(f, "private"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AntNetwork({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AntNetwork {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "AntNetwork::PUBLIC(0)"),
+            1 => write!(f, "AntNetwork::ANTPLUS(1)"),
+            2 => write!(f, "AntNetwork::ANTFS(2)"),
+            3 => write!(f, "AntNetwork::PRIVATE(3)"),
+            _ => write!(f, "AntNetwork({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WorkoutCapabilities(pub u32);
 
 impl WorkoutCapabilities {
@@ -4683,7 +6802,7 @@ impl WorkoutCapabilities {
 
 impl Default for WorkoutCapabilities {
     fn default() -> Self {
-        Self(u32::MAX)
+        Self(u32::MIN)
     }
 }
 
@@ -4704,12 +6823,34 @@ impl fmt::Display for WorkoutCapabilities {
             0x00001000 => write!(f, "grade"),
             0x00002000 => write!(f, "resistance"),
             0x00004000 => write!(f, "protected"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WorkoutCapabilities({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WorkoutCapabilities {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x00000001 => write!(f, "WorkoutCapabilities::INTERVAL(0x00000001)"),
+            0x00000002 => write!(f, "WorkoutCapabilities::CUSTOM(0x00000002)"),
+            0x00000004 => write!(f, "WorkoutCapabilities::FITNESS_EQUIPMENT(0x00000004)"),
+            0x00000008 => write!(f, "WorkoutCapabilities::FIRSTBEAT(0x00000008)"),
+            0x00000010 => write!(f, "WorkoutCapabilities::NEW_LEAF(0x00000010)"),
+            0x00000020 => write!(f, "WorkoutCapabilities::TCX(0x00000020)"),
+            0x00000080 => write!(f, "WorkoutCapabilities::SPEED(0x00000080)"),
+            0x00000100 => write!(f, "WorkoutCapabilities::HEART_RATE(0x00000100)"),
+            0x00000200 => write!(f, "WorkoutCapabilities::DISTANCE(0x00000200)"),
+            0x00000400 => write!(f, "WorkoutCapabilities::CADENCE(0x00000400)"),
+            0x00000800 => write!(f, "WorkoutCapabilities::POWER(0x00000800)"),
+            0x00001000 => write!(f, "WorkoutCapabilities::GRADE(0x00001000)"),
+            0x00002000 => write!(f, "WorkoutCapabilities::RESISTANCE(0x00002000)"),
+            0x00004000 => write!(f, "WorkoutCapabilities::PROTECTED(0x00004000)"),
+            _ => write!(f, "WorkoutCapabilities({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BatteryStatus(pub u8);
 
 impl BatteryStatus {
@@ -4738,12 +6879,27 @@ impl fmt::Display for BatteryStatus {
             5 => write!(f, "critical"),
             6 => write!(f, "charging"),
             7 => write!(f, "unknown"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BatteryStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BatteryStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "BatteryStatus::NEW(1)"),
+            2 => write!(f, "BatteryStatus::GOOD(2)"),
+            3 => write!(f, "BatteryStatus::OK(3)"),
+            4 => write!(f, "BatteryStatus::LOW(4)"),
+            5 => write!(f, "BatteryStatus::CRITICAL(5)"),
+            6 => write!(f, "BatteryStatus::CHARGING(6)"),
+            7 => write!(f, "BatteryStatus::UNKNOWN(7)"),
+            _ => write!(f, "BatteryStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HrType(pub u8);
 
 impl HrType {
@@ -4762,12 +6918,22 @@ impl fmt::Display for HrType {
         match self.0 {
             0 => write!(f, "normal"),
             1 => write!(f, "irregular"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HrType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HrType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "HrType::NORMAL(0)"),
+            1 => write!(f, "HrType::IRREGULAR(1)"),
+            _ => write!(f, "HrType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CourseCapabilities(pub u32);
 
 impl CourseCapabilities {
@@ -4788,7 +6954,7 @@ impl CourseCapabilities {
 
 impl Default for CourseCapabilities {
     fn default() -> Self {
-        Self(u32::MAX)
+        Self(u32::MIN)
     }
 }
 
@@ -4807,12 +6973,32 @@ impl fmt::Display for CourseCapabilities {
             0x00000200 => write!(f, "navigation"),
             0x00000400 => write!(f, "bikeway"),
             0x00001000 => write!(f, "aviation"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CourseCapabilities({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CourseCapabilities {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x00000001 => write!(f, "CourseCapabilities::PROCESSED(0x00000001)"),
+            0x00000002 => write!(f, "CourseCapabilities::VALID(0x00000002)"),
+            0x00000004 => write!(f, "CourseCapabilities::TIME(0x00000004)"),
+            0x00000008 => write!(f, "CourseCapabilities::DISTANCE(0x00000008)"),
+            0x00000010 => write!(f, "CourseCapabilities::POSITION(0x00000010)"),
+            0x00000020 => write!(f, "CourseCapabilities::HEART_RATE(0x00000020)"),
+            0x00000040 => write!(f, "CourseCapabilities::POWER(0x00000040)"),
+            0x00000080 => write!(f, "CourseCapabilities::CADENCE(0x00000080)"),
+            0x00000100 => write!(f, "CourseCapabilities::TRAINING(0x00000100)"),
+            0x00000200 => write!(f, "CourseCapabilities::NAVIGATION(0x00000200)"),
+            0x00000400 => write!(f, "CourseCapabilities::BIKEWAY(0x00000400)"),
+            0x00001000 => write!(f, "CourseCapabilities::AVIATION(0x00001000)"),
+            _ => write!(f, "CourseCapabilities({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Weight(pub u16);
 
 impl Weight {
@@ -4829,12 +7015,21 @@ impl fmt::Display for Weight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0xFFFE => write!(f, "calculating"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Weight({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Weight {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0xFFFE => write!(f, "Weight::CALCULATING(0xFFFE)"),
+            _ => write!(f, "Weight({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WorkoutHr(pub u32);
 
 impl WorkoutHr {
@@ -4851,12 +7046,21 @@ impl fmt::Display for WorkoutHr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             100 => write!(f, "bpm_offset"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WorkoutHr({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WorkoutHr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            100 => write!(f, "WorkoutHr::BPM_OFFSET(100)"),
+            _ => write!(f, "WorkoutHr({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WorkoutPower(pub u32);
 
 impl WorkoutPower {
@@ -4873,12 +7077,21 @@ impl fmt::Display for WorkoutPower {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             1000 => write!(f, "watts_offset"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WorkoutPower({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WorkoutPower {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1000 => write!(f, "WorkoutPower::WATTS_OFFSET(1000)"),
+            _ => write!(f, "WorkoutPower({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BpStatus(pub u8);
 
 impl BpStatus {
@@ -4903,12 +7116,25 @@ impl fmt::Display for BpStatus {
             2 => write!(f, "error_no_measurement"),
             3 => write!(f, "error_data_out_of_range"),
             4 => write!(f, "error_irregular_heart_rate"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BpStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BpStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BpStatus::NO_ERROR(0)"),
+            1 => write!(f, "BpStatus::ERROR_INCOMPLETE_DATA(1)"),
+            2 => write!(f, "BpStatus::ERROR_NO_MEASUREMENT(2)"),
+            3 => write!(f, "BpStatus::ERROR_DATA_OUT_OF_RANGE(3)"),
+            4 => write!(f, "BpStatus::ERROR_IRREGULAR_HEART_RATE(4)"),
+            _ => write!(f, "BpStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct UserLocalId(pub u16);
 
 impl UserLocalId {
@@ -4935,12 +7161,26 @@ impl fmt::Display for UserLocalId {
             0x00FF => write!(f, "stationary_max"),
             0x0100 => write!(f, "portable_min"),
             0xFFFE => write!(f, "portable_max"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "UserLocalId({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for UserLocalId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x0000 => write!(f, "UserLocalId::LOCAL_MIN(0x0000)"),
+            0x000F => write!(f, "UserLocalId::LOCAL_MAX(0x000F)"),
+            0x0010 => write!(f, "UserLocalId::STATIONARY_MIN(0x0010)"),
+            0x00FF => write!(f, "UserLocalId::STATIONARY_MAX(0x00FF)"),
+            0x0100 => write!(f, "UserLocalId::PORTABLE_MIN(0x0100)"),
+            0xFFFE => write!(f, "UserLocalId::PORTABLE_MAX(0xFFFE)"),
+            _ => write!(f, "UserLocalId({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SwimStroke(pub u8);
 
 impl SwimStroke {
@@ -4976,12 +7216,29 @@ impl fmt::Display for SwimStroke {
             6 => write!(f, "im"),
             7 => write!(f, "im_by_round"),
             8 => write!(f, "rimo"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SwimStroke({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SwimStroke {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SwimStroke::FREESTYLE(0)"),
+            1 => write!(f, "SwimStroke::BACKSTROKE(1)"),
+            2 => write!(f, "SwimStroke::BREASTSTROKE(2)"),
+            3 => write!(f, "SwimStroke::BUTTERFLY(3)"),
+            4 => write!(f, "SwimStroke::DRILL(4)"),
+            5 => write!(f, "SwimStroke::MIXED(5)"),
+            6 => write!(f, "SwimStroke::IM(6)"),
+            7 => write!(f, "SwimStroke::IM_BY_ROUND(7)"),
+            8 => write!(f, "SwimStroke::RIMO(8)"),
+            _ => write!(f, "SwimStroke({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ActivityType(pub u8);
 
 impl ActivityType {
@@ -5016,12 +7273,29 @@ impl fmt::Display for ActivityType {
             6 => write!(f, "walking"),
             8 => write!(f, "sedentary"),
             254 => write!(f, "all"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ActivityType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ActivityType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ActivityType::GENERIC(0)"),
+            1 => write!(f, "ActivityType::RUNNING(1)"),
+            2 => write!(f, "ActivityType::CYCLING(2)"),
+            3 => write!(f, "ActivityType::TRANSITION(3)"),
+            4 => write!(f, "ActivityType::FITNESS_EQUIPMENT(4)"),
+            5 => write!(f, "ActivityType::SWIMMING(5)"),
+            6 => write!(f, "ActivityType::WALKING(6)"),
+            8 => write!(f, "ActivityType::SEDENTARY(8)"),
+            254 => write!(f, "ActivityType::ALL(254)"),
+            _ => write!(f, "ActivityType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ActivitySubtype(pub u8);
 
 impl ActivitySubtype {
@@ -5094,12 +7368,40 @@ impl fmt::Display for ActivitySubtype {
             17 => write!(f, "lap_swimming"),
             18 => write!(f, "open_water"),
             254 => write!(f, "all"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ActivitySubtype({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ActivitySubtype {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ActivitySubtype::GENERIC(0)"),
+            1 => write!(f, "ActivitySubtype::TREADMILL(1)"),
+            2 => write!(f, "ActivitySubtype::STREET(2)"),
+            3 => write!(f, "ActivitySubtype::TRAIL(3)"),
+            4 => write!(f, "ActivitySubtype::TRACK(4)"),
+            5 => write!(f, "ActivitySubtype::SPIN(5)"),
+            6 => write!(f, "ActivitySubtype::INDOOR_CYCLING(6)"),
+            7 => write!(f, "ActivitySubtype::ROAD(7)"),
+            8 => write!(f, "ActivitySubtype::MOUNTAIN(8)"),
+            9 => write!(f, "ActivitySubtype::DOWNHILL(9)"),
+            10 => write!(f, "ActivitySubtype::RECUMBENT(10)"),
+            11 => write!(f, "ActivitySubtype::CYCLOCROSS(11)"),
+            12 => write!(f, "ActivitySubtype::HAND_CYCLING(12)"),
+            13 => write!(f, "ActivitySubtype::TRACK_CYCLING(13)"),
+            14 => write!(f, "ActivitySubtype::INDOOR_ROWING(14)"),
+            15 => write!(f, "ActivitySubtype::ELLIPTICAL(15)"),
+            16 => write!(f, "ActivitySubtype::STAIR_CLIMBING(16)"),
+            17 => write!(f, "ActivitySubtype::LAP_SWIMMING(17)"),
+            18 => write!(f, "ActivitySubtype::OPEN_WATER(18)"),
+            254 => write!(f, "ActivitySubtype::ALL(254)"),
+            _ => write!(f, "ActivitySubtype({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ActivityLevel(pub u8);
 
 impl ActivityLevel {
@@ -5120,12 +7422,23 @@ impl fmt::Display for ActivityLevel {
             0 => write!(f, "low"),
             1 => write!(f, "medium"),
             2 => write!(f, "high"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ActivityLevel({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ActivityLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ActivityLevel::LOW(0)"),
+            1 => write!(f, "ActivityLevel::MEDIUM(1)"),
+            2 => write!(f, "ActivityLevel::HIGH(2)"),
+            _ => write!(f, "ActivityLevel({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Side(pub u8);
 
 impl Side {
@@ -5144,12 +7457,22 @@ impl fmt::Display for Side {
         match self.0 {
             0 => write!(f, "right"),
             1 => write!(f, "left"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Side({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Side {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Side::RIGHT(0)"),
+            1 => write!(f, "Side::LEFT(1)"),
+            _ => write!(f, "Side({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LeftRightBalance(pub u8);
 
 impl LeftRightBalance {
@@ -5170,12 +7493,22 @@ impl fmt::Display for LeftRightBalance {
         match self.0 {
             0x7F => write!(f, "mask"),
             0x80 => write!(f, "right"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LeftRightBalance({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LeftRightBalance {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x7F => write!(f, "LeftRightBalance::MASK(0x7F)"),
+            0x80 => write!(f, "LeftRightBalance::RIGHT(0x80)"),
+            _ => write!(f, "LeftRightBalance({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LeftRightBalance100(pub u16);
 
 impl LeftRightBalance100 {
@@ -5196,12 +7529,22 @@ impl fmt::Display for LeftRightBalance100 {
         match self.0 {
             0x3FFF => write!(f, "mask"),
             0x8000 => write!(f, "right"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LeftRightBalance100({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LeftRightBalance100 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x3FFF => write!(f, "LeftRightBalance100::MASK(0x3FFF)"),
+            0x8000 => write!(f, "LeftRightBalance100::RIGHT(0x8000)"),
+            _ => write!(f, "LeftRightBalance100({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LengthType(pub u8);
 
 impl LengthType {
@@ -5222,12 +7565,22 @@ impl fmt::Display for LengthType {
         match self.0 {
             0 => write!(f, "idle"),
             1 => write!(f, "active"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LengthType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LengthType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LengthType::IDLE(0)"),
+            1 => write!(f, "LengthType::ACTIVE(1)"),
+            _ => write!(f, "LengthType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DayOfWeek(pub u8);
 
 impl DayOfWeek {
@@ -5256,12 +7609,27 @@ impl fmt::Display for DayOfWeek {
             4 => write!(f, "thursday"),
             5 => write!(f, "friday"),
             6 => write!(f, "saturday"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DayOfWeek({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DayOfWeek {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DayOfWeek::SUNDAY(0)"),
+            1 => write!(f, "DayOfWeek::MONDAY(1)"),
+            2 => write!(f, "DayOfWeek::TUESDAY(2)"),
+            3 => write!(f, "DayOfWeek::WEDNESDAY(3)"),
+            4 => write!(f, "DayOfWeek::THURSDAY(4)"),
+            5 => write!(f, "DayOfWeek::FRIDAY(5)"),
+            6 => write!(f, "DayOfWeek::SATURDAY(6)"),
+            _ => write!(f, "DayOfWeek({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ConnectivityCapabilities(pub u32);
 
 impl ConnectivityCapabilities {
@@ -5320,7 +7688,7 @@ impl ConnectivityCapabilities {
 
 impl Default for ConnectivityCapabilities {
     fn default() -> Self {
-        Self(u32::MAX)
+        Self(u32::MIN)
     }
 }
 
@@ -5359,12 +7727,100 @@ impl fmt::Display for ConnectivityCapabilities {
             0x20000000 => write!(f, "live_track_auto_start"),
             0x40000000 => write!(f, "live_track_messaging"),
             0x80000000 => write!(f, "instant_input"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ConnectivityCapabilities({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ConnectivityCapabilities {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x00000001 => write!(f, "ConnectivityCapabilities::BLUETOOTH(0x00000001)"),
+            0x00000002 => write!(f, "ConnectivityCapabilities::BLUETOOTH_LE(0x00000002)"),
+            0x00000004 => write!(f, "ConnectivityCapabilities::ANT(0x00000004)"),
+            0x00000008 => write!(f, "ConnectivityCapabilities::ACTIVITY_UPLOAD(0x00000008)"),
+            0x00000010 => write!(f, "ConnectivityCapabilities::COURSE_DOWNLOAD(0x00000010)"),
+            0x00000020 => write!(f, "ConnectivityCapabilities::WORKOUT_DOWNLOAD(0x00000020)"),
+            0x00000040 => write!(f, "ConnectivityCapabilities::LIVE_TRACK(0x00000040)"),
+            0x00000080 => write!(
+                f,
+                "ConnectivityCapabilities::WEATHER_CONDITIONS(0x00000080)"
+            ),
+            0x00000100 => write!(f, "ConnectivityCapabilities::WEATHER_ALERTS(0x00000100)"),
+            0x00000200 => write!(
+                f,
+                "ConnectivityCapabilities::GPS_EPHEMERIS_DOWNLOAD(0x00000200)"
+            ),
+            0x00000400 => write!(f, "ConnectivityCapabilities::EXPLICIT_ARCHIVE(0x00000400)"),
+            0x00000800 => write!(f, "ConnectivityCapabilities::SETUP_INCOMPLETE(0x00000800)"),
+            0x00001000 => write!(
+                f,
+                "ConnectivityCapabilities::CONTINUE_SYNC_AFTER_SOFTWARE_UPDATE(0x00001000)"
+            ),
+            0x00002000 => write!(
+                f,
+                "ConnectivityCapabilities::CONNECT_IQ_APP_DOWNLOAD(0x00002000)"
+            ),
+            0x00004000 => write!(
+                f,
+                "ConnectivityCapabilities::GOLF_COURSE_DOWNLOAD(0x00004000)"
+            ),
+            0x00008000 => write!(
+                f,
+                "ConnectivityCapabilities::DEVICE_INITIATES_SYNC(0x00008000)"
+            ),
+            0x00010000 => write!(
+                f,
+                "ConnectivityCapabilities::CONNECT_IQ_WATCH_APP_DOWNLOAD(0x00010000)"
+            ),
+            0x00020000 => write!(
+                f,
+                "ConnectivityCapabilities::CONNECT_IQ_WIDGET_DOWNLOAD(0x00020000)"
+            ),
+            0x00040000 => write!(
+                f,
+                "ConnectivityCapabilities::CONNECT_IQ_WATCH_FACE_DOWNLOAD(0x00040000)"
+            ),
+            0x00080000 => write!(
+                f,
+                "ConnectivityCapabilities::CONNECT_IQ_DATA_FIELD_DOWNLOAD(0x00080000)"
+            ),
+            0x00100000 => write!(
+                f,
+                "ConnectivityCapabilities::CONNECT_IQ_APP_MANAGEMENT(0x00100000)"
+            ),
+            0x00200000 => write!(f, "ConnectivityCapabilities::SWING_SENSOR(0x00200000)"),
+            0x00400000 => write!(
+                f,
+                "ConnectivityCapabilities::SWING_SENSOR_REMOTE(0x00400000)"
+            ),
+            0x00800000 => write!(
+                f,
+                "ConnectivityCapabilities::INCIDENT_DETECTION(0x00800000)"
+            ),
+            0x01000000 => write!(f, "ConnectivityCapabilities::AUDIO_PROMPTS(0x01000000)"),
+            0x02000000 => write!(f, "ConnectivityCapabilities::WIFI_VERIFICATION(0x02000000)"),
+            0x04000000 => write!(f, "ConnectivityCapabilities::TRUE_UP(0x04000000)"),
+            0x08000000 => write!(f, "ConnectivityCapabilities::FIND_MY_WATCH(0x08000000)"),
+            0x10000000 => write!(
+                f,
+                "ConnectivityCapabilities::REMOTE_MANUAL_SYNC(0x10000000)"
+            ),
+            0x20000000 => write!(
+                f,
+                "ConnectivityCapabilities::LIVE_TRACK_AUTO_START(0x20000000)"
+            ),
+            0x40000000 => write!(
+                f,
+                "ConnectivityCapabilities::LIVE_TRACK_MESSAGING(0x40000000)"
+            ),
+            0x80000000 => write!(f, "ConnectivityCapabilities::INSTANT_INPUT(0x80000000)"),
+            _ => write!(f, "ConnectivityCapabilities({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WeatherReport(pub u8);
 
 impl WeatherReport {
@@ -5388,12 +7844,24 @@ impl fmt::Display for WeatherReport {
             //  1 => write!(f, "forecast"),
             1 => write!(f, "hourly_forecast"),
             2 => write!(f, "daily_forecast"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WeatherReport({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WeatherReport {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WeatherReport::CURRENT(0)"),
+            //  1 => write!(f, "WeatherReport::FORECAST(1)"),
+            1 => write!(f, "WeatherReport::HOURLY_FORECAST(1)"),
+            2 => write!(f, "WeatherReport::DAILY_FORECAST(2)"),
+            _ => write!(f, "WeatherReport({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WeatherStatus(pub u8);
 
 impl WeatherStatus {
@@ -5450,12 +7918,41 @@ impl fmt::Display for WeatherStatus {
             20 => write!(f, "light_rain_snow"),
             21 => write!(f, "heavy_rain_snow"),
             22 => write!(f, "cloudy"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WeatherStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WeatherStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WeatherStatus::CLEAR(0)"),
+            1 => write!(f, "WeatherStatus::PARTLY_CLOUDY(1)"),
+            2 => write!(f, "WeatherStatus::MOSTLY_CLOUDY(2)"),
+            3 => write!(f, "WeatherStatus::RAIN(3)"),
+            4 => write!(f, "WeatherStatus::SNOW(4)"),
+            5 => write!(f, "WeatherStatus::WINDY(5)"),
+            6 => write!(f, "WeatherStatus::THUNDERSTORMS(6)"),
+            7 => write!(f, "WeatherStatus::WINTRY_MIX(7)"),
+            8 => write!(f, "WeatherStatus::FOG(8)"),
+            11 => write!(f, "WeatherStatus::HAZY(11)"),
+            12 => write!(f, "WeatherStatus::HAIL(12)"),
+            13 => write!(f, "WeatherStatus::SCATTERED_SHOWERS(13)"),
+            14 => write!(f, "WeatherStatus::SCATTERED_THUNDERSTORMS(14)"),
+            15 => write!(f, "WeatherStatus::UNKNOWN_PRECIPITATION(15)"),
+            16 => write!(f, "WeatherStatus::LIGHT_RAIN(16)"),
+            17 => write!(f, "WeatherStatus::HEAVY_RAIN(17)"),
+            18 => write!(f, "WeatherStatus::LIGHT_SNOW(18)"),
+            19 => write!(f, "WeatherStatus::HEAVY_SNOW(19)"),
+            20 => write!(f, "WeatherStatus::LIGHT_RAIN_SNOW(20)"),
+            21 => write!(f, "WeatherStatus::HEAVY_RAIN_SNOW(21)"),
+            22 => write!(f, "WeatherStatus::CLOUDY(22)"),
+            _ => write!(f, "WeatherStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WeatherSeverity(pub u8);
 
 impl WeatherSeverity {
@@ -5480,12 +7977,25 @@ impl fmt::Display for WeatherSeverity {
             2 => write!(f, "watch"),
             3 => write!(f, "advisory"),
             4 => write!(f, "statement"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WeatherSeverity({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WeatherSeverity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WeatherSeverity::UNKNOWN(0)"),
+            1 => write!(f, "WeatherSeverity::WARNING(1)"),
+            2 => write!(f, "WeatherSeverity::WATCH(2)"),
+            3 => write!(f, "WeatherSeverity::ADVISORY(3)"),
+            4 => write!(f, "WeatherSeverity::STATEMENT(4)"),
+            _ => write!(f, "WeatherSeverity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WeatherSevereType(pub u8);
 
 impl WeatherSevereType {
@@ -5670,12 +8180,105 @@ impl fmt::Display for WeatherSevereType {
             82 => write!(f, "low_water"),
             83 => write!(f, "hydrological"),
             84 => write!(f, "special_weather"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WeatherSevereType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WeatherSevereType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WeatherSevereType::UNSPECIFIED(0)"),
+            1 => write!(f, "WeatherSevereType::TORNADO(1)"),
+            2 => write!(f, "WeatherSevereType::TSUNAMI(2)"),
+            3 => write!(f, "WeatherSevereType::HURRICANE(3)"),
+            4 => write!(f, "WeatherSevereType::EXTREME_WIND(4)"),
+            5 => write!(f, "WeatherSevereType::TYPHOON(5)"),
+            6 => write!(f, "WeatherSevereType::INLAND_HURRICANE(6)"),
+            7 => write!(f, "WeatherSevereType::HURRICANE_FORCE_WIND(7)"),
+            8 => write!(f, "WeatherSevereType::WATERSPOUT(8)"),
+            9 => write!(f, "WeatherSevereType::SEVERE_THUNDERSTORM(9)"),
+            10 => write!(f, "WeatherSevereType::WRECKHOUSE_WINDS(10)"),
+            11 => write!(f, "WeatherSevereType::LES_SUETES_WIND(11)"),
+            12 => write!(f, "WeatherSevereType::AVALANCHE(12)"),
+            13 => write!(f, "WeatherSevereType::FLASH_FLOOD(13)"),
+            14 => write!(f, "WeatherSevereType::TROPICAL_STORM(14)"),
+            15 => write!(f, "WeatherSevereType::INLAND_TROPICAL_STORM(15)"),
+            16 => write!(f, "WeatherSevereType::BLIZZARD(16)"),
+            17 => write!(f, "WeatherSevereType::ICE_STORM(17)"),
+            18 => write!(f, "WeatherSevereType::FREEZING_RAIN(18)"),
+            19 => write!(f, "WeatherSevereType::DEBRIS_FLOW(19)"),
+            20 => write!(f, "WeatherSevereType::FLASH_FREEZE(20)"),
+            21 => write!(f, "WeatherSevereType::DUST_STORM(21)"),
+            22 => write!(f, "WeatherSevereType::HIGH_WIND(22)"),
+            23 => write!(f, "WeatherSevereType::WINTER_STORM(23)"),
+            24 => write!(f, "WeatherSevereType::HEAVY_FREEZING_SPRAY(24)"),
+            25 => write!(f, "WeatherSevereType::EXTREME_COLD(25)"),
+            26 => write!(f, "WeatherSevereType::WIND_CHILL(26)"),
+            27 => write!(f, "WeatherSevereType::COLD_WAVE(27)"),
+            28 => write!(f, "WeatherSevereType::HEAVY_SNOW_ALERT(28)"),
+            29 => write!(f, "WeatherSevereType::LAKE_EFFECT_BLOWING_SNOW(29)"),
+            30 => write!(f, "WeatherSevereType::SNOW_SQUALL(30)"),
+            31 => write!(f, "WeatherSevereType::LAKE_EFFECT_SNOW(31)"),
+            32 => write!(f, "WeatherSevereType::WINTER_WEATHER(32)"),
+            33 => write!(f, "WeatherSevereType::SLEET(33)"),
+            34 => write!(f, "WeatherSevereType::SNOWFALL(34)"),
+            35 => write!(f, "WeatherSevereType::SNOW_AND_BLOWING_SNOW(35)"),
+            36 => write!(f, "WeatherSevereType::BLOWING_SNOW(36)"),
+            37 => write!(f, "WeatherSevereType::SNOW_ALERT(37)"),
+            38 => write!(f, "WeatherSevereType::ARCTIC_OUTFLOW(38)"),
+            39 => write!(f, "WeatherSevereType::FREEZING_DRIZZLE(39)"),
+            40 => write!(f, "WeatherSevereType::STORM(40)"),
+            41 => write!(f, "WeatherSevereType::STORM_SURGE(41)"),
+            42 => write!(f, "WeatherSevereType::RAINFALL(42)"),
+            43 => write!(f, "WeatherSevereType::AREAL_FLOOD(43)"),
+            44 => write!(f, "WeatherSevereType::COASTAL_FLOOD(44)"),
+            45 => write!(f, "WeatherSevereType::LAKESHORE_FLOOD(45)"),
+            46 => write!(f, "WeatherSevereType::EXCESSIVE_HEAT(46)"),
+            47 => write!(f, "WeatherSevereType::HEAT(47)"),
+            48 => write!(f, "WeatherSevereType::WEATHER(48)"),
+            49 => write!(f, "WeatherSevereType::HIGH_HEAT_AND_HUMIDITY(49)"),
+            50 => write!(f, "WeatherSevereType::HUMIDEX_AND_HEALTH(50)"),
+            51 => write!(f, "WeatherSevereType::HUMIDEX(51)"),
+            52 => write!(f, "WeatherSevereType::GALE(52)"),
+            53 => write!(f, "WeatherSevereType::FREEZING_SPRAY(53)"),
+            54 => write!(f, "WeatherSevereType::SPECIAL_MARINE(54)"),
+            55 => write!(f, "WeatherSevereType::SQUALL(55)"),
+            56 => write!(f, "WeatherSevereType::STRONG_WIND(56)"),
+            57 => write!(f, "WeatherSevereType::LAKE_WIND(57)"),
+            58 => write!(f, "WeatherSevereType::MARINE_WEATHER(58)"),
+            59 => write!(f, "WeatherSevereType::WIND(59)"),
+            60 => write!(f, "WeatherSevereType::SMALL_CRAFT_HAZARDOUS_SEAS(60)"),
+            61 => write!(f, "WeatherSevereType::HAZARDOUS_SEAS(61)"),
+            62 => write!(f, "WeatherSevereType::SMALL_CRAFT(62)"),
+            63 => write!(f, "WeatherSevereType::SMALL_CRAFT_WINDS(63)"),
+            64 => write!(f, "WeatherSevereType::SMALL_CRAFT_ROUGH_BAR(64)"),
+            65 => write!(f, "WeatherSevereType::HIGH_WATER_LEVEL(65)"),
+            66 => write!(f, "WeatherSevereType::ASHFALL(66)"),
+            67 => write!(f, "WeatherSevereType::FREEZING_FOG(67)"),
+            68 => write!(f, "WeatherSevereType::DENSE_FOG(68)"),
+            69 => write!(f, "WeatherSevereType::DENSE_SMOKE(69)"),
+            70 => write!(f, "WeatherSevereType::BLOWING_DUST(70)"),
+            71 => write!(f, "WeatherSevereType::HARD_FREEZE(71)"),
+            72 => write!(f, "WeatherSevereType::FREEZE(72)"),
+            73 => write!(f, "WeatherSevereType::FROST(73)"),
+            74 => write!(f, "WeatherSevereType::FIRE_WEATHER(74)"),
+            75 => write!(f, "WeatherSevereType::FLOOD(75)"),
+            76 => write!(f, "WeatherSevereType::RIP_TIDE(76)"),
+            77 => write!(f, "WeatherSevereType::HIGH_SURF(77)"),
+            78 => write!(f, "WeatherSevereType::SMOG(78)"),
+            79 => write!(f, "WeatherSevereType::AIR_QUALITY(79)"),
+            80 => write!(f, "WeatherSevereType::BRISK_WIND(80)"),
+            81 => write!(f, "WeatherSevereType::AIR_STAGNATION(81)"),
+            82 => write!(f, "WeatherSevereType::LOW_WATER(82)"),
+            83 => write!(f, "WeatherSevereType::HYDROLOGICAL(83)"),
+            84 => write!(f, "WeatherSevereType::SPECIAL_WEATHER(84)"),
+            _ => write!(f, "WeatherSevereType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TimeIntoDay(pub u32);
 
 impl TimeIntoDay {}
@@ -5689,12 +8292,20 @@ impl Default for TimeIntoDay {
 impl fmt::Display for TimeIntoDay {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TimeIntoDay({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TimeIntoDay {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            _ => write!(f, "TimeIntoDay({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LocaltimeIntoDay(pub u32);
 
 impl LocaltimeIntoDay {}
@@ -5708,12 +8319,20 @@ impl Default for LocaltimeIntoDay {
 impl fmt::Display for LocaltimeIntoDay {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LocaltimeIntoDay({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LocaltimeIntoDay {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            _ => write!(f, "LocaltimeIntoDay({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct StrokeType(pub u8);
 
 impl StrokeType {
@@ -5741,12 +8360,26 @@ impl fmt::Display for StrokeType {
             3 => write!(f, "forehand"),
             4 => write!(f, "backhand"),
             5 => write!(f, "smash"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "StrokeType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for StrokeType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "StrokeType::NO_EVENT(0)"),
+            1 => write!(f, "StrokeType::OTHER(1)"),
+            2 => write!(f, "StrokeType::SERVE(2)"),
+            3 => write!(f, "StrokeType::FOREHAND(3)"),
+            4 => write!(f, "StrokeType::BACKHAND(4)"),
+            5 => write!(f, "StrokeType::SMASH(5)"),
+            _ => write!(f, "StrokeType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BodyLocation(pub u8);
 
 impl BodyLocation {
@@ -5845,12 +8478,60 @@ impl fmt::Display for BodyLocation {
             37 => write!(f, "waist_front"),
             38 => write!(f, "waist_left"),
             39 => write!(f, "waist_right"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BodyLocation({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BodyLocation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BodyLocation::LEFT_LEG(0)"),
+            1 => write!(f, "BodyLocation::LEFT_CALF(1)"),
+            2 => write!(f, "BodyLocation::LEFT_SHIN(2)"),
+            3 => write!(f, "BodyLocation::LEFT_HAMSTRING(3)"),
+            4 => write!(f, "BodyLocation::LEFT_QUAD(4)"),
+            5 => write!(f, "BodyLocation::LEFT_GLUTE(5)"),
+            6 => write!(f, "BodyLocation::RIGHT_LEG(6)"),
+            7 => write!(f, "BodyLocation::RIGHT_CALF(7)"),
+            8 => write!(f, "BodyLocation::RIGHT_SHIN(8)"),
+            9 => write!(f, "BodyLocation::RIGHT_HAMSTRING(9)"),
+            10 => write!(f, "BodyLocation::RIGHT_QUAD(10)"),
+            11 => write!(f, "BodyLocation::RIGHT_GLUTE(11)"),
+            12 => write!(f, "BodyLocation::TORSO_BACK(12)"),
+            13 => write!(f, "BodyLocation::LEFT_LOWER_BACK(13)"),
+            14 => write!(f, "BodyLocation::LEFT_UPPER_BACK(14)"),
+            15 => write!(f, "BodyLocation::RIGHT_LOWER_BACK(15)"),
+            16 => write!(f, "BodyLocation::RIGHT_UPPER_BACK(16)"),
+            17 => write!(f, "BodyLocation::TORSO_FRONT(17)"),
+            18 => write!(f, "BodyLocation::LEFT_ABDOMEN(18)"),
+            19 => write!(f, "BodyLocation::LEFT_CHEST(19)"),
+            20 => write!(f, "BodyLocation::RIGHT_ABDOMEN(20)"),
+            21 => write!(f, "BodyLocation::RIGHT_CHEST(21)"),
+            22 => write!(f, "BodyLocation::LEFT_ARM(22)"),
+            23 => write!(f, "BodyLocation::LEFT_SHOULDER(23)"),
+            24 => write!(f, "BodyLocation::LEFT_BICEP(24)"),
+            25 => write!(f, "BodyLocation::LEFT_TRICEP(25)"),
+            26 => write!(f, "BodyLocation::LEFT_BRACHIORADIALIS(26)"),
+            27 => write!(f, "BodyLocation::LEFT_FOREARM_EXTENSORS(27)"),
+            28 => write!(f, "BodyLocation::RIGHT_ARM(28)"),
+            29 => write!(f, "BodyLocation::RIGHT_SHOULDER(29)"),
+            30 => write!(f, "BodyLocation::RIGHT_BICEP(30)"),
+            31 => write!(f, "BodyLocation::RIGHT_TRICEP(31)"),
+            32 => write!(f, "BodyLocation::RIGHT_BRACHIORADIALIS(32)"),
+            33 => write!(f, "BodyLocation::RIGHT_FOREARM_EXTENSORS(33)"),
+            34 => write!(f, "BodyLocation::NECK(34)"),
+            35 => write!(f, "BodyLocation::THROAT(35)"),
+            36 => write!(f, "BodyLocation::WAIST_MID_BACK(36)"),
+            37 => write!(f, "BodyLocation::WAIST_FRONT(37)"),
+            38 => write!(f, "BodyLocation::WAIST_LEFT(38)"),
+            39 => write!(f, "BodyLocation::WAIST_RIGHT(39)"),
+            _ => write!(f, "BodyLocation({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SegmentLapStatus(pub u8);
 
 impl SegmentLapStatus {
@@ -5869,12 +8550,22 @@ impl fmt::Display for SegmentLapStatus {
         match self.0 {
             0 => write!(f, "end"),
             1 => write!(f, "fail"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SegmentLapStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SegmentLapStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SegmentLapStatus::END(0)"),
+            1 => write!(f, "SegmentLapStatus::FAIL(1)"),
+            _ => write!(f, "SegmentLapStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SegmentLeaderboardType(pub u8);
 
 impl SegmentLeaderboardType {
@@ -5919,12 +8610,35 @@ impl fmt::Display for SegmentLeaderboardType {
             12 => write!(f, "last"),
             13 => write!(f, "recent_best"),
             14 => write!(f, "course_record"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SegmentLeaderboardType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SegmentLeaderboardType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SegmentLeaderboardType::OVERALL(0)"),
+            1 => write!(f, "SegmentLeaderboardType::PERSONAL_BEST(1)"),
+            2 => write!(f, "SegmentLeaderboardType::CONNECTIONS(2)"),
+            3 => write!(f, "SegmentLeaderboardType::GROUP(3)"),
+            4 => write!(f, "SegmentLeaderboardType::CHALLENGER(4)"),
+            5 => write!(f, "SegmentLeaderboardType::KOM(5)"),
+            6 => write!(f, "SegmentLeaderboardType::QOM(6)"),
+            7 => write!(f, "SegmentLeaderboardType::PR(7)"),
+            8 => write!(f, "SegmentLeaderboardType::GOAL(8)"),
+            9 => write!(f, "SegmentLeaderboardType::CARROT(9)"),
+            10 => write!(f, "SegmentLeaderboardType::CLUB_LEADER(10)"),
+            11 => write!(f, "SegmentLeaderboardType::RIVAL(11)"),
+            12 => write!(f, "SegmentLeaderboardType::LAST(12)"),
+            13 => write!(f, "SegmentLeaderboardType::RECENT_BEST(13)"),
+            14 => write!(f, "SegmentLeaderboardType::COURSE_RECORD(14)"),
+            _ => write!(f, "SegmentLeaderboardType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SegmentDeleteStatus(pub u8);
 
 impl SegmentDeleteStatus {
@@ -5945,12 +8659,23 @@ impl fmt::Display for SegmentDeleteStatus {
             0 => write!(f, "do_not_delete"),
             1 => write!(f, "delete_one"),
             2 => write!(f, "delete_all"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SegmentDeleteStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SegmentDeleteStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SegmentDeleteStatus::DO_NOT_DELETE(0)"),
+            1 => write!(f, "SegmentDeleteStatus::DELETE_ONE(1)"),
+            2 => write!(f, "SegmentDeleteStatus::DELETE_ALL(2)"),
+            _ => write!(f, "SegmentDeleteStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SegmentSelectionType(pub u8);
 
 impl SegmentSelectionType {
@@ -5969,12 +8694,22 @@ impl fmt::Display for SegmentSelectionType {
         match self.0 {
             0 => write!(f, "starred"),
             1 => write!(f, "suggested"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SegmentSelectionType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SegmentSelectionType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SegmentSelectionType::STARRED(0)"),
+            1 => write!(f, "SegmentSelectionType::SUGGESTED(1)"),
+            _ => write!(f, "SegmentSelectionType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SourceType(pub u8);
 
 impl SourceType {
@@ -6007,12 +8742,26 @@ impl fmt::Display for SourceType {
             3 => write!(f, "bluetooth_low_energy"),
             4 => write!(f, "wifi"),
             5 => write!(f, "local"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SourceType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SourceType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SourceType::ANT(0)"),
+            1 => write!(f, "SourceType::ANTPLUS(1)"),
+            2 => write!(f, "SourceType::BLUETOOTH(2)"),
+            3 => write!(f, "SourceType::BLUETOOTH_LOW_ENERGY(3)"),
+            4 => write!(f, "SourceType::WIFI(4)"),
+            5 => write!(f, "SourceType::LOCAL(5)"),
+            _ => write!(f, "SourceType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LocalDeviceType(pub u8);
 
 impl LocalDeviceType {
@@ -6051,12 +8800,28 @@ impl fmt::Display for LocalDeviceType {
             5 => write!(f, "temperature"),
             10 => write!(f, "whr"),
             12 => write!(f, "sensor_hub"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LocalDeviceType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LocalDeviceType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LocalDeviceType::GPS(0)"),
+            1 => write!(f, "LocalDeviceType::GLONASS(1)"),
+            2 => write!(f, "LocalDeviceType::GPS_GLONASS(2)"),
+            3 => write!(f, "LocalDeviceType::ACCELEROMETER(3)"),
+            4 => write!(f, "LocalDeviceType::BAROMETER(4)"),
+            5 => write!(f, "LocalDeviceType::TEMPERATURE(5)"),
+            10 => write!(f, "LocalDeviceType::WHR(10)"),
+            12 => write!(f, "LocalDeviceType::SENSOR_HUB(12)"),
+            _ => write!(f, "LocalDeviceType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BleDeviceType(pub u8);
 
 impl BleDeviceType {
@@ -6089,12 +8854,28 @@ impl fmt::Display for BleDeviceType {
             5 => write!(f, "bike_cadence"),
             6 => write!(f, "footpod"),
             7 => write!(f, "bike_trainer"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BleDeviceType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BleDeviceType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BleDeviceType::CONNECTED_GPS(0)"),
+            1 => write!(f, "BleDeviceType::HEART_RATE(1)"),
+            2 => write!(f, "BleDeviceType::BIKE_POWER(2)"),
+            3 => write!(f, "BleDeviceType::BIKE_SPEED_CADENCE(3)"),
+            4 => write!(f, "BleDeviceType::BIKE_SPEED(4)"),
+            5 => write!(f, "BleDeviceType::BIKE_CADENCE(5)"),
+            6 => write!(f, "BleDeviceType::FOOTPOD(6)"),
+            7 => write!(f, "BleDeviceType::BIKE_TRAINER(7)"),
+            _ => write!(f, "BleDeviceType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AntChannelId(pub u32);
 
 impl AntChannelId {
@@ -6106,7 +8887,7 @@ impl AntChannelId {
 
 impl Default for AntChannelId {
     fn default() -> Self {
-        Self(u32::MAX)
+        Self(u32::MIN)
     }
 }
 
@@ -6117,12 +8898,30 @@ impl fmt::Display for AntChannelId {
             0x0F000000 => write!(f, "ant_transmission_type_lower_nibble"),
             0x00FF0000 => write!(f, "ant_device_type"),
             0x0000FFFF => write!(f, "ant_device_number"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AntChannelId({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AntChannelId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0xF0000000 => write!(
+                f,
+                "AntChannelId::ANT_EXTENDED_DEVICE_NUMBER_UPPER_NIBBLE(0xF0000000)"
+            ),
+            0x0F000000 => write!(
+                f,
+                "AntChannelId::ANT_TRANSMISSION_TYPE_LOWER_NIBBLE(0x0F000000)"
+            ),
+            0x00FF0000 => write!(f, "AntChannelId::ANT_DEVICE_TYPE(0x00FF0000)"),
+            0x0000FFFF => write!(f, "AntChannelId::ANT_DEVICE_NUMBER(0x0000FFFF)"),
+            _ => write!(f, "AntChannelId({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DisplayOrientation(pub u8);
 
 impl DisplayOrientation {
@@ -6150,12 +8949,25 @@ impl fmt::Display for DisplayOrientation {
             2 => write!(f, "landscape"),
             3 => write!(f, "portrait_flipped"),
             4 => write!(f, "landscape_flipped"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DisplayOrientation({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DisplayOrientation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DisplayOrientation::AUTO(0)"),
+            1 => write!(f, "DisplayOrientation::PORTRAIT(1)"),
+            2 => write!(f, "DisplayOrientation::LANDSCAPE(2)"),
+            3 => write!(f, "DisplayOrientation::PORTRAIT_FLIPPED(3)"),
+            4 => write!(f, "DisplayOrientation::LANDSCAPE_FLIPPED(4)"),
+            _ => write!(f, "DisplayOrientation({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WorkoutEquipment(pub u8);
 
 impl WorkoutEquipment {
@@ -6182,12 +8994,26 @@ impl fmt::Display for WorkoutEquipment {
             3 => write!(f, "swim_paddles"),
             4 => write!(f, "swim_pull_buoy"),
             5 => write!(f, "swim_snorkel"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WorkoutEquipment({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WorkoutEquipment {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WorkoutEquipment::NONE(0)"),
+            1 => write!(f, "WorkoutEquipment::SWIM_FINS(1)"),
+            2 => write!(f, "WorkoutEquipment::SWIM_KICKBOARD(2)"),
+            3 => write!(f, "WorkoutEquipment::SWIM_PADDLES(3)"),
+            4 => write!(f, "WorkoutEquipment::SWIM_PULL_BUOY(4)"),
+            5 => write!(f, "WorkoutEquipment::SWIM_SNORKEL(5)"),
+            _ => write!(f, "WorkoutEquipment({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WatchfaceMode(pub u8);
 
 impl WatchfaceMode {
@@ -6210,12 +9036,24 @@ impl fmt::Display for WatchfaceMode {
             1 => write!(f, "analog"),
             2 => write!(f, "connect_iq"),
             3 => write!(f, "disabled"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WatchfaceMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WatchfaceMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WatchfaceMode::DIGITAL(0)"),
+            1 => write!(f, "WatchfaceMode::ANALOG(1)"),
+            2 => write!(f, "WatchfaceMode::CONNECT_IQ(2)"),
+            3 => write!(f, "WatchfaceMode::DISABLED(3)"),
+            _ => write!(f, "WatchfaceMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DigitalWatchfaceLayout(pub u8);
 
 impl DigitalWatchfaceLayout {
@@ -6236,12 +9074,23 @@ impl fmt::Display for DigitalWatchfaceLayout {
             0 => write!(f, "traditional"),
             1 => write!(f, "modern"),
             2 => write!(f, "bold"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DigitalWatchfaceLayout({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DigitalWatchfaceLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DigitalWatchfaceLayout::TRADITIONAL(0)"),
+            1 => write!(f, "DigitalWatchfaceLayout::MODERN(1)"),
+            2 => write!(f, "DigitalWatchfaceLayout::BOLD(2)"),
+            _ => write!(f, "DigitalWatchfaceLayout({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AnalogWatchfaceLayout(pub u8);
 
 impl AnalogWatchfaceLayout {
@@ -6262,12 +9111,23 @@ impl fmt::Display for AnalogWatchfaceLayout {
             0 => write!(f, "minimal"),
             1 => write!(f, "traditional"),
             2 => write!(f, "modern"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AnalogWatchfaceLayout({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AnalogWatchfaceLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "AnalogWatchfaceLayout::MINIMAL(0)"),
+            1 => write!(f, "AnalogWatchfaceLayout::TRADITIONAL(1)"),
+            2 => write!(f, "AnalogWatchfaceLayout::MODERN(2)"),
+            _ => write!(f, "AnalogWatchfaceLayout({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct RiderPositionType(pub u8);
 
 impl RiderPositionType {
@@ -6290,12 +9150,24 @@ impl fmt::Display for RiderPositionType {
             1 => write!(f, "standing"),
             2 => write!(f, "transition_to_seated"),
             3 => write!(f, "transition_to_standing"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "RiderPositionType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for RiderPositionType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "RiderPositionType::SEATED(0)"),
+            1 => write!(f, "RiderPositionType::STANDING(1)"),
+            2 => write!(f, "RiderPositionType::TRANSITION_TO_SEATED(2)"),
+            3 => write!(f, "RiderPositionType::TRANSITION_TO_STANDING(3)"),
+            _ => write!(f, "RiderPositionType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PowerPhaseType(pub u8);
 
 impl PowerPhaseType {
@@ -6318,12 +9190,24 @@ impl fmt::Display for PowerPhaseType {
             1 => write!(f, "power_phase_end_angle"),
             2 => write!(f, "power_phase_arc_length"),
             3 => write!(f, "power_phase_center"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PowerPhaseType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PowerPhaseType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PowerPhaseType::POWER_PHASE_START_ANGLE(0)"),
+            1 => write!(f, "PowerPhaseType::POWER_PHASE_END_ANGLE(1)"),
+            2 => write!(f, "PowerPhaseType::POWER_PHASE_ARC_LENGTH(2)"),
+            3 => write!(f, "PowerPhaseType::POWER_PHASE_CENTER(3)"),
+            _ => write!(f, "PowerPhaseType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CameraEventType(pub u8);
 
 impl CameraEventType {
@@ -6371,12 +9255,33 @@ impl fmt::Display for CameraEventType {
             12 => write!(f, "video_second_stream_pause"),
             13 => write!(f, "video_resume"),
             14 => write!(f, "video_second_stream_resume"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CameraEventType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CameraEventType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CameraEventType::VIDEO_START(0)"),
+            1 => write!(f, "CameraEventType::VIDEO_SPLIT(1)"),
+            2 => write!(f, "CameraEventType::VIDEO_END(2)"),
+            3 => write!(f, "CameraEventType::PHOTO_TAKEN(3)"),
+            4 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_START(4)"),
+            5 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_SPLIT(5)"),
+            6 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_END(6)"),
+            7 => write!(f, "CameraEventType::VIDEO_SPLIT_START(7)"),
+            8 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_SPLIT_START(8)"),
+            11 => write!(f, "CameraEventType::VIDEO_PAUSE(11)"),
+            12 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_PAUSE(12)"),
+            13 => write!(f, "CameraEventType::VIDEO_RESUME(13)"),
+            14 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_RESUME(14)"),
+            _ => write!(f, "CameraEventType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SensorType(pub u8);
 
 impl SensorType {
@@ -6400,12 +9305,24 @@ impl fmt::Display for SensorType {
             1 => write!(f, "gyroscope"),
             2 => write!(f, "compass"),
             3 => write!(f, "barometer"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SensorType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SensorType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SensorType::ACCELEROMETER(0)"),
+            1 => write!(f, "SensorType::GYROSCOPE(1)"),
+            2 => write!(f, "SensorType::COMPASS(2)"),
+            3 => write!(f, "SensorType::BAROMETER(3)"),
+            _ => write!(f, "SensorType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BikeLightNetworkConfigType(pub u8);
 
 impl BikeLightNetworkConfigType {
@@ -6428,12 +9345,24 @@ impl fmt::Display for BikeLightNetworkConfigType {
             4 => write!(f, "individual"),
             5 => write!(f, "high_visibility"),
             6 => write!(f, "trail"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BikeLightNetworkConfigType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BikeLightNetworkConfigType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BikeLightNetworkConfigType::AUTO(0)"),
+            4 => write!(f, "BikeLightNetworkConfigType::INDIVIDUAL(4)"),
+            5 => write!(f, "BikeLightNetworkConfigType::HIGH_VISIBILITY(5)"),
+            6 => write!(f, "BikeLightNetworkConfigType::TRAIL(6)"),
+            _ => write!(f, "BikeLightNetworkConfigType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CommTimeoutType(pub u16);
 
 impl CommTimeoutType {
@@ -6460,12 +9389,24 @@ impl fmt::Display for CommTimeoutType {
             1 => write!(f, "pairing_timeout"),
             2 => write!(f, "connection_lost"),
             3 => write!(f, "connection_timeout"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CommTimeoutType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CommTimeoutType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CommTimeoutType::WILDCARD_PAIRING_TIMEOUT(0)"),
+            1 => write!(f, "CommTimeoutType::PAIRING_TIMEOUT(1)"),
+            2 => write!(f, "CommTimeoutType::CONNECTION_LOST(2)"),
+            3 => write!(f, "CommTimeoutType::CONNECTION_TIMEOUT(3)"),
+            _ => write!(f, "CommTimeoutType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CameraOrientationType(pub u8);
 
 impl CameraOrientationType {
@@ -6488,12 +9429,24 @@ impl fmt::Display for CameraOrientationType {
             1 => write!(f, "camera_orientation_90"),
             2 => write!(f, "camera_orientation_180"),
             3 => write!(f, "camera_orientation_270"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CameraOrientationType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CameraOrientationType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_0(0)"),
+            1 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_90(1)"),
+            2 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_180(2)"),
+            3 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_270(3)"),
+            _ => write!(f, "CameraOrientationType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AttitudeStage(pub u8);
 
 impl AttitudeStage {
@@ -6516,12 +9469,24 @@ impl fmt::Display for AttitudeStage {
             1 => write!(f, "aligning"),
             2 => write!(f, "degraded"),
             3 => write!(f, "valid"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AttitudeStage({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AttitudeStage {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "AttitudeStage::FAILED(0)"),
+            1 => write!(f, "AttitudeStage::ALIGNING(1)"),
+            2 => write!(f, "AttitudeStage::DEGRADED(2)"),
+            3 => write!(f, "AttitudeStage::VALID(3)"),
+            _ => write!(f, "AttitudeStage({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AttitudeValidity(pub u16);
 
 impl AttitudeValidity {
@@ -6562,12 +9527,33 @@ impl fmt::Display for AttitudeValidity {
             0x0400 => write!(f, "solution_coasting"),
             0x0800 => write!(f, "true_track_angle"),
             0x1000 => write!(f, "magnetic_heading"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AttitudeValidity({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AttitudeValidity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x0001 => write!(f, "AttitudeValidity::TRACK_ANGLE_HEADING_VALID(0x0001)"),
+            0x0002 => write!(f, "AttitudeValidity::PITCH_VALID(0x0002)"),
+            0x0004 => write!(f, "AttitudeValidity::ROLL_VALID(0x0004)"),
+            0x0008 => write!(f, "AttitudeValidity::LATERAL_BODY_ACCEL_VALID(0x0008)"),
+            0x0010 => write!(f, "AttitudeValidity::NORMAL_BODY_ACCEL_VALID(0x0010)"),
+            0x0020 => write!(f, "AttitudeValidity::TURN_RATE_VALID(0x0020)"),
+            0x0040 => write!(f, "AttitudeValidity::HW_FAIL(0x0040)"),
+            0x0080 => write!(f, "AttitudeValidity::MAG_INVALID(0x0080)"),
+            0x0100 => write!(f, "AttitudeValidity::NO_GPS(0x0100)"),
+            0x0200 => write!(f, "AttitudeValidity::GPS_INVALID(0x0200)"),
+            0x0400 => write!(f, "AttitudeValidity::SOLUTION_COASTING(0x0400)"),
+            0x0800 => write!(f, "AttitudeValidity::TRUE_TRACK_ANGLE(0x0800)"),
+            0x1000 => write!(f, "AttitudeValidity::MAGNETIC_HEADING(0x1000)"),
+            _ => write!(f, "AttitudeValidity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AutoSyncFrequency(pub u8);
 
 impl AutoSyncFrequency {
@@ -6592,12 +9578,25 @@ impl fmt::Display for AutoSyncFrequency {
             2 => write!(f, "frequent"),
             3 => write!(f, "once_a_day"),
             4 => write!(f, "remote"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AutoSyncFrequency({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AutoSyncFrequency {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "AutoSyncFrequency::NEVER(0)"),
+            1 => write!(f, "AutoSyncFrequency::OCCASIONALLY(1)"),
+            2 => write!(f, "AutoSyncFrequency::FREQUENT(2)"),
+            3 => write!(f, "AutoSyncFrequency::ONCE_A_DAY(3)"),
+            4 => write!(f, "AutoSyncFrequency::REMOTE(4)"),
+            _ => write!(f, "AutoSyncFrequency({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ExdLayout(pub u8);
 
 impl ExdLayout {
@@ -6631,12 +9630,29 @@ impl fmt::Display for ExdLayout {
             6 => write!(f, "half_vertical_left_split"),
             7 => write!(f, "half_horizontal_top_split"),
             8 => write!(f, "dynamic"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ExdLayout({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ExdLayout {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ExdLayout::FULL_SCREEN(0)"),
+            1 => write!(f, "ExdLayout::HALF_VERTICAL(1)"),
+            2 => write!(f, "ExdLayout::HALF_HORIZONTAL(2)"),
+            3 => write!(f, "ExdLayout::HALF_VERTICAL_RIGHT_SPLIT(3)"),
+            4 => write!(f, "ExdLayout::HALF_HORIZONTAL_BOTTOM_SPLIT(4)"),
+            5 => write!(f, "ExdLayout::FULL_QUARTER_SPLIT(5)"),
+            6 => write!(f, "ExdLayout::HALF_VERTICAL_LEFT_SPLIT(6)"),
+            7 => write!(f, "ExdLayout::HALF_HORIZONTAL_TOP_SPLIT(7)"),
+            8 => write!(f, "ExdLayout::DYNAMIC(8)"),
+            _ => write!(f, "ExdLayout({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ExdDisplayType(pub u8);
 
 impl ExdDisplayType {
@@ -6673,12 +9689,31 @@ impl fmt::Display for ExdDisplayType {
             8 => write!(f, "string"),
             9 => write!(f, "simple_dynamic_icon"),
             10 => write!(f, "gauge"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ExdDisplayType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ExdDisplayType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ExdDisplayType::NUMERICAL(0)"),
+            1 => write!(f, "ExdDisplayType::SIMPLE(1)"),
+            2 => write!(f, "ExdDisplayType::GRAPH(2)"),
+            3 => write!(f, "ExdDisplayType::BAR(3)"),
+            4 => write!(f, "ExdDisplayType::CIRCLE_GRAPH(4)"),
+            5 => write!(f, "ExdDisplayType::VIRTUAL_PARTNER(5)"),
+            6 => write!(f, "ExdDisplayType::BALANCE(6)"),
+            7 => write!(f, "ExdDisplayType::STRING_LIST(7)"),
+            8 => write!(f, "ExdDisplayType::STRING(8)"),
+            9 => write!(f, "ExdDisplayType::SIMPLE_DYNAMIC_ICON(9)"),
+            10 => write!(f, "ExdDisplayType::GAUGE(10)"),
+            _ => write!(f, "ExdDisplayType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ExdDataUnits(pub u8);
 
 impl ExdDataUnits {
@@ -6793,12 +9828,70 @@ impl fmt::Display for ExdDataUnits {
             47 => write!(f, "meters_per_min"),
             48 => write!(f, "meters_per_sec"),
             49 => write!(f, "eight_cardinal"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ExdDataUnits({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ExdDataUnits {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ExdDataUnits::NO_UNITS(0)"),
+            1 => write!(f, "ExdDataUnits::LAPS(1)"),
+            2 => write!(f, "ExdDataUnits::MILES_PER_HOUR(2)"),
+            3 => write!(f, "ExdDataUnits::KILOMETERS_PER_HOUR(3)"),
+            4 => write!(f, "ExdDataUnits::FEET_PER_HOUR(4)"),
+            5 => write!(f, "ExdDataUnits::METERS_PER_HOUR(5)"),
+            6 => write!(f, "ExdDataUnits::DEGREES_CELSIUS(6)"),
+            7 => write!(f, "ExdDataUnits::DEGREES_FAHRENHEIT(7)"),
+            8 => write!(f, "ExdDataUnits::ZONE(8)"),
+            9 => write!(f, "ExdDataUnits::GEAR(9)"),
+            10 => write!(f, "ExdDataUnits::RPM(10)"),
+            11 => write!(f, "ExdDataUnits::BPM(11)"),
+            12 => write!(f, "ExdDataUnits::DEGREES(12)"),
+            13 => write!(f, "ExdDataUnits::MILLIMETERS(13)"),
+            14 => write!(f, "ExdDataUnits::METERS(14)"),
+            15 => write!(f, "ExdDataUnits::KILOMETERS(15)"),
+            16 => write!(f, "ExdDataUnits::FEET(16)"),
+            17 => write!(f, "ExdDataUnits::YARDS(17)"),
+            18 => write!(f, "ExdDataUnits::KILOFEET(18)"),
+            19 => write!(f, "ExdDataUnits::MILES(19)"),
+            20 => write!(f, "ExdDataUnits::TIME(20)"),
+            21 => write!(f, "ExdDataUnits::ENUM_TURN_TYPE(21)"),
+            22 => write!(f, "ExdDataUnits::PERCENT(22)"),
+            23 => write!(f, "ExdDataUnits::WATTS(23)"),
+            24 => write!(f, "ExdDataUnits::WATTS_PER_KILOGRAM(24)"),
+            25 => write!(f, "ExdDataUnits::ENUM_BATTERY_STATUS(25)"),
+            26 => write!(f, "ExdDataUnits::ENUM_BIKE_LIGHT_BEAM_ANGLE_MODE(26)"),
+            27 => write!(f, "ExdDataUnits::ENUM_BIKE_LIGHT_BATTERY_STATUS(27)"),
+            28 => write!(f, "ExdDataUnits::ENUM_BIKE_LIGHT_NETWORK_CONFIG_TYPE(28)"),
+            29 => write!(f, "ExdDataUnits::LIGHTS(29)"),
+            30 => write!(f, "ExdDataUnits::SECONDS(30)"),
+            31 => write!(f, "ExdDataUnits::MINUTES(31)"),
+            32 => write!(f, "ExdDataUnits::HOURS(32)"),
+            33 => write!(f, "ExdDataUnits::CALORIES(33)"),
+            34 => write!(f, "ExdDataUnits::KILOJOULES(34)"),
+            35 => write!(f, "ExdDataUnits::MILLISECONDS(35)"),
+            36 => write!(f, "ExdDataUnits::SECOND_PER_MILE(36)"),
+            37 => write!(f, "ExdDataUnits::SECOND_PER_KILOMETER(37)"),
+            38 => write!(f, "ExdDataUnits::CENTIMETER(38)"),
+            39 => write!(f, "ExdDataUnits::ENUM_COURSE_POINT(39)"),
+            40 => write!(f, "ExdDataUnits::BRADIANS(40)"),
+            41 => write!(f, "ExdDataUnits::ENUM_SPORT(41)"),
+            42 => write!(f, "ExdDataUnits::INCHES_HG(42)"),
+            43 => write!(f, "ExdDataUnits::MM_HG(43)"),
+            44 => write!(f, "ExdDataUnits::MBARS(44)"),
+            45 => write!(f, "ExdDataUnits::HECTO_PASCALS(45)"),
+            46 => write!(f, "ExdDataUnits::FEET_PER_MIN(46)"),
+            47 => write!(f, "ExdDataUnits::METERS_PER_MIN(47)"),
+            48 => write!(f, "ExdDataUnits::METERS_PER_SEC(48)"),
+            49 => write!(f, "ExdDataUnits::EIGHT_CARDINAL(49)"),
+            _ => write!(f, "ExdDataUnits({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ExdQualifiers(pub u8);
 
 impl ExdQualifiers {
@@ -6901,12 +9994,64 @@ impl fmt::Display for ExdQualifiers {
             248 => write!(f, "zone_3"),
             249 => write!(f, "zone_2"),
             250 => write!(f, "zone_1"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ExdQualifiers({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ExdQualifiers {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ExdQualifiers::NO_QUALIFIER(0)"),
+            1 => write!(f, "ExdQualifiers::INSTANTANEOUS(1)"),
+            2 => write!(f, "ExdQualifiers::AVERAGE(2)"),
+            3 => write!(f, "ExdQualifiers::LAP(3)"),
+            4 => write!(f, "ExdQualifiers::MAXIMUM(4)"),
+            5 => write!(f, "ExdQualifiers::MAXIMUM_AVERAGE(5)"),
+            6 => write!(f, "ExdQualifiers::MAXIMUM_LAP(6)"),
+            7 => write!(f, "ExdQualifiers::LAST_LAP(7)"),
+            8 => write!(f, "ExdQualifiers::AVERAGE_LAP(8)"),
+            9 => write!(f, "ExdQualifiers::TO_DESTINATION(9)"),
+            10 => write!(f, "ExdQualifiers::TO_GO(10)"),
+            11 => write!(f, "ExdQualifiers::TO_NEXT(11)"),
+            12 => write!(f, "ExdQualifiers::NEXT_COURSE_POINT(12)"),
+            13 => write!(f, "ExdQualifiers::TOTAL(13)"),
+            14 => write!(f, "ExdQualifiers::THREE_SECOND_AVERAGE(14)"),
+            15 => write!(f, "ExdQualifiers::TEN_SECOND_AVERAGE(15)"),
+            16 => write!(f, "ExdQualifiers::THIRTY_SECOND_AVERAGE(16)"),
+            17 => write!(f, "ExdQualifiers::PERCENT_MAXIMUM(17)"),
+            18 => write!(f, "ExdQualifiers::PERCENT_MAXIMUM_AVERAGE(18)"),
+            19 => write!(f, "ExdQualifiers::LAP_PERCENT_MAXIMUM(19)"),
+            20 => write!(f, "ExdQualifiers::ELAPSED(20)"),
+            21 => write!(f, "ExdQualifiers::SUNRISE(21)"),
+            22 => write!(f, "ExdQualifiers::SUNSET(22)"),
+            23 => write!(f, "ExdQualifiers::COMPARED_TO_VIRTUAL_PARTNER(23)"),
+            24 => write!(f, "ExdQualifiers::MAXIMUM_24H(24)"),
+            25 => write!(f, "ExdQualifiers::MINIMUM_24H(25)"),
+            26 => write!(f, "ExdQualifiers::MINIMUM(26)"),
+            27 => write!(f, "ExdQualifiers::FIRST(27)"),
+            28 => write!(f, "ExdQualifiers::SECOND(28)"),
+            29 => write!(f, "ExdQualifiers::THIRD(29)"),
+            30 => write!(f, "ExdQualifiers::SHIFTER(30)"),
+            31 => write!(f, "ExdQualifiers::LAST_SPORT(31)"),
+            32 => write!(f, "ExdQualifiers::MOVING(32)"),
+            33 => write!(f, "ExdQualifiers::STOPPED(33)"),
+            34 => write!(f, "ExdQualifiers::ESTIMATED_TOTAL(34)"),
+            242 => write!(f, "ExdQualifiers::ZONE_9(242)"),
+            243 => write!(f, "ExdQualifiers::ZONE_8(243)"),
+            244 => write!(f, "ExdQualifiers::ZONE_7(244)"),
+            245 => write!(f, "ExdQualifiers::ZONE_6(245)"),
+            246 => write!(f, "ExdQualifiers::ZONE_5(246)"),
+            247 => write!(f, "ExdQualifiers::ZONE_4(247)"),
+            248 => write!(f, "ExdQualifiers::ZONE_3(248)"),
+            249 => write!(f, "ExdQualifiers::ZONE_2(249)"),
+            250 => write!(f, "ExdQualifiers::ZONE_1(250)"),
+            _ => write!(f, "ExdQualifiers({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ExdDescriptors(pub u8);
 
 impl ExdDescriptors {
@@ -7116,12 +10261,120 @@ impl fmt::Display for ExdDescriptors {
             94 => write!(f, "ambient_pressure"),
             95 => write!(f, "pressure"),
             96 => write!(f, "vam"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ExdDescriptors({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ExdDescriptors {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ExdDescriptors::BIKE_LIGHT_BATTERY_STATUS(0)"),
+            1 => write!(f, "ExdDescriptors::BEAM_ANGLE_STATUS(1)"),
+            2 => write!(f, "ExdDescriptors::BATERY_LEVEL(2)"),
+            3 => write!(f, "ExdDescriptors::LIGHT_NETWORK_MODE(3)"),
+            4 => write!(f, "ExdDescriptors::NUMBER_LIGHTS_CONNECTED(4)"),
+            5 => write!(f, "ExdDescriptors::CADENCE(5)"),
+            6 => write!(f, "ExdDescriptors::DISTANCE(6)"),
+            7 => write!(f, "ExdDescriptors::ESTIMATED_TIME_OF_ARRIVAL(7)"),
+            8 => write!(f, "ExdDescriptors::HEADING(8)"),
+            9 => write!(f, "ExdDescriptors::TIME(9)"),
+            10 => write!(f, "ExdDescriptors::BATTERY_LEVEL(10)"),
+            11 => write!(f, "ExdDescriptors::TRAINER_RESISTANCE(11)"),
+            12 => write!(f, "ExdDescriptors::TRAINER_TARGET_POWER(12)"),
+            13 => write!(f, "ExdDescriptors::TIME_SEATED(13)"),
+            14 => write!(f, "ExdDescriptors::TIME_STANDING(14)"),
+            15 => write!(f, "ExdDescriptors::ELEVATION(15)"),
+            16 => write!(f, "ExdDescriptors::GRADE(16)"),
+            17 => write!(f, "ExdDescriptors::ASCENT(17)"),
+            18 => write!(f, "ExdDescriptors::DESCENT(18)"),
+            19 => write!(f, "ExdDescriptors::VERTICAL_SPEED(19)"),
+            20 => write!(f, "ExdDescriptors::DI2_BATTERY_LEVEL(20)"),
+            21 => write!(f, "ExdDescriptors::FRONT_GEAR(21)"),
+            22 => write!(f, "ExdDescriptors::REAR_GEAR(22)"),
+            23 => write!(f, "ExdDescriptors::GEAR_RATIO(23)"),
+            24 => write!(f, "ExdDescriptors::HEART_RATE(24)"),
+            25 => write!(f, "ExdDescriptors::HEART_RATE_ZONE(25)"),
+            26 => write!(f, "ExdDescriptors::TIME_IN_HEART_RATE_ZONE(26)"),
+            27 => write!(f, "ExdDescriptors::HEART_RATE_RESERVE(27)"),
+            28 => write!(f, "ExdDescriptors::CALORIES(28)"),
+            29 => write!(f, "ExdDescriptors::GPS_ACCURACY(29)"),
+            30 => write!(f, "ExdDescriptors::GPS_SIGNAL_STRENGTH(30)"),
+            31 => write!(f, "ExdDescriptors::TEMPERATURE(31)"),
+            32 => write!(f, "ExdDescriptors::TIME_OF_DAY(32)"),
+            33 => write!(f, "ExdDescriptors::BALANCE(33)"),
+            34 => write!(f, "ExdDescriptors::PEDAL_SMOOTHNESS(34)"),
+            35 => write!(f, "ExdDescriptors::POWER(35)"),
+            36 => write!(f, "ExdDescriptors::FUNCTIONAL_THRESHOLD_POWER(36)"),
+            37 => write!(f, "ExdDescriptors::INTENSITY_FACTOR(37)"),
+            38 => write!(f, "ExdDescriptors::WORK(38)"),
+            39 => write!(f, "ExdDescriptors::POWER_RATIO(39)"),
+            40 => write!(f, "ExdDescriptors::NORMALIZED_POWER(40)"),
+            41 => write!(f, "ExdDescriptors::TRAINING_STRESS_SCORE(41)"),
+            42 => write!(f, "ExdDescriptors::TIME_ON_ZONE(42)"),
+            43 => write!(f, "ExdDescriptors::SPEED(43)"),
+            44 => write!(f, "ExdDescriptors::LAPS(44)"),
+            45 => write!(f, "ExdDescriptors::REPS(45)"),
+            46 => write!(f, "ExdDescriptors::WORKOUT_STEP(46)"),
+            47 => write!(f, "ExdDescriptors::COURSE_DISTANCE(47)"),
+            48 => write!(f, "ExdDescriptors::NAVIGATION_DISTANCE(48)"),
+            49 => write!(f, "ExdDescriptors::COURSE_ESTIMATED_TIME_OF_ARRIVAL(49)"),
+            50 => write!(
+                f,
+                "ExdDescriptors::NAVIGATION_ESTIMATED_TIME_OF_ARRIVAL(50)"
+            ),
+            51 => write!(f, "ExdDescriptors::COURSE_TIME(51)"),
+            52 => write!(f, "ExdDescriptors::NAVIGATION_TIME(52)"),
+            53 => write!(f, "ExdDescriptors::COURSE_HEADING(53)"),
+            54 => write!(f, "ExdDescriptors::NAVIGATION_HEADING(54)"),
+            55 => write!(f, "ExdDescriptors::POWER_ZONE(55)"),
+            56 => write!(f, "ExdDescriptors::TORQUE_EFFECTIVENESS(56)"),
+            57 => write!(f, "ExdDescriptors::TIMER_TIME(57)"),
+            58 => write!(f, "ExdDescriptors::POWER_WEIGHT_RATIO(58)"),
+            59 => write!(f, "ExdDescriptors::LEFT_PLATFORM_CENTER_OFFSET(59)"),
+            60 => write!(f, "ExdDescriptors::RIGHT_PLATFORM_CENTER_OFFSET(60)"),
+            61 => write!(f, "ExdDescriptors::LEFT_POWER_PHASE_START_ANGLE(61)"),
+            62 => write!(f, "ExdDescriptors::RIGHT_POWER_PHASE_START_ANGLE(62)"),
+            63 => write!(f, "ExdDescriptors::LEFT_POWER_PHASE_FINISH_ANGLE(63)"),
+            64 => write!(f, "ExdDescriptors::RIGHT_POWER_PHASE_FINISH_ANGLE(64)"),
+            65 => write!(f, "ExdDescriptors::GEARS(65)"),
+            66 => write!(f, "ExdDescriptors::PACE(66)"),
+            67 => write!(f, "ExdDescriptors::TRAINING_EFFECT(67)"),
+            68 => write!(f, "ExdDescriptors::VERTICAL_OSCILLATION(68)"),
+            69 => write!(f, "ExdDescriptors::VERTICAL_RATIO(69)"),
+            70 => write!(f, "ExdDescriptors::GROUND_CONTACT_TIME(70)"),
+            71 => write!(f, "ExdDescriptors::LEFT_GROUND_CONTACT_TIME_BALANCE(71)"),
+            72 => write!(f, "ExdDescriptors::RIGHT_GROUND_CONTACT_TIME_BALANCE(72)"),
+            73 => write!(f, "ExdDescriptors::STRIDE_LENGTH(73)"),
+            74 => write!(f, "ExdDescriptors::RUNNING_CADENCE(74)"),
+            75 => write!(f, "ExdDescriptors::PERFORMANCE_CONDITION(75)"),
+            76 => write!(f, "ExdDescriptors::COURSE_TYPE(76)"),
+            77 => write!(f, "ExdDescriptors::TIME_IN_POWER_ZONE(77)"),
+            78 => write!(f, "ExdDescriptors::NAVIGATION_TURN(78)"),
+            79 => write!(f, "ExdDescriptors::COURSE_LOCATION(79)"),
+            80 => write!(f, "ExdDescriptors::NAVIGATION_LOCATION(80)"),
+            81 => write!(f, "ExdDescriptors::COMPASS(81)"),
+            82 => write!(f, "ExdDescriptors::GEAR_COMBO(82)"),
+            83 => write!(f, "ExdDescriptors::MUSCLE_OXYGEN(83)"),
+            84 => write!(f, "ExdDescriptors::ICON(84)"),
+            85 => write!(f, "ExdDescriptors::COMPASS_HEADING(85)"),
+            86 => write!(f, "ExdDescriptors::GPS_HEADING(86)"),
+            87 => write!(f, "ExdDescriptors::GPS_ELEVATION(87)"),
+            88 => write!(f, "ExdDescriptors::ANAEROBIC_TRAINING_EFFECT(88)"),
+            89 => write!(f, "ExdDescriptors::COURSE(89)"),
+            90 => write!(f, "ExdDescriptors::OFF_COURSE(90)"),
+            91 => write!(f, "ExdDescriptors::GLIDE_RATIO(91)"),
+            92 => write!(f, "ExdDescriptors::VERTICAL_DISTANCE(92)"),
+            93 => write!(f, "ExdDescriptors::VMG(93)"),
+            94 => write!(f, "ExdDescriptors::AMBIENT_PRESSURE(94)"),
+            95 => write!(f, "ExdDescriptors::PRESSURE(95)"),
+            96 => write!(f, "ExdDescriptors::VAM(96)"),
+            _ => write!(f, "ExdDescriptors({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct AutoActivityDetect(pub u32);
 
 impl AutoActivityDetect {
@@ -7150,12 +10403,27 @@ impl fmt::Display for AutoActivityDetect {
             0x00000008 => write!(f, "walking"),
             0x00000020 => write!(f, "elliptical"),
             0x00000400 => write!(f, "sedentary"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "AutoActivityDetect({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for AutoActivityDetect {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x00000000 => write!(f, "AutoActivityDetect::NONE(0x00000000)"),
+            0x00000001 => write!(f, "AutoActivityDetect::RUNNING(0x00000001)"),
+            0x00000002 => write!(f, "AutoActivityDetect::CYCLING(0x00000002)"),
+            0x00000004 => write!(f, "AutoActivityDetect::SWIMMING(0x00000004)"),
+            0x00000008 => write!(f, "AutoActivityDetect::WALKING(0x00000008)"),
+            0x00000020 => write!(f, "AutoActivityDetect::ELLIPTICAL(0x00000020)"),
+            0x00000400 => write!(f, "AutoActivityDetect::SEDENTARY(0x00000400)"),
+            _ => write!(f, "AutoActivityDetect({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SupportedExdScreenLayouts(pub u32);
 
 impl SupportedExdScreenLayouts {
@@ -7175,7 +10443,7 @@ impl SupportedExdScreenLayouts {
 
 impl Default for SupportedExdScreenLayouts {
     fn default() -> Self {
-        Self(u32::MAX)
+        Self(u32::MIN)
     }
 }
 
@@ -7190,12 +10458,43 @@ impl fmt::Display for SupportedExdScreenLayouts {
             0x00000020 => write!(f, "full_quarter_split"),
             0x00000040 => write!(f, "half_vertical_left_split"),
             0x00000080 => write!(f, "half_horizontal_top_split"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SupportedExdScreenLayouts({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SupportedExdScreenLayouts {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0x00000001 => write!(f, "SupportedExdScreenLayouts::FULL_SCREEN(0x00000001)"),
+            0x00000002 => write!(f, "SupportedExdScreenLayouts::HALF_VERTICAL(0x00000002)"),
+            0x00000004 => write!(f, "SupportedExdScreenLayouts::HALF_HORIZONTAL(0x00000004)"),
+            0x00000008 => write!(
+                f,
+                "SupportedExdScreenLayouts::HALF_VERTICAL_RIGHT_SPLIT(0x00000008)"
+            ),
+            0x00000010 => write!(
+                f,
+                "SupportedExdScreenLayouts::HALF_HORIZONTAL_BOTTOM_SPLIT(0x00000010)"
+            ),
+            0x00000020 => write!(
+                f,
+                "SupportedExdScreenLayouts::FULL_QUARTER_SPLIT(0x00000020)"
+            ),
+            0x00000040 => write!(
+                f,
+                "SupportedExdScreenLayouts::HALF_VERTICAL_LEFT_SPLIT(0x00000040)"
+            ),
+            0x00000080 => write!(
+                f,
+                "SupportedExdScreenLayouts::HALF_HORIZONTAL_TOP_SPLIT(0x00000080)"
+            ),
+            _ => write!(f, "SupportedExdScreenLayouts({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FitBaseType(pub u8);
 
 impl FitBaseType {
@@ -7257,12 +10556,37 @@ impl fmt::Display for FitBaseType {
             142 => write!(f, "sint64"),
             143 => write!(f, "uint64"),
             144 => write!(f, "uint64z"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FitBaseType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FitBaseType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "FitBaseType::ENUM(0)"),
+            1 => write!(f, "FitBaseType::SINT8(1)"),
+            2 => write!(f, "FitBaseType::UINT8(2)"),
+            131 => write!(f, "FitBaseType::SINT16(131)"),
+            132 => write!(f, "FitBaseType::UINT16(132)"),
+            133 => write!(f, "FitBaseType::SINT32(133)"),
+            134 => write!(f, "FitBaseType::UINT32(134)"),
+            7 => write!(f, "FitBaseType::STRING(7)"),
+            136 => write!(f, "FitBaseType::FLOAT32(136)"),
+            137 => write!(f, "FitBaseType::FLOAT64(137)"),
+            10 => write!(f, "FitBaseType::UINT8Z(10)"),
+            139 => write!(f, "FitBaseType::UINT16Z(139)"),
+            140 => write!(f, "FitBaseType::UINT32Z(140)"),
+            13 => write!(f, "FitBaseType::BYTE(13)"),
+            142 => write!(f, "FitBaseType::SINT64(142)"),
+            143 => write!(f, "FitBaseType::UINT64(143)"),
+            144 => write!(f, "FitBaseType::UINT64Z(144)"),
+            _ => write!(f, "FitBaseType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TurnType(pub u8);
 
 impl TurnType {
@@ -7353,12 +10677,58 @@ impl fmt::Display for TurnType {
             35 => write!(f, "uturn_right_idx"),
             36 => write!(f, "icon_inv_idx"),
             37 => write!(f, "icon_idx_cnt"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TurnType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TurnType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TurnType::ARRIVING_IDX(0)"),
+            1 => write!(f, "TurnType::ARRIVING_LEFT_IDX(1)"),
+            2 => write!(f, "TurnType::ARRIVING_RIGHT_IDX(2)"),
+            3 => write!(f, "TurnType::ARRIVING_VIA_IDX(3)"),
+            4 => write!(f, "TurnType::ARRIVING_VIA_LEFT_IDX(4)"),
+            5 => write!(f, "TurnType::ARRIVING_VIA_RIGHT_IDX(5)"),
+            6 => write!(f, "TurnType::BEAR_KEEP_LEFT_IDX(6)"),
+            7 => write!(f, "TurnType::BEAR_KEEP_RIGHT_IDX(7)"),
+            8 => write!(f, "TurnType::CONTINUE_IDX(8)"),
+            9 => write!(f, "TurnType::EXIT_LEFT_IDX(9)"),
+            10 => write!(f, "TurnType::EXIT_RIGHT_IDX(10)"),
+            11 => write!(f, "TurnType::FERRY_IDX(11)"),
+            12 => write!(f, "TurnType::ROUNDABOUT_45_IDX(12)"),
+            13 => write!(f, "TurnType::ROUNDABOUT_90_IDX(13)"),
+            14 => write!(f, "TurnType::ROUNDABOUT_135_IDX(14)"),
+            15 => write!(f, "TurnType::ROUNDABOUT_180_IDX(15)"),
+            16 => write!(f, "TurnType::ROUNDABOUT_225_IDX(16)"),
+            17 => write!(f, "TurnType::ROUNDABOUT_270_IDX(17)"),
+            18 => write!(f, "TurnType::ROUNDABOUT_315_IDX(18)"),
+            19 => write!(f, "TurnType::ROUNDABOUT_360_IDX(19)"),
+            20 => write!(f, "TurnType::ROUNDABOUT_NEG_45_IDX(20)"),
+            21 => write!(f, "TurnType::ROUNDABOUT_NEG_90_IDX(21)"),
+            22 => write!(f, "TurnType::ROUNDABOUT_NEG_135_IDX(22)"),
+            23 => write!(f, "TurnType::ROUNDABOUT_NEG_180_IDX(23)"),
+            24 => write!(f, "TurnType::ROUNDABOUT_NEG_225_IDX(24)"),
+            25 => write!(f, "TurnType::ROUNDABOUT_NEG_270_IDX(25)"),
+            26 => write!(f, "TurnType::ROUNDABOUT_NEG_315_IDX(26)"),
+            27 => write!(f, "TurnType::ROUNDABOUT_NEG_360_IDX(27)"),
+            28 => write!(f, "TurnType::ROUNDABOUT_GENERIC_IDX(28)"),
+            29 => write!(f, "TurnType::ROUNDABOUT_NEG_GENERIC_IDX(29)"),
+            30 => write!(f, "TurnType::SHARP_TURN_LEFT_IDX(30)"),
+            31 => write!(f, "TurnType::SHARP_TURN_RIGHT_IDX(31)"),
+            32 => write!(f, "TurnType::TURN_LEFT_IDX(32)"),
+            33 => write!(f, "TurnType::TURN_RIGHT_IDX(33)"),
+            34 => write!(f, "TurnType::UTURN_LEFT_IDX(34)"),
+            35 => write!(f, "TurnType::UTURN_RIGHT_IDX(35)"),
+            36 => write!(f, "TurnType::ICON_INV_IDX(36)"),
+            37 => write!(f, "TurnType::ICON_IDX_CNT(37)"),
+            _ => write!(f, "TurnType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BikeLightBeamAngleMode(pub u8);
 
 impl BikeLightBeamAngleMode {
@@ -7377,12 +10747,22 @@ impl fmt::Display for BikeLightBeamAngleMode {
         match self.0 {
             0 => write!(f, "manual"),
             1 => write!(f, "auto"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BikeLightBeamAngleMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BikeLightBeamAngleMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BikeLightBeamAngleMode::MANUAL(0)"),
+            1 => write!(f, "BikeLightBeamAngleMode::AUTO(1)"),
+            _ => write!(f, "BikeLightBeamAngleMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FitBaseUnit(pub u16);
 
 impl FitBaseUnit {
@@ -7403,12 +10783,23 @@ impl fmt::Display for FitBaseUnit {
             0 => write!(f, "other"),
             1 => write!(f, "kilogram"),
             2 => write!(f, "pound"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FitBaseUnit({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FitBaseUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "FitBaseUnit::OTHER(0)"),
+            1 => write!(f, "FitBaseUnit::KILOGRAM(1)"),
+            2 => write!(f, "FitBaseUnit::POUND(2)"),
+            _ => write!(f, "FitBaseUnit({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SetType(pub u8);
 
 impl SetType {
@@ -7427,12 +10818,22 @@ impl fmt::Display for SetType {
         match self.0 {
             0 => write!(f, "rest"),
             1 => write!(f, "active"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SetType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SetType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SetType::REST(0)"),
+            1 => write!(f, "SetType::ACTIVE(1)"),
+            _ => write!(f, "SetType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MaxMetCategory(pub u8);
 
 impl MaxMetCategory {
@@ -7451,12 +10852,22 @@ impl fmt::Display for MaxMetCategory {
         match self.0 {
             0 => write!(f, "generic"),
             1 => write!(f, "cycling"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MaxMetCategory({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MaxMetCategory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "MaxMetCategory::GENERIC(0)"),
+            1 => write!(f, "MaxMetCategory::CYCLING(1)"),
+            _ => write!(f, "MaxMetCategory({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ExerciseCategory(pub u16);
 
 impl ExerciseCategory {
@@ -7578,12 +10989,73 @@ impl fmt::Display for ExerciseCategory {
             52 => write!(f, "run_indoor"),
             53 => write!(f, "bike_outdoor"),
             65534 => write!(f, "unknown"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ExerciseCategory({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ExerciseCategory {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ExerciseCategory::BENCH_PRESS(0)"),
+            1 => write!(f, "ExerciseCategory::CALF_RAISE(1)"),
+            2 => write!(f, "ExerciseCategory::CARDIO(2)"),
+            3 => write!(f, "ExerciseCategory::CARRY(3)"),
+            4 => write!(f, "ExerciseCategory::CHOP(4)"),
+            5 => write!(f, "ExerciseCategory::CORE(5)"),
+            6 => write!(f, "ExerciseCategory::CRUNCH(6)"),
+            7 => write!(f, "ExerciseCategory::CURL(7)"),
+            8 => write!(f, "ExerciseCategory::DEADLIFT(8)"),
+            9 => write!(f, "ExerciseCategory::FLYE(9)"),
+            10 => write!(f, "ExerciseCategory::HIP_RAISE(10)"),
+            11 => write!(f, "ExerciseCategory::HIP_STABILITY(11)"),
+            12 => write!(f, "ExerciseCategory::HIP_SWING(12)"),
+            13 => write!(f, "ExerciseCategory::HYPEREXTENSION(13)"),
+            14 => write!(f, "ExerciseCategory::LATERAL_RAISE(14)"),
+            15 => write!(f, "ExerciseCategory::LEG_CURL(15)"),
+            16 => write!(f, "ExerciseCategory::LEG_RAISE(16)"),
+            17 => write!(f, "ExerciseCategory::LUNGE(17)"),
+            18 => write!(f, "ExerciseCategory::OLYMPIC_LIFT(18)"),
+            19 => write!(f, "ExerciseCategory::PLANK(19)"),
+            20 => write!(f, "ExerciseCategory::PLYO(20)"),
+            21 => write!(f, "ExerciseCategory::PULL_UP(21)"),
+            22 => write!(f, "ExerciseCategory::PUSH_UP(22)"),
+            23 => write!(f, "ExerciseCategory::ROW(23)"),
+            24 => write!(f, "ExerciseCategory::SHOULDER_PRESS(24)"),
+            25 => write!(f, "ExerciseCategory::SHOULDER_STABILITY(25)"),
+            26 => write!(f, "ExerciseCategory::SHRUG(26)"),
+            27 => write!(f, "ExerciseCategory::SIT_UP(27)"),
+            28 => write!(f, "ExerciseCategory::SQUAT(28)"),
+            29 => write!(f, "ExerciseCategory::TOTAL_BODY(29)"),
+            30 => write!(f, "ExerciseCategory::TRICEPS_EXTENSION(30)"),
+            31 => write!(f, "ExerciseCategory::WARM_UP(31)"),
+            32 => write!(f, "ExerciseCategory::RUN(32)"),
+            33 => write!(f, "ExerciseCategory::BIKE(33)"),
+            34 => write!(f, "ExerciseCategory::CARDIO_SENSORS(34)"),
+            35 => write!(f, "ExerciseCategory::MOVE(35)"),
+            36 => write!(f, "ExerciseCategory::POSE(36)"),
+            37 => write!(f, "ExerciseCategory::BANDED_EXERCISES(37)"),
+            38 => write!(f, "ExerciseCategory::BATTLE_ROPE(38)"),
+            39 => write!(f, "ExerciseCategory::ELLIPTICAL(39)"),
+            40 => write!(f, "ExerciseCategory::FLOOR_CLIMB(40)"),
+            41 => write!(f, "ExerciseCategory::INDOOR_BIKE(41)"),
+            42 => write!(f, "ExerciseCategory::INDOOR_ROW(42)"),
+            43 => write!(f, "ExerciseCategory::LADDER(43)"),
+            44 => write!(f, "ExerciseCategory::SANDBAG(44)"),
+            45 => write!(f, "ExerciseCategory::SLED(45)"),
+            46 => write!(f, "ExerciseCategory::SLEDGE_HAMMER(46)"),
+            47 => write!(f, "ExerciseCategory::STAIR_STEPPER(47)"),
+            49 => write!(f, "ExerciseCategory::SUSPENSION(49)"),
+            50 => write!(f, "ExerciseCategory::TIRE(50)"),
+            52 => write!(f, "ExerciseCategory::RUN_INDOOR(52)"),
+            53 => write!(f, "ExerciseCategory::BIKE_OUTDOOR(53)"),
+            65534 => write!(f, "ExerciseCategory::UNKNOWN(65534)"),
+            _ => write!(f, "ExerciseCategory({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BenchPressExerciseName(pub u16);
 
 impl BenchPressExerciseName {
@@ -7656,12 +11128,92 @@ impl fmt::Display for BenchPressExerciseName {
             24 => write!(f, "triple_stop_barbell_bench_press"),
             25 => write!(f, "wide_grip_barbell_bench_press"),
             26 => write!(f, "alternating_dumbbell_chest_press"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BenchPressExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BenchPressExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(
+                f,
+                "BenchPressExerciseName::ALTERNATING_DUMBBELL_CHEST_PRESS_ON_SWISS_BALL(0)"
+            ),
+            1 => write!(f, "BenchPressExerciseName::BARBELL_BENCH_PRESS(1)"),
+            2 => write!(f, "BenchPressExerciseName::BARBELL_BOARD_BENCH_PRESS(2)"),
+            3 => write!(f, "BenchPressExerciseName::BARBELL_FLOOR_PRESS(3)"),
+            4 => write!(
+                f,
+                "BenchPressExerciseName::CLOSE_GRIP_BARBELL_BENCH_PRESS(4)"
+            ),
+            5 => write!(f, "BenchPressExerciseName::DECLINE_DUMBBELL_BENCH_PRESS(5)"),
+            6 => write!(f, "BenchPressExerciseName::DUMBBELL_BENCH_PRESS(6)"),
+            7 => write!(f, "BenchPressExerciseName::DUMBBELL_FLOOR_PRESS(7)"),
+            8 => write!(f, "BenchPressExerciseName::INCLINE_BARBELL_BENCH_PRESS(8)"),
+            9 => write!(f, "BenchPressExerciseName::INCLINE_DUMBBELL_BENCH_PRESS(9)"),
+            10 => write!(
+                f,
+                "BenchPressExerciseName::INCLINE_SMITH_MACHINE_BENCH_PRESS(10)"
+            ),
+            11 => write!(
+                f,
+                "BenchPressExerciseName::ISOMETRIC_BARBELL_BENCH_PRESS(11)"
+            ),
+            12 => write!(f, "BenchPressExerciseName::KETTLEBELL_CHEST_PRESS(12)"),
+            13 => write!(
+                f,
+                "BenchPressExerciseName::NEUTRAL_GRIP_DUMBBELL_BENCH_PRESS(13)"
+            ),
+            14 => write!(
+                f,
+                "BenchPressExerciseName::NEUTRAL_GRIP_DUMBBELL_INCLINE_BENCH_PRESS(14)"
+            ),
+            15 => write!(f, "BenchPressExerciseName::ONE_ARM_FLOOR_PRESS(15)"),
+            16 => write!(
+                f,
+                "BenchPressExerciseName::WEIGHTED_ONE_ARM_FLOOR_PRESS(16)"
+            ),
+            17 => write!(f, "BenchPressExerciseName::PARTIAL_LOCKOUT(17)"),
+            18 => write!(
+                f,
+                "BenchPressExerciseName::REVERSE_GRIP_BARBELL_BENCH_PRESS(18)"
+            ),
+            19 => write!(
+                f,
+                "BenchPressExerciseName::REVERSE_GRIP_INCLINE_BENCH_PRESS(19)"
+            ),
+            20 => write!(
+                f,
+                "BenchPressExerciseName::SINGLE_ARM_CABLE_CHEST_PRESS(20)"
+            ),
+            21 => write!(
+                f,
+                "BenchPressExerciseName::SINGLE_ARM_DUMBBELL_BENCH_PRESS(21)"
+            ),
+            22 => write!(f, "BenchPressExerciseName::SMITH_MACHINE_BENCH_PRESS(22)"),
+            23 => write!(
+                f,
+                "BenchPressExerciseName::SWISS_BALL_DUMBBELL_CHEST_PRESS(23)"
+            ),
+            24 => write!(
+                f,
+                "BenchPressExerciseName::TRIPLE_STOP_BARBELL_BENCH_PRESS(24)"
+            ),
+            25 => write!(
+                f,
+                "BenchPressExerciseName::WIDE_GRIP_BARBELL_BENCH_PRESS(25)"
+            ),
+            26 => write!(
+                f,
+                "BenchPressExerciseName::ALTERNATING_DUMBBELL_CHEST_PRESS(26)"
+            ),
+            _ => write!(f, "BenchPressExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CalfRaiseExerciseName(pub u16);
 
 impl CalfRaiseExerciseName {
@@ -7723,12 +11275,62 @@ impl fmt::Display for CalfRaiseExerciseName {
             18 => write!(f, "standing_calf_raise"),
             19 => write!(f, "weighted_standing_calf_raise"),
             20 => write!(f, "standing_dumbbell_calf_raise"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CalfRaiseExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CalfRaiseExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CalfRaiseExerciseName::_3_WAY_CALF_RAISE(0)"),
+            1 => write!(f, "CalfRaiseExerciseName::_3_WAY_WEIGHTED_CALF_RAISE(1)"),
+            2 => write!(f, "CalfRaiseExerciseName::_3_WAY_SINGLE_LEG_CALF_RAISE(2)"),
+            3 => write!(
+                f,
+                "CalfRaiseExerciseName::_3_WAY_WEIGHTED_SINGLE_LEG_CALF_RAISE(3)"
+            ),
+            4 => write!(f, "CalfRaiseExerciseName::DONKEY_CALF_RAISE(4)"),
+            5 => write!(f, "CalfRaiseExerciseName::WEIGHTED_DONKEY_CALF_RAISE(5)"),
+            6 => write!(f, "CalfRaiseExerciseName::SEATED_CALF_RAISE(6)"),
+            7 => write!(f, "CalfRaiseExerciseName::WEIGHTED_SEATED_CALF_RAISE(7)"),
+            8 => write!(f, "CalfRaiseExerciseName::SEATED_DUMBBELL_TOE_RAISE(8)"),
+            9 => write!(
+                f,
+                "CalfRaiseExerciseName::SINGLE_LEG_BENT_KNEE_CALF_RAISE(9)"
+            ),
+            10 => write!(
+                f,
+                "CalfRaiseExerciseName::WEIGHTED_SINGLE_LEG_BENT_KNEE_CALF_RAISE(10)"
+            ),
+            11 => write!(f, "CalfRaiseExerciseName::SINGLE_LEG_DECLINE_PUSH_UP(11)"),
+            12 => write!(f, "CalfRaiseExerciseName::SINGLE_LEG_DONKEY_CALF_RAISE(12)"),
+            13 => write!(
+                f,
+                "CalfRaiseExerciseName::WEIGHTED_SINGLE_LEG_DONKEY_CALF_RAISE(13)"
+            ),
+            14 => write!(
+                f,
+                "CalfRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_KNEE_HOLD(14)"
+            ),
+            15 => write!(
+                f,
+                "CalfRaiseExerciseName::SINGLE_LEG_STANDING_CALF_RAISE(15)"
+            ),
+            16 => write!(
+                f,
+                "CalfRaiseExerciseName::SINGLE_LEG_STANDING_DUMBBELL_CALF_RAISE(16)"
+            ),
+            17 => write!(f, "CalfRaiseExerciseName::STANDING_BARBELL_CALF_RAISE(17)"),
+            18 => write!(f, "CalfRaiseExerciseName::STANDING_CALF_RAISE(18)"),
+            19 => write!(f, "CalfRaiseExerciseName::WEIGHTED_STANDING_CALF_RAISE(19)"),
+            20 => write!(f, "CalfRaiseExerciseName::STANDING_DUMBBELL_CALF_RAISE(20)"),
+            _ => write!(f, "CalfRaiseExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CardioExerciseName(pub u16);
 
 impl CardioExerciseName {
@@ -7829,12 +11431,72 @@ impl fmt::Display for CardioExerciseName {
             40 => write!(f, "pole_dd_ff_uu_wheelchair"),
             41 => write!(f, "butterfly_arms_wheelchair"),
             42 => write!(f, "punch"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CardioExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CardioExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CardioExerciseName::BOB_AND_WEAVE_CIRCLE(0)"),
+            1 => write!(f, "CardioExerciseName::WEIGHTED_BOB_AND_WEAVE_CIRCLE(1)"),
+            2 => write!(f, "CardioExerciseName::CARDIO_CORE_CRAWL(2)"),
+            3 => write!(f, "CardioExerciseName::WEIGHTED_CARDIO_CORE_CRAWL(3)"),
+            4 => write!(f, "CardioExerciseName::DOUBLE_UNDER(4)"),
+            5 => write!(f, "CardioExerciseName::WEIGHTED_DOUBLE_UNDER(5)"),
+            6 => write!(f, "CardioExerciseName::JUMP_ROPE(6)"),
+            7 => write!(f, "CardioExerciseName::WEIGHTED_JUMP_ROPE(7)"),
+            8 => write!(f, "CardioExerciseName::JUMP_ROPE_CROSSOVER(8)"),
+            9 => write!(f, "CardioExerciseName::WEIGHTED_JUMP_ROPE_CROSSOVER(9)"),
+            10 => write!(f, "CardioExerciseName::JUMP_ROPE_JOG(10)"),
+            11 => write!(f, "CardioExerciseName::WEIGHTED_JUMP_ROPE_JOG(11)"),
+            12 => write!(f, "CardioExerciseName::JUMPING_JACKS(12)"),
+            13 => write!(f, "CardioExerciseName::WEIGHTED_JUMPING_JACKS(13)"),
+            14 => write!(f, "CardioExerciseName::SKI_MOGULS(14)"),
+            15 => write!(f, "CardioExerciseName::WEIGHTED_SKI_MOGULS(15)"),
+            16 => write!(f, "CardioExerciseName::SPLIT_JACKS(16)"),
+            17 => write!(f, "CardioExerciseName::WEIGHTED_SPLIT_JACKS(17)"),
+            18 => write!(f, "CardioExerciseName::SQUAT_JACKS(18)"),
+            19 => write!(f, "CardioExerciseName::WEIGHTED_SQUAT_JACKS(19)"),
+            20 => write!(f, "CardioExerciseName::TRIPLE_UNDER(20)"),
+            21 => write!(f, "CardioExerciseName::WEIGHTED_TRIPLE_UNDER(21)"),
+            22 => write!(f, "CardioExerciseName::ELLIPTICAL(22)"),
+            23 => write!(f, "CardioExerciseName::SPINNING(23)"),
+            24 => write!(f, "CardioExerciseName::POLE_PADDLE_FORWARD_WHEELCHAIR(24)"),
+            25 => write!(f, "CardioExerciseName::POLE_PADDLE_BACKWARD_WHEELCHAIR(25)"),
+            26 => write!(
+                f,
+                "CardioExerciseName::POLE_HANDCYCLE_FORWARD_WHEELCHAIR(26)"
+            ),
+            27 => write!(
+                f,
+                "CardioExerciseName::POLE_HANDCYCLE_BACKWARD_WHEELCHAIR(27)"
+            ),
+            28 => write!(f, "CardioExerciseName::POLE_RAINBOW_WHEELCHAIR(28)"),
+            29 => write!(f, "CardioExerciseName::DOUBLE_PUNCH_FORWARD_WHEELCHAIR(29)"),
+            30 => write!(f, "CardioExerciseName::DOUBLE_PUNCH_DOWN_WHEELCHAIR(30)"),
+            31 => write!(
+                f,
+                "CardioExerciseName::DOUBLE_PUNCH_SIDEWAYS_WHEELCHAIR(31)"
+            ),
+            32 => write!(f, "CardioExerciseName::DOUBLE_PUNCH_UP_WHEELCHAIR(32)"),
+            33 => write!(f, "CardioExerciseName::SIT_SKI_WHEELCHAIR(33)"),
+            34 => write!(f, "CardioExerciseName::SITTING_JACKS_WHEELCHAIR(34)"),
+            35 => write!(f, "CardioExerciseName::PUNCH_FORWARD_WHEELCHAIR(35)"),
+            36 => write!(f, "CardioExerciseName::PUNCH_DOWN_WHEELCHAIR(36)"),
+            37 => write!(f, "CardioExerciseName::PUNCH_SIDEWAYS_WHEELCHAIR(37)"),
+            38 => write!(f, "CardioExerciseName::PUNCH_UP_WHEELCHAIR(38)"),
+            39 => write!(f, "CardioExerciseName::PUNCH_BAG_WHEELCHAIR(39)"),
+            40 => write!(f, "CardioExerciseName::POLE_DD_FF_UU_WHEELCHAIR(40)"),
+            41 => write!(f, "CardioExerciseName::BUTTERFLY_ARMS_WHEELCHAIR(41)"),
+            42 => write!(f, "CardioExerciseName::PUNCH(42)"),
+            _ => write!(f, "CardioExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CarryExerciseName(pub u16);
 
 impl CarryExerciseName {
@@ -7867,12 +11529,29 @@ impl fmt::Display for CarryExerciseName {
             6 => write!(f, "farmers_carry_walk_lunge"),
             7 => write!(f, "farmers_carry"),
             8 => write!(f, "farmers_carry_on_toes"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CarryExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CarryExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CarryExerciseName::BAR_HOLDS(0)"),
+            1 => write!(f, "CarryExerciseName::FARMERS_WALK(1)"),
+            2 => write!(f, "CarryExerciseName::FARMERS_WALK_ON_TOES(2)"),
+            3 => write!(f, "CarryExerciseName::HEX_DUMBBELL_HOLD(3)"),
+            4 => write!(f, "CarryExerciseName::OVERHEAD_CARRY(4)"),
+            5 => write!(f, "CarryExerciseName::DUMBBELL_WAITER_CARRY(5)"),
+            6 => write!(f, "CarryExerciseName::FARMERS_CARRY_WALK_LUNGE(6)"),
+            7 => write!(f, "CarryExerciseName::FARMERS_CARRY(7)"),
+            8 => write!(f, "CarryExerciseName::FARMERS_CARRY_ON_TOES(8)"),
+            _ => write!(f, "CarryExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ChopExerciseName(pub u16);
 
 impl ChopExerciseName {
@@ -7933,12 +11612,52 @@ impl fmt::Display for ChopExerciseName {
             20 => write!(f, "standing_split_rotational_chop"),
             21 => write!(f, "standing_split_rotational_reverse_chop"),
             22 => write!(f, "standing_stability_reverse_chop"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ChopExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ChopExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ChopExerciseName::CABLE_PULL_THROUGH(0)"),
+            1 => write!(f, "ChopExerciseName::CABLE_ROTATIONAL_LIFT(1)"),
+            2 => write!(f, "ChopExerciseName::CABLE_WOODCHOP(2)"),
+            3 => write!(f, "ChopExerciseName::CROSS_CHOP_TO_KNEE(3)"),
+            4 => write!(f, "ChopExerciseName::WEIGHTED_CROSS_CHOP_TO_KNEE(4)"),
+            5 => write!(f, "ChopExerciseName::DUMBBELL_CHOP(5)"),
+            6 => write!(f, "ChopExerciseName::HALF_KNEELING_ROTATION(6)"),
+            7 => write!(f, "ChopExerciseName::WEIGHTED_HALF_KNEELING_ROTATION(7)"),
+            8 => write!(f, "ChopExerciseName::HALF_KNEELING_ROTATIONAL_CHOP(8)"),
+            9 => write!(
+                f,
+                "ChopExerciseName::HALF_KNEELING_ROTATIONAL_REVERSE_CHOP(9)"
+            ),
+            10 => write!(f, "ChopExerciseName::HALF_KNEELING_STABILITY_CHOP(10)"),
+            11 => write!(
+                f,
+                "ChopExerciseName::HALF_KNEELING_STABILITY_REVERSE_CHOP(11)"
+            ),
+            12 => write!(f, "ChopExerciseName::KNEELING_ROTATIONAL_CHOP(12)"),
+            13 => write!(f, "ChopExerciseName::KNEELING_ROTATIONAL_REVERSE_CHOP(13)"),
+            14 => write!(f, "ChopExerciseName::KNEELING_STABILITY_CHOP(14)"),
+            15 => write!(f, "ChopExerciseName::KNEELING_WOODCHOPPER(15)"),
+            16 => write!(f, "ChopExerciseName::MEDICINE_BALL_WOOD_CHOPS(16)"),
+            17 => write!(f, "ChopExerciseName::POWER_SQUAT_CHOPS(17)"),
+            18 => write!(f, "ChopExerciseName::WEIGHTED_POWER_SQUAT_CHOPS(18)"),
+            19 => write!(f, "ChopExerciseName::STANDING_ROTATIONAL_CHOP(19)"),
+            20 => write!(f, "ChopExerciseName::STANDING_SPLIT_ROTATIONAL_CHOP(20)"),
+            21 => write!(
+                f,
+                "ChopExerciseName::STANDING_SPLIT_ROTATIONAL_REVERSE_CHOP(21)"
+            ),
+            22 => write!(f, "ChopExerciseName::STANDING_STABILITY_REVERSE_CHOP(22)"),
+            _ => write!(f, "ChopExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CoreExerciseName(pub u16);
 
 impl CoreExerciseName {
@@ -8144,12 +11863,120 @@ impl fmt::Display for CoreExerciseName {
             94 => write!(f, "side_bend_mid_wheelchair"),
             95 => write!(f, "side_bend_high_wheelchair"),
             96 => write!(f, "seated_side_bend"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CoreExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CoreExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CoreExerciseName::ABS_JABS(0)"),
+            1 => write!(f, "CoreExerciseName::WEIGHTED_ABS_JABS(1)"),
+            2 => write!(f, "CoreExerciseName::ALTERNATING_PLATE_REACH(2)"),
+            3 => write!(f, "CoreExerciseName::BARBELL_ROLLOUT(3)"),
+            4 => write!(f, "CoreExerciseName::WEIGHTED_BARBELL_ROLLOUT(4)"),
+            5 => write!(f, "CoreExerciseName::BODY_BAR_OBLIQUE_TWIST(5)"),
+            6 => write!(f, "CoreExerciseName::CABLE_CORE_PRESS(6)"),
+            7 => write!(f, "CoreExerciseName::CABLE_SIDE_BEND(7)"),
+            8 => write!(f, "CoreExerciseName::SIDE_BEND(8)"),
+            9 => write!(f, "CoreExerciseName::WEIGHTED_SIDE_BEND(9)"),
+            10 => write!(f, "CoreExerciseName::CRESCENT_CIRCLE(10)"),
+            11 => write!(f, "CoreExerciseName::WEIGHTED_CRESCENT_CIRCLE(11)"),
+            12 => write!(f, "CoreExerciseName::CYCLING_RUSSIAN_TWIST(12)"),
+            13 => write!(f, "CoreExerciseName::WEIGHTED_CYCLING_RUSSIAN_TWIST(13)"),
+            14 => write!(f, "CoreExerciseName::ELEVATED_FEET_RUSSIAN_TWIST(14)"),
+            15 => write!(
+                f,
+                "CoreExerciseName::WEIGHTED_ELEVATED_FEET_RUSSIAN_TWIST(15)"
+            ),
+            16 => write!(f, "CoreExerciseName::HALF_TURKISH_GET_UP(16)"),
+            17 => write!(f, "CoreExerciseName::KETTLEBELL_WINDMILL(17)"),
+            18 => write!(f, "CoreExerciseName::KNEELING_AB_WHEEL(18)"),
+            19 => write!(f, "CoreExerciseName::WEIGHTED_KNEELING_AB_WHEEL(19)"),
+            20 => write!(f, "CoreExerciseName::MODIFIED_FRONT_LEVER(20)"),
+            21 => write!(f, "CoreExerciseName::OPEN_KNEE_TUCKS(21)"),
+            22 => write!(f, "CoreExerciseName::WEIGHTED_OPEN_KNEE_TUCKS(22)"),
+            23 => write!(f, "CoreExerciseName::SIDE_ABS_LEG_LIFT(23)"),
+            24 => write!(f, "CoreExerciseName::WEIGHTED_SIDE_ABS_LEG_LIFT(24)"),
+            25 => write!(f, "CoreExerciseName::SWISS_BALL_JACKKNIFE(25)"),
+            26 => write!(f, "CoreExerciseName::WEIGHTED_SWISS_BALL_JACKKNIFE(26)"),
+            27 => write!(f, "CoreExerciseName::SWISS_BALL_PIKE(27)"),
+            28 => write!(f, "CoreExerciseName::WEIGHTED_SWISS_BALL_PIKE(28)"),
+            29 => write!(f, "CoreExerciseName::SWISS_BALL_ROLLOUT(29)"),
+            30 => write!(f, "CoreExerciseName::WEIGHTED_SWISS_BALL_ROLLOUT(30)"),
+            31 => write!(f, "CoreExerciseName::TRIANGLE_HIP_PRESS(31)"),
+            32 => write!(f, "CoreExerciseName::WEIGHTED_TRIANGLE_HIP_PRESS(32)"),
+            33 => write!(f, "CoreExerciseName::TRX_SUSPENDED_JACKKNIFE(33)"),
+            34 => write!(f, "CoreExerciseName::WEIGHTED_TRX_SUSPENDED_JACKKNIFE(34)"),
+            35 => write!(f, "CoreExerciseName::U_BOAT(35)"),
+            36 => write!(f, "CoreExerciseName::WEIGHTED_U_BOAT(36)"),
+            37 => write!(f, "CoreExerciseName::WINDMILL_SWITCHES(37)"),
+            38 => write!(f, "CoreExerciseName::WEIGHTED_WINDMILL_SWITCHES(38)"),
+            39 => write!(f, "CoreExerciseName::ALTERNATING_SLIDE_OUT(39)"),
+            40 => write!(f, "CoreExerciseName::WEIGHTED_ALTERNATING_SLIDE_OUT(40)"),
+            41 => write!(f, "CoreExerciseName::GHD_BACK_EXTENSIONS(41)"),
+            42 => write!(f, "CoreExerciseName::WEIGHTED_GHD_BACK_EXTENSIONS(42)"),
+            43 => write!(f, "CoreExerciseName::OVERHEAD_WALK(43)"),
+            44 => write!(f, "CoreExerciseName::INCHWORM(44)"),
+            45 => write!(f, "CoreExerciseName::WEIGHTED_MODIFIED_FRONT_LEVER(45)"),
+            46 => write!(f, "CoreExerciseName::RUSSIAN_TWIST(46)"),
+            47 => write!(f, "CoreExerciseName::ABDOMINAL_LEG_ROTATIONS(47)"),
+            48 => write!(f, "CoreExerciseName::ARM_AND_LEG_EXTENSION_ON_KNEES(48)"),
+            49 => write!(f, "CoreExerciseName::BICYCLE(49)"),
+            50 => write!(f, "CoreExerciseName::BICEP_CURL_WITH_LEG_EXTENSION(50)"),
+            51 => write!(f, "CoreExerciseName::CAT_COW(51)"),
+            52 => write!(f, "CoreExerciseName::CORKSCREW(52)"),
+            53 => write!(f, "CoreExerciseName::CRISS_CROSS(53)"),
+            54 => write!(f, "CoreExerciseName::CRISS_CROSS_WITH_BALL(54)"),
+            55 => write!(f, "CoreExerciseName::DOUBLE_LEG_STRETCH(55)"),
+            56 => write!(f, "CoreExerciseName::KNEE_FOLDS(56)"),
+            57 => write!(f, "CoreExerciseName::LOWER_LIFT(57)"),
+            58 => write!(f, "CoreExerciseName::NECK_PULL(58)"),
+            59 => write!(f, "CoreExerciseName::PELVIC_CLOCKS(59)"),
+            60 => write!(f, "CoreExerciseName::ROLL_OVER(60)"),
+            61 => write!(f, "CoreExerciseName::ROLL_UP(61)"),
+            62 => write!(f, "CoreExerciseName::ROLLING(62)"),
+            63 => write!(f, "CoreExerciseName::ROWING_1(63)"),
+            64 => write!(f, "CoreExerciseName::ROWING_2(64)"),
+            65 => write!(f, "CoreExerciseName::SCISSORS(65)"),
+            66 => write!(f, "CoreExerciseName::SINGLE_LEG_CIRCLES(66)"),
+            67 => write!(f, "CoreExerciseName::SINGLE_LEG_STRETCH(67)"),
+            68 => write!(f, "CoreExerciseName::SNAKE_TWIST_1_AND_2(68)"),
+            69 => write!(f, "CoreExerciseName::SWAN(69)"),
+            70 => write!(f, "CoreExerciseName::SWIMMING(70)"),
+            71 => write!(f, "CoreExerciseName::TEASER(71)"),
+            72 => write!(f, "CoreExerciseName::THE_HUNDRED(72)"),
+            73 => write!(
+                f,
+                "CoreExerciseName::BICEP_CURL_WITH_LEG_EXTENSION_WITH_WEIGHTS(73)"
+            ),
+            75 => write!(f, "CoreExerciseName::HANGING_L_SIT(75)"),
+            77 => write!(f, "CoreExerciseName::LOWER_LIFT_WITH_WEIGHTS(77)"),
+            79 => write!(f, "CoreExerciseName::RING_L_SIT(79)"),
+            80 => write!(f, "CoreExerciseName::ROWING_1_WITH_WEIGHTS(80)"),
+            81 => write!(f, "CoreExerciseName::ROWING_2_WITH_WEIGHTS(81)"),
+            82 => write!(f, "CoreExerciseName::SCISSORS_WITH_WEIGHTS(82)"),
+            83 => write!(f, "CoreExerciseName::SINGLE_LEG_STRETCH_WITH_WEIGHTS(83)"),
+            84 => write!(f, "CoreExerciseName::TOES_TO_ELBOWS(84)"),
+            85 => write!(f, "CoreExerciseName::WEIGHTED_CRISS_CROSS(85)"),
+            86 => write!(f, "CoreExerciseName::WEIGHTED_DOUBLE_LEG_STRETCH(86)"),
+            87 => write!(f, "CoreExerciseName::WEIGHTED_THE_HUNDRED(87)"),
+            88 => write!(f, "CoreExerciseName::L_SIT(88)"),
+            89 => write!(f, "CoreExerciseName::TURKISH_GET_UP(89)"),
+            90 => write!(f, "CoreExerciseName::WEIGHTED_RING_L_SIT(90)"),
+            91 => write!(f, "CoreExerciseName::WEIGHTED_HANGING_L_SIT(91)"),
+            92 => write!(f, "CoreExerciseName::WEIGHTED_L_SIT(92)"),
+            93 => write!(f, "CoreExerciseName::SIDE_BEND_LOW_WHEELCHAIR(93)"),
+            94 => write!(f, "CoreExerciseName::SIDE_BEND_MID_WHEELCHAIR(94)"),
+            95 => write!(f, "CoreExerciseName::SIDE_BEND_HIGH_WHEELCHAIR(95)"),
+            96 => write!(f, "CoreExerciseName::SEATED_SIDE_BEND(96)"),
+            _ => write!(f, "CoreExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CrunchExerciseName(pub u16);
 
 impl CrunchExerciseName {
@@ -8342,12 +12169,163 @@ impl fmt::Display for CrunchExerciseName {
             83 => write!(f, "crunch"),
             84 => write!(f, "straight_leg_crunch_with_ball"),
             86 => write!(f, "leg_climb_crunch"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CrunchExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CrunchExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CrunchExerciseName::BICYCLE_CRUNCH(0)"),
+            1 => write!(f, "CrunchExerciseName::CABLE_CRUNCH(1)"),
+            2 => write!(f, "CrunchExerciseName::CIRCULAR_ARM_CRUNCH(2)"),
+            3 => write!(f, "CrunchExerciseName::CROSSED_ARMS_CRUNCH(3)"),
+            4 => write!(f, "CrunchExerciseName::WEIGHTED_CROSSED_ARMS_CRUNCH(4)"),
+            5 => write!(f, "CrunchExerciseName::CROSS_LEG_REVERSE_CRUNCH(5)"),
+            6 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_CROSS_LEG_REVERSE_CRUNCH(6)"
+            ),
+            7 => write!(f, "CrunchExerciseName::CRUNCH_CHOP(7)"),
+            8 => write!(f, "CrunchExerciseName::WEIGHTED_CRUNCH_CHOP(8)"),
+            9 => write!(f, "CrunchExerciseName::DOUBLE_CRUNCH(9)"),
+            10 => write!(f, "CrunchExerciseName::WEIGHTED_DOUBLE_CRUNCH(10)"),
+            11 => write!(f, "CrunchExerciseName::ELBOW_TO_KNEE_CRUNCH(11)"),
+            12 => write!(f, "CrunchExerciseName::WEIGHTED_ELBOW_TO_KNEE_CRUNCH(12)"),
+            13 => write!(f, "CrunchExerciseName::FLUTTER_KICKS(13)"),
+            14 => write!(f, "CrunchExerciseName::WEIGHTED_FLUTTER_KICKS(14)"),
+            15 => write!(
+                f,
+                "CrunchExerciseName::FOAM_ROLLER_REVERSE_CRUNCH_ON_BENCH(15)"
+            ),
+            16 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_FOAM_ROLLER_REVERSE_CRUNCH_ON_BENCH(16)"
+            ),
+            17 => write!(
+                f,
+                "CrunchExerciseName::FOAM_ROLLER_REVERSE_CRUNCH_WITH_DUMBBELL(17)"
+            ),
+            18 => write!(
+                f,
+                "CrunchExerciseName::FOAM_ROLLER_REVERSE_CRUNCH_WITH_MEDICINE_BALL(18)"
+            ),
+            19 => write!(f, "CrunchExerciseName::FROG_PRESS(19)"),
+            20 => write!(
+                f,
+                "CrunchExerciseName::HANGING_KNEE_RAISE_OBLIQUE_CRUNCH(20)"
+            ),
+            21 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_HANGING_KNEE_RAISE_OBLIQUE_CRUNCH(21)"
+            ),
+            22 => write!(f, "CrunchExerciseName::HIP_CROSSOVER(22)"),
+            23 => write!(f, "CrunchExerciseName::WEIGHTED_HIP_CROSSOVER(23)"),
+            24 => write!(f, "CrunchExerciseName::HOLLOW_ROCK(24)"),
+            25 => write!(f, "CrunchExerciseName::WEIGHTED_HOLLOW_ROCK(25)"),
+            26 => write!(f, "CrunchExerciseName::INCLINE_REVERSE_CRUNCH(26)"),
+            27 => write!(f, "CrunchExerciseName::WEIGHTED_INCLINE_REVERSE_CRUNCH(27)"),
+            28 => write!(f, "CrunchExerciseName::KNEELING_CABLE_CRUNCH(28)"),
+            29 => write!(f, "CrunchExerciseName::KNEELING_CROSS_CRUNCH(29)"),
+            30 => write!(f, "CrunchExerciseName::WEIGHTED_KNEELING_CROSS_CRUNCH(30)"),
+            31 => write!(f, "CrunchExerciseName::KNEELING_OBLIQUE_CABLE_CRUNCH(31)"),
+            32 => write!(f, "CrunchExerciseName::KNEES_TO_ELBOW(32)"),
+            33 => write!(f, "CrunchExerciseName::LEG_EXTENSIONS(33)"),
+            34 => write!(f, "CrunchExerciseName::WEIGHTED_LEG_EXTENSIONS(34)"),
+            35 => write!(f, "CrunchExerciseName::LEG_LEVERS(35)"),
+            36 => write!(f, "CrunchExerciseName::MCGILL_CURL_UP(36)"),
+            37 => write!(f, "CrunchExerciseName::WEIGHTED_MCGILL_CURL_UP(37)"),
+            38 => write!(
+                f,
+                "CrunchExerciseName::MODIFIED_PILATES_ROLL_UP_WITH_BALL(38)"
+            ),
+            39 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_MODIFIED_PILATES_ROLL_UP_WITH_BALL(39)"
+            ),
+            40 => write!(f, "CrunchExerciseName::PILATES_CRUNCH(40)"),
+            41 => write!(f, "CrunchExerciseName::WEIGHTED_PILATES_CRUNCH(41)"),
+            42 => write!(f, "CrunchExerciseName::PILATES_ROLL_UP_WITH_BALL(42)"),
+            43 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_PILATES_ROLL_UP_WITH_BALL(43)"
+            ),
+            44 => write!(f, "CrunchExerciseName::RAISED_LEGS_CRUNCH(44)"),
+            45 => write!(f, "CrunchExerciseName::WEIGHTED_RAISED_LEGS_CRUNCH(45)"),
+            46 => write!(f, "CrunchExerciseName::REVERSE_CRUNCH(46)"),
+            47 => write!(f, "CrunchExerciseName::WEIGHTED_REVERSE_CRUNCH(47)"),
+            48 => write!(f, "CrunchExerciseName::REVERSE_CRUNCH_ON_A_BENCH(48)"),
+            49 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_REVERSE_CRUNCH_ON_A_BENCH(49)"
+            ),
+            50 => write!(f, "CrunchExerciseName::REVERSE_CURL_AND_LIFT(50)"),
+            51 => write!(f, "CrunchExerciseName::WEIGHTED_REVERSE_CURL_AND_LIFT(51)"),
+            52 => write!(f, "CrunchExerciseName::ROTATIONAL_LIFT(52)"),
+            53 => write!(f, "CrunchExerciseName::WEIGHTED_ROTATIONAL_LIFT(53)"),
+            54 => write!(
+                f,
+                "CrunchExerciseName::SEATED_ALTERNATING_REVERSE_CRUNCH(54)"
+            ),
+            55 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_SEATED_ALTERNATING_REVERSE_CRUNCH(55)"
+            ),
+            56 => write!(f, "CrunchExerciseName::SEATED_LEG_U(56)"),
+            57 => write!(f, "CrunchExerciseName::WEIGHTED_SEATED_LEG_U(57)"),
+            58 => write!(f, "CrunchExerciseName::SIDE_TO_SIDE_CRUNCH_AND_WEAVE(58)"),
+            59 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_SIDE_TO_SIDE_CRUNCH_AND_WEAVE(59)"
+            ),
+            60 => write!(f, "CrunchExerciseName::SINGLE_LEG_REVERSE_CRUNCH(60)"),
+            61 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_SINGLE_LEG_REVERSE_CRUNCH(61)"
+            ),
+            62 => write!(f, "CrunchExerciseName::SKATER_CRUNCH_CROSS(62)"),
+            63 => write!(f, "CrunchExerciseName::WEIGHTED_SKATER_CRUNCH_CROSS(63)"),
+            64 => write!(f, "CrunchExerciseName::STANDING_CABLE_CRUNCH(64)"),
+            65 => write!(f, "CrunchExerciseName::STANDING_SIDE_CRUNCH(65)"),
+            66 => write!(f, "CrunchExerciseName::STEP_CLIMB(66)"),
+            67 => write!(f, "CrunchExerciseName::WEIGHTED_STEP_CLIMB(67)"),
+            68 => write!(f, "CrunchExerciseName::SWISS_BALL_CRUNCH(68)"),
+            69 => write!(f, "CrunchExerciseName::SWISS_BALL_REVERSE_CRUNCH(69)"),
+            70 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_SWISS_BALL_REVERSE_CRUNCH(70)"
+            ),
+            71 => write!(f, "CrunchExerciseName::SWISS_BALL_RUSSIAN_TWIST(71)"),
+            72 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_SWISS_BALL_RUSSIAN_TWIST(72)"
+            ),
+            73 => write!(f, "CrunchExerciseName::SWISS_BALL_SIDE_CRUNCH(73)"),
+            74 => write!(f, "CrunchExerciseName::WEIGHTED_SWISS_BALL_SIDE_CRUNCH(74)"),
+            75 => write!(
+                f,
+                "CrunchExerciseName::THORACIC_CRUNCHES_ON_FOAM_ROLLER(75)"
+            ),
+            76 => write!(
+                f,
+                "CrunchExerciseName::WEIGHTED_THORACIC_CRUNCHES_ON_FOAM_ROLLER(76)"
+            ),
+            77 => write!(f, "CrunchExerciseName::TRICEPS_CRUNCH(77)"),
+            78 => write!(f, "CrunchExerciseName::WEIGHTED_BICYCLE_CRUNCH(78)"),
+            79 => write!(f, "CrunchExerciseName::WEIGHTED_CRUNCH(79)"),
+            80 => write!(f, "CrunchExerciseName::WEIGHTED_SWISS_BALL_CRUNCH(80)"),
+            81 => write!(f, "CrunchExerciseName::TOES_TO_BAR(81)"),
+            82 => write!(f, "CrunchExerciseName::WEIGHTED_TOES_TO_BAR(82)"),
+            83 => write!(f, "CrunchExerciseName::CRUNCH(83)"),
+            84 => write!(f, "CrunchExerciseName::STRAIGHT_LEG_CRUNCH_WITH_BALL(84)"),
+            86 => write!(f, "CrunchExerciseName::LEG_CLIMB_CRUNCH(86)"),
+            _ => write!(f, "CrunchExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CurlExerciseName(pub u16);
 
 impl CurlExerciseName {
@@ -8466,12 +12444,101 @@ impl fmt::Display for CurlExerciseName {
             48 => write!(f, "dumbbell_biceps_curl_wheelchair"),
             49 => write!(f, "bottle_curl"),
             50 => write!(f, "seated_bottle_curl"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CurlExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CurlExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CurlExerciseName::ALTERNATING_DUMBBELL_BICEPS_CURL(0)"),
+            1 => write!(
+                f,
+                "CurlExerciseName::ALTERNATING_DUMBBELL_BICEPS_CURL_ON_SWISS_BALL(1)"
+            ),
+            2 => write!(
+                f,
+                "CurlExerciseName::ALTERNATING_INCLINE_DUMBBELL_BICEPS_CURL(2)"
+            ),
+            3 => write!(f, "CurlExerciseName::BARBELL_BICEPS_CURL(3)"),
+            4 => write!(f, "CurlExerciseName::BARBELL_REVERSE_WRIST_CURL(4)"),
+            5 => write!(f, "CurlExerciseName::BARBELL_WRIST_CURL(5)"),
+            6 => write!(
+                f,
+                "CurlExerciseName::BEHIND_THE_BACK_BARBELL_REVERSE_WRIST_CURL(6)"
+            ),
+            7 => write!(f, "CurlExerciseName::BEHIND_THE_BACK_ONE_ARM_CABLE_CURL(7)"),
+            8 => write!(f, "CurlExerciseName::CABLE_BICEPS_CURL(8)"),
+            9 => write!(f, "CurlExerciseName::CABLE_HAMMER_CURL(9)"),
+            10 => write!(f, "CurlExerciseName::CHEATING_BARBELL_BICEPS_CURL(10)"),
+            11 => write!(f, "CurlExerciseName::CLOSE_GRIP_EZ_BAR_BICEPS_CURL(11)"),
+            12 => write!(f, "CurlExerciseName::CROSS_BODY_DUMBBELL_HAMMER_CURL(12)"),
+            13 => write!(f, "CurlExerciseName::DEAD_HANG_BICEPS_CURL(13)"),
+            14 => write!(f, "CurlExerciseName::DECLINE_HAMMER_CURL(14)"),
+            15 => write!(
+                f,
+                "CurlExerciseName::DUMBBELL_BICEPS_CURL_WITH_STATIC_HOLD(15)"
+            ),
+            16 => write!(f, "CurlExerciseName::DUMBBELL_HAMMER_CURL(16)"),
+            17 => write!(f, "CurlExerciseName::DUMBBELL_REVERSE_WRIST_CURL(17)"),
+            18 => write!(f, "CurlExerciseName::DUMBBELL_WRIST_CURL(18)"),
+            19 => write!(f, "CurlExerciseName::EZ_BAR_PREACHER_CURL(19)"),
+            20 => write!(f, "CurlExerciseName::FORWARD_BEND_BICEPS_CURL(20)"),
+            21 => write!(f, "CurlExerciseName::HAMMER_CURL_TO_PRESS(21)"),
+            22 => write!(f, "CurlExerciseName::INCLINE_DUMBBELL_BICEPS_CURL(22)"),
+            23 => write!(
+                f,
+                "CurlExerciseName::INCLINE_OFFSET_THUMB_DUMBBELL_CURL(23)"
+            ),
+            24 => write!(f, "CurlExerciseName::KETTLEBELL_BICEPS_CURL(24)"),
+            25 => write!(f, "CurlExerciseName::LYING_CONCENTRATION_CABLE_CURL(25)"),
+            26 => write!(f, "CurlExerciseName::ONE_ARM_PREACHER_CURL(26)"),
+            27 => write!(f, "CurlExerciseName::PLATE_PINCH_CURL(27)"),
+            28 => write!(f, "CurlExerciseName::PREACHER_CURL_WITH_CABLE(28)"),
+            29 => write!(f, "CurlExerciseName::REVERSE_EZ_BAR_CURL(29)"),
+            30 => write!(f, "CurlExerciseName::REVERSE_GRIP_WRIST_CURL(30)"),
+            31 => write!(f, "CurlExerciseName::REVERSE_GRIP_BARBELL_BICEPS_CURL(31)"),
+            32 => write!(
+                f,
+                "CurlExerciseName::SEATED_ALTERNATING_DUMBBELL_BICEPS_CURL(32)"
+            ),
+            33 => write!(f, "CurlExerciseName::SEATED_DUMBBELL_BICEPS_CURL(33)"),
+            34 => write!(f, "CurlExerciseName::SEATED_REVERSE_DUMBBELL_CURL(34)"),
+            35 => write!(
+                f,
+                "CurlExerciseName::SPLIT_STANCE_OFFSET_PINKY_DUMBBELL_CURL(35)"
+            ),
+            36 => write!(
+                f,
+                "CurlExerciseName::STANDING_ALTERNATING_DUMBBELL_CURLS(36)"
+            ),
+            37 => write!(f, "CurlExerciseName::STANDING_DUMBBELL_BICEPS_CURL(37)"),
+            38 => write!(f, "CurlExerciseName::STANDING_EZ_BAR_BICEPS_CURL(38)"),
+            39 => write!(f, "CurlExerciseName::STATIC_CURL(39)"),
+            40 => write!(
+                f,
+                "CurlExerciseName::SWISS_BALL_DUMBBELL_OVERHEAD_TRICEPS_EXTENSION(40)"
+            ),
+            41 => write!(f, "CurlExerciseName::SWISS_BALL_EZ_BAR_PREACHER_CURL(41)"),
+            42 => write!(
+                f,
+                "CurlExerciseName::TWISTING_STANDING_DUMBBELL_BICEPS_CURL(42)"
+            ),
+            43 => write!(f, "CurlExerciseName::WIDE_GRIP_EZ_BAR_BICEPS_CURL(43)"),
+            44 => write!(f, "CurlExerciseName::ONE_ARM_CONCENTRATION_CURL(44)"),
+            45 => write!(f, "CurlExerciseName::STANDING_ZOTTMAN_BICEPS_CURL(45)"),
+            46 => write!(f, "CurlExerciseName::DUMBBELL_BICEPS_CURL(46)"),
+            47 => write!(f, "CurlExerciseName::DRAG_CURL_WHEELCHAIR(47)"),
+            48 => write!(f, "CurlExerciseName::DUMBBELL_BICEPS_CURL_WHEELCHAIR(48)"),
+            49 => write!(f, "CurlExerciseName::BOTTLE_CURL(49)"),
+            50 => write!(f, "CurlExerciseName::SEATED_BOTTLE_CURL(50)"),
+            _ => write!(f, "CurlExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DeadliftExerciseName(pub u16);
 
 impl DeadliftExerciseName {
@@ -8537,12 +12604,62 @@ impl fmt::Display for DeadliftExerciseName {
             23 => write!(f, "romanian_deadlift"),
             24 => write!(f, "single_leg_romanian_deadlift_circuit"),
             25 => write!(f, "straight_leg_deadlift"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DeadliftExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DeadliftExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DeadliftExerciseName::BARBELL_DEADLIFT(0)"),
+            1 => write!(f, "DeadliftExerciseName::BARBELL_STRAIGHT_LEG_DEADLIFT(1)"),
+            2 => write!(f, "DeadliftExerciseName::DUMBBELL_DEADLIFT(2)"),
+            3 => write!(
+                f,
+                "DeadliftExerciseName::DUMBBELL_SINGLE_LEG_DEADLIFT_TO_ROW(3)"
+            ),
+            4 => write!(f, "DeadliftExerciseName::DUMBBELL_STRAIGHT_LEG_DEADLIFT(4)"),
+            5 => write!(f, "DeadliftExerciseName::KETTLEBELL_FLOOR_TO_SHELF(5)"),
+            6 => write!(f, "DeadliftExerciseName::ONE_ARM_ONE_LEG_DEADLIFT(6)"),
+            7 => write!(f, "DeadliftExerciseName::RACK_PULL(7)"),
+            8 => write!(
+                f,
+                "DeadliftExerciseName::ROTATIONAL_DUMBBELL_STRAIGHT_LEG_DEADLIFT(8)"
+            ),
+            9 => write!(f, "DeadliftExerciseName::SINGLE_ARM_DEADLIFT(9)"),
+            10 => write!(f, "DeadliftExerciseName::SINGLE_LEG_BARBELL_DEADLIFT(10)"),
+            11 => write!(
+                f,
+                "DeadliftExerciseName::SINGLE_LEG_BARBELL_STRAIGHT_LEG_DEADLIFT(11)"
+            ),
+            12 => write!(
+                f,
+                "DeadliftExerciseName::SINGLE_LEG_DEADLIFT_WITH_BARBELL(12)"
+            ),
+            13 => write!(f, "DeadliftExerciseName::SINGLE_LEG_RDL_CIRCUIT(13)"),
+            14 => write!(
+                f,
+                "DeadliftExerciseName::SINGLE_LEG_ROMANIAN_DEADLIFT_WITH_DUMBBELL(14)"
+            ),
+            15 => write!(f, "DeadliftExerciseName::SUMO_DEADLIFT(15)"),
+            16 => write!(f, "DeadliftExerciseName::SUMO_DEADLIFT_HIGH_PULL(16)"),
+            17 => write!(f, "DeadliftExerciseName::TRAP_BAR_DEADLIFT(17)"),
+            18 => write!(f, "DeadliftExerciseName::WIDE_GRIP_BARBELL_DEADLIFT(18)"),
+            20 => write!(f, "DeadliftExerciseName::KETTLEBELL_DEADLIFT(20)"),
+            21 => write!(f, "DeadliftExerciseName::KETTLEBELL_SUMO_DEADLIFT(21)"),
+            23 => write!(f, "DeadliftExerciseName::ROMANIAN_DEADLIFT(23)"),
+            24 => write!(
+                f,
+                "DeadliftExerciseName::SINGLE_LEG_ROMANIAN_DEADLIFT_CIRCUIT(24)"
+            ),
+            25 => write!(f, "DeadliftExerciseName::STRAIGHT_LEG_DEADLIFT(25)"),
+            _ => write!(f, "DeadliftExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FlyeExerciseName(pub u16);
 
 impl FlyeExerciseName {
@@ -8583,12 +12700,36 @@ impl fmt::Display for FlyeExerciseName {
             10 => write!(f, "face_down_incline_reverse_flye"),
             11 => write!(f, "incline_reverse_flye"),
             12 => write!(f, "rear_delt_fly_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FlyeExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FlyeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "FlyeExerciseName::CABLE_CROSSOVER(0)"),
+            1 => write!(f, "FlyeExerciseName::DECLINE_DUMBBELL_FLYE(1)"),
+            2 => write!(f, "FlyeExerciseName::DUMBBELL_FLYE(2)"),
+            3 => write!(f, "FlyeExerciseName::INCLINE_DUMBBELL_FLYE(3)"),
+            4 => write!(f, "FlyeExerciseName::KETTLEBELL_FLYE(4)"),
+            5 => write!(f, "FlyeExerciseName::KNEELING_REAR_FLYE(5)"),
+            6 => write!(
+                f,
+                "FlyeExerciseName::SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE(6)"
+            ),
+            7 => write!(f, "FlyeExerciseName::SWISS_BALL_DUMBBELL_FLYE(7)"),
+            8 => write!(f, "FlyeExerciseName::ARM_ROTATIONS(8)"),
+            9 => write!(f, "FlyeExerciseName::HUG_A_TREE(9)"),
+            10 => write!(f, "FlyeExerciseName::FACE_DOWN_INCLINE_REVERSE_FLYE(10)"),
+            11 => write!(f, "FlyeExerciseName::INCLINE_REVERSE_FLYE(11)"),
+            12 => write!(f, "FlyeExerciseName::REAR_DELT_FLY_WHEELCHAIR(12)"),
+            _ => write!(f, "FlyeExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HipRaiseExerciseName(pub u16);
 
 impl HipRaiseExerciseName {
@@ -8726,12 +12867,145 @@ impl fmt::Display for HipRaiseExerciseName {
             47 => write!(f, "leg_circles"),
             48 => write!(f, "leg_lift"),
             49 => write!(f, "leg_lift_in_external_rotation"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HipRaiseExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HipRaiseExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "HipRaiseExerciseName::BARBELL_HIP_THRUST_ON_FLOOR(0)"),
+            1 => write!(f, "HipRaiseExerciseName::BARBELL_HIP_THRUST_WITH_BENCH(1)"),
+            2 => write!(
+                f,
+                "HipRaiseExerciseName::BENT_KNEE_SWISS_BALL_REVERSE_HIP_RAISE(2)"
+            ),
+            3 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_BENT_KNEE_SWISS_BALL_REVERSE_HIP_RAISE(3)"
+            ),
+            4 => write!(f, "HipRaiseExerciseName::BRIDGE_WITH_LEG_EXTENSION(4)"),
+            5 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_BRIDGE_WITH_LEG_EXTENSION(5)"
+            ),
+            6 => write!(f, "HipRaiseExerciseName::CLAM_BRIDGE(6)"),
+            7 => write!(f, "HipRaiseExerciseName::FRONT_KICK_TABLETOP(7)"),
+            8 => write!(f, "HipRaiseExerciseName::WEIGHTED_FRONT_KICK_TABLETOP(8)"),
+            9 => write!(f, "HipRaiseExerciseName::HIP_EXTENSION_AND_CROSS(9)"),
+            10 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_HIP_EXTENSION_AND_CROSS(10)"
+            ),
+            11 => write!(f, "HipRaiseExerciseName::HIP_RAISE(11)"),
+            12 => write!(f, "HipRaiseExerciseName::WEIGHTED_HIP_RAISE(12)"),
+            13 => write!(
+                f,
+                "HipRaiseExerciseName::HIP_RAISE_WITH_FEET_ON_SWISS_BALL(13)"
+            ),
+            14 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_FEET_ON_SWISS_BALL(14)"
+            ),
+            15 => write!(
+                f,
+                "HipRaiseExerciseName::HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(15)"
+            ),
+            16 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(16)"
+            ),
+            17 => write!(
+                f,
+                "HipRaiseExerciseName::HIP_RAISE_WITH_HEAD_ON_SWISS_BALL(17)"
+            ),
+            18 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_HEAD_ON_SWISS_BALL(18)"
+            ),
+            19 => write!(f, "HipRaiseExerciseName::HIP_RAISE_WITH_KNEE_SQUEEZE(19)"),
+            20 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_KNEE_SQUEEZE(20)"
+            ),
+            21 => write!(f, "HipRaiseExerciseName::INCLINE_REAR_LEG_EXTENSION(21)"),
+            22 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_INCLINE_REAR_LEG_EXTENSION(22)"
+            ),
+            23 => write!(f, "HipRaiseExerciseName::KETTLEBELL_SWING(23)"),
+            24 => write!(f, "HipRaiseExerciseName::MARCHING_HIP_RAISE(24)"),
+            25 => write!(f, "HipRaiseExerciseName::WEIGHTED_MARCHING_HIP_RAISE(25)"),
+            26 => write!(
+                f,
+                "HipRaiseExerciseName::MARCHING_HIP_RAISE_WITH_FEET_ON_A_SWISS_BALL(26)"
+            ),
+            27 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_MARCHING_HIP_RAISE_WITH_FEET_ON_A_SWISS_BALL(27)"
+            ),
+            28 => write!(f, "HipRaiseExerciseName::REVERSE_HIP_RAISE(28)"),
+            29 => write!(f, "HipRaiseExerciseName::WEIGHTED_REVERSE_HIP_RAISE(29)"),
+            30 => write!(f, "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE(30)"),
+            31 => write!(f, "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE(31)"),
+            32 => write!(
+                f,
+                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BENCH(32)"
+            ),
+            33 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BENCH(33)"
+            ),
+            34 => write!(
+                f,
+                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BOSU_BALL(34)"
+            ),
+            35 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BOSU_BALL(35)"
+            ),
+            36 => write!(
+                f,
+                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_FOAM_ROLLER(36)"
+            ),
+            37 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_FOAM_ROLLER(37)"
+            ),
+            38 => write!(
+                f,
+                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_MEDICINE_BALL(38)"
+            ),
+            39 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_MEDICINE_BALL(39)"
+            ),
+            40 => write!(
+                f,
+                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(40)"
+            ),
+            41 => write!(
+                f,
+                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(41)"
+            ),
+            42 => write!(f, "HipRaiseExerciseName::WEIGHTED_CLAM_BRIDGE(42)"),
+            43 => write!(
+                f,
+                "HipRaiseExerciseName::SINGLE_LEG_SWISS_BALL_HIP_RAISE_AND_LEG_CURL(43)"
+            ),
+            44 => write!(f, "HipRaiseExerciseName::CLAMS(44)"),
+            45 => write!(f, "HipRaiseExerciseName::INNER_THIGH_CIRCLES(45)"),
+            46 => write!(f, "HipRaiseExerciseName::INNER_THIGH_SIDE_LIFT(46)"),
+            47 => write!(f, "HipRaiseExerciseName::LEG_CIRCLES(47)"),
+            48 => write!(f, "HipRaiseExerciseName::LEG_LIFT(48)"),
+            49 => write!(f, "HipRaiseExerciseName::LEG_LIFT_IN_EXTERNAL_ROTATION(49)"),
+            _ => write!(f, "HipRaiseExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HipStabilityExerciseName(pub u16);
 
 impl HipStabilityExerciseName {
@@ -8825,12 +13099,103 @@ impl fmt::Display for HipStabilityExerciseName {
             32 => write!(f, "supine_hip_internal_rotation"),
             33 => write!(f, "weighted_supine_hip_internal_rotation"),
             34 => write!(f, "lying_abduction_stretch"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HipStabilityExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HipStabilityExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "HipStabilityExerciseName::BAND_SIDE_LYING_LEG_RAISE(0)"),
+            1 => write!(f, "HipStabilityExerciseName::DEAD_BUG(1)"),
+            2 => write!(f, "HipStabilityExerciseName::WEIGHTED_DEAD_BUG(2)"),
+            3 => write!(f, "HipStabilityExerciseName::EXTERNAL_HIP_RAISE(3)"),
+            4 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_EXTERNAL_HIP_RAISE(4)"
+            ),
+            5 => write!(f, "HipStabilityExerciseName::FIRE_HYDRANT_KICKS(5)"),
+            6 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_FIRE_HYDRANT_KICKS(6)"
+            ),
+            7 => write!(f, "HipStabilityExerciseName::HIP_CIRCLES(7)"),
+            8 => write!(f, "HipStabilityExerciseName::WEIGHTED_HIP_CIRCLES(8)"),
+            9 => write!(f, "HipStabilityExerciseName::INNER_THIGH_LIFT(9)"),
+            10 => write!(f, "HipStabilityExerciseName::WEIGHTED_INNER_THIGH_LIFT(10)"),
+            11 => write!(
+                f,
+                "HipStabilityExerciseName::LATERAL_WALKS_WITH_BAND_AT_ANKLES(11)"
+            ),
+            12 => write!(f, "HipStabilityExerciseName::PRETZEL_SIDE_KICK(12)"),
+            13 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_PRETZEL_SIDE_KICK(13)"
+            ),
+            14 => write!(
+                f,
+                "HipStabilityExerciseName::PRONE_HIP_INTERNAL_ROTATION(14)"
+            ),
+            15 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_PRONE_HIP_INTERNAL_ROTATION(15)"
+            ),
+            16 => write!(f, "HipStabilityExerciseName::QUADRUPED(16)"),
+            17 => write!(f, "HipStabilityExerciseName::QUADRUPED_HIP_EXTENSION(17)"),
+            18 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_QUADRUPED_HIP_EXTENSION(18)"
+            ),
+            19 => write!(f, "HipStabilityExerciseName::QUADRUPED_WITH_LEG_LIFT(19)"),
+            20 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_QUADRUPED_WITH_LEG_LIFT(20)"
+            ),
+            21 => write!(f, "HipStabilityExerciseName::SIDE_LYING_LEG_RAISE(21)"),
+            22 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_SIDE_LYING_LEG_RAISE(22)"
+            ),
+            23 => write!(f, "HipStabilityExerciseName::SLIDING_HIP_ADDUCTION(23)"),
+            24 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_SLIDING_HIP_ADDUCTION(24)"
+            ),
+            25 => write!(f, "HipStabilityExerciseName::STANDING_ADDUCTION(25)"),
+            26 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_STANDING_ADDUCTION(26)"
+            ),
+            27 => write!(
+                f,
+                "HipStabilityExerciseName::STANDING_CABLE_HIP_ABDUCTION(27)"
+            ),
+            28 => write!(f, "HipStabilityExerciseName::STANDING_HIP_ABDUCTION(28)"),
+            29 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_STANDING_HIP_ABDUCTION(29)"
+            ),
+            30 => write!(f, "HipStabilityExerciseName::STANDING_REAR_LEG_RAISE(30)"),
+            31 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_STANDING_REAR_LEG_RAISE(31)"
+            ),
+            32 => write!(
+                f,
+                "HipStabilityExerciseName::SUPINE_HIP_INTERNAL_ROTATION(32)"
+            ),
+            33 => write!(
+                f,
+                "HipStabilityExerciseName::WEIGHTED_SUPINE_HIP_INTERNAL_ROTATION(33)"
+            ),
+            34 => write!(f, "HipStabilityExerciseName::LYING_ABDUCTION_STRETCH(34)"),
+            _ => write!(f, "HipStabilityExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HipSwingExerciseName(pub u16);
 
 impl HipSwingExerciseName {
@@ -8853,12 +13218,24 @@ impl fmt::Display for HipSwingExerciseName {
             1 => write!(f, "single_arm_dumbbell_swing"),
             2 => write!(f, "step_out_swing"),
             3 => write!(f, "one_arm_swing"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HipSwingExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HipSwingExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "HipSwingExerciseName::SINGLE_ARM_KETTLEBELL_SWING(0)"),
+            1 => write!(f, "HipSwingExerciseName::SINGLE_ARM_DUMBBELL_SWING(1)"),
+            2 => write!(f, "HipSwingExerciseName::STEP_OUT_SWING(2)"),
+            3 => write!(f, "HipSwingExerciseName::ONE_ARM_SWING(3)"),
+            _ => write!(f, "HipSwingExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HyperextensionExerciseName(pub u16);
 
 impl HyperextensionExerciseName {
@@ -8973,12 +13350,120 @@ impl fmt::Display for HyperextensionExerciseName {
             37 => write!(f, "superman_on_swiss_ball"),
             38 => write!(f, "cobra"),
             39 => write!(f, "supine_floor_barre"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HyperextensionExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HyperextensionExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(
+                f,
+                "HyperextensionExerciseName::BACK_EXTENSION_WITH_OPPOSITE_ARM_AND_LEG_REACH(0)"
+            ),
+            1 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_BACK_EXTENSION_WITH_OPPOSITE_ARM_AND_LEG_REACH(1)"
+            ),
+            2 => write!(f, "HyperextensionExerciseName::BASE_ROTATIONS(2)"),
+            3 => write!(f, "HyperextensionExerciseName::WEIGHTED_BASE_ROTATIONS(3)"),
+            4 => write!(
+                f,
+                "HyperextensionExerciseName::BENT_KNEE_REVERSE_HYPEREXTENSION(4)"
+            ),
+            5 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_BENT_KNEE_REVERSE_HYPEREXTENSION(5)"
+            ),
+            6 => write!(f, "HyperextensionExerciseName::HOLLOW_HOLD_AND_ROLL(6)"),
+            7 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_HOLLOW_HOLD_AND_ROLL(7)"
+            ),
+            8 => write!(f, "HyperextensionExerciseName::KICKS(8)"),
+            9 => write!(f, "HyperextensionExerciseName::WEIGHTED_KICKS(9)"),
+            10 => write!(f, "HyperextensionExerciseName::KNEE_RAISES(10)"),
+            11 => write!(f, "HyperextensionExerciseName::WEIGHTED_KNEE_RAISES(11)"),
+            12 => write!(f, "HyperextensionExerciseName::KNEELING_SUPERMAN(12)"),
+            13 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_KNEELING_SUPERMAN(13)"
+            ),
+            14 => write!(f, "HyperextensionExerciseName::LAT_PULL_DOWN_WITH_ROW(14)"),
+            15 => write!(
+                f,
+                "HyperextensionExerciseName::MEDICINE_BALL_DEADLIFT_TO_REACH(15)"
+            ),
+            16 => write!(f, "HyperextensionExerciseName::ONE_ARM_ONE_LEG_ROW(16)"),
+            17 => write!(f, "HyperextensionExerciseName::ONE_ARM_ROW_WITH_BAND(17)"),
+            18 => write!(
+                f,
+                "HyperextensionExerciseName::OVERHEAD_LUNGE_WITH_MEDICINE_BALL(18)"
+            ),
+            19 => write!(f, "HyperextensionExerciseName::PLANK_KNEE_TUCKS(19)"),
+            20 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_PLANK_KNEE_TUCKS(20)"
+            ),
+            21 => write!(f, "HyperextensionExerciseName::SIDE_STEP(21)"),
+            22 => write!(f, "HyperextensionExerciseName::WEIGHTED_SIDE_STEP(22)"),
+            23 => write!(
+                f,
+                "HyperextensionExerciseName::SINGLE_LEG_BACK_EXTENSION(23)"
+            ),
+            24 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_SINGLE_LEG_BACK_EXTENSION(24)"
+            ),
+            25 => write!(f, "HyperextensionExerciseName::SPINE_EXTENSION(25)"),
+            26 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_SPINE_EXTENSION(26)"
+            ),
+            27 => write!(f, "HyperextensionExerciseName::STATIC_BACK_EXTENSION(27)"),
+            28 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_STATIC_BACK_EXTENSION(28)"
+            ),
+            29 => write!(f, "HyperextensionExerciseName::SUPERMAN_FROM_FLOOR(29)"),
+            30 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_SUPERMAN_FROM_FLOOR(30)"
+            ),
+            31 => write!(
+                f,
+                "HyperextensionExerciseName::SWISS_BALL_BACK_EXTENSION(31)"
+            ),
+            32 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_SWISS_BALL_BACK_EXTENSION(32)"
+            ),
+            33 => write!(
+                f,
+                "HyperextensionExerciseName::SWISS_BALL_HYPEREXTENSION(33)"
+            ),
+            34 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_SWISS_BALL_HYPEREXTENSION(34)"
+            ),
+            35 => write!(
+                f,
+                "HyperextensionExerciseName::SWISS_BALL_OPPOSITE_ARM_AND_LEG_LIFT(35)"
+            ),
+            36 => write!(
+                f,
+                "HyperextensionExerciseName::WEIGHTED_SWISS_BALL_OPPOSITE_ARM_AND_LEG_LIFT(36)"
+            ),
+            37 => write!(f, "HyperextensionExerciseName::SUPERMAN_ON_SWISS_BALL(37)"),
+            38 => write!(f, "HyperextensionExerciseName::COBRA(38)"),
+            39 => write!(f, "HyperextensionExerciseName::SUPINE_FLOOR_BARRE(39)"),
+            _ => write!(f, "HyperextensionExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LateralRaiseExerciseName(pub u16);
 
 impl LateralRaiseExerciseName {
@@ -9084,12 +13569,91 @@ impl fmt::Display for LateralRaiseExerciseName {
             39 => write!(f, "dumbbell_lateral_raise_wheelchair"),
             40 => write!(f, "pole_double_arm_overhead_and_forward_wheelchair"),
             41 => write!(f, "pole_straight_arm_overhead_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LateralRaiseExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LateralRaiseExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(
+                f,
+                "LateralRaiseExerciseName::_45_DEGREE_CABLE_EXTERNAL_ROTATION(0)"
+            ),
+            1 => write!(
+                f,
+                "LateralRaiseExerciseName::ALTERNATING_LATERAL_RAISE_WITH_STATIC_HOLD(1)"
+            ),
+            2 => write!(f, "LateralRaiseExerciseName::BAR_MUSCLE_UP(2)"),
+            3 => write!(f, "LateralRaiseExerciseName::BENT_OVER_LATERAL_RAISE(3)"),
+            4 => write!(f, "LateralRaiseExerciseName::CABLE_DIAGONAL_RAISE(4)"),
+            5 => write!(f, "LateralRaiseExerciseName::CABLE_FRONT_RAISE(5)"),
+            6 => write!(f, "LateralRaiseExerciseName::CALORIE_ROW(6)"),
+            7 => write!(f, "LateralRaiseExerciseName::COMBO_SHOULDER_RAISE(7)"),
+            8 => write!(f, "LateralRaiseExerciseName::DUMBBELL_DIAGONAL_RAISE(8)"),
+            9 => write!(f, "LateralRaiseExerciseName::DUMBBELL_V_RAISE(9)"),
+            10 => write!(f, "LateralRaiseExerciseName::FRONT_RAISE(10)"),
+            11 => write!(
+                f,
+                "LateralRaiseExerciseName::LEANING_DUMBBELL_LATERAL_RAISE(11)"
+            ),
+            12 => write!(f, "LateralRaiseExerciseName::LYING_DUMBBELL_RAISE(12)"),
+            13 => write!(f, "LateralRaiseExerciseName::MUSCLE_UP(13)"),
+            14 => write!(
+                f,
+                "LateralRaiseExerciseName::ONE_ARM_CABLE_LATERAL_RAISE(14)"
+            ),
+            15 => write!(
+                f,
+                "LateralRaiseExerciseName::OVERHAND_GRIP_REAR_LATERAL_RAISE(15)"
+            ),
+            16 => write!(f, "LateralRaiseExerciseName::PLATE_RAISES(16)"),
+            17 => write!(f, "LateralRaiseExerciseName::RING_DIP(17)"),
+            18 => write!(f, "LateralRaiseExerciseName::WEIGHTED_RING_DIP(18)"),
+            19 => write!(f, "LateralRaiseExerciseName::RING_MUSCLE_UP(19)"),
+            20 => write!(f, "LateralRaiseExerciseName::WEIGHTED_RING_MUSCLE_UP(20)"),
+            21 => write!(f, "LateralRaiseExerciseName::ROPE_CLIMB(21)"),
+            22 => write!(f, "LateralRaiseExerciseName::WEIGHTED_ROPE_CLIMB(22)"),
+            23 => write!(f, "LateralRaiseExerciseName::SCAPTION(23)"),
+            24 => write!(f, "LateralRaiseExerciseName::SEATED_LATERAL_RAISE(24)"),
+            25 => write!(f, "LateralRaiseExerciseName::SEATED_REAR_LATERAL_RAISE(25)"),
+            26 => write!(f, "LateralRaiseExerciseName::SIDE_LYING_LATERAL_RAISE(26)"),
+            27 => write!(f, "LateralRaiseExerciseName::STANDING_LIFT(27)"),
+            28 => write!(f, "LateralRaiseExerciseName::SUSPENDED_ROW(28)"),
+            29 => write!(
+                f,
+                "LateralRaiseExerciseName::UNDERHAND_GRIP_REAR_LATERAL_RAISE(29)"
+            ),
+            30 => write!(f, "LateralRaiseExerciseName::WALL_SLIDE(30)"),
+            31 => write!(f, "LateralRaiseExerciseName::WEIGHTED_WALL_SLIDE(31)"),
+            32 => write!(f, "LateralRaiseExerciseName::ARM_CIRCLES(32)"),
+            33 => write!(f, "LateralRaiseExerciseName::SHAVING_THE_HEAD(33)"),
+            34 => write!(f, "LateralRaiseExerciseName::DUMBBELL_LATERAL_RAISE(34)"),
+            36 => write!(f, "LateralRaiseExerciseName::RING_DIP_KIPPING(36)"),
+            37 => write!(f, "LateralRaiseExerciseName::WALL_WALK(37)"),
+            38 => write!(
+                f,
+                "LateralRaiseExerciseName::DUMBBELL_FRONT_RAISE_WHEELCHAIR(38)"
+            ),
+            39 => write!(
+                f,
+                "LateralRaiseExerciseName::DUMBBELL_LATERAL_RAISE_WHEELCHAIR(39)"
+            ),
+            40 => write!(
+                f,
+                "LateralRaiseExerciseName::POLE_DOUBLE_ARM_OVERHEAD_AND_FORWARD_WHEELCHAIR(40)"
+            ),
+            41 => write!(
+                f,
+                "LateralRaiseExerciseName::POLE_STRAIGHT_ARM_OVERHEAD_WHEELCHAIR(41)"
+            ),
+            _ => write!(f, "LateralRaiseExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LegCurlExerciseName(pub u16);
 
 impl LegCurlExerciseName {
@@ -9132,12 +13696,37 @@ impl fmt::Display for LegCurlExerciseName {
             11 => write!(f, "zercher_good_morning"),
             12 => write!(f, "band_good_morning"),
             13 => write!(f, "bar_good_morning"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LegCurlExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LegCurlExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LegCurlExerciseName::LEG_CURL(0)"),
+            1 => write!(f, "LegCurlExerciseName::WEIGHTED_LEG_CURL(1)"),
+            2 => write!(f, "LegCurlExerciseName::GOOD_MORNING(2)"),
+            3 => write!(f, "LegCurlExerciseName::SEATED_BARBELL_GOOD_MORNING(3)"),
+            4 => write!(f, "LegCurlExerciseName::SINGLE_LEG_BARBELL_GOOD_MORNING(4)"),
+            5 => write!(f, "LegCurlExerciseName::SINGLE_LEG_SLIDING_LEG_CURL(5)"),
+            6 => write!(f, "LegCurlExerciseName::SLIDING_LEG_CURL(6)"),
+            7 => write!(f, "LegCurlExerciseName::SPLIT_BARBELL_GOOD_MORNING(7)"),
+            8 => write!(f, "LegCurlExerciseName::SPLIT_STANCE_EXTENSION(8)"),
+            9 => write!(f, "LegCurlExerciseName::STAGGERED_STANCE_GOOD_MORNING(9)"),
+            10 => write!(
+                f,
+                "LegCurlExerciseName::SWISS_BALL_HIP_RAISE_AND_LEG_CURL(10)"
+            ),
+            11 => write!(f, "LegCurlExerciseName::ZERCHER_GOOD_MORNING(11)"),
+            12 => write!(f, "LegCurlExerciseName::BAND_GOOD_MORNING(12)"),
+            13 => write!(f, "LegCurlExerciseName::BAR_GOOD_MORNING(13)"),
+            _ => write!(f, "LegCurlExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LegRaiseExerciseName(pub u16);
 
 impl LegRaiseExerciseName {
@@ -9197,12 +13786,57 @@ impl fmt::Display for LegRaiseExerciseName {
             19 => write!(f, "weighted_hanging_knee_raise"),
             20 => write!(f, "lateral_stepover"),
             21 => write!(f, "weighted_lateral_stepover"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LegRaiseExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LegRaiseExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LegRaiseExerciseName::HANGING_KNEE_RAISE(0)"),
+            1 => write!(f, "LegRaiseExerciseName::HANGING_LEG_RAISE(1)"),
+            2 => write!(f, "LegRaiseExerciseName::WEIGHTED_HANGING_LEG_RAISE(2)"),
+            3 => write!(f, "LegRaiseExerciseName::HANGING_SINGLE_LEG_RAISE(3)"),
+            4 => write!(
+                f,
+                "LegRaiseExerciseName::WEIGHTED_HANGING_SINGLE_LEG_RAISE(4)"
+            ),
+            5 => write!(f, "LegRaiseExerciseName::KETTLEBELL_LEG_RAISES(5)"),
+            6 => write!(f, "LegRaiseExerciseName::LEG_LOWERING_DRILL(6)"),
+            7 => write!(f, "LegRaiseExerciseName::WEIGHTED_LEG_LOWERING_DRILL(7)"),
+            8 => write!(f, "LegRaiseExerciseName::LYING_STRAIGHT_LEG_RAISE(8)"),
+            9 => write!(
+                f,
+                "LegRaiseExerciseName::WEIGHTED_LYING_STRAIGHT_LEG_RAISE(9)"
+            ),
+            10 => write!(f, "LegRaiseExerciseName::MEDICINE_BALL_LEG_DROPS(10)"),
+            11 => write!(f, "LegRaiseExerciseName::QUADRUPED_LEG_RAISE(11)"),
+            12 => write!(f, "LegRaiseExerciseName::WEIGHTED_QUADRUPED_LEG_RAISE(12)"),
+            13 => write!(f, "LegRaiseExerciseName::REVERSE_LEG_RAISE(13)"),
+            14 => write!(f, "LegRaiseExerciseName::WEIGHTED_REVERSE_LEG_RAISE(14)"),
+            15 => write!(
+                f,
+                "LegRaiseExerciseName::REVERSE_LEG_RAISE_ON_SWISS_BALL(15)"
+            ),
+            16 => write!(
+                f,
+                "LegRaiseExerciseName::WEIGHTED_REVERSE_LEG_RAISE_ON_SWISS_BALL(16)"
+            ),
+            17 => write!(f, "LegRaiseExerciseName::SINGLE_LEG_LOWERING_DRILL(17)"),
+            18 => write!(
+                f,
+                "LegRaiseExerciseName::WEIGHTED_SINGLE_LEG_LOWERING_DRILL(18)"
+            ),
+            19 => write!(f, "LegRaiseExerciseName::WEIGHTED_HANGING_KNEE_RAISE(19)"),
+            20 => write!(f, "LegRaiseExerciseName::LATERAL_STEPOVER(20)"),
+            21 => write!(f, "LegRaiseExerciseName::WEIGHTED_LATERAL_STEPOVER(21)"),
+            _ => write!(f, "LegRaiseExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LungeExerciseName(pub u16);
 
 impl LungeExerciseName {
@@ -9402,12 +14036,162 @@ impl fmt::Display for LungeExerciseName {
             88 => write!(f, "weighted_shifting_side_lunge"),
             89 => write!(f, "weighted_side_lunge_and_press"),
             90 => write!(f, "weighted_side_lunge_jump_off"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LungeExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LungeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LungeExerciseName::OVERHEAD_LUNGE(0)"),
+            1 => write!(f, "LungeExerciseName::LUNGE_MATRIX(1)"),
+            2 => write!(f, "LungeExerciseName::WEIGHTED_LUNGE_MATRIX(2)"),
+            3 => write!(f, "LungeExerciseName::ALTERNATING_BARBELL_FORWARD_LUNGE(3)"),
+            4 => write!(
+                f,
+                "LungeExerciseName::ALTERNATING_DUMBBELL_LUNGE_WITH_REACH(4)"
+            ),
+            5 => write!(
+                f,
+                "LungeExerciseName::BACK_FOOT_ELEVATED_DUMBBELL_SPLIT_SQUAT(5)"
+            ),
+            6 => write!(f, "LungeExerciseName::BARBELL_BOX_LUNGE(6)"),
+            7 => write!(f, "LungeExerciseName::BARBELL_BULGARIAN_SPLIT_SQUAT(7)"),
+            8 => write!(f, "LungeExerciseName::BARBELL_CROSSOVER_LUNGE(8)"),
+            9 => write!(f, "LungeExerciseName::BARBELL_FRONT_SPLIT_SQUAT(9)"),
+            10 => write!(f, "LungeExerciseName::BARBELL_LUNGE(10)"),
+            11 => write!(f, "LungeExerciseName::BARBELL_REVERSE_LUNGE(11)"),
+            12 => write!(f, "LungeExerciseName::BARBELL_SIDE_LUNGE(12)"),
+            13 => write!(f, "LungeExerciseName::BARBELL_SPLIT_SQUAT(13)"),
+            14 => write!(f, "LungeExerciseName::CORE_CONTROL_REAR_LUNGE(14)"),
+            15 => write!(f, "LungeExerciseName::DIAGONAL_LUNGE(15)"),
+            16 => write!(f, "LungeExerciseName::DROP_LUNGE(16)"),
+            17 => write!(f, "LungeExerciseName::DUMBBELL_BOX_LUNGE(17)"),
+            18 => write!(f, "LungeExerciseName::DUMBBELL_BULGARIAN_SPLIT_SQUAT(18)"),
+            19 => write!(f, "LungeExerciseName::DUMBBELL_CROSSOVER_LUNGE(19)"),
+            20 => write!(f, "LungeExerciseName::DUMBBELL_DIAGONAL_LUNGE(20)"),
+            21 => write!(f, "LungeExerciseName::DUMBBELL_LUNGE(21)"),
+            22 => write!(f, "LungeExerciseName::DUMBBELL_LUNGE_AND_ROTATION(22)"),
+            23 => write!(
+                f,
+                "LungeExerciseName::DUMBBELL_OVERHEAD_BULGARIAN_SPLIT_SQUAT(23)"
+            ),
+            24 => write!(
+                f,
+                "LungeExerciseName::DUMBBELL_REVERSE_LUNGE_TO_HIGH_KNEE_AND_PRESS(24)"
+            ),
+            25 => write!(f, "LungeExerciseName::DUMBBELL_SIDE_LUNGE(25)"),
+            26 => write!(
+                f,
+                "LungeExerciseName::ELEVATED_FRONT_FOOT_BARBELL_SPLIT_SQUAT(26)"
+            ),
+            27 => write!(
+                f,
+                "LungeExerciseName::FRONT_FOOT_ELEVATED_DUMBBELL_SPLIT_SQUAT(27)"
+            ),
+            28 => write!(f, "LungeExerciseName::GUNSLINGER_LUNGE(28)"),
+            29 => write!(f, "LungeExerciseName::LAWNMOWER_LUNGE(29)"),
+            30 => write!(
+                f,
+                "LungeExerciseName::LOW_LUNGE_WITH_ISOMETRIC_ADDUCTION(30)"
+            ),
+            31 => write!(f, "LungeExerciseName::LOW_SIDE_TO_SIDE_LUNGE(31)"),
+            32 => write!(f, "LungeExerciseName::LUNGE(32)"),
+            33 => write!(f, "LungeExerciseName::WEIGHTED_LUNGE(33)"),
+            34 => write!(f, "LungeExerciseName::LUNGE_WITH_ARM_REACH(34)"),
+            35 => write!(f, "LungeExerciseName::LUNGE_WITH_DIAGONAL_REACH(35)"),
+            36 => write!(f, "LungeExerciseName::LUNGE_WITH_SIDE_BEND(36)"),
+            37 => write!(f, "LungeExerciseName::OFFSET_DUMBBELL_LUNGE(37)"),
+            38 => write!(f, "LungeExerciseName::OFFSET_DUMBBELL_REVERSE_LUNGE(38)"),
+            39 => write!(f, "LungeExerciseName::OVERHEAD_BULGARIAN_SPLIT_SQUAT(39)"),
+            40 => write!(f, "LungeExerciseName::OVERHEAD_DUMBBELL_REVERSE_LUNGE(40)"),
+            41 => write!(f, "LungeExerciseName::OVERHEAD_DUMBBELL_SPLIT_SQUAT(41)"),
+            42 => write!(f, "LungeExerciseName::OVERHEAD_LUNGE_WITH_ROTATION(42)"),
+            43 => write!(f, "LungeExerciseName::REVERSE_BARBELL_BOX_LUNGE(43)"),
+            44 => write!(f, "LungeExerciseName::REVERSE_BOX_LUNGE(44)"),
+            45 => write!(f, "LungeExerciseName::REVERSE_DUMBBELL_BOX_LUNGE(45)"),
+            46 => write!(f, "LungeExerciseName::REVERSE_DUMBBELL_CROSSOVER_LUNGE(46)"),
+            47 => write!(f, "LungeExerciseName::REVERSE_DUMBBELL_DIAGONAL_LUNGE(47)"),
+            48 => write!(f, "LungeExerciseName::REVERSE_LUNGE_WITH_REACH_BACK(48)"),
+            49 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_REVERSE_LUNGE_WITH_REACH_BACK(49)"
+            ),
+            50 => write!(
+                f,
+                "LungeExerciseName::REVERSE_LUNGE_WITH_TWIST_AND_OVERHEAD_REACH(50)"
+            ),
+            51 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_REVERSE_LUNGE_WITH_TWIST_AND_OVERHEAD_REACH(51)"
+            ),
+            52 => write!(f, "LungeExerciseName::REVERSE_SLIDING_BOX_LUNGE(52)"),
+            53 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_REVERSE_SLIDING_BOX_LUNGE(53)"
+            ),
+            54 => write!(f, "LungeExerciseName::REVERSE_SLIDING_LUNGE(54)"),
+            55 => write!(f, "LungeExerciseName::WEIGHTED_REVERSE_SLIDING_LUNGE(55)"),
+            56 => write!(f, "LungeExerciseName::RUNNERS_LUNGE_TO_BALANCE(56)"),
+            57 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_RUNNERS_LUNGE_TO_BALANCE(57)"
+            ),
+            58 => write!(f, "LungeExerciseName::SHIFTING_SIDE_LUNGE(58)"),
+            59 => write!(f, "LungeExerciseName::SIDE_AND_CROSSOVER_LUNGE(59)"),
+            60 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_SIDE_AND_CROSSOVER_LUNGE(60)"
+            ),
+            61 => write!(f, "LungeExerciseName::SIDE_LUNGE(61)"),
+            62 => write!(f, "LungeExerciseName::WEIGHTED_SIDE_LUNGE(62)"),
+            63 => write!(f, "LungeExerciseName::SIDE_LUNGE_AND_PRESS(63)"),
+            64 => write!(f, "LungeExerciseName::SIDE_LUNGE_JUMP_OFF(64)"),
+            65 => write!(f, "LungeExerciseName::SIDE_LUNGE_SWEEP(65)"),
+            66 => write!(f, "LungeExerciseName::WEIGHTED_SIDE_LUNGE_SWEEP(66)"),
+            67 => write!(f, "LungeExerciseName::SIDE_LUNGE_TO_CROSSOVER_TAP(67)"),
+            68 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_SIDE_LUNGE_TO_CROSSOVER_TAP(68)"
+            ),
+            69 => write!(f, "LungeExerciseName::SIDE_TO_SIDE_LUNGE_CHOPS(69)"),
+            70 => write!(
+                f,
+                "LungeExerciseName::WEIGHTED_SIDE_TO_SIDE_LUNGE_CHOPS(70)"
+            ),
+            71 => write!(f, "LungeExerciseName::SIFF_JUMP_LUNGE(71)"),
+            72 => write!(f, "LungeExerciseName::WEIGHTED_SIFF_JUMP_LUNGE(72)"),
+            73 => write!(
+                f,
+                "LungeExerciseName::SINGLE_ARM_REVERSE_LUNGE_AND_PRESS(73)"
+            ),
+            74 => write!(f, "LungeExerciseName::SLIDING_LATERAL_LUNGE(74)"),
+            75 => write!(f, "LungeExerciseName::WEIGHTED_SLIDING_LATERAL_LUNGE(75)"),
+            76 => write!(f, "LungeExerciseName::WALKING_BARBELL_LUNGE(76)"),
+            77 => write!(f, "LungeExerciseName::WALKING_DUMBBELL_LUNGE(77)"),
+            78 => write!(f, "LungeExerciseName::WALKING_LUNGE(78)"),
+            79 => write!(f, "LungeExerciseName::WEIGHTED_WALKING_LUNGE(79)"),
+            80 => write!(
+                f,
+                "LungeExerciseName::WIDE_GRIP_OVERHEAD_BARBELL_SPLIT_SQUAT(80)"
+            ),
+            81 => write!(f, "LungeExerciseName::ALTERNATING_DUMBBELL_LUNGE(81)"),
+            82 => write!(f, "LungeExerciseName::DUMBBELL_REVERSE_LUNGE(82)"),
+            83 => write!(f, "LungeExerciseName::OVERHEAD_DUMBBELL_LUNGE(83)"),
+            84 => write!(f, "LungeExerciseName::SCISSOR_POWER_SWITCH(84)"),
+            85 => write!(f, "LungeExerciseName::DUMBBELL_OVERHEAD_WALKING_LUNGE(85)"),
+            86 => write!(f, "LungeExerciseName::CURTSY_LUNGE(86)"),
+            87 => write!(f, "LungeExerciseName::WEIGHTED_CURTSY_LUNGE(87)"),
+            88 => write!(f, "LungeExerciseName::WEIGHTED_SHIFTING_SIDE_LUNGE(88)"),
+            89 => write!(f, "LungeExerciseName::WEIGHTED_SIDE_LUNGE_AND_PRESS(89)"),
+            90 => write!(f, "LungeExerciseName::WEIGHTED_SIDE_LUNGE_JUMP_OFF(90)"),
+            _ => write!(f, "LungeExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct OlympicLiftExerciseName(pub u16);
 
 impl OlympicLiftExerciseName {
@@ -9482,12 +14266,64 @@ impl fmt::Display for OlympicLiftExerciseName {
             26 => write!(f, "medicine_ball_clean"),
             27 => write!(f, "clean_and_press"),
             28 => write!(f, "snatch"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "OlympicLiftExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for OlympicLiftExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_POWER_CLEAN(0)"),
+            1 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_SQUAT_CLEAN(1)"),
+            2 => write!(f, "OlympicLiftExerciseName::BARBELL_POWER_CLEAN(2)"),
+            3 => write!(f, "OlympicLiftExerciseName::BARBELL_POWER_SNATCH(3)"),
+            4 => write!(f, "OlympicLiftExerciseName::BARBELL_SQUAT_CLEAN(4)"),
+            5 => write!(f, "OlympicLiftExerciseName::CLEAN_AND_JERK(5)"),
+            6 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_POWER_SNATCH(6)"),
+            7 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_PULL(7)"),
+            8 => write!(f, "OlympicLiftExerciseName::BARBELL_HIGH_PULL(8)"),
+            9 => write!(f, "OlympicLiftExerciseName::BARBELL_SNATCH(9)"),
+            10 => write!(f, "OlympicLiftExerciseName::BARBELL_SPLIT_JERK(10)"),
+            11 => write!(f, "OlympicLiftExerciseName::CLEAN(11)"),
+            12 => write!(f, "OlympicLiftExerciseName::DUMBBELL_CLEAN(12)"),
+            13 => write!(f, "OlympicLiftExerciseName::DUMBBELL_HANG_PULL(13)"),
+            14 => write!(
+                f,
+                "OlympicLiftExerciseName::ONE_HAND_DUMBBELL_SPLIT_SNATCH(14)"
+            ),
+            15 => write!(f, "OlympicLiftExerciseName::PUSH_JERK(15)"),
+            16 => write!(f, "OlympicLiftExerciseName::SINGLE_ARM_DUMBBELL_SNATCH(16)"),
+            17 => write!(f, "OlympicLiftExerciseName::SINGLE_ARM_HANG_SNATCH(17)"),
+            18 => write!(
+                f,
+                "OlympicLiftExerciseName::SINGLE_ARM_KETTLEBELL_SNATCH(18)"
+            ),
+            19 => write!(f, "OlympicLiftExerciseName::SPLIT_JERK(19)"),
+            20 => write!(f, "OlympicLiftExerciseName::SQUAT_CLEAN_AND_JERK(20)"),
+            21 => write!(f, "OlympicLiftExerciseName::DUMBBELL_HANG_SNATCH(21)"),
+            22 => write!(
+                f,
+                "OlympicLiftExerciseName::DUMBBELL_POWER_CLEAN_AND_JERK(22)"
+            ),
+            23 => write!(
+                f,
+                "OlympicLiftExerciseName::DUMBBELL_POWER_CLEAN_AND_PUSH_PRESS(23)"
+            ),
+            24 => write!(
+                f,
+                "OlympicLiftExerciseName::DUMBBELL_POWER_CLEAN_AND_STRICT_PRESS(24)"
+            ),
+            25 => write!(f, "OlympicLiftExerciseName::DUMBBELL_SNATCH(25)"),
+            26 => write!(f, "OlympicLiftExerciseName::MEDICINE_BALL_CLEAN(26)"),
+            27 => write!(f, "OlympicLiftExerciseName::CLEAN_AND_PRESS(27)"),
+            28 => write!(f, "OlympicLiftExerciseName::SNATCH(28)"),
+            _ => write!(f, "OlympicLiftExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PlankExerciseName(pub u16);
 
 impl PlankExerciseName {
@@ -9790,12 +14626,291 @@ impl fmt::Display for PlankExerciseName {
             133 => write!(f, "plank_with_leg_lift"),
             134 => write!(f, "reverse_plank_with_leg_pull"),
             135 => write!(f, "ring_plank_sprawls"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PlankExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PlankExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PlankExerciseName::_45_DEGREE_PLANK(0)"),
+            1 => write!(f, "PlankExerciseName::WEIGHTED_45_DEGREE_PLANK(1)"),
+            2 => write!(f, "PlankExerciseName::_90_DEGREE_STATIC_HOLD(2)"),
+            3 => write!(f, "PlankExerciseName::WEIGHTED_90_DEGREE_STATIC_HOLD(3)"),
+            4 => write!(f, "PlankExerciseName::BEAR_CRAWL(4)"),
+            5 => write!(f, "PlankExerciseName::WEIGHTED_BEAR_CRAWL(5)"),
+            6 => write!(f, "PlankExerciseName::CROSS_BODY_MOUNTAIN_CLIMBER(6)"),
+            7 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_CROSS_BODY_MOUNTAIN_CLIMBER(7)"
+            ),
+            8 => write!(f, "PlankExerciseName::ELBOW_PLANK_PIKE_JACKS(8)"),
+            9 => write!(f, "PlankExerciseName::WEIGHTED_ELBOW_PLANK_PIKE_JACKS(9)"),
+            10 => write!(f, "PlankExerciseName::ELEVATED_FEET_PLANK(10)"),
+            11 => write!(f, "PlankExerciseName::WEIGHTED_ELEVATED_FEET_PLANK(11)"),
+            12 => write!(f, "PlankExerciseName::ELEVATOR_ABS(12)"),
+            13 => write!(f, "PlankExerciseName::WEIGHTED_ELEVATOR_ABS(13)"),
+            14 => write!(f, "PlankExerciseName::EXTENDED_PLANK(14)"),
+            15 => write!(f, "PlankExerciseName::WEIGHTED_EXTENDED_PLANK(15)"),
+            16 => write!(f, "PlankExerciseName::FULL_PLANK_PASSE_TWIST(16)"),
+            17 => write!(f, "PlankExerciseName::WEIGHTED_FULL_PLANK_PASSE_TWIST(17)"),
+            18 => write!(f, "PlankExerciseName::INCHING_ELBOW_PLANK(18)"),
+            19 => write!(f, "PlankExerciseName::WEIGHTED_INCHING_ELBOW_PLANK(19)"),
+            20 => write!(f, "PlankExerciseName::INCHWORM_TO_SIDE_PLANK(20)"),
+            21 => write!(f, "PlankExerciseName::WEIGHTED_INCHWORM_TO_SIDE_PLANK(21)"),
+            22 => write!(f, "PlankExerciseName::KNEELING_PLANK(22)"),
+            23 => write!(f, "PlankExerciseName::WEIGHTED_KNEELING_PLANK(23)"),
+            24 => write!(
+                f,
+                "PlankExerciseName::KNEELING_SIDE_PLANK_WITH_LEG_LIFT(24)"
+            ),
+            25 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_KNEELING_SIDE_PLANK_WITH_LEG_LIFT(25)"
+            ),
+            26 => write!(f, "PlankExerciseName::LATERAL_ROLL(26)"),
+            27 => write!(f, "PlankExerciseName::WEIGHTED_LATERAL_ROLL(27)"),
+            28 => write!(f, "PlankExerciseName::LYING_REVERSE_PLANK(28)"),
+            29 => write!(f, "PlankExerciseName::WEIGHTED_LYING_REVERSE_PLANK(29)"),
+            30 => write!(f, "PlankExerciseName::MEDICINE_BALL_MOUNTAIN_CLIMBER(30)"),
+            31 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_MEDICINE_BALL_MOUNTAIN_CLIMBER(31)"
+            ),
+            32 => write!(
+                f,
+                "PlankExerciseName::MODIFIED_MOUNTAIN_CLIMBER_AND_EXTENSION(32)"
+            ),
+            33 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_MODIFIED_MOUNTAIN_CLIMBER_AND_EXTENSION(33)"
+            ),
+            34 => write!(f, "PlankExerciseName::MOUNTAIN_CLIMBER(34)"),
+            35 => write!(f, "PlankExerciseName::WEIGHTED_MOUNTAIN_CLIMBER(35)"),
+            36 => write!(
+                f,
+                "PlankExerciseName::MOUNTAIN_CLIMBER_ON_SLIDING_DISCS(36)"
+            ),
+            37 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_MOUNTAIN_CLIMBER_ON_SLIDING_DISCS(37)"
+            ),
+            38 => write!(
+                f,
+                "PlankExerciseName::MOUNTAIN_CLIMBER_WITH_FEET_ON_BOSU_BALL(38)"
+            ),
+            39 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_MOUNTAIN_CLIMBER_WITH_FEET_ON_BOSU_BALL(39)"
+            ),
+            40 => write!(
+                f,
+                "PlankExerciseName::MOUNTAIN_CLIMBER_WITH_HANDS_ON_BENCH(40)"
+            ),
+            41 => write!(
+                f,
+                "PlankExerciseName::MOUNTAIN_CLIMBER_WITH_HANDS_ON_SWISS_BALL(41)"
+            ),
+            42 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_MOUNTAIN_CLIMBER_WITH_HANDS_ON_SWISS_BALL(42)"
+            ),
+            43 => write!(f, "PlankExerciseName::PLANK(43)"),
+            44 => write!(
+                f,
+                "PlankExerciseName::PLANK_JACKS_WITH_FEET_ON_SLIDING_DISCS(44)"
+            ),
+            45 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_PLANK_JACKS_WITH_FEET_ON_SLIDING_DISCS(45)"
+            ),
+            46 => write!(f, "PlankExerciseName::PLANK_KNEE_TWIST(46)"),
+            47 => write!(f, "PlankExerciseName::WEIGHTED_PLANK_KNEE_TWIST(47)"),
+            48 => write!(f, "PlankExerciseName::PLANK_PIKE_JUMPS(48)"),
+            49 => write!(f, "PlankExerciseName::WEIGHTED_PLANK_PIKE_JUMPS(49)"),
+            50 => write!(f, "PlankExerciseName::PLANK_PIKES(50)"),
+            51 => write!(f, "PlankExerciseName::WEIGHTED_PLANK_PIKES(51)"),
+            52 => write!(f, "PlankExerciseName::PLANK_TO_STAND_UP(52)"),
+            53 => write!(f, "PlankExerciseName::WEIGHTED_PLANK_TO_STAND_UP(53)"),
+            54 => write!(f, "PlankExerciseName::PLANK_WITH_ARM_RAISE(54)"),
+            55 => write!(f, "PlankExerciseName::WEIGHTED_PLANK_WITH_ARM_RAISE(55)"),
+            56 => write!(f, "PlankExerciseName::PLANK_WITH_KNEE_TO_ELBOW(56)"),
+            57 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_PLANK_WITH_KNEE_TO_ELBOW(57)"
+            ),
+            58 => write!(f, "PlankExerciseName::PLANK_WITH_OBLIQUE_CRUNCH(58)"),
+            59 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_PLANK_WITH_OBLIQUE_CRUNCH(59)"
+            ),
+            60 => write!(f, "PlankExerciseName::PLYOMETRIC_SIDE_PLANK(60)"),
+            61 => write!(f, "PlankExerciseName::WEIGHTED_PLYOMETRIC_SIDE_PLANK(61)"),
+            62 => write!(f, "PlankExerciseName::ROLLING_SIDE_PLANK(62)"),
+            63 => write!(f, "PlankExerciseName::WEIGHTED_ROLLING_SIDE_PLANK(63)"),
+            64 => write!(f, "PlankExerciseName::SIDE_KICK_PLANK(64)"),
+            65 => write!(f, "PlankExerciseName::WEIGHTED_SIDE_KICK_PLANK(65)"),
+            66 => write!(f, "PlankExerciseName::SIDE_PLANK(66)"),
+            67 => write!(f, "PlankExerciseName::WEIGHTED_SIDE_PLANK(67)"),
+            68 => write!(f, "PlankExerciseName::SIDE_PLANK_AND_ROW(68)"),
+            69 => write!(f, "PlankExerciseName::WEIGHTED_SIDE_PLANK_AND_ROW(69)"),
+            70 => write!(f, "PlankExerciseName::SIDE_PLANK_LIFT(70)"),
+            71 => write!(f, "PlankExerciseName::WEIGHTED_SIDE_PLANK_LIFT(71)"),
+            72 => write!(
+                f,
+                "PlankExerciseName::SIDE_PLANK_WITH_ELBOW_ON_BOSU_BALL(72)"
+            ),
+            73 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SIDE_PLANK_WITH_ELBOW_ON_BOSU_BALL(73)"
+            ),
+            74 => write!(f, "PlankExerciseName::SIDE_PLANK_WITH_FEET_ON_BENCH(74)"),
+            75 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SIDE_PLANK_WITH_FEET_ON_BENCH(75)"
+            ),
+            76 => write!(f, "PlankExerciseName::SIDE_PLANK_WITH_KNEE_CIRCLE(76)"),
+            77 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SIDE_PLANK_WITH_KNEE_CIRCLE(77)"
+            ),
+            78 => write!(f, "PlankExerciseName::SIDE_PLANK_WITH_KNEE_TUCK(78)"),
+            79 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SIDE_PLANK_WITH_KNEE_TUCK(79)"
+            ),
+            80 => write!(f, "PlankExerciseName::SIDE_PLANK_WITH_LEG_LIFT(80)"),
+            81 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SIDE_PLANK_WITH_LEG_LIFT(81)"
+            ),
+            82 => write!(f, "PlankExerciseName::SIDE_PLANK_WITH_REACH_UNDER(82)"),
+            83 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SIDE_PLANK_WITH_REACH_UNDER(83)"
+            ),
+            84 => write!(f, "PlankExerciseName::SINGLE_LEG_ELEVATED_FEET_PLANK(84)"),
+            85 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SINGLE_LEG_ELEVATED_FEET_PLANK(85)"
+            ),
+            86 => write!(f, "PlankExerciseName::SINGLE_LEG_FLEX_AND_EXTEND(86)"),
+            87 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SINGLE_LEG_FLEX_AND_EXTEND(87)"
+            ),
+            88 => write!(f, "PlankExerciseName::SINGLE_LEG_SIDE_PLANK(88)"),
+            89 => write!(f, "PlankExerciseName::WEIGHTED_SINGLE_LEG_SIDE_PLANK(89)"),
+            90 => write!(f, "PlankExerciseName::SPIDERMAN_PLANK(90)"),
+            91 => write!(f, "PlankExerciseName::WEIGHTED_SPIDERMAN_PLANK(91)"),
+            92 => write!(f, "PlankExerciseName::STRAIGHT_ARM_PLANK(92)"),
+            93 => write!(f, "PlankExerciseName::WEIGHTED_STRAIGHT_ARM_PLANK(93)"),
+            94 => write!(
+                f,
+                "PlankExerciseName::STRAIGHT_ARM_PLANK_WITH_SHOULDER_TOUCH(94)"
+            ),
+            95 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_STRAIGHT_ARM_PLANK_WITH_SHOULDER_TOUCH(95)"
+            ),
+            96 => write!(f, "PlankExerciseName::SWISS_BALL_PLANK(96)"),
+            97 => write!(f, "PlankExerciseName::WEIGHTED_SWISS_BALL_PLANK(97)"),
+            98 => write!(f, "PlankExerciseName::SWISS_BALL_PLANK_LEG_LIFT(98)"),
+            99 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SWISS_BALL_PLANK_LEG_LIFT(99)"
+            ),
+            100 => write!(
+                f,
+                "PlankExerciseName::SWISS_BALL_PLANK_LEG_LIFT_AND_HOLD(100)"
+            ),
+            101 => write!(
+                f,
+                "PlankExerciseName::SWISS_BALL_PLANK_WITH_FEET_ON_BENCH(101)"
+            ),
+            102 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SWISS_BALL_PLANK_WITH_FEET_ON_BENCH(102)"
+            ),
+            103 => write!(f, "PlankExerciseName::SWISS_BALL_PRONE_JACKKNIFE(103)"),
+            104 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SWISS_BALL_PRONE_JACKKNIFE(104)"
+            ),
+            105 => write!(f, "PlankExerciseName::SWISS_BALL_SIDE_PLANK(105)"),
+            106 => write!(f, "PlankExerciseName::WEIGHTED_SWISS_BALL_SIDE_PLANK(106)"),
+            107 => write!(f, "PlankExerciseName::THREE_WAY_PLANK(107)"),
+            108 => write!(f, "PlankExerciseName::WEIGHTED_THREE_WAY_PLANK(108)"),
+            109 => write!(f, "PlankExerciseName::TOWEL_PLANK_AND_KNEE_IN(109)"),
+            110 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_TOWEL_PLANK_AND_KNEE_IN(110)"
+            ),
+            111 => write!(f, "PlankExerciseName::T_STABILIZATION(111)"),
+            112 => write!(f, "PlankExerciseName::WEIGHTED_T_STABILIZATION(112)"),
+            113 => write!(f, "PlankExerciseName::TURKISH_GET_UP_TO_SIDE_PLANK(113)"),
+            114 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_TURKISH_GET_UP_TO_SIDE_PLANK(114)"
+            ),
+            115 => write!(f, "PlankExerciseName::TWO_POINT_PLANK(115)"),
+            116 => write!(f, "PlankExerciseName::WEIGHTED_TWO_POINT_PLANK(116)"),
+            117 => write!(f, "PlankExerciseName::WEIGHTED_PLANK(117)"),
+            118 => write!(
+                f,
+                "PlankExerciseName::WIDE_STANCE_PLANK_WITH_DIAGONAL_ARM_LIFT(118)"
+            ),
+            119 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_WIDE_STANCE_PLANK_WITH_DIAGONAL_ARM_LIFT(119)"
+            ),
+            120 => write!(
+                f,
+                "PlankExerciseName::WIDE_STANCE_PLANK_WITH_DIAGONAL_LEG_LIFT(120)"
+            ),
+            121 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_WIDE_STANCE_PLANK_WITH_DIAGONAL_LEG_LIFT(121)"
+            ),
+            122 => write!(f, "PlankExerciseName::WIDE_STANCE_PLANK_WITH_LEG_LIFT(122)"),
+            123 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_WIDE_STANCE_PLANK_WITH_LEG_LIFT(123)"
+            ),
+            124 => write!(
+                f,
+                "PlankExerciseName::WIDE_STANCE_PLANK_WITH_OPPOSITE_ARM_AND_LEG_LIFT(124)"
+            ),
+            125 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_MOUNTAIN_CLIMBER_WITH_HANDS_ON_BENCH(125)"
+            ),
+            126 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_SWISS_BALL_PLANK_LEG_LIFT_AND_HOLD(126)"
+            ),
+            127 => write!(
+                f,
+                "PlankExerciseName::WEIGHTED_WIDE_STANCE_PLANK_WITH_OPPOSITE_ARM_AND_LEG_LIFT(127)"
+            ),
+            128 => write!(f, "PlankExerciseName::PLANK_WITH_FEET_ON_SWISS_BALL(128)"),
+            129 => write!(
+                f,
+                "PlankExerciseName::SIDE_PLANK_TO_PLANK_WITH_REACH_UNDER(129)"
+            ),
+            130 => write!(f, "PlankExerciseName::BRIDGE_WITH_GLUTE_LOWER_LIFT(130)"),
+            131 => write!(f, "PlankExerciseName::BRIDGE_ONE_LEG_BRIDGE(131)"),
+            132 => write!(f, "PlankExerciseName::PLANK_WITH_ARM_VARIATIONS(132)"),
+            133 => write!(f, "PlankExerciseName::PLANK_WITH_LEG_LIFT(133)"),
+            134 => write!(f, "PlankExerciseName::REVERSE_PLANK_WITH_LEG_PULL(134)"),
+            135 => write!(f, "PlankExerciseName::RING_PLANK_SPRAWLS(135)"),
+            _ => write!(f, "PlankExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PlyoExerciseName(pub u16);
 
 impl PlyoExerciseName {
@@ -9886,12 +15001,67 @@ impl fmt::Display for PlyoExerciseName {
             35 => write!(f, "box_jump_overs_over_the_box"),
             36 => write!(f, "star_jump_squats"),
             37 => write!(f, "jump_squat"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PlyoExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PlyoExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PlyoExerciseName::ALTERNATING_JUMP_LUNGE(0)"),
+            1 => write!(f, "PlyoExerciseName::WEIGHTED_ALTERNATING_JUMP_LUNGE(1)"),
+            2 => write!(f, "PlyoExerciseName::BARBELL_JUMP_SQUAT(2)"),
+            3 => write!(f, "PlyoExerciseName::BODY_WEIGHT_JUMP_SQUAT(3)"),
+            4 => write!(f, "PlyoExerciseName::WEIGHTED_JUMP_SQUAT(4)"),
+            5 => write!(f, "PlyoExerciseName::CROSS_KNEE_STRIKE(5)"),
+            6 => write!(f, "PlyoExerciseName::WEIGHTED_CROSS_KNEE_STRIKE(6)"),
+            7 => write!(f, "PlyoExerciseName::DEPTH_JUMP(7)"),
+            8 => write!(f, "PlyoExerciseName::WEIGHTED_DEPTH_JUMP(8)"),
+            9 => write!(f, "PlyoExerciseName::DUMBBELL_JUMP_SQUAT(9)"),
+            10 => write!(f, "PlyoExerciseName::DUMBBELL_SPLIT_JUMP(10)"),
+            11 => write!(f, "PlyoExerciseName::FRONT_KNEE_STRIKE(11)"),
+            12 => write!(f, "PlyoExerciseName::WEIGHTED_FRONT_KNEE_STRIKE(12)"),
+            13 => write!(f, "PlyoExerciseName::HIGH_BOX_JUMP(13)"),
+            14 => write!(f, "PlyoExerciseName::WEIGHTED_HIGH_BOX_JUMP(14)"),
+            15 => write!(
+                f,
+                "PlyoExerciseName::ISOMETRIC_EXPLOSIVE_BODY_WEIGHT_JUMP_SQUAT(15)"
+            ),
+            16 => write!(
+                f,
+                "PlyoExerciseName::WEIGHTED_ISOMETRIC_EXPLOSIVE_JUMP_SQUAT(16)"
+            ),
+            17 => write!(f, "PlyoExerciseName::LATERAL_LEAP_AND_HOP(17)"),
+            18 => write!(f, "PlyoExerciseName::WEIGHTED_LATERAL_LEAP_AND_HOP(18)"),
+            19 => write!(f, "PlyoExerciseName::LATERAL_PLYO_SQUATS(19)"),
+            20 => write!(f, "PlyoExerciseName::WEIGHTED_LATERAL_PLYO_SQUATS(20)"),
+            21 => write!(f, "PlyoExerciseName::LATERAL_SLIDE(21)"),
+            22 => write!(f, "PlyoExerciseName::WEIGHTED_LATERAL_SLIDE(22)"),
+            23 => write!(f, "PlyoExerciseName::MEDICINE_BALL_OVERHEAD_THROWS(23)"),
+            24 => write!(f, "PlyoExerciseName::MEDICINE_BALL_SIDE_THROW(24)"),
+            25 => write!(f, "PlyoExerciseName::MEDICINE_BALL_SLAM(25)"),
+            26 => write!(f, "PlyoExerciseName::SIDE_TO_SIDE_MEDICINE_BALL_THROWS(26)"),
+            27 => write!(f, "PlyoExerciseName::SIDE_TO_SIDE_SHUFFLE_JUMP(27)"),
+            28 => write!(
+                f,
+                "PlyoExerciseName::WEIGHTED_SIDE_TO_SIDE_SHUFFLE_JUMP(28)"
+            ),
+            29 => write!(f, "PlyoExerciseName::SQUAT_JUMP_ONTO_BOX(29)"),
+            30 => write!(f, "PlyoExerciseName::WEIGHTED_SQUAT_JUMP_ONTO_BOX(30)"),
+            31 => write!(f, "PlyoExerciseName::SQUAT_JUMPS_IN_AND_OUT(31)"),
+            32 => write!(f, "PlyoExerciseName::WEIGHTED_SQUAT_JUMPS_IN_AND_OUT(32)"),
+            33 => write!(f, "PlyoExerciseName::BOX_JUMP(33)"),
+            34 => write!(f, "PlyoExerciseName::BOX_JUMP_OVERS(34)"),
+            35 => write!(f, "PlyoExerciseName::BOX_JUMP_OVERS_OVER_THE_BOX(35)"),
+            36 => write!(f, "PlyoExerciseName::STAR_JUMP_SQUATS(36)"),
+            37 => write!(f, "PlyoExerciseName::JUMP_SQUAT(37)"),
+            _ => write!(f, "PlyoExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PullUpExerciseName(pub u16);
 
 impl PullUpExerciseName {
@@ -9998,12 +15168,69 @@ impl fmt::Display for PullUpExerciseName {
             43 => write!(f, "neutral_grip_pull_up"),
             44 => write!(f, "weighted_neutral_grip_chin_up"),
             45 => write!(f, "weighted_neutral_grip_pull_up"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PullUpExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PullUpExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PullUpExerciseName::BANDED_PULL_UPS(0)"),
+            1 => write!(f, "PullUpExerciseName::_30_DEGREE_LAT_PULLDOWN(1)"),
+            2 => write!(f, "PullUpExerciseName::BAND_ASSISTED_CHIN_UP(2)"),
+            3 => write!(f, "PullUpExerciseName::CLOSE_GRIP_CHIN_UP(3)"),
+            4 => write!(f, "PullUpExerciseName::WEIGHTED_CLOSE_GRIP_CHIN_UP(4)"),
+            5 => write!(f, "PullUpExerciseName::CLOSE_GRIP_LAT_PULLDOWN(5)"),
+            6 => write!(f, "PullUpExerciseName::CROSSOVER_CHIN_UP(6)"),
+            7 => write!(f, "PullUpExerciseName::WEIGHTED_CROSSOVER_CHIN_UP(7)"),
+            8 => write!(f, "PullUpExerciseName::EZ_BAR_PULLOVER(8)"),
+            9 => write!(f, "PullUpExerciseName::HANGING_HURDLE(9)"),
+            10 => write!(f, "PullUpExerciseName::WEIGHTED_HANGING_HURDLE(10)"),
+            11 => write!(f, "PullUpExerciseName::KNEELING_LAT_PULLDOWN(11)"),
+            12 => write!(
+                f,
+                "PullUpExerciseName::KNEELING_UNDERHAND_GRIP_LAT_PULLDOWN(12)"
+            ),
+            13 => write!(f, "PullUpExerciseName::LAT_PULLDOWN(13)"),
+            14 => write!(f, "PullUpExerciseName::MIXED_GRIP_CHIN_UP(14)"),
+            15 => write!(f, "PullUpExerciseName::WEIGHTED_MIXED_GRIP_CHIN_UP(15)"),
+            16 => write!(f, "PullUpExerciseName::MIXED_GRIP_PULL_UP(16)"),
+            17 => write!(f, "PullUpExerciseName::WEIGHTED_MIXED_GRIP_PULL_UP(17)"),
+            18 => write!(f, "PullUpExerciseName::REVERSE_GRIP_PULLDOWN(18)"),
+            19 => write!(f, "PullUpExerciseName::STANDING_CABLE_PULLOVER(19)"),
+            20 => write!(f, "PullUpExerciseName::STRAIGHT_ARM_PULLDOWN(20)"),
+            21 => write!(f, "PullUpExerciseName::SWISS_BALL_EZ_BAR_PULLOVER(21)"),
+            22 => write!(f, "PullUpExerciseName::TOWEL_PULL_UP(22)"),
+            23 => write!(f, "PullUpExerciseName::WEIGHTED_TOWEL_PULL_UP(23)"),
+            24 => write!(f, "PullUpExerciseName::WEIGHTED_PULL_UP(24)"),
+            25 => write!(f, "PullUpExerciseName::WIDE_GRIP_LAT_PULLDOWN(25)"),
+            26 => write!(f, "PullUpExerciseName::WIDE_GRIP_PULL_UP(26)"),
+            27 => write!(f, "PullUpExerciseName::WEIGHTED_WIDE_GRIP_PULL_UP(27)"),
+            28 => write!(f, "PullUpExerciseName::BURPEE_PULL_UP(28)"),
+            29 => write!(f, "PullUpExerciseName::WEIGHTED_BURPEE_PULL_UP(29)"),
+            30 => write!(f, "PullUpExerciseName::JUMPING_PULL_UPS(30)"),
+            31 => write!(f, "PullUpExerciseName::WEIGHTED_JUMPING_PULL_UPS(31)"),
+            32 => write!(f, "PullUpExerciseName::KIPPING_PULL_UP(32)"),
+            33 => write!(f, "PullUpExerciseName::WEIGHTED_KIPPING_PULL_UP(33)"),
+            34 => write!(f, "PullUpExerciseName::L_PULL_UP(34)"),
+            35 => write!(f, "PullUpExerciseName::WEIGHTED_L_PULL_UP(35)"),
+            36 => write!(f, "PullUpExerciseName::SUSPENDED_CHIN_UP(36)"),
+            37 => write!(f, "PullUpExerciseName::WEIGHTED_SUSPENDED_CHIN_UP(37)"),
+            38 => write!(f, "PullUpExerciseName::PULL_UP(38)"),
+            39 => write!(f, "PullUpExerciseName::CHIN_UP(39)"),
+            40 => write!(f, "PullUpExerciseName::NEUTRAL_GRIP_CHIN_UP(40)"),
+            41 => write!(f, "PullUpExerciseName::WEIGHTED_CHIN_UP(41)"),
+            42 => write!(f, "PullUpExerciseName::BAND_ASSISTED_PULL_UP(42)"),
+            43 => write!(f, "PullUpExerciseName::NEUTRAL_GRIP_PULL_UP(43)"),
+            44 => write!(f, "PullUpExerciseName::WEIGHTED_NEUTRAL_GRIP_CHIN_UP(44)"),
+            45 => write!(f, "PullUpExerciseName::WEIGHTED_NEUTRAL_GRIP_PULL_UP(45)"),
+            _ => write!(f, "PullUpExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PushUpExerciseName(pub u16);
 
 impl PushUpExerciseName {
@@ -10205,12 +15432,162 @@ impl fmt::Display for PushUpExerciseName {
             88 => write!(f, "weighted_pike_push_up"),
             89 => write!(f, "kipping_parallette_handstand_push_up"),
             90 => write!(f, "wall_push_up"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PushUpExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PushUpExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PushUpExerciseName::CHEST_PRESS_WITH_BAND(0)"),
+            1 => write!(f, "PushUpExerciseName::ALTERNATING_STAGGERED_PUSH_UP(1)"),
+            2 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_ALTERNATING_STAGGERED_PUSH_UP(2)"
+            ),
+            3 => write!(
+                f,
+                "PushUpExerciseName::ALTERNATING_HANDS_MEDICINE_BALL_PUSH_UP(3)"
+            ),
+            4 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_ALTERNATING_HANDS_MEDICINE_BALL_PUSH_UP(4)"
+            ),
+            5 => write!(f, "PushUpExerciseName::BOSU_BALL_PUSH_UP(5)"),
+            6 => write!(f, "PushUpExerciseName::WEIGHTED_BOSU_BALL_PUSH_UP(6)"),
+            7 => write!(f, "PushUpExerciseName::CLAPPING_PUSH_UP(7)"),
+            8 => write!(f, "PushUpExerciseName::WEIGHTED_CLAPPING_PUSH_UP(8)"),
+            9 => write!(f, "PushUpExerciseName::CLOSE_GRIP_MEDICINE_BALL_PUSH_UP(9)"),
+            10 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_CLOSE_GRIP_MEDICINE_BALL_PUSH_UP(10)"
+            ),
+            11 => write!(f, "PushUpExerciseName::CLOSE_HANDS_PUSH_UP(11)"),
+            12 => write!(f, "PushUpExerciseName::WEIGHTED_CLOSE_HANDS_PUSH_UP(12)"),
+            13 => write!(f, "PushUpExerciseName::DECLINE_PUSH_UP(13)"),
+            14 => write!(f, "PushUpExerciseName::WEIGHTED_DECLINE_PUSH_UP(14)"),
+            15 => write!(f, "PushUpExerciseName::DIAMOND_PUSH_UP(15)"),
+            16 => write!(f, "PushUpExerciseName::WEIGHTED_DIAMOND_PUSH_UP(16)"),
+            17 => write!(f, "PushUpExerciseName::EXPLOSIVE_CROSSOVER_PUSH_UP(17)"),
+            18 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_EXPLOSIVE_CROSSOVER_PUSH_UP(18)"
+            ),
+            19 => write!(f, "PushUpExerciseName::EXPLOSIVE_PUSH_UP(19)"),
+            20 => write!(f, "PushUpExerciseName::WEIGHTED_EXPLOSIVE_PUSH_UP(20)"),
+            21 => write!(
+                f,
+                "PushUpExerciseName::FEET_ELEVATED_SIDE_TO_SIDE_PUSH_UP(21)"
+            ),
+            22 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_FEET_ELEVATED_SIDE_TO_SIDE_PUSH_UP(22)"
+            ),
+            23 => write!(f, "PushUpExerciseName::HAND_RELEASE_PUSH_UP(23)"),
+            24 => write!(f, "PushUpExerciseName::WEIGHTED_HAND_RELEASE_PUSH_UP(24)"),
+            25 => write!(f, "PushUpExerciseName::HANDSTAND_PUSH_UP(25)"),
+            26 => write!(f, "PushUpExerciseName::WEIGHTED_HANDSTAND_PUSH_UP(26)"),
+            27 => write!(f, "PushUpExerciseName::INCLINE_PUSH_UP(27)"),
+            28 => write!(f, "PushUpExerciseName::WEIGHTED_INCLINE_PUSH_UP(28)"),
+            29 => write!(f, "PushUpExerciseName::ISOMETRIC_EXPLOSIVE_PUSH_UP(29)"),
+            30 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_ISOMETRIC_EXPLOSIVE_PUSH_UP(30)"
+            ),
+            31 => write!(f, "PushUpExerciseName::JUDO_PUSH_UP(31)"),
+            32 => write!(f, "PushUpExerciseName::WEIGHTED_JUDO_PUSH_UP(32)"),
+            33 => write!(f, "PushUpExerciseName::KNEELING_PUSH_UP(33)"),
+            34 => write!(f, "PushUpExerciseName::WEIGHTED_KNEELING_PUSH_UP(34)"),
+            35 => write!(f, "PushUpExerciseName::MEDICINE_BALL_CHEST_PASS(35)"),
+            36 => write!(f, "PushUpExerciseName::MEDICINE_BALL_PUSH_UP(36)"),
+            37 => write!(f, "PushUpExerciseName::WEIGHTED_MEDICINE_BALL_PUSH_UP(37)"),
+            38 => write!(f, "PushUpExerciseName::ONE_ARM_PUSH_UP(38)"),
+            39 => write!(f, "PushUpExerciseName::WEIGHTED_ONE_ARM_PUSH_UP(39)"),
+            40 => write!(f, "PushUpExerciseName::WEIGHTED_PUSH_UP(40)"),
+            41 => write!(f, "PushUpExerciseName::PUSH_UP_AND_ROW(41)"),
+            42 => write!(f, "PushUpExerciseName::WEIGHTED_PUSH_UP_AND_ROW(42)"),
+            43 => write!(f, "PushUpExerciseName::PUSH_UP_PLUS(43)"),
+            44 => write!(f, "PushUpExerciseName::WEIGHTED_PUSH_UP_PLUS(44)"),
+            45 => write!(f, "PushUpExerciseName::PUSH_UP_WITH_FEET_ON_SWISS_BALL(45)"),
+            46 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_PUSH_UP_WITH_FEET_ON_SWISS_BALL(46)"
+            ),
+            47 => write!(
+                f,
+                "PushUpExerciseName::PUSH_UP_WITH_ONE_HAND_ON_MEDICINE_BALL(47)"
+            ),
+            48 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_PUSH_UP_WITH_ONE_HAND_ON_MEDICINE_BALL(48)"
+            ),
+            49 => write!(f, "PushUpExerciseName::SHOULDER_PUSH_UP(49)"),
+            50 => write!(f, "PushUpExerciseName::WEIGHTED_SHOULDER_PUSH_UP(50)"),
+            51 => write!(
+                f,
+                "PushUpExerciseName::SINGLE_ARM_MEDICINE_BALL_PUSH_UP(51)"
+            ),
+            52 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_SINGLE_ARM_MEDICINE_BALL_PUSH_UP(52)"
+            ),
+            53 => write!(f, "PushUpExerciseName::SPIDERMAN_PUSH_UP(53)"),
+            54 => write!(f, "PushUpExerciseName::WEIGHTED_SPIDERMAN_PUSH_UP(54)"),
+            55 => write!(f, "PushUpExerciseName::STACKED_FEET_PUSH_UP(55)"),
+            56 => write!(f, "PushUpExerciseName::WEIGHTED_STACKED_FEET_PUSH_UP(56)"),
+            57 => write!(f, "PushUpExerciseName::STAGGERED_HANDS_PUSH_UP(57)"),
+            58 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_STAGGERED_HANDS_PUSH_UP(58)"
+            ),
+            59 => write!(f, "PushUpExerciseName::SUSPENDED_PUSH_UP(59)"),
+            60 => write!(f, "PushUpExerciseName::WEIGHTED_SUSPENDED_PUSH_UP(60)"),
+            61 => write!(f, "PushUpExerciseName::SWISS_BALL_PUSH_UP(61)"),
+            62 => write!(f, "PushUpExerciseName::WEIGHTED_SWISS_BALL_PUSH_UP(62)"),
+            63 => write!(f, "PushUpExerciseName::SWISS_BALL_PUSH_UP_PLUS(63)"),
+            64 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_SWISS_BALL_PUSH_UP_PLUS(64)"
+            ),
+            65 => write!(f, "PushUpExerciseName::T_PUSH_UP(65)"),
+            66 => write!(f, "PushUpExerciseName::WEIGHTED_T_PUSH_UP(66)"),
+            67 => write!(f, "PushUpExerciseName::TRIPLE_STOP_PUSH_UP(67)"),
+            68 => write!(f, "PushUpExerciseName::WEIGHTED_TRIPLE_STOP_PUSH_UP(68)"),
+            69 => write!(f, "PushUpExerciseName::WIDE_HANDS_PUSH_UP(69)"),
+            70 => write!(f, "PushUpExerciseName::WEIGHTED_WIDE_HANDS_PUSH_UP(70)"),
+            71 => write!(f, "PushUpExerciseName::PARALLETTE_HANDSTAND_PUSH_UP(71)"),
+            72 => write!(
+                f,
+                "PushUpExerciseName::WEIGHTED_PARALLETTE_HANDSTAND_PUSH_UP(72)"
+            ),
+            73 => write!(f, "PushUpExerciseName::RING_HANDSTAND_PUSH_UP(73)"),
+            74 => write!(f, "PushUpExerciseName::WEIGHTED_RING_HANDSTAND_PUSH_UP(74)"),
+            75 => write!(f, "PushUpExerciseName::RING_PUSH_UP(75)"),
+            76 => write!(f, "PushUpExerciseName::WEIGHTED_RING_PUSH_UP(76)"),
+            77 => write!(f, "PushUpExerciseName::PUSH_UP(77)"),
+            78 => write!(f, "PushUpExerciseName::PILATES_PUSHUP(78)"),
+            79 => write!(f, "PushUpExerciseName::DYNAMIC_PUSH_UP(79)"),
+            80 => write!(f, "PushUpExerciseName::KIPPING_HANDSTAND_PUSH_UP(80)"),
+            81 => write!(f, "PushUpExerciseName::SHOULDER_TAPPING_PUSH_UP(81)"),
+            82 => write!(f, "PushUpExerciseName::BICEPS_PUSH_UP(82)"),
+            83 => write!(f, "PushUpExerciseName::HINDU_PUSH_UP(83)"),
+            84 => write!(f, "PushUpExerciseName::PIKE_PUSH_UP(84)"),
+            85 => write!(f, "PushUpExerciseName::WIDE_GRIP_PUSH_UP(85)"),
+            86 => write!(f, "PushUpExerciseName::WEIGHTED_BICEPS_PUSH_UP(86)"),
+            87 => write!(f, "PushUpExerciseName::WEIGHTED_HINDU_PUSH_UP(87)"),
+            88 => write!(f, "PushUpExerciseName::WEIGHTED_PIKE_PUSH_UP(88)"),
+            89 => write!(
+                f,
+                "PushUpExerciseName::KIPPING_PARALLETTE_HANDSTAND_PUSH_UP(89)"
+            ),
+            90 => write!(f, "PushUpExerciseName::WALL_PUSH_UP(90)"),
+            _ => write!(f, "PushUpExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct RowExerciseName(pub u16);
 
 impl RowExerciseName {
@@ -10332,12 +15709,94 @@ impl fmt::Display for RowExerciseName {
             50 => write!(f, "weighted_inverted_row"),
             51 => write!(f, "weighted_trx_inverted_row"),
             52 => write!(f, "dumbbell_row_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "RowExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for RowExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(
+                f,
+                "RowExerciseName::BARBELL_STRAIGHT_LEG_DEADLIFT_TO_ROW(0)"
+            ),
+            1 => write!(f, "RowExerciseName::CABLE_ROW_STANDING(1)"),
+            2 => write!(f, "RowExerciseName::DUMBBELL_ROW(2)"),
+            3 => write!(f, "RowExerciseName::ELEVATED_FEET_INVERTED_ROW(3)"),
+            4 => write!(f, "RowExerciseName::WEIGHTED_ELEVATED_FEET_INVERTED_ROW(4)"),
+            5 => write!(f, "RowExerciseName::FACE_PULL(5)"),
+            6 => write!(f, "RowExerciseName::FACE_PULL_WITH_EXTERNAL_ROTATION(6)"),
+            7 => write!(
+                f,
+                "RowExerciseName::INVERTED_ROW_WITH_FEET_ON_SWISS_BALL(7)"
+            ),
+            8 => write!(
+                f,
+                "RowExerciseName::WEIGHTED_INVERTED_ROW_WITH_FEET_ON_SWISS_BALL(8)"
+            ),
+            9 => write!(f, "RowExerciseName::KETTLEBELL_ROW(9)"),
+            10 => write!(f, "RowExerciseName::MODIFIED_INVERTED_ROW(10)"),
+            11 => write!(f, "RowExerciseName::WEIGHTED_MODIFIED_INVERTED_ROW(11)"),
+            12 => write!(
+                f,
+                "RowExerciseName::NEUTRAL_GRIP_ALTERNATING_DUMBBELL_ROW(12)"
+            ),
+            13 => write!(f, "RowExerciseName::ONE_ARM_BENT_OVER_ROW(13)"),
+            14 => write!(f, "RowExerciseName::ONE_LEGGED_DUMBBELL_ROW(14)"),
+            15 => write!(f, "RowExerciseName::RENEGADE_ROW(15)"),
+            16 => write!(f, "RowExerciseName::REVERSE_GRIP_BARBELL_ROW(16)"),
+            17 => write!(f, "RowExerciseName::ROPE_HANDLE_CABLE_ROW(17)"),
+            18 => write!(f, "RowExerciseName::SEATED_CABLE_ROW(18)"),
+            19 => write!(f, "RowExerciseName::SEATED_DUMBBELL_ROW(19)"),
+            20 => write!(f, "RowExerciseName::SINGLE_ARM_CABLE_ROW(20)"),
+            21 => write!(f, "RowExerciseName::SINGLE_ARM_CABLE_ROW_AND_ROTATION(21)"),
+            22 => write!(f, "RowExerciseName::SINGLE_ARM_INVERTED_ROW(22)"),
+            23 => write!(f, "RowExerciseName::WEIGHTED_SINGLE_ARM_INVERTED_ROW(23)"),
+            24 => write!(
+                f,
+                "RowExerciseName::SINGLE_ARM_NEUTRAL_GRIP_DUMBBELL_ROW(24)"
+            ),
+            25 => write!(
+                f,
+                "RowExerciseName::SINGLE_ARM_NEUTRAL_GRIP_DUMBBELL_ROW_AND_ROTATION(25)"
+            ),
+            26 => write!(f, "RowExerciseName::SUSPENDED_INVERTED_ROW(26)"),
+            27 => write!(f, "RowExerciseName::WEIGHTED_SUSPENDED_INVERTED_ROW(27)"),
+            28 => write!(f, "RowExerciseName::T_BAR_ROW(28)"),
+            29 => write!(f, "RowExerciseName::TOWEL_GRIP_INVERTED_ROW(29)"),
+            30 => write!(f, "RowExerciseName::WEIGHTED_TOWEL_GRIP_INVERTED_ROW(30)"),
+            31 => write!(f, "RowExerciseName::UNDERHAND_GRIP_CABLE_ROW(31)"),
+            32 => write!(f, "RowExerciseName::V_GRIP_CABLE_ROW(32)"),
+            33 => write!(f, "RowExerciseName::WIDE_GRIP_SEATED_CABLE_ROW(33)"),
+            34 => write!(f, "RowExerciseName::ALTERNATING_DUMBBELL_ROW(34)"),
+            35 => write!(f, "RowExerciseName::INVERTED_ROW(35)"),
+            36 => write!(f, "RowExerciseName::ROW(36)"),
+            37 => write!(f, "RowExerciseName::WEIGHTED_ROW(37)"),
+            38 => write!(f, "RowExerciseName::INDOOR_ROW(38)"),
+            39 => write!(f, "RowExerciseName::BANDED_FACE_PULLS(39)"),
+            40 => write!(f, "RowExerciseName::CHEST_SUPPORTED_DUMBBELL_ROW(40)"),
+            41 => write!(f, "RowExerciseName::DECLINE_RING_ROW(41)"),
+            42 => write!(f, "RowExerciseName::ELEVATED_RING_ROW(42)"),
+            43 => write!(
+                f,
+                "RowExerciseName::RDL_BENT_OVER_ROW_WITH_BARBELL_DUMBBELL(43)"
+            ),
+            44 => write!(f, "RowExerciseName::RING_ROW(44)"),
+            45 => write!(f, "RowExerciseName::BARBELL_ROW(45)"),
+            46 => write!(f, "RowExerciseName::BENT_OVER_ROW_WITH_BARBELL(46)"),
+            47 => write!(f, "RowExerciseName::BENT_OVER_ROW_WITH_DUMBELL(47)"),
+            48 => write!(f, "RowExerciseName::SEATED_UNDERHAND_GRIP_CABLE_ROW(48)"),
+            49 => write!(f, "RowExerciseName::TRX_INVERTED_ROW(49)"),
+            50 => write!(f, "RowExerciseName::WEIGHTED_INVERTED_ROW(50)"),
+            51 => write!(f, "RowExerciseName::WEIGHTED_TRX_INVERTED_ROW(51)"),
+            52 => write!(f, "RowExerciseName::DUMBBELL_ROW_WHEELCHAIR(52)"),
+            _ => write!(f, "RowExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ShoulderPressExerciseName(pub u16);
 
 impl ShoulderPressExerciseName {
@@ -10430,12 +15889,99 @@ impl fmt::Display for ShoulderPressExerciseName {
             29 => write!(f, "dumbbell_curl_to_overhead_press_wheelchair"),
             30 => write!(f, "arnold_press_wheelchair"),
             31 => write!(f, "overhead_dumbbell_press_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ShoulderPressExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ShoulderPressExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(
+                f,
+                "ShoulderPressExerciseName::ALTERNATING_DUMBBELL_SHOULDER_PRESS(0)"
+            ),
+            1 => write!(f, "ShoulderPressExerciseName::ARNOLD_PRESS(1)"),
+            2 => write!(
+                f,
+                "ShoulderPressExerciseName::BARBELL_FRONT_SQUAT_TO_PUSH_PRESS(2)"
+            ),
+            3 => write!(f, "ShoulderPressExerciseName::BARBELL_PUSH_PRESS(3)"),
+            4 => write!(f, "ShoulderPressExerciseName::BARBELL_SHOULDER_PRESS(4)"),
+            5 => write!(f, "ShoulderPressExerciseName::DEAD_CURL_PRESS(5)"),
+            6 => write!(
+                f,
+                "ShoulderPressExerciseName::DUMBBELL_ALTERNATING_SHOULDER_PRESS_AND_TWIST(6)"
+            ),
+            7 => write!(
+                f,
+                "ShoulderPressExerciseName::DUMBBELL_HAMMER_CURL_TO_LUNGE_TO_PRESS(7)"
+            ),
+            8 => write!(f, "ShoulderPressExerciseName::DUMBBELL_PUSH_PRESS(8)"),
+            9 => write!(
+                f,
+                "ShoulderPressExerciseName::FLOOR_INVERTED_SHOULDER_PRESS(9)"
+            ),
+            10 => write!(
+                f,
+                "ShoulderPressExerciseName::WEIGHTED_FLOOR_INVERTED_SHOULDER_PRESS(10)"
+            ),
+            11 => write!(f, "ShoulderPressExerciseName::INVERTED_SHOULDER_PRESS(11)"),
+            12 => write!(
+                f,
+                "ShoulderPressExerciseName::WEIGHTED_INVERTED_SHOULDER_PRESS(12)"
+            ),
+            13 => write!(f, "ShoulderPressExerciseName::ONE_ARM_PUSH_PRESS(13)"),
+            14 => write!(f, "ShoulderPressExerciseName::OVERHEAD_BARBELL_PRESS(14)"),
+            15 => write!(f, "ShoulderPressExerciseName::OVERHEAD_DUMBBELL_PRESS(15)"),
+            16 => write!(
+                f,
+                "ShoulderPressExerciseName::SEATED_BARBELL_SHOULDER_PRESS(16)"
+            ),
+            17 => write!(
+                f,
+                "ShoulderPressExerciseName::SEATED_DUMBBELL_SHOULDER_PRESS(17)"
+            ),
+            18 => write!(
+                f,
+                "ShoulderPressExerciseName::SINGLE_ARM_DUMBBELL_SHOULDER_PRESS(18)"
+            ),
+            19 => write!(
+                f,
+                "ShoulderPressExerciseName::SINGLE_ARM_STEP_UP_AND_PRESS(19)"
+            ),
+            20 => write!(
+                f,
+                "ShoulderPressExerciseName::SMITH_MACHINE_OVERHEAD_PRESS(20)"
+            ),
+            21 => write!(
+                f,
+                "ShoulderPressExerciseName::SPLIT_STANCE_HAMMER_CURL_TO_PRESS(21)"
+            ),
+            22 => write!(
+                f,
+                "ShoulderPressExerciseName::SWISS_BALL_DUMBBELL_SHOULDER_PRESS(22)"
+            ),
+            23 => write!(f, "ShoulderPressExerciseName::WEIGHT_PLATE_FRONT_RAISE(23)"),
+            24 => write!(f, "ShoulderPressExerciseName::DUMBBELL_SHOULDER_PRESS(24)"),
+            25 => write!(f, "ShoulderPressExerciseName::MILITARY_PRESS(25)"),
+            27 => write!(f, "ShoulderPressExerciseName::STRICT_PRESS(27)"),
+            28 => write!(f, "ShoulderPressExerciseName::DUMBBELL_FRONT_RAISE(28)"),
+            29 => write!(
+                f,
+                "ShoulderPressExerciseName::DUMBBELL_CURL_TO_OVERHEAD_PRESS_WHEELCHAIR(29)"
+            ),
+            30 => write!(f, "ShoulderPressExerciseName::ARNOLD_PRESS_WHEELCHAIR(30)"),
+            31 => write!(
+                f,
+                "ShoulderPressExerciseName::OVERHEAD_DUMBBELL_PRESS_WHEELCHAIR(31)"
+            ),
+            _ => write!(f, "ShoulderPressExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ShoulderStabilityExerciseName(pub u16);
 
 impl ShoulderStabilityExerciseName {
@@ -10545,12 +16091,125 @@ impl fmt::Display for ShoulderStabilityExerciseName {
             33 => write!(f, "cable_internal_rotation"),
             34 => write!(f, "lying_internal_rotation"),
             35 => write!(f, "seated_dumbbell_internal_rotation"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ShoulderStabilityExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ShoulderStabilityExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(
+                f,
+                "ShoulderStabilityExerciseName::_90_DEGREE_CABLE_EXTERNAL_ROTATION(0)"
+            ),
+            1 => write!(
+                f,
+                "ShoulderStabilityExerciseName::BAND_EXTERNAL_ROTATION(1)"
+            ),
+            2 => write!(
+                f,
+                "ShoulderStabilityExerciseName::BAND_INTERNAL_ROTATION(2)"
+            ),
+            3 => write!(
+                f,
+                "ShoulderStabilityExerciseName::BENT_ARM_LATERAL_RAISE_AND_EXTERNAL_ROTATION(3)"
+            ),
+            4 => write!(
+                f,
+                "ShoulderStabilityExerciseName::CABLE_EXTERNAL_ROTATION(4)"
+            ),
+            5 => write!(
+                f,
+                "ShoulderStabilityExerciseName::DUMBBELL_FACE_PULL_WITH_EXTERNAL_ROTATION(5)"
+            ),
+            6 => write!(f, "ShoulderStabilityExerciseName::FLOOR_I_RAISE(6)"),
+            7 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_FLOOR_I_RAISE(7)"
+            ),
+            8 => write!(f, "ShoulderStabilityExerciseName::FLOOR_T_RAISE(8)"),
+            9 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_FLOOR_T_RAISE(9)"
+            ),
+            10 => write!(f, "ShoulderStabilityExerciseName::FLOOR_Y_RAISE(10)"),
+            11 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_FLOOR_Y_RAISE(11)"
+            ),
+            12 => write!(f, "ShoulderStabilityExerciseName::INCLINE_I_RAISE(12)"),
+            13 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_I_RAISE(13)"
+            ),
+            14 => write!(f, "ShoulderStabilityExerciseName::INCLINE_L_RAISE(14)"),
+            15 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_L_RAISE(15)"
+            ),
+            16 => write!(f, "ShoulderStabilityExerciseName::INCLINE_T_RAISE(16)"),
+            17 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_T_RAISE(17)"
+            ),
+            18 => write!(f, "ShoulderStabilityExerciseName::INCLINE_W_RAISE(18)"),
+            19 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_W_RAISE(19)"
+            ),
+            20 => write!(f, "ShoulderStabilityExerciseName::INCLINE_Y_RAISE(20)"),
+            21 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_Y_RAISE(21)"
+            ),
+            22 => write!(
+                f,
+                "ShoulderStabilityExerciseName::LYING_EXTERNAL_ROTATION(22)"
+            ),
+            23 => write!(
+                f,
+                "ShoulderStabilityExerciseName::SEATED_DUMBBELL_EXTERNAL_ROTATION(23)"
+            ),
+            24 => write!(f, "ShoulderStabilityExerciseName::STANDING_L_RAISE(24)"),
+            25 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_I_RAISE(25)"),
+            26 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_I_RAISE(26)"
+            ),
+            27 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_T_RAISE(27)"),
+            28 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_T_RAISE(28)"
+            ),
+            29 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_W_RAISE(29)"),
+            30 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_W_RAISE(30)"
+            ),
+            31 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_Y_RAISE(31)"),
+            32 => write!(
+                f,
+                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_Y_RAISE(32)"
+            ),
+            33 => write!(
+                f,
+                "ShoulderStabilityExerciseName::CABLE_INTERNAL_ROTATION(33)"
+            ),
+            34 => write!(
+                f,
+                "ShoulderStabilityExerciseName::LYING_INTERNAL_ROTATION(34)"
+            ),
+            35 => write!(
+                f,
+                "ShoulderStabilityExerciseName::SEATED_DUMBBELL_INTERNAL_ROTATION(35)"
+            ),
+            _ => write!(f, "ShoulderStabilityExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ShrugExerciseName(pub u16);
 
 impl ShrugExerciseName {
@@ -10615,12 +16274,48 @@ impl fmt::Display for ShrugExerciseName {
             22 => write!(f, "shrug_arm_mid_wheelchair"),
             23 => write!(f, "shrug_arm_up_wheelchair"),
             24 => write!(f, "upright_row"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ShrugExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ShrugExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ShrugExerciseName::BARBELL_JUMP_SHRUG(0)"),
+            1 => write!(f, "ShrugExerciseName::BARBELL_SHRUG(1)"),
+            2 => write!(f, "ShrugExerciseName::BARBELL_UPRIGHT_ROW(2)"),
+            3 => write!(
+                f,
+                "ShrugExerciseName::BEHIND_THE_BACK_SMITH_MACHINE_SHRUG(3)"
+            ),
+            4 => write!(f, "ShrugExerciseName::DUMBBELL_JUMP_SHRUG(4)"),
+            5 => write!(f, "ShrugExerciseName::DUMBBELL_SHRUG(5)"),
+            6 => write!(f, "ShrugExerciseName::DUMBBELL_UPRIGHT_ROW(6)"),
+            7 => write!(f, "ShrugExerciseName::INCLINE_DUMBBELL_SHRUG(7)"),
+            8 => write!(f, "ShrugExerciseName::OVERHEAD_BARBELL_SHRUG(8)"),
+            9 => write!(f, "ShrugExerciseName::OVERHEAD_DUMBBELL_SHRUG(9)"),
+            10 => write!(f, "ShrugExerciseName::SCAPTION_AND_SHRUG(10)"),
+            11 => write!(f, "ShrugExerciseName::SCAPULAR_RETRACTION(11)"),
+            12 => write!(f, "ShrugExerciseName::SERRATUS_CHAIR_SHRUG(12)"),
+            13 => write!(f, "ShrugExerciseName::WEIGHTED_SERRATUS_CHAIR_SHRUG(13)"),
+            14 => write!(f, "ShrugExerciseName::SERRATUS_SHRUG(14)"),
+            15 => write!(f, "ShrugExerciseName::WEIGHTED_SERRATUS_SHRUG(15)"),
+            16 => write!(f, "ShrugExerciseName::WIDE_GRIP_JUMP_SHRUG(16)"),
+            17 => write!(f, "ShrugExerciseName::WIDE_GRIP_BARBELL_SHRUG(17)"),
+            18 => write!(f, "ShrugExerciseName::BEHIND_THE_BACK_SHRUG(18)"),
+            19 => write!(f, "ShrugExerciseName::DUMBBELL_SHRUG_WHEELCHAIR(19)"),
+            20 => write!(f, "ShrugExerciseName::SHRUG_WHEELCHAIR(20)"),
+            21 => write!(f, "ShrugExerciseName::SHRUG_ARM_DOWN_WHEELCHAIR(21)"),
+            22 => write!(f, "ShrugExerciseName::SHRUG_ARM_MID_WHEELCHAIR(22)"),
+            23 => write!(f, "ShrugExerciseName::SHRUG_ARM_UP_WHEELCHAIR(23)"),
+            24 => write!(f, "ShrugExerciseName::UPRIGHT_ROW(24)"),
+            _ => write!(f, "ShrugExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SitUpExerciseName(pub u16);
 
 impl SitUpExerciseName {
@@ -10717,12 +16412,67 @@ impl fmt::Display for SitUpExerciseName {
             38 => write!(f, "ghd_sit_ups"),
             39 => write!(f, "sit_up_turkish_get_up"),
             40 => write!(f, "russian_twist_on_swiss_ball"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SitUpExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SitUpExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SitUpExerciseName::ALTERNATING_SIT_UP(0)"),
+            1 => write!(f, "SitUpExerciseName::WEIGHTED_ALTERNATING_SIT_UP(1)"),
+            2 => write!(f, "SitUpExerciseName::BENT_KNEE_V_UP(2)"),
+            3 => write!(f, "SitUpExerciseName::WEIGHTED_BENT_KNEE_V_UP(3)"),
+            4 => write!(f, "SitUpExerciseName::BUTTERFLY_SIT_UP(4)"),
+            5 => write!(f, "SitUpExerciseName::WEIGHTED_BUTTERFLY_SITUP(5)"),
+            6 => write!(f, "SitUpExerciseName::CROSS_PUNCH_ROLL_UP(6)"),
+            7 => write!(f, "SitUpExerciseName::WEIGHTED_CROSS_PUNCH_ROLL_UP(7)"),
+            8 => write!(f, "SitUpExerciseName::CROSSED_ARMS_SIT_UP(8)"),
+            9 => write!(f, "SitUpExerciseName::WEIGHTED_CROSSED_ARMS_SIT_UP(9)"),
+            10 => write!(f, "SitUpExerciseName::GET_UP_SIT_UP(10)"),
+            11 => write!(f, "SitUpExerciseName::WEIGHTED_GET_UP_SIT_UP(11)"),
+            12 => write!(f, "SitUpExerciseName::HOVERING_SIT_UP(12)"),
+            13 => write!(f, "SitUpExerciseName::WEIGHTED_HOVERING_SIT_UP(13)"),
+            14 => write!(f, "SitUpExerciseName::KETTLEBELL_SIT_UP(14)"),
+            15 => write!(f, "SitUpExerciseName::MEDICINE_BALL_ALTERNATING_V_UP(15)"),
+            16 => write!(f, "SitUpExerciseName::MEDICINE_BALL_SIT_UP(16)"),
+            17 => write!(f, "SitUpExerciseName::MEDICINE_BALL_V_UP(17)"),
+            18 => write!(f, "SitUpExerciseName::MODIFIED_SIT_UP(18)"),
+            19 => write!(f, "SitUpExerciseName::NEGATIVE_SIT_UP(19)"),
+            20 => write!(f, "SitUpExerciseName::ONE_ARM_FULL_SIT_UP(20)"),
+            21 => write!(f, "SitUpExerciseName::RECLINING_CIRCLE(21)"),
+            22 => write!(f, "SitUpExerciseName::WEIGHTED_RECLINING_CIRCLE(22)"),
+            23 => write!(f, "SitUpExerciseName::REVERSE_CURL_UP(23)"),
+            24 => write!(f, "SitUpExerciseName::WEIGHTED_REVERSE_CURL_UP(24)"),
+            25 => write!(f, "SitUpExerciseName::SINGLE_LEG_SWISS_BALL_JACKKNIFE(25)"),
+            26 => write!(
+                f,
+                "SitUpExerciseName::WEIGHTED_SINGLE_LEG_SWISS_BALL_JACKKNIFE(26)"
+            ),
+            27 => write!(f, "SitUpExerciseName::THE_TEASER(27)"),
+            28 => write!(f, "SitUpExerciseName::THE_TEASER_WEIGHTED(28)"),
+            29 => write!(f, "SitUpExerciseName::THREE_PART_ROLL_DOWN(29)"),
+            30 => write!(f, "SitUpExerciseName::WEIGHTED_THREE_PART_ROLL_DOWN(30)"),
+            31 => write!(f, "SitUpExerciseName::V_UP(31)"),
+            32 => write!(f, "SitUpExerciseName::WEIGHTED_V_UP(32)"),
+            33 => write!(
+                f,
+                "SitUpExerciseName::WEIGHTED_RUSSIAN_TWIST_ON_SWISS_BALL(33)"
+            ),
+            34 => write!(f, "SitUpExerciseName::WEIGHTED_SIT_UP(34)"),
+            35 => write!(f, "SitUpExerciseName::X_ABS(35)"),
+            36 => write!(f, "SitUpExerciseName::WEIGHTED_X_ABS(36)"),
+            37 => write!(f, "SitUpExerciseName::SIT_UP(37)"),
+            38 => write!(f, "SitUpExerciseName::GHD_SIT_UPS(38)"),
+            39 => write!(f, "SitUpExerciseName::SIT_UP_TURKISH_GET_UP(39)"),
+            40 => write!(f, "SitUpExerciseName::RUSSIAN_TWIST_ON_SWISS_BALL(40)"),
+            _ => write!(f, "SitUpExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SquatExerciseName(pub u16);
 
 impl SquatExerciseName {
@@ -10945,12 +16695,154 @@ impl fmt::Display for SquatExerciseName {
             100 => write!(f, "air_squat"),
             101 => write!(f, "dumbbell_thrusters"),
             102 => write!(f, "overhead_barbell_squat"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SquatExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SquatExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SquatExerciseName::LEG_PRESS(0)"),
+            1 => write!(f, "SquatExerciseName::BACK_SQUAT_WITH_BODY_BAR(1)"),
+            2 => write!(f, "SquatExerciseName::BACK_SQUATS(2)"),
+            3 => write!(f, "SquatExerciseName::WEIGHTED_BACK_SQUATS(3)"),
+            4 => write!(f, "SquatExerciseName::BALANCING_SQUAT(4)"),
+            5 => write!(f, "SquatExerciseName::WEIGHTED_BALANCING_SQUAT(5)"),
+            6 => write!(f, "SquatExerciseName::BARBELL_BACK_SQUAT(6)"),
+            7 => write!(f, "SquatExerciseName::BARBELL_BOX_SQUAT(7)"),
+            8 => write!(f, "SquatExerciseName::BARBELL_FRONT_SQUAT(8)"),
+            9 => write!(f, "SquatExerciseName::BARBELL_HACK_SQUAT(9)"),
+            10 => write!(f, "SquatExerciseName::BARBELL_HANG_SQUAT_SNATCH(10)"),
+            11 => write!(f, "SquatExerciseName::BARBELL_LATERAL_STEP_UP(11)"),
+            12 => write!(f, "SquatExerciseName::BARBELL_QUARTER_SQUAT(12)"),
+            13 => write!(f, "SquatExerciseName::BARBELL_SIFF_SQUAT(13)"),
+            14 => write!(f, "SquatExerciseName::BARBELL_SQUAT_SNATCH(14)"),
+            15 => write!(f, "SquatExerciseName::BARBELL_SQUAT_WITH_HEELS_RAISED(15)"),
+            16 => write!(f, "SquatExerciseName::BARBELL_STEPOVER(16)"),
+            17 => write!(f, "SquatExerciseName::BARBELL_STEP_UP(17)"),
+            18 => write!(f, "SquatExerciseName::BENCH_SQUAT_WITH_ROTATIONAL_CHOP(18)"),
+            19 => write!(
+                f,
+                "SquatExerciseName::WEIGHTED_BENCH_SQUAT_WITH_ROTATIONAL_CHOP(19)"
+            ),
+            20 => write!(f, "SquatExerciseName::BODY_WEIGHT_WALL_SQUAT(20)"),
+            21 => write!(f, "SquatExerciseName::WEIGHTED_WALL_SQUAT(21)"),
+            22 => write!(f, "SquatExerciseName::BOX_STEP_SQUAT(22)"),
+            23 => write!(f, "SquatExerciseName::WEIGHTED_BOX_STEP_SQUAT(23)"),
+            24 => write!(f, "SquatExerciseName::BRACED_SQUAT(24)"),
+            25 => write!(f, "SquatExerciseName::CROSSED_ARM_BARBELL_FRONT_SQUAT(25)"),
+            26 => write!(f, "SquatExerciseName::CROSSOVER_DUMBBELL_STEP_UP(26)"),
+            27 => write!(f, "SquatExerciseName::DUMBBELL_FRONT_SQUAT(27)"),
+            28 => write!(f, "SquatExerciseName::DUMBBELL_SPLIT_SQUAT(28)"),
+            29 => write!(f, "SquatExerciseName::DUMBBELL_SQUAT(29)"),
+            30 => write!(f, "SquatExerciseName::DUMBBELL_SQUAT_CLEAN(30)"),
+            31 => write!(f, "SquatExerciseName::DUMBBELL_STEPOVER(31)"),
+            32 => write!(f, "SquatExerciseName::DUMBBELL_STEP_UP(32)"),
+            33 => write!(f, "SquatExerciseName::ELEVATED_SINGLE_LEG_SQUAT(33)"),
+            34 => write!(
+                f,
+                "SquatExerciseName::WEIGHTED_ELEVATED_SINGLE_LEG_SQUAT(34)"
+            ),
+            35 => write!(f, "SquatExerciseName::FIGURE_FOUR_SQUATS(35)"),
+            36 => write!(f, "SquatExerciseName::WEIGHTED_FIGURE_FOUR_SQUATS(36)"),
+            37 => write!(f, "SquatExerciseName::GOBLET_SQUAT(37)"),
+            38 => write!(f, "SquatExerciseName::KETTLEBELL_SQUAT(38)"),
+            39 => write!(f, "SquatExerciseName::KETTLEBELL_SWING_OVERHEAD(39)"),
+            40 => write!(
+                f,
+                "SquatExerciseName::KETTLEBELL_SWING_WITH_FLIP_TO_SQUAT(40)"
+            ),
+            41 => write!(f, "SquatExerciseName::LATERAL_DUMBBELL_STEP_UP(41)"),
+            42 => write!(f, "SquatExerciseName::ONE_LEGGED_SQUAT(42)"),
+            43 => write!(f, "SquatExerciseName::OVERHEAD_DUMBBELL_SQUAT(43)"),
+            44 => write!(f, "SquatExerciseName::OVERHEAD_SQUAT(44)"),
+            45 => write!(f, "SquatExerciseName::PARTIAL_SINGLE_LEG_SQUAT(45)"),
+            46 => write!(
+                f,
+                "SquatExerciseName::WEIGHTED_PARTIAL_SINGLE_LEG_SQUAT(46)"
+            ),
+            47 => write!(f, "SquatExerciseName::PISTOL_SQUAT(47)"),
+            48 => write!(f, "SquatExerciseName::WEIGHTED_PISTOL_SQUAT(48)"),
+            49 => write!(f, "SquatExerciseName::PLIE_SLIDES(49)"),
+            50 => write!(f, "SquatExerciseName::WEIGHTED_PLIE_SLIDES(50)"),
+            51 => write!(f, "SquatExerciseName::PLIE_SQUAT(51)"),
+            52 => write!(f, "SquatExerciseName::WEIGHTED_PLIE_SQUAT(52)"),
+            53 => write!(f, "SquatExerciseName::PRISONER_SQUAT(53)"),
+            54 => write!(f, "SquatExerciseName::WEIGHTED_PRISONER_SQUAT(54)"),
+            55 => write!(f, "SquatExerciseName::SINGLE_LEG_BENCH_GET_UP(55)"),
+            56 => write!(f, "SquatExerciseName::WEIGHTED_SINGLE_LEG_BENCH_GET_UP(56)"),
+            57 => write!(f, "SquatExerciseName::SINGLE_LEG_BENCH_SQUAT(57)"),
+            58 => write!(f, "SquatExerciseName::WEIGHTED_SINGLE_LEG_BENCH_SQUAT(58)"),
+            59 => write!(f, "SquatExerciseName::SINGLE_LEG_SQUAT_ON_SWISS_BALL(59)"),
+            60 => write!(
+                f,
+                "SquatExerciseName::WEIGHTED_SINGLE_LEG_SQUAT_ON_SWISS_BALL(60)"
+            ),
+            61 => write!(f, "SquatExerciseName::SQUAT(61)"),
+            62 => write!(f, "SquatExerciseName::WEIGHTED_SQUAT(62)"),
+            63 => write!(f, "SquatExerciseName::SQUATS_WITH_BAND(63)"),
+            64 => write!(f, "SquatExerciseName::STAGGERED_SQUAT(64)"),
+            65 => write!(f, "SquatExerciseName::WEIGHTED_STAGGERED_SQUAT(65)"),
+            66 => write!(f, "SquatExerciseName::STEP_UP(66)"),
+            67 => write!(f, "SquatExerciseName::WEIGHTED_STEP_UP(67)"),
+            68 => write!(f, "SquatExerciseName::SUITCASE_SQUATS(68)"),
+            69 => write!(f, "SquatExerciseName::SUMO_SQUAT(69)"),
+            70 => write!(f, "SquatExerciseName::SUMO_SQUAT_SLIDE_IN(70)"),
+            71 => write!(f, "SquatExerciseName::WEIGHTED_SUMO_SQUAT_SLIDE_IN(71)"),
+            72 => write!(f, "SquatExerciseName::SUMO_SQUAT_TO_HIGH_PULL(72)"),
+            73 => write!(f, "SquatExerciseName::SUMO_SQUAT_TO_STAND(73)"),
+            74 => write!(f, "SquatExerciseName::WEIGHTED_SUMO_SQUAT_TO_STAND(74)"),
+            75 => write!(f, "SquatExerciseName::SUMO_SQUAT_WITH_ROTATION(75)"),
+            76 => write!(
+                f,
+                "SquatExerciseName::WEIGHTED_SUMO_SQUAT_WITH_ROTATION(76)"
+            ),
+            77 => write!(
+                f,
+                "SquatExerciseName::SWISS_BALL_BODY_WEIGHT_WALL_SQUAT(77)"
+            ),
+            78 => write!(f, "SquatExerciseName::WEIGHTED_SWISS_BALL_WALL_SQUAT(78)"),
+            79 => write!(f, "SquatExerciseName::THRUSTERS(79)"),
+            80 => write!(f, "SquatExerciseName::UNEVEN_SQUAT(80)"),
+            81 => write!(f, "SquatExerciseName::WEIGHTED_UNEVEN_SQUAT(81)"),
+            82 => write!(f, "SquatExerciseName::WAIST_SLIMMING_SQUAT(82)"),
+            83 => write!(f, "SquatExerciseName::WALL_BALL(83)"),
+            84 => write!(f, "SquatExerciseName::WIDE_STANCE_BARBELL_SQUAT(84)"),
+            85 => write!(f, "SquatExerciseName::WIDE_STANCE_GOBLET_SQUAT(85)"),
+            86 => write!(f, "SquatExerciseName::ZERCHER_SQUAT(86)"),
+            87 => write!(f, "SquatExerciseName::KBS_OVERHEAD(87)"),
+            88 => write!(f, "SquatExerciseName::SQUAT_AND_SIDE_KICK(88)"),
+            89 => write!(f, "SquatExerciseName::SQUAT_JUMPS_IN_N_OUT(89)"),
+            90 => write!(
+                f,
+                "SquatExerciseName::PILATES_PLIE_SQUATS_PARALLEL_TURNED_OUT_FLAT_AND_HEELS(90)"
+            ),
+            91 => write!(
+                f,
+                "SquatExerciseName::RELEVE_STRAIGHT_LEG_AND_KNEE_BENT_WITH_ONE_LEG_VARIATION(91)"
+            ),
+            92 => write!(
+                f,
+                "SquatExerciseName::ALTERNATING_BOX_DUMBBELL_STEP_UPS(92)"
+            ),
+            93 => write!(
+                f,
+                "SquatExerciseName::DUMBBELL_OVERHEAD_SQUAT_SINGLE_ARM(93)"
+            ),
+            94 => write!(f, "SquatExerciseName::DUMBBELL_SQUAT_SNATCH(94)"),
+            95 => write!(f, "SquatExerciseName::MEDICINE_BALL_SQUAT(95)"),
+            97 => write!(f, "SquatExerciseName::WALL_BALL_SQUAT_AND_PRESS(97)"),
+            98 => write!(f, "SquatExerciseName::SQUAT_AMERICAN_SWING(98)"),
+            100 => write!(f, "SquatExerciseName::AIR_SQUAT(100)"),
+            101 => write!(f, "SquatExerciseName::DUMBBELL_THRUSTERS(101)"),
+            102 => write!(f, "SquatExerciseName::OVERHEAD_BARBELL_SQUAT(102)"),
+            _ => write!(f, "SquatExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TotalBodyExerciseName(pub u16);
 
 impl TotalBodyExerciseName {
@@ -11007,12 +16899,46 @@ impl fmt::Display for TotalBodyExerciseName {
             18 => write!(f, "total_body_burpee_over_bar"),
             19 => write!(f, "burpee_box_jump_over"),
             20 => write!(f, "burpee_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TotalBodyExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TotalBodyExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TotalBodyExerciseName::BURPEE(0)"),
+            1 => write!(f, "TotalBodyExerciseName::WEIGHTED_BURPEE(1)"),
+            2 => write!(f, "TotalBodyExerciseName::BURPEE_BOX_JUMP(2)"),
+            3 => write!(f, "TotalBodyExerciseName::WEIGHTED_BURPEE_BOX_JUMP(3)"),
+            4 => write!(f, "TotalBodyExerciseName::HIGH_PULL_BURPEE(4)"),
+            5 => write!(f, "TotalBodyExerciseName::MAN_MAKERS(5)"),
+            6 => write!(f, "TotalBodyExerciseName::ONE_ARM_BURPEE(6)"),
+            7 => write!(f, "TotalBodyExerciseName::SQUAT_THRUSTS(7)"),
+            8 => write!(f, "TotalBodyExerciseName::WEIGHTED_SQUAT_THRUSTS(8)"),
+            9 => write!(f, "TotalBodyExerciseName::SQUAT_PLANK_PUSH_UP(9)"),
+            10 => write!(f, "TotalBodyExerciseName::WEIGHTED_SQUAT_PLANK_PUSH_UP(10)"),
+            11 => write!(f, "TotalBodyExerciseName::STANDING_T_ROTATION_BALANCE(11)"),
+            12 => write!(
+                f,
+                "TotalBodyExerciseName::WEIGHTED_STANDING_T_ROTATION_BALANCE(12)"
+            ),
+            13 => write!(f, "TotalBodyExerciseName::BARBELL_BURPEE(13)"),
+            15 => write!(
+                f,
+                "TotalBodyExerciseName::BURPEE_BOX_JUMP_OVER_YES_LITERALLY_JUMPING_OVER_THE_BOX(15)"
+            ),
+            16 => write!(f, "TotalBodyExerciseName::BURPEE_BOX_JUMP_STEP_UP_OVER(16)"),
+            17 => write!(f, "TotalBodyExerciseName::LATERAL_BARBELL_BURPEE(17)"),
+            18 => write!(f, "TotalBodyExerciseName::TOTAL_BODY_BURPEE_OVER_BAR(18)"),
+            19 => write!(f, "TotalBodyExerciseName::BURPEE_BOX_JUMP_OVER(19)"),
+            20 => write!(f, "TotalBodyExerciseName::BURPEE_WHEELCHAIR(20)"),
+            _ => write!(f, "TotalBodyExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MoveExerciseName(pub u16);
 
 impl MoveExerciseName {
@@ -11203,12 +17129,150 @@ impl fmt::Display for MoveExerciseName {
             82 => write!(f, "trunk_rotations"),
             83 => write!(f, "seated_trunk_rotations"),
             84 => write!(f, "toe_touch"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MoveExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MoveExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "MoveExerciseName::ARCH_AND_CURL(0)"),
+            1 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_WITH_BALL_BAND_AND_WEIGHT(1)"
+            ),
+            2 => write!(f, "MoveExerciseName::ARM_STRETCH(2)"),
+            3 => write!(f, "MoveExerciseName::BACK_MASSAGE(3)"),
+            4 => write!(f, "MoveExerciseName::BELLY_BREATHING(4)"),
+            5 => write!(f, "MoveExerciseName::BRIDGE_WITH_BALL(5)"),
+            6 => write!(f, "MoveExerciseName::DIAMOND_LEG_CRUNCH(6)"),
+            7 => write!(f, "MoveExerciseName::DIAMOND_LEG_LIFT(7)"),
+            8 => write!(f, "MoveExerciseName::EIGHT_POINT_SHOULDER_OPENER(8)"),
+            9 => write!(f, "MoveExerciseName::FOOT_ROLLING(9)"),
+            10 => write!(f, "MoveExerciseName::FOOTWORK(10)"),
+            11 => write!(f, "MoveExerciseName::FOOTWORK_ON_DISC(11)"),
+            12 => write!(f, "MoveExerciseName::FORWARD_FOLD(12)"),
+            13 => write!(f, "MoveExerciseName::FROG_WITH_BAND(13)"),
+            14 => write!(f, "MoveExerciseName::HALF_ROLL_UP(14)"),
+            15 => write!(f, "MoveExerciseName::HAMSTRING_CURL(15)"),
+            16 => write!(f, "MoveExerciseName::HAMSTRING_STRETCH(16)"),
+            17 => write!(f, "MoveExerciseName::HIP_STRETCH(17)"),
+            18 => write!(
+                f,
+                "MoveExerciseName::HUG_A_TREE_WITH_BALL_BAND_AND_WEIGHT(18)"
+            ),
+            19 => write!(f, "MoveExerciseName::KNEE_CIRCLES(19)"),
+            20 => write!(f, "MoveExerciseName::KNEE_FOLDS_ON_DISC(20)"),
+            21 => write!(f, "MoveExerciseName::LATERAL_FLEXION(21)"),
+            22 => write!(f, "MoveExerciseName::LEG_STRETCH_WITH_BAND(22)"),
+            23 => write!(f, "MoveExerciseName::LEG_STRETCH_WITH_LEG_CIRCLES(23)"),
+            24 => write!(f, "MoveExerciseName::LOWER_LIFT_ON_DISC(24)"),
+            25 => write!(f, "MoveExerciseName::LUNGE_SQUAT(25)"),
+            26 => write!(f, "MoveExerciseName::LUNGES_WITH_KNEE_LIFT(26)"),
+            27 => write!(f, "MoveExerciseName::MERMAID_STRETCH(27)"),
+            28 => write!(f, "MoveExerciseName::NEUTRAL_PELVIC_POSITION(28)"),
+            29 => write!(f, "MoveExerciseName::PELVIC_CLOCKS_ON_DISC(29)"),
+            30 => write!(
+                f,
+                "MoveExerciseName::PILATES_PLIE_SQUATS_PARALLEL_TURNED_OUT_FLAT_AND_HEELS_WITH_CHAIR(30)"
+            ),
+            31 => write!(f, "MoveExerciseName::PIRIFORMIS_STRETCH(31)"),
+            32 => write!(f, "MoveExerciseName::PLANK_KNEE_CROSSES(32)"),
+            33 => write!(f, "MoveExerciseName::PLANK_KNEE_PULLS(33)"),
+            34 => write!(f, "MoveExerciseName::PLANK_UP_DOWNS(34)"),
+            35 => write!(f, "MoveExerciseName::PRAYER_MUDRA(35)"),
+            36 => write!(f, "MoveExerciseName::PSOAS_LUNGE_STRETCH(36)"),
+            37 => write!(f, "MoveExerciseName::RIBCAGE_BREATHING(37)"),
+            38 => write!(f, "MoveExerciseName::ROLL_DOWN(38)"),
+            39 => write!(f, "MoveExerciseName::ROLL_UP_WITH_WEIGHT_AND_BAND(39)"),
+            40 => write!(f, "MoveExerciseName::SAW(40)"),
+            41 => write!(f, "MoveExerciseName::SCAPULAR_STABILIZATION(41)"),
+            42 => write!(f, "MoveExerciseName::SCISSORS_ON_DISC(42)"),
+            43 => write!(f, "MoveExerciseName::SEATED_HIP_STRETCHUP(43)"),
+            44 => write!(f, "MoveExerciseName::SEATED_TWIST(44)"),
+            45 => write!(
+                f,
+                "MoveExerciseName::SHAVING_THE_HEAD_WITH_BALL_BAND_AND_WEIGHT(45)"
+            ),
+            46 => write!(f, "MoveExerciseName::SPINAL_TWIST(46)"),
+            47 => write!(f, "MoveExerciseName::SPINAL_TWIST_STRETCH(47)"),
+            48 => write!(f, "MoveExerciseName::SPINE_STRETCH_FORWARD(48)"),
+            49 => write!(f, "MoveExerciseName::SQUAT_OPEN_ARM_TWIST_POSE(49)"),
+            50 => write!(f, "MoveExerciseName::SQUATS_WITH_BALL(50)"),
+            51 => write!(f, "MoveExerciseName::STAND_AND_HANG(51)"),
+            52 => write!(f, "MoveExerciseName::STANDING_SIDE_STRETCH(52)"),
+            53 => write!(
+                f,
+                "MoveExerciseName::STANDING_SINGLE_LEG_FORWARD_BEND_WITH_IT_BAND_OPENER(53)"
+            ),
+            54 => write!(f, "MoveExerciseName::STRAIGHT_LEG_CRUNCH_WITH_LEG_LIFT(54)"),
+            55 => write!(
+                f,
+                "MoveExerciseName::STRAIGHT_LEG_CRUNCH_WITH_LEG_LIFT_WITH_BALL(55)"
+            ),
+            56 => write!(
+                f,
+                "MoveExerciseName::STRAIGHT_LEG_CRUNCH_WITH_LEGS_CROSSED(56)"
+            ),
+            57 => write!(
+                f,
+                "MoveExerciseName::STRAIGHT_LEG_CRUNCH_WITH_LEGS_CROSSED_WITH_BALL(57)"
+            ),
+            58 => write!(f, "MoveExerciseName::STRAIGHT_LEG_DIAGONAL_CRUNCH(58)"),
+            59 => write!(
+                f,
+                "MoveExerciseName::STRAIGHT_LEG_DIAGONAL_CRUNCH_WITH_BALL(59)"
+            ),
+            60 => write!(f, "MoveExerciseName::TAILBONE_CURL(60)"),
+            61 => write!(f, "MoveExerciseName::THROAT_LOCK(61)"),
+            62 => write!(f, "MoveExerciseName::TICK_TOCK_SIDE_ROLL(62)"),
+            63 => write!(f, "MoveExerciseName::TWIST(63)"),
+            64 => write!(f, "MoveExerciseName::V_LEG_CRUNCHES(64)"),
+            65 => write!(f, "MoveExerciseName::V_SIT(65)"),
+            66 => write!(f, "MoveExerciseName::FORWARD_FOLD_WHEELCHAIR(66)"),
+            67 => write!(f, "MoveExerciseName::FORWARD_FOLD_PLUS_WHEELCHAIR(67)"),
+            68 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_LOW_FORWARD_WHEELCHAIR(68)"
+            ),
+            69 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_MID_FORWARD_WHEELCHAIR(69)"
+            ),
+            70 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_HIGH_FORWARD_WHEELCHAIR(70)"
+            ),
+            71 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_LOW_BACKWARD_WHEELCHAIR(71)"
+            ),
+            72 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_MID_BACKWARD_WHEELCHAIR(72)"
+            ),
+            73 => write!(
+                f,
+                "MoveExerciseName::ARM_CIRCLES_HIGH_BACKWARD_WHEELCHAIR(73)"
+            ),
+            74 => write!(f, "MoveExerciseName::CORE_TWISTS_WHEELCHAIR(74)"),
+            75 => write!(f, "MoveExerciseName::ARM_RAISE_WHEELCHAIR(75)"),
+            76 => write!(f, "MoveExerciseName::CHEST_EXPAND_WHEELCHAIR(76)"),
+            77 => write!(f, "MoveExerciseName::ARM_EXTEND_WHEELCHAIR(77)"),
+            78 => write!(f, "MoveExerciseName::FORWARD_BEND_WHEELCHAIR(78)"),
+            79 => write!(f, "MoveExerciseName::TOE_TOUCH_WHEELCHAIR(79)"),
+            80 => write!(f, "MoveExerciseName::EXTENDED_TOE_TOUCH_WHEELCHAIR(80)"),
+            81 => write!(f, "MoveExerciseName::SEATED_ARM_CIRCLES(81)"),
+            82 => write!(f, "MoveExerciseName::TRUNK_ROTATIONS(82)"),
+            83 => write!(f, "MoveExerciseName::SEATED_TRUNK_ROTATIONS(83)"),
+            84 => write!(f, "MoveExerciseName::TOE_TOUCH(84)"),
+            _ => write!(f, "MoveExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct PoseExerciseName(pub u16);
 
 impl PoseExerciseName {
@@ -11458,12 +17522,172 @@ impl fmt::Display for PoseExerciseName {
             113 => write!(f, "reverse_warrior_wheelchair"),
             114 => write!(f, "downward_facing_dog_to_cobra"),
             115 => write!(f, "seated_cat_cow"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "PoseExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for PoseExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "PoseExerciseName::ALL_FOURS(0)"),
+            1 => write!(f, "PoseExerciseName::ANKLE_TO_KNEE(1)"),
+            2 => write!(f, "PoseExerciseName::BABY_COBRA(2)"),
+            3 => write!(f, "PoseExerciseName::BOAT(3)"),
+            4 => write!(f, "PoseExerciseName::BOUND_ANGLE(4)"),
+            5 => write!(
+                f,
+                "PoseExerciseName::BOUND_SEATED_SINGLE_LEG_FORWARD_BEND(5)"
+            ),
+            6 => write!(f, "PoseExerciseName::BOW(6)"),
+            7 => write!(f, "PoseExerciseName::BOWED_HALF_MOON(7)"),
+            8 => write!(f, "PoseExerciseName::BRIDGE(8)"),
+            9 => write!(f, "PoseExerciseName::CAT(9)"),
+            10 => write!(f, "PoseExerciseName::CHAIR(10)"),
+            11 => write!(f, "PoseExerciseName::CHILDS(11)"),
+            12 => write!(f, "PoseExerciseName::CORPSE(12)"),
+            13 => write!(f, "PoseExerciseName::COW_FACE(13)"),
+            14 => write!(f, "PoseExerciseName::COW(14)"),
+            15 => write!(f, "PoseExerciseName::DEVOTIONAL_WARRIOR(15)"),
+            16 => write!(f, "PoseExerciseName::DOLPHIN_PLANK(16)"),
+            17 => write!(f, "PoseExerciseName::DOLPHIN(17)"),
+            18 => write!(f, "PoseExerciseName::DOWN_DOG_KNEE_TO_NOSE(18)"),
+            19 => write!(f, "PoseExerciseName::DOWN_DOG_SPLIT(19)"),
+            20 => write!(f, "PoseExerciseName::DOWN_DOG_SPLIT_OPEN_HIP_BENT_KNEE(20)"),
+            21 => write!(f, "PoseExerciseName::DOWNWARD_FACING_DOG(21)"),
+            22 => write!(f, "PoseExerciseName::EAGLE(22)"),
+            23 => write!(f, "PoseExerciseName::EASY_SEATED(23)"),
+            24 => write!(f, "PoseExerciseName::EXTENDED_PUPPY(24)"),
+            25 => write!(f, "PoseExerciseName::EXTENDED_SIDE_ANGLE(25)"),
+            26 => write!(f, "PoseExerciseName::FISH(26)"),
+            27 => write!(f, "PoseExerciseName::FOUR_LIMBED_STAFF(27)"),
+            28 => write!(f, "PoseExerciseName::FULL_SPLIT(28)"),
+            29 => write!(f, "PoseExerciseName::GATE(29)"),
+            30 => write!(f, "PoseExerciseName::HALF_CHAIR_HALF_ANKLE_TO_KNEE(30)"),
+            31 => write!(f, "PoseExerciseName::HALF_MOON(31)"),
+            32 => write!(f, "PoseExerciseName::HEAD_TO_KNEE(32)"),
+            33 => write!(f, "PoseExerciseName::HERON(33)"),
+            34 => write!(f, "PoseExerciseName::HEROS(34)"),
+            35 => write!(f, "PoseExerciseName::HIGH_LUNGE(35)"),
+            36 => write!(f, "PoseExerciseName::KNEES_CHEST_CHIN(36)"),
+            37 => write!(f, "PoseExerciseName::LIZARD(37)"),
+            38 => write!(f, "PoseExerciseName::LOCUST(38)"),
+            39 => write!(f, "PoseExerciseName::LOW_LUNGE(39)"),
+            40 => write!(f, "PoseExerciseName::LOW_LUNGE_TWIST(40)"),
+            41 => write!(f, "PoseExerciseName::LOW_LUNGE_WITH_KNEE_DOWN(41)"),
+            42 => write!(f, "PoseExerciseName::MERMAID(42)"),
+            43 => write!(f, "PoseExerciseName::MOUNTAIN(43)"),
+            44 => write!(
+                f,
+                "PoseExerciseName::ONE_LEGGED_DOWNWARD_FACING_POSE_OPEN_HIP_BENT_KNEE(44)"
+            ),
+            45 => write!(f, "PoseExerciseName::ONE_LEGGED_PIGEON(45)"),
+            46 => write!(f, "PoseExerciseName::PEACEFUL_WARRIOR(46)"),
+            47 => write!(f, "PoseExerciseName::PLANK(47)"),
+            48 => write!(f, "PoseExerciseName::PLOW(48)"),
+            49 => write!(f, "PoseExerciseName::RECLINED_HAND_TO_FOOT(49)"),
+            50 => write!(f, "PoseExerciseName::REVOLVED_HALF_MOON(50)"),
+            51 => write!(f, "PoseExerciseName::REVOLVED_HEAD_TO_KNEE(51)"),
+            52 => write!(f, "PoseExerciseName::REVOLVED_TRIANGLE(52)"),
+            53 => write!(f, "PoseExerciseName::RUNNERS_LUNGE(53)"),
+            54 => write!(f, "PoseExerciseName::SEATED_EASY_SIDE_BEND(54)"),
+            55 => write!(f, "PoseExerciseName::SEATED_EASY_TWIST(55)"),
+            56 => write!(f, "PoseExerciseName::SEATED_LONG_LEG_FORWARD_BEND(56)"),
+            57 => write!(f, "PoseExerciseName::SEATED_WIDE_LEG_FORWARD_BEND(57)"),
+            58 => write!(f, "PoseExerciseName::SHOULDER_STAND(58)"),
+            59 => write!(f, "PoseExerciseName::SIDE_BOAT(59)"),
+            60 => write!(f, "PoseExerciseName::SIDE_PLANK(60)"),
+            61 => write!(f, "PoseExerciseName::SPHINX(61)"),
+            62 => write!(f, "PoseExerciseName::SQUAT_OPEN_ARM_TWIST(62)"),
+            63 => write!(f, "PoseExerciseName::SQUAT_PALM_PRESS(63)"),
+            64 => write!(f, "PoseExerciseName::STAFF(64)"),
+            65 => write!(f, "PoseExerciseName::STANDING_ARMS_UP(65)"),
+            66 => write!(f, "PoseExerciseName::STANDING_FORWARD_BEND_HALFWAY_UP(66)"),
+            67 => write!(f, "PoseExerciseName::STANDING_FORWARD_BEND(67)"),
+            68 => write!(f, "PoseExerciseName::STANDING_SIDE_OPENER(68)"),
+            69 => write!(f, "PoseExerciseName::STANDING_SINGLE_LEG_FORWARD_BEND(69)"),
+            70 => write!(f, "PoseExerciseName::STANDING_SPLIT(70)"),
+            71 => write!(f, "PoseExerciseName::STANDING_WIDE_LEG_FORWARD_BEND(71)"),
+            72 => write!(
+                f,
+                "PoseExerciseName::STANDING_WIDE_LEG_FORWARD_BEND_WITH_TWIST(72)"
+            ),
+            73 => write!(f, "PoseExerciseName::SUPINE_SPINAL_TWIST(73)"),
+            74 => write!(f, "PoseExerciseName::TABLE_TOP(74)"),
+            75 => write!(f, "PoseExerciseName::THREAD_THE_NEEDLE(75)"),
+            76 => write!(f, "PoseExerciseName::THUNDERBOLT(76)"),
+            77 => write!(
+                f,
+                "PoseExerciseName::THUNDERBOLT_POSE_BOTH_SIDES_ARM_STRETCH(77)"
+            ),
+            78 => write!(f, "PoseExerciseName::TREE(78)"),
+            79 => write!(f, "PoseExerciseName::TRIANGLE(79)"),
+            80 => write!(f, "PoseExerciseName::UP_DOG(80)"),
+            81 => write!(f, "PoseExerciseName::UPWARD_FACING_PLANK(81)"),
+            82 => write!(f, "PoseExerciseName::WARRIOR_ONE(82)"),
+            83 => write!(f, "PoseExerciseName::WARRIOR_THREE(83)"),
+            84 => write!(f, "PoseExerciseName::WARRIOR_TWO(84)"),
+            85 => write!(f, "PoseExerciseName::WHEEL(85)"),
+            86 => write!(f, "PoseExerciseName::WIDE_SIDE_LUNGE(86)"),
+            87 => write!(f, "PoseExerciseName::DEEP_BREATHING_WHEELCHAIR(87)"),
+            88 => write!(f, "PoseExerciseName::DEEP_BREATHING_LOW_WHEELCHAIR(88)"),
+            89 => write!(f, "PoseExerciseName::DEEP_BREATHING_MID_WHEELCHAIR(89)"),
+            90 => write!(f, "PoseExerciseName::DEEP_BREATHING_HIGH_WHEELCHAIR(90)"),
+            91 => write!(f, "PoseExerciseName::PRAYER_WHEELCHAIR(91)"),
+            92 => write!(f, "PoseExerciseName::OVERHEAD_PRAYER_WHEELCHAIR(92)"),
+            93 => write!(f, "PoseExerciseName::CACTUS_WHEELCHAIR(93)"),
+            94 => write!(f, "PoseExerciseName::BREATHING_PUNCHES_WHEELCHAIR(94)"),
+            95 => write!(
+                f,
+                "PoseExerciseName::BREATHING_PUNCHES_EXTENDED_WHEELCHAIR(95)"
+            ),
+            96 => write!(
+                f,
+                "PoseExerciseName::BREATHING_PUNCHES_OVERHEAD_WHEELCHAIR(96)"
+            ),
+            97 => write!(
+                f,
+                "PoseExerciseName::BREATHING_PUNCHES_OVERHEAD_AND_DOWN_WHEELCHAIR(97)"
+            ),
+            98 => write!(f, "PoseExerciseName::BREATHING_PUNCHES_SIDE_WHEELCHAIR(98)"),
+            99 => write!(
+                f,
+                "PoseExerciseName::BREATHING_PUNCHES_EXTENDED_SIDE_WHEELCHAIR(99)"
+            ),
+            100 => write!(
+                f,
+                "PoseExerciseName::BREATHING_PUNCHES_OVERHEAD_SIDE_WHEELCHAIR(100)"
+            ),
+            101 => write!(
+                f,
+                "PoseExerciseName::BREATHING_PUNCHES_OVERHEAD_AND_DOWN_SIDE_WHEELCHAIR(101)"
+            ),
+            102 => write!(f, "PoseExerciseName::LEFT_HAND_BACK_WHEELCHAIR(102)"),
+            103 => write!(f, "PoseExerciseName::TRIANGLE_WHEELCHAIR(103)"),
+            104 => write!(f, "PoseExerciseName::THREAD_THE_NEEDLE_WHEELCHAIR(104)"),
+            105 => write!(
+                f,
+                "PoseExerciseName::NECK_FLEXION_AND_EXTENSION_WHEELCHAIR(105)"
+            ),
+            106 => write!(f, "PoseExerciseName::NECK_LATERAL_FLEXION_WHEELCHAIR(106)"),
+            107 => write!(
+                f,
+                "PoseExerciseName::SPINE_FLEXION_AND_EXTENSION_WHEELCHAIR(107)"
+            ),
+            108 => write!(f, "PoseExerciseName::SPINE_ROTATION_WHEELCHAIR(108)"),
+            109 => write!(f, "PoseExerciseName::SPINE_LATERAL_FLEXION_WHEELCHAIR(109)"),
+            110 => write!(f, "PoseExerciseName::ALTERNATIVE_SKIING_WHEELCHAIR(110)"),
+            111 => write!(f, "PoseExerciseName::REACH_FORWARD_WHEELCHAIR(111)"),
+            112 => write!(f, "PoseExerciseName::WARRIOR_WHEELCHAIR(112)"),
+            113 => write!(f, "PoseExerciseName::REVERSE_WARRIOR_WHEELCHAIR(113)"),
+            114 => write!(f, "PoseExerciseName::DOWNWARD_FACING_DOG_TO_COBRA(114)"),
+            115 => write!(f, "PoseExerciseName::SEATED_CAT_COW(115)"),
+            _ => write!(f, "PoseExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TricepsExtensionExerciseName(pub u16);
 
 impl TricepsExtensionExerciseName {
@@ -11599,12 +17823,155 @@ impl fmt::Display for TricepsExtensionExerciseName {
             42 => write!(f, "triceps_press"),
             43 => write!(f, "dumbbell_kickback_wheelchair"),
             44 => write!(f, "overhead_dumbbell_triceps_extension_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TricepsExtensionExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TricepsExtensionExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TricepsExtensionExerciseName::BENCH_DIP(0)"),
+            1 => write!(f, "TricepsExtensionExerciseName::WEIGHTED_BENCH_DIP(1)"),
+            2 => write!(f, "TricepsExtensionExerciseName::BODY_WEIGHT_DIP(2)"),
+            3 => write!(f, "TricepsExtensionExerciseName::CABLE_KICKBACK(3)"),
+            4 => write!(
+                f,
+                "TricepsExtensionExerciseName::CABLE_LYING_TRICEPS_EXTENSION(4)"
+            ),
+            5 => write!(
+                f,
+                "TricepsExtensionExerciseName::CABLE_OVERHEAD_TRICEPS_EXTENSION(5)"
+            ),
+            6 => write!(f, "TricepsExtensionExerciseName::DUMBBELL_KICKBACK(6)"),
+            7 => write!(
+                f,
+                "TricepsExtensionExerciseName::DUMBBELL_LYING_TRICEPS_EXTENSION(7)"
+            ),
+            8 => write!(
+                f,
+                "TricepsExtensionExerciseName::EZ_BAR_OVERHEAD_TRICEPS_EXTENSION(8)"
+            ),
+            9 => write!(f, "TricepsExtensionExerciseName::INCLINE_DIP(9)"),
+            10 => write!(f, "TricepsExtensionExerciseName::WEIGHTED_INCLINE_DIP(10)"),
+            11 => write!(
+                f,
+                "TricepsExtensionExerciseName::INCLINE_EZ_BAR_LYING_TRICEPS_EXTENSION(11)"
+            ),
+            12 => write!(
+                f,
+                "TricepsExtensionExerciseName::LYING_DUMBBELL_PULLOVER_TO_EXTENSION(12)"
+            ),
+            13 => write!(
+                f,
+                "TricepsExtensionExerciseName::LYING_EZ_BAR_TRICEPS_EXTENSION(13)"
+            ),
+            14 => write!(
+                f,
+                "TricepsExtensionExerciseName::LYING_TRICEPS_EXTENSION_TO_CLOSE_GRIP_BENCH_PRESS(14)"
+            ),
+            15 => write!(
+                f,
+                "TricepsExtensionExerciseName::OVERHEAD_DUMBBELL_TRICEPS_EXTENSION(15)"
+            ),
+            16 => write!(
+                f,
+                "TricepsExtensionExerciseName::RECLINING_TRICEPS_PRESS(16)"
+            ),
+            17 => write!(
+                f,
+                "TricepsExtensionExerciseName::REVERSE_GRIP_PRESSDOWN(17)"
+            ),
+            18 => write!(
+                f,
+                "TricepsExtensionExerciseName::REVERSE_GRIP_TRICEPS_PRESSDOWN(18)"
+            ),
+            19 => write!(f, "TricepsExtensionExerciseName::ROPE_PRESSDOWN(19)"),
+            20 => write!(
+                f,
+                "TricepsExtensionExerciseName::SEATED_BARBELL_OVERHEAD_TRICEPS_EXTENSION(20)"
+            ),
+            21 => write!(
+                f,
+                "TricepsExtensionExerciseName::SEATED_DUMBBELL_OVERHEAD_TRICEPS_EXTENSION(21)"
+            ),
+            22 => write!(
+                f,
+                "TricepsExtensionExerciseName::SEATED_EZ_BAR_OVERHEAD_TRICEPS_EXTENSION(22)"
+            ),
+            23 => write!(
+                f,
+                "TricepsExtensionExerciseName::SEATED_SINGLE_ARM_OVERHEAD_DUMBBELL_EXTENSION(23)"
+            ),
+            24 => write!(
+                f,
+                "TricepsExtensionExerciseName::SINGLE_ARM_DUMBBELL_OVERHEAD_TRICEPS_EXTENSION(24)"
+            ),
+            25 => write!(
+                f,
+                "TricepsExtensionExerciseName::SINGLE_DUMBBELL_SEATED_OVERHEAD_TRICEPS_EXTENSION(25)"
+            ),
+            26 => write!(
+                f,
+                "TricepsExtensionExerciseName::SINGLE_LEG_BENCH_DIP_AND_KICK(26)"
+            ),
+            27 => write!(
+                f,
+                "TricepsExtensionExerciseName::WEIGHTED_SINGLE_LEG_BENCH_DIP_AND_KICK(27)"
+            ),
+            28 => write!(f, "TricepsExtensionExerciseName::SINGLE_LEG_DIP(28)"),
+            29 => write!(
+                f,
+                "TricepsExtensionExerciseName::WEIGHTED_SINGLE_LEG_DIP(29)"
+            ),
+            30 => write!(
+                f,
+                "TricepsExtensionExerciseName::STATIC_LYING_TRICEPS_EXTENSION(30)"
+            ),
+            31 => write!(f, "TricepsExtensionExerciseName::SUSPENDED_DIP(31)"),
+            32 => write!(
+                f,
+                "TricepsExtensionExerciseName::WEIGHTED_SUSPENDED_DIP(32)"
+            ),
+            33 => write!(
+                f,
+                "TricepsExtensionExerciseName::SWISS_BALL_DUMBBELL_LYING_TRICEPS_EXTENSION(33)"
+            ),
+            34 => write!(
+                f,
+                "TricepsExtensionExerciseName::SWISS_BALL_EZ_BAR_LYING_TRICEPS_EXTENSION(34)"
+            ),
+            35 => write!(
+                f,
+                "TricepsExtensionExerciseName::SWISS_BALL_EZ_BAR_OVERHEAD_TRICEPS_EXTENSION(35)"
+            ),
+            36 => write!(f, "TricepsExtensionExerciseName::TABLETOP_DIP(36)"),
+            37 => write!(f, "TricepsExtensionExerciseName::WEIGHTED_TABLETOP_DIP(37)"),
+            38 => write!(
+                f,
+                "TricepsExtensionExerciseName::TRICEPS_EXTENSION_ON_FLOOR(38)"
+            ),
+            39 => write!(f, "TricepsExtensionExerciseName::TRICEPS_PRESSDOWN(39)"),
+            40 => write!(f, "TricepsExtensionExerciseName::WEIGHTED_DIP(40)"),
+            41 => write!(
+                f,
+                "TricepsExtensionExerciseName::ALTERNATING_DUMBBELL_LYING_TRICEPS_EXTENSION(41)"
+            ),
+            42 => write!(f, "TricepsExtensionExerciseName::TRICEPS_PRESS(42)"),
+            43 => write!(
+                f,
+                "TricepsExtensionExerciseName::DUMBBELL_KICKBACK_WHEELCHAIR(43)"
+            ),
+            44 => write!(
+                f,
+                "TricepsExtensionExerciseName::OVERHEAD_DUMBBELL_TRICEPS_EXTENSION_WHEELCHAIR(44)"
+            ),
+            _ => write!(f, "TricepsExtensionExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WarmUpExerciseName(pub u16);
 
 impl WarmUpExerciseName {
@@ -11803,12 +18170,111 @@ impl fmt::Display for WarmUpExerciseName {
             88 => write!(f, "marching_in_place"),
             89 => write!(f, "triceps_stretch_wheelchair"),
             90 => write!(f, "upper_back_stretch_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WarmUpExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WarmUpExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WarmUpExerciseName::QUADRUPED_ROCKING(0)"),
+            1 => write!(f, "WarmUpExerciseName::NECK_TILTS(1)"),
+            2 => write!(f, "WarmUpExerciseName::ANKLE_CIRCLES(2)"),
+            3 => write!(f, "WarmUpExerciseName::ANKLE_DORSIFLEXION_WITH_BAND(3)"),
+            4 => write!(f, "WarmUpExerciseName::ANKLE_INTERNAL_ROTATION(4)"),
+            5 => write!(f, "WarmUpExerciseName::ARM_CIRCLES(5)"),
+            6 => write!(f, "WarmUpExerciseName::BENT_OVER_REACH_TO_SKY(6)"),
+            7 => write!(f, "WarmUpExerciseName::CAT_CAMEL(7)"),
+            8 => write!(f, "WarmUpExerciseName::ELBOW_TO_FOOT_LUNGE(8)"),
+            9 => write!(f, "WarmUpExerciseName::FORWARD_AND_BACKWARD_LEG_SWINGS(9)"),
+            10 => write!(f, "WarmUpExerciseName::GROINERS(10)"),
+            11 => write!(f, "WarmUpExerciseName::INVERTED_HAMSTRING_STRETCH(11)"),
+            12 => write!(f, "WarmUpExerciseName::LATERAL_DUCK_UNDER(12)"),
+            13 => write!(f, "WarmUpExerciseName::NECK_ROTATIONS(13)"),
+            14 => write!(f, "WarmUpExerciseName::OPPOSITE_ARM_AND_LEG_BALANCE(14)"),
+            15 => write!(f, "WarmUpExerciseName::REACH_ROLL_AND_LIFT(15)"),
+            16 => write!(f, "WarmUpExerciseName::SCORPION(16)"),
+            17 => write!(f, "WarmUpExerciseName::SHOULDER_CIRCLES(17)"),
+            18 => write!(f, "WarmUpExerciseName::SIDE_TO_SIDE_LEG_SWINGS(18)"),
+            19 => write!(f, "WarmUpExerciseName::SLEEPER_STRETCH(19)"),
+            20 => write!(f, "WarmUpExerciseName::SLIDE_OUT(20)"),
+            21 => write!(f, "WarmUpExerciseName::SWISS_BALL_HIP_CROSSOVER(21)"),
+            22 => write!(f, "WarmUpExerciseName::SWISS_BALL_REACH_ROLL_AND_LIFT(22)"),
+            23 => write!(f, "WarmUpExerciseName::SWISS_BALL_WINDSHIELD_WIPERS(23)"),
+            24 => write!(f, "WarmUpExerciseName::THORACIC_ROTATION(24)"),
+            25 => write!(f, "WarmUpExerciseName::WALKING_HIGH_KICKS(25)"),
+            26 => write!(f, "WarmUpExerciseName::WALKING_HIGH_KNEES(26)"),
+            27 => write!(f, "WarmUpExerciseName::WALKING_KNEE_HUGS(27)"),
+            28 => write!(f, "WarmUpExerciseName::WALKING_LEG_CRADLES(28)"),
+            29 => write!(f, "WarmUpExerciseName::WALKOUT(29)"),
+            30 => write!(f, "WarmUpExerciseName::WALKOUT_FROM_PUSH_UP_POSITION(30)"),
+            31 => write!(f, "WarmUpExerciseName::BICEPS_STRETCH(31)"),
+            32 => write!(f, "WarmUpExerciseName::GLUTES_STRETCH(32)"),
+            33 => write!(f, "WarmUpExerciseName::STANDING_HAMSTRING_STRETCH(33)"),
+            34 => write!(f, "WarmUpExerciseName::STRETCH_90_90(34)"),
+            35 => write!(f, "WarmUpExerciseName::STRETCH_ABS(35)"),
+            36 => write!(f, "WarmUpExerciseName::STRETCH_BUTTERFLY(36)"),
+            37 => write!(f, "WarmUpExerciseName::STRETCH_CALF(37)"),
+            38 => write!(f, "WarmUpExerciseName::STRETCH_CAT_COW(38)"),
+            39 => write!(f, "WarmUpExerciseName::STRETCH_CHILDS_POSE(39)"),
+            40 => write!(f, "WarmUpExerciseName::STRETCH_COBRA(40)"),
+            41 => write!(f, "WarmUpExerciseName::STRETCH_FOREARMS(41)"),
+            42 => write!(f, "WarmUpExerciseName::STRETCH_FORWARD_GLUTES(42)"),
+            43 => write!(f, "WarmUpExerciseName::STRETCH_FRONT_SPLIT(43)"),
+            44 => write!(f, "WarmUpExerciseName::STRETCH_HAMSTRING(44)"),
+            45 => write!(f, "WarmUpExerciseName::STRETCH_HIP_FLEXOR_AND_QUAD(45)"),
+            46 => write!(f, "WarmUpExerciseName::STRETCH_LAT(46)"),
+            47 => write!(f, "WarmUpExerciseName::STRETCH_LEVATOR_SCAPULAE(47)"),
+            48 => write!(f, "WarmUpExerciseName::STRETCH_LUNGE_WITH_SPINAL_TWIST(48)"),
+            49 => write!(f, "WarmUpExerciseName::STRETCH_LUNGING_HIP_FLEXOR(49)"),
+            50 => write!(f, "WarmUpExerciseName::STRETCH_LYING_ABDUCTION(50)"),
+            51 => write!(f, "WarmUpExerciseName::STRETCH_LYING_IT_BAND(51)"),
+            52 => write!(f, "WarmUpExerciseName::STRETCH_LYING_KNEE_TO_CHEST(52)"),
+            53 => write!(f, "WarmUpExerciseName::STRETCH_LYING_PIRIFORMIS(53)"),
+            54 => write!(f, "WarmUpExerciseName::STRETCH_LYING_SPINAL_TWIST(54)"),
+            55 => write!(f, "WarmUpExerciseName::STRETCH_NECK(55)"),
+            56 => write!(f, "WarmUpExerciseName::STRETCH_OBLIQUES(56)"),
+            57 => write!(f, "WarmUpExerciseName::STRETCH_OVER_UNDER_SHOULDER(57)"),
+            58 => write!(f, "WarmUpExerciseName::STRETCH_PECTORAL(58)"),
+            59 => write!(f, "WarmUpExerciseName::STRETCH_PIGEON_POSE(59)"),
+            60 => write!(f, "WarmUpExerciseName::STRETCH_PIRIFORMIS(60)"),
+            61 => write!(f, "WarmUpExerciseName::STRETCH_QUAD(61)"),
+            62 => write!(f, "WarmUpExerciseName::STRETCH_SCORPION(62)"),
+            63 => write!(f, "WarmUpExerciseName::STRETCH_SHOULDER(63)"),
+            64 => write!(f, "WarmUpExerciseName::STRETCH_SIDE(64)"),
+            65 => write!(f, "WarmUpExerciseName::STRETCH_SIDE_LUNGE(65)"),
+            66 => write!(f, "WarmUpExerciseName::STRETCH_SIDE_SPLIT(66)"),
+            67 => write!(f, "WarmUpExerciseName::STRETCH_STANDING_IT_BAND(67)"),
+            68 => write!(f, "WarmUpExerciseName::STRETCH_STRADDLE(68)"),
+            69 => write!(f, "WarmUpExerciseName::STRETCH_TRICEPS(69)"),
+            70 => write!(f, "WarmUpExerciseName::STRETCH_WALL_CHEST_AND_SHOULDER(70)"),
+            71 => write!(f, "WarmUpExerciseName::NECK_ROTATIONS_WHEELCHAIR(71)"),
+            72 => write!(f, "WarmUpExerciseName::HALF_KNEELING_ARM_ROTATION(72)"),
+            73 => write!(f, "WarmUpExerciseName::THREE_WAY_ANKLE_MOBILIZATION(73)"),
+            74 => write!(f, "WarmUpExerciseName::NINETY_NINETY_HIP_SWITCH(74)"),
+            75 => write!(f, "WarmUpExerciseName::ACTIVE_FROG(75)"),
+            76 => write!(f, "WarmUpExerciseName::SHOULDER_SWEEPS(76)"),
+            77 => write!(f, "WarmUpExerciseName::ANKLE_LUNGES(77)"),
+            78 => write!(f, "WarmUpExerciseName::BACK_ROLL_FOAM_ROLLER(78)"),
+            79 => write!(f, "WarmUpExerciseName::BEAR_CRAWL(79)"),
+            80 => write!(f, "WarmUpExerciseName::LATISSIMUS_DORSI_FOAM_ROLL(80)"),
+            81 => write!(f, "WarmUpExerciseName::REVERSE_T_HIP_OPENER(81)"),
+            82 => write!(f, "WarmUpExerciseName::SHOULDER_ROLLS(82)"),
+            83 => write!(f, "WarmUpExerciseName::CHEST_OPENERS(83)"),
+            84 => write!(f, "WarmUpExerciseName::TRICEPS_STRETCH(84)"),
+            85 => write!(f, "WarmUpExerciseName::UPPER_BACK_STRETCH(85)"),
+            86 => write!(f, "WarmUpExerciseName::HIP_CIRCLES(86)"),
+            87 => write!(f, "WarmUpExerciseName::ANKLE_STRETCH(87)"),
+            88 => write!(f, "WarmUpExerciseName::MARCHING_IN_PLACE(88)"),
+            89 => write!(f, "WarmUpExerciseName::TRICEPS_STRETCH_WHEELCHAIR(89)"),
+            90 => write!(f, "WarmUpExerciseName::UPPER_BACK_STRETCH_WHEELCHAIR(90)"),
+            _ => write!(f, "WarmUpExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct RunExerciseName(pub u16);
 
 impl RunExerciseName {
@@ -11837,12 +18303,27 @@ impl fmt::Display for RunExerciseName {
             4 => write!(f, "run_or_walk"),
             5 => write!(f, "speed_walk"),
             6 => write!(f, "warm_up"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "RunExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for RunExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "RunExerciseName::RUN(0)"),
+            1 => write!(f, "RunExerciseName::WALK(1)"),
+            2 => write!(f, "RunExerciseName::JOG(2)"),
+            3 => write!(f, "RunExerciseName::SPRINT(3)"),
+            4 => write!(f, "RunExerciseName::RUN_OR_WALK(4)"),
+            5 => write!(f, "RunExerciseName::SPEED_WALK(5)"),
+            6 => write!(f, "RunExerciseName::WARM_UP(6)"),
+            _ => write!(f, "RunExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BikeExerciseName(pub u16);
 
 impl BikeExerciseName {
@@ -11863,12 +18344,23 @@ impl fmt::Display for BikeExerciseName {
             0 => write!(f, "bike"),
             1 => write!(f, "ride"),
             2 => write!(f, "sprint"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BikeExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BikeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BikeExerciseName::BIKE(0)"),
+            1 => write!(f, "BikeExerciseName::RIDE(1)"),
+            2 => write!(f, "BikeExerciseName::SPRINT(2)"),
+            _ => write!(f, "BikeExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BandedExercisesExerciseName(pub u16);
 
 impl BandedExercisesExerciseName {
@@ -12015,12 +18507,116 @@ impl fmt::Display for BandedExercisesExerciseName {
             59 => write!(f, "pull_apart_wheelchair"),
             60 => write!(f, "side_curl_wheelchair"),
             61 => write!(f, "overhead_press_wheelchair"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BandedExercisesExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BandedExercisesExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "BandedExercisesExerciseName::AB_TWIST(1)"),
+            2 => write!(f, "BandedExercisesExerciseName::BACK_EXTENSION(2)"),
+            3 => write!(f, "BandedExercisesExerciseName::BICYCLE_CRUNCH(3)"),
+            4 => write!(f, "BandedExercisesExerciseName::CALF_RAISES(4)"),
+            5 => write!(f, "BandedExercisesExerciseName::CHEST_PRESS(5)"),
+            6 => write!(f, "BandedExercisesExerciseName::CLAM_SHELLS(6)"),
+            7 => write!(f, "BandedExercisesExerciseName::CURL(7)"),
+            8 => write!(f, "BandedExercisesExerciseName::DEADBUG(8)"),
+            9 => write!(f, "BandedExercisesExerciseName::DEADLIFT(9)"),
+            10 => write!(f, "BandedExercisesExerciseName::DONKEY_KICK(10)"),
+            11 => write!(f, "BandedExercisesExerciseName::EXTERNAL_ROTATION(11)"),
+            12 => write!(
+                f,
+                "BandedExercisesExerciseName::EXTERNAL_ROTATION_AT_90_DEGREE_ABDUCTION(12)"
+            ),
+            13 => write!(f, "BandedExercisesExerciseName::FACE_PULL(13)"),
+            14 => write!(f, "BandedExercisesExerciseName::FIRE_HYDRANT(14)"),
+            15 => write!(f, "BandedExercisesExerciseName::FLY(15)"),
+            16 => write!(f, "BandedExercisesExerciseName::FRONT_RAISE(16)"),
+            17 => write!(f, "BandedExercisesExerciseName::GLUTE_BRIDGE(17)"),
+            18 => write!(f, "BandedExercisesExerciseName::HAMSTRING_CURLS(18)"),
+            19 => write!(f, "BandedExercisesExerciseName::HIGH_PLANK_LEG_LIFTS(19)"),
+            20 => write!(f, "BandedExercisesExerciseName::HIP_EXTENSION(20)"),
+            21 => write!(f, "BandedExercisesExerciseName::INTERNAL_ROTATION(21)"),
+            22 => write!(f, "BandedExercisesExerciseName::JUMPING_JACK(22)"),
+            23 => write!(f, "BandedExercisesExerciseName::KNEELING_CRUNCH(23)"),
+            24 => write!(f, "BandedExercisesExerciseName::LATERAL_BAND_WALKS(24)"),
+            25 => write!(f, "BandedExercisesExerciseName::LATERAL_RAISE(25)"),
+            26 => write!(f, "BandedExercisesExerciseName::LATPULL(26)"),
+            27 => write!(f, "BandedExercisesExerciseName::LEG_ABDUCTION(27)"),
+            28 => write!(f, "BandedExercisesExerciseName::LEG_ADDUCTION(28)"),
+            29 => write!(f, "BandedExercisesExerciseName::LEG_EXTENSION(29)"),
+            30 => write!(f, "BandedExercisesExerciseName::LUNGE(30)"),
+            31 => write!(f, "BandedExercisesExerciseName::PLANK(31)"),
+            32 => write!(f, "BandedExercisesExerciseName::PULL_APART(32)"),
+            33 => write!(f, "BandedExercisesExerciseName::PUSH_UPS(33)"),
+            34 => write!(f, "BandedExercisesExerciseName::REVERSE_CRUNCH(34)"),
+            35 => write!(f, "BandedExercisesExerciseName::ROW(35)"),
+            36 => write!(f, "BandedExercisesExerciseName::SHOULDER_ABDUCTION(36)"),
+            37 => write!(f, "BandedExercisesExerciseName::SHOULDER_EXTENSION(37)"),
+            38 => write!(
+                f,
+                "BandedExercisesExerciseName::SHOULDER_EXTERNAL_ROTATION(38)"
+            ),
+            39 => write!(
+                f,
+                "BandedExercisesExerciseName::SHOULDER_FLEXION_TO_90_DEGREES(39)"
+            ),
+            40 => write!(f, "BandedExercisesExerciseName::SIDE_PLANK_LEG_LIFTS(40)"),
+            41 => write!(f, "BandedExercisesExerciseName::SIDE_RAISE(41)"),
+            42 => write!(f, "BandedExercisesExerciseName::SQUAT(42)"),
+            43 => write!(f, "BandedExercisesExerciseName::SQUAT_TO_PRESS(43)"),
+            44 => write!(f, "BandedExercisesExerciseName::TRICEP_EXTENSION(44)"),
+            45 => write!(f, "BandedExercisesExerciseName::TRICEP_KICKBACK(45)"),
+            46 => write!(f, "BandedExercisesExerciseName::UPRIGHT_ROW(46)"),
+            47 => write!(
+                f,
+                "BandedExercisesExerciseName::WALL_CRAWL_WITH_EXTERNAL_ROTATION(47)"
+            ),
+            49 => write!(
+                f,
+                "BandedExercisesExerciseName::LATERAL_RAISE_WHEELCHAIR(49)"
+            ),
+            50 => write!(
+                f,
+                "BandedExercisesExerciseName::TRICEPS_EXTENSION_WHEELCHAIR(50)"
+            ),
+            51 => write!(
+                f,
+                "BandedExercisesExerciseName::CHEST_FLY_INCLINE_WHEELCHAIR(51)"
+            ),
+            52 => write!(
+                f,
+                "BandedExercisesExerciseName::CHEST_FLY_DECLINE_WHEELCHAIR(52)"
+            ),
+            53 => write!(f, "BandedExercisesExerciseName::PULL_DOWN_WHEELCHAIR(53)"),
+            54 => write!(
+                f,
+                "BandedExercisesExerciseName::STRAIGHT_ARM_PULL_DOWN_WHEELCHAIR(54)"
+            ),
+            55 => write!(f, "BandedExercisesExerciseName::CURL_WHEELCHAIR(55)"),
+            56 => write!(
+                f,
+                "BandedExercisesExerciseName::OVERHEAD_CURL_WHEELCHAIR(56)"
+            ),
+            57 => write!(f, "BandedExercisesExerciseName::FACE_PULL_WHEELCHAIR(57)"),
+            58 => write!(
+                f,
+                "BandedExercisesExerciseName::AROUND_THE_WORLD_WHEELCHAIR(58)"
+            ),
+            59 => write!(f, "BandedExercisesExerciseName::PULL_APART_WHEELCHAIR(59)"),
+            60 => write!(f, "BandedExercisesExerciseName::SIDE_CURL_WHEELCHAIR(60)"),
+            61 => write!(
+                f,
+                "BandedExercisesExerciseName::OVERHEAD_PRESS_WHEELCHAIR(61)"
+            ),
+            _ => write!(f, "BandedExercisesExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BattleRopeExerciseName(pub u16);
 
 impl BattleRopeExerciseName {
@@ -12093,12 +18689,57 @@ impl fmt::Display for BattleRopeExerciseName {
             25 => write!(f, "stage_coach"),
             26 => write!(f, "ultimate_warrior"),
             27 => write!(f, "upper_cuts"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BattleRopeExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BattleRopeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BattleRopeExerciseName::ALTERNATING_FIGURE_EIGHT(0)"),
+            1 => write!(f, "BattleRopeExerciseName::ALTERNATING_JUMP_WAVE(1)"),
+            2 => write!(
+                f,
+                "BattleRopeExerciseName::ALTERNATING_KNEELING_TO_STANDING_WAVE(2)"
+            ),
+            3 => write!(f, "BattleRopeExerciseName::ALTERNATING_LUNGE_WAVE(3)"),
+            4 => write!(f, "BattleRopeExerciseName::ALTERNATING_SQUAT_WAVE(4)"),
+            5 => write!(f, "BattleRopeExerciseName::ALTERNATING_WAVE(5)"),
+            6 => write!(
+                f,
+                "BattleRopeExerciseName::ALTERNATING_WAVE_WITH_LATERAL_SHUFFLE(6)"
+            ),
+            7 => write!(f, "BattleRopeExerciseName::CLAP_WAVE(7)"),
+            8 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_FIGURE_EIGHT(8)"),
+            9 => write!(
+                f,
+                "BattleRopeExerciseName::DOUBLE_ARM_SIDE_TO_SIDE_SNAKE(9)"
+            ),
+            10 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_SIDE_WAVE(10)"),
+            11 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_SLAM(11)"),
+            12 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_WAVE(12)"),
+            13 => write!(f, "BattleRopeExerciseName::GRAPPLER_TOSS(13)"),
+            14 => write!(f, "BattleRopeExerciseName::HIP_TOSS(14)"),
+            15 => write!(f, "BattleRopeExerciseName::IN_AND_OUT_WAVE(15)"),
+            16 => write!(f, "BattleRopeExerciseName::INSIDE_CIRCLE(16)"),
+            17 => write!(f, "BattleRopeExerciseName::JUMPING_JACKS(17)"),
+            18 => write!(f, "BattleRopeExerciseName::OUTSIDE_CIRCLE(18)"),
+            19 => write!(f, "BattleRopeExerciseName::RAINBOW(19)"),
+            20 => write!(f, "BattleRopeExerciseName::SIDE_PLANK_WAVE(20)"),
+            21 => write!(f, "BattleRopeExerciseName::SIDEWINDER(21)"),
+            22 => write!(f, "BattleRopeExerciseName::SITTING_RUSSIAN_TWIST(22)"),
+            23 => write!(f, "BattleRopeExerciseName::SNAKE_WAVE(23)"),
+            24 => write!(f, "BattleRopeExerciseName::SPLIT_JACK(24)"),
+            25 => write!(f, "BattleRopeExerciseName::STAGE_COACH(25)"),
+            26 => write!(f, "BattleRopeExerciseName::ULTIMATE_WARRIOR(26)"),
+            27 => write!(f, "BattleRopeExerciseName::UPPER_CUTS(27)"),
+            _ => write!(f, "BattleRopeExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct EllipticalExerciseName(pub u16);
 
 impl EllipticalExerciseName {
@@ -12115,12 +18756,21 @@ impl fmt::Display for EllipticalExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "elliptical"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "EllipticalExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for EllipticalExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "EllipticalExerciseName::ELLIPTICAL(0)"),
+            _ => write!(f, "EllipticalExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FloorClimbExerciseName(pub u16);
 
 impl FloorClimbExerciseName {
@@ -12137,12 +18787,21 @@ impl fmt::Display for FloorClimbExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "floor_climb"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FloorClimbExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FloorClimbExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "FloorClimbExerciseName::FLOOR_CLIMB(0)"),
+            _ => write!(f, "FloorClimbExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct IndoorBikeExerciseName(pub u16);
 
 impl IndoorBikeExerciseName {
@@ -12163,12 +18822,23 @@ impl fmt::Display for IndoorBikeExerciseName {
             0 => write!(f, "air_bike"),
             1 => write!(f, "assault_bike"),
             3 => write!(f, "stationary_bike"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "IndoorBikeExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for IndoorBikeExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "IndoorBikeExerciseName::AIR_BIKE(0)"),
+            1 => write!(f, "IndoorBikeExerciseName::ASSAULT_BIKE(1)"),
+            3 => write!(f, "IndoorBikeExerciseName::STATIONARY_BIKE(3)"),
+            _ => write!(f, "IndoorBikeExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct IndoorRowExerciseName(pub u16);
 
 impl IndoorRowExerciseName {
@@ -12185,12 +18855,21 @@ impl fmt::Display for IndoorRowExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "rowing_machine"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "IndoorRowExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for IndoorRowExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "IndoorRowExerciseName::ROWING_MACHINE(0)"),
+            _ => write!(f, "IndoorRowExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct LadderExerciseName(pub u16);
 
 impl LadderExerciseName {
@@ -12209,12 +18888,22 @@ impl fmt::Display for LadderExerciseName {
         match self.0 {
             0 => write!(f, "agility"),
             1 => write!(f, "speed"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "LadderExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for LadderExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "LadderExerciseName::AGILITY(0)"),
+            1 => write!(f, "LadderExerciseName::SPEED(1)"),
+            _ => write!(f, "LadderExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SandbagExerciseName(pub u16);
 
 impl SandbagExerciseName {
@@ -12269,12 +18958,40 @@ impl fmt::Display for SandbagExerciseName {
             17 => write!(f, "side_lunge"),
             18 => write!(f, "sprint"),
             19 => write!(f, "zercher_squat"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SandbagExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SandbagExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SandbagExerciseName::AROUND_THE_WORLD(0)"),
+            1 => write!(f, "SandbagExerciseName::BACK_SQUAT(1)"),
+            2 => write!(f, "SandbagExerciseName::BEAR_CRAWL_PULL_THROUGH(2)"),
+            3 => write!(f, "SandbagExerciseName::BEAR_HUG_SQUAT(3)"),
+            4 => write!(f, "SandbagExerciseName::CLEAN(4)"),
+            5 => write!(f, "SandbagExerciseName::CLEAN_AND_PRESS(5)"),
+            6 => write!(f, "SandbagExerciseName::CURL(6)"),
+            7 => write!(f, "SandbagExerciseName::FRONT_CARRY(7)"),
+            8 => write!(f, "SandbagExerciseName::FRONT_SQUAT(8)"),
+            9 => write!(f, "SandbagExerciseName::LUNGE(9)"),
+            10 => write!(f, "SandbagExerciseName::OVERHEAD_PRESS(10)"),
+            11 => write!(f, "SandbagExerciseName::PLANK_PULL_THROUGH(11)"),
+            12 => write!(f, "SandbagExerciseName::ROTATIONAL_LUNGE(12)"),
+            13 => write!(f, "SandbagExerciseName::ROW(13)"),
+            14 => write!(f, "SandbagExerciseName::RUSSIAN_TWIST(14)"),
+            15 => write!(f, "SandbagExerciseName::SHOULDERING(15)"),
+            16 => write!(f, "SandbagExerciseName::SHOVELING(16)"),
+            17 => write!(f, "SandbagExerciseName::SIDE_LUNGE(17)"),
+            18 => write!(f, "SandbagExerciseName::SPRINT(18)"),
+            19 => write!(f, "SandbagExerciseName::ZERCHER_SQUAT(19)"),
+            _ => write!(f, "SandbagExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SledExerciseName(pub u16);
 
 impl SledExerciseName {
@@ -12301,12 +19018,26 @@ impl fmt::Display for SledExerciseName {
             3 => write!(f, "low_push"),
             4 => write!(f, "push"),
             5 => write!(f, "row"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SledExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SledExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SledExerciseName::BACKWARD_DRAG(0)"),
+            1 => write!(f, "SledExerciseName::CHEST_PRESS(1)"),
+            2 => write!(f, "SledExerciseName::FORWARD_DRAG(2)"),
+            3 => write!(f, "SledExerciseName::LOW_PUSH(3)"),
+            4 => write!(f, "SledExerciseName::PUSH(4)"),
+            5 => write!(f, "SledExerciseName::ROW(5)"),
+            _ => write!(f, "SledExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SledgeHammerExerciseName(pub u16);
 
 impl SledgeHammerExerciseName {
@@ -12325,12 +19056,22 @@ impl fmt::Display for SledgeHammerExerciseName {
         match self.0 {
             0 => write!(f, "lateral_swing"),
             1 => write!(f, "hammer_slam"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SledgeHammerExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SledgeHammerExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SledgeHammerExerciseName::LATERAL_SWING(0)"),
+            1 => write!(f, "SledgeHammerExerciseName::HAMMER_SLAM(1)"),
+            _ => write!(f, "SledgeHammerExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct StairStepperExerciseName(pub u16);
 
 impl StairStepperExerciseName {
@@ -12347,12 +19088,21 @@ impl fmt::Display for StairStepperExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "stair_stepper"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "StairStepperExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for StairStepperExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "StairStepperExerciseName::STAIR_STEPPER(0)"),
+            _ => write!(f, "StairStepperExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SuspensionExerciseName(pub u16);
 
 impl SuspensionExerciseName {
@@ -12437,12 +19187,55 @@ impl fmt::Display for SuspensionExerciseName {
             32 => write!(f, "squat_jump"),
             33 => write!(f, "tricep_press"),
             34 => write!(f, "y_fly"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SuspensionExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SuspensionExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SuspensionExerciseName::CHEST_FLY(0)"),
+            1 => write!(f, "SuspensionExerciseName::CHEST_PRESS(1)"),
+            2 => write!(f, "SuspensionExerciseName::CRUNCH(2)"),
+            3 => write!(f, "SuspensionExerciseName::CURL(3)"),
+            4 => write!(f, "SuspensionExerciseName::DIP(4)"),
+            5 => write!(f, "SuspensionExerciseName::FACE_PULL(5)"),
+            6 => write!(f, "SuspensionExerciseName::GLUTE_BRIDGE(6)"),
+            7 => write!(f, "SuspensionExerciseName::HAMSTRING_CURL(7)"),
+            8 => write!(f, "SuspensionExerciseName::HIP_DROP(8)"),
+            9 => write!(f, "SuspensionExerciseName::INVERTED_ROW(9)"),
+            10 => write!(f, "SuspensionExerciseName::KNEE_DRIVE_JUMP(10)"),
+            11 => write!(f, "SuspensionExerciseName::KNEE_TO_CHEST(11)"),
+            12 => write!(f, "SuspensionExerciseName::LAT_PULLOVER(12)"),
+            13 => write!(f, "SuspensionExerciseName::LUNGE(13)"),
+            14 => write!(f, "SuspensionExerciseName::MOUNTAIN_CLIMBER(14)"),
+            15 => write!(f, "SuspensionExerciseName::PENDULUM(15)"),
+            16 => write!(f, "SuspensionExerciseName::PIKE(16)"),
+            17 => write!(f, "SuspensionExerciseName::PLANK(17)"),
+            18 => write!(f, "SuspensionExerciseName::POWER_PULL(18)"),
+            19 => write!(f, "SuspensionExerciseName::PULL_UP(19)"),
+            20 => write!(f, "SuspensionExerciseName::PUSH_UP(20)"),
+            21 => write!(f, "SuspensionExerciseName::REVERSE_MOUNTAIN_CLIMBER(21)"),
+            22 => write!(f, "SuspensionExerciseName::REVERSE_PLANK(22)"),
+            23 => write!(f, "SuspensionExerciseName::ROLLOUT(23)"),
+            24 => write!(f, "SuspensionExerciseName::ROW(24)"),
+            25 => write!(f, "SuspensionExerciseName::SIDE_LUNGE(25)"),
+            26 => write!(f, "SuspensionExerciseName::SIDE_PLANK(26)"),
+            27 => write!(f, "SuspensionExerciseName::SINGLE_LEG_DEADLIFT(27)"),
+            28 => write!(f, "SuspensionExerciseName::SINGLE_LEG_SQUAT(28)"),
+            29 => write!(f, "SuspensionExerciseName::SIT_UP(29)"),
+            30 => write!(f, "SuspensionExerciseName::SPLIT(30)"),
+            31 => write!(f, "SuspensionExerciseName::SQUAT(31)"),
+            32 => write!(f, "SuspensionExerciseName::SQUAT_JUMP(32)"),
+            33 => write!(f, "SuspensionExerciseName::TRICEP_PRESS(33)"),
+            34 => write!(f, "SuspensionExerciseName::Y_FLY(34)"),
+            _ => write!(f, "SuspensionExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TireExerciseName(pub u16);
 
 impl TireExerciseName {
@@ -12459,12 +19252,21 @@ impl fmt::Display for TireExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "flip"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TireExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TireExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TireExerciseName::FLIP(0)"),
+            _ => write!(f, "TireExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct BikeOutdoorExerciseName(pub u16);
 
 impl BikeOutdoorExerciseName {
@@ -12481,12 +19283,21 @@ impl fmt::Display for BikeOutdoorExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "bike"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "BikeOutdoorExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for BikeOutdoorExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "BikeOutdoorExerciseName::BIKE(0)"),
+            _ => write!(f, "BikeOutdoorExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct RunIndoorExerciseName(pub u16);
 
 impl RunIndoorExerciseName {
@@ -12505,12 +19316,22 @@ impl fmt::Display for RunIndoorExerciseName {
         match self.0 {
             0 => write!(f, "indoor_track_run"),
             1 => write!(f, "treadmill"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "RunIndoorExerciseName({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for RunIndoorExerciseName {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "RunIndoorExerciseName::INDOOR_TRACK_RUN(0)"),
+            1 => write!(f, "RunIndoorExerciseName::TREADMILL(1)"),
+            _ => write!(f, "RunIndoorExerciseName({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct WaterType(pub u8);
 
 impl WaterType {
@@ -12533,12 +19354,24 @@ impl fmt::Display for WaterType {
             1 => write!(f, "salt"),
             2 => write!(f, "en13319"),
             3 => write!(f, "custom"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "WaterType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for WaterType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "WaterType::FRESH(0)"),
+            1 => write!(f, "WaterType::SALT(1)"),
+            2 => write!(f, "WaterType::EN13319(2)"),
+            3 => write!(f, "WaterType::CUSTOM(3)"),
+            _ => write!(f, "WaterType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TissueModelType(pub u8);
 
 impl TissueModelType {
@@ -12556,12 +19389,21 @@ impl fmt::Display for TissueModelType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "zhl_16c"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TissueModelType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TissueModelType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TissueModelType::ZHL_16C(0)"),
+            _ => write!(f, "TissueModelType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DiveGasStatus(pub u8);
 
 impl DiveGasStatus {
@@ -12582,12 +19424,23 @@ impl fmt::Display for DiveGasStatus {
             0 => write!(f, "disabled"),
             1 => write!(f, "enabled"),
             2 => write!(f, "backup_only"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DiveGasStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DiveGasStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DiveGasStatus::DISABLED(0)"),
+            1 => write!(f, "DiveGasStatus::ENABLED(1)"),
+            2 => write!(f, "DiveGasStatus::BACKUP_ONLY(2)"),
+            _ => write!(f, "DiveGasStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DiveAlert(pub u8);
 
 impl DiveAlert {
@@ -12687,12 +19540,59 @@ impl fmt::Display for DiveAlert {
             37 => write!(f, "apnea_surface"),
             38 => write!(f, "apnea_high_speed"),
             39 => write!(f, "apnea_low_speed"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DiveAlert({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DiveAlert {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DiveAlert::NDL_REACHED(0)"),
+            1 => write!(f, "DiveAlert::GAS_SWITCH_PROMPTED(1)"),
+            2 => write!(f, "DiveAlert::NEAR_SURFACE(2)"),
+            3 => write!(f, "DiveAlert::APPROACHING_NDL(3)"),
+            4 => write!(f, "DiveAlert::PO2_WARN(4)"),
+            5 => write!(f, "DiveAlert::PO2_CRIT_HIGH(5)"),
+            6 => write!(f, "DiveAlert::PO2_CRIT_LOW(6)"),
+            7 => write!(f, "DiveAlert::TIME_ALERT(7)"),
+            8 => write!(f, "DiveAlert::DEPTH_ALERT(8)"),
+            9 => write!(f, "DiveAlert::DECO_CEILING_BROKEN(9)"),
+            10 => write!(f, "DiveAlert::DECO_COMPLETE(10)"),
+            11 => write!(f, "DiveAlert::SAFETY_STOP_BROKEN(11)"),
+            12 => write!(f, "DiveAlert::SAFETY_STOP_COMPLETE(12)"),
+            13 => write!(f, "DiveAlert::CNS_WARNING(13)"),
+            14 => write!(f, "DiveAlert::CNS_CRITICAL(14)"),
+            15 => write!(f, "DiveAlert::OTU_WARNING(15)"),
+            16 => write!(f, "DiveAlert::OTU_CRITICAL(16)"),
+            17 => write!(f, "DiveAlert::ASCENT_CRITICAL(17)"),
+            18 => write!(f, "DiveAlert::ALERT_DISMISSED_BY_KEY(18)"),
+            19 => write!(f, "DiveAlert::ALERT_DISMISSED_BY_TIMEOUT(19)"),
+            20 => write!(f, "DiveAlert::BATTERY_LOW(20)"),
+            21 => write!(f, "DiveAlert::BATTERY_CRITICAL(21)"),
+            22 => write!(f, "DiveAlert::SAFETY_STOP_STARTED(22)"),
+            23 => write!(f, "DiveAlert::APPROACHING_FIRST_DECO_STOP(23)"),
+            24 => write!(f, "DiveAlert::SETPOINT_SWITCH_AUTO_LOW(24)"),
+            25 => write!(f, "DiveAlert::SETPOINT_SWITCH_AUTO_HIGH(25)"),
+            26 => write!(f, "DiveAlert::SETPOINT_SWITCH_MANUAL_LOW(26)"),
+            27 => write!(f, "DiveAlert::SETPOINT_SWITCH_MANUAL_HIGH(27)"),
+            28 => write!(f, "DiveAlert::AUTO_SETPOINT_SWITCH_IGNORED(28)"),
+            29 => write!(f, "DiveAlert::SWITCHED_TO_OPEN_CIRCUIT(29)"),
+            30 => write!(f, "DiveAlert::SWITCHED_TO_CLOSED_CIRCUIT(30)"),
+            32 => write!(f, "DiveAlert::TANK_BATTERY_LOW(32)"),
+            33 => write!(f, "DiveAlert::PO2_CCR_DIL_LOW(33)"),
+            34 => write!(f, "DiveAlert::DECO_STOP_CLEARED(34)"),
+            35 => write!(f, "DiveAlert::APNEA_NEUTRAL_BUOYANCY(35)"),
+            36 => write!(f, "DiveAlert::APNEA_TARGET_DEPTH(36)"),
+            37 => write!(f, "DiveAlert::APNEA_SURFACE(37)"),
+            38 => write!(f, "DiveAlert::APNEA_HIGH_SPEED(38)"),
+            39 => write!(f, "DiveAlert::APNEA_LOW_SPEED(39)"),
+            _ => write!(f, "DiveAlert({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DiveAlarmType(pub u8);
 
 impl DiveAlarmType {
@@ -12716,12 +19616,23 @@ impl fmt::Display for DiveAlarmType {
             0 => write!(f, "depth"),
             1 => write!(f, "time"),
             2 => write!(f, "speed"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DiveAlarmType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DiveAlarmType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DiveAlarmType::DEPTH(0)"),
+            1 => write!(f, "DiveAlarmType::TIME(1)"),
+            2 => write!(f, "DiveAlarmType::SPEED(2)"),
+            _ => write!(f, "DiveAlarmType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DiveBacklightMode(pub u8);
 
 impl DiveBacklightMode {
@@ -12740,12 +19651,22 @@ impl fmt::Display for DiveBacklightMode {
         match self.0 {
             0 => write!(f, "at_depth"),
             1 => write!(f, "always_on"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DiveBacklightMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DiveBacklightMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DiveBacklightMode::AT_DEPTH(0)"),
+            1 => write!(f, "DiveBacklightMode::ALWAYS_ON(1)"),
+            _ => write!(f, "DiveBacklightMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SleepLevel(pub u8);
 
 impl SleepLevel {
@@ -12770,12 +19691,25 @@ impl fmt::Display for SleepLevel {
             2 => write!(f, "light"),
             3 => write!(f, "deep"),
             4 => write!(f, "rem"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SleepLevel({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SleepLevel {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SleepLevel::UNMEASURABLE(0)"),
+            1 => write!(f, "SleepLevel::AWAKE(1)"),
+            2 => write!(f, "SleepLevel::LIGHT(2)"),
+            3 => write!(f, "SleepLevel::DEEP(3)"),
+            4 => write!(f, "SleepLevel::REM(4)"),
+            _ => write!(f, "SleepLevel({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct Spo2MeasurementType(pub u8);
 
 impl Spo2MeasurementType {
@@ -12798,12 +19732,24 @@ impl fmt::Display for Spo2MeasurementType {
             1 => write!(f, "spot_check"),
             2 => write!(f, "continuous_check"),
             3 => write!(f, "periodic"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "Spo2MeasurementType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for Spo2MeasurementType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "Spo2MeasurementType::OFF_WRIST(0)"),
+            1 => write!(f, "Spo2MeasurementType::SPOT_CHECK(1)"),
+            2 => write!(f, "Spo2MeasurementType::CONTINUOUS_CHECK(2)"),
+            3 => write!(f, "Spo2MeasurementType::PERIODIC(3)"),
+            _ => write!(f, "Spo2MeasurementType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct CcrSetpointSwitchMode(pub u8);
 
 impl CcrSetpointSwitchMode {
@@ -12824,12 +19770,22 @@ impl fmt::Display for CcrSetpointSwitchMode {
         match self.0 {
             0 => write!(f, "manual"),
             1 => write!(f, "automatic"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "CcrSetpointSwitchMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for CcrSetpointSwitchMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "CcrSetpointSwitchMode::MANUAL(0)"),
+            1 => write!(f, "CcrSetpointSwitchMode::AUTOMATIC(1)"),
+            _ => write!(f, "CcrSetpointSwitchMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct DiveGasMode(pub u8);
 
 impl DiveGasMode {
@@ -12848,12 +19804,22 @@ impl fmt::Display for DiveGasMode {
         match self.0 {
             0 => write!(f, "open_circuit"),
             1 => write!(f, "closed_circuit_diluent"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "DiveGasMode({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for DiveGasMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "DiveGasMode::OPEN_CIRCUIT(0)"),
+            1 => write!(f, "DiveGasMode::CLOSED_CIRCUIT_DILUENT(1)"),
+            _ => write!(f, "DiveGasMode({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ProjectileType(pub u8);
 
 impl ProjectileType {
@@ -12886,12 +19852,26 @@ impl fmt::Display for ProjectileType {
             3 => write!(f, "shotshell"),
             4 => write!(f, "air_rifle_pellet"),
             5 => write!(f, "other"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ProjectileType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ProjectileType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ProjectileType::ARROW(0)"),
+            1 => write!(f, "ProjectileType::RIFLE_CARTRIDGE(1)"),
+            2 => write!(f, "ProjectileType::PISTOL_CARTRIDGE(2)"),
+            3 => write!(f, "ProjectileType::SHOTSHELL(3)"),
+            4 => write!(f, "ProjectileType::AIR_RIFLE_PELLET(4)"),
+            5 => write!(f, "ProjectileType::OTHER(5)"),
+            _ => write!(f, "ProjectileType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct FaveroProduct(pub u16);
 
 impl FaveroProduct {
@@ -12910,12 +19890,22 @@ impl fmt::Display for FaveroProduct {
         match self.0 {
             10 => write!(f, "assioma_uno"),
             12 => write!(f, "assioma_duo"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "FaveroProduct({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for FaveroProduct {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            10 => write!(f, "FaveroProduct::ASSIOMA_UNO(10)"),
+            12 => write!(f, "FaveroProduct::ASSIOMA_DUO(12)"),
+            _ => write!(f, "FaveroProduct({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct SplitType(pub u8);
 
 impl SplitType {
@@ -12976,12 +19966,41 @@ impl fmt::Display for SplitType {
             23 => write!(f, "transition"),
             28 => write!(f, "ski_lift_split"),
             29 => write!(f, "ski_run_split"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "SplitType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for SplitType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            1 => write!(f, "SplitType::ASCENT_SPLIT(1)"),
+            2 => write!(f, "SplitType::DESCENT_SPLIT(2)"),
+            3 => write!(f, "SplitType::INTERVAL_ACTIVE(3)"),
+            4 => write!(f, "SplitType::INTERVAL_REST(4)"),
+            5 => write!(f, "SplitType::INTERVAL_WARMUP(5)"),
+            6 => write!(f, "SplitType::INTERVAL_COOLDOWN(6)"),
+            7 => write!(f, "SplitType::INTERVAL_RECOVERY(7)"),
+            8 => write!(f, "SplitType::INTERVAL_OTHER(8)"),
+            9 => write!(f, "SplitType::CLIMB_ACTIVE(9)"),
+            10 => write!(f, "SplitType::CLIMB_REST(10)"),
+            11 => write!(f, "SplitType::SURF_ACTIVE(11)"),
+            12 => write!(f, "SplitType::RUN_ACTIVE(12)"),
+            13 => write!(f, "SplitType::RUN_REST(13)"),
+            14 => write!(f, "SplitType::WORKOUT_ROUND(14)"),
+            17 => write!(f, "SplitType::RWD_RUN(17)"),
+            18 => write!(f, "SplitType::RWD_WALK(18)"),
+            21 => write!(f, "SplitType::WINDSURF_ACTIVE(21)"),
+            22 => write!(f, "SplitType::RWD_STAND(22)"),
+            23 => write!(f, "SplitType::TRANSITION(23)"),
+            28 => write!(f, "SplitType::SKI_LIFT_SPLIT(28)"),
+            29 => write!(f, "SplitType::SKI_RUN_SPLIT(29)"),
+            _ => write!(f, "SplitType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct ClimbProEvent(pub u8);
 
 impl ClimbProEvent {
@@ -13002,12 +20021,23 @@ impl fmt::Display for ClimbProEvent {
             0 => write!(f, "approach"),
             1 => write!(f, "start"),
             2 => write!(f, "complete"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "ClimbProEvent({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for ClimbProEvent {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "ClimbProEvent::APPROACH(0)"),
+            1 => write!(f, "ClimbProEvent::START(1)"),
+            2 => write!(f, "ClimbProEvent::COMPLETE(2)"),
+            _ => write!(f, "ClimbProEvent({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct GasConsumptionRateType(pub u8);
 
 impl GasConsumptionRateType {
@@ -13031,12 +20061,23 @@ impl fmt::Display for GasConsumptionRateType {
             0 => write!(f, "pressure_sac"),
             1 => write!(f, "volume_sac"),
             2 => write!(f, "rmv"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "GasConsumptionRateType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for GasConsumptionRateType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "GasConsumptionRateType::PRESSURE_SAC(0)"),
+            1 => write!(f, "GasConsumptionRateType::VOLUME_SAC(1)"),
+            2 => write!(f, "GasConsumptionRateType::RMV(2)"),
+            _ => write!(f, "GasConsumptionRateType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct TapSensitivity(pub u8);
 
 impl TapSensitivity {
@@ -13057,12 +20098,23 @@ impl fmt::Display for TapSensitivity {
             0 => write!(f, "high"),
             1 => write!(f, "medium"),
             2 => write!(f, "low"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "TapSensitivity({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for TapSensitivity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "TapSensitivity::HIGH(0)"),
+            1 => write!(f, "TapSensitivity::MEDIUM(1)"),
+            2 => write!(f, "TapSensitivity::LOW(2)"),
+            _ => write!(f, "TapSensitivity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct RadarThreatLevelType(pub u8);
 
 impl RadarThreatLevelType {
@@ -13085,12 +20137,64 @@ impl fmt::Display for RadarThreatLevelType {
             1 => write!(f, "threat_none"),
             2 => write!(f, "threat_approaching"),
             3 => write!(f, "threat_approaching_fast"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "RadarThreatLevelType({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for RadarThreatLevelType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "RadarThreatLevelType::THREAT_UNKNOWN(0)"),
+            1 => write!(f, "RadarThreatLevelType::THREAT_NONE(1)"),
+            2 => write!(f, "RadarThreatLevelType::THREAT_APPROACHING(2)"),
+            3 => write!(f, "RadarThreatLevelType::THREAT_APPROACHING_FAST(3)"),
+            _ => write!(f, "RadarThreatLevelType({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct SleepDisruptionSeverity(pub u8);
+
+impl SleepDisruptionSeverity {
+    pub const NONE: SleepDisruptionSeverity = SleepDisruptionSeverity(0);
+    pub const LOW: SleepDisruptionSeverity = SleepDisruptionSeverity(1);
+    pub const MEDIUM: SleepDisruptionSeverity = SleepDisruptionSeverity(2);
+    pub const HIGH: SleepDisruptionSeverity = SleepDisruptionSeverity(3);
+}
+
+impl Default for SleepDisruptionSeverity {
+    fn default() -> Self {
+        Self(u8::MAX)
+    }
+}
+
+impl fmt::Display for SleepDisruptionSeverity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "none"),
+            1 => write!(f, "low"),
+            2 => write!(f, "medium"),
+            3 => write!(f, "high"),
+            _ => write!(f, "SleepDisruptionSeverity({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for SleepDisruptionSeverity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "SleepDisruptionSeverity::NONE(0)"),
+            1 => write!(f, "SleepDisruptionSeverity::LOW(1)"),
+            2 => write!(f, "SleepDisruptionSeverity::MEDIUM(2)"),
+            3 => write!(f, "SleepDisruptionSeverity::HIGH(3)"),
+            _ => write!(f, "SleepDisruptionSeverity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MaxMetSpeedSource(pub u8);
 
 impl MaxMetSpeedSource {
@@ -13111,12 +20215,23 @@ impl fmt::Display for MaxMetSpeedSource {
             0 => write!(f, "onboard_gps"),
             1 => write!(f, "connected_gps"),
             2 => write!(f, "cadence"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MaxMetSpeedSource({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MaxMetSpeedSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "MaxMetSpeedSource::ONBOARD_GPS(0)"),
+            1 => write!(f, "MaxMetSpeedSource::CONNECTED_GPS(1)"),
+            2 => write!(f, "MaxMetSpeedSource::CADENCE(2)"),
+            _ => write!(f, "MaxMetSpeedSource({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct MaxMetHeartRateSource(pub u8);
 
 impl MaxMetHeartRateSource {
@@ -13137,12 +20252,22 @@ impl fmt::Display for MaxMetHeartRateSource {
         match self.0 {
             0 => write!(f, "whr"),
             1 => write!(f, "hrm"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "MaxMetHeartRateSource({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for MaxMetHeartRateSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "MaxMetHeartRateSource::WHR(0)"),
+            1 => write!(f, "MaxMetHeartRateSource::HRM(1)"),
+            _ => write!(f, "MaxMetHeartRateSource({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct HrvStatus(pub u8);
 
 impl HrvStatus {
@@ -13167,12 +20292,25 @@ impl fmt::Display for HrvStatus {
             2 => write!(f, "low"),
             3 => write!(f, "unbalanced"),
             4 => write!(f, "balanced"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "HrvStatus({})", self.0),
         }
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq)]
+impl fmt::Debug for HrvStatus {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "HrvStatus::NONE(0)"),
+            1 => write!(f, "HrvStatus::POOR(1)"),
+            2 => write!(f, "HrvStatus::LOW(2)"),
+            3 => write!(f, "HrvStatus::UNBALANCED(3)"),
+            4 => write!(f, "HrvStatus::BALANCED(4)"),
+            _ => write!(f, "HrvStatus({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
 pub struct NoFlyTimeMode(pub u8);
 
 impl NoFlyTimeMode {
@@ -13193,7 +20331,17 @@ impl fmt::Display for NoFlyTimeMode {
         match self.0 {
             0 => write!(f, "standard"),
             1 => write!(f, "flat_24_hours"),
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "NoFlyTimeMode({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for NoFlyTimeMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "NoFlyTimeMode::STANDARD(0)"),
+            1 => write!(f, "NoFlyTimeMode::FLAT_24_HOURS(1)"),
+            _ => write!(f, "NoFlyTimeMode({})", self.0),
         }
     }
 }

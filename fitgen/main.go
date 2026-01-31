@@ -25,7 +25,6 @@ import (
 )
 
 func main() {
-
 	var (
 		generatePath   = flag.String("p", "", "root/path/to/generate/files")
 		whichBuilder   = flag.String("b", "", "Value separated by comma: lookup,profile_type")

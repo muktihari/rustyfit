@@ -11,6 +11,7 @@ type Data struct {
 type Type struct {
 	TypeName  string
 	Base      string
+	Invalid   string
 	Constants []Constant
 }
 

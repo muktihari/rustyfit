@@ -39,16 +39,6 @@ func NewBuilder(path string, lookup *lookup.Lookup, message []parser.Message, ty
 	return &Builder{
 		template: template.Must(template.New("main").
 			Funcs(template.FuncMap{
-				"stringsJoin":   strings.Join,
-				"stringReplace": strings.Replace,
-				"byteDiv":       func(a, b byte) byte { return a / b },
-				"byteAdd":       func(a, b byte) byte { return a + b },
-				"byteSub":       func(a, b byte) byte { return a - b },
-				"extractExactlyType": func(s string) string {
-					s = strings.Replace(s, "Vec<", "", 1)
-					s = strings.Replace(s, ">", "", 1)
-					return s
-				},
 				"formatFloat": func(f float64) string {
 					if f == float64(int64(f)) {
 						return strconv.FormatFloat(f, 'f', 1, 64)
@@ -177,6 +167,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Name:              strutil.ToTitle(mesg.Name),
 			Fields:            fields,
 			DynamicFields:     dynamicFields,
+			StateSize:         (maxFieldExpandNum + 8) / 8,
 			MaxFieldNum:       maxFieldNum + 1,
 			MaxFieldExpandNum: maxFieldExpandNum + 1,
 		})

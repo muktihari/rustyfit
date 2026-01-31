@@ -1,3 +1,7 @@
+#![warn(missing_docs)]
+
+use std::fmt;
+
 use crate::{
     profile::{
         mesgdef,
@@ -8,30 +12,97 @@ use crate::{
 
 #[derive(Debug, Clone)]
 pub enum MessageValidatorError {
-    ValueIntegrity(IntegrityError, String),
-    MissingDeveloperDataId(String),
-    MissingFieldDescription(String),
-    NoValidFields,
+    /// Message has no fields.
+    NoFields,
+    /// Field value integrity
+    FieldValueIntegrity {
+        field_index: usize,
+        err: IntegrityError,
+    },
+    /// Developer field value integrity
+    DeveloperFieldValueIntegrity {
+        developer_field_index: usize,
+        err: IntegrityError,
+    },
+    /// Missing developer data id
+    MissingDeveloperDataId { developer_field_index: usize },
+    /// Missing field description
+    MissingFieldDescription { developer_field_index: usize },
+}
+
+impl fmt::Display for MessageValidatorError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            Self::NoFields => write!(f, "no fields"),
+            Self::FieldValueIntegrity { field_index, err } => write!(
+                f,
+                "value integrity: field index {}, err: {}",
+                field_index, err
+            ),
+            Self::DeveloperFieldValueIntegrity {
+                developer_field_index,
+                err,
+            } => write!(
+                f,
+                "value integrity: developer field index {}, err: {}",
+                developer_field_index, err
+            ),
+            Self::MissingDeveloperDataId {
+                developer_field_index,
+            } => write!(
+                f,
+                "missing developer data id for developer field index {}",
+                developer_field_index
+            ),
+            Self::MissingFieldDescription {
+                developer_field_index,
+            } => write!(
+                f,
+                "missing field description for developer field index {}",
+                developer_field_index
+            ),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
 pub enum IntegrityError {
-    ValueBaseTypeNotAlign(String),
+    /// Value and base type is not align
+    ValueBaseTypeNotAlign {
+        value: Value,
+        base_type: FitBaseType,
+    },
+    /// Invalid UTF-8 string in a value.
     InvalidUTF8String(String),
+    /// Value size exceed maximum limit (255 bytes)
     ValueSizeExceedLimit,
 }
 
+impl fmt::Display for IntegrityError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            Self::ValueBaseTypeNotAlign { value, base_type } => {
+                write!(
+                    f,
+                    "value {:?} is not align with base type {}",
+                    value, base_type
+                )
+            }
+            Self::InvalidUTF8String(value) => write!(f, "invalid UTF-8 string: {:?}", value),
+            Self::ValueSizeExceedLimit => write!(f, "value's size exceed limit"),
+        }
+    }
+}
+
 pub(super) struct MessageValidator {
-    omit_invalid_value: bool,
-    developer_data_indexes: Vec<u8>,
+    developer_data_index_seen: [u64; 4],
     field_descriptions: Vec<mesgdef::FieldDescription>,
 }
 
 impl MessageValidator {
-    pub(super) fn new(omit_invalid_value: bool) -> Self {
+    pub(super) fn new() -> Self {
         Self {
-            omit_invalid_value,
-            developer_data_indexes: Vec::new(),
+            developer_data_index_seen: [0u64; 4],
             field_descriptions: Vec::new(),
         }
     }
@@ -47,23 +118,18 @@ impl MessageValidator {
                 continue;
             }
 
-            let base_type = field.profile_type.base_type();
-            if self.omit_invalid_value && !field.value.is_valid(base_type) {
-                continue;
-            }
-
-            if let Err(err) = self.value_integrity(&field.value, base_type) {
-                return Err(MessageValidatorError::ValueIntegrity(
+            if let Err(err) = self.value_integrity(&field.value, field.profile_type.base_type()) {
+                return Err(MessageValidatorError::FieldValueIntegrity {
+                    field_index: i,
                     err,
-                    format!("fields[{}], num: {}", i, field.num),
-                ));
+                });
             }
 
             if valid == 255 {
-                return Err(MessageValidatorError::ValueIntegrity(
-                    IntegrityError::ValueSizeExceedLimit,
-                    format!("fields[{}], num: {}", i, field.num),
-                ));
+                return Err(MessageValidatorError::FieldValueIntegrity {
+                    field_index: i,
+                    err: IntegrityError::ValueSizeExceedLimit,
+                });
             }
 
             if i != valid {
@@ -83,7 +149,7 @@ impl MessageValidator {
                     .find(|field| field.num == mesgdef::DeveloperDataId::DEVELOPER_DATA_INDEX)
                 {
                     if let Value::Uint8(v) = field.value {
-                        self.developer_data_indexes.push(v);
+                        self.developer_data_index_seen[(v as usize) >> 6] |= 1 << (v & 63)
                     }
                 }
             }
@@ -97,56 +163,40 @@ impl MessageValidator {
         for i in 0..mesg.developer_fields.len() {
             let dev_field = &mesg.developer_fields[i];
 
-            let mut ok = false;
-            for &developer_data_index in &self.developer_data_indexes {
-                if developer_data_index == dev_field.developer_data_index {
-                    ok = true;
-                    break;
-                }
+            let x = dev_field.developer_data_index;
+            if (self.developer_data_index_seen[(x as usize) >> 6] >> (x & 63)) & 1 == 0 {
+                return Err(MessageValidatorError::MissingDeveloperDataId {
+                    developer_field_index: i,
+                });
             }
 
-            if !ok {
-                return Err(MessageValidatorError::MissingDeveloperDataId(format!(
-                    "developer_fields[{}], num: {}",
-                    i, dev_field.num
-                )));
-            }
-
-            let mut field_desc: Option<&mesgdef::FieldDescription> = None;
-            for v in &self.field_descriptions {
-                if v.developer_data_index == dev_field.developer_data_index
+            match self.field_descriptions.iter().find(|v| {
+                v.developer_data_index == dev_field.developer_data_index
                     && v.field_definition_number == dev_field.num
-                {
-                    field_desc = Some(v);
-                    break;
-                }
-            }
-
-            match field_desc {
+            }) {
                 Some(v) => {
                     if !dev_field.value.is_valid(v.fit_base_type_id) {
                         continue;
                     }
                     if let Err(err) = self.value_integrity(&dev_field.value, v.fit_base_type_id) {
-                        return Err(MessageValidatorError::ValueIntegrity(
+                        return Err(MessageValidatorError::DeveloperFieldValueIntegrity {
+                            developer_field_index: i,
                             err,
-                            format!("developer_fields[{}], num: {}", i, dev_field.num),
-                        ));
+                        });
                     }
                 }
                 None => {
-                    return Err(MessageValidatorError::MissingFieldDescription(format!(
-                        "developer_fields[{}], num: {}",
-                        i, dev_field.num
-                    )));
+                    return Err(MessageValidatorError::MissingFieldDescription {
+                        developer_field_index: i,
+                    });
                 }
             };
 
             if valid == 255 {
-                return Err(MessageValidatorError::ValueIntegrity(
-                    IntegrityError::ValueSizeExceedLimit,
-                    format!("developer_fields[{}], num: {}", i, dev_field.num),
-                ));
+                return Err(MessageValidatorError::DeveloperFieldValueIntegrity {
+                    developer_field_index: i,
+                    err: IntegrityError::ValueSizeExceedLimit,
+                });
             }
 
             if i != valid {
@@ -159,7 +209,7 @@ impl MessageValidator {
         mesg.developer_fields.truncate(valid);
 
         if mesg.fields.is_empty() && mesg.developer_fields.is_empty() {
-            return Err(MessageValidatorError::NoValidFields);
+            return Err(MessageValidatorError::NoFields);
         }
 
         Ok(())
@@ -167,28 +217,22 @@ impl MessageValidator {
 
     fn value_integrity(&self, value: &Value, base_type: FitBaseType) -> Result<(), IntegrityError> {
         if !value.is_align(base_type) {
-            return Err(IntegrityError::ValueBaseTypeNotAlign(format!(
-                "value {:?} is not align with base_type '{}'",
-                value, base_type
-            )));
+            return Err(IntegrityError::ValueBaseTypeNotAlign {
+                value: value.clone(),
+                base_type,
+            });
         }
 
         match value {
             Value::String(v) => {
                 if std::str::from_utf8(v.as_bytes()).is_err() {
-                    return Err(IntegrityError::InvalidUTF8String(format!(
-                        "\"{}\" is not a valid utf-8 string",
-                        v
-                    )));
+                    return Err(IntegrityError::InvalidUTF8String(v.clone()));
                 }
             }
             Value::VecString(v) => {
-                for (i, x) in v.iter().enumerate() {
+                for x in v.iter() {
                     if std::str::from_utf8(x.as_bytes()).is_err() {
-                        return Err(IntegrityError::InvalidUTF8String(format!(
-                            "[{}] \"{}\" is not a valid utf-8 string",
-                            i, x
-                        )));
+                        return Err(IntegrityError::InvalidUTF8String(x.clone()));
                     }
                 }
             }
@@ -204,6 +248,7 @@ impl MessageValidator {
     }
 
     pub(super) fn reset(&mut self) {
+        self.developer_data_index_seen.fill(0);
         self.field_descriptions.clear();
     }
 }

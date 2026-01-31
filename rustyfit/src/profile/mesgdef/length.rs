@@ -10,9 +10,10 @@ use crate::profile::{ProfileType, lookup, typedef};
 use crate::proto::*;
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
-    let pos = num / 8;
-    let bit = 1u8 << (num - (8 * pos));
-    state[pos as usize] & bit == bit
+    match num {
+        22 | 23 => (state[num as usize >> 3] >> (num & 7)) & 1 == 1,
+        _ => false,
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -51,7 +52,7 @@ pub struct Length {
     pub enhanced_max_respiration_rate: u16,
     pub avg_respiration_rate: u8,
     pub max_respiration_rate: u8,
-    state: [u8; 4], // Used for tracking expanded fields.
+    state: [u8; 3], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -207,24 +208,21 @@ impl Length {
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).
     pub fn mark_as_expanded(&mut self, num: u8, flag: bool) -> bool {
         match num {
-            22 | 23 => {}
-            _ => return false,
-        };
-        let pos = num / 8;
-        let bit = 1u8 << (num - (8 * pos));
-        self.state[pos as usize] &= !bit;
-        if flag {
-            self.state[pos as usize] |= bit;
+            22 | 23 => {
+                if flag {
+                    self.state[num as usize >> 3] |= 1 << (num & 7)
+                } else {
+                    self.state[num as usize >> 3] &= !(1 << (num & 7))
+                }
+                true
+            }
+            _ => false,
         }
-        true
     }
 
     /// checks whether given field's num is a field generated through a component expansion.
     pub fn is_expanded(&self, num: u8) -> bool {
-        if num / 8 < self.state.len() as u8 {
-            return is_expanded(&self.state, num);
-        }
-        false
+        is_expanded(&self.state, num)
     }
 }
 
@@ -238,7 +236,7 @@ impl From<&Message> for Length {
     /// from creates new Length struct based on given mesg.
     fn from(mesg: &Message) -> Self {
         let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
-        let mut state = [0u8; 4];
+        let mut state = [0u8; 3];
         let mut unknown_fields: Vec<Field> = Vec::new();
 
         for field in &mesg.fields {
@@ -246,9 +244,8 @@ impl From<&Message> for Length {
                 unknown_fields.push(field.clone());
                 continue;
             }
-            if field.num < 24 && field.is_expanded {
-                let pos: u8 = field.num / 8;
-                state[pos as usize] |= 1 << (field.num - (8 * pos));
+            if field.is_expanded && field.num < 24 {
+                state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
             vals[field.num as usize] = &field.value;
         }

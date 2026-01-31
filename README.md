@@ -247,6 +247,5 @@ let mut enc: Encoder = EncoderBuilder::new(&mut bw)
         .endianness(Endianness::BigEndian)
         .protocol_version(ProtocolVersion::V2)
         .header_option(HeaderOption::Compressed(3))
-        .omit_invalid_value(false)
         .build();
 ```

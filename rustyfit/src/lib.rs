@@ -1,6 +1,9 @@
-pub use decoder::{Decoder, DecoderBuilder, DecoderError, DecoderEvent};
+pub use decoder::{
+    Builder as DecoderBuilder, Decoder, Error as DecoderError, Event as DecoderEvent,
+};
 pub use encoder::{
-    Encoder, EncoderBuilder, EncoderError, EncoderMessageError, Endianness, HeaderOption,
+    Builder as EncoderBuilder, Encoder, Endianness, Error as EncoderError, HeaderOption,
+    IoError as EncoderIoError, MessageError as EncoderMessageError,
 };
 
 /// FIT Global Profile representation (generated from Profile.xlsx)

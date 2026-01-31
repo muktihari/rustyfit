@@ -10,16 +10,17 @@ use crate::profile::{ProfileType, lookup, typedef};
 use crate::proto::*;
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
-    let pos = num / 8;
-    let bit = 1u8 << (num - (8 * pos));
-    state[pos as usize] & bit == bit
+    match num {
+        91 | 92 | 93 => (state[num as usize >> 3] >> (num & 7)) & 1 == 1,
+        _ => false,
+    }
 }
 
 #[derive(Debug, Clone)]
 /// SegmentLap is a SegmentLap message.
 pub struct SegmentLap {
     pub message_index: typedef::MessageIndex,
-    /// Units: s; Lap end time.
+    /// Units: s
     pub timestamp: typedef::DateTime,
     pub event: typedef::Event,
     pub event_type: typedef::EventType,
@@ -1266,24 +1267,21 @@ impl SegmentLap {
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).
     pub fn mark_as_expanded(&mut self, num: u8, flag: bool) -> bool {
         match num {
-            91 | 92 | 93 => {}
-            _ => return false,
-        };
-        let pos = num / 8;
-        let bit = 1u8 << (num - (8 * pos));
-        self.state[pos as usize] &= !bit;
-        if flag {
-            self.state[pos as usize] |= bit;
+            91 | 92 | 93 => {
+                if flag {
+                    self.state[num as usize >> 3] |= 1 << (num & 7)
+                } else {
+                    self.state[num as usize >> 3] &= !(1 << (num & 7))
+                }
+                true
+            }
+            _ => false,
         }
-        true
     }
 
     /// checks whether given field's num is a field generated through a component expansion.
     pub fn is_expanded(&self, num: u8) -> bool {
-        if num / 8 < self.state.len() as u8 {
-            return is_expanded(&self.state, num);
-        }
-        false
+        is_expanded(&self.state, num)
     }
 }
 
@@ -1305,9 +1303,8 @@ impl From<&Message> for SegmentLap {
                 unknown_fields.push(field.clone());
                 continue;
             }
-            if field.num < 94 && field.is_expanded {
-                let pos: u8 = field.num / 8;
-                state[pos as usize] |= 1 << (field.num - (8 * pos));
+            if field.is_expanded && field.num < 94 {
+                state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
             vals[field.num as usize] = &field.value;
         }

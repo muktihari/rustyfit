@@ -87,8 +87,15 @@ func (b *Builder) Build() ([]generator.Data, error) {
 		}
 
 		data.Types = append(data.Types, Type{
-			TypeName:  typeName,
-			Base:      intoRustType(basetype.FromString(t.BaseType)),
+			TypeName: typeName,
+			Base:     intoRustType(basetype.FromString(t.BaseType)),
+			Invalid: func() string {
+				rt := intoRustType(basetype.FromString(t.BaseType))
+				if strings.HasSuffix(t.BaseType, "z") {
+					return rt + "::MIN"
+				}
+				return rt + "::MAX"
+			}(),
 			Constants: constants,
 		})
 

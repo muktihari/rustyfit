@@ -28,7 +28,7 @@ impl Bool {
 }
 
 {{ range $_, $typ := .Types }}
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 pub struct {{ $typ.TypeName }}(pub {{ $typ.Base }});
 
 impl {{ $typ.TypeName }} {
@@ -58,7 +58,7 @@ impl {{ $typ.TypeName }} {
 
 impl Default for {{ $typ.TypeName }} {
     fn default() -> Self {
-        Self({{ $typ.Base }}::MAX)
+        Self({{ $typ.Invalid }})
     }
 }
 
@@ -68,7 +68,18 @@ impl fmt::Display for {{ $typ.TypeName }} {
             {{ range .Constants -}}
             {{ .Decorator }} {{ .Value }} => write!(f, "{{ .String }}"),
             {{ end -}}
-            _ => write!(f, "unknown({})", self.0),
+            _ => write!(f, "{{ $typ.TypeName }}({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for {{ $typ.TypeName }} {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            {{ range .Constants -}}
+            {{ .Decorator }} {{ .Value }} => write!(f, "{{ $typ.TypeName }}::{{ .Name }}({{ .Value }})"),
+            {{ end -}}
+            _ => write!(f, "{{ $typ.TypeName }}({})", self.0),
         }
     }
 }
