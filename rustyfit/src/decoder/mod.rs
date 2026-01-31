@@ -21,47 +21,72 @@ use std::{
 
 /// Decoder Error
 #[derive(Debug, Clone, Copy)]
-pub enum DecoderError {
+pub enum Error {
     /// IO related error when reading from the Reader.
-    /// 0: io error kind, 1: read byte position
-    Io(ErrorKind, usize),
+    Io {
+        /// IO error kind
+        error_kind: ErrorKind,
+        /// Byte position
+        byte_pos: usize,
+    },
     /// File Header's size is not 12 or 14, or data_type is not `.FIT`.
     NotFITFile,
     /// Checksum mismatch either in File Header or in record data.
-    /// 0: expected crc, 1: got crc
-    ChecksumMismatch(u16, u16),
+    ChecksumMismatch {
+        /// Expected CRC retrieved from FIT File.
+        expected: u16,
+        /// Actual CRC calculated by Decoder
+        got: u16,
+    },
     /// Missing message definition for the current message data.
-    /// 0: local message number
-    MissingMessageDefinition(u8),
+    MissingMessageDefinition {
+        /// Local Message Number
+        local_mesg_num: u8,
+    },
     /// Field definition's size should match exactly, or be a multiple of, the BaseType's size.
-    /// 0: expected size, 1: got size, 2: base type
-    BaseTypeSizeMismatch(u8, u8, FitBaseType),
+    BaseTypeSizeMismatch {
+        /// Expected size
+        expected: u8,
+        /// Actual size
+        got: u8,
+        /// FIT Base Type
+        base_type: FitBaseType,
+    },
 }
 
-impl fmt::Display for DecoderError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self {
-            DecoderError::Io(kind, n) => write!(f, "io error kind {} at byte pos {}", kind, n),
-            DecoderError::NotFITFile => write!(f, "not a FIT file"),
-            DecoderError::ChecksumMismatch(expected, got) => {
+            Error::Io {
+                error_kind,
+                byte_pos,
+            } => {
+                write!(f, "io error kind {} at byte pos {}", error_kind, byte_pos)
+            }
+            Error::NotFITFile => write!(f, "not a FIT file"),
+            Error::ChecksumMismatch { expected, got } => {
                 write!(f, "checksum mismatch, expected {} got {}", expected, got)
             }
-            DecoderError::MissingMessageDefinition(local_mesg_num) => write!(
+            Error::MissingMessageDefinition { local_mesg_num } => write!(
                 f,
                 "missing message definition for local message number {}",
                 local_mesg_num
             ),
-            DecoderError::BaseTypeSizeMismatch(expected, size, base_type) => write!(
+            Error::BaseTypeSizeMismatch {
+                expected,
+                got,
+                base_type,
+            } => write!(
                 f,
                 "size {} is less than expected {} for base type {}",
-                size, expected, base_type
+                got, expected, base_type
             ),
         }
     }
 }
 
 /// Event produced by decode_fn.
-pub enum DecoderEvent<'a> {
+pub enum Event<'a> {
     /// Message ref when the Decoder encounter a Message.
     Message(&'a Message),
     /// MessageDefinition ref when the Decoder encounter a MessageDefinition.
@@ -71,15 +96,6 @@ pub enum DecoderEvent<'a> {
 struct Options {
     checksum: bool,
     expand_components: bool,
-}
-
-impl Default for Options {
-    fn default() -> Self {
-        Self {
-            checksum: true,
-            expand_components: true,
-        }
-    }
 }
 
 /// Decoder for decoding FIT file.
@@ -102,17 +118,17 @@ impl<R: Read> Decoder<R> {
     /// Create new Decoder for decoding FIT file.
     /// For more options, use DecoderBuilder to build the Decoder.
     pub fn new(reader: R) -> Self {
-        DecoderBuilder::new(reader).build()
+        Builder::new(reader).build()
     }
 
     /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
-    pub fn decode(&mut self) -> Result<FIT, DecoderError> {
+    pub fn decode(&mut self) -> Result<FIT, Error> {
         let file_header = self.decode_file_header()?;
 
         let mut messages = Vec::new();
         self.decode_message_fn(file_header.data_size, |event| match event {
-            DecoderEvent::Message(mesg) => messages.push(mesg.clone()),
-            DecoderEvent::MessageDefinition(_) => {}
+            Event::Message(mesg) => messages.push(mesg.clone()),
+            Event::MessageDefinition(_) => {}
         })?;
 
         let crc = self.decode_crc()?;
@@ -126,9 +142,9 @@ impl<R: Read> Decoder<R> {
 
     /// Similar to Decode but with a closure for retrieving DecoderEvent (Message or MessageDefinition)
     /// for the current FIT sequence.
-    pub fn decode_fn<F>(&mut self, f: F) -> Result<(), DecoderError>
+    pub fn decode_fn<F>(&mut self, f: F) -> Result<(), Error>
     where
-        F: FnMut(DecoderEvent),
+        F: FnMut(Event),
     {
         let file_header = self.decode_file_header()?;
         self.decode_message_fn(file_header.data_size, f)?;
@@ -137,25 +153,31 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_file_header(&mut self) -> Result<FileHeader, DecoderError> {
+    fn decode_file_header(&mut self) -> Result<FileHeader, Error> {
         let mut arr = [0u8; 14];
         if let Err(err) = self.reader.read_exact(&mut arr[..1]) {
-            return Err(DecoderError::Io(err.kind(), self.n));
+            return Err(Error::Io {
+                error_kind: err.kind(),
+                byte_pos: self.n,
+            });
         };
         self.n += 1;
 
         let n = arr[0];
         if n != 12 && n != 14 {
-            return Err(DecoderError::NotFITFile);
+            return Err(Error::NotFITFile);
         }
 
         if let Err(err) = self.reader.read_exact(&mut arr[1..n as usize]) {
-            return Err(DecoderError::Io(err.kind(), self.n));
+            return Err(Error::Io {
+                error_kind: err.kind(),
+                byte_pos: self.n,
+            });
         }
         self.n += n as usize - 1;
 
         if &arr[8..12] != DATA_TYPE.as_bytes() {
-            return Err(DecoderError::NotFITFile);
+            return Err(Error::NotFITFile);
         }
 
         let crc = match n {
@@ -166,7 +188,10 @@ impl<R: Read> Decoder<R> {
         if n == 14 && crc != 0 {
             self.crc16.write(&arr[..12]);
             if self.options.checksum && crc != self.crc16.sum16() {
-                return Err(DecoderError::ChecksumMismatch(crc, self.crc16.sum16()));
+                return Err(Error::ChecksumMismatch {
+                    expected: crc,
+                    got: self.crc16.sum16(),
+                });
             }
             self.crc16.reset();
         }
@@ -182,9 +207,12 @@ impl<R: Read> Decoder<R> {
     }
 
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
-    fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), DecoderError> {
+    fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error> {
         if let Err(err) = self.reader.read_exact(buf) {
-            return Err(DecoderError::Io(err.kind(), self.n));
+            return Err(Error::Io {
+                error_kind: err.kind(),
+                byte_pos: self.n,
+            });
         };
         self.n += buf.len();
         self.cur += buf.len() as u32;
@@ -194,9 +222,9 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_fn<F>(&mut self, data_size: u32, mut f: F) -> Result<(), DecoderError>
+    fn decode_message_fn<F>(&mut self, data_size: u32, mut f: F) -> Result<(), Error>
     where
-        F: FnMut(DecoderEvent),
+        F: FnMut(Event),
     {
         let mut arr = [0u8; 1];
 
@@ -204,39 +232,59 @@ impl<R: Read> Decoder<R> {
             self.read_exact_inc(&mut arr)?;
 
             let header = arr[0];
+
             if header & MESG_HEADER_MASK == MESG_DEFINITION_MASK {
-                let local_num = (header & LOCAL_MESG_NUM_MASK) as usize;
-                let mut mesg_def = mem::replace(&mut self.mesg_definitions[local_num], MESG_DEF);
+                let local_mesg_num = (header & LOCAL_MESG_NUM_MASK) as usize;
+                let mut mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
+                mesg_def.header = header;
 
-                self.decode_message_definition(header, &mut mesg_def)?;
+                self.decode_message_definition(&mut mesg_def)?;
 
-                f(DecoderEvent::MessageDefinition(&mesg_def));
+                f(Event::MessageDefinition(&mesg_def));
 
-                self.mesg_definitions[local_num] = mesg_def;
+                self.mesg_definitions[local_mesg_num] = mesg_def;
                 continue;
             }
 
-            let mut mesg = self.decode_message_data(header)?;
+            let local_mesg_num = match header & COMPRESSED_TIME_MASK {
+                COMPRESSED_TIME_MASK => {
+                    (header & COMPRESSED_LOCAL_MESG_NUM_MASK) >> COMPRESSED_BIT_SHIFT
+                }
+                _ => header,
+            } & LOCAL_MESG_NUM_MASK;
 
-            f(DecoderEvent::Message(&mesg));
+            let mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num as usize]);
+            if mesg_def.header == 0 {
+                return Err(Error::MissingMessageDefinition { local_mesg_num });
+            }
 
-            mem::swap(&mut mesg.fields, &mut self.buf_fields);
-            mem::swap(&mut mesg.developer_fields, &mut self.buf_developer_fields);
+            self.buf_fields.clear();
+            self.buf_developer_fields.clear();
+
+            let mut mesg = Message {
+                header,
+                num: mesg_def.mesg_num,
+                fields: mem::take(&mut self.buf_fields),
+                developer_fields: mem::take(&mut self.buf_developer_fields),
+            };
+
+            self.decode_message_data(&mut mesg, &mesg_def)?;
+
+            self.mesg_definitions[local_mesg_num as usize] = mesg_def;
+
+            f(Event::Message(&mesg));
+
+            self.buf_fields = mesg.fields;
+            self.buf_developer_fields = mesg.developer_fields;
         }
 
         Ok(())
     }
 
-    fn decode_message_definition(
-        &mut self,
-        header: u8,
-        mesg_def: &mut MessageDefinition,
-    ) -> Result<(), DecoderError> {
+    fn decode_message_definition(&mut self, mesg_def: &mut MessageDefinition) -> Result<(), Error> {
         let mut arr = [0u8; 765];
-
         self.read_exact_inc(&mut arr[..5])?;
 
-        mesg_def.header = header;
         mesg_def.reserved = arr[0];
         mesg_def.arch = arr[1];
         mesg_def.mesg_num = MesgNum(match mesg_def.arch {
@@ -261,7 +309,7 @@ impl<R: Read> Decoder<R> {
             buf = &buf[3..];
         }
 
-        if header & DEV_DATA_MASK == DEV_DATA_MASK {
+        if mesg_def.header & DEV_DATA_MASK == DEV_DATA_MASK {
             self.read_exact_inc(&mut arr[..1])?;
 
             let n = arr[0] as usize * 3;
@@ -285,32 +333,13 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_data(&mut self, header: u8) -> Result<Message, DecoderError> {
-        let local_num = match header & COMPRESSED_TIME_MASK {
-            COMPRESSED_TIME_MASK => {
-                (header & COMPRESSED_LOCAL_MESG_NUM_MASK) >> COMPRESSED_BIT_SHIFT
-            }
-            _ => header,
-        } & LOCAL_MESG_NUM_MASK;
-
-        let mesg_def = mem::replace(&mut self.mesg_definitions[local_num as usize], MESG_DEF);
-        if mesg_def.field_definitions.is_empty() && mesg_def.developer_field_definitions.is_empty()
-        {
-            return Err(DecoderError::MissingMessageDefinition(local_num));
-        }
-
-        let mut mesg = Message {
-            header,
-            num: mesg_def.mesg_num,
-            fields: mem::take(&mut self.buf_fields),
-            developer_fields: mem::take(&mut self.buf_developer_fields),
-        };
-
-        mesg.fields.clear();
-        mesg.developer_fields.clear();
-
-        if header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
-            let time_offset = header & COMPRESSED_TIME_MASK;
+    fn decode_message_data(
+        &mut self,
+        mesg: &mut Message,
+        mesg_def: &MessageDefinition,
+    ) -> Result<(), Error> {
+        if mesg.header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
+            let time_offset = mesg.header & COMPRESSED_TIME_MASK;
             self.timestamp += ((time_offset - self.last_time_offset) & COMPRESSED_TIME_MASK) as u32;
             self.last_time_offset = time_offset;
 
@@ -322,20 +351,18 @@ impl<R: Read> Decoder<R> {
             });
         }
 
-        self.decode_fields(&mut mesg, &mesg_def)?;
+        self.decode_fields(mesg, &mesg_def)?;
 
-        self.decode_developer_fields(&mut mesg, &mesg_def)?;
-
-        self.mesg_definitions[local_num as usize] = mesg_def;
+        self.decode_developer_fields(mesg, &mesg_def)?;
 
         // Developer Data Lookup, currently we allow missing developer_data_id
         if mesg.num == MesgNum::FIELD_DESCRIPTION {
             self.field_descriptions
-                .push(mesgdef::FieldDescription::from(&mesg));
+                .push(mesgdef::FieldDescription::from(&*mesg));
         }
 
         if !self.options.expand_components {
-            return Ok(mesg);
+            return Ok(());
         }
 
         // Now that all fields has been decoded, we need to expand all components and accumulate the accumulable values.
@@ -356,18 +383,18 @@ impl<R: Read> Decoder<R> {
                 continue;
             }
             if let Some(bits) = &mut Bits::new(&field.value) {
-                self.expand_components(&mut mesg, bits, components);
+                self.expand_components(mesg, bits, components);
             };
         }
 
-        Ok(mesg)
+        Ok(())
     }
 
     fn decode_fields(
         &mut self,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), DecoderError> {
+    ) -> Result<(), Error> {
         let mut arr = [0u8; 255];
 
         for field_def in &mesg_def.field_definitions {
@@ -432,47 +459,45 @@ impl<R: Read> Decoder<R> {
                 None => break,
             };
 
+            let field_num = component.field_num;
             if component.accumulate {
-                val =
-                    self.accumulator
-                        .accumulate(mesg.num, component.field_num, val, component.bits);
+                val = self
+                    .accumulator
+                    .accumulate(mesg.num, field_num, val, component.bits);
             }
 
-            let field_ref = match lookup::field_reference(mesg.num, component.field_num) {
+            let field_ref = match lookup::field_reference(mesg.num, field_num) {
                 Some(v) => v,
                 None => continue,
-            };
-
-            let mut field = Field {
-                num: component.field_num,
-                profile_type: field_ref.profile_type,
-                is_expanded: true,
-                value: Value::Invalid,
             };
 
             let scaled_val = val as f64 / component.scale - component.offset;
             val = ((scaled_val + field_ref.offset) * field_ref.scale) as u32;
             let value = convert_u32_to_value(val, field_ref.base_type);
 
-            let mut should_append = true;
-            let mut field_mut = &mut field;
-            for v in &mut mesg.fields {
-                if v.num == field_mut.num {
-                    field_mut = v;
-                    should_append = false;
-                    break;
+            match mesg.fields.iter_mut().find(|v| v.num == field_num) {
+                Some(v) => {
+                    if field_ref.array {
+                        push_value_to_vec(&mut v.value, &value);
+                    } else {
+                        v.value = value;
+                    }
                 }
-            }
-
-            if field_ref.array {
-                push_value_to_vec(&mut field_mut.value, &value);
-            } else {
-                field_mut.value = value;
-            }
-
-            if should_append {
-                mesg.fields.push(field);
-            }
+                None => {
+                    mesg.fields.push(Field {
+                        num: field_num,
+                        profile_type: field_ref.profile_type,
+                        is_expanded: true,
+                        value: if field_ref.array {
+                            let mut vec_value = Value::Invalid;
+                            push_value_to_vec(&mut vec_value, &value);
+                            vec_value
+                        } else {
+                            value
+                        },
+                    });
+                }
+            };
 
             let components = match mesg.sub_field_substitution(&field_ref) {
                 Some(sub_field) => sub_field.components,
@@ -498,37 +523,28 @@ impl<R: Read> Decoder<R> {
         &mut self,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), DecoderError> {
+    ) -> Result<(), Error> {
         let mut arr = [0u8; 255];
 
         for dev_field_def in &mesg_def.developer_field_definitions {
             let buf = &mut arr[..dev_field_def.size as usize];
             self.read_exact_inc(buf)?;
 
-            let mut field_desc: Option<&mesgdef::FieldDescription> = None;
-            for f in &self.field_descriptions {
-                if f.developer_data_index != dev_field_def.developer_data_index {
-                    continue;
-                }
-                if f.field_definition_number != dev_field_def.num {
-                    continue;
-                }
-                field_desc = Some(f);
-                break;
-            }
-
-            let field_desc = match field_desc {
+            let field_desc = match self.field_descriptions.iter().find(|v| {
+                v.developer_data_index == dev_field_def.developer_data_index
+                    && v.field_definition_number == dev_field_def.num
+            }) {
                 Some(field_desc) => field_desc,
                 None => continue, // Currently we ignore missing field_description
             };
 
             let base_type = field_desc.fit_base_type_id;
             if dev_field_def.size < base_type.size() {
-                return Err(DecoderError::BaseTypeSizeMismatch(
-                    base_type.size(),
-                    dev_field_def.size,
+                return Err(Error::BaseTypeSizeMismatch {
+                    expected: base_type.size(),
+                    got: dev_field_def.size,
                     base_type,
-                ));
+                });
             }
 
             let size = dev_field_def.size;
@@ -549,16 +565,22 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_crc(&mut self) -> Result<u16, DecoderError> {
+    fn decode_crc(&mut self) -> Result<u16, Error> {
         let mut arr = [0u8; 2];
         if let Err(err) = self.reader.read_exact(&mut arr) {
-            return Err(DecoderError::Io(err.kind(), self.n));
+            return Err(Error::Io {
+                error_kind: err.kind(),
+                byte_pos: self.n,
+            });
         };
         self.n += arr.len();
 
         let crc = u16::from_le_bytes(arr);
         if self.options.checksum && crc != self.crc16.sum16() {
-            return Err(DecoderError::ChecksumMismatch(crc, self.crc16.sum16()));
+            return Err(Error::ChecksumMismatch {
+                expected: crc,
+                got: self.crc16.sum16(),
+            });
         }
         Ok(crc)
     }
@@ -567,8 +589,7 @@ impl<R: Read> Decoder<R> {
         self.cur = 0;
         self.crc16.reset();
         for mesg_def in &mut self.mesg_definitions {
-            mesg_def.field_definitions.clear();
-            mesg_def.developer_field_definitions.clear();
+            mesg_def.header = 0;
         }
         self.accumulator.reset();
         self.timestamp = 0;
@@ -642,17 +663,20 @@ fn push_value_to_vec(vec_value: &mut Value, value: &Value) {
 }
 
 /// Build Decoder with some options.
-pub struct DecoderBuilder<R: Read> {
+pub struct Builder<R: Read> {
     reader: R,
     options: Options,
 }
 
-impl<R: Read> DecoderBuilder<R> {
+impl<R: Read> Builder<R> {
     /// Create new DecoderBuilder.
     pub fn new(reader: R) -> Self {
         Self {
             reader,
-            options: Options::default(),
+            options: Options {
+                checksum: false,
+                expand_components: false,
+            },
         }
     }
 
@@ -676,7 +700,16 @@ impl<R: Read> DecoderBuilder<R> {
             n: 0,
             cur: 0,
             crc16: Crc16::new(),
-            mesg_definitions: [MESG_DEF; 16],
+            mesg_definitions: [const {
+                MessageDefinition {
+                    header: 0,
+                    reserved: 0,
+                    arch: 0,
+                    mesg_num: MesgNum(0),
+                    field_definitions: Vec::new(),
+                    developer_field_definitions: Vec::new(),
+                }
+            }; 16],
             accumulator: Accumulator::new(),
             timestamp: 0,
             last_time_offset: 0,
@@ -687,12 +720,3 @@ impl<R: Read> DecoderBuilder<R> {
         }
     }
 }
-
-const MESG_DEF: MessageDefinition = MessageDefinition {
-    header: 0,
-    reserved: 0,
-    arch: 0,
-    mesg_num: MesgNum(0),
-    field_definitions: Vec::new(),
-    developer_field_definitions: Vec::new(),
-};

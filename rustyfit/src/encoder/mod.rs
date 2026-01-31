@@ -5,67 +5,96 @@ mod validator;
 
 use crate::{
     crc16::Crc16,
+    encoder::validator::MessageValidatorError,
     profile::{
         PROFILE_VERSION,
         typedef::{DateTime, MesgNum},
     },
-    proto::*,
+    proto::{Error as ProtocolError, *},
 };
 use lru::Lru;
 use std::{
-    cell::RefCell,
-    fmt,
+    fmt::{self},
     io::{self, Seek, SeekFrom, Write},
-    rc::Rc,
 };
 use validator::MessageValidator;
 
 /// Encoder Error
 #[derive(Debug, Clone)]
-pub enum EncoderError {
+pub enum Error {
     /// IO related error when reading from the Reader.
-    /// 0: io error kind, 1: write byte position.
-    Io(io::ErrorKind, i64),
+    Io(IoError),
     /// Empty messages, no data to be encoded.
     EmptyMessages,
-    /// Protocol related error.
-    /// 0: protocol error, 1: mesg index, 2: mesg number
-    ProtocolValidation(ProtocolError, usize, MesgNum),
-    /// 0: validator error, 1: error message.
-    /// Message validation related error.
-    MessageValidation(validator::MessageValidatorError, usize, MesgNum),
-    /// 0: encode message error, 1: mesg index, 2: mesg number
-    EncodeMessage(EncoderMessageError, usize, MesgNum),
+    /// Encode message error.
+    Message {
+        /// Message index
+        mesg_index: usize,
+        /// Message number
+        mesg_num: MesgNum,
+        /// Encoder error
+        err: MessageError,
+    },
 }
 
-impl fmt::Display for EncoderError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match &self {
-            EncoderError::Io(kind, total_written) => {
-                write!(f, "io error kind {}, total written {}", kind, total_written)
-            }
-            EncoderError::EmptyMessages => write!(f, "empty messages"),
-            EncoderError::ProtocolValidation(err, i, mesg_num) => {
-                write!(f, "{:?}: mesg index {}, mesg num {}", err, i, mesg_num)
-            }
-            EncoderError::MessageValidation(err, i, mesg_num) => {
-                write!(f, "{:?}: mesg index {}, mesg num {}", err, i, mesg_num)
-            }
-            EncoderError::EncodeMessage(err, i, mesg_num) => {
-                write!(f, "{:?}: mesg index {}, mesg num {}", err, i, mesg_num)
+            Self::Io(err) => write!(f, "io: {}", err),
+            Self::EmptyMessages => write!(f, "messages is empty"),
+            Self::Message {
+                mesg_index,
+                mesg_num,
+                err,
+            } => {
+                write!(
+                    f,
+                    "message: mesg index {}, mesg num {}: {}",
+                    mesg_index, mesg_num, err
+                )
             }
         }
     }
 }
 
-/// Error related to encoding the message.
+/// IO related error when reading from the Reader.
 #[derive(Debug, Clone, Copy)]
-pub enum EncoderMessageError {
+pub struct IoError {
+    /// IO error kind
+    error_kind: io::ErrorKind,
+    /// Total bytes written
+    total_written: i64,
+}
+
+impl fmt::Display for IoError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "error kind: {}, total written {}",
+            self.error_kind, self.total_written
+        )
+    }
+}
+
+/// Message related error.
+#[derive(Debug, Clone)]
+pub enum MessageError {
     /// IO related error when reading from the Reader.
-    /// 0: io error kind, 1: write byte position
-    Io(io::ErrorKind, i64),
-    /// Error occurs when marshaling a message.
-    MarshalMessage(ProtocolError),
+    Io(IoError),
+    /// Protocol error.
+    Protocol(ProtocolError),
+    /// Message validation related error.
+    Validation(MessageValidatorError),
+}
+
+impl fmt::Display for MessageError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            Self::Io(err) => write!(f, "io: {}", err),
+            Self::Validation(err) => write!(f, "message validator: {}", err),
+            Self::Protocol(err) => write!(f, "protocol: {}", err),
+        }
+    }
 }
 
 /// HeaderOption to pick when encoding FIT file, this will optimize
@@ -118,11 +147,9 @@ pub struct Encoder<W: Write + Seek> {
     data_size: u32,
     crc16: Crc16,
     lru: Lru,
-    mesg_def: MessageDefinition,
-    buf_vector: Rc<RefCell<Vec<u8>>>,
+    buf: Vec<u8>,
     timestamp_reference: u32,
     options: Options,
-    protocol_validator: ProtocolValidator,
     message_validator: MessageValidator,
 }
 
@@ -130,13 +157,13 @@ impl<W: Write + Seek> Encoder<W> {
     /// Create new Encoder for encoding FIT file.
     /// For more options, use EncoderBuilder to build the Encoder.
     pub fn new(writer: W) -> Encoder<W> {
-        EncoderBuilder::new(writer).build()
+        Builder::new(writer).build()
     }
 
     /// Encode the given `fit` to the writer.
-    pub fn encode(&mut self, fit: &mut FIT) -> Result<(), EncoderError> {
+    pub fn encode(&mut self, fit: &mut FIT) -> Result<(), Error> {
         self.select_protocol_version(&mut fit.file_header);
-        self.validate_messages(&mut fit.messages)?;
+        self.validate(fit)?;
 
         self.encode_file_header(&mut fit.file_header)?;
         self.encode_messages(&mut fit.messages)?;
@@ -150,32 +177,40 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn select_protocol_version(&mut self, file_header: &mut FileHeader) {
-        if self.options.protocol_version != ProtocolVersion(0) {
+        if self.options.protocol_version.0 != 0 {
             file_header.protocol_version = self.options.protocol_version;
-        } else if file_header.protocol_version == ProtocolVersion(0) {
+        } else if file_header.protocol_version.0 == 0 {
             file_header.protocol_version = ProtocolVersion::V1
         }
-        self.protocol_validator.protocol_version = file_header.protocol_version;
     }
 
-    fn validate_messages(&mut self, messages: &mut [Message]) -> Result<(), EncoderError> {
-        if messages.is_empty() {
-            return Err(EncoderError::EmptyMessages);
+    fn validate(&mut self, fit: &mut FIT) -> Result<(), Error> {
+        if fit.messages.is_empty() {
+            return Err(Error::EmptyMessages);
         }
-        for (i, mesg) in messages.iter_mut().enumerate() {
-            if let Err(err) = self.protocol_validator.validate_message(mesg) {
-                return Err(EncoderError::ProtocolValidation(err, i, mesg.num));
+        let protocol_version = fit.file_header.protocol_version;
+        for (i, mesg) in fit.messages.iter_mut().enumerate() {
+            if let Err(err) = validate_message(mesg, protocol_version) {
+                return Err(Error::Message {
+                    mesg_index: i,
+                    mesg_num: mesg.num,
+                    err: MessageError::Protocol(err),
+                });
             }
         }
-        for (i, mesg) in messages.iter_mut().enumerate() {
+        for (i, mesg) in fit.messages.iter_mut().enumerate() {
             if let Err(err) = self.message_validator.validate_message(mesg) {
-                return Err(EncoderError::MessageValidation(err, i, mesg.num));
+                return Err(Error::Message {
+                    mesg_index: i,
+                    mesg_num: mesg.num,
+                    err: MessageError::Validation(err),
+                });
             }
         }
         Ok(())
     }
 
-    fn encode_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), EncoderError> {
+    fn encode_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), Error> {
         self.last_file_header_pos = self.n;
 
         if file_header.size != 12 {
@@ -189,88 +224,101 @@ impl<W: Write + Seek> Encoder<W> {
         file_header.data_type = DATA_TYPE;
         file_header.crc = 0; // recalculated
 
-        let mut buf = self.buf_vector.borrow_mut();
+        let buf = &mut self.buf;
         buf.clear();
 
-        file_header.marshal_append(&mut buf);
+        file_header.marshal_append(buf);
 
-        if let Err(err) = self.writer.write_all(&buf) {
-            return Err(EncoderError::Io(err.kind(), self.n));
+        if let Err(err) = self.writer.write_all(buf) {
+            return Err(Error::Io(IoError {
+                error_kind: err.kind(),
+                total_written: self.n,
+            }));
         }
         self.n += buf.len() as i64;
 
         Ok(())
     }
 
-    fn update_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), EncoderError> {
+    fn update_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), Error> {
         file_header.data_size = self.data_size;
 
-        let mut buf_mut = self.buf_vector.borrow_mut();
-        buf_mut.clear();
+        let buf = &mut self.buf;
+        buf.clear();
 
-        file_header.marshal_append(&mut buf_mut);
+        file_header.marshal_append(buf);
 
         if file_header.size == 14 {
-            self.crc16.write(&buf_mut[..12]);
+            self.crc16.write(&buf[..12]);
             file_header.crc = self.crc16.sum16();
-            buf_mut[12..14].copy_from_slice(&self.crc16.sum16().to_le_bytes());
+            buf[12..14].copy_from_slice(&self.crc16.sum16().to_le_bytes());
             self.crc16.reset();
         }
 
         let size = self.n - self.last_file_header_pos;
         if let Err(err) = self.writer.seek(SeekFrom::Current(-size)) {
-            return Err(EncoderError::Io(err.kind(), self.n));
+            return Err(Error::Io(IoError {
+                error_kind: err.kind(),
+                total_written: self.n,
+            }));
         }
 
-        if let Err(err) = self.writer.write_all(&buf_mut) {
-            return Err(EncoderError::Io(err.kind(), self.last_file_header_pos));
+        if let Err(err) = self.writer.write_all(&buf) {
+            return Err(Error::Io(IoError {
+                error_kind: err.kind(),
+                total_written: self.n,
+            }));
         }
 
-        let n = buf_mut.len() as i64;
+        let n = buf.len() as i64;
         if let Err(err) = self.writer.seek(SeekFrom::Current(size - n)) {
-            return Err(EncoderError::Io(err.kind(), self.n));
+            return Err(Error::Io(IoError {
+                error_kind: err.kind(),
+                total_written: self.n,
+            }));
         };
         Ok(())
     }
 
-    fn encode_messages(&mut self, messages: &mut [Message]) -> Result<(), EncoderError> {
+    fn encode_messages(&mut self, messages: &mut [Message]) -> Result<(), Error> {
         for (i, mesg) in messages.iter_mut().enumerate() {
             if let Err(err) = self.encode_message(mesg) {
-                return Err(EncoderError::EncodeMessage(err, i, mesg.num));
+                return Err(Error::Message {
+                    mesg_index: i,
+                    mesg_num: mesg.num,
+                    err,
+                });
             }
         }
         Ok(())
     }
 
-    fn encode_message(&mut self, mesg: &mut Message) -> Result<(), EncoderMessageError> {
+    fn encode_message(&mut self, mesg: &mut Message) -> Result<(), MessageError> {
         mesg.header = MESG_NORMAL_HEADER_MASK;
 
-        let mut compressed = false;
         if let HeaderOption::Compressed(_) = self.options.header_option {
-            compressed = self.compress_timestamp_into_header(mesg);
+            self.compress_timestamp_into_header(mesg);
         }
 
-        let buf_rc = self.buf_vector.clone();
-        let mut buf = buf_rc.borrow_mut();
+        let buf = &mut self.buf;
         buf.clear();
 
-        self.create_message_definition(mesg);
-        let mesg_def = &self.mesg_def;
-
-        mesg_def.marshal_append(&mut buf);
-
+        marshal_append_message_definition(buf, mesg, self.options.endianness as u8);
         let (local_mesg_num, is_new_mesg_def) = self.lru.put(&buf);
 
         buf[0] |= local_mesg_num;
-        if compressed {
+        if mesg.header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
             mesg.header |= local_mesg_num << COMPRESSED_BIT_SHIFT;
         } else {
             mesg.header |= local_mesg_num;
         }
 
         if is_new_mesg_def {
-            if let Err(err) = self.writer.write_all(&buf) {
-                return Err(EncoderMessageError::Io(err.kind(), self.n));
+            if let Err(err) = self.writer.write_all(buf) {
+                return Err(MessageError::Io(IoError {
+                    error_kind: err.kind(),
+                    total_written: self.n,
+                }));
             }
             self.n += buf.len() as i64;
             self.data_size += buf.len() as u32;
@@ -278,12 +326,15 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         buf.clear();
-        if let Err(err) = mesg.marshal_append(&mut buf, mesg_def.arch) {
-            return Err(EncoderMessageError::MarshalMessage(err));
+        if let Err(err) = mesg.marshal_append(buf, self.options.endianness as u8) {
+            return Err(MessageError::Protocol(err));
         }
 
-        if let Err(err) = self.writer.write_all(&buf) {
-            return Err(EncoderMessageError::Io(err.kind(), self.n));
+        if let Err(err) = self.writer.write_all(buf) {
+            return Err(MessageError::Io(IoError {
+                error_kind: err.kind(),
+                total_written: self.n,
+            }));
         }
         self.n += buf.len() as i64;
         self.data_size += buf.len() as u32;
@@ -292,7 +343,7 @@ impl<W: Write + Seek> Encoder<W> {
         Ok(())
     }
 
-    fn compress_timestamp_into_header(&mut self, mesg: &mut Message) -> bool {
+    fn compress_timestamp_into_header(&mut self, mesg: &mut Message) {
         let mut timestamp = u32::MAX;
         for field in &mesg.fields {
             if field.num == FIELD_NUM_TIMESTAMP {
@@ -304,12 +355,12 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         if timestamp == u32::MAX || timestamp < DateTime::MIN.0 {
-            return false;
+            return;
         }
 
         if (timestamp - self.timestamp_reference) as u8 > COMPRESSED_TIME_MASK {
             self.timestamp_reference = timestamp;
-            return false;
+            return;
         }
 
         let time_offset = (timestamp & COMPRESSED_TIME_MASK as u32) as u8;
@@ -320,47 +371,15 @@ impl<W: Write + Seek> Encoder<W> {
                 break;
             }
         }
-        true
     }
 
-    fn create_message_definition(&mut self, mesg: &Message) {
-        let mesg_def = &mut self.mesg_def;
-
-        mesg_def.header = MESG_DEFINITION_MASK;
-        mesg_def.reserved = 0;
-        mesg_def.arch = self.options.endianness as u8;
-        mesg_def.mesg_num = mesg.num;
-        mesg_def.field_definitions.clear();
-        mesg_def.developer_field_definitions.clear();
-
-        for field in &mesg.fields {
-            mesg_def.field_definitions.push(FieldDefinition {
-                num: field.num,
-                size: field.value.size() as u8,
-                base_type: field.profile_type.base_type(),
-            });
-        }
-
-        if mesg.developer_fields.is_empty() {
-            return;
-        }
-
-        mesg_def.header |= DEV_DATA_MASK;
-        for developer_field in &mesg.developer_fields {
-            mesg_def
-                .developer_field_definitions
-                .push(DeveloperFieldDefinition {
-                    num: developer_field.num,
-                    size: developer_field.value.size() as u8,
-                    developer_data_index: developer_field.developer_data_index,
-                });
-        }
-    }
-
-    fn encode_crc(&mut self) -> Result<(), EncoderError> {
+    fn encode_crc(&mut self) -> Result<(), Error> {
         let crc = self.crc16.sum16().to_le_bytes();
         if let Err(err) = self.writer.write_all(&crc) {
-            return Err(EncoderError::Io(err.kind(), self.n));
+            return Err(Error::Io(IoError {
+                error_kind: err.kind(),
+                total_written: self.n,
+            }));
         }
         self.n += 2;
         self.crc16.reset();
@@ -375,20 +394,50 @@ impl<W: Write + Seek> Encoder<W> {
     }
 }
 
-/// Build Encoder with some options.
-pub struct EncoderBuilder<W: Write + Seek> {
-    writer: W,
-    options: Options,
-    omit_invalid_value: bool,
+fn marshal_append_message_definition(buf: &mut Vec<u8>, mesg: &Message, arch: u8) {
+    buf.extend_from_slice(&[
+        MESG_DEFINITION_MASK, // header
+        0,                    // reserved
+        arch,                 // architecture
+    ]);
+
+    buf.extend_from_slice(&match arch {
+        0 => mesg.num.0.to_le_bytes(),
+        _ => mesg.num.0.to_be_bytes(),
+    });
+
+    buf.push(mesg.fields.len() as u8);
+    for field in &mesg.fields {
+        buf.push(field.num);
+        buf.push(field.value.size() as u8);
+        buf.push(field.profile_type.base_type().0)
+    }
+
+    if mesg.developer_fields.is_empty() {
+        return;
+    }
+
+    buf[0] |= DEV_DATA_MASK;
+    buf.push(mesg.developer_fields.len() as u8);
+    for developer_field in &mesg.developer_fields {
+        buf.push(developer_field.num);
+        buf.push(developer_field.value.size() as u8);
+        buf.push(developer_field.developer_data_index);
+    }
 }
 
-impl<W: Write + Seek> EncoderBuilder<W> {
+/// Build Encoder with some options.
+pub struct Builder<W: Write + Seek> {
+    writer: W,
+    options: Options,
+}
+
+impl<W: Write + Seek> Builder<W> {
     /// Create new DecoderBuilder.
-    pub fn new(writer: W) -> EncoderBuilder<W> {
+    pub fn new(writer: W) -> Builder<W> {
         Self {
             writer,
             options: Options::default(),
-            omit_invalid_value: true,
         }
     }
 
@@ -413,15 +462,6 @@ impl<W: Write + Seek> EncoderBuilder<W> {
         self
     }
 
-    /// By default, the encoder will omit invalid values to create a more compact file.
-    /// For example, an u16 having value 0xFFFF will be omitted.
-    ///
-    /// Set this to `false` if you want to encode the value as it is.
-    pub fn omit_invalid_value(mut self, flag: bool) -> Self {
-        self.omit_invalid_value = flag;
-        self
-    }
-
     /// Build Encoder based on given options (if any).
     pub fn build(self) -> Encoder<W> {
         Encoder {
@@ -436,16 +476,10 @@ impl<W: Write + Seek> EncoderBuilder<W> {
                     HeaderOption::Compressed(interleave) => interleave.min(3) as usize,
                 } + 1,
             ),
-            mesg_def: MessageDefinition {
-                field_definitions: Vec::with_capacity(255),
-                developer_field_definitions: Vec::with_capacity(255),
-                ..Default::default()
-            },
-            buf_vector: Rc::new(RefCell::new(Vec::with_capacity(1536))),
+            buf: Vec::with_capacity(1536),
             timestamp_reference: 0,
             options: self.options,
-            protocol_validator: ProtocolValidator::default(),
-            message_validator: MessageValidator::new(self.omit_invalid_value),
+            message_validator: MessageValidator::new(),
         }
     }
 }

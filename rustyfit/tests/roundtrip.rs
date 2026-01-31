@@ -22,7 +22,7 @@ fn decode_encode_roundtrip() {
         let mut fit = match dec.decode() {
             Ok(fit) => fit,
             Err(err) => {
-                if let DecoderError::ChecksumMismatch(_, _) = err {
+                if let DecoderError::ChecksumMismatch { .. } = err {
                     // NOTE: Doubts exist regarding the integrity of these files.
                     let exceptions = ["WeightScaleMultiUser.fit", "Settings.fit"];
                     for v in exceptions {
@@ -38,7 +38,6 @@ fn decode_encode_roundtrip() {
         let mut cursor = Cursor::new(Vec::new());
 
         let mut enc = EncoderBuilder::new(&mut cursor)
-            .omit_invalid_value(false)
             .endianness(Endianness::BigEndian)
             .build();
 

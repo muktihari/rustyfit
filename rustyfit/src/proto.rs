@@ -47,7 +47,7 @@ pub(crate) static DATA_TYPE: &str = ".FIT";
 
 /// Defined errors returned from proto module.
 #[derive(Debug, Clone, Copy)]
-pub enum ProtocolError {
+pub enum Error {
     /// Protocol Validator's error when Protocol Version 1.0 constains developer data.
     ProtocolViolationDeveloperData,
     /// Protocol Validator's error when Protocol Version 1.0 has base_type number more than byte number.
@@ -56,16 +56,16 @@ pub enum ProtocolError {
     InvalidValue,
 }
 
-impl fmt::Display for ProtocolError {
+impl fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match *self {
-            ProtocolError::ProtocolViolationDeveloperData => {
+            Error::ProtocolViolationDeveloperData => {
                 write!(f, "protocol version 1.0 do not support developer data")
             }
-            ProtocolError::ProtocolViolationUnsupportedBaseType(base_type) => {
+            Error::ProtocolViolationUnsupportedBaseType(base_type) => {
                 write!(f, "protocol version 1.0 do not support type {}", base_type)
             }
-            ProtocolError::InvalidValue => write!(f, "invalid proto::Value"),
+            Error::InvalidValue => write!(f, "invalid proto::Value"),
         }
     }
 }
@@ -130,35 +130,6 @@ pub struct MessageDefinition {
     pub developer_field_definitions: Vec<DeveloperFieldDefinition>,
 }
 
-impl MessageDefinition {
-    pub(crate) fn marshal_append(&self, vec: &mut Vec<u8>) {
-        vec.push(self.header);
-        vec.push(self.reserved);
-        vec.push(self.arch);
-
-        vec.extend_from_slice(&match self.arch {
-            0 => self.mesg_num.0.to_le_bytes(),
-            _ => self.mesg_num.0.to_be_bytes(),
-        });
-
-        vec.push(self.field_definitions.len() as u8);
-        for field_def in &self.field_definitions {
-            vec.push(field_def.num);
-            vec.push(field_def.size);
-            vec.push(field_def.base_type.0);
-        }
-
-        if self.header & DEV_DATA_MASK == DEV_DATA_MASK {
-            vec.push(self.developer_field_definitions.len() as u8);
-            for dev_field_def in &self.developer_field_definitions {
-                vec.push(dev_field_def.num);
-                vec.push(dev_field_def.size);
-                vec.push(dev_field_def.developer_data_index);
-            }
-        }
-    }
-}
-
 /// FieldDefinition is the definition of the upcoming field within the message's structure.
 #[derive(Debug, Default, Clone, Copy)]
 pub struct FieldDefinition {
@@ -217,7 +188,7 @@ impl Message {
         None
     }
 
-    pub(crate) fn marshal_append(&self, vec: &mut Vec<u8>, arch: u8) -> Result<(), ProtocolError> {
+    pub(crate) fn marshal_append(&self, vec: &mut Vec<u8>, arch: u8) -> Result<(), Error> {
         vec.push(self.header);
         for field in &self.fields {
             field.value.marshal_append(vec, arch)?;
@@ -559,7 +530,7 @@ impl Value {
         }
     }
 
-    pub(crate) fn marshal_append(&self, vec: &mut Vec<u8>, arch: u8) -> Result<(), ProtocolError> {
+    pub(crate) fn marshal_append(&self, vec: &mut Vec<u8>, arch: u8) -> Result<(), Error> {
         match self {
             Value::Int8(v) => vec.push(*v as u8),
             Value::Uint8(v) => vec.push(*v),
@@ -717,7 +688,7 @@ impl Value {
                     }
                 }
             },
-            Value::Invalid => return Err(ProtocolError::InvalidValue),
+            Value::Invalid => return Err(Error::InvalidValue),
         };
         Ok(())
     }
@@ -1224,32 +1195,26 @@ impl ProtocolVersion {
     }
 }
 
-/// ProtocolValidator is protocol validator
-#[derive(Default)]
-pub(crate) struct ProtocolValidator {
-    /// Protocol Version Target
-    pub protocol_version: ProtocolVersion,
-}
-
-impl ProtocolValidator {
-    /// Validates whether the message contains unsupported data for the targeted protocol version.
-    pub(crate) fn validate_message(&self, mesg: &Message) -> Result<(), ProtocolError> {
-        if self.protocol_version == ProtocolVersion::V1 {
-            if !mesg.developer_fields.is_empty() {
-                return Err(ProtocolError::ProtocolViolationDeveloperData);
-            }
-            for field in &mesg.fields {
-                if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
-                    > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
-                {
-                    return Err(ProtocolError::ProtocolViolationUnsupportedBaseType(
-                        field.profile_type.base_type(),
-                    ));
-                }
+/// Validates whether the message contains unsupported data for the targeted protocol version.
+pub(crate) fn validate_message(
+    mesg: &Message,
+    protocol_version: ProtocolVersion,
+) -> Result<(), Error> {
+    if protocol_version == ProtocolVersion::V1 {
+        if !mesg.developer_fields.is_empty() {
+            return Err(Error::ProtocolViolationDeveloperData);
+        }
+        for field in &mesg.fields {
+            if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
+                > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
+            {
+                return Err(Error::ProtocolViolationUnsupportedBaseType(
+                    field.profile_type.base_type(),
+                ));
             }
         }
-        Ok(())
     }
+    Ok(())
 }
 
 /// Counts how many valid utf-8 string in s.
