@@ -14,6 +14,7 @@ use crate::{
 };
 use lru::Lru;
 use std::{
+    error,
     fmt::{self},
     io::{self, Seek, SeekFrom, Write},
 };
@@ -56,6 +57,8 @@ impl fmt::Display for Error {
         }
     }
 }
+
+impl error::Error for Error {}
 
 /// IO related error when reading from the Reader.
 #[derive(Debug, Clone, Copy)]

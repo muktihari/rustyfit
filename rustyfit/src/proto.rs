@@ -1,6 +1,6 @@
 #![warn(missing_docs)]
 
-use core::fmt;
+use std::{error, fmt};
 
 use crate::profile::{
     ProfileType,
@@ -69,6 +69,8 @@ impl fmt::Display for Error {
         }
     }
 }
+
+impl error::Error for Error {}
 
 /// FIT is FIT protocol data representative.
 #[derive(Default, Debug)]
