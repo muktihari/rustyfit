@@ -13,8 +13,8 @@ use crate::{
 };
 use accumulator::Accumulator;
 use bits::Bits;
-use core::fmt;
 use std::{
+    error, fmt,
     io::{ErrorKind, Read},
     mem,
 };
@@ -85,12 +85,18 @@ impl fmt::Display for Error {
     }
 }
 
-/// Event produced by decode_fn.
+impl error::Error for Error {}
+
+/// Event is FIT segments encountered by the Decoder.
 pub enum Event<'a> {
-    /// Message ref when the Decoder encounter a Message.
-    Message(&'a Message),
-    /// MessageDefinition ref when the Decoder encounter a MessageDefinition.
+    /// Returned when the Decoder encounter FileHeader.
+    FileHeader(&'a FileHeader),
+    /// Returned when the Decoder encounter MessageDefinition.
     MessageDefinition(&'a MessageDefinition),
+    /// Returned when the Decoder encounter Message.
+    Message(&'a Message),
+    /// Returned when the Decoder encounter File's CRC.
+    Crc(&'a u16),
 }
 
 struct Options {
@@ -122,40 +128,53 @@ impl<R: Read> Decoder<R> {
     }
 
     /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
-    pub fn decode(&mut self) -> Result<FIT, Error> {
-        let file_header = self.decode_file_header()?;
+    /// First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
+    /// On next call, it may return Ok(None) to indicate that no more FIT sequence in the file.
+    pub fn decode(&mut self) -> Result<Option<FIT>, Error> {
+        let file_header = match self.decode_file_header()? {
+            Some(file_header) => file_header,
+            None => return Ok(None),
+        };
 
         let mut messages = Vec::new();
-        self.decode_message_fn(file_header.data_size, |event| match event {
-            Event::Message(mesg) => messages.push(mesg.clone()),
-            Event::MessageDefinition(_) => {}
+        self.decode_message_with(file_header.data_size, |event| {
+            if let Event::Message(mesg) = event {
+                messages.push(mesg.clone())
+            }
         })?;
 
         let crc = self.decode_crc()?;
         self.reset();
-        Ok(FIT {
+        Ok(Some(FIT {
             file_header,
             messages,
             crc,
-        })
+        }))
     }
 
-    /// Similar to Decode but with a closure for retrieving DecoderEvent (Message or MessageDefinition)
-    /// for the current FIT sequence.
-    pub fn decode_fn<F>(&mut self, f: F) -> Result<(), Error>
+    /// Similar to Decode but with a closure for retrieving DecoderEvent for the current FIT sequence.
+    pub fn decode_with<F>(&mut self, mut f: F) -> Result<bool, Error>
     where
         F: FnMut(Event),
     {
-        let file_header = self.decode_file_header()?;
-        self.decode_message_fn(file_header.data_size, f)?;
-        _ = self.decode_crc()?;
+        let file_header = match self.decode_file_header()? {
+            Some(file_header) => file_header,
+            None => return Ok(false),
+        };
+        f(Event::FileHeader(&file_header));
+        self.decode_message_with(file_header.data_size, &mut f)?;
+        let crc = self.decode_crc()?;
+        f(Event::Crc(&crc));
         self.reset();
-        Ok(())
+        Ok(true)
     }
 
-    fn decode_file_header(&mut self) -> Result<FileHeader, Error> {
+    fn decode_file_header(&mut self) -> Result<Option<FileHeader>, Error> {
         let mut arr = [0u8; 14];
         if let Err(err) = self.reader.read_exact(&mut arr[..1]) {
+            if self.n > 0 && err.kind() == ErrorKind::UnexpectedEof {
+                return Ok(None); // No chained FIT sequence
+            }
             return Err(Error::Io {
                 error_kind: err.kind(),
                 byte_pos: self.n,
@@ -163,18 +182,18 @@ impl<R: Read> Decoder<R> {
         };
         self.n += 1;
 
-        let n = arr[0];
+        let n = arr[0] as usize;
         if n != 12 && n != 14 {
             return Err(Error::NotFITFile);
         }
 
-        if let Err(err) = self.reader.read_exact(&mut arr[1..n as usize]) {
+        if let Err(err) = self.reader.read_exact(&mut arr[1..n]) {
             return Err(Error::Io {
                 error_kind: err.kind(),
                 byte_pos: self.n,
             });
         }
-        self.n += n as usize - 1;
+        self.n += n - 1;
 
         if &arr[8..12] != DATA_TYPE.as_bytes() {
             return Err(Error::NotFITFile);
@@ -196,14 +215,14 @@ impl<R: Read> Decoder<R> {
             self.crc16.reset();
         }
 
-        Ok(FileHeader {
-            size: n,
+        Ok(Some(FileHeader {
+            size: n as u8,
             protocol_version: ProtocolVersion(arr[1]),
             profile_version: u16::from_le_bytes([arr[12], arr[13]]),
             data_size: u32::from_le_bytes(arr[4..8].try_into().unwrap()),
             data_type: DATA_TYPE,
             crc,
-        })
+        }))
     }
 
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
@@ -222,7 +241,7 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_fn<F>(&mut self, data_size: u32, mut f: F) -> Result<(), Error>
+    fn decode_message_with<F>(&mut self, data_size: u32, mut f: F) -> Result<(), Error>
     where
         F: FnMut(Event),
     {
@@ -398,7 +417,7 @@ impl<R: Read> Decoder<R> {
         let mut arr = [0u8; 255];
 
         for field_def in &mesg_def.field_definitions {
-            let buf = &mut arr[..field_def.size as usize];
+            let mut buf = &mut arr[..field_def.size as usize];
             self.read_exact_inc(buf)?;
 
             let num = field_def.num;
@@ -427,6 +446,15 @@ impl<R: Read> Decoder<R> {
                     }
                 }
             };
+
+            if field_def.size < base_type.size() {
+                buf = slice_buffer_to_match_type_size(
+                    &mut arr,
+                    mesg_def.arch,
+                    field_def.size as usize,
+                    base_type.size() as usize,
+                );
+            }
 
             let value = Value::unmarshal(buf, array, base_type, mesg_def.arch);
 
@@ -527,7 +555,7 @@ impl<R: Read> Decoder<R> {
         let mut arr = [0u8; 255];
 
         for dev_field_def in &mesg_def.developer_field_definitions {
-            let buf = &mut arr[..dev_field_def.size as usize];
+            let mut buf = &mut arr[..dev_field_def.size as usize];
             self.read_exact_inc(buf)?;
 
             let field_desc = match self.field_descriptions.iter().find(|v| {
@@ -540,11 +568,12 @@ impl<R: Read> Decoder<R> {
 
             let base_type = field_desc.fit_base_type_id;
             if dev_field_def.size < base_type.size() {
-                return Err(Error::BaseTypeSizeMismatch {
-                    expected: base_type.size(),
-                    got: dev_field_def.size,
-                    base_type,
-                });
+                buf = slice_buffer_to_match_type_size(
+                    &mut arr,
+                    mesg_def.arch,
+                    dev_field_def.size as usize,
+                    base_type.size() as usize,
+                );
             }
 
             let size = dev_field_def.size;
@@ -595,6 +624,22 @@ impl<R: Read> Decoder<R> {
         self.timestamp = 0;
         self.last_time_offset = 0;
         self.field_descriptions.clear();
+    }
+}
+
+fn slice_buffer_to_match_type_size(
+    arr: &mut [u8; 255],
+    arch: u8,
+    current_len: usize,
+    target_len: usize,
+) -> &mut [u8] {
+    if arch == 0 {
+        arr[current_len..target_len].fill(0);
+        &mut arr[..target_len]
+    } else {
+        arr.copy_within(..current_len, target_len - current_len);
+        arr[..target_len - current_len].fill(0);
+        &mut arr[..target_len]
     }
 }
 
@@ -674,8 +719,8 @@ impl<R: Read> Builder<R> {
         Self {
             reader,
             options: Options {
-                checksum: false,
-                expand_components: false,
+                checksum: true,
+                expand_components: true,
             },
         }
     }

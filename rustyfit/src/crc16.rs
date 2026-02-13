@@ -24,7 +24,7 @@ impl Crc16 {
         self.0 = crc;
     }
 
-    pub fn sum16(&mut self) -> u16 {
+    pub fn sum16(&self) -> u16 {
         self.0
     }
 

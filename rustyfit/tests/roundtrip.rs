@@ -16,46 +16,49 @@ fn decode_encode_roundtrip() {
     let walk_fn = |path: &PathBuf| {
         let file = File::open(path).unwrap();
         let br = BufReader::new(file);
-
+        let mut buf = Vec::<u8>::with_capacity(10_000 >> 10); // 10 MB, large enough to avoid realloc.
         let mut dec = Decoder::new(br);
 
-        let mut fit = match dec.decode() {
+        'decode: while let Some(fit) = &mut match dec.decode() {
             Ok(fit) => fit,
             Err(err) => {
                 if let DecoderError::ChecksumMismatch { .. } = err {
-                    // NOTE: Doubts exist regarding the integrity of these files.
-                    let exceptions = ["WeightScaleMultiUser.fit", "Settings.fit"];
-                    for v in exceptions {
-                        if path.file_name().unwrap() == v {
-                            return;
+                    if let Some(file_name) = path.file_name() {
+                        // NOTE: Doubts exist regarding the integrity of these files.
+                        if ["WeightScaleMultiUser.fit", "Settings.fit"]
+                            .iter()
+                            .any(|x| *x == file_name)
+                        {
+                            continue 'decode;
                         }
                     }
                 }
                 panic!("decode: {:?}, err: {:?}", path, err);
             }
-        };
+        } {
+            let mut cursor = Cursor::new(&mut buf);
 
-        let mut cursor = Cursor::new(Vec::new());
+            let mut enc = EncoderBuilder::new(&mut cursor)
+                .endianness(Endianness::BigEndian)
+                .build();
 
-        let mut enc = EncoderBuilder::new(&mut cursor)
-            .endianness(Endianness::BigEndian)
-            .build();
+            if let Err(err) = enc.encode(fit) {
+                panic!("encode: {:?}, err: {:?}", path, err);
+            }
 
-        if let Err(err) = enc.encode(&mut fit) {
-            panic!("encode: {:?}, err: {:?}", path, err);
-        }
+            cursor.seek(SeekFrom::Start(0)).unwrap();
 
-        cursor.seek(SeekFrom::Start(0)).unwrap();
+            let mut dec = Decoder::new(&mut cursor);
+            if let Err(err) = dec.decode() {
+                panic!("re-decode the encoded file: {:?}, err: {:?}", path, err);
+            }
 
-        let mut dec = Decoder::new(&mut cursor);
-        if let Err(err) = dec.decode() {
-            panic!("re-decode the encoded file: {:?}, err: {:?}", path, err);
+            buf.clear();
         }
     };
 
-    match walk_path(&path, &walk_fn) {
-        Ok(_) => {}
-        Err(err) => panic!("walk_path: {}", err),
+    if let Err(err) = walk_path(&path, &walk_fn) {
+        panic!("walk_path: {}", err);
     }
 }
 
