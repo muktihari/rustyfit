@@ -154,6 +154,8 @@ pub struct Encoder<W: Write + Seek> {
     timestamp_reference: u32,
     options: Options,
     message_validator: MessageValidator,
+    message_count: usize,
+    file_header: Option<FileHeader>,
 }
 
 impl<W: Write + Seek> Encoder<W> {
@@ -177,6 +179,57 @@ impl<W: Write + Seek> Encoder<W> {
         self.update_file_header(&mut fit.file_header)?;
         self.reset();
         Ok(())
+    }
+
+    /// TODO
+    pub fn begin(&mut self) -> Result<(), Error> {
+        let mut file_header = FileHeader::default();
+        self.encode_file_header(&mut file_header)?;
+        self.file_header = Some(file_header);
+        self.encode_crc()?;
+        self.message_count = 0;
+        Ok(())
+    }
+
+    /// TODO
+    pub fn add_message(&mut self, mesg: &mut Message) -> Result<(), Error> {
+        // FIXME: remove unwrap
+        let protocol_version = self.file_header.unwrap().protocol_version;
+        if let Err(err) = validate_message(mesg, protocol_version) {
+            return Err(Error::Message {
+                mesg_index: self.message_count,
+                mesg_num: mesg.num,
+                err: MessageError::Protocol(err),
+            });
+        }
+        if let Err(err) = self.message_validator.validate_message(mesg) {
+            return Err(Error::Message {
+                mesg_index: self.message_count,
+                mesg_num: mesg.num,
+                err: MessageError::Validation(err),
+            });
+        }
+
+        if let Err(e) = self.encode_message(mesg) {
+            return Err(Error::Message {
+                mesg_index: self.message_count,
+                mesg_num: mesg.num,
+                err: e,
+            });
+        };
+        self.message_count += 1;
+        Ok(())
+    }
+
+    /// TODO
+    pub fn finish(&mut self) -> Result<u16, Error> {
+        let crc = self.crc16.sum16();
+        self.encode_crc()?;
+
+        let mut file_header = self.file_header.unwrap();
+        self.update_file_header(&mut file_header)?;
+        self.reset();
+        Ok(crc)
     }
 
     fn select_protocol_version(&mut self, file_header: &mut FileHeader) {
@@ -483,6 +536,42 @@ impl<W: Write + Seek> Builder<W> {
             timestamp_reference: 0,
             options: self.options,
             message_validator: MessageValidator::new(),
+            message_count: 0,
+            file_header: None,
         }
     }
+}
+
+#[test]
+fn test_streaming_vs_non_streaming() {
+    use crate::profile::{mesgdef, typedef};
+    use std::io::BufWriter;
+
+    let mut file_id = mesgdef::FileId::new();
+    file_id.manufacturer = typedef::Manufacturer::DEVELOPMENT;
+    let mut message1 = Message::from(file_id);
+    let mut record = mesgdef::Record::new();
+    record.cadence = 90;
+    let mut message2 = Message::from(record);
+
+    let mut fit = FIT {
+        messages: vec![message1.clone(), message2.clone()],
+        ..Default::default()
+    };
+
+    let buf1 = std::io::Cursor::new(Vec::<u8>::new());
+    let mut bw1 = BufWriter::new(buf1);
+    let mut enc1 = Encoder::new(&mut bw1);
+    enc1.encode(&mut fit).unwrap();
+
+    let buf2 = std::io::Cursor::new(Vec::<u8>::new());
+    let mut bw2 = BufWriter::new(buf2);
+    let mut enc2 = Encoder::new(&mut bw2);
+
+    enc2.begin().unwrap();
+    enc2.add_message(&mut message1).unwrap();
+    enc2.add_message(&mut message2).unwrap();
+    let crc = enc2.finish().unwrap();
+
+    assert_eq!(fit.crc, crc);
 }
