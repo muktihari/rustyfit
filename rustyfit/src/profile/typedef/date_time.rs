@@ -19,7 +19,7 @@ impl DateTime {
     /// Offset duration in secs between UNIX_EPOCH (1 January 1970 UTC) and FIT_EPOCH (31 December 1989 UTC).
     const FIT_EPOCH_OFFSET: i64 = 631065600;
 
-    /// Creates a new DateTime (relative to 31 December 1989 UTC) from Unix seconds (relative to 1 January 1970 UTC)
+    /// Creates a new DateTime (relative to 31 December 1989 UTC) from Unix timestamp secs (relative to 1 January 1970 UTC)
     /// if the value is within a valid range. `DateTime(u32::MAX)` otherwise.
     pub fn from_unix_timestamp(secs: i64) -> DateTime {
         if let Some(t) = secs.checked_sub(Self::FIT_EPOCH_OFFSET)
@@ -32,8 +32,8 @@ impl DateTime {
         }
     }
 
-    /// Returns Some(t) where t is Unix seconds (relative to 1 January 1970 UTC) if `self` is a valid DateTime. None otherwise.
-    pub fn checked_unix_secs(&self) -> Option<i64> {
+    /// Returns `Some(t)` where `t` is an Unix timestamp secs (relative to 1 January 1970 UTC) if `self` is valid. `None` otherwise.
+    pub fn unix_timestamp(self) -> Option<i64> {
         if self.0 == u32::MAX {
             None
         } else {
