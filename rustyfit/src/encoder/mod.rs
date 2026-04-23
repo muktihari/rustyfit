@@ -347,15 +347,12 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn compress_timestamp_into_header(&mut self, mesg: &mut Message) {
-        let mut timestamp = u32::MAX;
-        for field in &mesg.fields {
-            if field.num == FIELD_NUM_TIMESTAMP {
-                if let Value::Uint32(v) = &field.value {
-                    timestamp = *v
-                }
-                break;
-            }
-        }
+        let timestamp = mesg
+            .fields
+            .iter()
+            .find(|field| field.num == FIELD_NUM_TIMESTAMP)
+            .map(|field| field.value.as_u32())
+            .unwrap_or(u32::MAX);
 
         if timestamp == u32::MAX || timestamp < DateTime::MIN.0 {
             return;
@@ -368,12 +365,7 @@ impl<W: Write + Seek> Encoder<W> {
 
         let time_offset = (timestamp & COMPRESSED_TIME_MASK as u32) as u8;
         mesg.header = MESG_COMPRESSED_HEADER_MASK | time_offset;
-        for (i, field) in mesg.fields.iter().enumerate() {
-            if field.num == FIELD_NUM_TIMESTAMP {
-                mesg.fields.remove(i);
-                break;
-            }
-        }
+        mesg.fields.retain(|field| field.num != FIELD_NUM_TIMESTAMP);
     }
 
     fn encode_crc(&mut self) -> Result<(), Error> {
@@ -485,4 +477,75 @@ impl<W: Write + Seek> Builder<W> {
             message_validator: MessageValidator::new(),
         }
     }
+}
+
+#[cfg(test)]
+#[test]
+fn compress_timestamp_into_header() {
+    use crate::profile::{mesgdef, typedef};
+    use std::io::Cursor;
+
+    let meter: u32 = 100;
+
+    let mut mesgs = vec![
+        {
+            let mut file_id = mesgdef::FileId::new();
+            file_id.manufacturer = typedef::Manufacturer::DEVELOPMENT;
+            Message::from(file_id)
+        },
+        {
+            let mut rec = mesgdef::Record::new();
+            rec.timestamp = typedef::DateTime(0);
+            rec.distance = 100 * meter;
+            Message::from(rec)
+        },
+        {
+            let mut rec = mesgdef::Record::new();
+            rec.timestamp = DateTime(1062594924);
+            rec.distance = 200 * meter;
+            Message::from(rec)
+        },
+        {
+            let mut rec = mesgdef::Record::new();
+            rec.timestamp = DateTime(1062594925);
+            rec.distance = 300 * meter;
+            Message::from(rec)
+        },
+    ];
+
+    let expected = vec![
+        {
+            let mut file_id = mesgdef::FileId::new();
+            file_id.manufacturer = typedef::Manufacturer::DEVELOPMENT;
+            Message::from(file_id) // Nothing's changed since no timestamp
+        },
+        {
+            let mut rec = mesgdef::Record::new();
+            rec.timestamp = typedef::DateTime(0); // Keep since timestamp <= DateTime::MIN
+            rec.distance = 100 * meter;
+            Message::from(rec)
+        },
+        {
+            let mut rec = mesgdef::Record::new();
+            rec.timestamp = DateTime(1062594924); // Keep since first timestamp 
+            rec.distance = 200 * meter;
+            Message::from(rec)
+        },
+        {
+            let mut rec = mesgdef::Record::new();
+            // Timestamp is compressed into header since roll over < 32
+            rec.distance = 300 * meter;
+            let mut mesg = Message::from(rec);
+            mesg.header |=
+                MESG_COMPRESSED_HEADER_MASK | (1062594925 & COMPRESSED_TIME_MASK as u32) as u8;
+            mesg
+        },
+    ];
+
+    let mut enc = Encoder::new(Cursor::new(Vec::new()));
+    for mesg in mesgs.iter_mut() {
+        enc.compress_timestamp_into_header(mesg);
+    }
+
+    assert_eq!(mesgs, expected);
 }
