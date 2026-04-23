@@ -24,3 +24,7 @@ harness = false
 [[bench]]
 name = "encoder"
 harness = false
+
+[[bench]]
+name = "mesgdef"
+harness = false
