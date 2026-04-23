@@ -67,11 +67,13 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			maxLenFields = len(mesg.Fields)
 		}
 		var (
+			knownNums     [4]uint64
 			maxFieldNum   byte
 			dynamicFields []DynamicField
 			fields        = make([]Field, 0, len(mesg.Fields))
 		)
 		for _, parserField := range mesg.Fields {
+			knownNums[parserField.Num>>6] |= 1 << (parserField.Num & 63)
 			if parserField.Num > maxFieldNum {
 				maxFieldNum = parserField.Num
 			}
@@ -167,6 +169,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Name:              strutil.ToTitle(mesg.Name),
 			Fields:            fields,
 			DynamicFields:     dynamicFields,
+			KnownNums:         knownNums,
 			StateSize:         (maxFieldExpandNum + 8) / 8,
 			MaxFieldNum:       maxFieldNum + 1,
 			MaxFieldExpandNum: maxFieldExpandNum + 1,
