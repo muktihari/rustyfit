@@ -6,7 +6,7 @@
 
 #![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, lookup, typedef};
+use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
@@ -237,10 +237,16 @@ impl From<&Message> for Length {
     fn from(mesg: &Message) -> Self {
         let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
         let mut state = [0u8; 3];
-        let mut unknown_fields: Vec<Field> = Vec::new();
+
+        const KNOWN_NUMS: [u64; 4] = [66854655, 0, 0, 6917529027641081856];
+        let mut n = 0u64;
+        for field in &mesg.fields {
+            n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
+        }
+        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
 
         for field in &mesg.fields {
-            if lookup::field_reference(mesg.num, field.num).is_none() {
+            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
                 unknown_fields.push(field.clone());
                 continue;
             }
