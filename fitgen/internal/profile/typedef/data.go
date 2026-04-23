@@ -4,8 +4,13 @@
 
 package typedef
 
-type Data struct {
-	Types []Type
+type Mod struct {
+	SubMods []SubMod
+}
+
+type SubMod struct {
+	Name     string
+	Reexport string
 }
 
 type Type struct {

@@ -13,77 +13,73 @@
 
 use std::fmt;
 
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct Bool(pub u8);
-
-impl Default for Bool {
-    fn default() -> Self {
-        Self(u8::MAX)
-    }
-}
-
-impl Bool {
-    pub const FALSE: Bool = Bool(0);
-    pub const TRUE: Bool = Bool(1);
-}
-
-{{ range $_, $typ := .Types }}
 #[derive(Clone, Copy, PartialEq)]
-pub struct {{ $typ.TypeName }}(pub {{ $typ.Base }});
+pub struct {{ .TypeName }}(pub {{ .Base }});
 
-impl {{ $typ.TypeName }} {
+impl {{ .TypeName }} {
     {{ range .Constants -}}
     {{ if gt (len .Comment) 0 -}} 
     {{ .Comment }} 
-    {{ .Decorator }} pub const {{ .Name }}: {{ $typ.TypeName }} = {{ $typ.TypeName }}({{ .Value }});
+    {{ .Decorator }} pub const {{ .Name }}: {{ $.TypeName }} = {{ $.TypeName }}({{ .Value }});
     {{ else -}} 
-    {{ .Decorator }} pub const {{ .Name }}: {{ $typ.TypeName }} = {{ $typ.TypeName }}({{ .Value }});
+    {{ .Decorator }} pub const {{ .Name }}: {{ $.TypeName }} = {{ $.TypeName }}({{ .Value }});
     {{ end -}}
     {{ end }}
-    {{ if eq $typ.TypeName "FitBaseType" }}
+    {{ if eq .TypeName "FitBaseType" }}
     pub const NUM_MASK: u8 = 0b00011111;
     pub const ENDIAN_ABILITY_MASK: u8 = 0b00011111;
     
     const SIZES: [u8; 17] = [1, 1, 1, 2, 2, 4, 4, 1, 4, 8, 1, 2, 4, 1, 8, 8, 8];
 
     pub const fn size(self) -> u8 {
-        let index = (self.0 & {{ $typ.TypeName }}::NUM_MASK) as usize;
-        if index < {{ $typ.TypeName }}::SIZES.len() {
-            return {{ $typ.TypeName }}::SIZES[index];
+        let index = (self.0 & {{ .TypeName }}::NUM_MASK) as usize;
+        if index < {{ .TypeName }}::SIZES.len() {
+            return {{ .TypeName }}::SIZES[index];
         }
         0
     }
     {{ end -}}
 }
 
-impl Default for {{ $typ.TypeName }} {
+impl Default for {{ .TypeName }} {
     fn default() -> Self {
-        Self({{ $typ.Invalid }})
+        Self({{ .Invalid }})
     }
 }
 
-impl fmt::Display for {{ $typ.TypeName }} {
+impl fmt::Display for {{ .TypeName }} {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             {{ range .Constants -}}
             {{ .Decorator }} {{ .Value }} => write!(f, "{{ .String }}"),
             {{ end -}}
-            _ => write!(f, "{{ $typ.TypeName }}({})", self.0),
+            _ => write!(f, "{{ .TypeName }}({})", self.0),
         }
     }
 }
 
-impl fmt::Debug for {{ $typ.TypeName }} {
+impl fmt::Debug for {{ .TypeName }} {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             {{ range .Constants -}}
-            {{ .Decorator }} {{ .Value }} => write!(f, "{{ $typ.TypeName }}::{{ .Name }}({{ .Value }})"),
+            {{ .Decorator }} {{ .Value }} => write!(f, "{{ $.TypeName }}::{{ .Name }}({{ .Value }})"),
             {{ end -}}
-            _ => write!(f, "{{ $typ.TypeName }}({})", self.0),
+            _ => write!(f, "{{ .TypeName }}({})", self.0),
         }
     }
 }
 
+{{ end }}
+
+{{ define "mod" -}}
+{{ template "header" . -}}
+
+{{ range .SubMods -}}
+pub use {{ .Name }}::{{ .Reexport }};
+{{ end }}
+
+{{ range .SubMods -}}
+mod {{ .Name }};
 {{ end }}
 
 {{ end }}
