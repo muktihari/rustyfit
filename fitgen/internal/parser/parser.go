@@ -225,11 +225,16 @@ func (p *Parser) ParseMessages() ([]Message, error) {
 }
 
 func skipMessagesSection(row *xlsxlite.RowIterator) bool {
+	// Previously on profile <= 21.188, it has len(cells) == 1 and cells[0].Name is "D".
+	// Starting from profile 21.195, it has len(cells) == 16, cells[3].Name is "D", and only this cell has a value.
 	cells := row.Cells()
-	if len(cells) == 1 && cells[0].Name == "D" {
-		return true
+	count := 0
+	for _, v := range cells {
+		if v.Value != "" {
+			count++
+		}
 	}
-	return false
+	return count == 1
 }
 
 func splitStringOrNil(s string) []string {

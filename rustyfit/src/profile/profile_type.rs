@@ -7,7 +7,7 @@
 use crate::profile::typedef::FitBaseType;
 use std::fmt;
 
-pub const PROFILE_VERSION: u16 = 21188;
+pub const PROFILE_VERSION: u16 = 21200;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct ProfileType(pub u16);
@@ -438,13 +438,17 @@ impl ProfileType {
     /// FitBaseType::ENUM
     pub const SLEEP_DISRUPTION_SEVERITY: ProfileType = ProfileType(0x1860);
     /// FitBaseType::ENUM
-    pub const MAX_MET_SPEED_SOURCE: ProfileType = ProfileType(0x1880);
+    pub const NAP_PERIOD_FEEDBACK: ProfileType = ProfileType(0x1880);
     /// FitBaseType::ENUM
-    pub const MAX_MET_HEART_RATE_SOURCE: ProfileType = ProfileType(0x18A0);
+    pub const NAP_SOURCE: ProfileType = ProfileType(0x18A0);
     /// FitBaseType::ENUM
-    pub const HRV_STATUS: ProfileType = ProfileType(0x18C0);
+    pub const MAX_MET_SPEED_SOURCE: ProfileType = ProfileType(0x18C0);
     /// FitBaseType::ENUM
-    pub const NO_FLY_TIME_MODE: ProfileType = ProfileType(0x18E0);
+    pub const MAX_MET_HEART_RATE_SOURCE: ProfileType = ProfileType(0x18E0);
+    /// FitBaseType::ENUM
+    pub const HRV_STATUS: ProfileType = ProfileType(0x1900);
+    /// FitBaseType::ENUM
+    pub const NO_FLY_TIME_MODE: ProfileType = ProfileType(0x1920);
 
     const BASE_TYPES: [FitBaseType; 17] = [
         FitBaseType::ENUM,
@@ -696,10 +700,12 @@ impl fmt::Display for ProfileType {
             0x1820 => write!(f, "tap_sensitivity"),
             0x1840 => write!(f, "radar_threat_level_type"),
             0x1860 => write!(f, "sleep_disruption_severity"),
-            0x1880 => write!(f, "max_met_speed_source"),
-            0x18A0 => write!(f, "max_met_heart_rate_source"),
-            0x18C0 => write!(f, "hrv_status"),
-            0x18E0 => write!(f, "no_fly_time_mode"),
+            0x1880 => write!(f, "nap_period_feedback"),
+            0x18A0 => write!(f, "nap_source"),
+            0x18C0 => write!(f, "max_met_speed_source"),
+            0x18E0 => write!(f, "max_met_heart_rate_source"),
+            0x1900 => write!(f, "hrv_status"),
+            0x1920 => write!(f, "no_fly_time_mode"),
             _ => write!(f, "ProfileType({})", self.0),
         }
     }
@@ -920,10 +926,12 @@ impl fmt::Debug for ProfileType {
             0x1820 => write!(f, "ProfileType::TAP_SENSITIVITY(0x1820)"),
             0x1840 => write!(f, "ProfileType::RADAR_THREAT_LEVEL_TYPE(0x1840)"),
             0x1860 => write!(f, "ProfileType::SLEEP_DISRUPTION_SEVERITY(0x1860)"),
-            0x1880 => write!(f, "ProfileType::MAX_MET_SPEED_SOURCE(0x1880)"),
-            0x18A0 => write!(f, "ProfileType::MAX_MET_HEART_RATE_SOURCE(0x18A0)"),
-            0x18C0 => write!(f, "ProfileType::HRV_STATUS(0x18C0)"),
-            0x18E0 => write!(f, "ProfileType::NO_FLY_TIME_MODE(0x18E0)"),
+            0x1880 => write!(f, "ProfileType::NAP_PERIOD_FEEDBACK(0x1880)"),
+            0x18A0 => write!(f, "ProfileType::NAP_SOURCE(0x18A0)"),
+            0x18C0 => write!(f, "ProfileType::MAX_MET_SPEED_SOURCE(0x18C0)"),
+            0x18E0 => write!(f, "ProfileType::MAX_MET_HEART_RATE_SOURCE(0x18E0)"),
+            0x1900 => write!(f, "ProfileType::HRV_STATUS(0x1900)"),
+            0x1920 => write!(f, "ProfileType::NO_FLY_TIME_MODE(0x1920)"),
             _ => write!(f, "ProfileType({})", self.0),
         }
     }

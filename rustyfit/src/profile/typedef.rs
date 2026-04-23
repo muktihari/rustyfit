@@ -255,6 +255,7 @@ impl MesgNum {
     pub const SKIN_TEMP_OVERNIGHT: MesgNum = MesgNum(398);
     /// Message number for the HSA wrist temperature data message
     pub const HSA_WRIST_TEMPERATURE_DATA: MesgNum = MesgNum(409);
+    pub const NAP_EVENT: MesgNum = MesgNum(412);
     pub const SLEEP_DISRUPTION_SEVERITY_PERIOD: MesgNum = MesgNum(470);
     pub const SLEEP_DISRUPTION_OVERNIGHT_SEVERITY: MesgNum = MesgNum(471);
     /// 0xFF00 - 0xFFFE reserved for manufacturer specific messages
@@ -393,6 +394,7 @@ impl fmt::Display for MesgNum {
             393 => write!(f, "dive_apnea_alarm"),
             398 => write!(f, "skin_temp_overnight"),
             409 => write!(f, "hsa_wrist_temperature_data"),
+            412 => write!(f, "nap_event"),
             470 => write!(f, "sleep_disruption_severity_period"),
             471 => write!(f, "sleep_disruption_overnight_severity"),
             0xFF00 => write!(f, "mfg_range_min"),
@@ -526,6 +528,7 @@ impl fmt::Debug for MesgNum {
             393 => write!(f, "MesgNum::DIVE_APNEA_ALARM(393)"),
             398 => write!(f, "MesgNum::SKIN_TEMP_OVERNIGHT(398)"),
             409 => write!(f, "MesgNum::HSA_WRIST_TEMPERATURE_DATA(409)"),
+            412 => write!(f, "MesgNum::NAP_EVENT(412)"),
             470 => write!(f, "MesgNum::SLEEP_DISRUPTION_SEVERITY_PERIOD(470)"),
             471 => write!(f, "MesgNum::SLEEP_DISRUPTION_OVERNIGHT_SEVERITY(471)"),
             0xFF00 => write!(f, "MesgNum::MFG_RANGE_MIN(0xFF00)"),
@@ -1957,12 +1960,20 @@ impl Sport {
     pub const FLOOR_CLIMBING: Sport = Sport(48);
     pub const BASEBALL: Sport = Sport(49);
     pub const DIVING: Sport = Sport(53);
+    /// Sport Shooting bits, set here for sport_bits alignment
+    pub const SHOOTING: Sport = Sport(56);
+    pub const WINTER_SPORT: Sport = Sport(58);
+    /// Sailing position, operating manual winches to power boat controls
+    pub const GRINDING: Sport = Sport(59);
     pub const HIIT: Sport = Sport(62);
+    pub const VIDEO_GAMING: Sport = Sport(63);
     pub const RACKET: Sport = Sport(64);
     pub const WHEELCHAIR_PUSH_WALK: Sport = Sport(65);
     pub const WHEELCHAIR_PUSH_RUN: Sport = Sport(66);
     pub const MEDITATION: Sport = Sport(67);
+    pub const PARA_SPORT: Sport = Sport(68);
     pub const DISC_GOLF: Sport = Sport(69);
+    pub const TEAM_SPORT: Sport = Sport(70);
     pub const CRICKET: Sport = Sport(71);
     pub const RUGBY: Sport = Sport(72);
     pub const HOCKEY: Sport = Sport(73);
@@ -1970,10 +1981,17 @@ impl Sport {
     pub const VOLLEYBALL: Sport = Sport(75);
     pub const WATER_TUBING: Sport = Sport(76);
     pub const WAKESURFING: Sport = Sport(77);
+    pub const WATER_SPORT: Sport = Sport(78);
+    pub const ARCHERY: Sport = Sport(79);
     pub const MIXED_MARTIAL_ARTS: Sport = Sport(80);
+    pub const MOTOR_SPORTS: Sport = Sport(81);
     pub const SNORKELING: Sport = Sport(82);
     pub const DANCE: Sport = Sport(83);
     pub const JUMP_ROPE: Sport = Sport(84);
+    pub const POOL_APNEA: Sport = Sport(85);
+    pub const MOBILITY: Sport = Sport(86);
+    pub const GEOCACHING: Sport = Sport(87);
+    pub const CANOEING: Sport = Sport(88);
     /// All is for goals only to include all sports.
     pub const ALL: Sport = Sport(254);
 }
@@ -2038,12 +2056,18 @@ impl fmt::Display for Sport {
             48 => write!(f, "floor_climbing"),
             49 => write!(f, "baseball"),
             53 => write!(f, "diving"),
+            56 => write!(f, "shooting"),
+            58 => write!(f, "winter_sport"),
+            59 => write!(f, "grinding"),
             62 => write!(f, "hiit"),
+            63 => write!(f, "video_gaming"),
             64 => write!(f, "racket"),
             65 => write!(f, "wheelchair_push_walk"),
             66 => write!(f, "wheelchair_push_run"),
             67 => write!(f, "meditation"),
+            68 => write!(f, "para_sport"),
             69 => write!(f, "disc_golf"),
+            70 => write!(f, "team_sport"),
             71 => write!(f, "cricket"),
             72 => write!(f, "rugby"),
             73 => write!(f, "hockey"),
@@ -2051,10 +2075,17 @@ impl fmt::Display for Sport {
             75 => write!(f, "volleyball"),
             76 => write!(f, "water_tubing"),
             77 => write!(f, "wakesurfing"),
+            78 => write!(f, "water_sport"),
+            79 => write!(f, "archery"),
             80 => write!(f, "mixed_martial_arts"),
+            81 => write!(f, "motor_sports"),
             82 => write!(f, "snorkeling"),
             83 => write!(f, "dance"),
             84 => write!(f, "jump_rope"),
+            85 => write!(f, "pool_apnea"),
+            86 => write!(f, "mobility"),
+            87 => write!(f, "geocaching"),
+            88 => write!(f, "canoeing"),
             254 => write!(f, "all"),
             _ => write!(f, "Sport({})", self.0),
         }
@@ -2115,12 +2146,18 @@ impl fmt::Debug for Sport {
             48 => write!(f, "Sport::FLOOR_CLIMBING(48)"),
             49 => write!(f, "Sport::BASEBALL(49)"),
             53 => write!(f, "Sport::DIVING(53)"),
+            56 => write!(f, "Sport::SHOOTING(56)"),
+            58 => write!(f, "Sport::WINTER_SPORT(58)"),
+            59 => write!(f, "Sport::GRINDING(59)"),
             62 => write!(f, "Sport::HIIT(62)"),
+            63 => write!(f, "Sport::VIDEO_GAMING(63)"),
             64 => write!(f, "Sport::RACKET(64)"),
             65 => write!(f, "Sport::WHEELCHAIR_PUSH_WALK(65)"),
             66 => write!(f, "Sport::WHEELCHAIR_PUSH_RUN(66)"),
             67 => write!(f, "Sport::MEDITATION(67)"),
+            68 => write!(f, "Sport::PARA_SPORT(68)"),
             69 => write!(f, "Sport::DISC_GOLF(69)"),
+            70 => write!(f, "Sport::TEAM_SPORT(70)"),
             71 => write!(f, "Sport::CRICKET(71)"),
             72 => write!(f, "Sport::RUGBY(72)"),
             73 => write!(f, "Sport::HOCKEY(73)"),
@@ -2128,10 +2165,17 @@ impl fmt::Debug for Sport {
             75 => write!(f, "Sport::VOLLEYBALL(75)"),
             76 => write!(f, "Sport::WATER_TUBING(76)"),
             77 => write!(f, "Sport::WAKESURFING(77)"),
+            78 => write!(f, "Sport::WATER_SPORT(78)"),
+            79 => write!(f, "Sport::ARCHERY(79)"),
             80 => write!(f, "Sport::MIXED_MARTIAL_ARTS(80)"),
+            81 => write!(f, "Sport::MOTOR_SPORTS(81)"),
             82 => write!(f, "Sport::SNORKELING(82)"),
             83 => write!(f, "Sport::DANCE(83)"),
             84 => write!(f, "Sport::JUMP_ROPE(84)"),
+            85 => write!(f, "Sport::POOL_APNEA(85)"),
+            86 => write!(f, "Sport::MOBILITY(86)"),
+            87 => write!(f, "Sport::GEOCACHING(87)"),
+            88 => write!(f, "Sport::CANOEING(88)"),
             254 => write!(f, "Sport::ALL(254)"),
             _ => write!(f, "Sport({})", self.0),
         }
@@ -2601,8 +2645,12 @@ impl SubSport {
     /// Used for events where participants run, crawl through mud, climb over walls, etc.
     pub const OBSTACLE: SubSport = SubSport(59);
     pub const BREATHING: SubSport = SubSport(62);
+    /// Diving w/ closed circuit rebreather
+    pub const CCR_DIVING: SubSport = SubSport(63);
     /// Sailing
     pub const SAIL_RACE: SubSport = SubSport(65);
+    /// Generic
+    pub const EXPEDITION: SubSport = SubSport(66);
     /// Ultramarathon
     pub const ULTRA: SubSport = SubSport(67);
     /// Climbing
@@ -2611,12 +2659,30 @@ impl SubSport {
     pub const BOULDERING: SubSport = SubSport(69);
     /// High Intensity Interval Training
     pub const HIIT: SubSport = SubSport(70);
+    /// Sailing position, operating manual winches to power boat controls
+    pub const INDOOR_GRINDING: SubSport = SubSport(71);
+    /// Hunting
+    pub const HUNTING_WITH_DOGS: SubSport = SubSport(72);
     /// HIIT
     pub const AMRAP: SubSport = SubSport(73);
     /// HIIT
     pub const EMOM: SubSport = SubSport(74);
     /// HIIT
     pub const TABATA: SubSport = SubSport(75);
+    /// Video Gaming, Cycling, etc.
+    pub const ESPORT: SubSport = SubSport(77);
+    /// Multisport
+    pub const TRIATHLON: SubSport = SubSport(78);
+    /// Multisport
+    pub const DUATHLON: SubSport = SubSport(79);
+    /// Multisport
+    pub const BRICK: SubSport = SubSport(80);
+    /// Multisport
+    pub const SWIM_RUN: SubSport = SubSport(81);
+    /// Multisport
+    pub const ADVENTURE_RACE: SubSport = SubSport(82);
+    /// DEZL trucker workout training sport
+    pub const TRUCKER_WORKOUT: SubSport = SubSport(83);
     /// Racket
     pub const PICKLEBALL: SubSport = SubSport(84);
     /// Racket
@@ -2624,10 +2690,25 @@ impl SubSport {
     pub const INDOOR_WHEELCHAIR_WALK: SubSport = SubSport(86);
     pub const INDOOR_WHEELCHAIR_RUN: SubSport = SubSport(87);
     pub const INDOOR_HAND_CYCLING: SubSport = SubSport(88);
+    /// Hockey
+    pub const FIELD: SubSport = SubSport(90);
+    /// Hockey
+    pub const ICE: SubSport = SubSport(91);
+    /// Disc
+    pub const ULTIMATE: SubSport = SubSport(92);
+    /// Racket
+    pub const PLATFORM: SubSport = SubSport(93);
+    /// Racket
     pub const SQUASH: SubSport = SubSport(94);
+    /// Racket
     pub const BADMINTON: SubSport = SubSport(95);
+    /// Racket
     pub const RACQUETBALL: SubSport = SubSport(96);
+    /// Racket
     pub const TABLE_TENNIS: SubSport = SubSport(97);
+    pub const OVERLAND: SubSport = SubSport(98);
+    /// Generic
+    pub const TROLLING_MOTOR: SubSport = SubSport(99);
     /// Flying
     pub const FLY_CANOPY: SubSport = SubSport(110);
     /// Flying
@@ -2648,6 +2729,17 @@ impl SubSport {
     pub const FLY_VFR: SubSport = SubSport(118);
     /// Flying
     pub const FLY_IFR: SubSport = SubSport(119);
+    pub const DYNAMIC_APNEA: SubSport = SubSport(121);
+    /// Cycling
+    pub const ENDURO: SubSport = SubSport(123);
+    /// Hiking
+    pub const RUCKING: SubSport = SubSport(124);
+    /// Motor sports
+    pub const RALLY: SubSport = SubSport(125);
+    /// Multisport
+    pub const POOL_TRIATHLON: SubSport = SubSport(126);
+    /// Cycling
+    pub const E_BIKE_ENDURO: SubSport = SubSport(127);
     pub const ALL: SubSport = SubSport(254);
 }
 
@@ -2721,23 +2813,40 @@ impl fmt::Display for SubSport {
             58 => write!(f, "virtual_activity"),
             59 => write!(f, "obstacle"),
             62 => write!(f, "breathing"),
+            63 => write!(f, "ccr_diving"),
             65 => write!(f, "sail_race"),
+            66 => write!(f, "expedition"),
             67 => write!(f, "ultra"),
             68 => write!(f, "indoor_climbing"),
             69 => write!(f, "bouldering"),
             70 => write!(f, "hiit"),
+            71 => write!(f, "indoor_grinding"),
+            72 => write!(f, "hunting_with_dogs"),
             73 => write!(f, "amrap"),
             74 => write!(f, "emom"),
             75 => write!(f, "tabata"),
+            77 => write!(f, "esport"),
+            78 => write!(f, "triathlon"),
+            79 => write!(f, "duathlon"),
+            80 => write!(f, "brick"),
+            81 => write!(f, "swim_run"),
+            82 => write!(f, "adventure_race"),
+            83 => write!(f, "trucker_workout"),
             84 => write!(f, "pickleball"),
             85 => write!(f, "padel"),
             86 => write!(f, "indoor_wheelchair_walk"),
             87 => write!(f, "indoor_wheelchair_run"),
             88 => write!(f, "indoor_hand_cycling"),
+            90 => write!(f, "field"),
+            91 => write!(f, "ice"),
+            92 => write!(f, "ultimate"),
+            93 => write!(f, "platform"),
             94 => write!(f, "squash"),
             95 => write!(f, "badminton"),
             96 => write!(f, "racquetball"),
             97 => write!(f, "table_tennis"),
+            98 => write!(f, "overland"),
+            99 => write!(f, "trolling_motor"),
             110 => write!(f, "fly_canopy"),
             111 => write!(f, "fly_paraglide"),
             112 => write!(f, "fly_paramotor"),
@@ -2748,6 +2857,12 @@ impl fmt::Display for SubSport {
             117 => write!(f, "fly_wx"),
             118 => write!(f, "fly_vfr"),
             119 => write!(f, "fly_ifr"),
+            121 => write!(f, "dynamic_apnea"),
+            123 => write!(f, "enduro"),
+            124 => write!(f, "rucking"),
+            125 => write!(f, "rally"),
+            126 => write!(f, "pool_triathlon"),
+            127 => write!(f, "e_bike_enduro"),
             254 => write!(f, "all"),
             _ => write!(f, "SubSport({})", self.0),
         }
@@ -2818,23 +2933,40 @@ impl fmt::Debug for SubSport {
             58 => write!(f, "SubSport::VIRTUAL_ACTIVITY(58)"),
             59 => write!(f, "SubSport::OBSTACLE(59)"),
             62 => write!(f, "SubSport::BREATHING(62)"),
+            63 => write!(f, "SubSport::CCR_DIVING(63)"),
             65 => write!(f, "SubSport::SAIL_RACE(65)"),
+            66 => write!(f, "SubSport::EXPEDITION(66)"),
             67 => write!(f, "SubSport::ULTRA(67)"),
             68 => write!(f, "SubSport::INDOOR_CLIMBING(68)"),
             69 => write!(f, "SubSport::BOULDERING(69)"),
             70 => write!(f, "SubSport::HIIT(70)"),
+            71 => write!(f, "SubSport::INDOOR_GRINDING(71)"),
+            72 => write!(f, "SubSport::HUNTING_WITH_DOGS(72)"),
             73 => write!(f, "SubSport::AMRAP(73)"),
             74 => write!(f, "SubSport::EMOM(74)"),
             75 => write!(f, "SubSport::TABATA(75)"),
+            77 => write!(f, "SubSport::ESPORT(77)"),
+            78 => write!(f, "SubSport::TRIATHLON(78)"),
+            79 => write!(f, "SubSport::DUATHLON(79)"),
+            80 => write!(f, "SubSport::BRICK(80)"),
+            81 => write!(f, "SubSport::SWIM_RUN(81)"),
+            82 => write!(f, "SubSport::ADVENTURE_RACE(82)"),
+            83 => write!(f, "SubSport::TRUCKER_WORKOUT(83)"),
             84 => write!(f, "SubSport::PICKLEBALL(84)"),
             85 => write!(f, "SubSport::PADEL(85)"),
             86 => write!(f, "SubSport::INDOOR_WHEELCHAIR_WALK(86)"),
             87 => write!(f, "SubSport::INDOOR_WHEELCHAIR_RUN(87)"),
             88 => write!(f, "SubSport::INDOOR_HAND_CYCLING(88)"),
+            90 => write!(f, "SubSport::FIELD(90)"),
+            91 => write!(f, "SubSport::ICE(91)"),
+            92 => write!(f, "SubSport::ULTIMATE(92)"),
+            93 => write!(f, "SubSport::PLATFORM(93)"),
             94 => write!(f, "SubSport::SQUASH(94)"),
             95 => write!(f, "SubSport::BADMINTON(95)"),
             96 => write!(f, "SubSport::RACQUETBALL(96)"),
             97 => write!(f, "SubSport::TABLE_TENNIS(97)"),
+            98 => write!(f, "SubSport::OVERLAND(98)"),
+            99 => write!(f, "SubSport::TROLLING_MOTOR(99)"),
             110 => write!(f, "SubSport::FLY_CANOPY(110)"),
             111 => write!(f, "SubSport::FLY_PARAGLIDE(111)"),
             112 => write!(f, "SubSport::FLY_PARAMOTOR(112)"),
@@ -2845,6 +2977,12 @@ impl fmt::Debug for SubSport {
             117 => write!(f, "SubSport::FLY_WX(117)"),
             118 => write!(f, "SubSport::FLY_VFR(118)"),
             119 => write!(f, "SubSport::FLY_IFR(119)"),
+            121 => write!(f, "SubSport::DYNAMIC_APNEA(121)"),
+            123 => write!(f, "SubSport::ENDURO(123)"),
+            124 => write!(f, "SubSport::RUCKING(124)"),
+            125 => write!(f, "SubSport::RALLY(125)"),
+            126 => write!(f, "SubSport::POOL_TRIATHLON(126)"),
+            127 => write!(f, "SubSport::E_BIKE_ENDURO(127)"),
             254 => write!(f, "SubSport::ALL(254)"),
             _ => write!(f, "SubSport({})", self.0),
         }
@@ -4645,6 +4783,15 @@ impl Manufacturer {
     pub const DARAD_INNOVATION_CORPORATION: Manufacturer = Manufacturer(334);
     pub const CYCLOPTIM: Manufacturer = Manufacturer(335);
     pub const RUNNA: Manufacturer = Manufacturer(337);
+    pub const ZEPP: Manufacturer = Manufacturer(339);
+    pub const PELOTON: Manufacturer = Manufacturer(340);
+    pub const CARV: Manufacturer = Manufacturer(341);
+    pub const TISSOT: Manufacturer = Manufacturer(342);
+    pub const REAL_VELO: Manufacturer = Manufacturer(345);
+    pub const WETECH: Manufacturer = Manufacturer(346);
+    pub const JESPR: Manufacturer = Manufacturer(347);
+    pub const HUAWEI: Manufacturer = Manufacturer(348);
+    pub const GOTOES: Manufacturer = Manufacturer(349);
     pub const ACTIGRAPHCORP: Manufacturer = Manufacturer(5759);
 }
 
@@ -4889,6 +5036,15 @@ impl fmt::Display for Manufacturer {
             334 => write!(f, "darad_innovation_corporation"),
             335 => write!(f, "cycloptim"),
             337 => write!(f, "runna"),
+            339 => write!(f, "zepp"),
+            340 => write!(f, "peloton"),
+            341 => write!(f, "carv"),
+            342 => write!(f, "tissot"),
+            345 => write!(f, "real_velo"),
+            346 => write!(f, "wetech"),
+            347 => write!(f, "jespr"),
+            348 => write!(f, "huawei"),
+            349 => write!(f, "gotoes"),
             5759 => write!(f, "actigraphcorp"),
             _ => write!(f, "Manufacturer({})", self.0),
         }
@@ -5130,6 +5286,15 @@ impl fmt::Debug for Manufacturer {
             334 => write!(f, "Manufacturer::DARAD_INNOVATION_CORPORATION(334)"),
             335 => write!(f, "Manufacturer::CYCLOPTIM(335)"),
             337 => write!(f, "Manufacturer::RUNNA(337)"),
+            339 => write!(f, "Manufacturer::ZEPP(339)"),
+            340 => write!(f, "Manufacturer::PELOTON(340)"),
+            341 => write!(f, "Manufacturer::CARV(341)"),
+            342 => write!(f, "Manufacturer::TISSOT(342)"),
+            345 => write!(f, "Manufacturer::REAL_VELO(345)"),
+            346 => write!(f, "Manufacturer::WETECH(346)"),
+            347 => write!(f, "Manufacturer::JESPR(347)"),
+            348 => write!(f, "Manufacturer::HUAWEI(348)"),
+            349 => write!(f, "Manufacturer::GOTOES(349)"),
             5759 => write!(f, "Manufacturer::ACTIGRAPHCORP(5759)"),
             _ => write!(f, "Manufacturer({})", self.0),
         }
@@ -5640,6 +5805,7 @@ impl GarminProduct {
     pub const INSTINCT3_SOLAR_50MM: GarminProduct = GarminProduct(4759);
     pub const TACTIX8_AMOLED: GarminProduct = GarminProduct(4775);
     pub const TACTIX8_SOLAR: GarminProduct = GarminProduct(4776);
+    pub const APPROACH_J1: GarminProduct = GarminProduct(4825);
     pub const D2_MACH2: GarminProduct = GarminProduct(4879);
     pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
     pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
@@ -6127,6 +6293,7 @@ impl fmt::Display for GarminProduct {
             4759 => write!(f, "instinct3_solar_50mm"),
             4775 => write!(f, "tactix8_amoled"),
             4776 => write!(f, "tactix8_solar"),
+            4825 => write!(f, "approach_j1"),
             4879 => write!(f, "d2_mach2"),
             4678 => write!(f, "instinct_crossover_amoled"),
             4944 => write!(f, "d2_air_x15"),
@@ -6609,6 +6776,7 @@ impl fmt::Debug for GarminProduct {
             4759 => write!(f, "GarminProduct::INSTINCT3_SOLAR_50MM(4759)"),
             4775 => write!(f, "GarminProduct::TACTIX8_AMOLED(4775)"),
             4776 => write!(f, "GarminProduct::TACTIX8_SOLAR(4776)"),
+            4825 => write!(f, "GarminProduct::APPROACH_J1(4825)"),
             4879 => write!(f, "GarminProduct::D2_MACH2(4879)"),
             4678 => write!(f, "GarminProduct::INSTINCT_CROSSOVER_AMOLED(4678)"),
             4944 => write!(f, "GarminProduct::D2_AIR_X15(4944)"),
@@ -20190,6 +20358,152 @@ impl fmt::Debug for SleepDisruptionSeverity {
             2 => write!(f, "SleepDisruptionSeverity::MEDIUM(2)"),
             3 => write!(f, "SleepDisruptionSeverity::HIGH(3)"),
             _ => write!(f, "SleepDisruptionSeverity({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct NapPeriodFeedback(pub u8);
+
+impl NapPeriodFeedback {
+    pub const NONE: NapPeriodFeedback = NapPeriodFeedback(0);
+    pub const MULTIPLE_NAPS_DURING_DAY: NapPeriodFeedback = NapPeriodFeedback(1);
+    pub const JETLAG_IDEAL_TIMING_IDEAL_DURATION: NapPeriodFeedback = NapPeriodFeedback(2);
+    pub const JETLAG_IDEAL_TIMING_LONG_DURATION: NapPeriodFeedback = NapPeriodFeedback(3);
+    pub const JETLAG_LATE_TIMING_IDEAL_DURATION: NapPeriodFeedback = NapPeriodFeedback(4);
+    pub const JETLAG_LATE_TIMING_LONG_DURATION: NapPeriodFeedback = NapPeriodFeedback(5);
+    pub const IDEAL_TIMING_IDEAL_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(6);
+    pub const IDEAL_TIMING_IDEAL_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(7);
+    pub const IDEAL_TIMING_LONG_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(8);
+    pub const IDEAL_TIMING_LONG_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(9);
+    pub const LATE_TIMING_IDEAL_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(10);
+    pub const LATE_TIMING_IDEAL_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(11);
+    pub const LATE_TIMING_LONG_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(12);
+    pub const LATE_TIMING_LONG_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(13);
+    pub const IDEAL_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(14);
+    pub const IDEAL_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(15);
+    pub const LONG_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(16);
+    pub const LONG_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(17);
+}
+
+impl Default for NapPeriodFeedback {
+    fn default() -> Self {
+        Self(u8::MAX)
+    }
+}
+
+impl fmt::Display for NapPeriodFeedback {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "none"),
+            1 => write!(f, "multiple_naps_during_day"),
+            2 => write!(f, "jetlag_ideal_timing_ideal_duration"),
+            3 => write!(f, "jetlag_ideal_timing_long_duration"),
+            4 => write!(f, "jetlag_late_timing_ideal_duration"),
+            5 => write!(f, "jetlag_late_timing_long_duration"),
+            6 => write!(f, "ideal_timing_ideal_duration_low_need"),
+            7 => write!(f, "ideal_timing_ideal_duration_high_need"),
+            8 => write!(f, "ideal_timing_long_duration_low_need"),
+            9 => write!(f, "ideal_timing_long_duration_high_need"),
+            10 => write!(f, "late_timing_ideal_duration_low_need"),
+            11 => write!(f, "late_timing_ideal_duration_high_need"),
+            12 => write!(f, "late_timing_long_duration_low_need"),
+            13 => write!(f, "late_timing_long_duration_high_need"),
+            14 => write!(f, "ideal_duration_low_need"),
+            15 => write!(f, "ideal_duration_high_need"),
+            16 => write!(f, "long_duration_low_need"),
+            17 => write!(f, "long_duration_high_need"),
+            _ => write!(f, "NapPeriodFeedback({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for NapPeriodFeedback {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "NapPeriodFeedback::NONE(0)"),
+            1 => write!(f, "NapPeriodFeedback::MULTIPLE_NAPS_DURING_DAY(1)"),
+            2 => write!(
+                f,
+                "NapPeriodFeedback::JETLAG_IDEAL_TIMING_IDEAL_DURATION(2)"
+            ),
+            3 => write!(f, "NapPeriodFeedback::JETLAG_IDEAL_TIMING_LONG_DURATION(3)"),
+            4 => write!(f, "NapPeriodFeedback::JETLAG_LATE_TIMING_IDEAL_DURATION(4)"),
+            5 => write!(f, "NapPeriodFeedback::JETLAG_LATE_TIMING_LONG_DURATION(5)"),
+            6 => write!(
+                f,
+                "NapPeriodFeedback::IDEAL_TIMING_IDEAL_DURATION_LOW_NEED(6)"
+            ),
+            7 => write!(
+                f,
+                "NapPeriodFeedback::IDEAL_TIMING_IDEAL_DURATION_HIGH_NEED(7)"
+            ),
+            8 => write!(
+                f,
+                "NapPeriodFeedback::IDEAL_TIMING_LONG_DURATION_LOW_NEED(8)"
+            ),
+            9 => write!(
+                f,
+                "NapPeriodFeedback::IDEAL_TIMING_LONG_DURATION_HIGH_NEED(9)"
+            ),
+            10 => write!(
+                f,
+                "NapPeriodFeedback::LATE_TIMING_IDEAL_DURATION_LOW_NEED(10)"
+            ),
+            11 => write!(
+                f,
+                "NapPeriodFeedback::LATE_TIMING_IDEAL_DURATION_HIGH_NEED(11)"
+            ),
+            12 => write!(
+                f,
+                "NapPeriodFeedback::LATE_TIMING_LONG_DURATION_LOW_NEED(12)"
+            ),
+            13 => write!(
+                f,
+                "NapPeriodFeedback::LATE_TIMING_LONG_DURATION_HIGH_NEED(13)"
+            ),
+            14 => write!(f, "NapPeriodFeedback::IDEAL_DURATION_LOW_NEED(14)"),
+            15 => write!(f, "NapPeriodFeedback::IDEAL_DURATION_HIGH_NEED(15)"),
+            16 => write!(f, "NapPeriodFeedback::LONG_DURATION_LOW_NEED(16)"),
+            17 => write!(f, "NapPeriodFeedback::LONG_DURATION_HIGH_NEED(17)"),
+            _ => write!(f, "NapPeriodFeedback({})", self.0),
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq)]
+pub struct NapSource(pub u8);
+
+impl NapSource {
+    pub const AUTOMATIC: NapSource = NapSource(0);
+    pub const MANUAL_DEVICE: NapSource = NapSource(1);
+    pub const MANUAL_GC: NapSource = NapSource(2);
+}
+
+impl Default for NapSource {
+    fn default() -> Self {
+        Self(u8::MAX)
+    }
+}
+
+impl fmt::Display for NapSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "automatic"),
+            1 => write!(f, "manual_device"),
+            2 => write!(f, "manual_gc"),
+            _ => write!(f, "NapSource({})", self.0),
+        }
+    }
+}
+
+impl fmt::Debug for NapSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self.0 {
+            0 => write!(f, "NapSource::AUTOMATIC(0)"),
+            1 => write!(f, "NapSource::MANUAL_DEVICE(1)"),
+            2 => write!(f, "NapSource::MANUAL_GC(2)"),
+            _ => write!(f, "NapSource({})", self.0),
         }
     }
 }
