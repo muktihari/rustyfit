@@ -39,14 +39,45 @@ func NewBuilder(path string, types []parser.Type) *Builder {
 				filepath.Join(cd, "typedef.tmpl"),
 			)),
 		templateExec: "typedef",
-		path:         filepath.Join(path, "profile"),
+		path:         filepath.Join(path, "profile", "typedef"),
 		types:        types,
 	}
 }
 
 func (b *Builder) Build() ([]generator.Data, error) {
-	var dataBuilder generator.Data
-	var data Data
+	data := make([]generator.Data, 0, len(b.types)+2)
+	subMods := make([]SubMod, 0, len(b.types)+1)
+
+	// additional type: bool
+	data = append(data, generator.Data{
+		Template:     b.template,
+		TemplateExec: b.templateExec,
+		Path:         b.path,
+		Filename:     "bool.rs",
+		Data: Type{
+			TypeName: "Bool",
+			Base:     "u8",
+			Invalid:  "u8::MAX",
+			Constants: []Constant{
+				{
+					Name:   "FALSE",
+					Value:  "0",
+					String: "false",
+				},
+				{
+					Name:   "TRUE",
+					Value:  "1",
+					String: "true",
+				},
+			},
+		},
+	})
+
+	subMods = append(subMods, SubMod{
+		Name:     "bool",
+		Reexport: "Bool",
+	})
+
 	for _, t := range b.types {
 		typeName := strutil.ToTitle(t.Name)
 
@@ -86,30 +117,41 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			}
 		}
 
-		data.Types = append(data.Types, Type{
-			TypeName: typeName,
-			Base:     intoRustType(basetype.FromString(t.BaseType)),
-			Invalid: func() string {
-				rt := intoRustType(basetype.FromString(t.BaseType))
-				if strings.HasSuffix(t.BaseType, "z") {
-					return rt + "::MIN"
-				}
-				return rt + "::MAX"
-			}(),
-			Constants: constants,
+		data = append(data, generator.Data{
+			Template:     b.template,
+			TemplateExec: b.templateExec,
+			Path:         b.path,
+			Filename:     t.Name + ".rs",
+			Data: Type{
+				TypeName: typeName,
+				Base:     intoRustType(basetype.FromString(t.BaseType)),
+				Invalid: func() string {
+					rt := intoRustType(basetype.FromString(t.BaseType))
+					if strings.HasSuffix(t.BaseType, "z") {
+						return rt + "::MIN"
+					}
+					return rt + "::MAX"
+				}(),
+				Constants: constants,
+			},
 		})
 
+		subMods = append(subMods, SubMod{
+			Name:     t.Name,
+			Reexport: typeName,
+		})
 	}
 
-	dataBuilder = generator.Data{
+	// mod.rs
+	data = append(data, generator.Data{
 		Template:     b.template,
-		TemplateExec: b.templateExec,
+		TemplateExec: "mod",
 		Path:         b.path,
-		Filename:     "typedef.rs",
-		Data:         data,
-	}
+		Filename:     "mod.rs",
+		Data:         Mod{SubMods: subMods},
+	})
 
-	return []generator.Data{dataBuilder}, nil
+	return data, nil
 }
 
 func intoRustType(bt basetype.BaseType) string {
