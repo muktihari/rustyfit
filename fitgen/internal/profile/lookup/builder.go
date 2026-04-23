@@ -5,6 +5,7 @@
 package rustfactory2
 
 import (
+	"bytes"
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -87,17 +88,17 @@ func (b *Builder) Build() ([]generator.Data, error) {
 	// This way, we don't depend on generated value such as types and profile package to be able to generate factory.
 	// And also we don't need to process the data in the template which is a bit painful for complex data structure.
 
-	strbuf := new(strings.Builder)
-
+	buf := new(bytes.Buffer)
 	for _, message := range b.messages {
 		constName := fmt.Sprintf("MesgNum::%s", strings.ToUpper(message.Name))
 
-		fmt.Fprintf(strbuf, `
-%s => { match field_num {
-	%s
-	_ => None,
-	}
-},`, constName, b.makeFieldRefs(message))
+		fmt.Fprintf(buf, "\n%8s%s => { match field_num {\n%s %10s_ => None,\n%8s}},",
+			"",
+			constName,
+			b.makeFieldRefs(message),
+			"",
+			"",
+		)
 	}
 
 	return []generator.Data{
@@ -108,18 +109,14 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Filename:     "lookup.rs",
 			Data: Data{
 				MaxComponentBits: b.maxComponentBits,
-				Refs:             strbuf.String(),
+				Refs:             buf.String(),
 			},
 		},
 	}, nil
 }
 
 func (b *Builder) makeFieldRefs(message parser.Message) string {
-	if len(message.Fields) == 0 {
-		return "nil"
-	}
-
-	strbuf := new(strings.Builder)
+	buf := new(bytes.Buffer)
 	for _, field := range message.Fields {
 		// Scale and offset do not apply for field that has more than one components
 		var scale, offset = 1.0, 0.0
@@ -128,66 +125,92 @@ func (b *Builder) makeFieldRefs(message parser.Message) string {
 			offset = offsetOrDefault(field.Offsets, 0)
 		}
 
-		fmt.Fprintf(strbuf, `
-%d => Some(FieldReference {
-	name: %q,
-	num: %d,
-	base_type: FitBaseType::%s,
-	profile_type: ProfileType::%s,
-	array: %t %s,
-	accumulate: %t,
-	scale: %s,
-	offset: %s,
-	units: %q,
-	components: %s,
-	sub_fields: %s,
-}),`,
+		fmt.Fprintf(buf, "%12s%d => Some(FieldReference { name: %q, num: %d, base_type: FitBaseType::%s, profile_type: ProfileType::%s, ",
+			"",
 			field.Num,
 			field.Name,
 			field.Num,
 			strings.ToUpper(b.lookup.BaseType(field.Type).String()),
 			strings.ToUpper(field.Type),
-			field.Array != "", makeArrayComment(field.Array),
-			accumulateOrDefault(field.Accumulate, 0),
-			formatFloat(scale),
-			formatFloat(offset),
-			field.Units,
-			b.makeComponents(field, message.Name),
-			b.makeSubFields(field, message.Name),
 		)
+
+		if field.Array != "" {
+			fmt.Fprintf(buf, "array: %t %s, ", field.Array != "", makeArrayComment(field.Array))
+		}
+
+		accumulate := accumulateOrDefault(field.Accumulate, 0)
+		if accumulate {
+			fmt.Fprintf(buf, "accumulate: %t, ", accumulate)
+		}
+
+		if scale != 1 {
+			fmt.Fprintf(buf, "scale: %s, ", formatFloat(scale))
+		}
+
+		if offset != 0 {
+			fmt.Fprintf(buf, "offset: %s,", formatFloat(offset))
+		}
+
+		if field.Units != "" {
+			fmt.Fprintf(buf, "units: %q, ", field.Units)
+		}
+
+		components := b.makeComponents(field, message.Name, "")
+		if components != "&[]" {
+			fmt.Fprintf(buf, "components: %s, ", components)
+		}
+
+		subFields := b.makeSubFields(field, message.Name)
+		if subFields != "&[]" {
+			fmt.Fprintf(buf, "sub_fields: %s, ", subFields)
+		}
+
+		if field.Array == "" ||
+			!accumulate ||
+			scale == 1 ||
+			offset == 0 ||
+			field.Units == "" ||
+			components == "&[]" ||
+			subFields == "&[]" {
+			buf.WriteString("..FR_DEF, ")
+		}
+
+		buf.Truncate(buf.Len() - 2)
+		buf.WriteString(" }),\n")
 	}
 
-	return strbuf.String()
+	return buf.String()
 }
 
-func (b *Builder) makeComponents(compField parser.ComponentField, messageName string) string {
+func (b *Builder) makeComponents(compField parser.ComponentField, messageName string, extraPadding string) string {
 	if len(compField.GetComponents()) == 0 {
 		return "&[]"
 	}
 
-	strbuf := new(strings.Builder)
-	strbuf.WriteString("&[\n")
+	buf := new(bytes.Buffer)
+	buf.WriteString("&[")
 	var totalBits int
 	for i, fieldNameRef := range compField.GetComponents() {
 		fieldRef := b.lookup.FieldByName(messageName, fieldNameRef)
-		strbuf.WriteString("Component {")
-		fmt.Fprintf(strbuf, "field_num: %d /* %s */,", fieldRef.Num, fieldRef.Name)
-		fmt.Fprintf(strbuf, "scale: %s,", formatFloat(scaleOrDefault(compField.GetScales(), i)))    // component index or default
-		fmt.Fprintf(strbuf, "offset: %s,", formatFloat(offsetOrDefault(compField.GetOffsets(), i))) // component index or default
-		fmt.Fprintf(strbuf, "accumulate: %t,", accumulateOrDefault(compField.GetAccumulate(), i))   // component index or default
-		bits := bitsOrDefault(compField.GetBits(), i)                                               // component index or default
-		fmt.Fprintf(strbuf, "bits: %d,", bits)
-		strbuf.WriteString("},\n")
+		fmt.Fprintf(buf, "\n%19s%s Component { ", "", extraPadding)
+		fmt.Fprintf(buf, "field_num: %d /* %s */, ", fieldRef.Num, fieldRef.Name)
+		fmt.Fprintf(buf, "scale: %s, ", formatFloat(scaleOrDefault(compField.GetScales(), i)))    // component index or default
+		fmt.Fprintf(buf, "offset: %s, ", formatFloat(offsetOrDefault(compField.GetOffsets(), i))) // component index or default
+		fmt.Fprintf(buf, "accumulate: %t, ", accumulateOrDefault(compField.GetAccumulate(), i))   // component index or default
+		bits := bitsOrDefault(compField.GetBits(), i)                                             // component index or default
+		fmt.Fprintf(buf, "bits: %d", bits)
+		buf.WriteString(" },")
 
 		totalBits += int(bits)
 	}
-	strbuf.WriteString("]")
+	buf.Truncate(buf.Len() - 1)
+	fmt.Fprintf(buf, "\n%16s%s]", "", extraPadding)
 
 	if totalBits > b.maxComponentBits {
 		b.maxComponentBits = totalBits
 	}
 
-	return strbuf.String()
+	return buf.String()
 }
 
 func (b *Builder) makeSubFields(field parser.Field, messageName string) string {
@@ -195,26 +218,52 @@ func (b *Builder) makeSubFields(field parser.Field, messageName string) string {
 		return "&[]"
 	}
 
-	strbuf := new(strings.Builder)
-	strbuf.WriteString("&[\n")
+	buf := new(bytes.Buffer)
+	buf.WriteString("&[")
 	for _, subField := range field.SubFields {
-		strbuf.WriteString("SubField {")
-		fmt.Fprintf(strbuf, "name: %q,", subField.Name)
-		fmt.Fprintf(strbuf, "profile_type: ProfileType::%s,", strings.ToUpper(subField.Type))
-		fmt.Fprintf(strbuf, "scale: %s,", formatFloat(scaleOrDefault(subField.Scales, 0)))    // first index or default
-		fmt.Fprintf(strbuf, "offset: %s,", formatFloat(offsetOrDefault(subField.Offsets, 0))) // first index or default
-		fmt.Fprintf(strbuf, "units: %q,", subField.Units)
-		if components := b.makeComponents(subField, messageName); components != "" {
-			fmt.Fprintf(strbuf, "components: %s,", components)
-		} else {
-			strbuf.WriteString("components: &[],")
-		}
-		fmt.Fprintf(strbuf, "maps: %s,", b.makeSubFieldMaps(subField, messageName))
-		strbuf.WriteString("},\n")
-	}
-	strbuf.WriteString("]")
+		fmt.Fprintf(buf, "\n%19s SubField { ", "")
+		fmt.Fprintf(buf, "name: %q, ", subField.Name)
+		fmt.Fprintf(buf, "profile_type: ProfileType::%s, ", strings.ToUpper(subField.Type))
 
-	return strbuf.String()
+		scale := scaleOrDefault(subField.Scales, 0) // first index or default
+		if scale != 1 {
+			fmt.Fprintf(buf, "scale: %s, ", formatFloat(scale))
+		}
+
+		offset := offsetOrDefault(subField.Offsets, 0) // first index or default
+		if offset != 0 {
+			fmt.Fprintf(buf, "offset: %s, ", formatFloat(offset))
+		}
+
+		if subField.Units != "" {
+			fmt.Fprintf(buf, "units: %q, ", subField.Units)
+		}
+
+		components := b.makeComponents(subField, messageName, strings.Repeat(" ", 4))
+		if components != "&[]" {
+			fmt.Fprintf(buf, "components: %s, ", components)
+		}
+
+		subFields := b.makeSubFieldMaps(subField, messageName)
+		if subFields != "&[]" {
+			fmt.Fprintf(buf, "maps: %s, ", subFields)
+		}
+
+		if scale == 1 ||
+			offset == 0 ||
+			field.Units == "" ||
+			components == "&[]" ||
+			subFields == "&[]" {
+			buf.WriteString("..SF_DEF, ")
+		}
+
+		buf.Truncate(buf.Len() - 2)
+		buf.WriteString(" },")
+	}
+	buf.Truncate(buf.Len() - 1)
+	fmt.Fprintf(buf, "\n%16s]", "")
+
+	return buf.String()
 }
 
 func (b *Builder) makeSubFieldMaps(subfield parser.SubField, messageName string) string {
@@ -222,19 +271,19 @@ func (b *Builder) makeSubFieldMaps(subfield parser.SubField, messageName string)
 		return "&[]"
 	}
 
-	strbuf := new(strings.Builder)
-	strbuf.WriteString("&[\n")
+	buf := new(bytes.Buffer)
+	buf.WriteString("&[")
 	for i, refValueName := range subfield.RefFieldNames {
 		fieldRef := b.lookup.FieldByName(messageName, refValueName)
-		strbuf.WriteString("SubFieldMap {")
-		fmt.Fprintf(strbuf, "ref_field_num: %d /* %s */,", fieldRef.Num, fieldRef.Name)
+		fmt.Fprintf(buf, "\n%23s SubFieldMap { ", "")
+		fmt.Fprintf(buf, "ref_field_num: %d /* %s */, ", fieldRef.Num, fieldRef.Name)
 
 		typeValue := b.lookup.TypeValue(fieldRef.Type, subfield.RefFieldValue[i])
-		fmt.Fprintf(strbuf, "ref_field_value: %s /* %s */,", typeValue, subfield.RefFieldValue[i])
-		strbuf.WriteString("},\n")
+		fmt.Fprintf(buf, "ref_field_value: %s /* %s */ ", typeValue, subfield.RefFieldValue[i])
+		buf.WriteString("},")
 	}
-	strbuf.WriteString("]")
-	return strbuf.String()
+	fmt.Fprintf(buf, "\n%20s]", "")
+	return buf.String()
 }
 
 func bitsOrDefault(bits []byte, index int) byte {
