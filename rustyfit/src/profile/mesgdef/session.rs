@@ -300,6 +300,8 @@ pub struct Session {
     pub avg_spo2: u8,
     /// Units: percent; Average stress for the monitoring session
     pub avg_stress: u8,
+    /// Units: kcal
+    pub metabolic_calories: u16,
     /// Units: mS; Standard deviation of R-R interval (SDRR) - Heart rate variability measure most useful for wellness users.
     pub sdrr_hrv: u8,
     /// Units: mS; Root mean square successive difference (RMSSD) - Heart rate variability measure most useful for athletes
@@ -620,6 +622,8 @@ impl Session {
     pub const AVG_SPO2: u8 = 194;
     /// Value's type: `u8`; Units: `percent`
     pub const AVG_STRESS: u8 = 195;
+    /// Value's type: `u16`; Units: `kcal`
+    pub const METABOLIC_CALORIES: u8 = 196;
     /// Value's type: `u8`; Units: `mS`
     pub const SDRR_HRV: u8 = 197;
     /// Value's type: `u8`; Units: `mS`
@@ -2256,7 +2260,7 @@ impl From<&Message> for Session {
             18446742974197919743,
             18446678103011623167,
             932252819858127487,
-            6917529027641541103,
+            6917529027641541119,
         ];
         let mut n = 0u64;
         for field in &mesg.fields {
@@ -2425,6 +2429,7 @@ impl From<&Message> for Session {
             workout_rpe: vals[193].as_u8(),
             avg_spo2: vals[194].as_u8(),
             avg_stress: vals[195].as_u8(),
+            metabolic_calories: vals[196].as_u16(),
             sdrr_hrv: vals[197].as_u8(),
             rmssd_hrv: vals[198].as_u8(),
             total_fractional_ascent: vals[199].as_u8(),
@@ -2448,7 +2453,7 @@ impl From<Session> for Message {
                 value: Value::Invalid,
                 is_expanded: false,
             }
-        }; 156];
+        }; 157];
         let mut len = 0usize;
         let state = m.state;
 
@@ -3789,6 +3794,15 @@ impl From<Session> for Message {
                 num: 195,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_stress),
+                is_expanded: false,
+            };
+            len += 1;
+        }
+        if m.metabolic_calories != u16::MAX {
+            arr[len] = Field {
+                num: 196,
+                profile_type: ProfileType::UINT16,
+                value: Value::Uint16(m.metabolic_calories),
                 is_expanded: false,
             };
             len += 1;
