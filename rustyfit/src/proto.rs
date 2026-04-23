@@ -155,7 +155,7 @@ pub struct DeveloperFieldDefinition {
 }
 
 /// Message is a FIT protocol message containing the data defined in the Message Definition
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Message {
     /// Message Header serves to distinguish whether the message is a Normal Data or a Compressed Timestamp Data.
     /// Unlike MessageDefinition, Message's Header should not contain Developer Data Flag.
@@ -203,7 +203,7 @@ impl Message {
 }
 
 /// Field represents the full representation of a field, as specified in the Global FIT Profile.
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct Field {
     /// Defined in the Global FIT profile for the specified FIT message, otherwise
     /// its a manufaturer specific number (defined by manufacturer). (255 == invalid)
@@ -257,7 +257,7 @@ pub struct FieldReference<'a> {
 ///
 /// NOTE: If DeveloperField contains a valid NativeMesgNum and NativeFieldNum, the value should be treated as
 /// native value (scale, offset, etc shall apply). [Added since protocol version 2.0]
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct DeveloperField {
     /// Maps to `field_definition_number` of a `field_description` message.
     pub num: u8,
@@ -315,7 +315,7 @@ pub struct SubFieldMap {
 
 /// Value representation of Message's Field.
 #[allow(missing_docs)]
-#[derive(Debug, Clone, Default)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub enum Value {
     #[default]
     Invalid,
