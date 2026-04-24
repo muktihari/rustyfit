@@ -11,7 +11,7 @@ categories = ["encoding", "parser-implementations"]
 repository = "https://github.com/muktihari/rustyfit"
 
 [dev-dependencies]
-criterion = { version = "0.5.1" }
+criterion = { version = "0.8.2" }
 
 [[bench]]
 name = "bench_main"

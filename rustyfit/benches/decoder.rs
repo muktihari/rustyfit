@@ -1,6 +1,6 @@
-use std::io::Cursor;
+use std::{hint::black_box, io::Cursor};
 
-use criterion::{Criterion, black_box, criterion_group, criterion_main};
+use criterion::{Criterion, criterion_group, criterion_main};
 use rustyfit::{Decoder, DecoderBuilder};
 
 const TEST_FILE: &str = "tests/data/large.fit";
