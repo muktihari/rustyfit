@@ -31,8 +31,14 @@ impl ChronoShotData {
     pub const SHOT_NUM: u8 = 1;
 
     /// Create new ChronoShotData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            shot_speed: u32::MAX,
+            shot_num: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `shot_speed` in its scaled value. It returns invalid f64 when value is valid.

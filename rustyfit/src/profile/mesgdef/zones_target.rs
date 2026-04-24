@@ -36,8 +36,16 @@ impl ZonesTarget {
     pub const PWR_CALC_TYPE: u8 = 7;
 
     /// Create new ZonesTarget with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            max_heart_rate: u8::MAX,
+            threshold_heart_rate: u8::MAX,
+            functional_threshold_power: u16::MAX,
+            hr_calc_type: typedef::HrZoneCalc(u8::MAX),
+            pwr_calc_type: typedef::PwrZoneCalc(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

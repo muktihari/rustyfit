@@ -34,8 +34,15 @@ impl DeveloperDataId {
     pub const APPLICATION_VERSION: u8 = 4;
 
     /// Create new DeveloperDataId with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            developer_id: Vec::<u8>::new(),
+            application_id: Vec::<u8>::new(),
+            manufacturer_id: typedef::Manufacturer(u16::MAX),
+            developer_data_index: u8::MAX,
+            application_version: u32::MAX,
+            unknown_fields: Vec::new(),
+        }
     }
 }
 

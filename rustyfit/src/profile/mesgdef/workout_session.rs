@@ -43,8 +43,18 @@ impl WorkoutSession {
     pub const POOL_LENGTH_UNIT: u8 = 5;
 
     /// Create new WorkoutSession with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            num_valid_steps: u16::MAX,
+            first_step_index: u16::MAX,
+            pool_length: u16::MAX,
+            pool_length_unit: typedef::DisplayMeasure(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `pool_length` in its scaled value. It returns invalid f64 when value is valid.

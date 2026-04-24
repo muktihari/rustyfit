@@ -14,8 +14,10 @@ use crate::proto::*;
 pub struct HrmProfile {
     pub message_index: typedef::MessageIndex,
     pub enabled: typedef::Bool,
+    /// Base: UINT16Z
     pub hrm_ant_id: u16,
     pub log_hrv: typedef::Bool,
+    /// Base: UINT8Z
     pub hrm_ant_id_trans_type: u8,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -28,16 +30,24 @@ impl HrmProfile {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u8`
     pub const ENABLED: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const HRM_ANT_ID: u8 = 1;
     /// Value's type: `u8`
     pub const LOG_HRV: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const HRM_ANT_ID_TRANS_TYPE: u8 = 3;
 
     /// Create new HrmProfile with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            hrm_ant_id: u16::MIN,
+            log_hrv: typedef::Bool(u8::MAX),
+            hrm_ant_id_trans_type: u8::MIN,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

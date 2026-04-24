@@ -14,6 +14,7 @@ use crate::proto::*;
 pub struct SdmProfile {
     pub message_index: typedef::MessageIndex,
     pub enabled: typedef::Bool,
+    /// Base: UINT16Z
     pub sdm_ant_id: u16,
     /// Scale: 10; Units: %
     pub sdm_cal_factor: u16,
@@ -21,6 +22,7 @@ pub struct SdmProfile {
     pub odometer: u32,
     /// Use footpod for speed source instead of GPS
     pub speed_source: typedef::Bool,
+    /// Base: UINT8Z
     pub sdm_ant_id_trans_type: u8,
     /// Rollover counter that can be used to extend the odometer
     pub odometer_rollover: u8,
@@ -35,7 +37,7 @@ impl SdmProfile {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u8`
     pub const ENABLED: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const SDM_ANT_ID: u8 = 1;
     /// Value's type: `u16`; Scale: `10`; Units: `%`
     pub const SDM_CAL_FACTOR: u8 = 2;
@@ -43,14 +45,25 @@ impl SdmProfile {
     pub const ODOMETER: u8 = 3;
     /// Value's type: `u8`
     pub const SPEED_SOURCE: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const SDM_ANT_ID_TRANS_TYPE: u8 = 5;
     /// Value's type: `u8`
     pub const ODOMETER_ROLLOVER: u8 = 7;
 
     /// Create new SdmProfile with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            sdm_ant_id: u16::MIN,
+            sdm_cal_factor: u16::MAX,
+            odometer: u32::MAX,
+            speed_source: typedef::Bool(u8::MAX),
+            sdm_ant_id_trans_type: u8::MIN,
+            odometer_rollover: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `sdm_cal_factor` in its scaled value. It returns invalid f64 when value is valid.

@@ -16,7 +16,7 @@ pub struct Schedule {
     pub manufacturer: typedef::Manufacturer,
     /// Corresponds to file_id of scheduled workout / course.
     pub product: u16,
-    /// Corresponds to file_id of scheduled workout / course.
+    /// Base: UINT32Z; Corresponds to file_id of scheduled workout / course.
     pub serial_number: u32,
     /// Corresponds to file_id of scheduled workout / course.
     pub time_created: typedef::DateTime,
@@ -35,7 +35,7 @@ impl Schedule {
     pub const MANUFACTURER: u8 = 0;
     /// Value's type: `u16`
     pub const PRODUCT: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const SERIAL_NUMBER: u8 = 2;
     /// Value's type: `u32`
     pub const TIME_CREATED: u8 = 3;
@@ -47,8 +47,18 @@ impl Schedule {
     pub const SCHEDULED_TIME: u8 = 6;
 
     /// Create new Schedule with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            product: u16::MAX,
+            serial_number: u32::MIN,
+            time_created: typedef::DateTime(u32::MAX),
+            completed: typedef::Bool(u8::MAX),
+            r#type: typedef::Schedule(u8::MAX),
+            scheduled_time: typedef::LocalDateTime(u32::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

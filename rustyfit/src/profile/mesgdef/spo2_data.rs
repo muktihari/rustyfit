@@ -36,8 +36,15 @@ impl Spo2Data {
     pub const MODE: u8 = 2;
 
     /// Create new Spo2Data with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            reading_spo2: u8::MAX,
+            reading_confidence: u8::MAX,
+            mode: typedef::Spo2MeasurementType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

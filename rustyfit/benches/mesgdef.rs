@@ -45,5 +45,13 @@ pub fn bench_from(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, bench_from);
+pub fn bench_new(c: &mut Criterion) {
+    c.bench_function("new", |b| {
+        b.iter(|| {
+            let _ = Record::new();
+        })
+    });
+}
+
+criterion_group!(benches, bench_from, bench_new);
 criterion_main!(benches);

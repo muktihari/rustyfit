@@ -49,8 +49,18 @@ impl HsaAccelerometerData {
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaAccelerometerData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            sampling_interval: u16::MAX,
+            accel_x: Vec::<i16>::new(),
+            accel_y: Vec::<i16>::new(),
+            accel_z: Vec::<i16>::new(),
+            timestamp_32k: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `accel_x` in its scaled value. It returns invalid f64 when value is valid.

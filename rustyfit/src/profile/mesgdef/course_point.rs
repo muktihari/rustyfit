@@ -48,8 +48,19 @@ impl CoursePoint {
     pub const FAVORITE: u8 = 8;
 
     /// Create new CoursePoint with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: typedef::DateTime(u32::MAX),
+            position_lat: i32::MAX,
+            position_long: i32::MAX,
+            distance: u32::MAX,
+            r#type: typedef::CoursePoint(u8::MAX),
+            name: String::new(),
+            favorite: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.

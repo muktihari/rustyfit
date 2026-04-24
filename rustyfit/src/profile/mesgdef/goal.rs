@@ -60,8 +60,24 @@ impl Goal {
     pub const SOURCE: u8 = 11;
 
     /// Create new Goal with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            start_date: typedef::DateTime(u32::MAX),
+            end_date: typedef::DateTime(u32::MAX),
+            r#type: typedef::Goal(u8::MAX),
+            value: u32::MAX,
+            repeat: typedef::Bool(u8::MAX),
+            target_value: u32::MAX,
+            recurrence: typedef::GoalRecurrence(u8::MAX),
+            recurrence_value: u16::MAX,
+            enabled: typedef::Bool(u8::MAX),
+            source: typedef::GoalSource(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

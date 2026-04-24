@@ -45,6 +45,7 @@ func NewBuilder(path string, lookup *lookup.Lookup, message []parser.Message, ty
 					}
 					return strconv.FormatFloat(f, 'g', -1, 64)
 				},
+				"hasSuffix": strings.HasSuffix,
 			}).
 			ParseFiles(filepath.Join(cd, "mesgdef.tmpl"))),
 		templateExec: "mesgdef",
@@ -232,7 +233,7 @@ func (b *Builder) componentExpansionAbility(mesg *parser.Message) (canExpand map
 func createComment(field *Field, array string) string {
 	buf := new(strings.Builder)
 
-	if strings.HasSuffix(field.BaseType, "z") {
+	if strings.HasSuffix(field.BaseType, "Z") {
 		buf.WriteString("Base: ")
 		buf.WriteString(field.BaseType)
 		buf.WriteString("; ")

@@ -32,8 +32,14 @@ impl VideoTitle {
     pub const TEXT: u8 = 1;
 
     /// Create new VideoTitle with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            message_count: u16::MAX,
+            text: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -12,11 +12,13 @@ use crate::proto::*;
 #[derive(Debug, Clone)]
 /// Capabilities is a Capabilities message.
 pub struct Capabilities {
-    /// Use language_bits_x types where x is index of array.
+    /// Base: UINT8Z; Use language_bits_x types where x is index of array.
     pub languages: Vec<u8>,
-    /// Use sport_bits_x types where x is index of array.
+    /// Base: UINT8Z; Use sport_bits_x types where x is index of array.
     pub sports: Vec<typedef::SportBits0>,
+    /// Base: UINT32Z
     pub workouts_supported: typedef::WorkoutCapabilities,
+    /// Base: UINT32Z
     pub connectivity_supported: typedef::ConnectivityCapabilities,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -25,18 +27,25 @@ pub struct Capabilities {
 }
 
 impl Capabilities {
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; Base: UINT8Z
     pub const LANGUAGES: u8 = 0;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; Base: UINT8Z
     pub const SPORTS: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const WORKOUTS_SUPPORTED: u8 = 21;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const CONNECTIVITY_SUPPORTED: u8 = 23;
 
     /// Create new Capabilities with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            languages: Vec::<u8>::new(),
+            sports: Vec::<typedef::SportBits0>::new(),
+            workouts_supported: typedef::WorkoutCapabilities(u32::MIN),
+            connectivity_supported: typedef::ConnectivityCapabilities(u32::MIN),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

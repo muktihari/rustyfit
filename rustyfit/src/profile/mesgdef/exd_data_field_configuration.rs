@@ -48,8 +48,18 @@ impl ExdDataFieldConfiguration {
     pub const TITLE: u8 = 5;
 
     /// Create new ExdDataFieldConfiguration with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            screen_index: u8::MAX,
+            concept_field: u8::MAX,
+            field_id: u8::MAX,
+            concept_count: u8::MAX,
+            display_type: typedef::ExdDisplayType(u8::MAX),
+            title: [const { String::new() }; 32],
+            state: [0u8; 1],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).

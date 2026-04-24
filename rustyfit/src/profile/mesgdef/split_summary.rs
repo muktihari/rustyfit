@@ -74,8 +74,25 @@ impl SplitSummary {
     pub const TOTAL_MOVING_TIME: u8 = 77;
 
     /// Create new SplitSummary with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            split_type: typedef::SplitType(u8::MAX),
+            num_splits: u16::MAX,
+            total_timer_time: u32::MAX,
+            total_distance: u32::MAX,
+            avg_speed: u32::MAX,
+            max_speed: u32::MAX,
+            total_ascent: u16::MAX,
+            total_descent: u16::MAX,
+            avg_heart_rate: u8::MAX,
+            max_heart_rate: u8::MAX,
+            avg_vert_speed: i32::MAX,
+            total_calories: u32::MAX,
+            total_moving_time: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns invalid f64 when value is valid.

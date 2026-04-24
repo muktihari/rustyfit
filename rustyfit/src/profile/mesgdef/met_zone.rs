@@ -35,8 +35,15 @@ impl MetZone {
     pub const FAT_CALORIES: u8 = 3;
 
     /// Create new MetZone with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            high_bpm: u8::MAX,
+            calories: u16::MAX,
+            fat_calories: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `calories` in its scaled value. It returns invalid f64 when value is valid.

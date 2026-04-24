@@ -33,8 +33,15 @@ impl ExerciseTitle {
     pub const WKT_STEP_NAME: u8 = 2;
 
     /// Create new ExerciseTitle with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            exercise_category: typedef::ExerciseCategory(u16::MAX),
+            exercise_name: u16::MAX,
+            wkt_step_name: Vec::<String>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

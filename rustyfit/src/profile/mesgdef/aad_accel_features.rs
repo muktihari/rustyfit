@@ -44,8 +44,17 @@ impl AadAccelFeatures {
     pub const TIME_ABOVE_THRESHOLD: u8 = 4;
 
     /// Create new AadAccelFeatures with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            time: u16::MAX,
+            energy_total: u32::MAX,
+            zero_cross_cnt: u16::MAX,
+            instance: u8::MAX,
+            time_above_threshold: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `time_above_threshold` in its scaled value. It returns invalid f64 when value is valid.

@@ -36,8 +36,16 @@ impl MesgCapabilities {
     pub const COUNT: u8 = 3;
 
     /// Create new MesgCapabilities with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            file: typedef::File(u8::MAX),
+            mesg_num: typedef::MesgNum(u16::MAX),
+            count_type: typedef::MesgCount(u8::MAX),
+            count: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

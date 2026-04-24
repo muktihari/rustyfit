@@ -32,8 +32,14 @@ impl HsaStressData {
     pub const STRESS_LEVEL: u8 = 1;
 
     /// Create new HsaStressData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            processing_interval: u16::MAX,
+            stress_level: Vec::<i8>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

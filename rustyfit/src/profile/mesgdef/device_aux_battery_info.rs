@@ -37,8 +37,16 @@ impl DeviceAuxBatteryInfo {
     pub const BATTERY_IDENTIFIER: u8 = 3;
 
     /// Create new DeviceAuxBatteryInfo with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            device_index: typedef::DeviceIndex(u8::MAX),
+            battery_voltage: u16::MAX,
+            battery_status: typedef::BatteryStatus(u8::MAX),
+            battery_identifier: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `battery_voltage` in its scaled value. It returns invalid f64 when value is valid.

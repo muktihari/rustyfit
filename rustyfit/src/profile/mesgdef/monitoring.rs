@@ -142,8 +142,41 @@ impl Monitoring {
     pub const VIGOROUS_ACTIVITY_MINUTES: u8 = 34;
 
     /// Create new Monitoring with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            device_index: typedef::DeviceIndex(u8::MAX),
+            calories: u16::MAX,
+            distance: u32::MAX,
+            cycles: u32::MAX,
+            active_time: u32::MAX,
+            activity_type: typedef::ActivityType(u8::MAX),
+            activity_subtype: typedef::ActivitySubtype(u8::MAX),
+            activity_level: typedef::ActivityLevel(u8::MAX),
+            distance_16: u16::MAX,
+            cycles_16: u16::MAX,
+            active_time_16: u16::MAX,
+            local_timestamp: typedef::LocalDateTime(u32::MAX),
+            temperature: i16::MAX,
+            temperature_min: i16::MAX,
+            temperature_max: i16::MAX,
+            activity_time: [u16::MAX; 8],
+            active_calories: u16::MAX,
+            current_activity_type_intensity: u8::MAX,
+            timestamp_min_8: u8::MAX,
+            timestamp_16: u16::MAX,
+            heart_rate: u8::MAX,
+            intensity: u8::MAX,
+            duration_min: u16::MAX,
+            duration: u32::MAX,
+            ascent: u32::MAX,
+            descent: u32::MAX,
+            moderate_activity_minutes: u16::MAX,
+            vigorous_activity_minutes: u16::MAX,
+            state: [0u8; 4],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.

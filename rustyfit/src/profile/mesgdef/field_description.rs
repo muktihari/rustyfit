@@ -61,8 +61,24 @@ impl FieldDescription {
     pub const NATIVE_FIELD_NUM: u8 = 15;
 
     /// Create new FieldDescription with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            developer_data_index: u8::MAX,
+            field_definition_number: u8::MAX,
+            fit_base_type_id: typedef::FitBaseType(u8::MAX),
+            field_name: Vec::<String>::new(),
+            array: u8::MAX,
+            components: String::new(),
+            scale: u8::MAX,
+            offset: i8::MAX,
+            units: Vec::<String>::new(),
+            bits: String::new(),
+            accumulate: String::new(),
+            fit_base_unit_id: typedef::FitBaseUnit(u16::MAX),
+            native_mesg_num: typedef::MesgNum(u16::MAX),
+            native_field_num: u8::MAX,
+            unknown_fields: Vec::new(),
+        }
     }
 }
 

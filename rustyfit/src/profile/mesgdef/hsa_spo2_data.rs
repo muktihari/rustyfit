@@ -37,8 +37,15 @@ impl HsaSpo2Data {
     pub const CONFIDENCE: u8 = 2;
 
     /// Create new HsaSpo2Data with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            processing_interval: u16::MAX,
+            reading_spo2: Vec::<u8>::new(),
+            confidence: Vec::<u8>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -57,8 +57,20 @@ impl ObdiiData {
     pub const START_TIMESTAMP_MS: u8 = 7;
 
     /// Create new ObdiiData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            time_offset: Vec::<u16>::new(),
+            pid: u8::MAX,
+            raw_data: Vec::<u8>::new(),
+            pid_data_size: Vec::<u8>::new(),
+            system_time: Vec::<u32>::new(),
+            start_timestamp: typedef::DateTime(u32::MAX),
+            start_timestamp_ms: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

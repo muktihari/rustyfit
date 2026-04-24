@@ -47,8 +47,19 @@ impl Activity {
     pub const EVENT_GROUP: u8 = 6;
 
     /// Create new Activity with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            total_timer_time: u32::MAX,
+            num_sessions: u16::MAX,
+            r#type: typedef::Activity(u8::MAX),
+            event: typedef::Event(u8::MAX),
+            event_type: typedef::EventType(u8::MAX),
+            local_timestamp: typedef::LocalDateTime(u32::MAX),
+            event_group: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns invalid f64 when value is valid.

@@ -52,8 +52,18 @@ impl Hr {
     pub const EVENT_TIMESTAMP_12: u8 = 10;
 
     /// Create new Hr with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            fractional_timestamp: u16::MAX,
+            time256: u8::MAX,
+            filtered_bpm: Vec::<u8>::new(),
+            event_timestamp: Vec::<u32>::new(),
+            event_timestamp_12: Vec::<u8>::new(),
+            state: [0u8; 2],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `fractional_timestamp` in its scaled value. It returns invalid f64 when value is valid.

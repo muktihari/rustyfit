@@ -13,8 +13,11 @@ use crate::proto::*;
 /// AntChannelId is a AntChannelId message.
 pub struct AntChannelId {
     pub channel_number: u8,
+    /// Base: UINT8Z
     pub device_type: u8,
+    /// Base: UINT16Z
     pub device_number: u16,
+    /// Base: UINT8Z
     pub transmission_type: u8,
     pub device_index: typedef::DeviceIndex,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -26,18 +29,26 @@ pub struct AntChannelId {
 impl AntChannelId {
     /// Value's type: `u8`
     pub const CHANNEL_NUMBER: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const DEVICE_TYPE: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const DEVICE_NUMBER: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const TRANSMISSION_TYPE: u8 = 3;
     /// Value's type: `u8`
     pub const DEVICE_INDEX: u8 = 4;
 
     /// Create new AntChannelId with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            channel_number: u8::MAX,
+            device_type: u8::MIN,
+            device_number: u16::MIN,
+            transmission_type: u8::MIN,
+            device_index: typedef::DeviceIndex(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

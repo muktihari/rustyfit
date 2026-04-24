@@ -48,8 +48,18 @@ impl SegmentLeaderboardEntry {
     pub const ACTIVITY_ID_STRING: u8 = 5;
 
     /// Create new SegmentLeaderboardEntry with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            name: String::new(),
+            r#type: typedef::SegmentLeaderboardType(u8::MAX),
+            group_primary_key: u32::MAX,
+            activity_id: u32::MAX,
+            segment_time: u32::MAX,
+            activity_id_string: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `segment_time` in its scaled value. It returns invalid f64 when value is valid.

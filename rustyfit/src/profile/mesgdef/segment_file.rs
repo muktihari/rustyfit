@@ -56,8 +56,20 @@ impl SegmentFile {
     pub const DEFAULT_RACE_LEADER: u8 = 11;
 
     /// Create new SegmentFile with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            file_uuid: String::new(),
+            enabled: typedef::Bool(u8::MAX),
+            user_profile_primary_key: u32::MAX,
+            leader_type: Vec::<typedef::SegmentLeaderboardType>::new(),
+            leader_group_primary_key: Vec::<u32>::new(),
+            leader_activity_id: Vec::<u32>::new(),
+            leader_activity_id_string: Vec::<String>::new(),
+            default_race_leader: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

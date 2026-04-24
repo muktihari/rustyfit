@@ -31,8 +31,14 @@ impl CadenceZone {
     pub const NAME: u8 = 1;
 
     /// Create new CadenceZone with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            high_value: u8::MAX,
+            name: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

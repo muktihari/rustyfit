@@ -44,8 +44,17 @@ impl WeatherAlert {
     pub const TYPE: u8 = 4;
 
     /// Create new WeatherAlert with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            report_id: String::new(),
+            issue_time: typedef::DateTime(u32::MAX),
+            expire_time: typedef::DateTime(u32::MAX),
+            severity: typedef::WeatherSeverity(u8::MAX),
+            r#type: typedef::WeatherSevereType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

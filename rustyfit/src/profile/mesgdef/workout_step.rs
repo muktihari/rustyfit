@@ -79,8 +79,30 @@ impl WorkoutStep {
     pub const SECONDARY_CUSTOM_TARGET_VALUE_HIGH: u8 = 22;
 
     /// Create new WorkoutStep with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            wkt_step_name: String::new(),
+            duration_type: typedef::WktStepDuration(u8::MAX),
+            duration_value: u32::MAX,
+            target_type: typedef::WktStepTarget(u8::MAX),
+            target_value: u32::MAX,
+            custom_target_value_low: u32::MAX,
+            custom_target_value_high: u32::MAX,
+            intensity: typedef::Intensity(u8::MAX),
+            notes: String::new(),
+            equipment: typedef::WorkoutEquipment(u8::MAX),
+            exercise_category: typedef::ExerciseCategory(u16::MAX),
+            exercise_name: u16::MAX,
+            exercise_weight: u16::MAX,
+            weight_display_unit: typedef::FitBaseUnit(u16::MAX),
+            secondary_target_type: typedef::WktStepTarget(u8::MAX),
+            secondary_target_value: u32::MAX,
+            secondary_custom_target_value_low: u32::MAX,
+            secondary_custom_target_value_high: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `exercise_weight` in its scaled value. It returns invalid f64 when value is valid.

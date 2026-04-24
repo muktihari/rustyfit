@@ -77,8 +77,25 @@ impl SleepAssessment {
     pub const AVERAGE_STRESS_DURING_SLEEP: u8 = 15;
 
     /// Create new SleepAssessment with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            combined_awake_score: u8::MAX,
+            awake_time_score: u8::MAX,
+            awakenings_count_score: u8::MAX,
+            deep_sleep_score: u8::MAX,
+            sleep_duration_score: u8::MAX,
+            light_sleep_score: u8::MAX,
+            overall_sleep_score: u8::MAX,
+            sleep_quality_score: u8::MAX,
+            sleep_recovery_score: u8::MAX,
+            rem_sleep_score: u8::MAX,
+            sleep_restlessness_score: u8::MAX,
+            awakenings_count: u8::MAX,
+            interruptions_score: u8::MAX,
+            average_stress_during_sleep: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `average_stress_during_sleep` in its scaled value. It returns invalid f64 when value is valid.

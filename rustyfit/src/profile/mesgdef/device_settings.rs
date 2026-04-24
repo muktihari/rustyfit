@@ -114,8 +114,35 @@ impl DeviceSettings {
     pub const TAP_SENSITIVITY: u8 = 174;
 
     /// Create new DeviceSettings with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            active_time_zone: u8::MAX,
+            utc_offset: u32::MAX,
+            time_offset: Vec::<u32>::new(),
+            time_mode: Vec::<typedef::TimeMode>::new(),
+            time_zone_offset: Vec::<i8>::new(),
+            backlight_mode: typedef::BacklightMode(u8::MAX),
+            activity_tracker_enabled: typedef::Bool(u8::MAX),
+            clock_time: typedef::DateTime(u32::MAX),
+            pages_enabled: Vec::<u16>::new(),
+            move_alert_enabled: typedef::Bool(u8::MAX),
+            date_mode: typedef::DateMode(u8::MAX),
+            display_orientation: typedef::DisplayOrientation(u8::MAX),
+            mounting_side: typedef::Side(u8::MAX),
+            default_page: Vec::<u16>::new(),
+            autosync_min_steps: u16::MAX,
+            autosync_min_time: u16::MAX,
+            lactate_threshold_autodetect_enabled: typedef::Bool(u8::MAX),
+            ble_auto_upload_enabled: typedef::Bool(u8::MAX),
+            auto_sync_frequency: typedef::AutoSyncFrequency(u8::MAX),
+            auto_activity_detect: typedef::AutoActivityDetect(u32::MAX),
+            number_of_screens: u8::MAX,
+            smart_notification_display_orientation: typedef::DisplayOrientation(u8::MAX),
+            tap_interface: typedef::Switch(u8::MAX),
+            tap_sensitivity: typedef::TapSensitivity(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `time_zone_offset` in its scaled value. It returns invalid f64 when value is valid.

@@ -37,8 +37,15 @@ impl HsaHeartRateData {
     pub const HEART_RATE: u8 = 2;
 
     /// Create new HsaHeartRateData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            processing_interval: u16::MAX,
+            status: u8::MAX,
+            heart_rate: Vec::<u8>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

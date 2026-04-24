@@ -50,8 +50,19 @@ impl MaxMetData {
     pub const SPEED_SOURCE: u8 = 13;
 
     /// Create new MaxMetData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            update_time: typedef::DateTime(u32::MAX),
+            vo2_max: u16::MAX,
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            max_met_category: typedef::MaxMetCategory(u8::MAX),
+            calibrated_data: typedef::Bool(u8::MAX),
+            hr_source: typedef::MaxMetHeartRateSource(u8::MAX),
+            speed_source: typedef::MaxMetSpeedSource(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `vo2_max` in its scaled value. It returns invalid f64 when value is valid.

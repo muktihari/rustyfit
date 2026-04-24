@@ -57,8 +57,20 @@ impl SegmentId {
     pub const SELECTION_TYPE: u8 = 8;
 
     /// Create new SegmentId with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            name: String::new(),
+            uuid: String::new(),
+            sport: typedef::Sport(u8::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            user_profile_primary_key: u32::MAX,
+            device_id: u32::MAX,
+            default_race_leader: u8::MAX,
+            delete_status: typedef::SegmentDeleteStatus(u8::MAX),
+            selection_type: typedef::SegmentSelectionType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -14,6 +14,7 @@ use crate::proto::*;
 pub struct Course {
     pub sport: typedef::Sport,
     pub name: String,
+    /// Base: UINT32Z
     pub capabilities: typedef::CourseCapabilities,
     pub sub_sport: typedef::SubSport,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -27,14 +28,21 @@ impl Course {
     pub const SPORT: u8 = 4;
     /// Value's type: `String`
     pub const NAME: u8 = 5;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const CAPABILITIES: u8 = 6;
     /// Value's type: `u8`
     pub const SUB_SPORT: u8 = 7;
 
     /// Create new Course with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            sport: typedef::Sport(u8::MAX),
+            name: String::new(),
+            capabilities: typedef::CourseCapabilities(u32::MIN),
+            sub_sport: typedef::SubSport(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

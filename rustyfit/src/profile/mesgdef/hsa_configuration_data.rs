@@ -33,8 +33,14 @@ impl HsaConfigurationData {
     pub const DATA_SIZE: u8 = 1;
 
     /// Create new HsaConfigurationData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            data: Vec::<u8>::new(),
+            data_size: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

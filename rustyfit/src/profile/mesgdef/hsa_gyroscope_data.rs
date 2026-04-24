@@ -49,8 +49,18 @@ impl HsaGyroscopeData {
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaGyroscopeData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            sampling_interval: u16::MAX,
+            gyro_x: Vec::<i16>::new(),
+            gyro_y: Vec::<i16>::new(),
+            gyro_z: Vec::<i16>::new(),
+            timestamp_32k: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `gyro_x` in its scaled value. It returns invalid f64 when value is valid.

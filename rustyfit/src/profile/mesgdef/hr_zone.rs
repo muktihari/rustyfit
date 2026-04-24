@@ -31,8 +31,14 @@ impl HrZone {
     pub const NAME: u8 = 2;
 
     /// Create new HrZone with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            high_bpm: u8::MAX,
+            name: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -14,6 +14,7 @@ use crate::proto::*;
 pub struct FileCapabilities {
     pub message_index: typedef::MessageIndex,
     pub r#type: typedef::File,
+    /// Base: UINT8Z
     pub flags: typedef::FileFlags,
     pub directory: String,
     pub max_count: u16,
@@ -30,7 +31,7 @@ impl FileCapabilities {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u8`
     pub const TYPE: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const FLAGS: u8 = 1;
     /// Value's type: `String`
     pub const DIRECTORY: u8 = 2;
@@ -40,8 +41,17 @@ impl FileCapabilities {
     pub const MAX_SIZE: u8 = 4;
 
     /// Create new FileCapabilities with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            r#type: typedef::File(u8::MAX),
+            flags: typedef::FileFlags(u8::MIN),
+            directory: String::new(),
+            max_count: u16::MAX,
+            max_size: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

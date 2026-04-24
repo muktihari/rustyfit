@@ -57,8 +57,21 @@ impl Totals {
     pub const SPORT_INDEX: u8 = 9;
 
     /// Create new Totals with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: typedef::DateTime(u32::MAX),
+            timer_time: u32::MAX,
+            distance: u32::MAX,
+            calories: u32::MAX,
+            sport: typedef::Sport(u8::MAX),
+            elapsed_time: u32::MAX,
+            sessions: u16::MAX,
+            active_time: u32::MAX,
+            sport_index: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

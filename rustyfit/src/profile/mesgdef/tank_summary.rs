@@ -14,6 +14,7 @@ use crate::proto::*;
 pub struct TankSummary {
     /// Units: s
     pub timestamp: typedef::DateTime,
+    /// Base: UINT32Z
     pub sensor: typedef::AntChannelId,
     /// Scale: 100; Units: bar
     pub start_pressure: u16,
@@ -30,7 +31,7 @@ pub struct TankSummary {
 impl TankSummary {
     /// Value's type: `u32`; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const SENSOR: u8 = 0;
     /// Value's type: `u16`; Scale: `100`; Units: `bar`
     pub const START_PRESSURE: u8 = 1;
@@ -40,8 +41,16 @@ impl TankSummary {
     pub const VOLUME_USED: u8 = 3;
 
     /// Create new TankSummary with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            sensor: typedef::AntChannelId(u32::MIN),
+            start_pressure: u16::MAX,
+            end_pressure: u16::MAX,
+            volume_used: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `start_pressure` in its scaled value. It returns invalid f64 when value is valid.

@@ -69,8 +69,23 @@ impl AccelerometerData {
     pub const COMPRESSED_CALIBRATED_ACCEL_Z: u8 = 10;
 
     /// Create new AccelerometerData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            sample_time_offset: Vec::<u16>::new(),
+            accel_x: Vec::<u16>::new(),
+            accel_y: Vec::<u16>::new(),
+            accel_z: Vec::<u16>::new(),
+            calibrated_accel_x: Vec::<f32>::new(),
+            calibrated_accel_y: Vec::<f32>::new(),
+            calibrated_accel_z: Vec::<f32>::new(),
+            compressed_calibrated_accel_x: Vec::<i16>::new(),
+            compressed_calibrated_accel_y: Vec::<i16>::new(),
+            compressed_calibrated_accel_z: Vec::<i16>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 
