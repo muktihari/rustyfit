@@ -14,6 +14,29 @@ pub struct LocalDateTime(pub u32);
 impl LocalDateTime {
     /// if date_time is < 0x10000000 then it is system time (seconds from device power on)
     pub const MIN: LocalDateTime = LocalDateTime(0x10000000);
+
+    /// Offset duration in secs between UNIX_EPOCH (1 January 1970 UTC) and FIT_EPOCH (31 December 1989 UTC).
+    const FIT_EPOCH_OFFSET: u64 = 631065600;
+
+    /// Creates a new DateTime (relative to 31 December 1989 UTC) from Unix seconds (relative to 1 January 1970 UTC)
+    /// if the value is within a valid range. None otherwise.
+    pub fn new(unix_secs: u64) -> Option<LocalDateTime> {
+        let t = unix_secs.checked_sub(Self::FIT_EPOCH_OFFSET)?;
+        if t < u32::MAX as u64 {
+            Some(LocalDateTime(t as u32))
+        } else {
+            None
+        }
+    }
+
+    /// Returns Some(t) where t is Unix seconds (relative to 1 January 1970 UTC) if `self` is a valid LocalDateTime. None otherwise.
+    pub fn checked_unix_secs(&self) -> Option<u64> {
+        if self.0 == u32::MAX {
+            None
+        } else {
+            Some(self.0 as u64 + Self::FIT_EPOCH_OFFSET)
+        }
+    }
 }
 
 impl Default for LocalDateTime {
