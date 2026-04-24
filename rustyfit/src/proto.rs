@@ -46,7 +46,7 @@ pub(crate) const FIELD_NUM_TIMESTAMP: u8 = 253;
 pub(crate) static DATA_TYPE: &str = ".FIT";
 
 /// Defined errors returned from proto module.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Error {
     /// Protocol Validator's error when Protocol Version 1.0 constains developer data.
     ProtocolViolationDeveloperData,
@@ -637,7 +637,7 @@ impl Value {
                 for x in v {
                     let b = x.as_bytes();
                     vec.extend_from_slice(b);
-                    if v.is_empty() || b[b.len() - 1] != 0 {
+                    if x.is_empty() || b[b.len() - 1] != 0 {
                         vec.push(0);
                     }
                 }
@@ -1242,7 +1242,7 @@ pub(crate) fn strcount(s: &[u8]) -> u8 {
 mod tests {
     use crate::{
         profile::typedef::FitBaseType,
-        proto::{Value, strcount},
+        proto::{Error, Value, strcount},
     };
 
     #[test]
@@ -1601,6 +1601,377 @@ mod tests {
                 "{}: {:?} | {}",
                 i, tc.value, tc.base_type,
             );
+        }
+    }
+
+    #[test]
+    fn test_value_marshal_append() {
+        struct Case {
+            value: Value,
+            expected: Result<Vec<u8>, Error>,
+            arch: u8,
+        }
+
+        let tt = [
+            Case {
+                value: Value::Int8(1),
+                expected: Ok(1i8.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint8(2),
+                expected: Ok(2u8.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int16(3),
+                expected: Ok(3i16.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint16(4),
+                expected: Ok(4i16.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int32(5),
+                expected: Ok(5i32.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint32(6),
+                expected: Ok(6u32.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int64(7),
+                expected: Ok(7i64.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint64(8),
+                expected: Ok(8u64.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::String("FIT".to_owned()),
+                expected: Ok("FIT\x00".as_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::String("".to_owned()),
+                expected: Ok("\x00".as_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Float32(9.0),
+                expected: Ok(9.0f32.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::Float64(10.0),
+                expected: Ok(10.0f64.to_le_bytes().to_vec()),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt8(vec![1, 1]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(1u8.to_le_bytes());
+                    v.extend(1i8.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint8(vec![2, 2]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(2u8.to_le_bytes());
+                    v.extend(2u8.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt16(vec![3, 3]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(3i16.to_le_bytes());
+                    v.extend(3i16.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint16(vec![4, 4]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(4u16.to_le_bytes());
+                    v.extend(4u16.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt32(vec![5, 5]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(5i32.to_le_bytes());
+                    v.extend(5i32.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint32(vec![6, 6]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(6u32.to_le_bytes());
+                    v.extend(6u32.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt64(vec![7, 7]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(7i64.to_le_bytes());
+                    v.extend(7i64.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint64(vec![8, 8]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(8u64.to_le_bytes());
+                    v.extend(8u64.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecString(vec!["FIT".to_owned(), "SDK".to_owned()]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend("FIT\x00".as_bytes());
+                    v.extend("SDK\x00".as_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecString(vec!["".to_owned(), "SDK\x00".to_owned()]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend("\x00".as_bytes());
+                    v.extend("SDK\x00".as_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecFloat32(vec![9.0, 9.0]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(9.0f32.to_le_bytes());
+                    v.extend(9.0f32.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecFloat64(vec![10.0, 10.0]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(10.0f64.to_le_bytes());
+                    v.extend(10.0f64.to_le_bytes());
+                    v
+                }),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int8(1),
+                expected: Ok(1i8.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint8(2),
+                expected: Ok(2u8.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Int16(3),
+                expected: Ok(3i16.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint16(4),
+                expected: Ok(4i16.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Int32(5),
+                expected: Ok(5i32.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint32(6),
+                expected: Ok(6u32.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Int64(7),
+                expected: Ok(7i64.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint64(8),
+                expected: Ok(8u64.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Float32(9.0),
+                expected: Ok(9.0f32.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::Float64(10.0),
+                expected: Ok(10.0f64.to_be_bytes().to_vec()),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt8(vec![1, 1]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(1u8.to_be_bytes());
+                    v.extend(1i8.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint8(vec![2, 2]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(2u8.to_be_bytes());
+                    v.extend(2u8.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt16(vec![3, 3]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(3i16.to_be_bytes());
+                    v.extend(3i16.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint16(vec![4, 4]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(4u16.to_be_bytes());
+                    v.extend(4u16.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt32(vec![5, 5]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(5i32.to_be_bytes());
+                    v.extend(5i32.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint32(vec![6, 6]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(6u32.to_be_bytes());
+                    v.extend(6u32.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt64(vec![7, 7]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(7i64.to_be_bytes());
+                    v.extend(7i64.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint64(vec![8, 8]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(8u64.to_be_bytes());
+                    v.extend(8u64.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecFloat32(vec![9.0, 9.0]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(9.0f32.to_be_bytes());
+                    v.extend(9.0f32.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecFloat64(vec![10.0, 10.0]),
+                expected: Ok({
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(10.0f64.to_be_bytes());
+                    v.extend(10.0f64.to_be_bytes());
+                    v
+                }),
+                arch: 1,
+            },
+            Case {
+                value: Value::Invalid,
+                expected: Err(Error::InvalidValue),
+                arch: 0,
+            },
+        ];
+
+        let mut got_ok: Vec<u8> = Vec::new();
+        for tc in tt {
+            got_ok.clear();
+            let res = tc.value.marshal_append(&mut got_ok, tc.arch);
+            match tc.expected {
+                Ok(expected_ok) => match res {
+                    Ok(()) => assert_eq!(expected_ok, got_ok, "input: {:?}", tc.value),
+                    Err(got_err) => assert!(
+                        false,
+                        "expected ok, got err: {:?}, input: {:?}",
+                        got_err, tc.value
+                    ),
+                },
+                Err(expected_err) => match res {
+                    Ok(()) => assert!(
+                        false,
+                        "expected err: {:?}, got ok: {:?}, input: {:?}",
+                        expected_err, got_ok, tc.value
+                    ),
+                    Err(got_err) => assert_eq!(expected_err, got_err, "input: {:?}", tc.value),
+                },
+            };
         }
     }
 }
