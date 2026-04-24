@@ -7,7 +7,7 @@ mod mesgdef;
 criterion_group! {
     name = benches;
     config = Criterion::default();
-    targets = decoder::bench_decode, encoder::bench_encode, mesgdef::bench_from
+    targets = decoder::bench_decode, encoder::bench_encode,  mesgdef::bench_from, mesgdef::bench_new
 }
 
 criterion_main!(benches);
