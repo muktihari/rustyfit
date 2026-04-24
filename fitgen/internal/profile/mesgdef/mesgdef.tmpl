@@ -56,11 +56,24 @@ impl {{ .Name }} {
     {{- if ne .Scale 1.0 }}; Scale: `{{ .Scale }}` {{- end }} 
     {{- if ne .Offset 0.0 }}; Offset: `{{ .Offset }}` {{- end }}
     {{- if ne .Units "" }}; Units: `{{ .Units }}` {{- end }}
+    {{- if hasSuffix .BaseType "Z" }}; Base: {{ .BaseType }} {{- end }}
     pub const {{ .NameUpperCase }}: u8 = {{ .Num }};
     {{ end }}
     /// Create new {{ .Name }} with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            {{ range .Fields -}}
+            {{ .Name }}: {{ .InvalidValue }},
+            {{ end -}}
+            
+            {{ if gt .MaxFieldExpandNum 1 -}}
+           	state: [0u8; {{ .StateSize }}],
+           	{{ end -}}
+           	unknown_fields: Vec::new(),
+           	{{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription")) }}
+           	developer_fields: Vec::new(),
+           	{{- end }}
+        }
     }
 
     {{ range .Fields -}}
