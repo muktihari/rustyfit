@@ -75,8 +75,25 @@ impl WeightScale {
     pub const BMI: u8 = 13;
 
     /// Create new WeightScale with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            weight: typedef::Weight(u16::MAX),
+            percent_fat: u16::MAX,
+            percent_hydration: u16::MAX,
+            visceral_fat_mass: u16::MAX,
+            bone_mass: u16::MAX,
+            muscle_mass: u16::MAX,
+            basal_met: u16::MAX,
+            physique_rating: u8::MAX,
+            active_met: u16::MAX,
+            metabolic_age: u8::MAX,
+            visceral_fat_rating: u8::MAX,
+            user_profile_index: typedef::MessageIndex(u16::MAX),
+            bmi: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `weight` in its scaled value. It returns invalid f64 when value is valid.

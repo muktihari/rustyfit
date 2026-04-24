@@ -56,8 +56,21 @@ impl NapEvent {
     pub const UPDATE_TIMESTAMP: u8 = 7;
 
     /// Create new NapEvent with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: typedef::DateTime(u32::MAX),
+            start_time: typedef::DateTime(u32::MAX),
+            start_timezone_offset: i16::MAX,
+            end_time: typedef::DateTime(u32::MAX),
+            end_timezone_offset: i16::MAX,
+            feedback: typedef::NapPeriodFeedback(u8::MAX),
+            is_deleted: typedef::Bool(u8::MAX),
+            source: typedef::NapSource(u8::MAX),
+            update_timestamp: typedef::DateTime(u32::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

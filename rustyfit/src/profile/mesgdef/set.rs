@@ -60,8 +60,22 @@ impl Set {
     pub const WKT_STEP_INDEX: u8 = 11;
 
     /// Create new Set with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            duration: u32::MAX,
+            repetitions: u16::MAX,
+            weight: u16::MAX,
+            set_type: typedef::SetType(u8::MAX),
+            start_time: typedef::DateTime(u32::MAX),
+            category: Vec::<typedef::ExerciseCategory>::new(),
+            category_subtype: Vec::<u16>::new(),
+            weight_display_unit: typedef::FitBaseUnit(u16::MAX),
+            message_index: typedef::MessageIndex(u16::MAX),
+            wkt_step_index: typedef::MessageIndex(u16::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `duration` in its scaled value. It returns invalid f64 when value is valid.

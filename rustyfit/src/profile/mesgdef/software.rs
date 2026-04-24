@@ -31,8 +31,14 @@ impl Software {
     pub const PART_NUMBER: u8 = 5;
 
     /// Create new Software with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            version: u16::MAX,
+            part_number: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `version` in its scaled value. It returns invalid f64 when value is valid.

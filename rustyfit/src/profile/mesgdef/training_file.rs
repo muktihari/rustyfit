@@ -16,6 +16,7 @@ pub struct TrainingFile {
     pub r#type: typedef::File,
     pub manufacturer: typedef::Manufacturer,
     pub product: u16,
+    /// Base: UINT32Z
     pub serial_number: u32,
     pub time_created: typedef::DateTime,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -33,14 +34,23 @@ impl TrainingFile {
     pub const MANUFACTURER: u8 = 1;
     /// Value's type: `u16`
     pub const PRODUCT: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const SERIAL_NUMBER: u8 = 3;
     /// Value's type: `u32`
     pub const TIME_CREATED: u8 = 4;
 
     /// Create new TrainingFile with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            r#type: typedef::File(u8::MAX),
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            product: u16::MAX,
+            serial_number: u32::MIN,
+            time_created: typedef::DateTime(u32::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

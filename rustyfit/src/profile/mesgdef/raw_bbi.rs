@@ -52,8 +52,18 @@ impl RawBbi {
     pub const GAP: u8 = 4;
 
     /// Create new RawBbi with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            data: Vec::<u16>::new(),
+            time: Vec::<u16>::new(),
+            quality: Vec::<u8>::new(),
+            gap: Vec::<u8>::new(),
+            state: [0u8; 1],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).

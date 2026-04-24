@@ -38,8 +38,16 @@ impl CameraEvent {
     pub const CAMERA_ORIENTATION: u8 = 3;
 
     /// Create new CameraEvent with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            camera_event_type: typedef::CameraEventType(u8::MAX),
+            camera_file_uuid: String::new(),
+            camera_orientation: typedef::CameraOrientationType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

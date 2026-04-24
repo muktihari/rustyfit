@@ -28,8 +28,13 @@ impl HrvValue {
     pub const VALUE: u8 = 0;
 
     /// Create new HrvValue with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            value: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `value` in its scaled value. It returns invalid f64 when value is valid.

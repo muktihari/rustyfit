@@ -44,8 +44,18 @@ impl VideoClip {
     pub const CLIP_END: u8 = 7;
 
     /// Create new VideoClip with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            clip_number: u16::MAX,
+            start_timestamp: typedef::DateTime(u32::MAX),
+            start_timestamp_ms: u16::MAX,
+            end_timestamp: typedef::DateTime(u32::MAX),
+            end_timestamp_ms: u16::MAX,
+            clip_start: u32::MAX,
+            clip_end: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

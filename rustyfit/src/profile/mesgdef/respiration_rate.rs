@@ -28,8 +28,13 @@ impl RespirationRate {
     pub const RESPIRATION_RATE: u8 = 0;
 
     /// Create new RespirationRate with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            respiration_rate: i16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `respiration_rate` in its scaled value. It returns invalid f64 when value is valid.

@@ -15,6 +15,7 @@ pub struct FileId {
     pub r#type: typedef::File,
     pub manufacturer: typedef::Manufacturer,
     pub product: u16,
+    /// Base: UINT32Z
     pub serial_number: u32,
     /// Only set for files that are can be created/erased.
     pub time_created: typedef::DateTime,
@@ -33,7 +34,7 @@ impl FileId {
     pub const MANUFACTURER: u8 = 1;
     /// Value's type: `u16`
     pub const PRODUCT: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const SERIAL_NUMBER: u8 = 3;
     /// Value's type: `u32`
     pub const TIME_CREATED: u8 = 4;
@@ -43,8 +44,17 @@ impl FileId {
     pub const PRODUCT_NAME: u8 = 8;
 
     /// Create new FileId with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            r#type: typedef::File(u8::MAX),
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            product: u16::MAX,
+            serial_number: u32::MIN,
+            time_created: typedef::DateTime(u32::MAX),
+            number: u16::MAX,
+            product_name: String::new(),
+            unknown_fields: Vec::new(),
+        }
     }
 }
 

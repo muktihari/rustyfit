@@ -67,8 +67,23 @@ impl AviationAttitude {
     pub const VALIDITY: u8 = 10;
 
     /// Create new AviationAttitude with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            system_time: Vec::<u32>::new(),
+            pitch: Vec::<i16>::new(),
+            roll: Vec::<i16>::new(),
+            accel_lateral: Vec::<i16>::new(),
+            accel_normal: Vec::<i16>::new(),
+            turn_rate: Vec::<i16>::new(),
+            stage: Vec::<typedef::AttitudeStage>::new(),
+            attitude_stage_complete: Vec::<u8>::new(),
+            track: Vec::<u16>::new(),
+            validity: Vec::<typedef::AttitudeValidity>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `pitch` in its scaled value. It returns invalid f64 when value is valid.

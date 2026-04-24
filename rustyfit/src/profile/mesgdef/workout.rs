@@ -14,6 +14,7 @@ use crate::proto::*;
 pub struct Workout {
     pub message_index: typedef::MessageIndex,
     pub sport: typedef::Sport,
+    /// Base: UINT32Z
     pub capabilities: typedef::WorkoutCapabilities,
     /// number of valid steps
     pub num_valid_steps: u16,
@@ -35,7 +36,7 @@ impl Workout {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u8`
     pub const SPORT: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const CAPABILITIES: u8 = 5;
     /// Value's type: `u16`
     pub const NUM_VALID_STEPS: u8 = 6;
@@ -51,8 +52,20 @@ impl Workout {
     pub const WKT_DESCRIPTION: u8 = 17;
 
     /// Create new Workout with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            sport: typedef::Sport(u8::MAX),
+            capabilities: typedef::WorkoutCapabilities(u32::MIN),
+            num_valid_steps: u16::MAX,
+            wkt_name: String::new(),
+            sub_sport: typedef::SubSport(u8::MAX),
+            pool_length: u16::MAX,
+            pool_length_unit: typedef::DisplayMeasure(u8::MAX),
+            wkt_description: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `pool_length` in its scaled value. It returns invalid f64 when value is valid.

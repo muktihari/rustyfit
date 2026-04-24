@@ -33,8 +33,14 @@ impl VideoFrame {
     pub const FRAME_NUMBER: u8 = 1;
 
     /// Create new VideoFrame with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            frame_number: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

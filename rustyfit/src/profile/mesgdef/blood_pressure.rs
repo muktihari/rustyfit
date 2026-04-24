@@ -63,8 +63,22 @@ impl BloodPressure {
     pub const USER_PROFILE_INDEX: u8 = 9;
 
     /// Create new BloodPressure with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            systolic_pressure: u16::MAX,
+            diastolic_pressure: u16::MAX,
+            mean_arterial_pressure: u16::MAX,
+            map_3_sample_mean: u16::MAX,
+            map_morning_values: u16::MAX,
+            map_evening_values: u16::MAX,
+            heart_rate: u8::MAX,
+            heart_rate_type: typedef::HrType(u8::MAX),
+            status: typedef::BpStatus(u8::MAX),
+            user_profile_index: typedef::MessageIndex(u16::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

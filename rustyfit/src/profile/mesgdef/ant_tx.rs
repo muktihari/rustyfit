@@ -49,8 +49,18 @@ impl AntTx {
     pub const DATA: u8 = 4;
 
     /// Create new AntTx with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            fractional_timestamp: u16::MAX,
+            mesg_id: u8::MAX,
+            mesg_data: Vec::<u8>::new(),
+            channel_number: u8::MAX,
+            data: Vec::<u8>::new(),
+            state: [0u8; 1],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `fractional_timestamp` in its scaled value. It returns invalid f64 when value is valid.

@@ -25,8 +25,12 @@ impl Hrv {
     pub const TIME: u8 = 0;
 
     /// Create new Hrv with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            time: Vec::<u16>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `time` in its scaled value. It returns invalid f64 when value is valid.

@@ -37,8 +37,15 @@ impl TrainingSettings {
     pub const PRECISE_TARGET_SPEED: u8 = 153;
 
     /// Create new TrainingSettings with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            target_distance: u32::MAX,
+            target_speed: u16::MAX,
+            target_time: u32::MAX,
+            precise_target_speed: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `target_distance` in its scaled value. It returns invalid f64 when value is valid.

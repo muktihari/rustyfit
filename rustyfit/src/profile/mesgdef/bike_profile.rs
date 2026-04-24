@@ -18,9 +18,13 @@ pub struct BikeProfile {
     pub sub_sport: typedef::SubSport,
     /// Scale: 100; Units: m
     pub odometer: u32,
+    /// Base: UINT16Z
     pub bike_spd_ant_id: u16,
+    /// Base: UINT16Z
     pub bike_cad_ant_id: u16,
+    /// Base: UINT16Z
     pub bike_spdcad_ant_id: u16,
+    /// Base: UINT16Z
     pub bike_power_ant_id: u16,
     /// Scale: 1000; Units: m
     pub custom_wheelsize: u16,
@@ -40,19 +44,23 @@ pub struct BikeProfile {
     /// Scale: 2; Offset: -110; Units: mm
     pub crank_length: u8,
     pub enabled: typedef::Bool,
+    /// Base: UINT8Z
     pub bike_spd_ant_id_trans_type: u8,
+    /// Base: UINT8Z
     pub bike_cad_ant_id_trans_type: u8,
+    /// Base: UINT8Z
     pub bike_spdcad_ant_id_trans_type: u8,
+    /// Base: UINT8Z
     pub bike_power_ant_id_trans_type: u8,
     /// Rollover counter that can be used to extend the odometer
     pub odometer_rollover: u8,
-    /// Number of front gears
+    /// Base: UINT8Z; Number of front gears
     pub front_gear_num: u8,
-    /// Number of teeth on each gear 0 is innermost
+    /// Base: UINT8Z; Number of teeth on each gear 0 is innermost
     pub front_gear: Vec<u8>,
-    /// Number of rear gears
+    /// Base: UINT8Z; Number of rear gears
     pub rear_gear_num: u8,
-    /// Number of teeth on each gear 0 is innermost
+    /// Base: UINT8Z; Number of teeth on each gear 0 is innermost
     pub rear_gear: Vec<u8>,
     pub shimano_di2_enabled: typedef::Bool,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -72,13 +80,13 @@ impl BikeProfile {
     pub const SUB_SPORT: u8 = 2;
     /// Value's type: `u32`; Scale: `100`; Units: `m`
     pub const ODOMETER: u8 = 3;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const BIKE_SPD_ANT_ID: u8 = 4;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const BIKE_CAD_ANT_ID: u8 = 5;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const BIKE_SPDCAD_ANT_ID: u8 = 6;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const BIKE_POWER_ANT_ID: u8 = 7;
     /// Value's type: `u16`; Scale: `1000`; Units: `m`
     pub const CUSTOM_WHEELSIZE: u8 = 8;
@@ -106,30 +114,65 @@ impl BikeProfile {
     pub const CRANK_LENGTH: u8 = 19;
     /// Value's type: `u8`
     pub const ENABLED: u8 = 20;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const BIKE_SPD_ANT_ID_TRANS_TYPE: u8 = 21;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const BIKE_CAD_ANT_ID_TRANS_TYPE: u8 = 22;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const BIKE_SPDCAD_ANT_ID_TRANS_TYPE: u8 = 23;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const BIKE_POWER_ANT_ID_TRANS_TYPE: u8 = 24;
     /// Value's type: `u8`
     pub const ODOMETER_ROLLOVER: u8 = 37;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const FRONT_GEAR_NUM: u8 = 38;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; Base: UINT8Z
     pub const FRONT_GEAR: u8 = 39;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const REAR_GEAR_NUM: u8 = 40;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; Base: UINT8Z
     pub const REAR_GEAR: u8 = 41;
     /// Value's type: `u8`
     pub const SHIMANO_DI2_ENABLED: u8 = 44;
 
     /// Create new BikeProfile with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            name: String::new(),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            odometer: u32::MAX,
+            bike_spd_ant_id: u16::MIN,
+            bike_cad_ant_id: u16::MIN,
+            bike_spdcad_ant_id: u16::MIN,
+            bike_power_ant_id: u16::MIN,
+            custom_wheelsize: u16::MAX,
+            auto_wheelsize: u16::MAX,
+            bike_weight: u16::MAX,
+            power_cal_factor: u16::MAX,
+            auto_wheel_cal: typedef::Bool(u8::MAX),
+            auto_power_zero: typedef::Bool(u8::MAX),
+            id: u8::MAX,
+            spd_enabled: typedef::Bool(u8::MAX),
+            cad_enabled: typedef::Bool(u8::MAX),
+            spdcad_enabled: typedef::Bool(u8::MAX),
+            power_enabled: typedef::Bool(u8::MAX),
+            crank_length: u8::MAX,
+            enabled: typedef::Bool(u8::MAX),
+            bike_spd_ant_id_trans_type: u8::MIN,
+            bike_cad_ant_id_trans_type: u8::MIN,
+            bike_spdcad_ant_id_trans_type: u8::MIN,
+            bike_power_ant_id_trans_type: u8::MIN,
+            odometer_rollover: u8::MAX,
+            front_gear_num: u8::MIN,
+            front_gear: Vec::<u8>::new(),
+            rear_gear_num: u8::MIN,
+            rear_gear: Vec::<u8>::new(),
+            shimano_di2_enabled: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `odometer` in its scaled value. It returns invalid f64 when value is valid.

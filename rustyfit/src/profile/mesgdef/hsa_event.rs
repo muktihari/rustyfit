@@ -29,8 +29,13 @@ impl HsaEvent {
     pub const EVENT_ID: u8 = 0;
 
     /// Create new HsaEvent with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            event_id: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

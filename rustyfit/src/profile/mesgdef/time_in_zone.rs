@@ -81,8 +81,28 @@ impl TimeInZone {
     pub const FUNCTIONAL_THRESHOLD_POWER: u8 = 15;
 
     /// Create new TimeInZone with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            reference_mesg: typedef::MesgNum(u16::MAX),
+            reference_index: typedef::MessageIndex(u16::MAX),
+            time_in_hr_zone: Vec::<u32>::new(),
+            time_in_speed_zone: Vec::<u32>::new(),
+            time_in_cadence_zone: Vec::<u32>::new(),
+            time_in_power_zone: Vec::<u32>::new(),
+            hr_zone_high_boundary: Vec::<u8>::new(),
+            speed_zone_high_boundary: Vec::<u16>::new(),
+            cadence_zone_high_boundary: Vec::<u8>::new(),
+            power_zone_high_boundary: Vec::<u16>::new(),
+            hr_calc_type: typedef::HrZoneCalc(u8::MAX),
+            max_heart_rate: u8::MAX,
+            resting_heart_rate: u8::MAX,
+            threshold_heart_rate: u8::MAX,
+            pwr_calc_type: typedef::PwrZoneCalc(u8::MAX),
+            functional_threshold_power: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `time_in_hr_zone` in its scaled value. It returns invalid f64 when value is valid.

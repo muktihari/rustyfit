@@ -68,8 +68,22 @@ impl Jump {
     pub const ENHANCED_SPEED: u8 = 8;
 
     /// Create new Jump with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            distance: f32::MAX,
+            height: f32::MAX,
+            rotations: u8::MAX,
+            hang_time: f32::MAX,
+            score: f32::MAX,
+            position_lat: i32::MAX,
+            position_long: i32::MAX,
+            speed: u16::MAX,
+            enhanced_speed: u32::MAX,
+            state: [0u8; 2],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `speed` in its scaled value. It returns invalid f64 when value is valid.

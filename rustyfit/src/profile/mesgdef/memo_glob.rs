@@ -22,7 +22,7 @@ pub struct MemoGlob {
     pub parent_index: typedef::MessageIndex,
     /// Field within the parent that this glob is associated with
     pub field_num: u8,
-    /// Block of utf8 bytes. Note, mutltibyte characters may be split across adjoining memo_glob messages.
+    /// Base: UINT8Z; Block of utf8 bytes. Note, mutltibyte characters may be split across adjoining memo_glob messages.
     pub data: Vec<u8>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -41,12 +41,21 @@ impl MemoGlob {
     pub const PARENT_INDEX: u8 = 2;
     /// Value's type: `u8`
     pub const FIELD_NUM: u8 = 3;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; Base: UINT8Z
     pub const DATA: u8 = 4;
 
     /// Create new MemoGlob with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            part_index: u32::MAX,
+            memo: Vec::<u8>::new(),
+            mesg_num: typedef::MesgNum(u16::MAX),
+            parent_index: typedef::MessageIndex(u16::MAX),
+            field_num: u8::MAX,
+            data: Vec::<u8>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

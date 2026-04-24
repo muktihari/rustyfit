@@ -41,8 +41,16 @@ impl HsaBodyBatteryData {
     pub const UNCHARGED: u8 = 3;
 
     /// Create new HsaBodyBatteryData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            processing_interval: u16::MAX,
+            level: Vec::<i8>::new(),
+            charged: Vec::<i16>::new(),
+            uncharged: Vec::<i16>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

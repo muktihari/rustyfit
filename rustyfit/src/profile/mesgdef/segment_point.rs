@@ -56,8 +56,19 @@ impl SegmentPoint {
     pub const ENHANCED_ALTITUDE: u8 = 6;
 
     /// Create new SegmentPoint with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            position_lat: i32::MAX,
+            position_long: i32::MAX,
+            distance: u32::MAX,
+            altitude: u16::MAX,
+            leader_time: Vec::<u32>::new(),
+            enhanced_altitude: u32::MAX,
+            state: [0u8; 1],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.

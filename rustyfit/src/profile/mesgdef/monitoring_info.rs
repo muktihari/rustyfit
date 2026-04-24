@@ -44,8 +44,17 @@ impl MonitoringInfo {
     pub const RESTING_METABOLIC_RATE: u8 = 5;
 
     /// Create new MonitoringInfo with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            local_timestamp: typedef::LocalDateTime(u32::MAX),
+            activity_type: Vec::<typedef::ActivityType>::new(),
+            cycles_to_distance: Vec::<u16>::new(),
+            cycles_to_calories: Vec::<u16>::new(),
+            resting_metabolic_rate: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `cycles_to_distance` in its scaled value. It returns invalid f64 when value is valid.

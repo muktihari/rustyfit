@@ -17,6 +17,7 @@ pub struct DeviceInfo {
     pub device_index: typedef::DeviceIndex,
     pub device_type: u8,
     pub manufacturer: typedef::Manufacturer,
+    /// Base: UINT32Z
     pub serial_number: u32,
     pub product: u16,
     /// Scale: 100
@@ -31,7 +32,9 @@ pub struct DeviceInfo {
     pub sensor_position: typedef::BodyLocation,
     /// Used to describe the sensor or location
     pub descriptor: String,
+    /// Base: UINT8Z
     pub ant_transmission_type: u8,
+    /// Base: UINT16Z
     pub ant_device_number: u16,
     pub ant_network: typedef::AntNetwork,
     pub source_type: typedef::SourceType,
@@ -54,7 +57,7 @@ impl DeviceInfo {
     pub const DEVICE_TYPE: u8 = 1;
     /// Value's type: `u16`
     pub const MANUFACTURER: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; Base: UINT32Z
     pub const SERIAL_NUMBER: u8 = 3;
     /// Value's type: `u16`
     pub const PRODUCT: u8 = 4;
@@ -72,9 +75,9 @@ impl DeviceInfo {
     pub const SENSOR_POSITION: u8 = 18;
     /// Value's type: `String`
     pub const DESCRIPTOR: u8 = 19;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; Base: UINT8Z
     pub const ANT_TRANSMISSION_TYPE: u8 = 20;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; Base: UINT16Z
     pub const ANT_DEVICE_NUMBER: u8 = 21;
     /// Value's type: `u8`
     pub const ANT_NETWORK: u8 = 22;
@@ -86,8 +89,30 @@ impl DeviceInfo {
     pub const BATTERY_LEVEL: u8 = 32;
 
     /// Create new DeviceInfo with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            device_index: typedef::DeviceIndex(u8::MAX),
+            device_type: u8::MAX,
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            serial_number: u32::MIN,
+            product: u16::MAX,
+            software_version: u16::MAX,
+            hardware_version: u8::MAX,
+            cum_operating_time: u32::MAX,
+            battery_voltage: u16::MAX,
+            battery_status: typedef::BatteryStatus(u8::MAX),
+            sensor_position: typedef::BodyLocation(u8::MAX),
+            descriptor: String::new(),
+            ant_transmission_type: u8::MIN,
+            ant_device_number: u16::MIN,
+            ant_network: typedef::AntNetwork(u8::MAX),
+            source_type: typedef::SourceType(u8::MAX),
+            product_name: String::new(),
+            battery_level: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `software_version` in its scaled value. It returns invalid f64 when value is valid.

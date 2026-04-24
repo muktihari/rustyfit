@@ -50,8 +50,19 @@ impl ChronoShotSession {
     pub const STANDARD_DEVIATION: u8 = 6;
 
     /// Create new ChronoShotSession with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            min_speed: u32::MAX,
+            max_speed: u32::MAX,
+            avg_speed: u32::MAX,
+            shot_count: u16::MAX,
+            projectile_type: typedef::ProjectileType(u8::MAX),
+            grain_weight: u32::MAX,
+            standard_deviation: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `min_speed` in its scaled value. It returns invalid f64 when value is valid.

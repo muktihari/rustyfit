@@ -106,8 +106,34 @@ impl Length {
     pub const MAX_RESPIRATION_RATE: u8 = 25;
 
     /// Create new Length with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: typedef::DateTime(u32::MAX),
+            event: typedef::Event(u8::MAX),
+            event_type: typedef::EventType(u8::MAX),
+            start_time: typedef::DateTime(u32::MAX),
+            total_elapsed_time: u32::MAX,
+            total_timer_time: u32::MAX,
+            total_strokes: u16::MAX,
+            avg_speed: u16::MAX,
+            swim_stroke: typedef::SwimStroke(u8::MAX),
+            avg_swimming_cadence: u8::MAX,
+            event_group: u8::MAX,
+            total_calories: u16::MAX,
+            length_type: typedef::LengthType(u8::MAX),
+            player_score: u16::MAX,
+            opponent_score: u16::MAX,
+            stroke_count: Vec::<u16>::new(),
+            zone_count: Vec::<u16>::new(),
+            enhanced_avg_respiration_rate: u16::MAX,
+            enhanced_max_respiration_rate: u16::MAX,
+            avg_respiration_rate: u8::MAX,
+            max_respiration_rate: u8::MAX,
+            state: [0u8; 3],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns invalid f64 when value is valid.

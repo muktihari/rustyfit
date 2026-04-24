@@ -110,8 +110,34 @@ impl DiveSummary {
     pub const HANG_TIME: u8 = 25;
 
     /// Create new DiveSummary with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            reference_mesg: typedef::MesgNum(u16::MAX),
+            reference_index: typedef::MessageIndex(u16::MAX),
+            avg_depth: u32::MAX,
+            max_depth: u32::MAX,
+            surface_interval: u32::MAX,
+            start_cns: u8::MAX,
+            end_cns: u8::MAX,
+            start_n2: u16::MAX,
+            end_n2: u16::MAX,
+            o2_toxicity: u16::MAX,
+            dive_number: u32::MAX,
+            bottom_time: u32::MAX,
+            avg_pressure_sac: u16::MAX,
+            avg_volume_sac: u16::MAX,
+            avg_rmv: u16::MAX,
+            descent_time: u32::MAX,
+            ascent_time: u32::MAX,
+            avg_ascent_rate: i32::MAX,
+            avg_descent_rate: u32::MAX,
+            max_ascent_rate: u32::MAX,
+            max_descent_rate: u32::MAX,
+            hang_time: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `avg_depth` in its scaled value. It returns invalid f64 when value is valid.

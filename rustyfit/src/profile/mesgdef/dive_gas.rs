@@ -38,8 +38,16 @@ impl DiveGas {
     pub const MODE: u8 = 3;
 
     /// Create new DiveGas with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            helium_content: u8::MAX,
+            oxygen_content: u8::MAX,
+            status: typedef::DiveGasStatus(u8::MAX),
+            mode: typedef::DiveGasMode(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

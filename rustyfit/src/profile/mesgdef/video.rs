@@ -31,8 +31,14 @@ impl Video {
     pub const DURATION: u8 = 2;
 
     /// Create new Video with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            url: String::new(),
+            hosting_provider: String::new(),
+            duration: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

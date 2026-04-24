@@ -37,8 +37,15 @@ impl BarometerData {
     pub const BARO_PRES: u8 = 2;
 
     /// Create new BarometerData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            sample_time_offset: Vec::<u16>::new(),
+            baro_pres: Vec::<u32>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -49,8 +49,18 @@ impl TimestampCorrelation {
     pub const SYSTEM_TIMESTAMP_MS: u8 = 5;
 
     /// Create new TimestampCorrelation with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            fractional_timestamp: u16::MAX,
+            system_timestamp: typedef::DateTime(u32::MAX),
+            fractional_system_timestamp: u16::MAX,
+            local_timestamp: typedef::LocalDateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            system_timestamp_ms: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `fractional_timestamp` in its scaled value. It returns invalid f64 when value is valid.

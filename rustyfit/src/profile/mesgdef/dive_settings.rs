@@ -146,8 +146,46 @@ impl DiveSettings {
     pub const NO_FLY_TIME_MODE: u8 = 37;
 
     /// Create new DiveSettings with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            message_index: typedef::MessageIndex(u16::MAX),
+            name: String::new(),
+            model: typedef::TissueModelType(u8::MAX),
+            gf_low: u8::MAX,
+            gf_high: u8::MAX,
+            water_type: typedef::WaterType(u8::MAX),
+            water_density: f32::MAX,
+            po2_warn: u8::MAX,
+            po2_critical: u8::MAX,
+            po2_deco: u8::MAX,
+            safety_stop_enabled: typedef::Bool(u8::MAX),
+            bottom_depth: f32::MAX,
+            bottom_time: u32::MAX,
+            apnea_countdown_enabled: typedef::Bool(u8::MAX),
+            apnea_countdown_time: u32::MAX,
+            backlight_mode: typedef::DiveBacklightMode(u8::MAX),
+            backlight_brightness: u8::MAX,
+            backlight_timeout: typedef::BacklightTimeout(u8::MAX),
+            repeat_dive_interval: u16::MAX,
+            safety_stop_time: u16::MAX,
+            heart_rate_source_type: typedef::SourceType(u8::MAX),
+            heart_rate_source: u8::MAX,
+            travel_gas: typedef::MessageIndex(u16::MAX),
+            ccr_low_setpoint_switch_mode: typedef::CcrSetpointSwitchMode(u8::MAX),
+            ccr_low_setpoint: u8::MAX,
+            ccr_low_setpoint_depth: u32::MAX,
+            ccr_high_setpoint_switch_mode: typedef::CcrSetpointSwitchMode(u8::MAX),
+            ccr_high_setpoint: u8::MAX,
+            ccr_high_setpoint_depth: u32::MAX,
+            gas_consumption_display: typedef::GasConsumptionRateType(u8::MAX),
+            up_key_enabled: typedef::Bool(u8::MAX),
+            dive_sounds: typedef::Tone(u8::MAX),
+            last_stop_multiple: u8::MAX,
+            no_fly_time_mode: typedef::NoFlyTimeMode(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `po2_warn` in its scaled value. It returns invalid f64 when value is valid.

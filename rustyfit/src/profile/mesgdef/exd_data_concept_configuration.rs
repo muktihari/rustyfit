@@ -62,8 +62,23 @@ impl ExdDataConceptConfiguration {
     pub const IS_SIGNED: u8 = 11;
 
     /// Create new ExdDataConceptConfiguration with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            screen_index: u8::MAX,
+            concept_field: u8::MAX,
+            field_id: u8::MAX,
+            concept_index: u8::MAX,
+            data_page: u8::MAX,
+            concept_key: u8::MAX,
+            scaling: u8::MAX,
+            data_units: typedef::ExdDataUnits(u8::MAX),
+            qualifier: typedef::ExdQualifiers(u8::MAX),
+            descriptor: typedef::ExdDescriptors(u8::MAX),
+            is_signed: typedef::Bool(u8::MAX),
+            state: [0u8; 1],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).

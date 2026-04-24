@@ -82,8 +82,27 @@ impl WeatherConditions {
     pub const LOW_TEMPERATURE: u8 = 14;
 
     /// Create new WeatherConditions with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            weather_report: typedef::WeatherReport(u8::MAX),
+            temperature: i8::MAX,
+            condition: typedef::WeatherStatus(u8::MAX),
+            wind_direction: u16::MAX,
+            wind_speed: u16::MAX,
+            precipitation_probability: u8::MAX,
+            temperature_feels_like: i8::MAX,
+            relative_humidity: u8::MAX,
+            location: String::new(),
+            observed_at_time: typedef::DateTime(u32::MAX),
+            observed_location_lat: i32::MAX,
+            observed_location_long: i32::MAX,
+            day_of_week: typedef::DayOfWeek(u8::MAX),
+            high_temperature: i8::MAX,
+            low_temperature: i8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `wind_speed` in its scaled value. It returns invalid f64 when value is valid.

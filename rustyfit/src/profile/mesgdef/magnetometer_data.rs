@@ -57,8 +57,20 @@ impl MagnetometerData {
     pub const CALIBRATED_MAG_Z: u8 = 7;
 
     /// Create new MagnetometerData with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            sample_time_offset: Vec::<u16>::new(),
+            mag_x: Vec::<u16>::new(),
+            mag_y: Vec::<u16>::new(),
+            mag_z: Vec::<u16>::new(),
+            calibrated_mag_x: Vec::<f32>::new(),
+            calibrated_mag_y: Vec::<f32>::new(),
+            calibrated_mag_z: Vec::<f32>::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -45,8 +45,17 @@ impl OneDSensorCalibration {
     pub const OFFSET_CAL: u8 = 4;
 
     /// Create new OneDSensorCalibration with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            sensor_type: typedef::SensorType(u8::MAX),
+            calibration_factor: u32::MAX,
+            calibration_divisor: u32::MAX,
+            level_shift: u32::MAX,
+            offset_cal: i32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

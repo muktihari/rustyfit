@@ -57,8 +57,20 @@ impl GpsMetadata {
     pub const VELOCITY: u8 = 7;
 
     /// Create new GpsMetadata with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            timestamp_ms: u16::MAX,
+            position_lat: i32::MAX,
+            position_long: i32::MAX,
+            enhanced_altitude: u32::MAX,
+            enhanced_speed: u32::MAX,
+            heading: u16::MAX,
+            utc_timestamp: typedef::DateTime(u32::MAX),
+            velocity: [i16::MAX; 3],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `enhanced_altitude` in its scaled value. It returns invalid f64 when value is valid.

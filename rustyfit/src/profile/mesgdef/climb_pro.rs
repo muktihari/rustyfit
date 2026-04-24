@@ -46,8 +46,18 @@ impl ClimbPro {
     pub const CURRENT_DIST: u8 = 5;
 
     /// Create new ClimbPro with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            position_lat: i32::MAX,
+            position_long: i32::MAX,
+            climb_pro_event: typedef::ClimbProEvent(u8::MAX),
+            climb_number: u16::MAX,
+            climb_category: u8::MAX,
+            current_dist: f32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

@@ -63,8 +63,24 @@ impl Connectivity {
     pub const GROUPTRACK_ENABLED: u8 = 12;
 
     /// Create new Connectivity with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            bluetooth_enabled: typedef::Bool(u8::MAX),
+            bluetooth_le_enabled: typedef::Bool(u8::MAX),
+            ant_enabled: typedef::Bool(u8::MAX),
+            name: String::new(),
+            live_tracking_enabled: typedef::Bool(u8::MAX),
+            weather_conditions_enabled: typedef::Bool(u8::MAX),
+            weather_alerts_enabled: typedef::Bool(u8::MAX),
+            auto_activity_upload_enabled: typedef::Bool(u8::MAX),
+            course_download_enabled: typedef::Bool(u8::MAX),
+            workout_download_enabled: typedef::Bool(u8::MAX),
+            gps_ephemeris_download_enabled: typedef::Bool(u8::MAX),
+            incident_detection_enabled: typedef::Bool(u8::MAX),
+            grouptrack_enabled: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 

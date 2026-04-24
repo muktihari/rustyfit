@@ -121,8 +121,40 @@ impl UserProfile {
     pub const DIVE_COUNT: u8 = 49;
 
     /// Create new UserProfile with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            friendly_name: String::new(),
+            gender: typedef::Gender(u8::MAX),
+            age: u8::MAX,
+            height: u8::MAX,
+            weight: u16::MAX,
+            language: typedef::Language(u8::MAX),
+            elev_setting: typedef::DisplayMeasure(u8::MAX),
+            weight_setting: typedef::DisplayMeasure(u8::MAX),
+            resting_heart_rate: u8::MAX,
+            default_max_running_heart_rate: u8::MAX,
+            default_max_biking_heart_rate: u8::MAX,
+            default_max_heart_rate: u8::MAX,
+            hr_setting: typedef::DisplayHeart(u8::MAX),
+            speed_setting: typedef::DisplayMeasure(u8::MAX),
+            dist_setting: typedef::DisplayMeasure(u8::MAX),
+            power_setting: typedef::DisplayPower(u8::MAX),
+            activity_class: typedef::ActivityClass(u8::MAX),
+            position_setting: typedef::DisplayPosition(u8::MAX),
+            temperature_setting: typedef::DisplayMeasure(u8::MAX),
+            local_id: typedef::UserLocalId(u16::MAX),
+            global_id: [u8::MAX; 6],
+            wake_time: typedef::LocaltimeIntoDay(u32::MAX),
+            sleep_time: typedef::LocaltimeIntoDay(u32::MAX),
+            height_setting: typedef::DisplayMeasure(u8::MAX),
+            user_running_step_length: u16::MAX,
+            user_walking_step_length: u16::MAX,
+            depth_setting: typedef::DisplayMeasure(u8::MAX),
+            dive_count: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `height` in its scaled value. It returns invalid f64 when value is valid.

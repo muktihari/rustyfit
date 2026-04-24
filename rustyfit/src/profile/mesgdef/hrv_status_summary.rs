@@ -51,8 +51,19 @@ impl HrvStatusSummary {
     pub const STATUS: u8 = 6;
 
     /// Create new HrvStatusSummary with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            weekly_average: u16::MAX,
+            last_night_average: u16::MAX,
+            last_night_5_min_high: u16::MAX,
+            baseline_low_upper: u16::MAX,
+            baseline_balanced_lower: u16::MAX,
+            baseline_balanced_upper: u16::MAX,
+            status: typedef::HrvStatus(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `weekly_average` in its scaled value. It returns invalid f64 when value is valid.

@@ -73,8 +73,24 @@ impl DiveAlarm {
     pub const SPEED: u8 = 11;
 
     /// Create new DiveAlarm with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            depth: u32::MAX,
+            time: i32::MAX,
+            enabled: typedef::Bool(u8::MAX),
+            alarm_type: typedef::DiveAlarmType(u8::MAX),
+            sound: typedef::Tone(u8::MAX),
+            dive_types: Vec::<typedef::SubSport>::new(),
+            id: u32::MAX,
+            popup_enabled: typedef::Bool(u8::MAX),
+            trigger_on_descent: typedef::Bool(u8::MAX),
+            trigger_on_ascent: typedef::Bool(u8::MAX),
+            repeating: typedef::Bool(u8::MAX),
+            speed: i32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `depth` in its scaled value. It returns invalid f64 when value is valid.

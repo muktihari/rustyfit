@@ -49,8 +49,18 @@ impl ThreeDSensorCalibration {
     pub const ORIENTATION_MATRIX: u8 = 5;
 
     /// Create new ThreeDSensorCalibration with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            timestamp: typedef::DateTime(u32::MAX),
+            sensor_type: typedef::SensorType(u8::MAX),
+            calibration_factor: u32::MAX,
+            calibration_divisor: u32::MAX,
+            level_shift: u32::MAX,
+            offset_cal: [i32::MAX; 3],
+            orientation_matrix: [i32::MAX; 9],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 
     /// Returns `orientation_matrix` in its scaled value. It returns invalid f64 when value is valid.

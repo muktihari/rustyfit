@@ -28,8 +28,13 @@ impl StressLevel {
     pub const STRESS_LEVEL_TIME: u8 = 1;
 
     /// Create new StressLevel with all fields being set to its corresponding invalid value.
-    pub fn new() -> Self {
-        Self::from(&Message::default())
+    pub const fn new() -> Self {
+        Self {
+            stress_level_value: i16::MAX,
+            stress_level_time: typedef::DateTime(u32::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
+        }
     }
 }
 
