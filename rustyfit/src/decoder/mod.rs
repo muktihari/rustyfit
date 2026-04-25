@@ -15,19 +15,19 @@ use accumulator::Accumulator;
 use bits::Bits;
 use std::{
     error, fmt,
-    io::{ErrorKind, Read},
+    io::{self, ErrorKind, Read},
     mem,
 };
 
 /// Decoder Error
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug)]
 pub enum Error {
-    /// IO related error when reading from the Reader.
+    /// I/O related error when reading from the Reader.
     Io {
-        /// IO error kind
-        error_kind: ErrorKind,
+        /// I/O error
+        err: io::Error,
         /// Byte position
-        byte_pos: usize,
+        n: usize,
     },
     /// File Header's size is not 12 or 14, or data_type is not `.FIT`.
     NotFITFile,
@@ -43,26 +43,12 @@ pub enum Error {
         /// Local Message Number
         local_mesg_num: u8,
     },
-    /// Field definition's size should match exactly, or be a multiple of, the BaseType's size.
-    BaseTypeSizeMismatch {
-        /// Expected size
-        expected: u8,
-        /// Actual size
-        got: u8,
-        /// FIT Base Type
-        base_type: FitBaseType,
-    },
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match &self {
-            Error::Io {
-                error_kind,
-                byte_pos,
-            } => {
-                write!(f, "io error kind {} at byte pos {}", error_kind, byte_pos)
-            }
+            Error::Io { err, n } => write!(f, "io error kind {} at byte pos {}", err, n),
             Error::NotFITFile => write!(f, "not a FIT file"),
             Error::ChecksumMismatch { expected, got } => {
                 write!(f, "checksum mismatch, expected {} got {}", expected, got)
@@ -71,15 +57,6 @@ impl fmt::Display for Error {
                 f,
                 "missing message definition for local message number {}",
                 local_mesg_num
-            ),
-            Error::BaseTypeSizeMismatch {
-                expected,
-                got,
-                base_type,
-            } => write!(
-                f,
-                "size {} is less than expected {} for base type {}",
-                got, expected, base_type
             ),
         }
     }
@@ -175,10 +152,7 @@ impl<R: Read> Decoder<R> {
             if self.n > 0 && err.kind() == ErrorKind::UnexpectedEof {
                 return Ok(None); // No chained FIT sequence
             }
-            return Err(Error::Io {
-                error_kind: err.kind(),
-                byte_pos: self.n,
-            });
+            return Err(Error::Io { err, n: self.n });
         };
         self.n += 1;
 
@@ -188,10 +162,7 @@ impl<R: Read> Decoder<R> {
         }
 
         if let Err(err) = self.reader.read_exact(&mut arr[1..n]) {
-            return Err(Error::Io {
-                error_kind: err.kind(),
-                byte_pos: self.n,
-            });
+            return Err(Error::Io { err, n: self.n });
         }
         self.n += n - 1;
 
@@ -228,10 +199,7 @@ impl<R: Read> Decoder<R> {
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
     fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error> {
         if let Err(err) = self.reader.read_exact(buf) {
-            return Err(Error::Io {
-                error_kind: err.kind(),
-                byte_pos: self.n,
-            });
+            return Err(Error::Io { err, n: self.n });
         };
         self.n += buf.len();
         self.cur += buf.len() as u32;
@@ -597,10 +565,7 @@ impl<R: Read> Decoder<R> {
     fn decode_crc(&mut self) -> Result<u16, Error> {
         let mut arr = [0u8; 2];
         if let Err(err) = self.reader.read_exact(&mut arr) {
-            return Err(Error::Io {
-                error_kind: err.kind(),
-                byte_pos: self.n,
-            });
+            return Err(Error::Io { err, n: self.n });
         };
         self.n += arr.len();
 
