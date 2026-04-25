@@ -440,21 +440,29 @@ impl Value {
                 },
             },
             FitBaseType::STRING => match array {
-                true => Value::String(String::from_utf8_lossy(buf).to_string()),
-                false => Value::VecString({
+                true => Value::VecString({
                     let mut vals = Vec::with_capacity(strcount(buf) as usize);
                     let mut last = 0usize;
                     for (i, &v) in buf.iter().enumerate() {
                         if v != 0 {
-                            continue;
+                            if i == buf.len() - 1 {
+                                vals.push(String::from_utf8_lossy(&buf[last..i + 1]).into_owned());
+                            }
+                        } else {
+                            if last != i {
+                                vals.push(String::from_utf8_lossy(&buf[last..i]).into_owned());
+                            }
+                            last = i + 1;
                         }
-                        if last != i {
-                            vals.push(String::from_utf8_lossy(&buf[last..i]).into_owned());
-                        }
-                        last = i + 1
                     }
                     vals
                 }),
+                false => Value::String(
+                    String::from_utf8_lossy(
+                        &buf[0..buf.iter().position(|&v| v == 0).unwrap_or(buf.len())],
+                    )
+                    .to_string(),
+                ),
             },
             FitBaseType::FLOAT32 => match array {
                 true => Value::VecFloat32({
@@ -1225,12 +1233,15 @@ pub(crate) fn strcount(s: &[u8]) -> u8 {
     let mut size = 0u8;
     for (i, &v) in s.iter().enumerate() {
         if v != 0 {
-            continue;
+            if i == s.len() - 1 {
+                size += 1;
+            }
+        } else {
+            if last != i {
+                size += 1;
+            }
+            last = i + 1;
         }
-        if last != i {
-            size += 1
-        }
-        last = i + 1
     }
     if size == 0 && !s.is_empty() {
         return 1; // Allow string without utf-8 null termination.
@@ -1270,11 +1281,19 @@ mod tests {
                 input: "Open\x00Water\x00",
                 expected: 2,
             },
+            Case {
+                input: "Open\x00Water",
+                expected: 2,
+            },
+            Case {
+                input: "1\x002",
+                expected: 2,
+            },
         ];
 
         for (i, tc) in tt.iter().enumerate() {
             let v = strcount(tc.input.as_bytes());
-            assert_eq!(v, tc.expected, "index {} input \"{}\"", i, tc.input);
+            assert_eq!(tc.expected, v, "index {} input \"{:?}\"", i, tc.input);
         }
     }
 
@@ -1601,6 +1620,409 @@ mod tests {
                 "{}: {:?} | {}",
                 i, tc.value, tc.base_type,
             );
+        }
+    }
+
+    #[test]
+    fn test_value_unmarshal() {
+        struct Case {
+            buf: Vec<u8>,
+            array: bool,
+            base_type: FitBaseType,
+            arch: u8,
+            expected: Value,
+        }
+
+        let tt = [
+            Case {
+                buf: 10i8.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT8,
+                arch: 0,
+                expected: Value::Int8(10),
+            },
+            Case {
+                buf: 10u8.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT8,
+                arch: 0,
+                expected: Value::Uint8(10),
+            },
+            Case {
+                buf: 10i16.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT16,
+                arch: 0,
+                expected: Value::Int16(10),
+            },
+            Case {
+                buf: 10u16.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT16,
+                arch: 0,
+                expected: Value::Uint16(10),
+            },
+            Case {
+                buf: 10i32.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT32,
+                arch: 0,
+                expected: Value::Int32(10),
+            },
+            Case {
+                buf: 10u32.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT32,
+                arch: 0,
+                expected: Value::Uint32(10),
+            },
+            Case {
+                buf: "FIT\x00".as_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::STRING,
+                arch: 0,
+                expected: Value::String(String::from("FIT")),
+            },
+            Case {
+                buf: "FIT".as_bytes().to_vec(), // without utf8 null-terminated string
+                array: false,
+                base_type: FitBaseType::STRING,
+                arch: 0,
+                expected: Value::String(String::from("FIT")),
+            },
+            Case {
+                buf: 10f32.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::FLOAT32,
+                arch: 0,
+                expected: Value::Float32(10.0),
+            },
+            Case {
+                buf: 10f64.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::FLOAT64,
+                arch: 0,
+                expected: Value::Float64(10.0),
+            },
+            Case {
+                buf: 10i64.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT64,
+                arch: 0,
+                expected: Value::Int64(10),
+            },
+            Case {
+                buf: 10u64.to_le_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT64,
+                arch: 0,
+                expected: Value::Uint64(10),
+            },
+            Case {
+                buf: vec![1i8, 2i8]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT8,
+                arch: 0,
+                expected: Value::VecInt8(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u8, 2u8]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT8,
+                arch: 0,
+                expected: Value::VecUint8(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1i16, 2i16]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT16,
+                arch: 0,
+                expected: Value::VecInt16(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u16, 2u16]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT16,
+                arch: 0,
+                expected: Value::VecUint16(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1i32, 2i32]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT32,
+                arch: 0,
+                expected: Value::VecInt32(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u32, 2u32]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT32,
+                arch: 0,
+                expected: Value::VecUint32(vec![1, 2]),
+            },
+            Case {
+                buf: vec![String::from("1\x00"), String::from("2\x00")]
+                    .iter()
+                    .flat_map(|v| v.as_bytes().to_vec())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::STRING,
+                arch: 0,
+                expected: Value::VecString(vec![String::from("1"), String::from("2")]),
+            },
+            Case {
+                buf: vec![String::from("1\x00"), String::from("2")]
+                    .iter()
+                    .flat_map(|v| v.as_bytes().to_vec())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::STRING,
+                arch: 0,
+                expected: Value::VecString(vec![String::from("1"), String::from("2")]),
+            },
+            Case {
+                buf: vec![1.0f32, 2.0f32]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::FLOAT32,
+                arch: 0,
+                expected: Value::VecFloat32(vec![1.0, 2.0]),
+            },
+            Case {
+                buf: vec![1.0f64, 2.0f64]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::FLOAT64,
+                arch: 0,
+                expected: Value::VecFloat64(vec![1.0, 2.0]),
+            },
+            Case {
+                buf: vec![1i64, 2i64]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT64,
+                arch: 0,
+                expected: Value::VecInt64(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u64, 2u64]
+                    .iter()
+                    .flat_map(|v| v.to_le_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT64,
+                arch: 0,
+                expected: Value::VecUint64(vec![1, 2]),
+            },
+            Case {
+                buf: 10i8.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT8,
+                arch: 1,
+                expected: Value::Int8(10),
+            },
+            Case {
+                buf: 10u8.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT8,
+                arch: 1,
+                expected: Value::Uint8(10),
+            },
+            Case {
+                buf: 10i16.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT16,
+                arch: 1,
+                expected: Value::Int16(10),
+            },
+            Case {
+                buf: 10u16.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT16,
+                arch: 1,
+                expected: Value::Uint16(10),
+            },
+            Case {
+                buf: 10i32.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT32,
+                arch: 1,
+                expected: Value::Int32(10),
+            },
+            Case {
+                buf: 10u32.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT32,
+                arch: 1,
+                expected: Value::Uint32(10),
+            },
+            Case {
+                buf: 10f32.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::FLOAT32,
+                arch: 1,
+                expected: Value::Float32(10.0),
+            },
+            Case {
+                buf: 10f64.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::FLOAT64,
+                arch: 1,
+                expected: Value::Float64(10.0),
+            },
+            Case {
+                buf: 10i64.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::SINT64,
+                arch: 1,
+                expected: Value::Int64(10),
+            },
+            Case {
+                buf: 10u64.to_be_bytes().to_vec(),
+                array: false,
+                base_type: FitBaseType::UINT64,
+                arch: 1,
+                expected: Value::Uint64(10),
+            },
+            Case {
+                buf: vec![1i8, 2i8]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT8,
+                arch: 1,
+                expected: Value::VecInt8(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u8, 2u8]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT8,
+                arch: 1,
+                expected: Value::VecUint8(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1i16, 2i16]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT16,
+                arch: 1,
+                expected: Value::VecInt16(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u16, 2u16]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT16,
+                arch: 1,
+                expected: Value::VecUint16(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1i32, 2i32]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT32,
+                arch: 1,
+                expected: Value::VecInt32(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u32, 2u32]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT32,
+                arch: 1,
+                expected: Value::VecUint32(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1.0f32, 2.0f32]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::FLOAT32,
+                arch: 1,
+                expected: Value::VecFloat32(vec![1.0, 2.0]),
+            },
+            Case {
+                buf: vec![1.0f64, 2.0f64]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::FLOAT64,
+                arch: 1,
+                expected: Value::VecFloat64(vec![1.0, 2.0]),
+            },
+            Case {
+                buf: vec![1i64, 2i64]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::SINT64,
+                arch: 1,
+                expected: Value::VecInt64(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u64, 2u64]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType::UINT64,
+                arch: 1,
+                expected: Value::VecUint64(vec![1, 2]),
+            },
+            Case {
+                buf: vec![1u64, 2u64]
+                    .iter()
+                    .flat_map(|v| v.to_be_bytes())
+                    .collect(),
+                array: true,
+                base_type: FitBaseType(255),
+                arch: 1,
+                expected: Value::Invalid,
+            },
+        ];
+
+        for tc in tt {
+            let val = Value::unmarshal(&tc.buf, tc.array, tc.base_type, tc.arch);
+            assert_eq!(tc.expected, val);
         }
     }
 
