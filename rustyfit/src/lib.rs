@@ -3,7 +3,6 @@ pub use decoder::{
 };
 pub use encoder::{
     Builder as EncoderBuilder, Encoder, Endianness, Error as EncoderError, HeaderOption,
-    IoError as EncoderIoError, MessageError as EncoderMessageError,
 };
 
 /// FIT Global Profile representation (generated from Profile.xlsx)
