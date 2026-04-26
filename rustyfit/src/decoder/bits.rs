@@ -68,15 +68,15 @@ impl Bits {
     }
 }
 
-trait AsU64 {
-    fn as_u64(&self) -> u64;
+trait AsU64: Copy {
+    fn as_u64(self) -> u64;
 }
 
 macro_rules! impl_as_u64 {
     ($($type:ident),*) => {
         $(impl AsU64 for $type {
-            fn as_u64(&self) -> u64 {
-                *self as u64
+            fn as_u64(self) -> u64 {
+                self as u64
             }
         })*
     };

@@ -680,7 +680,7 @@ pub struct Builder<R: Read> {
 
 impl<R: Read> Builder<R> {
     /// Create new DecoderBuilder.
-    pub fn new(reader: R) -> Self {
+    pub const fn new(reader: R) -> Self {
         Self {
             reader,
             options: Options {
@@ -692,13 +692,13 @@ impl<R: Read> Builder<R> {
 
     /// Toggle for checksum calculation (default: `true`).
     /// If you want to retrieve the data regardless its integrity, set this to `false`.
-    pub fn checksum(mut self, v: bool) -> Self {
+    pub const fn checksum(mut self, v: bool) -> Self {
         self.options.checksum = v;
         self
     }
 
     /// Toggle for field's components expansion (default: `true`).
-    pub fn expand_components(mut self, v: bool) -> Self {
+    pub const fn expand_components(mut self, v: bool) -> Self {
         self.options.expand_components = v;
         self
     }
