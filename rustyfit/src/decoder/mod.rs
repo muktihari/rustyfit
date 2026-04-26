@@ -468,8 +468,8 @@ impl<R: Read> Decoder<R> {
             };
 
             let scaled_val = val as f64 / component.scale - component.offset;
-            val = ((scaled_val + field_ref.offset) * field_ref.scale) as u32;
-            let value = convert_u32_to_value(val, field_ref.base_type);
+            val = ((scaled_val + field_ref.offset) * field_ref.scale) as u64;
+            let value = convert_u64_to_value(val, field_ref.base_type);
 
             match mesg.fields.iter_mut().find(|v| v.num == field_num) {
                 Some(v) => {
@@ -504,7 +504,7 @@ impl<R: Read> Decoder<R> {
                 continue;
             }
 
-            let value = convert_u32_to_value(val, field_ref.base_type);
+            let value = convert_u64_to_value(val, field_ref.base_type);
             if !value.is_valid(field_ref.base_type) {
                 continue;
             }
@@ -608,7 +608,7 @@ fn slice_buffer_to_match_type_size(
     }
 }
 
-fn convert_u32_to_value(val: u32, base_type: FitBaseType) -> Value {
+fn convert_u64_to_value(val: u64, base_type: FitBaseType) -> Value {
     match base_type {
         FitBaseType::SINT8 => Value::Int8(val as i8),
         FitBaseType::ENUM | FitBaseType::BYTE | FitBaseType::UINT8 | FitBaseType::UINT8Z => {
@@ -617,11 +617,11 @@ fn convert_u32_to_value(val: u32, base_type: FitBaseType) -> Value {
         FitBaseType::SINT16 => Value::Int16(val as i16),
         FitBaseType::UINT16 | FitBaseType::UINT16Z => Value::Uint16(val as u16),
         FitBaseType::SINT32 => Value::Int32(val as i32),
-        FitBaseType::UINT32 | FitBaseType::UINT32Z => Value::Uint32(val),
+        FitBaseType::UINT32 | FitBaseType::UINT32Z => Value::Uint32(val as u32),
         FitBaseType::FLOAT32 => Value::Float32(val as f32),
         FitBaseType::FLOAT64 => Value::Float64(val as f64),
         FitBaseType::SINT64 => Value::Int64(val as i64),
-        FitBaseType::UINT64 | FitBaseType::UINT64Z => Value::Uint64(val as u64),
+        FitBaseType::UINT64 | FitBaseType::UINT64Z => Value::Uint64(val),
         _ => Value::Invalid,
     }
 }
@@ -728,5 +728,34 @@ impl<R: Read> Builder<R> {
             field_descriptions: Vec::new(),
             options: self.options,
         }
+    }
+}
+
+#[test]
+fn test_convert_u64_to_value() {
+    let input = 1u64;
+
+    let tt = [
+        (FitBaseType::SINT8, Value::Int8(1)),
+        (FitBaseType::ENUM, Value::Uint8(1)),
+        (FitBaseType::BYTE, Value::Uint8(1)),
+        (FitBaseType::UINT8, Value::Uint8(1)),
+        (FitBaseType::UINT8Z, Value::Uint8(1)),
+        (FitBaseType::SINT16, Value::Int16(1)),
+        (FitBaseType::UINT16, Value::Uint16(1)),
+        (FitBaseType::UINT16Z, Value::Uint16(1)),
+        (FitBaseType::SINT32, Value::Int32(1)),
+        (FitBaseType::UINT32, Value::Uint32(1)),
+        (FitBaseType::UINT32Z, Value::Uint32(1)),
+        (FitBaseType::FLOAT32, Value::Float32(1.0)),
+        (FitBaseType::FLOAT64, Value::Float64(1.0)),
+        (FitBaseType::SINT64, Value::Int64(1)),
+        (FitBaseType::UINT64, Value::Uint64(1)),
+        (FitBaseType::UINT64Z, Value::Uint64(1)),
+    ];
+
+    for tc in tt {
+        let val = convert_u64_to_value(input, tc.0);
+        assert_eq!(tc.1, val, "input: {:?}", tc);
     }
 }
