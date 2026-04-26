@@ -111,16 +111,6 @@ struct Options {
     header_option: HeaderOption,
 }
 
-impl Default for Options {
-    fn default() -> Self {
-        Self {
-            protocol_version: ProtocolVersion(0),
-            endianness: Endianness::LittleEndian,
-            header_option: HeaderOption::Normal(0),
-        }
-    }
-}
-
 /// Encoder for encoding FIT file.
 pub struct Encoder<W: Write + Seek> {
     writer: W,
@@ -392,30 +382,34 @@ pub struct Builder<W: Write + Seek> {
 
 impl<W: Write + Seek> Builder<W> {
     /// Create new DecoderBuilder.
-    pub fn new(writer: W) -> Builder<W> {
+    pub const fn new(writer: W) -> Builder<W> {
         Self {
             writer,
-            options: Options::default(),
+            options: Options {
+                protocol_version: ProtocolVersion(0),
+                endianness: Endianness::LittleEndian,
+                header_option: HeaderOption::Normal(0),
+            },
         }
     }
 
     /// Use this protocol version.
     /// Default: `file_header.protocol_version` or `ProtocolVersion::V1`
-    pub fn protocol_version(mut self, protocol_version: ProtocolVersion) -> Self {
+    pub const fn protocol_version(mut self, protocol_version: ProtocolVersion) -> Self {
         self.options.protocol_version = protocol_version;
         self
     }
 
     /// Use this endianness.
     /// Default: `Endianness::LittleEndian`
-    pub fn endianness(mut self, endianness: Endianness) -> Self {
+    pub const fn endianness(mut self, endianness: Endianness) -> Self {
         self.options.endianness = endianness;
         self
     }
 
     /// Use this header option.
     /// Default: `HeaderOption::Normal(0)`
-    pub fn header_option(mut self, header_option: HeaderOption) -> Self {
+    pub const fn header_option(mut self, header_option: HeaderOption) -> Self {
         self.options.header_option = header_option;
         self
     }

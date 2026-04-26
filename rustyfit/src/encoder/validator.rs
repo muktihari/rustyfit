@@ -100,7 +100,7 @@ pub(super) struct MessageValidator {
 }
 
 impl MessageValidator {
-    pub(super) fn new() -> Self {
+    pub(super) const fn new() -> Self {
         Self {
             developer_data_index_seen: [0u64; 4],
             field_descriptions: Vec::new(),

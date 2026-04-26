@@ -1,4 +1,3 @@
-#[derive(Default)]
 pub(super) struct Lru {
     items: Vec<Vec<u8>>,
     bucket: Vec<usize>,
