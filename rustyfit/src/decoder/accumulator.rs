@@ -79,10 +79,9 @@ impl Accumulator {
         self.values
             .iter_mut()
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
-            .and_then(|v| {
+            .map(|v| {
                 v.value = value;
                 v.last = value;
-                Some(())
             })
             .unwrap_or_else(|| {
                 self.values.push(AccuValue {
@@ -104,11 +103,11 @@ impl Accumulator {
         self.values
             .iter_mut()
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
-            .and_then(|v| {
+            .map(|v| {
                 let mask: u64 = (1 << bits) - 1;
                 v.value += (value.wrapping_sub(v.last)) & mask;
                 v.last = value;
-                Some(v.value)
+                v.value
             })
             .unwrap_or_else(|| {
                 self.values.push(AccuValue {
