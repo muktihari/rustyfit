@@ -46,7 +46,8 @@ pub(crate) const FIELD_NUM_TIMESTAMP: u8 = 253;
 pub(crate) static DATA_TYPE: &str = ".FIT";
 
 /// Defined errors returned from proto module.
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug)]
 pub enum Error {
     /// Protocol Validator's error when Protocol Version 1.0 constains developer data.
     ProtocolViolationDeveloperData,
@@ -73,7 +74,7 @@ impl fmt::Display for Error {
 impl error::Error for Error {}
 
 /// FIT is FIT protocol data representative.
-#[derive(Default, Debug)]
+#[derive(Debug, Default)]
 pub struct FIT {
     /// File Header contains either 12 or 14 bytes
     pub file_header: FileHeader,
@@ -133,7 +134,7 @@ pub struct MessageDefinition {
 }
 
 /// FieldDefinition is the definition of the upcoming field within the message's structure.
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct FieldDefinition {
     /// The field definition number
     pub num: u8,
@@ -144,7 +145,7 @@ pub struct FieldDefinition {
 }
 
 /// FieldDefinition is the definition of the upcoming developer field within the message's structure.
-#[derive(Debug, Default, Clone, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct DeveloperFieldDefinition {
     /// Maps to `field_definition_number` of a `field_description` message.
     pub num: u8,
@@ -155,7 +156,8 @@ pub struct DeveloperFieldDefinition {
 }
 
 /// Message is a FIT protocol message containing the data defined in the Message Definition
-#[derive(Default, Debug, Clone, PartialEq)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Default, Clone)]
 pub struct Message {
     /// Message Header serves to distinguish whether the message is a Normal Data or a Compressed Timestamp Data.
     /// Unlike MessageDefinition, Message's Header should not contain Developer Data Flag.
@@ -203,7 +205,8 @@ impl Message {
 }
 
 /// Field represents the full representation of a field, as specified in the Global FIT Profile.
-#[derive(Default, Debug, Clone, PartialEq)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Clone)]
 pub struct Field {
     /// Defined in the Global FIT profile for the specified FIT message, otherwise
     /// its a manufaturer specific number (defined by manufacturer). (255 == invalid)
@@ -257,7 +260,8 @@ pub struct FieldReference<'a> {
 ///
 /// NOTE: If DeveloperField contains a valid NativeMesgNum and NativeFieldNum, the value should be treated as
 /// native value (scale, offset, etc shall apply). [Added since protocol version 2.0]
-#[derive(Debug, Clone, PartialEq)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Clone)]
 pub struct DeveloperField {
     /// Maps to `field_definition_number` of a `field_description` message.
     pub num: u8,
@@ -315,7 +319,8 @@ pub struct SubFieldMap {
 
 /// Value representation of Message's Field.
 #[allow(missing_docs)]
-#[derive(Debug, Clone, Default, PartialEq)]
+#[cfg_attr(test, derive(PartialEq))]
+#[derive(Debug, Default, Clone)]
 pub enum Value {
     #[default]
     Invalid,
@@ -1186,7 +1191,7 @@ impl Value {
 }
 
 /// Protocol Version representation.
-#[derive(Default, Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct ProtocolVersion(pub u8);
 
 #[allow(missing_docs)]

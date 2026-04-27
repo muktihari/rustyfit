@@ -7,6 +7,13 @@ use rustyfit::{
 };
 
 pub fn bench_from(c: &mut Criterion) {
+    const FIELD: Field = Field {
+        num: 0,
+        profile_type: ProfileType(0),
+        value: Value::Invalid,
+        is_expanded: false,
+    };
+
     let mesg = Message {
         num: MesgNum::RECORD,
         fields: vec![
@@ -16,26 +23,11 @@ pub fn bench_from(c: &mut Criterion) {
                 value: Value::Uint32(1000),
                 is_expanded: false,
             },
-            Field {
-                num: 255,
-                ..Default::default()
-            },
-            Field {
-                num: 255,
-                ..Default::default()
-            },
-            Field {
-                num: 255,
-                ..Default::default()
-            },
-            Field {
-                num: 255,
-                ..Default::default()
-            },
-            Field {
-                num: 255,
-                ..Default::default()
-            },
+            Field { num: 255, ..FIELD },
+            Field { num: 255, ..FIELD },
+            Field { num: 255, ..FIELD },
+            Field { num: 255, ..FIELD },
+            Field { num: 255, ..FIELD },
         ],
         ..Default::default()
     };
