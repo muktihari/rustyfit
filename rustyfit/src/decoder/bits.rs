@@ -2,7 +2,7 @@ use crate::{profile::lookup, proto::Value};
 
 const N: usize = ((lookup::MAX_COMPONENT_BITS / 8) + 7) / 8;
 
-#[derive(Debug, PartialEq)]
+#[cfg_attr(test, derive(Debug, PartialEq))]
 pub(super) struct Bits {
     store: [u64; N],
     size: u64,
@@ -43,7 +43,7 @@ impl Bits {
         Some(bits)
     }
 
-    pub(super) fn pull(&mut self, bits: u8) -> Option<u32> {
+    pub(super) fn pull(&mut self, bits: u8) -> Option<u64> {
         if self.size == 0 {
             return None;
         }
@@ -51,7 +51,7 @@ impl Bits {
         self.size = self.size.saturating_sub(bits as u64);
 
         let mask = (1u64 << bits) - 1;
-        let val = (self.store[0] & mask) as u32;
+        let val = self.store[0] & mask;
         self.store[0] >>= bits;
 
         for i in 1..self.store.len() {
@@ -347,7 +347,7 @@ fn make_bits() {
 fn pull() {
     struct Pull {
         bits: u8,
-        value: Option<u32>,
+        value: Option<u64>,
         vbits: Bits,
     }
 

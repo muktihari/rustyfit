@@ -10,7 +10,7 @@ use crate::{
     proto::{Message, Value},
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum MessageValidatorError {
     /// Message has no fields.
     NoFields,
@@ -65,7 +65,7 @@ impl fmt::Display for MessageValidatorError {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum IntegrityError {
     /// Value and base type is not align
     ValueBaseTypeNotAlign {
