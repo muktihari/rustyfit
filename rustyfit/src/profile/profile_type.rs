@@ -7,7 +7,7 @@
 use crate::profile::typedef::FitBaseType;
 use std::fmt;
 
-pub const PROFILE_VERSION: u16 = 21200;
+pub const PROFILE_VERSION: u16 = 21201;
 
 #[derive(Clone, Copy, PartialEq)]
 pub struct ProfileType(pub u16);
