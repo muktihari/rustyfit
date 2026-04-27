@@ -3,7 +3,7 @@
 ![GitHub Workflow Status](https://github.com/muktihari/rustyfit/workflows/CI/badge.svg)
 [![Crates.io Version](https://img.shields.io/crates/v/rustyfit.svg)](https://crates.io/crates/rustyfit)
 [![Crates.io Downloads](https://img.shields.io/crates/d/rustyfit.svg)](https://crates.io/crates/rustyfit)
-[![Profile Version](https://img.shields.io/badge/profile-v21.200-lightblue.svg?style=flat)](https://developer.garmin.com/fit/download)
+[![Profile Version](https://img.shields.io/badge/profile-v21.201-lightblue.svg?style=flat)](https://developer.garmin.com/fit/download)
 
 Rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) in Rust.
 

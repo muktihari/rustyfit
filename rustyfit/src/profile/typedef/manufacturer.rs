@@ -263,6 +263,7 @@ impl Manufacturer {
     pub const JESPR: Manufacturer = Manufacturer(347);
     pub const HUAWEI: Manufacturer = Manufacturer(348);
     pub const GOTOES: Manufacturer = Manufacturer(349);
+    pub const CADENCE_APP: Manufacturer = Manufacturer(350);
     pub const ACTIGRAPHCORP: Manufacturer = Manufacturer(5759);
 }
 
@@ -516,6 +517,7 @@ impl fmt::Display for Manufacturer {
             347 => write!(f, "jespr"),
             348 => write!(f, "huawei"),
             349 => write!(f, "gotoes"),
+            350 => write!(f, "cadence_app"),
             5759 => write!(f, "actigraphcorp"),
             _ => write!(f, "Manufacturer({})", self.0),
         }
@@ -766,6 +768,7 @@ impl fmt::Debug for Manufacturer {
             347 => write!(f, "Manufacturer::JESPR(347)"),
             348 => write!(f, "Manufacturer::HUAWEI(348)"),
             349 => write!(f, "Manufacturer::GOTOES(349)"),
+            350 => write!(f, "Manufacturer::CADENCE_APP(350)"),
             5759 => write!(f, "Manufacturer::ACTIGRAPHCORP(5759)"),
             _ => write!(f, "Manufacturer({})", self.0),
         }
