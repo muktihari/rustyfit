@@ -20,7 +20,8 @@ Missing features, test completeness, and more robust documentation may be added 
 #### Decode
 
 Decoder's `decode` allows us to interact with FIT files directly through their original protocol messages' structure. 
-First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
+
+NOTE: First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
 On next call, it may return Ok(None) to indicate that no more FIT sequence in the file.
 
 ```rust
@@ -33,7 +34,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let br = BufReader::new(f);
     let mut dec = Decoder::new(br);
 
-    let fit = dec.decode()?.unwrap(); // First decode call is either Ok(Some(fit)) or Err(err), never Ok(None).
+    // SAFETY: First decode call is either Ok(Some(fit)) or Err(err), never Ok(None).
+    let fit = dec.decode()?.unwrap(); 
 
     println!("file_header's data_size: {}", fit.file_header.data_size);
     println!("messages count: {}", fit.messages.len());
@@ -161,7 +163,7 @@ fn main() -> Result<(), Box<dyn Error>> {
                 fields: vec![
                     Field {
                         num: mesgdef::FileId::MANUFACTURER,
-                        profile_type: ProfileType::MANUFACTURER,
+                        profile_type: ProfileType::MANUFACTURER, // or ProfileType::UINT16 is also valid
                         value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
                         is_expanded: false,
                     },
