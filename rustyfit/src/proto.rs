@@ -351,17 +351,12 @@ pub enum Value {
 /// Value that can hold FIT's value.
 impl Value {
     /// Unmarshal bytes into Value.
-    //
-    // This is hotpath. We intentionally avoid using chunks_exact() iterator, as
-    // it introduces a slight performance overhead compared to using a standard loop.
     pub(crate) fn unmarshal(buf: &[u8], array: bool, base_type: FitBaseType, arch: u8) -> Value {
         match base_type {
             FitBaseType::SINT8 => match array {
                 true => Value::VecInt8({
                     let mut vals: Vec<i8> = Vec::with_capacity(buf.len());
-                    for &v in buf {
-                        vals.push(v as i8);
-                    }
+                    vals.extend(buf.iter().map(|&x| x as i8));
                     vals
                 }),
                 false => Value::Int8(buf[0] as i8),
@@ -375,14 +370,16 @@ impl Value {
             FitBaseType::SINT16 => match array {
                 true => Value::VecInt16({
                     let mut vals: Vec<i16> = Vec::with_capacity(buf.len() / 2);
-                    let mut buf = buf;
-                    while buf.len() >= 2 {
-                        vals.push(match arch {
-                            0 => i16::from_le_bytes(buf[..2].try_into().unwrap()),
-                            _ => i16::from_be_bytes(buf[..2].try_into().unwrap()),
-                        });
-                        buf = &buf[2..];
-                    }
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(2)
+                                .map(|x| i16::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(2)
+                                .map(|x| i16::from_be_bytes(x.try_into().unwrap())),
+                        ),
+                    };
                     vals
                 }),
                 false => match arch {
@@ -393,14 +390,16 @@ impl Value {
             FitBaseType::UINT16 | FitBaseType::UINT16Z => match array {
                 true => Value::VecUint16({
                     let mut vals: Vec<u16> = Vec::with_capacity(buf.len() / 2);
-                    let mut buf = buf;
-                    while buf.len() >= 2 {
-                        vals.push(match arch {
-                            0 => u16::from_le_bytes(buf[..2].try_into().unwrap()),
-                            _ => u16::from_be_bytes(buf[..2].try_into().unwrap()),
-                        });
-                        buf = &buf[2..];
-                    }
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(2)
+                                .map(|x| u16::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(2)
+                                .map(|x| u16::from_be_bytes(x.try_into().unwrap())),
+                        ),
+                    };
                     vals
                 }),
                 false => match arch {
@@ -411,14 +410,16 @@ impl Value {
             FitBaseType::SINT32 => match array {
                 true => Value::VecInt32({
                     let mut vals: Vec<i32> = Vec::with_capacity(buf.len() / 4);
-                    let mut buf = buf;
-                    while buf.len() >= 4 {
-                        vals.push(match arch {
-                            0 => i32::from_le_bytes(buf[..4].try_into().unwrap()),
-                            _ => i32::from_be_bytes(buf[..4].try_into().unwrap()),
-                        });
-                        buf = &buf[4..];
-                    }
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(4)
+                                .map(|x| i32::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(4)
+                                .map(|x| i32::from_be_bytes(x.try_into().unwrap())),
+                        ),
+                    };
                     vals
                 }),
                 false => match arch {
@@ -429,14 +430,16 @@ impl Value {
             FitBaseType::UINT32 | FitBaseType::UINT32Z => match array {
                 true => Value::VecUint32({
                     let mut vals: Vec<u32> = Vec::with_capacity(buf.len() / 4);
-                    let mut buf = buf;
-                    while buf.len() >= 4 {
-                        vals.push(match arch {
-                            0 => u32::from_le_bytes(buf[..4].try_into().unwrap()),
-                            _ => u32::from_be_bytes(buf[..4].try_into().unwrap()),
-                        });
-                        buf = &buf[4..];
-                    }
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(4)
+                                .map(|x| u32::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(4)
+                                .map(|x| u32::from_be_bytes(x.try_into().unwrap())),
+                        ),
+                    };
                     vals
                 }),
                 false => match arch {
@@ -472,14 +475,16 @@ impl Value {
             FitBaseType::FLOAT32 => match array {
                 true => Value::VecFloat32({
                     let mut vals: Vec<f32> = Vec::with_capacity(buf.len() / 4);
-                    let mut buf = buf;
-                    while buf.len() >= 4 {
-                        vals.push(match arch {
-                            0 => f32::from_le_bytes(buf[..4].try_into().unwrap()),
-                            _ => f32::from_be_bytes(buf[..4].try_into().unwrap()),
-                        });
-                        buf = &buf[4..];
-                    }
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(4)
+                                .map(|x| f32::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(4)
+                                .map(|x| f32::from_be_bytes(x.try_into().unwrap())),
+                        ),
+                    };
                     vals
                 }),
                 false => match arch {
@@ -490,13 +495,15 @@ impl Value {
             FitBaseType::FLOAT64 => match array {
                 true => Value::VecFloat64({
                     let mut vals: Vec<f64> = Vec::with_capacity(buf.len() / 8);
-                    let mut buf = buf;
-                    while buf.len() >= 2 {
-                        vals.push(match arch {
-                            0 => f64::from_le_bytes(buf[..8].try_into().unwrap()),
-                            _ => f64::from_be_bytes(buf[..8].try_into().unwrap()),
-                        });
-                        buf = &buf[8..];
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(8)
+                                .map(|x| f64::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(8)
+                                .map(|x| f64::from_be_bytes(x.try_into().unwrap())),
+                        ),
                     }
                     vals
                 }),
@@ -508,13 +515,15 @@ impl Value {
             FitBaseType::SINT64 => match array {
                 true => Value::VecInt64({
                     let mut vals: Vec<i64> = Vec::with_capacity(buf.len() / 8);
-                    let mut buf = buf;
-                    while buf.len() >= 8 {
-                        vals.push(match arch {
-                            0 => i64::from_le_bytes(buf[..8].try_into().unwrap()),
-                            _ => i64::from_be_bytes(buf[..8].try_into().unwrap()),
-                        });
-                        buf = &buf[8..];
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(8)
+                                .map(|x| i64::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(8)
+                                .map(|x| i64::from_be_bytes(x.try_into().unwrap())),
+                        ),
                     }
                     vals
                 }),
@@ -526,13 +535,15 @@ impl Value {
             FitBaseType::UINT64 | FitBaseType::UINT64Z => match array {
                 true => Value::VecUint64({
                     let mut vals: Vec<u64> = Vec::with_capacity(buf.len() / 8);
-                    let mut buf = buf;
-                    while buf.len() >= 8 {
-                        vals.push(match arch {
-                            0 => u64::from_le_bytes(buf[..8].try_into().unwrap()),
-                            _ => u64::from_be_bytes(buf[..8].try_into().unwrap()),
-                        });
-                        buf = &buf[8..];
+                    match arch {
+                        0 => vals.extend(
+                            buf.chunks_exact(8)
+                                .map(|x| u64::from_le_bytes(x.try_into().unwrap())),
+                        ),
+                        _ => vals.extend(
+                            buf.chunks_exact(8)
+                                .map(|x| u64::from_be_bytes(x.try_into().unwrap())),
+                        ),
                     }
                     vals
                 }),
@@ -588,63 +599,23 @@ impl Value {
                 0 => v.to_le_bytes(),
                 _ => v.to_be_bytes(),
             }),
-            Value::VecInt8(v) => {
-                for &x in v {
-                    vec.push(x as u8);
-                }
-            }
-            Value::VecUint8(v) => {
-                for &x in v {
-                    vec.push(x);
-                }
-            }
+            Value::VecInt8(v) => vec.extend(v.iter().map(|&x| x as u8)),
+            Value::VecUint8(v) => vec.extend_from_slice(v),
             Value::VecInt16(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecUint16(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecInt32(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecUint32(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecString(v) => {
                 for x in v {
@@ -656,52 +627,20 @@ impl Value {
                 }
             }
             Value::VecFloat32(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecFloat64(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecInt64(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::VecUint64(v) => match arch {
-                0 => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_le_bytes());
-                    }
-                }
-                _ => {
-                    for x in v {
-                        vec.extend_from_slice(&x.to_be_bytes());
-                    }
-                }
+                0 => vec.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+                _ => vec.extend(v.iter().flat_map(|x| x.to_be_bytes())),
             },
             Value::Invalid => return Err(Error::InvalidValue),
         };
@@ -962,136 +901,31 @@ impl Value {
                 FitBaseType::UINT64Z => *v != 0,
                 _ => false,
             },
-            Value::VecInt8(v) => {
-                for &x in v {
-                    if x != i8::MAX {
-                        return true;
-                    }
-                }
-                false
-            }
+            Value::VecInt8(v) => v.iter().any(|&x| x != i8::MAX),
             Value::VecUint8(v) => match base_type {
-                FitBaseType::UINT8 => {
-                    for &x in v {
-                        if x != u8::MAX {
-                            return true;
-                        }
-                    }
-                    false
-                }
-                FitBaseType::UINT8Z => {
-                    for &x in v {
-                        if x != u8::MIN {
-                            return true;
-                        }
-                    }
-                    false
-                }
+                FitBaseType::UINT8 => v.iter().any(|&x| x != u8::MAX),
+                FitBaseType::UINT8Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
-            Value::VecInt16(v) => {
-                for &x in v {
-                    if x != i16::MAX {
-                        return true;
-                    }
-                }
-                false
-            }
+            Value::VecInt16(v) => v.iter().any(|&x| x != i16::MAX),
             Value::VecUint16(v) => match base_type {
-                FitBaseType::UINT16 => {
-                    for &x in v {
-                        if x != u16::MAX {
-                            return true;
-                        }
-                    }
-                    false
-                }
-                FitBaseType::UINT16Z => {
-                    for &x in v {
-                        if x != u16::MIN {
-                            return true;
-                        }
-                    }
-                    false
-                }
+                FitBaseType::UINT16 => v.iter().any(|&x| x != u16::MAX),
+                FitBaseType::UINT16Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
-            Value::VecInt32(v) => {
-                for &x in v {
-                    if x != i32::MAX {
-                        return true;
-                    }
-                }
-                false
-            }
+            Value::VecInt32(v) => v.iter().any(|&x| x != i32::MAX),
             Value::VecUint32(v) => match base_type {
-                FitBaseType::UINT32 => {
-                    for &x in v {
-                        if x != u32::MAX {
-                            return true;
-                        }
-                    }
-                    false
-                }
-                FitBaseType::UINT32Z => {
-                    for &x in v {
-                        if x != u32::MIN {
-                            return true;
-                        }
-                    }
-                    false
-                }
+                FitBaseType::UINT32 => v.iter().any(|&x| x != u32::MAX),
+                FitBaseType::UINT32Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
-            Value::VecString(v) => {
-                for x in v {
-                    if !x.is_empty() && x.as_str() != "\x00" {
-                        return true;
-                    }
-                }
-                false
-            }
-            Value::VecFloat32(v) => {
-                for &x in v {
-                    if x.to_bits() != u32::MAX {
-                        return true;
-                    }
-                }
-                false
-            }
-            Value::VecFloat64(v) => {
-                for &x in v {
-                    if x.to_bits() != u64::MAX {
-                        return true;
-                    }
-                }
-                false
-            }
-            Value::VecInt64(v) => {
-                for &x in v {
-                    if x != i64::MAX {
-                        return true;
-                    }
-                }
-                false
-            }
+            Value::VecString(v) => v.iter().any(|x| !x.is_empty() && x.as_str() != "\x00"),
+            Value::VecFloat32(v) => v.iter().any(|&x| x.to_bits() != u32::MAX),
+            Value::VecFloat64(v) => v.iter().any(|&x| x.to_bits() != u64::MAX),
+            Value::VecInt64(v) => v.iter().any(|&x| x != i64::MAX),
             Value::VecUint64(v) => match base_type {
-                FitBaseType::UINT64 => {
-                    for &x in v {
-                        if x != u64::MAX {
-                            return true;
-                        }
-                    }
-                    false
-                }
-                FitBaseType::UINT64Z => {
-                    for &x in v {
-                        if x != u64::MIN {
-                            return true;
-                        }
-                    }
-                    false
-                }
+                FitBaseType::UINT64 => v.iter().any(|&x| x != u64::MAX),
+                FitBaseType::UINT64Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
             Value::Invalid => false,
@@ -1177,11 +1011,11 @@ impl Value {
             Value::VecString(v) => {
                 let mut size = 0usize;
                 for x in v {
-                    let mut n = x.len();
-                    if n == 0 || x.as_bytes()[n - 1] != 0 {
-                        n += 1;
-                    }
+                    let n = x.len();
                     size += n;
+                    if n == 0 || x.as_bytes()[n - 1] != 0 {
+                        size += 1;
+                    }
                 }
                 size
             }
