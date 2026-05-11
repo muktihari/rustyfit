@@ -121,11 +121,8 @@ impl From<Capabilities> for Message {
                 num: 1,
                 profile_type: ProfileType::SPORT_BITS_0,
                 value: Value::VecUint8({
-                    let mut v = Vec::with_capacity(m.sports.len());
-                    for x in &m.sports {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.sports.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
             };

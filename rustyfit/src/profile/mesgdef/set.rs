@@ -241,11 +241,8 @@ impl From<Set> for Message {
                 num: 7,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
                 value: Value::VecUint16({
-                    let mut v = Vec::with_capacity(m.category.len());
-                    for x in &m.category {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.category.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
                 }),
                 is_expanded: false,
             };

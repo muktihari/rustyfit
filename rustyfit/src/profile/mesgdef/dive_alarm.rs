@@ -258,11 +258,8 @@ impl From<DiveAlarm> for Message {
                 num: 5,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::VecUint8({
-                    let mut v = Vec::with_capacity(m.dive_types.len());
-                    for x in &m.dive_types {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.dive_types.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
             };

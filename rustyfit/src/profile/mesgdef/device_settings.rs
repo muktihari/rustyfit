@@ -286,11 +286,8 @@ impl From<DeviceSettings> for Message {
                 num: 4,
                 profile_type: ProfileType::TIME_MODE,
                 value: Value::VecUint8({
-                    let mut v = Vec::with_capacity(m.time_mode.len());
-                    for x in &m.time_mode {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.time_mode.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
             };

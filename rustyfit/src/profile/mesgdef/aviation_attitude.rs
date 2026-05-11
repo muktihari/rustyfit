@@ -419,11 +419,8 @@ impl From<AviationAttitude> for Message {
                 num: 7,
                 profile_type: ProfileType::ATTITUDE_STAGE,
                 value: Value::VecUint8({
-                    let mut v = Vec::with_capacity(m.stage.len());
-                    for x in &m.stage {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.stage.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
             };
@@ -452,11 +449,8 @@ impl From<AviationAttitude> for Message {
                 num: 10,
                 profile_type: ProfileType::ATTITUDE_VALIDITY,
                 value: Value::VecUint16({
-                    let mut v = Vec::with_capacity(m.validity.len());
-                    for x in &m.validity {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.validity.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
                 }),
                 is_expanded: false,
             };
