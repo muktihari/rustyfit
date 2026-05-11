@@ -8,6 +8,7 @@
 
 use std::fmt;
 
+#[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Spo2MeasurementType(pub u8);
 

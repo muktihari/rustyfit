@@ -8,6 +8,7 @@
 
 use std::fmt;
 
+#[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LeftRightBalance(pub u8);
 
