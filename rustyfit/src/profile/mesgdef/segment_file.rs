@@ -177,11 +177,8 @@ impl From<SegmentFile> for Message {
                 num: 7,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
                 value: Value::VecUint8({
-                    let mut v = Vec::with_capacity(m.leader_type.len());
-                    for x in &m.leader_type {
-                        v.push(x.0)
-                    }
-                    v
+                    let (ptr, len, capacity) = m.leader_type.into_raw_parts();
+                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
             };

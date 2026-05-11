@@ -92,6 +92,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			}
 
 			baseType := b.lookup.BaseType(parserField.Type)
+			rustType := baseTypeToRustTypeReplacer.Replace(baseType.String())
 
 			field := Field{
 				Num:  parserField.Num,
@@ -105,21 +106,19 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				NameUpperCase: strings.ToUpper(parserField.Name),
 				String:        parserField.Name,
 				BaseType:      strings.ToUpper(baseType.String()),
-				BaseType0:     rustTypeReplacer.Replace(baseType.GoType()),
+				BaseType0:     rustType,
 				BaseType0Invalid: func() string {
 					if strings.HasSuffix(baseType.String(), "z") {
-						return fmt.Sprintf("%s::MIN", rustTypeReplacer.Replace(baseType.GoType()))
+						return fmt.Sprintf("%s::MIN", rustType)
 					}
-					return fmt.Sprintf("%s::MAX", rustTypeReplacer.Replace(baseType.GoType()))
+					return fmt.Sprintf("%s::MAX", rustType)
 				}(),
 				ProfileType: fmt.Sprintf("ProfileType::%s", strings.ToUpper(parserField.Type)),
 				MaxValue: func() string {
-					bt := baseType.GoType()
-					rtyp := rustTypeReplacer.Replace(bt)
-					if bt == "string" {
+					if rustType == "String" {
 						return ""
 					}
-					return fmt.Sprintf("%s::MAX", rtyp)
+					return fmt.Sprintf("%s::MAX", rustType)
 				}(),
 				Type:           b.transformType(parserField.Type, parserField.Array, fixedArraySize),
 				TypedValue:     b.transformTypedValue(parserField.Num, parserField.Type, parserField.Array, fixedArraySize),
@@ -334,18 +333,10 @@ func (b *Builder) createDynamicField(mesgName string, field *Field, parserField 
 	}
 }
 
-var rustTypeReplacer = strings.NewReplacer(
-	"byte", "u8",
-	"int", "i",
-	"uint", "u",
-	"float", "f",
-	"string", "String",
-)
-
 func (b *Builder) transformType(fieldType, fieldArray string, fixedArraySize byte) string {
 	var typ string
 	if v := b.lookup.BaseType(fieldType).String(); v == fieldType {
-		typ = rustTypeReplacer.Replace(b.lookup.GoType(fieldType))
+		typ = goTypeToRustTypeReplacer.Replace(b.lookup.GoType(fieldType))
 	} else {
 		typ = fmt.Sprintf("typedef::%s", strutil.ToTitle(fieldType))
 	}
@@ -361,66 +352,55 @@ func (b *Builder) transformType(fieldType, fieldArray string, fixedArraySize byt
 	return fmt.Sprintf("Vec<%s>", typ)
 }
 
-var baseTypeReplacer = strings.NewReplacer(
-	"Enum", "Uint8",
-	"Sint", "Int",
-	"Byte", "Uint8",
-)
-
 func (b *Builder) transformToProtoValue(fieldName, fieldType, array string, fixedArraySize uint8) string {
 	baseType := b.lookup.BaseType(fieldType).String()
 
-	typ := strutil.ToTitle(baseType)
-	typ = baseTypeReplacer.Replace(typ)
-	typ = strings.TrimSuffix(typ, "z")
+	valueEnum := strutil.ToTitle(baseType)
+	valueEnum = baseTypeToValueEnumReplacer.Replace(valueEnum)
+
+	rustType := baseTypeToRustTypeReplacer.Replace(baseType)
 
 	if baseType != fieldType {
 		if array != "" {
+			// SAFETY: From<T> for Message has move semantics.
 			return fmt.Sprintf(`Value::Vec%s({
-				let mut v = Vec::with_capacity(m.%s.len());
-				for x in &m.%s {
-					v.push(x.0)
-				}
-				v
-			})`, typ, fieldName, fieldName)
+				let (ptr, len, capacity) = m.%s.into_raw_parts();
+				unsafe { Vec::from_raw_parts(ptr.cast::<%s>(), len, capacity) }
+			})`, valueEnum, fieldName, rustType)
 		}
-		return fmt.Sprintf("Value::%s(m.%s.0)", typ, fieldName)
+		return fmt.Sprintf("Value::%s(m.%s.0)", valueEnum, fieldName)
 	}
 
 	if array != "" {
 		if fixedArraySize > 0 {
-			return fmt.Sprintf("Value::Vec%s(Vec::from(&m.%s))", typ, fieldName)
+			return fmt.Sprintf("Value::Vec%s(Vec::from(&m.%s))", valueEnum, fieldName)
 		}
-		return fmt.Sprintf("Value::Vec%s(m.%s)", typ, fieldName)
+		return fmt.Sprintf("Value::Vec%s(m.%s)", valueEnum, fieldName)
 	}
 
-	return fmt.Sprintf("Value::%s(m.%s)", typ, fieldName)
+	return fmt.Sprintf("Value::%s(m.%s)", valueEnum, fieldName)
 }
 
 func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedArraySize uint8) string {
 	baseType := b.lookup.BaseType(fieldType).String()
 	baseTypeTitleCase := strutil.ToTitle(baseType)
-	typ := baseTypeReplacer.Replace(baseTypeTitleCase)
-	rustType := strings.NewReplacer(
+	valueEnumType := baseTypeToValueEnumReplacer.Replace(baseTypeTitleCase)
+	rustAsType := strings.NewReplacer(
 		"enum", "u8",
 		"byte", "u8",
 		"sint", "i",
 		"uint", "u",
 		"float", "f",
-	).Replace(baseType)
-
-	if array != "" && strings.HasSuffix(typ, "z") {
-		typ = strings.TrimSuffix(typ, "z")
-	}
+	).Replace(baseType) // uint8z -> u8z (*.as_u8z())
 
 	var value string
 	if array == "" {
-		value = fmt.Sprintf(`vals[%d].as_%s()`, num, rustType)
+		value = fmt.Sprintf(`vals[%d].as_%s()`, num, rustAsType)
 	} else if fixedArraySize == 0 { // vector
-		value = fmt.Sprintf(`vals[%d].as_vec_%s()`, num, strings.TrimSuffix(rustType, "z"))
+		value = fmt.Sprintf(`vals[%d].as_vec_%s()`, num, strings.TrimSuffix(rustAsType, "z"))
 	} else { // array
-		rtype := rustTypeReplacer.Replace(strings.TrimSuffix(strings.ToLower(typ), "z"))
-		arrayValue := fmt.Sprintf("[%s::MAX; %d]", rtype, fixedArraySize)
+		rustType := baseTypeToRustTypeReplacer.Replace(baseType)
+		arrayValue := fmt.Sprintf("[%s::MAX; %d]", rustType, fixedArraySize)
 		rshValue := "*x"
 
 		if fieldType == "string" {
@@ -439,8 +419,8 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 			_ => %s,
 		}`,
 			num,
-			strings.TrimSuffix(typ, "z"),
-			rtype, fixedArraySize, arrayValue,
+			valueEnumType,
+			rustType, fixedArraySize, arrayValue,
 			rshValue,
 			arrayValue,
 		)
@@ -465,24 +445,21 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 			vs
 		},
 		_ => Vec::new(),
-	}`, num, strings.TrimSuffix(typ, "z"), typdef)
+	}`, num, strings.TrimSuffix(valueEnumType, "z"), typdef)
 }
 
 func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) string {
 	baseType := b.lookup.BaseType(fieldType).String()
-	baseTypeTitleCase := strutil.ToTitle(baseType)
-	typ := baseTypeReplacer.Replace(baseTypeTitleCase)
-	typ = strings.ToLower(typ)
-	z := strings.HasSuffix(typ, "z")
-	typ = rustTypeReplacer.Replace(strings.TrimSuffix(typ, "z"))
+	rustType := baseTypeToRustTypeReplacer.Replace(baseType)
+
 	var invalid string
 	if baseType == "string" {
 		invalid = "String::new()"
 	} else {
-		if z {
-			invalid = fmt.Sprintf("%s::MIN", typ)
+		if strings.HasSuffix(baseType, "z") {
+			invalid = fmt.Sprintf("%s::MIN", rustType)
 		} else {
-			invalid = fmt.Sprintf("%s::MAX", typ)
+			invalid = fmt.Sprintf("%s::MAX", rustType)
 		}
 	}
 
@@ -494,7 +471,7 @@ func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) s
 			if baseType != fieldType {
 				return fmt.Sprintf("Vec::<typedef::%s>::new()", strutil.ToTitle(fieldType))
 			}
-			return fmt.Sprintf("Vec::<%s>::new()", typ)
+			return fmt.Sprintf("Vec::<%s>::new()", rustType)
 		}
 		if baseType == "string" {
 			invalid = fmt.Sprintf("const { %s }", invalid)
@@ -536,3 +513,28 @@ func offsetOrDefault(offsets []float64, index int) float64 {
 	}
 	return 0.0
 }
+
+var baseTypeToValueEnumReplacer = strings.NewReplacer(
+	"Enum", "Uint8",
+	"Sint", "Int",
+	"Byte", "Uint8",
+	"z", "", // Uint8z -> Uint8
+)
+
+var baseTypeToRustTypeReplacer = strings.NewReplacer(
+	"enum", "u8",
+	"byte", "u8",
+	"sint", "i",
+	"uint", "u",
+	"float", "f",
+	"string", "String",
+	"z", "", // u8z -> u8
+)
+
+var goTypeToRustTypeReplacer = strings.NewReplacer(
+	"byte", "u8",
+	"int", "i",
+	"uint", "u",
+	"float", "f",
+	"string", "String",
+)
