@@ -286,15 +286,13 @@ impl<R: Read> Decoder<R> {
 
         mesg_def.field_definitions.reserve_exact(255);
 
-        let mut buf = &arr[..n];
-        while buf.len() >= 3 {
-            mesg_def.field_definitions.push(FieldDefinition {
-                num: buf[0],
-                size: buf[1],
-                base_type: FitBaseType(buf[2]),
-            });
-            buf = &buf[3..];
-        }
+        mesg_def
+            .field_definitions
+            .extend(arr[..n].chunks_exact(3).map(|b| FieldDefinition {
+                num: b[0],
+                size: b[1],
+                base_type: FitBaseType(b[2]),
+            }));
 
         if mesg_def.header & DEV_DATA_MASK == DEV_DATA_MASK {
             self.read_exact_inc(&mut arr[..1])?;
@@ -304,17 +302,13 @@ impl<R: Read> Decoder<R> {
 
             mesg_def.developer_field_definitions.reserve_exact(255);
 
-            buf = &arr[..n];
-            while buf.len() >= 3 {
-                mesg_def
-                    .developer_field_definitions
-                    .push(DeveloperFieldDefinition {
-                        num: buf[0],
-                        size: buf[1],
-                        developer_data_index: buf[2],
-                    });
-                buf = &buf[3..];
-            }
+            mesg_def
+                .developer_field_definitions
+                .extend(arr[..n].chunks_exact(3).map(|b| DeveloperFieldDefinition {
+                    num: b[0],
+                    size: b[1],
+                    developer_data_index: b[2],
+                }));
         }
 
         Ok(())
