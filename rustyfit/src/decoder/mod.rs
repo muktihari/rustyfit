@@ -332,7 +332,7 @@ impl<R: Read> Decoder<R> {
 
             mesg.fields.push(Field {
                 num: FIELD_NUM_TIMESTAMP,
-                profile_type: ProfileType::UINT32,
+                profile_type: ProfileType::DATE_TIME,
                 is_expanded: false,
                 value: Value::Uint32(self.timestamp),
             });
