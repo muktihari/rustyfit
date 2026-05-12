@@ -313,7 +313,7 @@ impl<W: Write + Seek> Encoder<W> {
             return;
         }
 
-        if (timestamp - self.timestamp_reference) as u8 > COMPRESSED_TIME_MASK {
+        if timestamp.wrapping_sub(self.timestamp_reference) as u8 > COMPRESSED_TIME_MASK {
             self.timestamp_reference = timestamp;
             return;
         }
