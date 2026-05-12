@@ -85,6 +85,7 @@ impl error::Error for Error {}
 /// Available options: Normal(0-15), Compressed(0-3).
 ///
 /// Default: Normal(0)
+#[derive(Clone, Copy)]
 pub enum HeaderOption {
     /// Set Normal Header with the number of maximum message definition interleave allowed.
     /// Valid value: 0-15;
