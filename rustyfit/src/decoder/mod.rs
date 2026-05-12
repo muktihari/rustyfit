@@ -725,31 +725,36 @@ impl<R: Read> Builder<R> {
     }
 }
 
-#[test]
-fn test_convert_u64_to_value() {
-    let input = 1u64;
+#[cfg(test)]
+mod tests {
+    use crate::{decoder::convert_u64_to_value, profile::typedef::FitBaseType, proto::Value};
 
-    let tt = [
-        (FitBaseType::SINT8, Value::Int8(1)),
-        (FitBaseType::ENUM, Value::Uint8(1)),
-        (FitBaseType::BYTE, Value::Uint8(1)),
-        (FitBaseType::UINT8, Value::Uint8(1)),
-        (FitBaseType::UINT8Z, Value::Uint8(1)),
-        (FitBaseType::SINT16, Value::Int16(1)),
-        (FitBaseType::UINT16, Value::Uint16(1)),
-        (FitBaseType::UINT16Z, Value::Uint16(1)),
-        (FitBaseType::SINT32, Value::Int32(1)),
-        (FitBaseType::UINT32, Value::Uint32(1)),
-        (FitBaseType::UINT32Z, Value::Uint32(1)),
-        (FitBaseType::FLOAT32, Value::Float32(1.0)),
-        (FitBaseType::FLOAT64, Value::Float64(1.0)),
-        (FitBaseType::SINT64, Value::Int64(1)),
-        (FitBaseType::UINT64, Value::Uint64(1)),
-        (FitBaseType::UINT64Z, Value::Uint64(1)),
-    ];
+    #[test]
+    fn test_convert_u64_to_value() {
+        let input = 1u64;
 
-    for tc in tt {
-        let val = convert_u64_to_value(input, tc.0);
-        assert_eq!(tc.1, val, "input: {:?}", tc);
+        let tt = [
+            (FitBaseType::SINT8, Value::Int8(1)),
+            (FitBaseType::ENUM, Value::Uint8(1)),
+            (FitBaseType::BYTE, Value::Uint8(1)),
+            (FitBaseType::UINT8, Value::Uint8(1)),
+            (FitBaseType::UINT8Z, Value::Uint8(1)),
+            (FitBaseType::SINT16, Value::Int16(1)),
+            (FitBaseType::UINT16, Value::Uint16(1)),
+            (FitBaseType::UINT16Z, Value::Uint16(1)),
+            (FitBaseType::SINT32, Value::Int32(1)),
+            (FitBaseType::UINT32, Value::Uint32(1)),
+            (FitBaseType::UINT32Z, Value::Uint32(1)),
+            (FitBaseType::FLOAT32, Value::Float32(1.0)),
+            (FitBaseType::FLOAT64, Value::Float64(1.0)),
+            (FitBaseType::SINT64, Value::Int64(1)),
+            (FitBaseType::UINT64, Value::Uint64(1)),
+            (FitBaseType::UINT64Z, Value::Uint64(1)),
+        ];
+
+        for tc in tt {
+            let val = convert_u64_to_value(input, tc.0);
+            assert_eq!(tc.1, val, "input: {:?}", tc);
+        }
     }
 }

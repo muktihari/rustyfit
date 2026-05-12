@@ -97,381 +97,388 @@ fn bits_from_slice<T: AsU64>(v: &mut Bits, s: &[T], bitsize: usize) {
 }
 
 #[cfg(test)]
-#[test]
-fn make_bits() {
-    struct TestCase {
-        value: Value,
-        expected: Option<Bits>,
-    }
+mod tests {
+    use crate::{
+        decoder::{Bits, bits::N},
+        proto::Value,
+    };
 
-    let tt = vec![
-        TestCase {
-            value: Value::Int8(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 8,
-            }),
-        },
-        TestCase {
-            value: Value::Uint8(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 8,
-            }),
-        },
-        TestCase {
-            value: Value::Int16(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 16,
-            }),
-        },
-        TestCase {
-            value: Value::Uint16(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 16,
-            }),
-        },
-        TestCase {
-            value: Value::Int32(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 32,
-            }),
-        },
-        TestCase {
-            value: Value::Uint32(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 32,
-            }),
-        },
-        TestCase {
-            value: Value::Float32(10.0),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 32,
-            }),
-        },
-        TestCase {
-            value: Value::Float64(10.0),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 64,
-            }),
-        },
-        TestCase {
-            value: Value::Int64(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 64,
-            }),
-        },
-        TestCase {
-            value: Value::Uint64(10),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 64,
-            }),
-        },
-        TestCase {
-            value: Value::VecInt8(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 8);
-                    tmp
-                },
-                size: 16,
-            }),
-        },
-        TestCase {
-            value: Value::VecUint8(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 8);
-                    tmp
-                },
-                size: 16,
-            }),
-        },
-        TestCase {
-            value: Value::VecInt16(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 16);
-                    tmp
-                },
-                size: 32,
-            }),
-        },
-        TestCase {
-            value: Value::VecUint16(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 16);
-                    tmp
-                },
-                size: 32,
-            }),
-        },
-        TestCase {
-            value: Value::VecInt32(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 32);
-                    tmp
-                },
-                size: 64,
-            }),
-        },
-        TestCase {
-            value: Value::VecUint32(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 32);
-                    tmp
-                },
-                size: 64,
-            }),
-        },
-        TestCase {
-            value: Value::VecFloat32(vec![1.0, 2.0]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | (2 << 32);
-                    tmp
-                },
-                size: 64,
-            }),
-        },
-        TestCase {
-            value: Value::VecFloat64(vec![1.0, 2.0]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1;
-                    tmp[1] = 2;
-                    tmp
-                },
-                size: 128,
-            }),
-        },
-        TestCase {
-            value: Value::VecInt64(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1;
-                    tmp[1] = 2;
-                    tmp
-                },
-                size: 128,
-            }),
-        },
-        TestCase {
-            value: Value::VecUint64(vec![1, 2]),
-            expected: Some(Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1;
-                    tmp[1] = 2;
-                    tmp
-                },
-                size: 128,
-            }),
-        },
-        TestCase {
-            value: Value::VecUint8(vec![0; 255]),
-            expected: Some(Bits {
-                store: [0u64; N],
-                size: 64 * (N as u64),
-            }),
-        },
-    ];
+    #[test]
+    fn make_bits() {
+        struct TestCase {
+            value: Value,
+            expected: Option<Bits>,
+        }
 
-    for tc in tt {
-        let vbits = Bits::new(&tc.value);
-        assert_eq!(tc.expected, vbits)
-    }
-}
-
-#[test]
-fn pull() {
-    struct Pull {
-        bits: u8,
-        value: Option<u64>,
-        vbits: Bits,
-    }
-
-    struct TestCase {
-        name: &'static str,
-        vbits: Bits,
-        pulls: Vec<Pull>,
-    }
-
-    let mut tt = vec![
-        TestCase {
-            name: "single value one pull",
-            vbits: Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 10;
-                    tmp
-                },
-                size: 8,
-            },
-            pulls: vec![Pull {
-                bits: 8,
-                value: Some(10),
-                vbits: Bits {
-                    store: [0u64; N],
-                    size: 0,
-                },
-            }],
-        },
-        TestCase {
-            name: "single value two pull",
-            vbits: Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 1 | 2 << 8;
-                    tmp
-                },
-                size: 16,
-            },
-            pulls: vec![
-                Pull {
-                    bits: 8,
-                    value: Some(1),
-                    vbits: Bits {
-                        store: {
-                            let mut tmp = [0u64; N];
-                            tmp[0] = 2;
-                            tmp
-                        },
-                        size: 8,
+        let tt = vec![
+            TestCase {
+                value: Value::Int8(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
                     },
+                    size: 8,
+                }),
+            },
+            TestCase {
+                value: Value::Uint8(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 8,
+                }),
+            },
+            TestCase {
+                value: Value::Int16(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 16,
+                }),
+            },
+            TestCase {
+                value: Value::Uint16(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 16,
+                }),
+            },
+            TestCase {
+                value: Value::Int32(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 32,
+                }),
+            },
+            TestCase {
+                value: Value::Uint32(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 32,
+                }),
+            },
+            TestCase {
+                value: Value::Float32(10.0),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 32,
+                }),
+            },
+            TestCase {
+                value: Value::Float64(10.0),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 64,
+                }),
+            },
+            TestCase {
+                value: Value::Int64(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 64,
+                }),
+            },
+            TestCase {
+                value: Value::Uint64(10),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 64,
+                }),
+            },
+            TestCase {
+                value: Value::VecInt8(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 8);
+                        tmp
+                    },
+                    size: 16,
+                }),
+            },
+            TestCase {
+                value: Value::VecUint8(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 8);
+                        tmp
+                    },
+                    size: 16,
+                }),
+            },
+            TestCase {
+                value: Value::VecInt16(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 16);
+                        tmp
+                    },
+                    size: 32,
+                }),
+            },
+            TestCase {
+                value: Value::VecUint16(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 16);
+                        tmp
+                    },
+                    size: 32,
+                }),
+            },
+            TestCase {
+                value: Value::VecInt32(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 32);
+                        tmp
+                    },
+                    size: 64,
+                }),
+            },
+            TestCase {
+                value: Value::VecUint32(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 32);
+                        tmp
+                    },
+                    size: 64,
+                }),
+            },
+            TestCase {
+                value: Value::VecFloat32(vec![1.0, 2.0]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1 | (2 << 32);
+                        tmp
+                    },
+                    size: 64,
+                }),
+            },
+            TestCase {
+                value: Value::VecFloat64(vec![1.0, 2.0]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1;
+                        tmp[1] = 2;
+                        tmp
+                    },
+                    size: 128,
+                }),
+            },
+            TestCase {
+                value: Value::VecInt64(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1;
+                        tmp[1] = 2;
+                        tmp
+                    },
+                    size: 128,
+                }),
+            },
+            TestCase {
+                value: Value::VecUint64(vec![1, 2]),
+                expected: Some(Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 1;
+                        tmp[1] = 2;
+                        tmp
+                    },
+                    size: 128,
+                }),
+            },
+            TestCase {
+                value: Value::VecUint8(vec![0; 255]),
+                expected: Some(Bits {
+                    store: [0u64; N],
+                    size: 64 * (N as u64),
+                }),
+            },
+        ];
+
+        for tc in tt {
+            let vbits = Bits::new(&tc.value);
+            assert_eq!(tc.expected, vbits)
+        }
+    }
+
+    #[test]
+    fn pull() {
+        struct Pull {
+            bits: u8,
+            value: Option<u64>,
+            vbits: Bits,
+        }
+
+        struct TestCase {
+            name: &'static str,
+            vbits: Bits,
+            pulls: Vec<Pull>,
+        }
+
+        let mut tt = vec![
+            TestCase {
+                name: "single value one pull",
+                vbits: Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 10;
+                        tmp
+                    },
+                    size: 8,
                 },
-                Pull {
+                pulls: vec![Pull {
                     bits: 8,
-                    value: Some(2),
+                    value: Some(10),
                     vbits: Bits {
                         store: [0u64; N],
                         size: 0,
                     },
-                },
-            ],
-        },
-        TestCase {
-            name: "multiple value one pull",
-            vbits: Bits {
-                store: {
-                    let mut tmp = [0u64; N];
-                    tmp[0] = 0x0000_0000_2701_0E08;
-                    tmp[1] = 0x0000_0000_0000_FFFF;
-                    tmp
-                },
-                size: 128,
+                }],
             },
-            pulls: vec![Pull {
-                bits: 8,
-                value: Some(0x08),
+            TestCase {
+                name: "single value two pull",
                 vbits: Bits {
                     store: {
                         let mut tmp = [0u64; N];
-                        tmp[0] = 0xFF00_0000_0027_010E;
-                        tmp[1] = 0x0000_0000_0000_00FF;
+                        tmp[0] = 1 | 2 << 8;
                         tmp
                     },
-                    size: 120,
+                    size: 16,
                 },
-            }],
-        },
-        TestCase {
-            name: "size is already zero",
-            vbits: Bits {
-                store: [0u64; N],
-                size: 0,
+                pulls: vec![
+                    Pull {
+                        bits: 8,
+                        value: Some(1),
+                        vbits: Bits {
+                            store: {
+                                let mut tmp = [0u64; N];
+                                tmp[0] = 2;
+                                tmp
+                            },
+                            size: 8,
+                        },
+                    },
+                    Pull {
+                        bits: 8,
+                        value: Some(2),
+                        vbits: Bits {
+                            store: [0u64; N],
+                            size: 0,
+                        },
+                    },
+                ],
             },
-            pulls: vec![Pull {
-                bits: 8,
-                value: None,
+            TestCase {
+                name: "multiple value one pull",
+                vbits: Bits {
+                    store: {
+                        let mut tmp = [0u64; N];
+                        tmp[0] = 0x0000_0000_2701_0E08;
+                        tmp[1] = 0x0000_0000_0000_FFFF;
+                        tmp
+                    },
+                    size: 128,
+                },
+                pulls: vec![Pull {
+                    bits: 8,
+                    value: Some(0x08),
+                    vbits: Bits {
+                        store: {
+                            let mut tmp = [0u64; N];
+                            tmp[0] = 0xFF00_0000_0027_010E;
+                            tmp[1] = 0x0000_0000_0000_00FF;
+                            tmp
+                        },
+                        size: 120,
+                    },
+                }],
+            },
+            TestCase {
+                name: "size is already zero",
                 vbits: Bits {
                     store: [0u64; N],
                     size: 0,
                 },
-            }],
-        },
-        TestCase {
-            name: "size 8 bits, pull 16 bits, return 8 bits",
-            vbits: Bits {
-                store: [0u64; N],
-                size: 8,
+                pulls: vec![Pull {
+                    bits: 8,
+                    value: None,
+                    vbits: Bits {
+                        store: [0u64; N],
+                        size: 0,
+                    },
+                }],
             },
-            pulls: vec![Pull {
-                bits: 16,
-                value: Some(0),
+            TestCase {
+                name: "size 8 bits, pull 16 bits, return 8 bits",
                 vbits: Bits {
                     store: [0u64; N],
-                    size: 0,
+                    size: 8,
                 },
-            }],
-        },
-    ];
+                pulls: vec![Pull {
+                    bits: 16,
+                    value: Some(0),
+                    vbits: Bits {
+                        store: [0u64; N],
+                        size: 0,
+                    },
+                }],
+            },
+        ];
 
-    for tc in &mut tt {
-        for (i, pull) in &mut tc.pulls.iter_mut().enumerate() {
-            let value = tc.vbits.pull(pull.bits);
-            assert_eq!(pull.value, value, "{}: pulls[{}]", tc.name, i);
-            assert_eq!(tc.vbits, pull.vbits, "{}: pills[{}]", tc.name, i);
+        for tc in &mut tt {
+            for (i, pull) in &mut tc.pulls.iter_mut().enumerate() {
+                let value = tc.vbits.pull(pull.bits);
+                assert_eq!(pull.value, value, "{}: pulls[{}]", tc.name, i);
+                assert_eq!(tc.vbits, pull.vbits, "{}: pills[{}]", tc.name, i);
+            }
         }
     }
 }

@@ -133,138 +133,147 @@ struct AccuValue {
     last: u64,
 }
 
-#[test]
-fn test_collect() {
-    let expected = vec![AccuValue {
-        mesg_num: MesgNum(1),
-        field_num: 1,
-        value: 2,
-        last: 2,
-    }];
+#[cfg(test)]
+mod tests {
+    use crate::{
+        decoder::{Accumulator, accumulator::AccuValue},
+        profile::typedef::MesgNum,
+        proto::Value,
+    };
 
-    let tt = [
-        Value::Int8(2),
-        Value::Uint8(2),
-        Value::Int16(2),
-        Value::Uint16(2),
-        Value::Int32(2),
-        Value::Uint32(2),
-        Value::Float32(2.0),
-        Value::Float64(2.0),
-        Value::Int64(2),
-        Value::Uint64(2),
-        Value::VecInt8(vec![1, 2]),
-        Value::VecUint8(vec![1, 2]),
-        Value::VecInt16(vec![1, 2]),
-        Value::VecUint16(vec![1, 2]),
-        Value::VecInt32(vec![1, 2]),
-        Value::VecUint32(vec![1, 2]),
-        Value::VecFloat32(vec![1.0, 2.0]),
-        Value::VecFloat64(vec![1.0, 2.0]),
-        Value::VecInt64(vec![1, 2]),
-        Value::VecUint64(vec![1, 2]),
-    ];
+    #[test]
+    fn test_collect() {
+        let expected = vec![AccuValue {
+            mesg_num: MesgNum(1),
+            field_num: 1,
+            value: 2,
+            last: 2,
+        }];
 
-    for tc in tt {
-        let mut accumu = Accumulator::new();
-        accumu.collect(MesgNum(1), 1, &tc);
-        assert_eq!(expected, accumu.values, "case: {:?}", tc);
+        let tt = [
+            Value::Int8(2),
+            Value::Uint8(2),
+            Value::Int16(2),
+            Value::Uint16(2),
+            Value::Int32(2),
+            Value::Uint32(2),
+            Value::Float32(2.0),
+            Value::Float64(2.0),
+            Value::Int64(2),
+            Value::Uint64(2),
+            Value::VecInt8(vec![1, 2]),
+            Value::VecUint8(vec![1, 2]),
+            Value::VecInt16(vec![1, 2]),
+            Value::VecUint16(vec![1, 2]),
+            Value::VecInt32(vec![1, 2]),
+            Value::VecUint32(vec![1, 2]),
+            Value::VecFloat32(vec![1.0, 2.0]),
+            Value::VecFloat64(vec![1.0, 2.0]),
+            Value::VecInt64(vec![1, 2]),
+            Value::VecUint64(vec![1, 2]),
+        ];
+
+        for tc in tt {
+            let mut accumu = Accumulator::new();
+            accumu.collect(MesgNum(1), 1, &tc);
+            assert_eq!(expected, accumu.values, "case: {:?}", tc);
+        }
+
+        let tt = [
+            Value::Invalid,
+            Value::String(String::new()),
+            Value::VecString(vec![]),
+        ];
+
+        for tc in tt {
+            let mut accumu = Accumulator::new();
+            accumu.collect(MesgNum(1), 1, &tc);
+            assert_eq!(Vec::<AccuValue>::new(), accumu.values, "case: {:?}", tc);
+        }
     }
 
-    let tt = [
-        Value::Invalid,
-        Value::String(String::new()),
-        Value::VecString(vec![]),
-    ];
-
-    for tc in tt {
+    #[test]
+    fn test_collect_64() {
         let mut accumu = Accumulator::new();
-        accumu.collect(MesgNum(1), 1, &tc);
-        assert_eq!(Vec::<AccuValue>::new(), accumu.values, "case: {:?}", tc);
-    }
-}
 
-#[test]
-fn test_collect_64() {
-    let mut accumu = Accumulator::new();
+        accumu.collect_u64(MesgNum(0), 0, 10);
+        assert_eq!(
+            vec![AccuValue {
+                mesg_num: MesgNum(0),
+                field_num: 0,
+                value: 10,
+                last: 10
+            }],
+            accumu.values,
+        );
 
-    accumu.collect_u64(MesgNum(0), 0, 10);
-    assert_eq!(
-        vec![AccuValue {
-            mesg_num: MesgNum(0),
-            field_num: 0,
-            value: 10,
-            last: 10
-        }],
-        accumu.values,
-    );
-
-    accumu.collect_u64(MesgNum(0), 0, 11);
-    assert_eq!(
-        vec![AccuValue {
-            mesg_num: MesgNum(0),
-            field_num: 0,
-            value: 11,
-            last: 11
-        }],
-        accumu.values,
-    );
-
-    accumu.collect_u64(MesgNum(0), 1, 11);
-    assert_eq!(
-        vec![
-            AccuValue {
+        accumu.collect_u64(MesgNum(0), 0, 11);
+        assert_eq!(
+            vec![AccuValue {
                 mesg_num: MesgNum(0),
                 field_num: 0,
                 value: 11,
                 last: 11
-            },
-            AccuValue {
-                mesg_num: MesgNum(0),
-                field_num: 1,
-                value: 11,
-                last: 11
-            }
-        ],
-        accumu.values,
-    );
-}
+            }],
+            accumu.values,
+        );
 
-#[test]
-fn test_accumulate() {
-    let mut accumu = Accumulator::new();
+        accumu.collect_u64(MesgNum(0), 1, 11);
+        assert_eq!(
+            vec![
+                AccuValue {
+                    mesg_num: MesgNum(0),
+                    field_num: 0,
+                    value: 11,
+                    last: 11
+                },
+                AccuValue {
+                    mesg_num: MesgNum(0),
+                    field_num: 1,
+                    value: 11,
+                    last: 11
+                }
+            ],
+            accumu.values,
+        );
+    }
 
-    accumu.collect_u64(MesgNum(1), 1, 1);
-    let val = accumu.accumulate(MesgNum(2), 2, 2, 8);
-    assert_eq!(2, val, "accumulate non-existing value");
+    #[test]
+    fn test_accumulate() {
+        let mut accumu = Accumulator::new();
 
-    let val = accumu.accumulate(MesgNum(1), 1, 10, 8);
-    assert_eq!(10, val, "accumulate first value");
-    assert_eq!(
-        vec![
-            AccuValue {
-                mesg_num: MesgNum(1),
-                field_num: 1,
-                value: 10,
-                last: 10,
-            },
-            AccuValue {
-                mesg_num: MesgNum(2),
-                field_num: 2,
-                value: 2,
-                last: 2,
-            }
-        ],
-        accumu.values,
-        "first value is updated, non-existing value is appended"
-    );
-}
+        accumu.collect_u64(MesgNum(1), 1, 1);
+        let val = accumu.accumulate(MesgNum(2), 2, 2, 8);
+        assert_eq!(2, val, "accumulate non-existing value");
 
-#[test]
-fn reset() {
-    let mut accumu = Accumulator::new();
-    accumu.collect_u64(MesgNum(1), 1, 1);
-    assert_eq!(1, accumu.values.len());
-    accumu.reset();
-    assert_eq!(0, accumu.values.len());
+        let val = accumu.accumulate(MesgNum(1), 1, 10, 8);
+        assert_eq!(10, val, "accumulate first value");
+        assert_eq!(
+            vec![
+                AccuValue {
+                    mesg_num: MesgNum(1),
+                    field_num: 1,
+                    value: 10,
+                    last: 10,
+                },
+                AccuValue {
+                    mesg_num: MesgNum(2),
+                    field_num: 2,
+                    value: 2,
+                    last: 2,
+                }
+            ],
+            accumu.values,
+            "first value is updated, non-existing value is appended"
+        );
+    }
+
+    #[test]
+    fn reset() {
+        let mut accumu = Accumulator::new();
+        accumu.collect_u64(MesgNum(1), 1, 1);
+        assert_eq!(1, accumu.values.len());
+        accumu.reset();
+        assert_eq!(0, accumu.values.len());
+    }
 }
