@@ -65,6 +65,7 @@ impl fmt::Display for Error {
 impl error::Error for Error {}
 
 /// Event is FIT segments encountered by the Decoder.
+#[derive(Debug)]
 pub enum Event<'a> {
     /// Returned when the Decoder encounter FileHeader.
     FileHeader(&'a FileHeader),
@@ -233,8 +234,8 @@ impl<R: Read> Decoder<R> {
                 continue;
             }
 
-            let local_mesg_num = match header & COMPRESSED_TIME_MASK {
-                COMPRESSED_TIME_MASK => {
+            let local_mesg_num = match header & MESG_COMPRESSED_HEADER_MASK {
+                MESG_COMPRESSED_HEADER_MASK => {
                     (header & COMPRESSED_LOCAL_MESG_NUM_MASK) >> COMPRESSED_BIT_SHIFT
                 }
                 _ => header,
@@ -321,7 +322,9 @@ impl<R: Read> Decoder<R> {
     ) -> Result<(), Error> {
         if mesg.header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
             let time_offset = mesg.header & COMPRESSED_TIME_MASK;
-            self.timestamp += ((time_offset - self.last_time_offset) & COMPRESSED_TIME_MASK) as u32;
+            self.timestamp = self.timestamp.wrapping_add(
+                (time_offset.wrapping_sub(self.last_time_offset) & COMPRESSED_TIME_MASK) as u32,
+            );
             self.last_time_offset = time_offset;
 
             mesg.fields.push(Field {

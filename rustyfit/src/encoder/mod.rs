@@ -85,6 +85,7 @@ impl error::Error for Error {}
 /// Available options: Normal(0-15), Compressed(0-3).
 ///
 /// Default: Normal(0)
+#[derive(Clone, Copy)]
 pub enum HeaderOption {
     /// Set Normal Header with the number of maximum message definition interleave allowed.
     /// Valid value: 0-15;
@@ -313,7 +314,7 @@ impl<W: Write + Seek> Encoder<W> {
             return;
         }
 
-        if (timestamp - self.timestamp_reference) as u8 > COMPRESSED_TIME_MASK {
+        if timestamp.wrapping_sub(self.timestamp_reference) as u8 > COMPRESSED_TIME_MASK {
             self.timestamp_reference = timestamp;
             return;
         }
