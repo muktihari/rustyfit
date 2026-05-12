@@ -1,22 +1,20 @@
-use std::{fs, io, path::PathBuf};
+use rustyfit::{Decoder, DecoderError, EncoderBuilder, Endianness};
+use std::error::Error;
+use std::{fs, path::PathBuf};
+use std::{
+    fs::File,
+    io::{BufReader, Cursor, Seek, SeekFrom},
+    path::Path,
+};
 
-#[cfg(test)]
 #[test]
 fn decode_encode_roundtrip() {
-    use std::{
-        fs::File,
-        io::{BufReader, Cursor, Seek, SeekFrom},
-        path::Path,
-    };
-
-    use rustyfit::{Decoder, DecoderError, EncoderBuilder, Endianness};
-
     let path = Path::new("tests/data").to_path_buf();
+    let mut buf = Vec::<u8>::with_capacity(5_000 >> 10); // 5 MB, large enough to avoid realloc.
 
-    let walk_fn = |path: &PathBuf| {
+    walk_path(&path, &mut |path: &PathBuf| {
         let file = File::open(path).unwrap();
         let br = BufReader::new(file);
-        let mut buf = Vec::<u8>::with_capacity(10_000 >> 10); // 10 MB, large enough to avoid realloc.
         let mut dec = Decoder::new(br);
 
         'decode: while let Some(fit) = &mut match dec.decode() {
@@ -33,36 +31,77 @@ fn decode_encode_roundtrip() {
                         }
                     }
                 }
-                panic!("decode: {:?}, err: {:?}", path, err);
+                return Err(format!("decode: {:?}", err).into());
             }
         } {
+            buf.clear();
             let mut cursor = Cursor::new(&mut buf);
 
             let mut enc = EncoderBuilder::new(&mut cursor)
                 .endianness(Endianness::BigEndian)
                 .build();
 
+            let expected_messages = fit.messages.clone(); // Must clone since encoder mutates the value.
+
             if let Err(err) = enc.encode(fit) {
-                panic!("encode: {:?}, err: {:?}", path, err);
+                return Err(format!("encode: {:?}", err).into());
             }
 
             cursor.seek(SeekFrom::Start(0)).unwrap();
 
             let mut dec = Decoder::new(&mut cursor);
-            if let Err(err) = dec.decode() {
-                panic!("re-decode the encoded file: {:?}, err: {:?}", path, err);
+            let result_fit = match dec.decode() {
+                Ok(result_fit) => result_fit,
+                Err(err) => {
+                    return Err(format!("re-decode the encoded file: {:?}", err).into());
+                }
+            };
+
+            let result_messages = result_fit.unwrap().messages;
+
+            if result_messages.len() == 0 || result_messages.len() != expected_messages.len() {
+                return Err(format!(
+                    "unexpected messages len, expected: {}, got: {}",
+                    expected_messages.len(),
+                    result_messages.len()
+                )
+                .into());
             }
 
-            buf.clear();
-        }
-    };
+            for (i, mesg) in expected_messages
+                .iter()
+                .zip(result_messages.iter())
+                .enumerate()
+            {
+                if mesg.0.num != mesg.1.num {
+                    return Err(format!(
+                        "mesg num mismatch for mesg index {}, expected: {}, got: {}",
+                        i, mesg.0.num, mesg.1.num
+                    )
+                    .into());
+                }
 
-    if let Err(err) = walk_path(&path, &walk_fn) {
-        panic!("walk_path: {}", err);
-    }
+                if mesg.0.fields.len() != mesg.1.fields.len() {
+                    return Err(format!(
+                        "fields len mismatch for mesg index {} num {}, expected: {}, got: {}",
+                        i,
+                        mesg.0.num,
+                        mesg.0.fields.len(),
+                        mesg.1.fields.len()
+                    )
+                    .into());
+                }
+            }
+        }
+        Ok(())
+    })
+    .unwrap()
 }
 
-fn walk_path<F: Fn(&PathBuf)>(path: &PathBuf, f: &F) -> Result<(), io::Error> {
+fn walk_path<F>(path: &PathBuf, f: &mut F) -> Result<(), Box<dyn Error>>
+where
+    F: FnMut(&PathBuf) -> Result<(), Box<dyn Error>>,
+{
     let dir = fs::read_dir(path)?;
 
     for entry in dir.flatten() {
@@ -72,7 +111,9 @@ fn walk_path<F: Fn(&PathBuf)>(path: &PathBuf, f: &F) -> Result<(), io::Error> {
             continue;
         }
         if path.extension().is_some_and(|ext| ext == "fit") {
-            f(&path);
+            if let Err(err) = f(&path) {
+                return Err(format!("path: {:?}, err: {:?}", path, err).into());
+            };
         }
     }
     Ok(())

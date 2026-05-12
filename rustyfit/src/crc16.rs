@@ -34,17 +34,21 @@ impl Crc16 {
 }
 
 #[cfg(test)]
-#[test]
-fn test_all() {
-    let b: [u8; 12] = [14, 32, 84, 8, 214, 204, 9, 0, 46, 70, 73, 84];
-    let expected: u16 = 12856;
+mod tests {
+    use crate::crc16::Crc16;
 
-    let mut c = Crc16::new();
-    c.write(&b);
+    #[test]
+    fn test_all() {
+        let b: [u8; 12] = [14, 32, 84, 8, 214, 204, 9, 0, 46, 70, 73, 84];
+        let expected: u16 = 12856;
 
-    assert_eq!(c.sum16(), expected);
+        let mut c = Crc16::new();
+        c.write(&b);
 
-    c.reset();
+        assert_eq!(c.sum16(), expected);
 
-    assert_eq!(c.sum16(), 0);
+        c.reset();
+
+        assert_eq!(c.sum16(), 0);
+    }
 }
