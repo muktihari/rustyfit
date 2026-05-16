@@ -5,27 +5,30 @@ mod bits;
 
 use crate::{
     crc16::Crc16,
+    decoder::accumulator::Accumulator,
+    decoder::bits::Bits,
     profile::{
         ProfileType, lookup, mesgdef,
         typedef::{FitBaseType, MesgNum},
     },
     proto::*,
 };
-use accumulator::Accumulator;
-use bits::Bits;
-use std::{
-    error, fmt,
-    io::{self, ErrorKind, Read},
-    mem,
-};
+use alloc::{vec, vec::Vec};
+use core::mem;
+use embedded_io::{Read, ReadExactError};
 
 /// Decoder Error
 #[derive(Debug)]
-pub enum Error {
+pub enum Error<E> {
     /// I/O related error when reading from the Reader.
     Io {
         /// I/O error
-        err: io::Error,
+        err: E,
+        /// Byte position
+        n: usize,
+    },
+    /// Unexpected EOF occurs during process.
+    UnexpectedEof {
         /// Byte position
         n: usize,
     },
@@ -45,10 +48,14 @@ pub enum Error {
     },
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl<E> core::fmt::Display for Error<E>
+where
+    E: core::fmt::Display,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Error::Io { err, n } => write!(f, "io error kind {} at byte pos {}", err, n),
+            Error::Io { err, n } => write!(f, "io error {} at byte pos {}", err, n),
+            Error::UnexpectedEof { n } => write!(f, "unexpected EOF at byte pos {}", n),
             Error::NotFITFile => write!(f, "not a FIT file"),
             Error::ChecksumMismatch { expected, got } => {
                 write!(f, "checksum mismatch, expected {} got {}", expected, got)
@@ -62,7 +69,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl error::Error for Error {}
+impl<E> core::error::Error for Error<E> where E: core::fmt::Debug + core::fmt::Display {}
 
 /// Event is FIT segments encountered by the Decoder.
 #[derive(Debug)]
@@ -108,7 +115,7 @@ impl<R: Read> Decoder<R> {
     /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
     /// First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
     /// On next call, it may return Ok(None) to indicate that no more FIT sequence in the file.
-    pub fn decode(&mut self) -> Result<Option<FIT>, Error> {
+    pub fn decode(&mut self) -> Result<Option<FIT>, Error<R::Error>> {
         let file_header = match self.decode_file_header()? {
             Some(file_header) => file_header,
             None => return Ok(None),
@@ -131,7 +138,7 @@ impl<R: Read> Decoder<R> {
     }
 
     /// Similar to Decode but with a closure for retrieving DecoderEvent for the current FIT sequence.
-    pub fn decode_with<F>(&mut self, mut f: F) -> Result<bool, Error>
+    pub fn decode_with<F>(&mut self, mut f: F) -> Result<bool, Error<R::Error>>
     where
         F: FnMut(Event),
     {
@@ -147,13 +154,18 @@ impl<R: Read> Decoder<R> {
         Ok(true)
     }
 
-    fn decode_file_header(&mut self) -> Result<Option<FileHeader>, Error> {
+    fn decode_file_header(&mut self) -> Result<Option<FileHeader>, Error<R::Error>> {
         let mut arr = [0u8; 14];
         if let Err(err) = self.reader.read_exact(&mut arr[..1]) {
-            if self.n > 0 && err.kind() == ErrorKind::UnexpectedEof {
-                return Ok(None); // No chained FIT sequence
+            match err {
+                ReadExactError::UnexpectedEof => {
+                    if self.n > 0 {
+                        return Ok(None);
+                    }
+                    return Err(Error::UnexpectedEof { n: self.n });
+                }
+                ReadExactError::Other(err) => return Err(Error::Io { err, n: self.n }),
             }
-            return Err(Error::Io { err, n: self.n });
         };
         self.n += 1;
 
@@ -163,7 +175,10 @@ impl<R: Read> Decoder<R> {
         }
 
         if let Err(err) = self.reader.read_exact(&mut arr[1..n]) {
-            return Err(Error::Io { err, n: self.n });
+            return Err(match err {
+                ReadExactError::UnexpectedEof => Error::UnexpectedEof { n: self.n },
+                ReadExactError::Other(err) => Error::Io { err, n: self.n },
+            });
         }
         self.n += n - 1;
 
@@ -198,9 +213,12 @@ impl<R: Read> Decoder<R> {
     }
 
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
-    fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error> {
+    fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error<R::Error>> {
         if let Err(err) = self.reader.read_exact(buf) {
-            return Err(Error::Io { err, n: self.n });
+            return Err(match err {
+                ReadExactError::UnexpectedEof => Error::UnexpectedEof { n: self.n },
+                ReadExactError::Other(err) => Error::Io { err, n: self.n },
+            });
         };
         self.n += buf.len();
         self.cur += buf.len() as u32;
@@ -210,7 +228,7 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_with<F>(&mut self, data_size: u32, mut f: F) -> Result<(), Error>
+    fn decode_message_with<F>(&mut self, data_size: u32, mut f: F) -> Result<(), Error<R::Error>>
     where
         F: FnMut(Event),
     {
@@ -269,7 +287,10 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_definition(&mut self, mesg_def: &mut MessageDefinition) -> Result<(), Error> {
+    fn decode_message_definition(
+        &mut self,
+        mesg_def: &mut MessageDefinition,
+    ) -> Result<(), Error<R::Error>> {
         let mut arr = [0u8; 765];
         self.read_exact_inc(&mut arr[..5])?;
 
@@ -319,7 +340,7 @@ impl<R: Read> Decoder<R> {
         &mut self,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Error<R::Error>> {
         if mesg.header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
             let time_offset = mesg.header & COMPRESSED_TIME_MASK;
             self.timestamp = self.timestamp.wrapping_add(
@@ -378,7 +399,7 @@ impl<R: Read> Decoder<R> {
         &mut self,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Error<R::Error>> {
         let mut arr = [0u8; 255];
 
         for field_def in &mesg_def.field_definitions {
@@ -516,7 +537,7 @@ impl<R: Read> Decoder<R> {
         &mut self,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Error<R::Error>> {
         let mut arr = [0u8; 255];
 
         for dev_field_def in &mesg_def.developer_field_definitions {
@@ -559,10 +580,13 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_crc(&mut self) -> Result<u16, Error> {
+    fn decode_crc(&mut self) -> Result<u16, Error<R::Error>> {
         let mut arr = [0u8; 2];
         if let Err(err) = self.reader.read_exact(&mut arr) {
-            return Err(Error::Io { err, n: self.n });
+            return Err(match err {
+                ReadExactError::UnexpectedEof => Error::UnexpectedEof { n: self.n },
+                ReadExactError::Other(err) => Error::Io { err, n: self.n },
+            });
         };
         self.n += arr.len();
 

@@ -1,7 +1,5 @@
 #![warn(missing_docs)]
 
-use std::fmt;
-
 use crate::{
     profile::{
         mesgdef,
@@ -9,6 +7,7 @@ use crate::{
     },
     proto::{Message, Value},
 };
+use alloc::{string::String, vec::Vec};
 
 #[derive(Debug)]
 pub enum MessageValidatorError {
@@ -30,8 +29,8 @@ pub enum MessageValidatorError {
     MissingFieldDescription { developer_field_index: usize },
 }
 
-impl fmt::Display for MessageValidatorError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for MessageValidatorError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
             Self::NoFields => write!(f, "no fields"),
             Self::FieldValueIntegrity { field_index, err } => write!(
@@ -78,8 +77,8 @@ pub enum IntegrityError {
     ValueSizeExceedLimit,
 }
 
-impl fmt::Display for IntegrityError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+impl core::fmt::Display for IntegrityError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
             Self::ValueBaseTypeNotAlign { value, base_type } => {
                 write!(
@@ -225,13 +224,13 @@ impl MessageValidator {
 
         match value {
             Value::String(v) => {
-                if std::str::from_utf8(v.as_bytes()).is_err() {
+                if core::str::from_utf8(v.as_bytes()).is_err() {
                     return Err(IntegrityError::InvalidUTF8String(v.clone()));
                 }
             }
             Value::VecString(v) => {
                 for x in v.iter() {
-                    if std::str::from_utf8(x.as_bytes()).is_err() {
+                    if core::str::from_utf8(x.as_bytes()).is_err() {
                         return Err(IntegrityError::InvalidUTF8String(x.clone()));
                     }
                 }

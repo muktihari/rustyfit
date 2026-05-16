@@ -1,11 +1,10 @@
 #![warn(missing_docs)]
 
-use std::{error, fmt};
-
 use crate::profile::{
     ProfileType,
     typedef::{FitBaseType, MesgNum},
 };
+use alloc::{string::String, vec::Vec};
 
 /// Mask for determining if the message type is a message definition.
 pub(crate) const MESG_DEFINITION_MASK: u8 = 0b01000000;
@@ -57,8 +56,8 @@ pub enum Error {
     InvalidValue,
 }
 
-impl fmt::Display for Error {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl core::fmt::Display for Error {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match *self {
             Error::ProtocolViolationDeveloperData => {
                 write!(f, "protocol version 1.0 do not support developer data")
@@ -71,7 +70,7 @@ impl fmt::Display for Error {
     }
 }
 
-impl error::Error for Error {}
+impl core::error::Error for Error {}
 
 /// FIT is FIT protocol data representative.
 #[derive(Debug, Default)]
@@ -469,7 +468,7 @@ impl Value {
                     String::from_utf8_lossy(
                         &buf[0..buf.iter().position(|&v| v == 0).unwrap_or(buf.len())],
                     )
-                    .to_string(),
+                    .into_owned(),
                 ),
             },
             FitBaseType::FLOAT32 => match array {
@@ -1094,6 +1093,7 @@ mod tests {
         profile::typedef::FitBaseType,
         proto::{Error, Value, strcount},
     };
+    use alloc::{borrow::ToOwned, string::String, vec, vec::Vec};
 
     #[test]
     fn test_strcount() {
@@ -1286,17 +1286,17 @@ mod tests {
                 is_valid: true,
             },
             Case {
-                value: Value::String("rustyfit".to_string()),
+                value: Value::String("rustyfit".to_owned()),
                 base_type: FitBaseType::STRING,
                 is_valid: true,
             },
             Case {
-                value: Value::String("".to_string()),
+                value: Value::String("".to_owned()),
                 base_type: FitBaseType::STRING,
                 is_valid: false,
             },
             Case {
-                value: Value::String("\x00".to_string()),
+                value: Value::String("\x00".to_owned()),
                 base_type: FitBaseType::STRING,
                 is_valid: false,
             },
@@ -1441,12 +1441,12 @@ mod tests {
                 is_valid: false,
             },
             Case {
-                value: Value::VecString(vec!["rustyfit".to_string(), "rustyfit".to_string()]),
+                value: Value::VecString(vec!["rustyfit".to_owned(), "rustyfit".to_owned()]),
                 base_type: FitBaseType::STRING,
                 is_valid: true,
             },
             Case {
-                value: Value::VecString(vec!["\x00".to_string(), "\x00".to_string()]),
+                value: Value::VecString(vec!["\x00".to_owned(), "\x00".to_owned()]),
                 base_type: FitBaseType::STRING,
                 is_valid: false,
             },

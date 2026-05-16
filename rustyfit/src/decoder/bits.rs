@@ -102,6 +102,7 @@ mod tests {
         decoder::{Bits, bits::N},
         proto::Value,
     };
+    use alloc::{vec, vec::Vec};
 
     #[test]
     fn make_bits() {

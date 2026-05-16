@@ -1,8 +1,8 @@
-use criterion::{Criterion, criterion_group, criterion_main};
-
 mod decoder;
 mod encoder;
 mod mesgdef;
+
+use criterion::{Criterion, criterion_group, criterion_main};
 
 criterion_group! {
     name = benches;

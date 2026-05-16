@@ -8,6 +8,8 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
 /// FieldDescription is a FieldDescription message.

@@ -23,6 +23,7 @@ type Message struct {
 	StateSize         byte
 	MaxFieldNum       byte
 	MaxFieldExpandNum byte
+	Imports           map[string]struct{}
 }
 
 type Field struct {

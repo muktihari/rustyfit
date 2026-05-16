@@ -1,3 +1,5 @@
+use alloc::{vec, vec::Vec};
+
 pub(super) struct Lru {
     items: Vec<Vec<u8>>,
     bucket: Vec<usize>,
@@ -63,6 +65,7 @@ impl Lru {
 #[cfg(test)]
 mod tests {
     use crate::encoder::Lru;
+    use alloc::vec;
 
     #[test]
     fn test_lru() {

@@ -1,10 +1,10 @@
+use embedded_io_adapters::std::FromStd;
 use rustyfit::{Decoder, DecoderError, EncoderBuilder, Endianness, HeaderOption};
-use std::error::Error;
-use std::{fs, path::PathBuf};
 use std::{
-    fs::File,
+    error::Error,
+    fs::{self, File},
     io::{BufReader, Cursor, Seek, SeekFrom},
-    path::Path,
+    path::{Path, PathBuf},
 };
 
 #[test]
@@ -73,7 +73,7 @@ fn do_roudtrip_with_encoder_options(
 ) -> Result<(), Box<dyn Error>> {
     let file = File::open(path).unwrap();
     let br = BufReader::new(file);
-    let mut dec = Decoder::new(br);
+    let mut dec = Decoder::new(FromStd::new(br));
     let buf = Vec::<u8>::with_capacity(5_000 >> 10); // 5 MB, large enough to avoid realloc.
     let mut cursor = Cursor::new(buf);
 
@@ -96,7 +96,7 @@ fn do_roudtrip_with_encoder_options(
     } {
         cursor.seek(SeekFrom::Start(0)).unwrap();
 
-        let mut enc = EncoderBuilder::new(&mut cursor)
+        let mut enc = EncoderBuilder::new(FromStd::new(&mut cursor))
             .endianness(encoder_options.endianness)
             .header_option(encoder_options.header_option)
             .build();
@@ -109,7 +109,7 @@ fn do_roudtrip_with_encoder_options(
 
         cursor.seek(SeekFrom::Start(0)).unwrap();
 
-        let mut dec = Decoder::new(&mut cursor);
+        let mut dec = Decoder::new(FromStd::new(&mut cursor));
         let result_fit = match dec.decode() {
             Ok(result_fit) => result_fit,
             Err(err) => {

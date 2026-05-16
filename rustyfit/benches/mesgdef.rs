@@ -1,10 +1,9 @@
-use std::hint::black_box;
-
 use criterion::{Criterion, criterion_group, criterion_main};
 use rustyfit::{
     profile::{ProfileType, mesgdef::Record, typedef::MesgNum},
     proto::{Field, Message, Value},
 };
+use std::hint::black_box;
 
 pub fn bench_from(c: &mut Criterion) {
     const FIELD: Field = Field {

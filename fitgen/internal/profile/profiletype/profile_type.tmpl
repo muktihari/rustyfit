@@ -10,7 +10,7 @@
 {{ define "profile_type" }}
 {{ template "header" . }}
 use crate::profile::typedef::FitBaseType;
-use std::fmt;
+use core::fmt;
 
 pub const PROFILE_VERSION: u16 = {{ .VersionData.Version }};
 

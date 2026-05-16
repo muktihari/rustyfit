@@ -1,3 +1,7 @@
+#![no_std]
+
+extern crate alloc;
+
 pub use decoder::{
     Builder as DecoderBuilder, Decoder, Error as DecoderError, Event as DecoderEvent,
 };
