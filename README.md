@@ -4,7 +4,7 @@
 [![docs.rs](https://img.shields.io/badge/docs.rs-rustyfit-gold?logo=docs.rs)](https://docs.rs/rustyfit)
 [![Crates.io Version](https://img.shields.io/crates/v/rustyfit.svg)](https://crates.io/crates/rustyfit)
 [![Crates.io Downloads](https://img.shields.io/crates/d/rustyfit.svg)](https://crates.io/crates/rustyfit)
-[![Profile Version](https://img.shields.io/badge/profile-v21.201-lightblue.svg?style=flat)](https://github.com/garmin/fit-sdk-tools/releases)
+[![Profile Version](https://img.shields.io/badge/profile-v21.202-lightblue.svg?style=flat)](https://github.com/garmin/fit-sdk-tools/releases)
 
 The `#![no_std]` Rust implementation of [The Flexible and Interoperable Data Transfer (FIT) Protocol](https://developer.garmin.com/fit) for decoding and encoding Garmin FIT files, supporting FIT Protocol V2.
 
