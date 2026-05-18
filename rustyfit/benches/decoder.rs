@@ -1,6 +1,6 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use embedded_io_adapters::std::FromStd;
-use rustyfit::{Decoder, DecoderBuilder};
+use rustyfit::Decoder;
 use std::{hint::black_box, io::Cursor};
 
 const TEST_FILE: &str = "tests/data/large.fit";
@@ -17,10 +17,10 @@ pub fn bench_decode(c: &mut Criterion) {
 
     c.bench_function("decode no checksum no expand", |b| {
         b.iter(|| {
-            let mut dec = DecoderBuilder::new(black_box(FromStd::new(Cursor::new(&file_bytes))))
+            let mut dec = Decoder::builder()
                 .checksum(false)
                 .expand_components(false)
-                .build();
+                .build(black_box(FromStd::new(Cursor::new(&file_bytes))));
             dec.decode().unwrap();
         })
     });
@@ -34,10 +34,10 @@ pub fn bench_decode(c: &mut Criterion) {
 
     c.bench_function("decode_with no checksum no expand", |b| {
         b.iter(|| {
-            let mut dec = DecoderBuilder::new(black_box(FromStd::new(Cursor::new(&file_bytes))))
+            let mut dec = Decoder::builder()
                 .checksum(false)
                 .expand_components(false)
-                .build();
+                .build(black_box(FromStd::new(Cursor::new(&file_bytes))));
             dec.decode_with(|_| {}).unwrap();
         })
     });

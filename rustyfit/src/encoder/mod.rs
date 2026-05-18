@@ -99,6 +99,7 @@ pub enum Endianness {
     BigEndian = 1,
 }
 
+#[derive(Clone, Copy)]
 struct Options {
     protocol_version: ProtocolVersion,
     endianness: Endianness,
@@ -106,7 +107,7 @@ struct Options {
 }
 
 /// Encoder for encoding FIT file.
-pub struct Encoder<W: Write + Seek> {
+pub struct Encoder<W> {
     writer: W,
     n: i64,
     last_file_header_pos: i64,
@@ -121,9 +122,9 @@ pub struct Encoder<W: Write + Seek> {
 
 impl<W: Write + Seek> Encoder<W> {
     /// Create new Encoder for encoding FIT file.
-    /// For more options, use EncoderBuilder to build the Encoder.
+    /// For more options, use `Encoder::builder()` to build the Encoder.
     pub fn new(writer: W) -> Encoder<W> {
-        Builder::new(writer).build()
+        Builder::new().build(writer)
     }
 
     /// Encode the given `fit` to the writer.
@@ -373,17 +374,22 @@ fn marshal_append_message_definition(buf: &mut Vec<u8>, mesg: &Message, arch: u8
     }
 }
 
+impl Encoder<()> {
+    /// Create new Encoder with options for encoding FIT file.
+    pub const fn builder() -> Builder {
+        Builder::new()
+    }
+}
+
 /// Build Encoder with some options.
-pub struct Builder<W: Write + Seek> {
-    writer: W,
+pub struct Builder {
     options: Options,
 }
 
-impl<W: Write + Seek> Builder<W> {
+impl Builder {
     /// Create new DecoderBuilder.
-    pub const fn new(writer: W) -> Builder<W> {
+    pub const fn new() -> Builder {
         Self {
-            writer,
             options: Options {
                 protocol_version: ProtocolVersion(0),
                 endianness: Endianness::LittleEndian,
@@ -414,9 +420,9 @@ impl<W: Write + Seek> Builder<W> {
     }
 
     /// Build Encoder based on given options (if any).
-    pub fn build(self) -> Encoder<W> {
+    pub fn build<W: Write + Seek>(&self, writer: W) -> Encoder<W> {
         Encoder {
-            writer: self.writer,
+            writer: writer,
             n: 0,
             last_file_header_pos: 0,
             data_size: 0,
