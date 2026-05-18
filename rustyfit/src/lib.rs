@@ -9,9 +9,9 @@ pub use encoder::{
     Builder as EncoderBuilder, Encoder, Endianness, Error as EncoderError, HeaderOption,
 };
 
-/// FIT Global Profile representation (generated from Profile.xlsx)
+/// The `profile` module represents FIT Global Profile containing types and messages generated from Profile.xlsx.
 pub mod profile;
-/// FIT Protocol representation
+/// The `proto` module provides FIT Protocol low level representation.
 pub mod proto;
 /// Semicircles/Degrees converter.
 pub mod semconv;

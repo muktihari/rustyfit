@@ -7,8 +7,12 @@
 use crate::profile::typedef::FitBaseType;
 use core::fmt;
 
+/// Current profile version.
 pub const PROFILE_VERSION: u16 = 21201;
 
+/// ProfileType is an abstraction layer over primitive-types such as sint, uint, etc.
+/// For example, if a Field has u32 value having ProfileType::DATE_TIME, that u32 value
+/// should be interpreted as a timestamp relative to the FIT Epoch.
 #[derive(Clone, Copy, PartialEq)]
 pub struct ProfileType(pub u16);
 
