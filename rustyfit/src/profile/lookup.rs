@@ -551,6 +551,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             71 => Some(FieldReference { name: "min_altitude", num: 71, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, scale: 5.0, offset: 500.0,units: "m", components: &[
                     Component { field_num: 127 /* enhanced_min_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
+            78 => Some(FieldReference { name: "active_time", num: 78, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 1000.0, units: "s", ..FR_DEF }),
             82 => Some(FieldReference { name: "player_score", num: 82, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, ..FR_DEF }),
             83 => Some(FieldReference { name: "opponent_score", num: 83, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, ..FR_DEF }),
             84 => Some(FieldReference { name: "opponent_name", num: 84, base_type: FitBaseType::STRING, profile_type: ProfileType::STRING, ..FR_DEF }),
@@ -734,6 +735,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                     Component { field_num: 113 /* enhanced_min_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
             63 => Some(FieldReference { name: "min_heart_rate", num: 63, base_type: FitBaseType::UINT8, profile_type: ProfileType::UINT8, units: "bpm", ..FR_DEF }),
+            70 => Some(FieldReference { name: "active_time", num: 70, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 1000.0, units: "s", ..FR_DEF }),
             71 => Some(FieldReference { name: "wkt_step_index", num: 71, base_type: FitBaseType::UINT16, profile_type: ProfileType::MESSAGE_INDEX, ..FR_DEF }),
             74 => Some(FieldReference { name: "opponent_score", num: 74, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, ..FR_DEF }),
             75 => Some(FieldReference { name: "stroke_count", num: 75, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, array: true /* [N] */, units: "counts", ..FR_DEF }),
@@ -1355,6 +1357,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             27 => Some(FieldReference { name: "end_time", num: 27, base_type: FitBaseType::UINT32, profile_type: ProfileType::DATE_TIME, ..FR_DEF }),
             28 => Some(FieldReference { name: "total_calories", num: 28, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, units: "kcal", ..FR_DEF }),
             74 => Some(FieldReference { name: "start_elevation", num: 74, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
+            78 => Some(FieldReference { name: "active_time", num: 78, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 1000.0, units: "s", ..FR_DEF }),
             110 => Some(FieldReference { name: "total_moving_time", num: 110, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 1000.0, units: "s", ..FR_DEF }),
            _ => None,
         }},
@@ -1372,6 +1375,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             11 => Some(FieldReference { name: "max_heart_rate", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::UINT8, units: "bpm", ..FR_DEF }),
             12 => Some(FieldReference { name: "avg_vert_speed", num: 12, base_type: FitBaseType::SINT32, profile_type: ProfileType::SINT32, scale: 1000.0, units: "m/s", ..FR_DEF }),
             13 => Some(FieldReference { name: "total_calories", num: 13, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, units: "kcal", ..FR_DEF }),
+            65 => Some(FieldReference { name: "active_time", num: 65, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 1000.0, units: "s", ..FR_DEF }),
             77 => Some(FieldReference { name: "total_moving_time", num: 77, base_type: FitBaseType::UINT32, profile_type: ProfileType::UINT32, scale: 1000.0, units: "s", ..FR_DEF }),
            _ => None,
         }},
