@@ -1,4 +1,5 @@
 use crate::{profile::typedef::MesgNum, proto::Value};
+use alloc::vec::Vec;
 
 pub(super) struct Accumulator {
     values: Vec<AccuValue>,
@@ -140,6 +141,7 @@ mod tests {
         profile::typedef::MesgNum,
         proto::Value,
     };
+    use alloc::{string::String, vec, vec::Vec};
 
     #[test]
     fn test_collect() {

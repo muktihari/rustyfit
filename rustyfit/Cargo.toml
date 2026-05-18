@@ -10,8 +10,12 @@ include = ["Cargo.toml", "src/**"]
 categories = ["encoding", "parser-implementations"]
 repository = "https://github.com/muktihari/rustyfit"
 
+[dependencies]
+embedded-io = { version = "0.7.1" }
+
 [dev-dependencies]
 criterion = { version = "0.8.2" }
+embedded-io-adapters = { version = "0.7.0", features = ["std"] }
 
 [[bench]]
 name = "bench_main"

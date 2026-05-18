@@ -6,7 +6,7 @@
 
 #![allow(unused, clippy::match_single_binding)]
 
-use std::fmt;
+use core::fmt;
 
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]

@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
 /// Schedule is a Schedule message.

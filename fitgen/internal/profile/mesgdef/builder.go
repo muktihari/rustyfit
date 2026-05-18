@@ -62,6 +62,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 
 	var maxLenFields int
 	for _, mesg := range b.messages {
+		imports := map[string]struct{}{}
 		canExpand, maxFieldExpandNum := b.componentExpansionAbility(&mesg)
 
 		if len(mesg.Fields) > maxLenFields {
@@ -131,6 +132,12 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				FixedArraySize: fixedArraySize,
 				Units:          parserField.Units,
 			}
+			if strings.Contains(field.Type, "String") {
+				imports["alloc::string::String"] = struct{}{}
+				if fixedArraySize > 0 {
+					imports["alloc::borrow::ToOwned"] = struct{}{}
+				}
+			}
 
 			if _, ok := canExpand[parserField.Name]; ok {
 				field.CanExpand = true
@@ -173,6 +180,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			StateSize:         (maxFieldExpandNum + 8) / 8,
 			MaxFieldNum:       maxFieldNum + 1,
 			MaxFieldExpandNum: maxFieldExpandNum + 1,
+			Imports:           imports,
 		})
 	}
 

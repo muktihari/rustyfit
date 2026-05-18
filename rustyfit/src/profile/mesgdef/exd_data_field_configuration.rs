@@ -8,6 +8,9 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {

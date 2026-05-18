@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
 /// BloodPressure is a BloodPressure message.

@@ -8,6 +8,8 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::string::String;
+use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
 /// Workout is a Workout message.

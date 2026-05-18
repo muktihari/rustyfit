@@ -1,20 +1,20 @@
-use std::{hint::black_box, io::Cursor};
-
 use criterion::{Criterion, criterion_group, criterion_main};
+use embedded_io_adapters::std::FromStd;
 use rustyfit::{Decoder, Encoder, EncoderBuilder, HeaderOption};
+use std::{hint::black_box, io::Cursor};
 
 const TEST_FILE: &str = "tests/data/large.fit";
 
 pub fn bench_encode(c: &mut Criterion) {
     let file_bytes = std::fs::read(TEST_FILE).unwrap();
-    let mut dec = Decoder::new(Cursor::new(&file_bytes));
+    let mut dec = Decoder::new(FromStd::new(Cursor::new(&file_bytes)));
     let mut buf = Vec::<u8>::with_capacity(10_000 >> 10); // 10 MB, large enough to avoid realloc.
 
     while let Some(fit) = &mut dec.decode().unwrap() {
         c.bench_function("encode default", |b| {
             b.iter(|| {
                 let cur = Cursor::new(&mut buf);
-                let mut enc = Encoder::new(black_box(cur));
+                let mut enc = Encoder::new(black_box(FromStd::new(cur)));
                 enc.encode(fit).unwrap();
                 buf.clear();
             })
@@ -23,7 +23,7 @@ pub fn bench_encode(c: &mut Criterion) {
         c.bench_function("encode normal interleave 15", |b| {
             b.iter(|| {
                 let cur = Cursor::new(&mut buf);
-                let mut enc = EncoderBuilder::new(black_box(cur))
+                let mut enc = EncoderBuilder::new(black_box(FromStd::new(cur)))
                     .header_option(HeaderOption::Normal(15))
                     .build();
                 enc.encode(fit).unwrap();
@@ -34,7 +34,7 @@ pub fn bench_encode(c: &mut Criterion) {
         c.bench_function("encode compress interleave 3", |b| {
             b.iter(|| {
                 let cur = Cursor::new(&mut buf);
-                let mut enc = EncoderBuilder::new(black_box(cur))
+                let mut enc = EncoderBuilder::new(black_box(FromStd::new(cur)))
                     .header_option(HeaderOption::Compressed(3))
                     .build();
                 enc.encode(fit).unwrap();

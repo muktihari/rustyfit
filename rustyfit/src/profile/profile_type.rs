@@ -5,7 +5,7 @@
 // license that can be found in the LICENSE file.
 
 use crate::profile::typedef::FitBaseType;
-use std::fmt;
+use core::fmt;
 
 pub const PROFILE_VERSION: u16 = 21201;
 
