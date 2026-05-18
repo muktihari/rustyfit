@@ -84,13 +84,14 @@ pub enum Event<'a> {
     Crc(&'a u16),
 }
 
+#[derive(Clone, Copy)]
 struct Options {
     checksum: bool,
     expand_components: bool,
 }
 
 /// Decoder for decoding FIT file.
-pub struct Decoder<R: Read> {
+pub struct Decoder<R> {
     reader: R,
     n: usize,
     cur: u32,
@@ -107,9 +108,9 @@ pub struct Decoder<R: Read> {
 
 impl<R: Read> Decoder<R> {
     /// Create new Decoder for decoding FIT file.
-    /// For more options, use DecoderBuilder to build the Decoder.
+    /// For more options, use `Decoder::builder()` to build the Decoder.
     pub fn new(reader: R) -> Self {
-        Builder::new(reader).build()
+        Builder::new().build(reader)
     }
 
     /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
@@ -693,17 +694,22 @@ fn push_value_to_vec(vec_value: &mut Value, value: &Value) {
     }
 }
 
+impl Decoder<()> {
+    /// Create new Decoder with options for decoding FIT file.
+    pub const fn builder() -> Builder {
+        Builder::new()
+    }
+}
+
 /// Build Decoder with some options.
-pub struct Builder<R: Read> {
-    reader: R,
+pub struct Builder {
     options: Options,
 }
 
-impl<R: Read> Builder<R> {
+impl Builder {
     /// Create new DecoderBuilder.
-    pub const fn new(reader: R) -> Self {
+    pub const fn new() -> Self {
         Self {
-            reader,
             options: Options {
                 checksum: true,
                 expand_components: true,
@@ -725,9 +731,9 @@ impl<R: Read> Builder<R> {
     }
 
     /// Build Decoder based on given options (if any).
-    pub fn build(self) -> Decoder<R> {
+    pub fn build<R: Read>(&self, reader: R) -> Decoder<R> {
         Decoder {
-            reader: self.reader,
+            reader: reader,
             n: 0,
             cur: 0,
             crc16: Crc16::new(),

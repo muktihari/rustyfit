@@ -14,10 +14,9 @@ fn decode_encode_roundtrip() {
         &mut |path: &PathBuf| {
             do_roudtrip_with_encoder_options(
                 path,
-                EncoderOptions {
-                    endianness: Endianness::LittleEndian,
-                    header_option: HeaderOption::Normal(0),
-                },
+                EncoderBuilder::new()
+                    .endianness(Endianness::LittleEndian)
+                    .header_option(HeaderOption::Normal(0)),
             )
         },
     )
@@ -31,19 +30,13 @@ fn decode_encode_roundtrip_compressed() {
         &mut |path: &PathBuf| {
             do_roudtrip_with_encoder_options(
                 path,
-                EncoderOptions {
-                    endianness: Endianness::BigEndian,
-                    header_option: HeaderOption::Compressed(3),
-                },
+                EncoderBuilder::new()
+                    .endianness(Endianness::BigEndian)
+                    .header_option(HeaderOption::Compressed(3)),
             )
         },
     )
     .unwrap();
-}
-
-struct EncoderOptions {
-    endianness: Endianness,
-    header_option: HeaderOption,
 }
 
 fn walk_path<F>(path: &PathBuf, f: &mut F) -> Result<(), Box<dyn Error>>
@@ -69,12 +62,12 @@ where
 
 fn do_roudtrip_with_encoder_options(
     path: &PathBuf,
-    encoder_options: EncoderOptions,
+    encoder_builder: EncoderBuilder,
 ) -> Result<(), Box<dyn Error>> {
     let file = File::open(path).unwrap();
     let br = BufReader::new(file);
     let mut dec = Decoder::new(FromStd::new(br));
-    let buf = Vec::<u8>::with_capacity(5_000 >> 10); // 5 MB, large enough to avoid realloc.
+    let buf = Vec::<u8>::with_capacity(5000 * 1024); // 5 MB, large enough to avoid realloc.
     let mut cursor = Cursor::new(buf);
 
     'decode: while let Some(fit) = &mut match dec.decode() {
@@ -96,10 +89,7 @@ fn do_roudtrip_with_encoder_options(
     } {
         cursor.seek(SeekFrom::Start(0)).unwrap();
 
-        let mut enc = EncoderBuilder::new(FromStd::new(&mut cursor))
-            .endianness(encoder_options.endianness)
-            .header_option(encoder_options.header_option)
-            .build();
+        let mut enc = encoder_builder.build(FromStd::new(&mut cursor));
 
         let expected_messages = fit.messages.clone(); // Must clone since encoder mutates the value.
 

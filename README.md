@@ -138,13 +138,13 @@ The `decode_with` method can be invoked multiple times to decode chained FIT fil
 
 #### DecoderBuilder
 
-Create `Decoder` instance with options using `DecoderBuilder`.
+Create `Decoder` instance with options using `Decoder::builder()` or `DecoderBuilder::new()`.
 
 ```rust
-let mut dec: Decoder = DecoderBuilder::new(br)
+let mut dec = Decoder::builder()
         .checksum(false)
         .expand_components(false)
-        .build();
+        .build(reader);
 ```
 
 ### Encoding
@@ -269,12 +269,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 #### EncoderBuilder
 
-Create `Encoder` instance with options using `EncoderBuilder`.
+Create `Encoder` instance with options using `Encoder::builder()` or `EncoderBuilder::new()`.
 
 ```rust
-let mut enc: Encoder = EncoderBuilder::new(&mut bw)
+let mut enc = Encoder::builder()
         .endianness(Endianness::BigEndian)
         .protocol_version(ProtocolVersion::V2)
         .header_option(HeaderOption::Compressed(3))
-        .build();
+        .build(writer);
 ```
