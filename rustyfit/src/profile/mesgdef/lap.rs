@@ -127,6 +127,8 @@ pub struct Lap {
     pub min_altitude: u16,
     /// Units: bpm
     pub min_heart_rate: u8,
+    /// Scale: 1000; Units: s
+    pub active_time: u32,
     pub wkt_step_index: typedef::MessageIndex,
     pub opponent_score: u16,
     /// Units: counts; stroke_type enum used as the index
@@ -375,6 +377,8 @@ impl Lap {
     pub const MIN_ALTITUDE: u8 = 62;
     /// Value's type: `u8`; Units: `bpm`
     pub const MIN_HEART_RATE: u8 = 63;
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    pub const ACTIVE_TIME: u8 = 70;
     /// Value's type: `u16`
     pub const WKT_STEP_INDEX: u8 = 71;
     /// Value's type: `u16`
@@ -565,6 +569,7 @@ impl Lap {
             repetition_num: u16::MAX,
             min_altitude: u16::MAX,
             min_heart_rate: u8::MAX,
+            active_time: u32::MAX,
             wkt_step_index: typedef::MessageIndex(u16::MAX),
             opponent_score: u16::MAX,
             stroke_count: Vec::<u16>::new(),
@@ -1112,6 +1117,25 @@ impl Lap {
             return self;
         }
         self.min_altitude = unscaled as u16;
+        self
+    }
+
+    /// Returns `active_time` in its scaled value. It returns invalid f64 when value is valid.
+    pub fn active_time_scaled(&self) -> f64 {
+        if self.active_time == u32::MAX {
+            return f64::from_bits(u64::MAX);
+        }
+        self.active_time as f64 / 1000.0 - 0.0
+    }
+
+    /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Lap {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.active_time = u32::MAX;
+            return self;
+        }
+        self.active_time = unscaled as u32;
         self
     }
 
@@ -2039,7 +2063,7 @@ impl From<&Message> for Lap {
 
         const KNOWN_NUMS: [u64; 4] = [
             18446744000829325311,
-            2305842996261682304,
+            2305842996261682368,
             8438416128,
             6917529027641081856,
         ];
@@ -2121,6 +2145,7 @@ impl From<&Message> for Lap {
             repetition_num: vals[61].as_u16(),
             min_altitude: vals[62].as_u16(),
             min_heart_rate: vals[63].as_u8(),
+            active_time: vals[70].as_u32(),
             wkt_step_index: typedef::MessageIndex(vals[71].as_u16()),
             opponent_score: vals[74].as_u16(),
             stroke_count: vals[75].as_vec_u16(),
@@ -2200,7 +2225,7 @@ impl From<Lap> for Message {
                 value: Value::Invalid,
                 is_expanded: false,
             }
-        }; 123];
+        }; 124];
         let mut len = 0usize;
         let state = m.state;
 
@@ -2740,6 +2765,15 @@ impl From<Lap> for Message {
                 num: 63,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.min_heart_rate),
+                is_expanded: false,
+            };
+            len += 1;
+        }
+        if m.active_time != u32::MAX {
+            arr[len] = Field {
+                num: 70,
+                profile_type: ProfileType::UINT32,
+                value: Value::Uint32(m.active_time),
                 is_expanded: false,
             };
             len += 1;

@@ -157,6 +157,8 @@ pub struct Session {
     pub best_lap_index: u16,
     /// Scale: 5; Offset: 500; Units: m
     pub min_altitude: u16,
+    /// Scale: 1000; Units: s
+    pub active_time: u32,
     pub player_score: u16,
     pub opponent_score: u16,
     pub opponent_name: String,
@@ -470,6 +472,8 @@ impl Session {
     pub const BEST_LAP_INDEX: u8 = 70;
     /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
     pub const MIN_ALTITUDE: u8 = 71;
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    pub const ACTIVE_TIME: u8 = 78;
     /// Value's type: `u16`
     pub const PLAYER_SCORE: u8 = 82;
     /// Value's type: `u16`
@@ -716,6 +720,7 @@ impl Session {
             avg_lap_time: u32::MAX,
             best_lap_index: u16::MAX,
             min_altitude: u16::MAX,
+            active_time: u32::MAX,
             player_score: u16::MAX,
             opponent_score: u16::MAX,
             opponent_name: String::new(),
@@ -1399,6 +1404,25 @@ impl Session {
             return self;
         }
         self.min_altitude = unscaled as u16;
+        self
+    }
+
+    /// Returns `active_time` in its scaled value. It returns invalid f64 when value is valid.
+    pub fn active_time_scaled(&self) -> f64 {
+        if self.active_time == u32::MAX {
+            return f64::from_bits(u64::MAX);
+        }
+        self.active_time as f64 / 1000.0 - 0.0
+    }
+
+    /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Session {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.active_time = u32::MAX;
+            return self;
+        }
+        self.active_time = unscaled as u32;
         self
     }
 
@@ -2421,7 +2445,7 @@ impl From<&Message> for Session {
 
         const KNOWN_NUMS: [u64; 4] = [
             18446742974197919743,
-            18446678103011623167,
+            18446678103011639551,
             932252819858127487,
             6917529027641541119,
         ];
@@ -2515,6 +2539,7 @@ impl From<&Message> for Session {
             avg_lap_time: vals[69].as_u32(),
             best_lap_index: vals[70].as_u16(),
             min_altitude: vals[71].as_u16(),
+            active_time: vals[78].as_u32(),
             player_score: vals[82].as_u16(),
             opponent_score: vals[83].as_u16(),
             opponent_name: vals[84].as_string(),
@@ -2616,7 +2641,7 @@ impl From<Session> for Message {
                 value: Value::Invalid,
                 is_expanded: false,
             }
-        }; 157];
+        }; 158];
         let mut len = 0usize;
         let state = m.state;
 
@@ -3264,6 +3289,15 @@ impl From<Session> for Message {
                 num: 71,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.min_altitude),
+                is_expanded: false,
+            };
+            len += 1;
+        }
+        if m.active_time != u32::MAX {
+            arr[len] = Field {
+                num: 78,
+                profile_type: ProfileType::UINT32,
+                value: Value::Uint32(m.active_time),
                 is_expanded: false,
             };
             len += 1;

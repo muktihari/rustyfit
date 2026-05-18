@@ -36,6 +36,8 @@ pub struct SplitSummary {
     pub avg_vert_speed: i32,
     /// Units: kcal
     pub total_calories: u32,
+    /// Scale: 1000; Units: s; total active time in all split rounds
+    pub active_time: u32,
     /// Scale: 1000; Units: s
     pub total_moving_time: u32,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -72,6 +74,8 @@ impl SplitSummary {
     /// Value's type: `u32`; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 13;
     /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    pub const ACTIVE_TIME: u8 = 65;
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 77;
 
     /// Create new SplitSummary with all fields being set to its corresponding invalid value.
@@ -90,6 +94,7 @@ impl SplitSummary {
             max_heart_rate: u8::MAX,
             avg_vert_speed: i32::MAX,
             total_calories: u32::MAX,
+            active_time: u32::MAX,
             total_moving_time: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -191,6 +196,25 @@ impl SplitSummary {
         self
     }
 
+    /// Returns `active_time` in its scaled value. It returns invalid f64 when value is valid.
+    pub fn active_time_scaled(&self) -> f64 {
+        if self.active_time == u32::MAX {
+            return f64::from_bits(u64::MAX);
+        }
+        self.active_time as f64 / 1000.0 - 0.0
+    }
+
+    /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut SplitSummary {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.active_time = u32::MAX;
+            return self;
+        }
+        self.active_time = unscaled as u32;
+        self
+    }
+
     /// Returns `total_moving_time` in its scaled value. It returns invalid f64 when value is valid.
     pub fn total_moving_time_scaled(&self) -> f64 {
         if self.total_moving_time == u32::MAX {
@@ -222,7 +246,7 @@ impl From<&Message> for SplitSummary {
     fn from(mesg: &Message) -> Self {
         let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
 
-        const KNOWN_NUMS: [u64; 4] = [16377, 8192, 0, 4611686018427387904];
+        const KNOWN_NUMS: [u64; 4] = [16377, 8194, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
@@ -251,6 +275,7 @@ impl From<&Message> for SplitSummary {
             max_heart_rate: vals[11].as_u8(),
             avg_vert_speed: vals[12].as_i32(),
             total_calories: vals[13].as_u32(),
+            active_time: vals[65].as_u32(),
             total_moving_time: vals[77].as_u32(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -267,7 +292,7 @@ impl From<SplitSummary> for Message {
                 value: Value::Invalid,
                 is_expanded: false,
             }
-        }; 14];
+        }; 15];
         let mut len = 0usize;
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
@@ -383,6 +408,15 @@ impl From<SplitSummary> for Message {
                 num: 13,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_calories),
+                is_expanded: false,
+            };
+            len += 1;
+        }
+        if m.active_time != u32::MAX {
+            arr[len] = Field {
+                num: 65,
+                profile_type: ProfileType::UINT32,
+                value: Value::Uint32(m.active_time),
                 is_expanded: false,
             };
             len += 1;
