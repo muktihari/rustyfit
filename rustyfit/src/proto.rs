@@ -59,13 +59,13 @@ pub enum Error {
 impl core::fmt::Display for Error {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match *self {
-            Error::ProtocolViolationDeveloperData => {
+            Self::ProtocolViolationDeveloperData => {
                 write!(f, "protocol version 1.0 do not support developer data")
             }
-            Error::ProtocolViolationUnsupportedBaseType(base_type) => {
+            Self::ProtocolViolationUnsupportedBaseType(base_type) => {
                 write!(f, "protocol version 1.0 do not support type {}", base_type)
             }
-            Error::InvalidValue => write!(f, "invalid proto::Value"),
+            Self::InvalidValue => write!(f, "invalid proto::Value"),
         }
     }
 }

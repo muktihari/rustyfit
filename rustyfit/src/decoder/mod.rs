@@ -54,13 +54,13 @@ where
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Error::Io { err, n } => write!(f, "io error {} at byte pos {}", err, n),
-            Error::UnexpectedEof { n } => write!(f, "unexpected EOF at byte pos {}", n),
-            Error::NotFITFile => write!(f, "not a FIT file"),
-            Error::ChecksumMismatch { expected, got } => {
+            Self::Io { err, n } => write!(f, "io error: {} at byte pos: {}", err, n),
+            Self::UnexpectedEof { n } => write!(f, "unexpected EOF at byte pos: {}", n),
+            Self::NotFITFile => write!(f, "not a FIT file"),
+            Self::ChecksumMismatch { expected, got } => {
                 write!(f, "checksum mismatch, expected {} got {}", expected, got)
             }
-            Error::MissingMessageDefinition { local_mesg_num } => write!(
+            Self::MissingMessageDefinition { local_mesg_num } => write!(
                 f,
                 "missing message definition for local message number {}",
                 local_mesg_num

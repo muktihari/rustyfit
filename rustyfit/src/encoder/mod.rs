@@ -54,7 +54,7 @@ where
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Self::Io { err, n } => write!(f, "io: {}, n: {}", err, n),
+            Self::Io { err, n } => write!(f, "io error: {} at byte pos: {}", err, n),
             Self::EmptyMessages => write!(f, "messages is empty"),
             Self::Protocol {
                 mesg_index,
@@ -238,17 +238,14 @@ impl<W: Write + Seek> Encoder<W> {
     fn encode_messages(&mut self, messages: &mut [Message]) -> Result<(), Error<W::Error>> {
         for (i, mesg) in messages.iter_mut().enumerate() {
             if let Err(e) = self.encode_message(mesg) {
-                match e {
-                    Error::Io { err, .. } => return Err(Error::Io { err, n: self.n }),
-                    Error::Protocol { err, .. } => {
-                        return Err(Error::Protocol {
-                            mesg_index: i,
-                            mesg_num: mesg.num,
-                            err,
-                        });
-                    }
-                    _ => return Err(e),
+                if let Error::Protocol { err, .. } = e {
+                    return Err(Error::Protocol {
+                        mesg_index: i,
+                        mesg_num: mesg.num,
+                        err,
+                    });
                 }
+                return Err(e);
             }
         }
         Ok(())
