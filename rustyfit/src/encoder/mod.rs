@@ -54,7 +54,7 @@ where
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Self::Io { err, n } => write!(f, "io: {}, n: {}", err, n),
+            Self::Io { err, n } => write!(f, "io error: {} at byte pos: {}", err, n),
             Self::EmptyMessages => write!(f, "messages is empty"),
             Self::Protocol {
                 mesg_index,
