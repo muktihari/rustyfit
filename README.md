@@ -1,19 +1,24 @@
 # RustyFIT
 
 ![GitHub Workflow Status](https://github.com/muktihari/rustyfit/workflows/CI/badge.svg)
+[![docs.rs](https://img.shields.io/badge/docs.rs-rustyfit-gold?logo=docs.rs)](https://docs.rs/rustyfit)
 [![Crates.io Version](https://img.shields.io/crates/v/rustyfit.svg)](https://crates.io/crates/rustyfit)
 [![Crates.io Downloads](https://img.shields.io/crates/d/rustyfit.svg)](https://crates.io/crates/rustyfit)
 [![Profile Version](https://img.shields.io/badge/profile-v21.201-lightblue.svg?style=flat)](https://github.com/garmin/fit-sdk-tools/releases)
 
-Rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) in Rust.
+This project hosts the `#![no_std]` Rust implementation for [The Flexible and Interoperable Data Transfer (FIT) Protocol](https://developer.garmin.com/fit), supporting both decoding and encoding
+
+This library is a rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) and is designed to run on baremetal Rust.
 
 ## Current State
 
-This project serves as an exercise for me to learn Rust. I believe the fastest way to learn something new is by reinventing the wheel or rewriting something that already exists. Although this is a learning project, this library generally works, is usable, and quite fast.
-
-Missing features, test completeness, and more robust documentation may be added later through release iteration.
+At the moment, I can't make this library heapless without complicating the code. I have no elegant solution for pure baremetal without dynamic memory allocation. That being said, this library is efficient enough to work on resource-constrained environments. I've tested it on a `#![no_std]` `#![no_main]` program to decode a FIT file (statically embedded) and print some of its Session's fields to `stdout` with a custom global allocator having less than 50 KB heap size and it works like a charm.
 
 ## Usage
+
+For [#![no_std]](https://docs.rust-embedded.org/book/intro/no-std.html), you need to provide [#[global_allocator]](https://doc.rust-lang.org/std/alloc/index.html#the-global_allocator-attribute) since this library requires allocation.
+
+For [std](https://doc.rust-lang.org/std), you need to wrap `std::io`'s [Read](https://doc.rust-lang.org/std/io/trait.Read.html) or [Write](https://doc.rust-lang.org/std/io/trait.Write.html) with [embedded_io_adapters::std:FromStd](https://docs.rs/embedded-io-adapters/0.7.0/embedded_io_adapters/std/struct.FromStd.html). We will provide examples in `std` for a broad audience and simplicity.
 
 ### Decoding
 
@@ -25,6 +30,7 @@ NOTE: First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
 On next call, it may return Ok(None) to indicate that no more FIT sequence in the file.
 
 ```rust
+use embedded_io_adapters::std::FromStd;
 use rustyfit::{Decoder, profile::{mesgdef, typedef}};
 use std::{error::Error, fs::File, io::BufReader};
 
@@ -32,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let name = "Activity.fit";
     let f = File::open(name)?;
     let br = BufReader::new(f);
-    let mut dec = Decoder::new(br);
+    let mut dec = Decoder::new(FromStd::new(br));
 
     // SAFETY: First decode call is either Ok(Some(fit)) or Err(err), never Ok(None).
     let fit = dec.decode()?.unwrap(); 
@@ -77,14 +83,15 @@ Decoder's `decode_with` allow us to retrieve event data (FileHeader, MessageDefi
 This way, users can have fine-grained control on how to interact with the data.
 
 ```rust
-use rustyfit::{Decoder, DecoderEvent,profile::{mesgdef, typedef}};
+use embedded_io_adapters::std::FromStd;
+use rustyfit::{Decoder, DecoderEvent, profile::{mesgdef, typedef}};
 use std::{error::Error, fs::File, io::BufReader};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let name = "Activity.fit";
     let f = File::open(name)?;
     let br = BufReader::new(f);
-    let mut dec = Decoder::new(br);
+    let mut dec = Decoder::new(FromStd::new(br));
 
     dec.decode_with(|event| match event {
         DecoderEvent::FileHeader(_) => {},
@@ -147,14 +154,15 @@ let mut dec: Decoder = DecoderBuilder::new(br)
 Here is the example of manually encode FIT protocol using this library to give the idea how it works.
 
 ```rust
+use embedded_io_adapters::std::FromStd;
+use rustyfit::{Encoder, profile::{ProfileType, mesgdef, typedef}, proto::{FIT, Field, Message, Value}};
 use std::{error::Error, fs::File, io::{BufWriter, Write}};
-use rustyfit::{Encoder, profile::{ProfileType, mesgdef, typedef::{self}}, proto::{FIT, Field, Message, Value}};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let fout_name = "output.fit";
     let fout = File::create(fout_name)?;
     let mut bw = BufWriter::new(fout);
-    let mut enc = Encoder::new(&mut bw);
+    let mut enc = Encoder::new(FromStd::new(&mut bw));
 
     let mut fit = FIT {
         messages: vec![
@@ -222,14 +230,15 @@ fn main() -> Result<(), Box<dyn Error>> {
 Alternatively, users can create messages using the mesgdef module for convenience.
 
 ```rust
+use embedded_io_adapters::std::FromStd;
+use rustyfit::{Encoder, profile::{mesgdef, typedef}, proto::{FIT, Message}};
 use std::{error::Error, fs::File, io::{BufWriter, Write}};
-use rustyfit::{Encoder, profile::{mesgdef, typedef::{self}}, proto::{FIT, Message}};
 
 fn main() -> Result<(), Box<dyn Error>> {
     let fout_name = "output.fit";
     let fout = File::create(fout_name)?;
     let mut bw = BufWriter::new(fout);
-    let mut enc = Encoder::new(&mut bw);
+    let mut enc = Encoder::new(FromStd::new(&mut bw));
 
     let mut fit = FIT {
         messages: vec![
