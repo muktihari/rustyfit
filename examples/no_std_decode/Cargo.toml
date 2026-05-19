@@ -1,0 +1,16 @@
+[package]
+name = "no_std_decode"
+version = "0.1.0"
+edition = "2024"
+
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
+
+[dependencies]
+embedded-io-cursor = { version = "0.1.0", features = ["alloc"] }
+rustyfit = { path = "../../rustyfit"}
+spinning_top = "0.3.0"
+talc = "5.0.3"
