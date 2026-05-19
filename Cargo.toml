@@ -1,3 +1,9 @@
 [workspace]
 resolver = "2"
-members = ["rustyfit"]
+members = [
+    "rustyfit", 
+    "examples/no_std_decode",
+]
+default-members = [
+    "rustyfit",
+]
