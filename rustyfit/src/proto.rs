@@ -1065,6 +1065,35 @@ pub(crate) fn validate_message(
     Ok(())
 }
 
+/// Simplified version of `FieldDescription` message.
+///
+/// We only need these fields to process developer data.
+#[derive(Clone, Copy)]
+pub(crate) struct LocalFieldDescription {
+    pub(crate) developer_data_index: u8,
+    pub(crate) field_definition_number: u8,
+    pub(crate) fit_base_type_id: FitBaseType,
+}
+
+impl From<&Message> for LocalFieldDescription {
+    fn from(mesg: &Message) -> Self {
+        let mut s = Self {
+            developer_data_index: u8::MAX,
+            field_definition_number: u8::MAX,
+            fit_base_type_id: FitBaseType(u8::MAX),
+        };
+        for field in &mesg.fields {
+            match field.num {
+                0 => s.developer_data_index = field.value.as_u8(),
+                1 => s.field_definition_number = field.value.as_u8(),
+                2 => s.fit_base_type_id = FitBaseType(field.value.as_u8()),
+                _ => {}
+            };
+        }
+        return s;
+    }
+}
+
 /// Counts how many valid utf-8 string in s.
 pub(crate) fn strcount(s: &[u8]) -> u8 {
     let mut last = 0usize;

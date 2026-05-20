@@ -5,10 +5,9 @@ mod bits;
 
 use crate::{
     crc16::Crc16,
-    decoder::accumulator::Accumulator,
-    decoder::bits::Bits,
+    decoder::{accumulator::Accumulator, bits::Bits},
     profile::{
-        ProfileType, lookup, mesgdef,
+        ProfileType, lookup,
         typedef::{FitBaseType, MesgNum},
     },
     proto::*,
@@ -102,7 +101,7 @@ pub struct Decoder<R> {
     last_time_offset: u8,
     buf_fields: Vec<Field>,
     buf_developer_fields: Vec<DeveloperField>,
-    field_descriptions: Vec<mesgdef::FieldDescription>,
+    field_descriptions: Vec<LocalFieldDescription>,
     options: Options,
 }
 
@@ -364,7 +363,7 @@ impl<R: Read> Decoder<R> {
         // Developer Data Lookup, currently we allow missing developer_data_id
         if mesg.num == MesgNum::FIELD_DESCRIPTION {
             self.field_descriptions
-                .push(mesgdef::FieldDescription::from(&*mesg));
+                .push(LocalFieldDescription::from(&*mesg));
         }
 
         if !self.options.expand_components {
