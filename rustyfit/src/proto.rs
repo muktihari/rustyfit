@@ -1043,26 +1043,25 @@ impl ProtocolVersion {
     }
 }
 
-/// Validates whether the message contains unsupported data for the targeted protocol version.
-pub(crate) fn validate_message(
-    mesg: &Message,
-    protocol_version: ProtocolVersion,
-) -> Result<(), Error> {
-    if protocol_version == ProtocolVersion::V1 {
-        if !mesg.developer_fields.is_empty() {
-            return Err(Error::ProtocolViolationDeveloperData);
-        }
-        for field in &mesg.fields {
-            if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
-                > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
-            {
-                return Err(Error::ProtocolViolationUnsupportedBaseType(
-                    field.profile_type.base_type(),
-                ));
+impl ProtocolVersion {
+    /// Validates whether the message contains unsupported data for the targeted protocol version.
+    pub(crate) fn validate_message(self, mesg: &Message) -> Result<(), Error> {
+        if self == ProtocolVersion::V1 {
+            if !mesg.developer_fields.is_empty() {
+                return Err(Error::ProtocolViolationDeveloperData);
+            }
+            for field in &mesg.fields {
+                if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
+                    > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
+                {
+                    return Err(Error::ProtocolViolationUnsupportedBaseType(
+                        field.profile_type.base_type(),
+                    ));
+                }
             }
         }
+        Ok(())
     }
-    Ok(())
 }
 
 /// Simplified version of `FieldDescription` message.

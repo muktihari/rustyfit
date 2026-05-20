@@ -11,7 +11,7 @@ use crate::{
         PROFILE_VERSION,
         typedef::{DateTime, MesgNum},
     },
-    proto::{self, Error as ProtocolError, *},
+    proto::{Error as ProtocolError, *},
 };
 use alloc::vec::Vec;
 use embedded_io::{Seek, SeekFrom, Write};
@@ -157,7 +157,7 @@ impl<W: Write + Seek> Encoder<W> {
         }
         let protocol_version = fit.file_header.protocol_version;
         for (i, mesg) in fit.messages.iter_mut().enumerate() {
-            if let Err(err) = proto::validate_message(mesg, protocol_version) {
+            if let Err(err) = protocol_version.validate_message(mesg) {
                 return Err(Error::Protocol {
                     mesg_index: i,
                     mesg_num: mesg.num,
