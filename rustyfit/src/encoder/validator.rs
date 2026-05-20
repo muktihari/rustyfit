@@ -5,7 +5,7 @@ use crate::{
         mesgdef,
         typedef::{FitBaseType, MesgNum},
     },
-    proto::{Message, Value},
+    proto::{LocalFieldDescription, Message, Value},
 };
 use alloc::{string::String, vec::Vec};
 
@@ -95,7 +95,7 @@ impl core::fmt::Display for IntegrityError {
 
 pub(super) struct MessageValidator {
     developer_data_index_seen: [u64; 4],
-    field_descriptions: Vec<mesgdef::FieldDescription>,
+    field_descriptions: Vec<LocalFieldDescription>,
 }
 
 impl MessageValidator {
@@ -154,7 +154,7 @@ impl MessageValidator {
             }
             MesgNum::FIELD_DESCRIPTION => self
                 .field_descriptions
-                .push(mesgdef::FieldDescription::from(mesg as &Message)),
+                .push(LocalFieldDescription::from(&*mesg)),
             _ => {}
         };
 
