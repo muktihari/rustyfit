@@ -6,44 +6,6 @@ use crate::profile::{
 };
 use alloc::{string::String, vec::Vec};
 
-/// Mask for determining if the message type is a message definition.
-pub(crate) const MESG_DEFINITION_MASK: u8 = 0b01000000;
-
-/// Mask for determining if the message type is a normal message data .
-pub(crate) const MESG_NORMAL_HEADER_MASK: u8 = 0b00000000;
-
-/// Mask for determining if the message type is a compressed timestamp message data.
-pub(crate) const MESG_COMPRESSED_HEADER_MASK: u8 = 0b10000000;
-
-/// Mask for determining if the message's header is a message definition or is it
-/// actually a message data with compressed timestamp and multiple local message type.
-///
-/// For compressed timestamp, message data's header bit 5-6 is the local message type.
-/// Bit 6 overlap with MESG_DEFINITION_MASK, it's a message definition only if Bit 7 is zero.
-pub(crate) const MESG_HEADER_MASK: u8 = MESG_COMPRESSED_HEADER_MASK | MESG_DEFINITION_MASK;
-
-/// Mask for mapping normal message data to the message definition.
-pub(crate) const LOCAL_MESG_NUM_MASK: u8 = 0b00001111;
-
-/// Mask for mapping compressed timestamp message data to the message definition. Used with CompressedBitShift.
-pub(crate) const COMPRESSED_LOCAL_MESG_NUM_MASK: u8 = 0b01100000;
-
-/// Mask for measuring time offset value from header. Compressed timestamp is using 5 least significant bits (lsb) of header
-pub(crate) const COMPRESSED_TIME_MASK: u8 = 0b00011111;
-
-/// Mask for determining if a message contains developer fields.
-pub(crate) const DEV_DATA_MASK: u8 = 0b00100000;
-
-/// Used for right-shifting the 5 least significant bits (lsb) of compressed time.
-pub(crate) const COMPRESSED_BIT_SHIFT: u8 = 5;
-
-/// Field's number for timestamp across all defined messages in the profile.
-/// Exception: Course Point and Set message.
-pub(crate) const FIELD_NUM_TIMESTAMP: u8 = 253;
-
-/// FileHeader's data_type.
-pub(crate) static DATA_TYPE: &str = ".FIT";
-
 /// Defined errors returned from proto module.
 #[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug)]
@@ -95,7 +57,7 @@ pub struct FileHeader {
     pub profile_version: u16,
     /// The size of the messages in bytes (this field will be automatically updated by the encoder)
     pub data_size: u32,
-    /// ".FIT" (an immutable string constant)
+    /// String marker `.FIT`. Any user-provided value is automatically overwritten with `FileHeader::DATA_TYPE` during encoding.
     pub data_type: &'static str,
     /// Cyclic Redundancy Check 16-bit value to ensure the integrity of the file header.
     /// (this field will be automatically updated by the encoder)
@@ -103,12 +65,14 @@ pub struct FileHeader {
 }
 
 impl FileHeader {
+    pub(crate) const DATA_TYPE: &str = ".FIT";
+
     pub(crate) fn marshal_append(&self, vec: &mut Vec<u8>) {
         vec.push(self.size);
         vec.push(self.protocol_version.0);
         vec.extend_from_slice(&self.profile_version.to_le_bytes());
         vec.extend_from_slice(&self.data_size.to_le_bytes());
-        vec.extend_from_slice(DATA_TYPE.as_bytes());
+        vec.extend_from_slice(Self::DATA_TYPE.as_bytes());
         if self.size >= 14 {
             vec.extend_from_slice(&self.crc.to_le_bytes());
         }
@@ -170,6 +134,29 @@ pub struct Message {
 }
 
 impl Message {
+    /// Mask for determining if the message type is a message definition.
+    pub(crate) const DEFINITION_MASK: u8 = 0b01000000;
+    /// Mask for determining if the message type is a normal message data .
+    pub(crate) const NORMAL_HEADER_MASK: u8 = 0b00000000;
+    /// Mask for determining if the message type is a compressed timestamp message data.
+    pub(crate) const COMPRESSED_HEADER_MASK: u8 = 0b10000000;
+    /// Mask for determining if the message's header is a message definition or is it
+    /// actually a message data with compressed timestamp and multiple local message type.
+    ///
+    /// For compressed timestamp, message data's header bit 5-6 is the local message type.
+    /// Bit 6 overlap with MESG_DEFINITION_MASK, it's a message definition only if Bit 7 is zero.
+    pub(crate) const HEADER_MASK: u8 = Self::COMPRESSED_HEADER_MASK | Self::DEFINITION_MASK;
+    /// Mask for mapping normal message data to the message definition.
+    pub(crate) const LOCAL_NUM_MASK: u8 = 0b00001111;
+    /// Mask for mapping compressed timestamp message data to the message definition. Used with CompressedBitShift.
+    pub(crate) const COMPRESSED_LOCAL_NUM_MASK: u8 = 0b01100000;
+    /// Mask for measuring time offset value from header. Compressed timestamp is using 5 least significant bits (lsb) of header
+    pub(crate) const COMPRESSED_TIME_MASK: u8 = 0b00011111;
+    /// Mask for determining if a message contains developer fields.
+    pub(crate) const DEV_DATA_MASK: u8 = 0b00100000;
+    /// Used for right-shifting the 5 least significant bits (lsb) of compressed time.
+    pub(crate) const COMPRESSED_BIT_SHIFT: u8 = 5;
+
     /// SubFieldSubstitution returns any sub-field that can substitute
     /// the properties interpretation of the parent Field (Dynamic Field).
     pub fn sub_field_substitution<'a>(
@@ -216,6 +203,12 @@ pub struct Field {
     pub value: Value,
     /// A flag to detect whether this field is generated through component expansion.
     pub is_expanded: bool,
+}
+
+impl Field {
+    /// Field's number for timestamp across all defined messages in the profile.
+    /// Exception: `CoursePoint` (1) and `Set` message (254).
+    pub(crate) const TIMESTAMP: u8 = 253;
 }
 
 /// FieldReference acts as a representation of a field as defined in the Global FIT Profile.
