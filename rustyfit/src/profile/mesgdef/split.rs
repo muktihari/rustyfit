@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use crate::semconv;
 use alloc::vec::Vec;
 
 #[derive(Debug, Clone)]
@@ -123,6 +124,26 @@ impl Split {
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
+    }
+
+    /// Returns `start_position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn start_position_lat_degrees(&self) -> f64 {
+        semconv::to_degrees(self.start_position_lat)
+    }
+
+    /// Returns `start_position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn start_position_long_degrees(&self) -> f64 {
+        semconv::to_degrees(self.start_position_long)
+    }
+
+    /// Returns `end_position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn end_position_lat_degrees(&self) -> f64 {
+        semconv::to_degrees(self.end_position_lat)
+    }
+
+    /// Returns `end_position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn end_position_long_degrees(&self) -> f64 {
+        semconv::to_degrees(self.end_position_long)
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns invalid f64 when value is valid.

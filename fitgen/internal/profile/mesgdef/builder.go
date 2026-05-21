@@ -138,6 +138,9 @@ func (b *Builder) Build() ([]generator.Data, error) {
 					imports["alloc::borrow::ToOwned"] = struct{}{}
 				}
 			}
+			if field.Units == "semicircles" {
+				imports["crate::semconv"] = struct{}{}
+			}
 
 			if _, ok := canExpand[parserField.Name]; ok {
 				field.CanExpand = true

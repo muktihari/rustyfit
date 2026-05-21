@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use crate::semconv;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -105,6 +106,16 @@ impl WeatherConditions {
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
+    }
+
+    /// Returns `observed_location_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn observed_location_lat_degrees(&self) -> f64 {
+        semconv::to_degrees(self.observed_location_lat)
+    }
+
+    /// Returns `observed_location_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn observed_location_long_degrees(&self) -> f64 {
+        semconv::to_degrees(self.observed_location_long)
     }
 
     /// Returns `wind_speed` in its scaled value. It returns invalid f64 when value is valid.

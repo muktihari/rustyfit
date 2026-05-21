@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use crate::semconv;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -63,6 +64,16 @@ impl CoursePoint {
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
+    }
+
+    /// Returns `position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn position_lat_degrees(&self) -> f64 {
+        semconv::to_degrees(self.position_lat)
+    }
+
+    /// Returns `position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
+    pub fn position_long_degrees(&self) -> f64 {
+        semconv::to_degrees(self.position_long)
     }
 
     /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.
