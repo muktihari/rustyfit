@@ -61,6 +61,10 @@ func main() {
 		fatalf("could no parse message: %v\n", err)
 	}
 
+	if filepath.Base(*generatePath) != "src" {
+		*generatePath = filepath.Join(*generatePath, "src")
+	}
+
 	path := abspath(*generatePath)
 	lookup := lookup.New(parsedtypes, parsedmesgs)
 	var (
