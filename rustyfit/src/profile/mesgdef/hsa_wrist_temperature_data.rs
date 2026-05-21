@@ -17,7 +17,7 @@ pub struct HsaWristTemperatureData {
     pub timestamp: typedef::DateTime,
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
-    /// Scale: 1000; Units: degC; Wrist temperature reading
+    /// Scale: 1000; Units: C; Wrist temperature reading
     pub value: Vec<u16>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -30,7 +30,7 @@ impl HsaWristTemperatureData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `degC`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `C`
     pub const VALUE: u8 = 1;
 
     /// Create new HsaWristTemperatureData with all fields being set to its corresponding invalid value.
