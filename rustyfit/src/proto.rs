@@ -342,6 +342,28 @@ pub enum Value {
 
 /// Value that can hold FIT's value.
 impl Value {
+    /// Counts how many valid utf-8 string in s.
+    pub(crate) fn strcount(s: &[u8]) -> u8 {
+        let mut last = 0usize;
+        let mut size = 0u8;
+        for (i, &v) in s.iter().enumerate() {
+            if v != 0 {
+                if i == s.len() - 1 {
+                    size += 1;
+                }
+            } else {
+                if last != i {
+                    size += 1;
+                }
+                last = i + 1;
+            }
+        }
+        if size == 0 && !s.is_empty() {
+            return 1; // Allow string without utf-8 null termination.
+        }
+        size
+    }
+
     /// Unmarshal bytes into Value.
     pub(crate) fn unmarshal(buf: &[u8], array: bool, base_type: FitBaseType, arch: u8) -> Value {
         match base_type {
@@ -441,7 +463,7 @@ impl Value {
             },
             FitBaseType::STRING => match array {
                 true => Value::VecString({
-                    let mut vals = Vec::with_capacity(strcount(buf) as usize);
+                    let mut vals = Vec::with_capacity(Value::strcount(buf) as usize);
                     let mut last = 0usize;
                     for (i, &v) in buf.iter().enumerate() {
                         if v != 0 {
@@ -1086,38 +1108,16 @@ impl From<&Message> for LocalFieldDescription {
     }
 }
 
-/// Counts how many valid utf-8 string in s.
-pub(crate) fn strcount(s: &[u8]) -> u8 {
-    let mut last = 0usize;
-    let mut size = 0u8;
-    for (i, &v) in s.iter().enumerate() {
-        if v != 0 {
-            if i == s.len() - 1 {
-                size += 1;
-            }
-        } else {
-            if last != i {
-                size += 1;
-            }
-            last = i + 1;
-        }
-    }
-    if size == 0 && !s.is_empty() {
-        return 1; // Allow string without utf-8 null termination.
-    }
-    size
-}
-
 #[cfg(test)]
 mod tests {
     use crate::{
         profile::typedef::FitBaseType,
-        proto::{Error, Value, strcount},
+        proto::{Error, Value},
     };
     use alloc::{borrow::ToOwned, string::String, vec, vec::Vec};
 
     #[test]
-    fn test_strcount() {
+    fn test_value_strcount() {
         #[derive(Default, Clone, Copy)]
         struct Case {
             input: &'static str,
@@ -1152,7 +1152,7 @@ mod tests {
         ];
 
         for (i, tc) in tt.iter().enumerate() {
-            let v = strcount(tc.input.as_bytes());
+            let v = Value::strcount(tc.input.as_bytes());
             assert_eq!(tc.expected, v, "index {} input \"{:?}\"", i, tc.input);
         }
     }

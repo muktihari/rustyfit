@@ -425,7 +425,7 @@ impl<R: Read> Decoder<R> {
                     profile_type = ProfileType::from(field_def.base_type);
                     accumulate = false;
                     array = match base_type {
-                        FitBaseType::STRING => strcount(buf) > 1,
+                        FitBaseType::STRING => Value::strcount(buf) > 1,
                         _ => {
                             field_def.size > base_type.size()
                                 && field_def.size % base_type.size() == 0
@@ -565,7 +565,7 @@ impl<R: Read> Decoder<R> {
 
             let size = dev_field_def.size;
             let array = match base_type {
-                FitBaseType::STRING => strcount(buf) > 1,
+                FitBaseType::STRING => Value::strcount(buf) > 1,
                 _ => size > base_type.size() && size % base_type.size() == 0,
             };
 
