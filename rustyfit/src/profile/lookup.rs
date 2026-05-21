@@ -2015,7 +2015,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
         MesgNum::HSA_WRIST_TEMPERATURE_DATA => { match field_num {
             253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DATE_TIME, units: "s", ..FR_DEF }),
             0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "value", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, array: true /* [N] */, scale: 1000.0, units: "degC", ..FR_DEF }),
+            1 => Some(FieldReference { name: "value", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::UINT16, array: true /* [N] */, scale: 1000.0, units: "C", ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MEMO_GLOB => { match field_num {

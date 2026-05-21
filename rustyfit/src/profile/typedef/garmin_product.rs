@@ -513,10 +513,14 @@ impl GarminProduct {
     pub const INSTINCT3_SOLAR_50MM: GarminProduct = GarminProduct(4759);
     pub const TACTIX8_AMOLED: GarminProduct = GarminProduct(4775);
     pub const TACTIX8_SOLAR: GarminProduct = GarminProduct(4776);
+    pub const FR170_MUSIC: GarminProduct = GarminProduct(4814);
+    pub const FR170: GarminProduct = GarminProduct(4815);
     pub const APPROACH_J1: GarminProduct = GarminProduct(4825);
     pub const D2_MACH2: GarminProduct = GarminProduct(4879);
+    pub const FR70_2026: GarminProduct = GarminProduct(4916);
     pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
     pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
+    pub const D2_MACH2_PRO: GarminProduct = GarminProduct(5056);
     /// SDM4 footpod
     pub const SDM4: GarminProduct = GarminProduct(10007);
     pub const EDGE_REMOTE: GarminProduct = GarminProduct(10014);
@@ -1001,10 +1005,14 @@ impl fmt::Display for GarminProduct {
             4759 => write!(f, "instinct3_solar_50mm"),
             4775 => write!(f, "tactix8_amoled"),
             4776 => write!(f, "tactix8_solar"),
+            4814 => write!(f, "fr170_music"),
+            4815 => write!(f, "fr170"),
             4825 => write!(f, "approach_j1"),
             4879 => write!(f, "d2_mach2"),
+            4916 => write!(f, "fr70_2026"),
             4678 => write!(f, "instinct_crossover_amoled"),
             4944 => write!(f, "d2_air_x15"),
+            5056 => write!(f, "d2_mach2_pro"),
             10007 => write!(f, "sdm4"),
             10014 => write!(f, "edge_remote"),
             20533 => write!(f, "tacx_training_app_win"),
@@ -1484,10 +1492,14 @@ impl fmt::Debug for GarminProduct {
             4759 => write!(f, "GarminProduct::INSTINCT3_SOLAR_50MM(4759)"),
             4775 => write!(f, "GarminProduct::TACTIX8_AMOLED(4775)"),
             4776 => write!(f, "GarminProduct::TACTIX8_SOLAR(4776)"),
+            4814 => write!(f, "GarminProduct::FR170_MUSIC(4814)"),
+            4815 => write!(f, "GarminProduct::FR170(4815)"),
             4825 => write!(f, "GarminProduct::APPROACH_J1(4825)"),
             4879 => write!(f, "GarminProduct::D2_MACH2(4879)"),
+            4916 => write!(f, "GarminProduct::FR70_2026(4916)"),
             4678 => write!(f, "GarminProduct::INSTINCT_CROSSOVER_AMOLED(4678)"),
             4944 => write!(f, "GarminProduct::D2_AIR_X15(4944)"),
+            5056 => write!(f, "GarminProduct::D2_MACH2_PRO(5056)"),
             10007 => write!(f, "GarminProduct::SDM4(10007)"),
             10014 => write!(f, "GarminProduct::EDGE_REMOTE(10014)"),
             20533 => write!(f, "GarminProduct::TACX_TRAINING_APP_WIN(20533)"),
