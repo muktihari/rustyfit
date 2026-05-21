@@ -77,21 +77,21 @@ impl Accumulator {
     }
 
     fn collect_u64(&mut self, mesg_num: MesgNum, field_num: u8, value: u64) {
-        self.values
+        if let Some(v) = self
+            .values
             .iter_mut()
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
-            .map(|v| {
-                v.value = value;
-                v.last = value;
-            })
-            .unwrap_or_else(|| {
-                self.values.push(AccuValue {
-                    mesg_num,
-                    field_num,
-                    value,
-                    last: value,
-                });
-            });
+        {
+            v.value = value;
+            v.last = value;
+            return;
+        }
+        self.values.push(AccuValue {
+            mesg_num,
+            field_num,
+            value,
+            last: value,
+        });
     }
 
     pub(super) fn accumulate(
@@ -101,24 +101,23 @@ impl Accumulator {
         value: u64,
         bits: u8,
     ) -> u64 {
-        self.values
+        if let Some(v) = self
+            .values
             .iter_mut()
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
-            .map(|v| {
-                let mask: u64 = (1 << bits) - 1;
-                v.value += (value.wrapping_sub(v.last)) & mask;
-                v.last = value;
-                v.value
-            })
-            .unwrap_or_else(|| {
-                self.values.push(AccuValue {
-                    mesg_num,
-                    field_num,
-                    value,
-                    last: value,
-                });
-                value
-            })
+        {
+            let mask: u64 = (1 << bits) - 1;
+            v.value += (value.wrapping_sub(v.last)) & mask;
+            v.last = value;
+            return v.value;
+        }
+        self.values.push(AccuValue {
+            mesg_num,
+            field_num,
+            value,
+            last: value,
+        });
+        value
     }
 
     pub(super) fn reset(&mut self) {
