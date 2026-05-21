@@ -188,7 +188,7 @@ impl<W: Write + Seek> Encoder<W> {
             file_header.profile_version = PROFILE_VERSION;
         }
 
-        file_header.data_type = DATA_TYPE;
+        file_header.data_type = FileHeader::DATA_TYPE;
         file_header.crc = 0; // recalculated
 
         let buf = &mut self.buf;
@@ -252,7 +252,7 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn encode_message(&mut self, mesg: &mut Message) -> Result<(), Error<W::Error>> {
-        mesg.header = MESG_NORMAL_HEADER_MASK;
+        mesg.header = Message::NORMAL_HEADER_MASK;
 
         if let HeaderOption::Compressed(_) = self.options.header_option {
             self.compress_timestamp_into_header(mesg);
@@ -265,8 +265,8 @@ impl<W: Write + Seek> Encoder<W> {
         let (local_mesg_num, is_new_mesg_def) = self.lru.put(&buf);
 
         buf[0] |= local_mesg_num;
-        if mesg.header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
-            mesg.header |= local_mesg_num << COMPRESSED_BIT_SHIFT;
+        if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
+            mesg.header |= local_mesg_num << Message::COMPRESSED_BIT_SHIFT;
         } else {
             mesg.header |= local_mesg_num;
         }
@@ -303,7 +303,7 @@ impl<W: Write + Seek> Encoder<W> {
         let timestamp = mesg
             .fields
             .iter()
-            .find(|field| field.num == FIELD_NUM_TIMESTAMP)
+            .find(|field| field.num == Field::TIMESTAMP)
             .map(|field| field.value.as_u32())
             .unwrap_or(u32::MAX);
 
@@ -311,14 +311,14 @@ impl<W: Write + Seek> Encoder<W> {
             return;
         }
 
-        if timestamp.wrapping_sub(self.timestamp_reference) as u8 > COMPRESSED_TIME_MASK {
+        if timestamp.wrapping_sub(self.timestamp_reference) as u8 > Message::COMPRESSED_TIME_MASK {
             self.timestamp_reference = timestamp;
             return;
         }
 
-        let time_offset = (timestamp & COMPRESSED_TIME_MASK as u32) as u8;
-        mesg.header = MESG_COMPRESSED_HEADER_MASK | time_offset;
-        mesg.fields.retain(|field| field.num != FIELD_NUM_TIMESTAMP);
+        let time_offset = (timestamp & Message::COMPRESSED_TIME_MASK as u32) as u8;
+        mesg.header = Message::COMPRESSED_HEADER_MASK | time_offset;
+        mesg.fields.retain(|field| field.num != Field::TIMESTAMP);
     }
 
     fn encode_crc(&mut self) -> Result<(), Error<W::Error>> {
@@ -341,9 +341,9 @@ impl<W: Write + Seek> Encoder<W> {
 
 fn marshal_append_message_definition(buf: &mut Vec<u8>, mesg: &Message, arch: u8) {
     buf.extend_from_slice(&[
-        MESG_DEFINITION_MASK, // header
-        0,                    // reserved
-        arch,                 // architecture
+        Message::DEFINITION_MASK, // header
+        0,                        // reserved
+        arch,                     // architecture
     ]);
 
     buf.extend_from_slice(&match arch {
@@ -362,7 +362,7 @@ fn marshal_append_message_definition(buf: &mut Vec<u8>, mesg: &Message, arch: u8
         return;
     }
 
-    buf[0] |= DEV_DATA_MASK;
+    buf[0] |= Message::DEV_DATA_MASK;
     buf.push(mesg.developer_fields.len() as u8);
     for developer_field in &mesg.developer_fields {
         buf.push(developer_field.num);
@@ -443,7 +443,7 @@ mod tests {
     use crate::{
         Encoder,
         profile::{mesgdef, typedef},
-        proto::{COMPRESSED_TIME_MASK, MESG_COMPRESSED_HEADER_MASK, Message},
+        proto::Message,
     };
     use alloc::vec;
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
@@ -522,8 +522,8 @@ mod tests {
                 // Timestamp is compressed into header since roll over < 32
                 rec.distance = 300 * meter;
                 let mut mesg = Message::from(rec);
-                mesg.header |=
-                    MESG_COMPRESSED_HEADER_MASK | (1062594925 & COMPRESSED_TIME_MASK as u32) as u8;
+                mesg.header |= Message::COMPRESSED_HEADER_MASK
+                    | (1062594925 & Message::COMPRESSED_TIME_MASK as u32) as u8;
                 mesg
             },
         ];

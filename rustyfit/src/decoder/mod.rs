@@ -182,7 +182,7 @@ impl<R: Read> Decoder<R> {
         }
         self.n += n - 1;
 
-        if &arr[8..12] != DATA_TYPE.as_bytes() {
+        if &arr[8..12] != FileHeader::DATA_TYPE.as_bytes() {
             return Err(Error::NotFITFile);
         }
 
@@ -207,7 +207,7 @@ impl<R: Read> Decoder<R> {
             protocol_version: ProtocolVersion(arr[1]),
             profile_version: u16::from_le_bytes([arr[12], arr[13]]),
             data_size: u32::from_le_bytes(arr[4..8].try_into().unwrap()),
-            data_type: DATA_TYPE,
+            data_type: FileHeader::DATA_TYPE,
             crc,
         }))
     }
@@ -239,8 +239,8 @@ impl<R: Read> Decoder<R> {
 
             let header = arr[0];
 
-            if header & MESG_HEADER_MASK == MESG_DEFINITION_MASK {
-                let local_mesg_num = (header & LOCAL_MESG_NUM_MASK) as usize;
+            if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
+                let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
                 let mut mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
                 mesg_def.header = header;
 
@@ -252,12 +252,12 @@ impl<R: Read> Decoder<R> {
                 continue;
             }
 
-            let local_mesg_num = match header & MESG_COMPRESSED_HEADER_MASK {
-                MESG_COMPRESSED_HEADER_MASK => {
-                    (header & COMPRESSED_LOCAL_MESG_NUM_MASK) >> COMPRESSED_BIT_SHIFT
+            let local_mesg_num = match header & Message::COMPRESSED_HEADER_MASK {
+                Message::COMPRESSED_HEADER_MASK => {
+                    (header & Message::COMPRESSED_LOCAL_NUM_MASK) >> Message::COMPRESSED_BIT_SHIFT
                 }
                 _ => header,
-            } & LOCAL_MESG_NUM_MASK;
+            } & Message::LOCAL_NUM_MASK;
 
             let mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num as usize]);
             if mesg_def.header == 0 {
@@ -316,7 +316,7 @@ impl<R: Read> Decoder<R> {
                 base_type: FitBaseType(b[2]),
             }));
 
-        if mesg_def.header & DEV_DATA_MASK == DEV_DATA_MASK {
+        if mesg_def.header & Message::DEV_DATA_MASK == Message::DEV_DATA_MASK {
             self.read_exact_inc(&mut arr[..1])?;
 
             let n = arr[0] as usize * 3;
@@ -341,15 +341,16 @@ impl<R: Read> Decoder<R> {
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
     ) -> Result<(), Error<R::Error>> {
-        if mesg.header & MESG_COMPRESSED_HEADER_MASK == MESG_COMPRESSED_HEADER_MASK {
-            let time_offset = mesg.header & COMPRESSED_TIME_MASK;
+        if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
+            let time_offset = mesg.header & Message::COMPRESSED_TIME_MASK;
             self.timestamp = self.timestamp.wrapping_add(
-                (time_offset.wrapping_sub(self.last_time_offset) & COMPRESSED_TIME_MASK) as u32,
+                (time_offset.wrapping_sub(self.last_time_offset) & Message::COMPRESSED_TIME_MASK)
+                    as u32,
             );
             self.last_time_offset = time_offset;
 
             mesg.fields.push(Field {
-                num: FIELD_NUM_TIMESTAMP,
+                num: Field::TIMESTAMP,
                 profile_type: ProfileType::DATE_TIME,
                 is_expanded: false,
                 value: Value::Uint32(self.timestamp),
@@ -444,10 +445,10 @@ impl<R: Read> Decoder<R> {
 
             let value = Value::unmarshal(buf, array, base_type, mesg_def.arch);
 
-            if num == FIELD_NUM_TIMESTAMP && base_type == FitBaseType::UINT32 {
+            if num == Field::TIMESTAMP && base_type == FitBaseType::UINT32 {
                 if let Value::Uint32(v) = value {
                     self.timestamp = v;
-                    self.last_time_offset = v as u8 & COMPRESSED_TIME_MASK;
+                    self.last_time_offset = v as u8 & Message::COMPRESSED_TIME_MASK;
                 }
             }
 
