@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -87,7 +88,7 @@ impl From<&Message> for FileCapabilities {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
             r#type: typedef::File(vals[0].as_u8()),
             flags: typedef::FileFlags(vals[1].as_u8z()),
-            directory: vals[2].to_string(),
+            directory: vals[2].as_str().to_owned(),
             max_count: vals[3].as_u16(),
             max_size: vals[4].as_u32(),
             unknown_fields,

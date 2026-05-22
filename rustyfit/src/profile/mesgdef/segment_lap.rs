@@ -9,6 +9,7 @@
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -1489,7 +1490,7 @@ impl From<&Message> for SegmentLap {
             nec_long: vals[26].as_i32(),
             swc_lat: vals[27].as_i32(),
             swc_long: vals[28].as_i32(),
-            name: vals[29].to_string(),
+            name: vals[29].as_str().to_owned(),
             normalized_power: vals[30].as_u16(),
             left_right_balance: typedef::LeftRightBalance100(vals[31].as_u16()),
             sub_sport: typedef::SubSport(vals[32].as_u8()),
@@ -1525,7 +1526,7 @@ impl From<&Message> for SegmentLap {
             avg_right_pedal_smoothness: vals[62].as_u8(),
             avg_combined_pedal_smoothness: vals[63].as_u8(),
             status: typedef::SegmentLapStatus(vals[64].as_u8()),
-            uuid: vals[65].to_string(),
+            uuid: vals[65].as_str().to_owned(),
             avg_fractional_cadence: vals[66].as_u8(),
             max_fractional_cadence: vals[67].as_u8(),
             total_fractional_cycles: vals[68].as_u8(),

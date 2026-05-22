@@ -47,10 +47,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("messages count: {}", fit.messages.len());
     for field in &fit.messages[0].fields {
         // first message: file_id
-        if field.num == mesgdef::FileId::TYPE {
-            if let Value::Uint8(v) = field.value {
-                println!("file type: {}", typedef::File(v));
-            }
+        if field.num == mesgdef::FileId::TYPE
+            && let Value::Uint8(v) = field.value
+        {
+            println!("file type: {}", typedef::File(v));
         }
     }
     
@@ -72,10 +72,10 @@ We can decode chained FIT file using `while let`, e.g:
         println!("messages count: {}", fit.messages.len());
         for field in &fit.messages[0].fields {
             // first message: file_id
-            if field.num == mesgdef::FileId::TYPE {
-                if let Value::Uint8(v) = field.value {
-                    println!("file type: {}", typedef::File(v));
-                }
+            if field.num == mesgdef::FileId::TYPE
+                && let Value::Uint8(v) = field.value
+            {
+                println!("file type: {}", typedef::File(v));
             }
         }
     }

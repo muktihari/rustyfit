@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -112,12 +113,12 @@ impl From<&Message> for SegmentLeaderboardEntry {
 
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            name: vals[0].to_string(),
+            name: vals[0].as_str().to_owned(),
             r#type: typedef::SegmentLeaderboardType(vals[1].as_u8()),
             group_primary_key: vals[2].as_u32(),
             activity_id: vals[3].as_u32(),
             segment_time: vals[4].as_u32(),
-            activity_id_string: vals[5].to_string(),
+            activity_id_string: vals[5].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

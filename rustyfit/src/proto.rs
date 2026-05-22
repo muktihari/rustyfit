@@ -748,12 +748,14 @@ impl Value {
         0
     }
 
-    /// Returns `String` by clone. Return empty string if it's not a `string` value.
-    pub(crate) fn to_string(&self) -> String {
+    /// Returns `&str`. Return empty string if it's not a `string` value.
+    ///
+    /// NOTE: Can not use `to_string()` since it is reserved for `fmt::Display`.
+    pub(crate) fn as_str(&self) -> &str {
         if let Value::String(v) = self {
-            return v.clone();
+            return v;
         }
-        String::new()
+        ""
     }
 
     /// Returns `f32` or its invalid value when it's not a `f32` value.

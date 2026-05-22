@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -88,7 +89,7 @@ impl From<&Message> for WeatherAlert {
 
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
-            report_id: vals[0].to_string(),
+            report_id: vals[0].as_str().to_owned(),
             issue_time: typedef::DateTime(vals[1].as_u32()),
             expire_time: typedef::DateTime(vals[2].as_u32()),
             severity: typedef::WeatherSeverity(vals[3].as_u8()),

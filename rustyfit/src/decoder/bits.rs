@@ -1,6 +1,6 @@
 use crate::{profile::lookup, proto::Value};
 
-const N: usize = ((lookup::MAX_COMPONENT_BITS / 8) + 7) / 8;
+const N: usize = ((lookup::MAX_COMPONENT_BITS.div_ceil(8)) + 7).div_ceil(8);
 
 #[cfg_attr(test, derive(Debug, PartialEq))]
 pub(super) struct Bits {
@@ -84,15 +84,15 @@ macro_rules! impl_as_u64 {
 
 impl_as_u64!(i8, u8, i16, u16, i32, u32, i64, u64, f32, f64);
 
-fn bits_from_slice<T: AsU64>(v: &mut Bits, s: &[T], bitsize: usize) {
-    for i in 0..s.len() {
-        let x = i * bitsize;
-        let index = x >> 6;
-        if index >= v.store.len() {
+fn bits_from_slice<T: AsU64>(bits: &mut Bits, v: &[T], bitsize: usize) {
+    for (i, x) in v.iter().enumerate() {
+        let pos = i * bitsize;
+        let index = pos >> 6;
+        if index >= bits.store.len() {
             break;
         }
-        v.store[index] |= s[i].as_u64() << (x & 63);
-        v.size += bitsize as u64;
+        bits.store[index] |= x.as_u64() << (pos & 63);
+        bits.size += bitsize as u64;
     }
 }
 

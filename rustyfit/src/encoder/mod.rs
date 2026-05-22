@@ -224,7 +224,7 @@ impl<W: Write + Seek> Encoder<W> {
         let size = self.n - self.last_file_header_pos;
         self.writer.seek(SeekFrom::Current(-size))?;
 
-        self.writer.write_all(&buf)?;
+        self.writer.write_all(buf)?;
 
         let n = buf.len() as i64;
         self.writer.seek(SeekFrom::Current(size - n))?;
@@ -258,7 +258,7 @@ impl<W: Write + Seek> Encoder<W> {
         buf.clear();
 
         marshal_append_message_definition(buf, mesg, self.options.endianness as u8);
-        let (local_mesg_num, is_new_mesg_def) = self.lru.put(&buf);
+        let (local_mesg_num, is_new_mesg_def) = self.lru.put(buf);
 
         buf[0] |= local_mesg_num;
         if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
@@ -292,12 +292,12 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn compress_timestamp_into_header(&mut self, mesg: &mut Message) {
-        let timestamp = mesg
-            .fields
-            .iter()
-            .find(|field| field.num == Field::TIMESTAMP)
-            .map(|field| field.value.as_u32())
-            .unwrap_or(u32::MAX);
+        let mut timestamp = u32::MAX;
+        if let Some(field) = mesg.fields.iter().find(|f| f.num == Field::TIMESTAMP)
+            && let Value::Uint32(v) = field.value
+        {
+            timestamp = v;
+        }
 
         if timestamp == u32::MAX || timestamp < DateTime::MIN.0 {
             return;
@@ -409,7 +409,7 @@ impl Builder {
     /// Build Encoder based on given options (if any).
     pub fn build<W: Write + Seek>(&self, writer: W) -> Encoder<W> {
         Encoder {
-            writer: writer,
+            writer,
             n: 0,
             last_file_header_pos: 0,
             data_size: 0,
@@ -425,6 +425,12 @@ impl Builder {
             options: self.options,
             message_validator: MessageValidator::new(),
         }
+    }
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

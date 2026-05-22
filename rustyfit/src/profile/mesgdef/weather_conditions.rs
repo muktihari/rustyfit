@@ -9,6 +9,7 @@
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -174,7 +175,7 @@ impl From<&Message> for WeatherConditions {
             precipitation_probability: vals[5].as_u8(),
             temperature_feels_like: vals[6].as_i8(),
             relative_humidity: vals[7].as_u8(),
-            location: vals[8].to_string(),
+            location: vals[8].as_str().to_owned(),
             observed_at_time: typedef::DateTime(vals[9].as_u32()),
             observed_location_lat: vals[10].as_i32(),
             observed_location_long: vals[11].as_i32(),

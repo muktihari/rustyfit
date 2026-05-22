@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -71,8 +72,8 @@ impl From<&Message> for Video {
         }
 
         Self {
-            url: vals[0].to_string(),
-            hosting_provider: vals[1].to_string(),
+            url: vals[0].as_str().to_owned(),
+            hosting_provider: vals[1].as_str().to_owned(),
             duration: vals[2].as_u32(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),

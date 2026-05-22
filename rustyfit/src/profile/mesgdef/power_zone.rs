@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -73,7 +74,7 @@ impl From<&Message> for PowerZone {
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
             high_value: vals[1].as_u16(),
-            name: vals[2].to_string(),
+            name: vals[2].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

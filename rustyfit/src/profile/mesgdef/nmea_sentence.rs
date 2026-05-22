@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -75,7 +76,7 @@ impl From<&Message> for NmeaSentence {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
-            sentence: vals[1].to_string(),
+            sentence: vals[1].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

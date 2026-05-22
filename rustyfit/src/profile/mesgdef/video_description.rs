@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -74,7 +75,7 @@ impl From<&Message> for VideoDescription {
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
             message_count: vals[0].as_u16(),
-            text: vals[1].to_string(),
+            text: vals[1].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

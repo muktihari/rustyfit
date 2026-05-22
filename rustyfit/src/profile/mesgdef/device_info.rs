@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -195,12 +196,12 @@ impl From<&Message> for DeviceInfo {
             battery_voltage: vals[10].as_u16(),
             battery_status: typedef::BatteryStatus(vals[11].as_u8()),
             sensor_position: typedef::BodyLocation(vals[18].as_u8()),
-            descriptor: vals[19].to_string(),
+            descriptor: vals[19].as_str().to_owned(),
             ant_transmission_type: vals[20].as_u8z(),
             ant_device_number: vals[21].as_u16z(),
             ant_network: typedef::AntNetwork(vals[22].as_u8()),
             source_type: typedef::SourceType(vals[25].as_u8()),
-            product_name: vals[27].to_string(),
+            product_name: vals[27].as_str().to_owned(),
             battery_level: vals[32].as_u8(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),

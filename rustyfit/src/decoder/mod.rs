@@ -352,9 +352,9 @@ impl<R: Read> Decoder<R> {
             });
         }
 
-        self.decode_fields(mesg, &mesg_def)?;
+        self.decode_fields(mesg, mesg_def)?;
 
-        self.decode_developer_fields(mesg, &mesg_def)?;
+        self.decode_developer_fields(mesg, mesg_def)?;
 
         // Developer Data Lookup, currently we allow missing developer_data_id
         if mesg.num == MesgNum::FIELD_DESCRIPTION {
@@ -440,11 +440,12 @@ impl<R: Read> Decoder<R> {
 
             let value = Value::unmarshal(buf, array, base_type, mesg_def.arch);
 
-            if num == Field::TIMESTAMP && base_type == FitBaseType::UINT32 {
-                if let Value::Uint32(v) = value {
-                    self.timestamp = v;
-                    self.last_time_offset = v as u8 & Message::COMPRESSED_TIME_MASK;
-                }
+            if num == Field::TIMESTAMP
+                && base_type == FitBaseType::UINT32
+                && let Value::Uint32(v) = value
+            {
+                self.timestamp = v;
+                self.last_time_offset = v as u8 & Message::COMPRESSED_TIME_MASK;
             }
 
             if accumulate {
@@ -723,7 +724,7 @@ impl Builder {
     /// Build Decoder based on given options (if any).
     pub fn build<R: Read>(&self, reader: R) -> Decoder<R> {
         Decoder {
-            reader: reader,
+            reader,
             n: 0,
             cur: 0,
             crc16: Crc16::new(),
@@ -745,6 +746,12 @@ impl Builder {
             field_descriptions: Vec::new(),
             options: self.options,
         }
+    }
+}
+
+impl Default for Builder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
