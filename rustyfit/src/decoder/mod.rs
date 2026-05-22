@@ -67,9 +67,12 @@ where
     }
 }
 
-impl<E> From<E> for Error<E> {
-    fn from(err: E) -> Self {
-        Self::Io { err }
+impl<E> From<ReadExactError<E>> for Error<E> {
+    fn from(err: ReadExactError<E>) -> Self {
+        match err {
+            ReadExactError::UnexpectedEof => Error::UnexpectedEof,
+            ReadExactError::Other(err) => Error::Io { err },
+        }
     }
 }
 
@@ -162,15 +165,12 @@ impl<R: Read> Decoder<R> {
     fn decode_file_header(&mut self) -> Result<Option<FileHeader>, Error<R::Error>> {
         let mut arr = [0u8; 14];
         if let Err(err) = self.reader.read_exact(&mut arr[..1]) {
-            match err {
-                ReadExactError::UnexpectedEof => {
-                    if self.n > 0 {
-                        return Ok(None);
-                    }
-                    return Err(Error::UnexpectedEof);
-                }
-                ReadExactError::Other(err) => return Err(Error::Io { err }),
+            if let ReadExactError::UnexpectedEof = err
+                && self.n > 0
+            {
+                return Ok(None);
             }
+            return Err(Error::from(err));
         };
         self.n += 1;
 
@@ -179,12 +179,7 @@ impl<R: Read> Decoder<R> {
             return Err(Error::NotFITFile);
         }
 
-        if let Err(err) = self.reader.read_exact(&mut arr[1..n]) {
-            return Err(match err {
-                ReadExactError::UnexpectedEof => Error::UnexpectedEof,
-                ReadExactError::Other(err) => Error::Io { err },
-            });
-        }
+        self.reader.read_exact(&mut arr[1..n])?;
         self.n += n - 1;
 
         if &arr[8..12] != FileHeader::DATA_TYPE.as_bytes() {
@@ -219,12 +214,7 @@ impl<R: Read> Decoder<R> {
 
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
     fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error<R::Error>> {
-        if let Err(err) = self.reader.read_exact(buf) {
-            return Err(match err {
-                ReadExactError::UnexpectedEof => Error::UnexpectedEof,
-                ReadExactError::Other(err) => Error::Io { err },
-            });
-        };
+        self.reader.read_exact(buf)?;
         self.n += buf.len();
         self.cur += buf.len() as u32;
         if self.options.checksum {
@@ -588,12 +578,7 @@ impl<R: Read> Decoder<R> {
 
     fn decode_crc(&mut self) -> Result<u16, Error<R::Error>> {
         let mut arr = [0u8; 2];
-        if let Err(err) = self.reader.read_exact(&mut arr) {
-            return Err(match err {
-                ReadExactError::UnexpectedEof => Error::UnexpectedEof,
-                ReadExactError::Other(err) => Error::Io { err },
-            });
-        };
+        self.reader.read_exact(&mut arr)?;
         self.n += arr.len();
 
         let crc = u16::from_le_bytes(arr);
