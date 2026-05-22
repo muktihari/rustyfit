@@ -31,7 +31,7 @@ On next call, it may return Ok(None) to indicate that no more FIT sequence in th
 
 ```rust
 use embedded_io_adapters::std::FromStd;
-use rustyfit::{Decoder, profile::{mesgdef, typedef}};
+use rustyfit::{Decoder, profile::{mesgdef, typedef}, proto::Value};
 use std::{error::Error, fs::File, io::BufReader};
 
 fn main() -> Result<(), Box<dyn Error>> {
@@ -48,7 +48,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     for field in &fit.messages[0].fields {
         // first message: file_id
         if field.num == mesgdef::FileId::TYPE {
-            println!("file type: {}", typedef::File(field.value.as_u8()));
+            if let Value::Uint8(v) = field.value {
+                println!("file type: {}", typedef::File(v));
+            }
         }
     }
     
@@ -71,7 +73,9 @@ We can decode chained FIT file using `while let`, e.g:
         for field in &fit.messages[0].fields {
             // first message: file_id
             if field.num == mesgdef::FileId::TYPE {
-                println!("file type: {}", typedef::File(field.value.as_u8()));
+                if let Value::Uint8(v) = field.value {
+                    println!("file type: {}", typedef::File(v));
+                }
             }
         }
     }
