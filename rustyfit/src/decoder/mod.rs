@@ -438,7 +438,7 @@ impl<R: Read> Decoder<R> {
                 );
             }
 
-            let value = Value::unmarshal(buf, array, base_type, mesg_def.arch);
+            let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
 
             if num == Field::TIMESTAMP
                 && base_type == FitBaseType::UINT32
@@ -565,7 +565,7 @@ impl<R: Read> Decoder<R> {
                 _ => size > base_type.size() && size % base_type.size() == 0,
             };
 
-            let value = Value::unmarshal(buf, array, base_type, mesg_def.arch);
+            let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
 
             mesg.developer_fields.push(DeveloperField {
                 num: dev_field_def.num,

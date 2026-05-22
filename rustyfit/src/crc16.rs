@@ -11,17 +11,15 @@ impl Crc16 {
     }
 
     pub fn write(&mut self, b: &[u8]) {
-        let mut crc = self.0;
         for &v in b {
-            let mut tmp = TABLE[(crc as usize) & 0xF];
-            crc = (crc >> 4) & 0x0FFF;
-            crc = crc ^ tmp ^ TABLE[(v as usize) & 0xF];
+            let mut tmp = TABLE[(self.0 as usize) & 0xF];
+            self.0 = (self.0 >> 4) & 0x0FFF;
+            self.0 = self.0 ^ tmp ^ TABLE[(v as usize) & 0xF];
 
-            tmp = TABLE[(crc as usize) & 0xF];
-            crc = (crc >> 4) & 0x0FFF;
-            crc = crc ^ tmp ^ TABLE[((v as usize) >> 4) & 0xF];
+            tmp = TABLE[(self.0 as usize) & 0xF];
+            self.0 = (self.0 >> 4) & 0x0FFF;
+            self.0 = self.0 ^ tmp ^ TABLE[((v as usize) >> 4) & 0xF];
         }
-        self.0 = crc;
     }
 
     pub fn sum16(&self) -> u16 {

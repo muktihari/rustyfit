@@ -198,7 +198,7 @@ impl<W: Write + Seek> Encoder<W> {
         let buf = &mut self.buf;
         buf.clear();
 
-        file_header.marshal_append(buf);
+        write_file_header_to_vec(buf, file_header);
 
         self.writer.write_all(buf)?;
         self.n += buf.len() as i64;
@@ -209,40 +209,29 @@ impl<W: Write + Seek> Encoder<W> {
     fn update_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), Error<W::Error>> {
         file_header.data_size = self.data_size;
 
-        let buf = &mut self.buf;
-        buf.clear();
-
-        file_header.marshal_append(buf);
+        self.buf.clear();
+        write_file_header_to_vec(&mut self.buf, file_header);
 
         if file_header.size == 14 {
-            self.crc16.write(&buf[..12]);
+            self.crc16.write(&self.buf[..12]);
             file_header.crc = self.crc16.sum16();
-            buf[12..14].copy_from_slice(&self.crc16.sum16().to_le_bytes());
+            self.buf[12..14].copy_from_slice(&self.crc16.sum16().to_le_bytes());
             self.crc16.reset();
         }
 
         let size = self.n - self.last_file_header_pos;
         self.writer.seek(SeekFrom::Current(-size))?;
 
-        self.writer.write_all(buf)?;
+        self.writer.write_all(&self.buf)?;
 
-        let n = buf.len() as i64;
+        let n = self.buf.len() as i64;
         self.writer.seek(SeekFrom::Current(size - n))?;
         Ok(())
     }
 
     fn encode_messages(&mut self, messages: &mut [Message]) -> Result<(), Error<W::Error>> {
-        for (i, mesg) in messages.iter_mut().enumerate() {
-            if let Err(e) = self.encode_message(mesg) {
-                if let Error::Protocol { err, .. } = e {
-                    return Err(Error::Protocol {
-                        mesg_index: i,
-                        mesg_num: mesg.num,
-                        err,
-                    });
-                }
-                return Err(e);
-            }
+        for mesg in messages {
+            self.encode_message(mesg)?;
         }
         Ok(())
     }
@@ -254,13 +243,17 @@ impl<W: Write + Seek> Encoder<W> {
             self.compress_timestamp_into_header(mesg);
         }
 
-        let buf = &mut self.buf;
-        buf.clear();
+        self.buf.clear();
 
-        marshal_append_message_definition(buf, mesg, self.options.endianness as u8);
-        let (local_mesg_num, is_new_mesg_def) = self.lru.put(buf);
+        // We write all at once because we need to store the whole message definition bytes
+        // in Lru for redefining `local_mesg_num`. We can use `hash` to optimize this, but
+        // we have to deal with collision. Currently, this is efficient enough. At most:
+        //  - We only use 1537 bytes of buffer per write.
+        //  - Lru can store up to 24592 bytes for 16 interleaves but it's practically impossible.
+        write_message_definition_to_vec(&mut self.buf, mesg, self.options.endianness as u8);
+        let (local_mesg_num, is_new_mesg_def) = self.lru.put(&self.buf);
 
-        buf[0] |= local_mesg_num;
+        self.buf[0] |= local_mesg_num;
         if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
             mesg.header |= local_mesg_num << Message::COMPRESSED_BIT_SHIFT;
         } else {
@@ -268,25 +261,13 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         if is_new_mesg_def {
-            self.writer.write_all(buf)?;
-            self.crc16.write(buf);
-            self.n += buf.len() as i64;
-            self.data_size += buf.len() as u32;
+            self.writer.write_all(&self.buf)?;
+            self.crc16.write(&self.buf);
+            self.n += self.buf.len() as i64;
+            self.data_size += self.buf.len() as u32;
         }
 
-        buf.clear();
-        if let Err(err) = mesg.marshal_append(buf, self.options.endianness as u8) {
-            return Err(Error::Protocol {
-                mesg_index: 0,
-                mesg_num: MesgNum(0),
-                err,
-            });
-        }
-
-        self.writer.write_all(buf)?;
-        self.crc16.write(buf);
-        self.n += buf.len() as i64;
-        self.data_size += buf.len() as u32;
+        self.write_message_checksum(mesg, self.options.endianness as u8)?;
 
         Ok(())
     }
@@ -313,6 +294,40 @@ impl<W: Write + Seek> Encoder<W> {
         mesg.fields.retain(|field| field.num != Field::TIMESTAMP);
     }
 
+    /// Write message to the writer and calculate the checksum.
+    /// This method writes one Value at a time. At most, we only use 255 bytes of buffer.
+    fn write_message_checksum(&mut self, mesg: &Message, arch: u8) -> Result<(), Error<W::Error>> {
+        self.writer.write_all(&[mesg.header])?;
+        self.crc16.write(&[mesg.header]);
+
+        self.n += 1;
+        self.data_size += 1;
+
+        for field in &mesg.fields {
+            self.buf.clear();
+            write_value_to_vec(&mut self.buf, &field.value, arch);
+
+            self.writer.write_all(&self.buf)?;
+            self.crc16.write(&self.buf);
+
+            self.n += self.buf.len() as i64;
+            self.data_size += self.buf.len() as u32;
+        }
+
+        for dev_field in &mesg.developer_fields {
+            self.buf.clear();
+            write_value_to_vec(&mut self.buf, &dev_field.value, arch);
+
+            self.writer.write_all(&self.buf)?;
+            self.crc16.write(&self.buf);
+
+            self.n += self.buf.len() as i64;
+            self.data_size += self.buf.len() as u32;
+        }
+
+        Ok(())
+    }
+
     fn encode_crc(&mut self) -> Result<(), Error<W::Error>> {
         let crc = self.crc16.sum16();
         self.writer.write_all(&crc.to_le_bytes())?;
@@ -329,7 +344,18 @@ impl<W: Write + Seek> Encoder<W> {
     }
 }
 
-fn marshal_append_message_definition(buf: &mut Vec<u8>, mesg: &Message, arch: u8) {
+fn write_file_header_to_vec(buf: &mut Vec<u8>, file_header: &FileHeader) {
+    buf.push(file_header.size);
+    buf.push(file_header.protocol_version.0);
+    buf.extend_from_slice(&file_header.profile_version.to_le_bytes());
+    buf.extend_from_slice(&file_header.data_size.to_le_bytes());
+    buf.extend_from_slice(FileHeader::DATA_TYPE.as_bytes());
+    if file_header.size == 14 {
+        buf.extend_from_slice(&file_header.crc.to_le_bytes());
+    }
+}
+
+fn write_message_definition_to_vec(buf: &mut Vec<u8>, mesg: &Message, arch: u8) {
     buf.extend_from_slice(&[
         Message::DEFINITION_MASK, // header
         0,                        // reserved
@@ -359,6 +385,96 @@ fn marshal_append_message_definition(buf: &mut Vec<u8>, mesg: &Message, arch: u8
         buf.push(developer_field.value.size() as u8);
         buf.push(developer_field.developer_data_index);
     }
+}
+
+fn write_value_to_vec(w: &mut Vec<u8>, value: &Value, arch: u8) {
+    match value {
+        Value::Int8(v) => w.push(*v as u8),
+        Value::Uint8(v) => w.push(*v),
+        Value::Int16(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::Uint16(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::Int32(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::Uint32(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::String(v) => {
+            let b = v.as_bytes();
+            w.extend_from_slice(b);
+            if b.is_empty() || b[b.len() - 1] != 0 {
+                w.push(0);
+            }
+        }
+        Value::Float32(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::Float64(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::Int64(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::Uint64(v) => w.extend_from_slice(&match arch {
+            0 => v.to_le_bytes(),
+            _ => v.to_be_bytes(),
+        }),
+        Value::VecInt8(v) => w.extend(v.iter().map(|&x| x as u8)),
+        Value::VecUint8(v) => w.extend(v.iter()),
+        Value::VecInt16(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecUint16(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecInt32(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecUint32(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecString(v) => {
+            for x in v {
+                let b = x.as_bytes();
+                w.extend_from_slice(b);
+                if b.is_empty() || b[b.len() - 1] != 0 {
+                    w.push(0);
+                }
+            }
+        }
+        Value::VecFloat32(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecFloat64(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecInt64(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        Value::VecUint64(v) => match arch {
+            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
+            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+        },
+        _ => {} // SAFETY: Value validity has been checked by MessageValidator
+    };
 }
 
 impl Encoder<()> {
@@ -420,7 +536,8 @@ impl Builder {
                     HeaderOption::Compressed(interleave) => interleave.min(3) as usize,
                 } + 1,
             ),
-            buf: Vec::with_capacity(1536),
+            // Fixed capacity, never realloc. [5+1+(3*255)+1+(3*255) = 1537]
+            buf: Vec::with_capacity(1537),
             timestamp_reference: 0,
             options: self.options,
             message_validator: MessageValidator::new(),
@@ -438,10 +555,11 @@ impl Default for Builder {
 mod tests {
     use crate::{
         Encoder,
+        encoder::write_value_to_vec,
         profile::{mesgdef, typedef},
-        proto::Message,
+        proto::{Message, Value},
     };
-    use alloc::vec;
+    use alloc::{borrow::ToOwned, vec, vec::Vec};
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
 
     struct Sink;
@@ -530,5 +648,354 @@ mod tests {
         }
 
         assert_eq!(mesgs, expected);
+    }
+
+    #[test]
+    fn test_write_value_to_vec() {
+        struct Case {
+            value: Value,
+            expected: Vec<u8>,
+            arch: u8,
+        }
+
+        let tt = [
+            Case {
+                value: Value::Int8(1),
+                expected: 1i8.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint8(2),
+                expected: 2u8.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int16(3),
+                expected: 3i16.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint16(4),
+                expected: 4i16.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int32(5),
+                expected: 5i32.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint32(6),
+                expected: 6u32.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Int64(7),
+                expected: 7i64.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Uint64(8),
+                expected: 8u64.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::String("FIT".to_owned()),
+                expected: "FIT\x00".as_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::String("".to_owned()),
+                expected: "\x00".as_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Float32(9.0),
+                expected: 9.0f32.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::Float64(10.0),
+                expected: 10.0f64.to_le_bytes().to_vec(),
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt8(vec![1, 1]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(1u8.to_le_bytes());
+                    v.extend(1i8.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint8(vec![2, 2]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(2u8.to_le_bytes());
+                    v.extend(2u8.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt16(vec![3, 3]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(3i16.to_le_bytes());
+                    v.extend(3i16.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint16(vec![4, 4]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(4u16.to_le_bytes());
+                    v.extend(4u16.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt32(vec![5, 5]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(5i32.to_le_bytes());
+                    v.extend(5i32.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint32(vec![6, 6]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(6u32.to_le_bytes());
+                    v.extend(6u32.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecInt64(vec![7, 7]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(7i64.to_le_bytes());
+                    v.extend(7i64.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecUint64(vec![8, 8]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(8u64.to_le_bytes());
+                    v.extend(8u64.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecString(vec!["FIT".to_owned(), "SDK".to_owned()]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend("FIT\x00".as_bytes());
+                    v.extend("SDK\x00".as_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecString(vec!["".to_owned(), "SDK\x00".to_owned()]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend("\x00".as_bytes());
+                    v.extend("SDK\x00".as_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecFloat32(vec![9.0, 9.0]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(9.0f32.to_le_bytes());
+                    v.extend(9.0f32.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::VecFloat64(vec![10.0, 10.0]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(10.0f64.to_le_bytes());
+                    v.extend(10.0f64.to_le_bytes());
+                    v
+                },
+                arch: 0,
+            },
+            Case {
+                value: Value::Int8(1),
+                expected: 1i8.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint8(2),
+                expected: 2u8.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Int16(3),
+                expected: 3i16.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint16(4),
+                expected: 4i16.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Int32(5),
+                expected: 5i32.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint32(6),
+                expected: 6u32.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Int64(7),
+                expected: 7i64.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Uint64(8),
+                expected: 8u64.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Float32(9.0),
+                expected: 9.0f32.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::Float64(10.0),
+                expected: 10.0f64.to_be_bytes().to_vec(),
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt8(vec![1, 1]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(1u8.to_be_bytes());
+                    v.extend(1i8.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint8(vec![2, 2]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(2u8.to_be_bytes());
+                    v.extend(2u8.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt16(vec![3, 3]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(3i16.to_be_bytes());
+                    v.extend(3i16.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint16(vec![4, 4]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(4u16.to_be_bytes());
+                    v.extend(4u16.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt32(vec![5, 5]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(5i32.to_be_bytes());
+                    v.extend(5i32.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint32(vec![6, 6]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(6u32.to_be_bytes());
+                    v.extend(6u32.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecInt64(vec![7, 7]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(7i64.to_be_bytes());
+                    v.extend(7i64.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecUint64(vec![8, 8]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(8u64.to_be_bytes());
+                    v.extend(8u64.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecFloat32(vec![9.0, 9.0]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(9.0f32.to_be_bytes());
+                    v.extend(9.0f32.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+            Case {
+                value: Value::VecFloat64(vec![10.0, 10.0]),
+                expected: {
+                    let mut v: Vec<u8> = Vec::new();
+                    v.extend(10.0f64.to_be_bytes());
+                    v.extend(10.0f64.to_be_bytes());
+                    v
+                },
+                arch: 1,
+            },
+        ];
+
+        let mut buf: Vec<u8> = Vec::new();
+        for tc in tt {
+            buf.clear();
+            write_value_to_vec(&mut buf, &tc.value, tc.arch);
+            assert_eq!(tc.expected, buf, "input: {:?}", tc.value)
+        }
     }
 }
