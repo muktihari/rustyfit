@@ -204,7 +204,7 @@ impl From<CoursePoint> for Message {
             };
             len += 1;
         }
-        if m.name != String::new() {
+        if !m.name.is_empty() {
             arr[len] = Field {
                 num: 6,
                 profile_type: ProfileType::STRING,

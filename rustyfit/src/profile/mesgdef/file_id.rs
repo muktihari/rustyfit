@@ -166,7 +166,7 @@ impl From<FileId> for Message {
             };
             len += 1;
         }
-        if m.product_name != String::new() {
+        if !m.product_name.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::STRING,

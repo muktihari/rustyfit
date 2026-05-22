@@ -112,7 +112,7 @@ impl From<VideoDescription> for Message {
             };
             len += 1;
         }
-        if m.text != String::new() {
+        if !m.text.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::STRING,

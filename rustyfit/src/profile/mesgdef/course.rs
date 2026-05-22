@@ -107,7 +107,7 @@ impl From<Course> for Message {
             };
             len += 1;
         }
-        if m.name != String::new() {
+        if !m.name.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::STRING,

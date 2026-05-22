@@ -130,7 +130,7 @@ impl From<Software> for Message {
             };
             len += 1;
         }
-        if m.part_number != String::new() {
+        if !m.part_number.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::STRING,

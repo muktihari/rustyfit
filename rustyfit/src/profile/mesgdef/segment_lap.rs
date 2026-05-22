@@ -1853,7 +1853,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.name != String::new() {
+        if !m.name.is_empty() {
             arr[len] = Field {
                 num: 29,
                 profile_type: ProfileType::STRING,
@@ -2177,7 +2177,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.uuid != String::new() {
+        if !m.uuid.is_empty() {
             arr[len] = Field {
                 num: 65,
                 profile_type: ProfileType::STRING,

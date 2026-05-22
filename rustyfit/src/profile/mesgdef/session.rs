@@ -3362,7 +3362,7 @@ impl From<Session> for Message {
             };
             len += 1;
         }
-        if m.opponent_name != String::new() {
+        if !m.opponent_name.is_empty() {
             arr[len] = Field {
                 num: 84,
                 profile_type: ProfileType::STRING,
@@ -3560,7 +3560,7 @@ impl From<Session> for Message {
             };
             len += 1;
         }
-        if m.sport_profile_name != String::new() {
+        if !m.sport_profile_name.is_empty() {
             arr[len] = Field {
                 num: 110,
                 profile_type: ProfileType::STRING,

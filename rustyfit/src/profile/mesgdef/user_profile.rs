@@ -329,7 +329,7 @@ impl From<UserProfile> for Message {
             };
             len += 1;
         }
-        if m.friendly_name != String::new() {
+        if !m.friendly_name.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::STRING,

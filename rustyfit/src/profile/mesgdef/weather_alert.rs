@@ -121,7 +121,7 @@ impl From<WeatherAlert> for Message {
             };
             len += 1;
         }
-        if m.report_id != String::new() {
+        if !m.report_id.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::STRING,

@@ -113,7 +113,7 @@ impl From<NmeaSentence> for Message {
             };
             len += 1;
         }
-        if m.sentence != String::new() {
+        if !m.sentence.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::STRING,

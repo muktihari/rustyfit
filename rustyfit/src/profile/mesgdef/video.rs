@@ -93,7 +93,7 @@ impl From<Video> for Message {
         }; 3];
         let mut len = 0usize;
 
-        if m.url != String::new() {
+        if !m.url.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
@@ -102,7 +102,7 @@ impl From<Video> for Message {
             };
             len += 1;
         }
-        if m.hosting_provider != String::new() {
+        if !m.hosting_provider.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::STRING,

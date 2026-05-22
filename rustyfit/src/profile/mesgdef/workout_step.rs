@@ -201,7 +201,7 @@ impl From<WorkoutStep> for Message {
             };
             len += 1;
         }
-        if m.wkt_step_name != String::new() {
+        if !m.wkt_step_name.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
@@ -273,7 +273,7 @@ impl From<WorkoutStep> for Message {
             };
             len += 1;
         }
-        if m.notes != String::new() {
+        if !m.notes.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::STRING,

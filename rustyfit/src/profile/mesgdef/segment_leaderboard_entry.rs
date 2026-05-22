@@ -146,7 +146,7 @@ impl From<SegmentLeaderboardEntry> for Message {
             };
             len += 1;
         }
-        if m.name != String::new() {
+        if !m.name.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
@@ -191,7 +191,7 @@ impl From<SegmentLeaderboardEntry> for Message {
             };
             len += 1;
         }
-        if m.activity_id_string != String::new() {
+        if !m.activity_id_string.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::STRING,
