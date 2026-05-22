@@ -23,8 +23,6 @@ pub enum Error<E> {
     Io {
         /// I/O error
         err: E,
-        /// Total written
-        n: i64,
     },
     /// Empty messages, no data to be encoded.
     EmptyMessages,
@@ -54,7 +52,7 @@ where
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Self::Io { err, n } => write!(f, "io error: {} at byte pos: {}", err, n),
+            Self::Io { err } => write!(f, "io error: {}", err),
             Self::EmptyMessages => write!(f, "messages is empty"),
             Self::Protocol {
                 mesg_index,
@@ -68,6 +66,12 @@ where
                 err,
             } => write!(f, "mesg: index: {}, num: {}: {}", mesg_index, mesg_num, err),
         }
+    }
+}
+
+impl<E> From<E> for Error<E> {
+    fn from(err: E) -> Self {
+        Self::Io { err }
     }
 }
 
@@ -196,9 +200,7 @@ impl<W: Write + Seek> Encoder<W> {
 
         file_header.marshal_append(buf);
 
-        if let Err(err) = self.writer.write_all(buf) {
-            return Err(Error::Io { err, n: self.n });
-        }
+        self.writer.write_all(buf)?;
         self.n += buf.len() as i64;
 
         Ok(())
@@ -220,18 +222,12 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         let size = self.n - self.last_file_header_pos;
-        if let Err(err) = self.writer.seek(SeekFrom::Current(-size)) {
-            return Err(Error::Io { err, n: self.n });
-        }
+        self.writer.seek(SeekFrom::Current(-size))?;
 
-        if let Err(err) = self.writer.write_all(&buf) {
-            return Err(Error::Io { err, n: self.n });
-        }
+        self.writer.write_all(&buf)?;
 
         let n = buf.len() as i64;
-        if let Err(err) = self.writer.seek(SeekFrom::Current(size - n)) {
-            return Err(Error::Io { err, n: self.n });
-        };
+        self.writer.seek(SeekFrom::Current(size - n))?;
         Ok(())
     }
 
@@ -272,12 +268,10 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         if is_new_mesg_def {
-            if let Err(err) = self.writer.write_all(buf) {
-                return Err(Error::Io { err, n: self.n });
-            }
+            self.writer.write_all(buf)?;
+            self.crc16.write(buf);
             self.n += buf.len() as i64;
             self.data_size += buf.len() as u32;
-            self.crc16.write(&buf);
         }
 
         buf.clear();
@@ -289,12 +283,10 @@ impl<W: Write + Seek> Encoder<W> {
             });
         }
 
-        if let Err(err) = self.writer.write_all(buf) {
-            return Err(Error::Io { err, n: self.n });
-        }
+        self.writer.write_all(buf)?;
+        self.crc16.write(buf);
         self.n += buf.len() as i64;
         self.data_size += buf.len() as u32;
-        self.crc16.write(&buf);
 
         Ok(())
     }
@@ -322,10 +314,8 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn encode_crc(&mut self) -> Result<(), Error<W::Error>> {
-        let crc = self.crc16.sum16().to_le_bytes();
-        if let Err(err) = self.writer.write_all(&crc) {
-            return Err(Error::Io { err, n: self.n });
-        }
+        let crc = self.crc16.sum16();
+        self.writer.write_all(&crc.to_le_bytes())?;
         self.n += 2;
         self.crc16.reset();
         Ok(())

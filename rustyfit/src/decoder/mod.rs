@@ -23,22 +23,17 @@ pub enum Error<E> {
     Io {
         /// I/O error
         err: E,
-        /// Byte position
-        n: usize,
     },
     /// Unexpected EOF occurs during process.
-    UnexpectedEof {
-        /// Byte position
-        n: usize,
-    },
+    UnexpectedEof,
     /// File Header's size is not 12 or 14, or data_type is not `.FIT`.
     NotFITFile,
     /// Checksum mismatch either in File Header or in record data.
     ChecksumMismatch {
         /// Expected CRC retrieved from FIT File.
-        expected: u16,
+        found: u16,
         /// Actual CRC calculated by Decoder
-        got: u16,
+        calculated: u16,
     },
     /// Missing message definition for the current message data.
     MissingMessageDefinition {
@@ -53,11 +48,15 @@ where
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Self::Io { err, n } => write!(f, "io error: {} at byte pos: {}", err, n),
-            Self::UnexpectedEof { n } => write!(f, "unexpected EOF at byte pos: {}", n),
+            Self::Io { err } => write!(f, "io error: {}", err),
+            Self::UnexpectedEof => write!(f, "unexpected EOF"),
             Self::NotFITFile => write!(f, "not a FIT file"),
-            Self::ChecksumMismatch { expected, got } => {
-                write!(f, "checksum mismatch, expected {} got {}", expected, got)
+            Self::ChecksumMismatch { found, calculated } => {
+                write!(
+                    f,
+                    "checksum mismatch, found {} calculated {}",
+                    found, calculated
+                )
             }
             Self::MissingMessageDefinition { local_mesg_num } => write!(
                 f,
@@ -65,6 +64,12 @@ where
                 local_mesg_num
             ),
         }
+    }
+}
+
+impl<E> From<E> for Error<E> {
+    fn from(err: E) -> Self {
+        Self::Io { err }
     }
 }
 
@@ -162,9 +167,9 @@ impl<R: Read> Decoder<R> {
                     if self.n > 0 {
                         return Ok(None);
                     }
-                    return Err(Error::UnexpectedEof { n: self.n });
+                    return Err(Error::UnexpectedEof);
                 }
-                ReadExactError::Other(err) => return Err(Error::Io { err, n: self.n }),
+                ReadExactError::Other(err) => return Err(Error::Io { err }),
             }
         };
         self.n += 1;
@@ -176,8 +181,8 @@ impl<R: Read> Decoder<R> {
 
         if let Err(err) = self.reader.read_exact(&mut arr[1..n]) {
             return Err(match err {
-                ReadExactError::UnexpectedEof => Error::UnexpectedEof { n: self.n },
-                ReadExactError::Other(err) => Error::Io { err, n: self.n },
+                ReadExactError::UnexpectedEof => Error::UnexpectedEof,
+                ReadExactError::Other(err) => Error::Io { err },
             });
         }
         self.n += n - 1;
@@ -195,8 +200,8 @@ impl<R: Read> Decoder<R> {
             self.crc16.write(&arr[..12]);
             if self.options.checksum && crc != self.crc16.sum16() {
                 return Err(Error::ChecksumMismatch {
-                    expected: crc,
-                    got: self.crc16.sum16(),
+                    found: crc,
+                    calculated: self.crc16.sum16(),
                 });
             }
             self.crc16.reset();
@@ -216,8 +221,8 @@ impl<R: Read> Decoder<R> {
     fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error<R::Error>> {
         if let Err(err) = self.reader.read_exact(buf) {
             return Err(match err {
-                ReadExactError::UnexpectedEof => Error::UnexpectedEof { n: self.n },
-                ReadExactError::Other(err) => Error::Io { err, n: self.n },
+                ReadExactError::UnexpectedEof => Error::UnexpectedEof,
+                ReadExactError::Other(err) => Error::Io { err },
             });
         };
         self.n += buf.len();
@@ -585,8 +590,8 @@ impl<R: Read> Decoder<R> {
         let mut arr = [0u8; 2];
         if let Err(err) = self.reader.read_exact(&mut arr) {
             return Err(match err {
-                ReadExactError::UnexpectedEof => Error::UnexpectedEof { n: self.n },
-                ReadExactError::Other(err) => Error::Io { err, n: self.n },
+                ReadExactError::UnexpectedEof => Error::UnexpectedEof,
+                ReadExactError::Other(err) => Error::Io { err },
             });
         };
         self.n += arr.len();
@@ -594,8 +599,8 @@ impl<R: Read> Decoder<R> {
         let crc = u16::from_le_bytes(arr);
         if self.options.checksum && crc != self.crc16.sum16() {
             return Err(Error::ChecksumMismatch {
-                expected: crc,
-                got: self.crc16.sum16(),
+                found: crc,
+                calculated: self.crc16.sum16(),
             });
         }
         Ok(crc)
