@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -87,14 +87,14 @@ impl TimeInZone {
             timestamp: typedef::DateTime(u32::MAX),
             reference_mesg: typedef::MesgNum(u16::MAX),
             reference_index: typedef::MessageIndex(u16::MAX),
-            time_in_hr_zone: Vec::<u32>::new(),
-            time_in_speed_zone: Vec::<u32>::new(),
-            time_in_cadence_zone: Vec::<u32>::new(),
-            time_in_power_zone: Vec::<u32>::new(),
-            hr_zone_high_boundary: Vec::<u8>::new(),
-            speed_zone_high_boundary: Vec::<u16>::new(),
-            cadence_zone_high_boundary: Vec::<u8>::new(),
-            power_zone_high_boundary: Vec::<u16>::new(),
+            time_in_hr_zone: Vec::new(),
+            time_in_speed_zone: Vec::new(),
+            time_in_cadence_zone: Vec::new(),
+            time_in_power_zone: Vec::new(),
+            hr_zone_high_boundary: Vec::new(),
+            speed_zone_high_boundary: Vec::new(),
+            cadence_zone_high_boundary: Vec::new(),
+            power_zone_high_boundary: Vec::new(),
             hr_calc_type: typedef::HrZoneCalc(u8::MAX),
             max_heart_rate: u8::MAX,
             resting_heart_rate: u8::MAX,
@@ -108,7 +108,7 @@ impl TimeInZone {
 
     /// Returns `time_in_hr_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_hr_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_hr_zone == Vec::<u32>::new() {
+        if self.time_in_hr_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_hr_zone.len());
@@ -138,7 +138,7 @@ impl TimeInZone {
 
     /// Returns `time_in_speed_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_speed_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_speed_zone == Vec::<u32>::new() {
+        if self.time_in_speed_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_speed_zone.len());
@@ -168,7 +168,7 @@ impl TimeInZone {
 
     /// Returns `time_in_cadence_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_cadence_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_cadence_zone == Vec::<u32>::new() {
+        if self.time_in_cadence_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_cadence_zone.len());
@@ -198,7 +198,7 @@ impl TimeInZone {
 
     /// Returns `time_in_power_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_power_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_power_zone == Vec::<u32>::new() {
+        if self.time_in_power_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_power_zone.len());
@@ -228,7 +228,7 @@ impl TimeInZone {
 
     /// Returns `speed_zone_high_boundary` in its scaled value. It returns invalid f64 when value is valid.
     pub fn speed_zone_high_boundary_scaled(&self) -> Vec<f64> {
-        if self.speed_zone_high_boundary == Vec::<u16>::new() {
+        if self.speed_zone_high_boundary.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.speed_zone_high_boundary.len());
@@ -266,14 +266,14 @@ impl Default for TimeInZone {
 impl From<&Message> for TimeInZone {
     /// from creates new TimeInZone struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [65535, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -287,14 +287,14 @@ impl From<&Message> for TimeInZone {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             reference_mesg: typedef::MesgNum(vals[0].as_u16()),
             reference_index: typedef::MessageIndex(vals[1].as_u16()),
-            time_in_hr_zone: vals[2].as_vec_u32(),
-            time_in_speed_zone: vals[3].as_vec_u32(),
-            time_in_cadence_zone: vals[4].as_vec_u32(),
-            time_in_power_zone: vals[5].as_vec_u32(),
-            hr_zone_high_boundary: vals[6].as_vec_u8(),
-            speed_zone_high_boundary: vals[7].as_vec_u16(),
-            cadence_zone_high_boundary: vals[8].as_vec_u8(),
-            power_zone_high_boundary: vals[9].as_vec_u16(),
+            time_in_hr_zone: vals[2].to_vec_u32(),
+            time_in_speed_zone: vals[3].to_vec_u32(),
+            time_in_cadence_zone: vals[4].to_vec_u32(),
+            time_in_power_zone: vals[5].to_vec_u32(),
+            hr_zone_high_boundary: vals[6].to_vec_u8(),
+            speed_zone_high_boundary: vals[7].to_vec_u16(),
+            cadence_zone_high_boundary: vals[8].to_vec_u8(),
+            power_zone_high_boundary: vals[9].to_vec_u16(),
             hr_calc_type: typedef::HrZoneCalc(vals[10].as_u8()),
             max_heart_rate: vals[11].as_u8(),
             resting_heart_rate: vals[12].as_u8(),
@@ -346,7 +346,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.time_in_hr_zone != Vec::<u32>::new() {
+        if !m.time_in_hr_zone.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
@@ -355,7 +355,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.time_in_speed_zone != Vec::<u32>::new() {
+        if !m.time_in_speed_zone.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
@@ -364,7 +364,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.time_in_cadence_zone != Vec::<u32>::new() {
+        if !m.time_in_cadence_zone.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
@@ -373,7 +373,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.time_in_power_zone != Vec::<u32>::new() {
+        if !m.time_in_power_zone.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
@@ -382,7 +382,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.hr_zone_high_boundary != Vec::<u8>::new() {
+        if !m.hr_zone_high_boundary.is_empty() {
             arr[len] = Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
@@ -391,7 +391,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.speed_zone_high_boundary != Vec::<u16>::new() {
+        if !m.speed_zone_high_boundary.is_empty() {
             arr[len] = Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
@@ -400,7 +400,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.cadence_zone_high_boundary != Vec::<u8>::new() {
+        if !m.cadence_zone_high_boundary.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
@@ -409,7 +409,7 @@ impl From<TimeInZone> for Message {
             };
             len += 1;
         }
-        if m.power_zone_high_boundary != Vec::<u16>::new() {
+        if !m.power_zone_high_boundary.is_empty() {
             arr[len] = Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
@@ -473,11 +473,11 @@ impl From<TimeInZone> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::TIME_IN_ZONE,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

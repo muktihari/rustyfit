@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -125,8 +125,8 @@ impl Length {
             length_type: typedef::LengthType(u8::MAX),
             player_score: u16::MAX,
             opponent_score: u16::MAX,
-            stroke_count: Vec::<u16>::new(),
-            zone_count: Vec::<u16>::new(),
+            stroke_count: Vec::new(),
+            zone_count: Vec::new(),
             enhanced_avg_respiration_rate: u16::MAX,
             enhanced_max_respiration_rate: u16::MAX,
             avg_respiration_rate: u8::MAX,
@@ -262,7 +262,7 @@ impl Default for Length {
 impl From<&Message> for Length {
     /// from creates new Length struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
         let mut state = [0u8; 3];
 
         const KNOWN_NUMS: [u64; 4] = [66854655, 0, 0, 6917529027641081856];
@@ -270,7 +270,7 @@ impl From<&Message> for Length {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -300,8 +300,8 @@ impl From<&Message> for Length {
             length_type: typedef::LengthType(vals[12].as_u8()),
             player_score: vals[18].as_u16(),
             opponent_score: vals[19].as_u16(),
-            stroke_count: vals[20].as_vec_u16(),
-            zone_count: vals[21].as_vec_u16(),
+            stroke_count: vals[20].to_vec_u16(),
+            zone_count: vals[21].to_vec_u16(),
             enhanced_avg_respiration_rate: vals[22].as_u16(),
             enhanced_max_respiration_rate: vals[23].as_u16(),
             avg_respiration_rate: vals[24].as_u8(),
@@ -470,7 +470,7 @@ impl From<Length> for Message {
             };
             len += 1;
         }
-        if m.stroke_count != Vec::<u16>::new() {
+        if !m.stroke_count.is_empty() {
             arr[len] = Field {
                 num: 20,
                 profile_type: ProfileType::UINT16,
@@ -479,7 +479,7 @@ impl From<Length> for Message {
             };
             len += 1;
         }
-        if m.zone_count != Vec::<u16>::new() {
+        if !m.zone_count.is_empty() {
             arr[len] = Field {
                 num: 21,
                 profile_type: ProfileType::UINT16,
@@ -525,11 +525,11 @@ impl From<Length> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::LENGTH,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

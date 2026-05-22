@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -449,10 +449,10 @@ impl SegmentLap {
             avg_neg_vertical_speed: i16::MAX,
             max_pos_vertical_speed: i16::MAX,
             max_neg_vertical_speed: i16::MAX,
-            time_in_hr_zone: Vec::<u32>::new(),
-            time_in_speed_zone: Vec::<u32>::new(),
-            time_in_cadence_zone: Vec::<u32>::new(),
-            time_in_power_zone: Vec::<u32>::new(),
+            time_in_hr_zone: Vec::new(),
+            time_in_speed_zone: Vec::new(),
+            time_in_cadence_zone: Vec::new(),
+            time_in_power_zone: Vec::new(),
             repetition_num: u16::MAX,
             min_altitude: u16::MAX,
             min_heart_rate: u8::MAX,
@@ -475,14 +475,14 @@ impl SegmentLap {
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::<u8>::new(),
-            avg_left_power_phase_peak: Vec::<u8>::new(),
-            avg_right_power_phase: Vec::<u8>::new(),
-            avg_right_power_phase_peak: Vec::<u8>::new(),
-            avg_power_position: Vec::<u16>::new(),
-            max_power_position: Vec::<u16>::new(),
-            avg_cadence_position: Vec::<u8>::new(),
-            max_cadence_position: Vec::<u8>::new(),
+            avg_left_power_phase: Vec::new(),
+            avg_left_power_phase_peak: Vec::new(),
+            avg_right_power_phase: Vec::new(),
+            avg_right_power_phase_peak: Vec::new(),
+            avg_power_position: Vec::new(),
+            max_power_position: Vec::new(),
+            avg_cadence_position: Vec::new(),
+            max_cadence_position: Vec::new(),
             manufacturer: typedef::Manufacturer(u16::MAX),
             total_grit: f32::MAX,
             total_flow: f32::MAX,
@@ -864,7 +864,7 @@ impl SegmentLap {
 
     /// Returns `time_in_hr_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_hr_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_hr_zone == Vec::<u32>::new() {
+        if self.time_in_hr_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_hr_zone.len());
@@ -894,7 +894,7 @@ impl SegmentLap {
 
     /// Returns `time_in_speed_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_speed_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_speed_zone == Vec::<u32>::new() {
+        if self.time_in_speed_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_speed_zone.len());
@@ -924,7 +924,7 @@ impl SegmentLap {
 
     /// Returns `time_in_cadence_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_cadence_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_cadence_zone == Vec::<u32>::new() {
+        if self.time_in_cadence_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_cadence_zone.len());
@@ -954,7 +954,7 @@ impl SegmentLap {
 
     /// Returns `time_in_power_zone` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_in_power_zone_scaled(&self) -> Vec<f64> {
-        if self.time_in_power_zone == Vec::<u32>::new() {
+        if self.time_in_power_zone.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_in_power_zone.len());
@@ -1193,7 +1193,7 @@ impl SegmentLap {
 
     /// Returns `avg_left_power_phase` in its scaled value. It returns invalid f64 when value is valid.
     pub fn avg_left_power_phase_scaled(&self) -> Vec<f64> {
-        if self.avg_left_power_phase == Vec::<u8>::new() {
+        if self.avg_left_power_phase.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.avg_left_power_phase.len());
@@ -1223,7 +1223,7 @@ impl SegmentLap {
 
     /// Returns `avg_left_power_phase_peak` in its scaled value. It returns invalid f64 when value is valid.
     pub fn avg_left_power_phase_peak_scaled(&self) -> Vec<f64> {
-        if self.avg_left_power_phase_peak == Vec::<u8>::new() {
+        if self.avg_left_power_phase_peak.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.avg_left_power_phase_peak.len());
@@ -1253,7 +1253,7 @@ impl SegmentLap {
 
     /// Returns `avg_right_power_phase` in its scaled value. It returns invalid f64 when value is valid.
     pub fn avg_right_power_phase_scaled(&self) -> Vec<f64> {
-        if self.avg_right_power_phase == Vec::<u8>::new() {
+        if self.avg_right_power_phase.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.avg_right_power_phase.len());
@@ -1283,7 +1283,7 @@ impl SegmentLap {
 
     /// Returns `avg_right_power_phase_peak` in its scaled value. It returns invalid f64 when value is valid.
     pub fn avg_right_power_phase_peak_scaled(&self) -> Vec<f64> {
-        if self.avg_right_power_phase_peak == Vec::<u8>::new() {
+        if self.avg_right_power_phase_peak.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.avg_right_power_phase_peak.len());
@@ -1436,7 +1436,7 @@ impl Default for SegmentLap {
 impl From<&Message> for SegmentLap {
     /// from creates new SegmentLap struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
         let mut state = [0u8; 12];
 
         const KNOWN_NUMS: [u64; 4] = [18446744073709551615, 1056964607, 0, 6917529027641081856];
@@ -1444,7 +1444,7 @@ impl From<&Message> for SegmentLap {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -1489,7 +1489,7 @@ impl From<&Message> for SegmentLap {
             nec_long: vals[26].as_i32(),
             swc_lat: vals[27].as_i32(),
             swc_long: vals[28].as_i32(),
-            name: vals[29].as_string(),
+            name: vals[29].to_string(),
             normalized_power: vals[30].as_u16(),
             left_right_balance: typedef::LeftRightBalance100(vals[31].as_u16()),
             sub_sport: typedef::SubSport(vals[32].as_u8()),
@@ -1509,10 +1509,10 @@ impl From<&Message> for SegmentLap {
             avg_neg_vertical_speed: vals[46].as_i16(),
             max_pos_vertical_speed: vals[47].as_i16(),
             max_neg_vertical_speed: vals[48].as_i16(),
-            time_in_hr_zone: vals[49].as_vec_u32(),
-            time_in_speed_zone: vals[50].as_vec_u32(),
-            time_in_cadence_zone: vals[51].as_vec_u32(),
-            time_in_power_zone: vals[52].as_vec_u32(),
+            time_in_hr_zone: vals[49].to_vec_u32(),
+            time_in_speed_zone: vals[50].to_vec_u32(),
+            time_in_cadence_zone: vals[51].to_vec_u32(),
+            time_in_power_zone: vals[52].to_vec_u32(),
             repetition_num: vals[53].as_u16(),
             min_altitude: vals[54].as_u16(),
             min_heart_rate: vals[55].as_u8(),
@@ -1525,7 +1525,7 @@ impl From<&Message> for SegmentLap {
             avg_right_pedal_smoothness: vals[62].as_u8(),
             avg_combined_pedal_smoothness: vals[63].as_u8(),
             status: typedef::SegmentLapStatus(vals[64].as_u8()),
-            uuid: vals[65].as_string(),
+            uuid: vals[65].to_string(),
             avg_fractional_cadence: vals[66].as_u8(),
             max_fractional_cadence: vals[67].as_u8(),
             total_fractional_cycles: vals[68].as_u8(),
@@ -1535,14 +1535,14 @@ impl From<&Message> for SegmentLap {
             stand_count: vals[72].as_u16(),
             avg_left_pco: vals[73].as_i8(),
             avg_right_pco: vals[74].as_i8(),
-            avg_left_power_phase: vals[75].as_vec_u8(),
-            avg_left_power_phase_peak: vals[76].as_vec_u8(),
-            avg_right_power_phase: vals[77].as_vec_u8(),
-            avg_right_power_phase_peak: vals[78].as_vec_u8(),
-            avg_power_position: vals[79].as_vec_u16(),
-            max_power_position: vals[80].as_vec_u16(),
-            avg_cadence_position: vals[81].as_vec_u8(),
-            max_cadence_position: vals[82].as_vec_u8(),
+            avg_left_power_phase: vals[75].to_vec_u8(),
+            avg_left_power_phase_peak: vals[76].to_vec_u8(),
+            avg_right_power_phase: vals[77].to_vec_u8(),
+            avg_right_power_phase_peak: vals[78].to_vec_u8(),
+            avg_power_position: vals[79].to_vec_u16(),
+            max_power_position: vals[80].to_vec_u16(),
+            avg_cadence_position: vals[81].to_vec_u8(),
+            max_cadence_position: vals[82].to_vec_u8(),
             manufacturer: typedef::Manufacturer(vals[83].as_u16()),
             total_grit: vals[84].as_f32(),
             total_flow: vals[85].as_f32(),
@@ -2032,7 +2032,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.time_in_hr_zone != Vec::<u32>::new() {
+        if !m.time_in_hr_zone.is_empty() {
             arr[len] = Field {
                 num: 49,
                 profile_type: ProfileType::UINT32,
@@ -2041,7 +2041,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.time_in_speed_zone != Vec::<u32>::new() {
+        if !m.time_in_speed_zone.is_empty() {
             arr[len] = Field {
                 num: 50,
                 profile_type: ProfileType::UINT32,
@@ -2050,7 +2050,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.time_in_cadence_zone != Vec::<u32>::new() {
+        if !m.time_in_cadence_zone.is_empty() {
             arr[len] = Field {
                 num: 51,
                 profile_type: ProfileType::UINT32,
@@ -2059,7 +2059,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.time_in_power_zone != Vec::<u32>::new() {
+        if !m.time_in_power_zone.is_empty() {
             arr[len] = Field {
                 num: 52,
                 profile_type: ProfileType::UINT32,
@@ -2266,7 +2266,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.avg_left_power_phase != Vec::<u8>::new() {
+        if !m.avg_left_power_phase.is_empty() {
             arr[len] = Field {
                 num: 75,
                 profile_type: ProfileType::UINT8,
@@ -2275,7 +2275,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.avg_left_power_phase_peak != Vec::<u8>::new() {
+        if !m.avg_left_power_phase_peak.is_empty() {
             arr[len] = Field {
                 num: 76,
                 profile_type: ProfileType::UINT8,
@@ -2284,7 +2284,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.avg_right_power_phase != Vec::<u8>::new() {
+        if !m.avg_right_power_phase.is_empty() {
             arr[len] = Field {
                 num: 77,
                 profile_type: ProfileType::UINT8,
@@ -2293,7 +2293,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.avg_right_power_phase_peak != Vec::<u8>::new() {
+        if !m.avg_right_power_phase_peak.is_empty() {
             arr[len] = Field {
                 num: 78,
                 profile_type: ProfileType::UINT8,
@@ -2302,7 +2302,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.avg_power_position != Vec::<u16>::new() {
+        if !m.avg_power_position.is_empty() {
             arr[len] = Field {
                 num: 79,
                 profile_type: ProfileType::UINT16,
@@ -2311,7 +2311,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.max_power_position != Vec::<u16>::new() {
+        if !m.max_power_position.is_empty() {
             arr[len] = Field {
                 num: 80,
                 profile_type: ProfileType::UINT16,
@@ -2320,7 +2320,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.avg_cadence_position != Vec::<u8>::new() {
+        if !m.avg_cadence_position.is_empty() {
             arr[len] = Field {
                 num: 81,
                 profile_type: ProfileType::UINT8,
@@ -2329,7 +2329,7 @@ impl From<SegmentLap> for Message {
             };
             len += 1;
         }
-        if m.max_cadence_position != Vec::<u8>::new() {
+        if !m.max_cadence_position.is_empty() {
             arr[len] = Field {
                 num: 82,
                 profile_type: ProfileType::UINT8,
@@ -2429,11 +2429,11 @@ impl From<SegmentLap> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_LAP,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

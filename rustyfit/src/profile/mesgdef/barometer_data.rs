@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -42,8 +42,8 @@ impl BarometerData {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::<u16>::new(),
-            baro_pres: Vec::<u32>::new(),
+            sample_time_offset: Vec::new(),
+            baro_pres: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -59,14 +59,14 @@ impl Default for BarometerData {
 impl From<&Message> for BarometerData {
     /// from creates new BarometerData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [7, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -79,8 +79,8 @@ impl From<&Message> for BarometerData {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
-            sample_time_offset: vals[1].as_vec_u16(),
-            baro_pres: vals[2].as_vec_u32(),
+            sample_time_offset: vals[1].to_vec_u16(),
+            baro_pres: vals[2].to_vec_u32(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }
@@ -117,7 +117,7 @@ impl From<BarometerData> for Message {
             };
             len += 1;
         }
-        if m.sample_time_offset != Vec::<u16>::new() {
+        if !m.sample_time_offset.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
@@ -126,7 +126,7 @@ impl From<BarometerData> for Message {
             };
             len += 1;
         }
-        if m.baro_pres != Vec::<u32>::new() {
+        if !m.baro_pres.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
@@ -136,11 +136,11 @@ impl From<BarometerData> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::BAROMETER_DATA,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

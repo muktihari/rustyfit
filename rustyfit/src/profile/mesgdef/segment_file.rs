@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -64,10 +64,10 @@ impl SegmentFile {
             file_uuid: String::new(),
             enabled: typedef::Bool(u8::MAX),
             user_profile_primary_key: u32::MAX,
-            leader_type: Vec::<typedef::SegmentLeaderboardType>::new(),
-            leader_group_primary_key: Vec::<u32>::new(),
-            leader_activity_id: Vec::<u32>::new(),
-            leader_activity_id_string: Vec::<String>::new(),
+            leader_type: Vec::new(),
+            leader_group_primary_key: Vec::new(),
+            leader_activity_id: Vec::new(),
+            leader_activity_id_string: Vec::new(),
             default_race_leader: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -84,14 +84,14 @@ impl Default for SegmentFile {
 impl From<&Message> for SegmentFile {
     /// from creates new SegmentFile struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
 
         const KNOWN_NUMS: [u64; 4] = [3994, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -103,22 +103,20 @@ impl From<&Message> for SegmentFile {
 
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            file_uuid: vals[1].as_string(),
+            file_uuid: vals[1].to_string(),
             enabled: typedef::Bool(vals[3].as_u8()),
             user_profile_primary_key: vals[4].as_u32(),
             leader_type: match &vals[7] {
                 Value::VecUint8(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::SegmentLeaderboardType(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::SegmentLeaderboardType(x)));
                     vs
                 }
                 _ => Vec::new(),
             },
-            leader_group_primary_key: vals[8].as_vec_u32(),
-            leader_activity_id: vals[9].as_vec_u32(),
-            leader_activity_id_string: vals[10].as_vec_string(),
+            leader_group_primary_key: vals[8].to_vec_u32(),
+            leader_activity_id: vals[9].to_vec_u32(),
+            leader_activity_id_string: vals[10].to_vec_string(),
             default_race_leader: vals[11].as_u8(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -174,7 +172,7 @@ impl From<SegmentFile> for Message {
             };
             len += 1;
         }
-        if m.leader_type != Vec::<typedef::SegmentLeaderboardType>::new() {
+        if !m.leader_type.is_empty() {
             arr[len] = Field {
                 num: 7,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
@@ -186,7 +184,7 @@ impl From<SegmentFile> for Message {
             };
             len += 1;
         }
-        if m.leader_group_primary_key != Vec::<u32>::new() {
+        if !m.leader_group_primary_key.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::UINT32,
@@ -195,7 +193,7 @@ impl From<SegmentFile> for Message {
             };
             len += 1;
         }
-        if m.leader_activity_id != Vec::<u32>::new() {
+        if !m.leader_activity_id.is_empty() {
             arr[len] = Field {
                 num: 9,
                 profile_type: ProfileType::UINT32,
@@ -204,7 +202,7 @@ impl From<SegmentFile> for Message {
             };
             len += 1;
         }
-        if m.leader_activity_id_string != Vec::<String>::new() {
+        if !m.leader_activity_id_string.is_empty() {
             arr[len] = Field {
                 num: 10,
                 profile_type: ProfileType::STRING,
@@ -223,11 +221,11 @@ impl From<SegmentFile> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_FILE,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

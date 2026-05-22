@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -68,12 +68,12 @@ impl FieldDescription {
             developer_data_index: u8::MAX,
             field_definition_number: u8::MAX,
             fit_base_type_id: typedef::FitBaseType(u8::MAX),
-            field_name: Vec::<String>::new(),
+            field_name: Vec::new(),
             array: u8::MAX,
             components: String::new(),
             scale: u8::MAX,
             offset: i8::MAX,
-            units: Vec::<String>::new(),
+            units: Vec::new(),
             bits: String::new(),
             accumulate: String::new(),
             fit_base_unit_id: typedef::FitBaseUnit(u16::MAX),
@@ -93,14 +93,14 @@ impl Default for FieldDescription {
 impl From<&Message> for FieldDescription {
     /// from creates new FieldDescription struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 16] = [const { &Value::Invalid }; 16];
+        let mut vals = [const { &Value::Invalid }; 16];
 
         const KNOWN_NUMS: [u64; 4] = [59391, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -114,14 +114,14 @@ impl From<&Message> for FieldDescription {
             developer_data_index: vals[0].as_u8(),
             field_definition_number: vals[1].as_u8(),
             fit_base_type_id: typedef::FitBaseType(vals[2].as_u8()),
-            field_name: vals[3].as_vec_string(),
+            field_name: vals[3].to_vec_string(),
             array: vals[4].as_u8(),
-            components: vals[5].as_string(),
+            components: vals[5].to_string(),
             scale: vals[6].as_u8(),
             offset: vals[7].as_i8(),
-            units: vals[8].as_vec_string(),
-            bits: vals[9].as_string(),
-            accumulate: vals[10].as_string(),
+            units: vals[8].to_vec_string(),
+            bits: vals[9].to_string(),
+            accumulate: vals[10].to_string(),
             fit_base_unit_id: typedef::FitBaseUnit(vals[13].as_u16()),
             native_mesg_num: typedef::MesgNum(vals[14].as_u16()),
             native_field_num: vals[15].as_u8(),
@@ -169,7 +169,7 @@ impl From<FieldDescription> for Message {
             };
             len += 1;
         }
-        if m.field_name != Vec::<String>::new() {
+        if !m.field_name.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::STRING,
@@ -214,7 +214,7 @@ impl From<FieldDescription> for Message {
             };
             len += 1;
         }
-        if m.units != Vec::<String>::new() {
+        if !m.units.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::STRING,
@@ -269,11 +269,11 @@ impl From<FieldDescription> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::FIELD_DESCRIPTION,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

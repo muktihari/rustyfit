@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -66,14 +66,14 @@ impl Default for FileCapabilities {
 impl From<&Message> for FileCapabilities {
     /// from creates new FileCapabilities struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
 
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -87,7 +87,7 @@ impl From<&Message> for FileCapabilities {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
             r#type: typedef::File(vals[0].as_u8()),
             flags: typedef::FileFlags(vals[1].as_u8z()),
-            directory: vals[2].as_string(),
+            directory: vals[2].to_string(),
             max_count: vals[3].as_u16(),
             max_size: vals[4].as_u32(),
             unknown_fields,
@@ -163,11 +163,11 @@ impl From<FileCapabilities> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::FILE_CAPABILITIES,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

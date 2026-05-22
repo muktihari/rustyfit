@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -28,7 +28,7 @@ impl Hrv {
     /// Create new Hrv with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
         Self {
-            time: Vec::<u16>::new(),
+            time: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -36,7 +36,7 @@ impl Hrv {
 
     /// Returns `time` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_scaled(&self) -> Vec<f64> {
-        if self.time == Vec::<u16>::new() {
+        if self.time.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time.len());
@@ -74,14 +74,14 @@ impl Default for Hrv {
 impl From<&Message> for Hrv {
     /// from creates new Hrv struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 1] = [const { &Value::Invalid }; 1];
+        let mut vals = [const { &Value::Invalid }; 1];
 
         const KNOWN_NUMS: [u64; 4] = [1, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -92,7 +92,7 @@ impl From<&Message> for Hrv {
         }
 
         Self {
-            time: vals[0].as_vec_u16(),
+            time: vals[0].to_vec_u16(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }
@@ -111,7 +111,7 @@ impl From<Hrv> for Message {
         }; 1];
         let mut len = 0usize;
 
-        if m.time != Vec::<u16>::new() {
+        if !m.time.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
@@ -121,11 +121,11 @@ impl From<Hrv> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::HRV,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

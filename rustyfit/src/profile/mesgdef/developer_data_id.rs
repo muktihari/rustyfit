@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -37,8 +37,8 @@ impl DeveloperDataId {
     /// Create new DeveloperDataId with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
         Self {
-            developer_id: Vec::<u8>::new(),
-            application_id: Vec::<u8>::new(),
+            developer_id: Vec::new(),
+            application_id: Vec::new(),
             manufacturer_id: typedef::Manufacturer(u16::MAX),
             developer_data_index: u8::MAX,
             application_version: u32::MAX,
@@ -56,14 +56,14 @@ impl Default for DeveloperDataId {
 impl From<&Message> for DeveloperDataId {
     /// from creates new DeveloperDataId struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 5] = [const { &Value::Invalid }; 5];
+        let mut vals = [const { &Value::Invalid }; 5];
 
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -74,8 +74,8 @@ impl From<&Message> for DeveloperDataId {
         }
 
         Self {
-            developer_id: vals[0].as_vec_u8(),
-            application_id: vals[1].as_vec_u8(),
+            developer_id: vals[0].to_vec_u8(),
+            application_id: vals[1].to_vec_u8(),
             manufacturer_id: typedef::Manufacturer(vals[2].as_u16()),
             developer_data_index: vals[3].as_u8(),
             application_version: vals[4].as_u32(),
@@ -96,7 +96,7 @@ impl From<DeveloperDataId> for Message {
         }; 5];
         let mut len = 0usize;
 
-        if m.developer_id != Vec::<u8>::new() {
+        if !m.developer_id.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::BYTE,
@@ -105,7 +105,7 @@ impl From<DeveloperDataId> for Message {
             };
             len += 1;
         }
-        if m.application_id != Vec::<u8>::new() {
+        if !m.application_id.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::BYTE,
@@ -142,11 +142,11 @@ impl From<DeveloperDataId> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::DEVELOPER_DATA_ID,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

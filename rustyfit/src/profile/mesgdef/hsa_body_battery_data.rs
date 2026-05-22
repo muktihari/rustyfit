@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -46,9 +46,9 @@ impl HsaBodyBatteryData {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            level: Vec::<i8>::new(),
-            charged: Vec::<i16>::new(),
-            uncharged: Vec::<i16>::new(),
+            level: Vec::new(),
+            charged: Vec::new(),
+            uncharged: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -64,14 +64,14 @@ impl Default for HsaBodyBatteryData {
 impl From<&Message> for HsaBodyBatteryData {
     /// from creates new HsaBodyBatteryData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [15, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -84,9 +84,9 @@ impl From<&Message> for HsaBodyBatteryData {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             processing_interval: vals[0].as_u16(),
-            level: vals[1].as_vec_i8(),
-            charged: vals[2].as_vec_i16(),
-            uncharged: vals[3].as_vec_i16(),
+            level: vals[1].to_vec_i8(),
+            charged: vals[2].to_vec_i16(),
+            uncharged: vals[3].to_vec_i16(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }
@@ -123,7 +123,7 @@ impl From<HsaBodyBatteryData> for Message {
             };
             len += 1;
         }
-        if m.level != Vec::<i8>::new() {
+        if !m.level.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::SINT8,
@@ -132,7 +132,7 @@ impl From<HsaBodyBatteryData> for Message {
             };
             len += 1;
         }
-        if m.charged != Vec::<i16>::new() {
+        if !m.charged.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::SINT16,
@@ -141,7 +141,7 @@ impl From<HsaBodyBatteryData> for Message {
             };
             len += 1;
         }
-        if m.uncharged != Vec::<i16>::new() {
+        if !m.uncharged.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::SINT16,
@@ -151,11 +151,11 @@ impl From<HsaBodyBatteryData> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::HSA_BODY_BATTERY_DATA,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

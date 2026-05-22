@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -119,18 +119,18 @@ impl DeviceSettings {
         Self {
             active_time_zone: u8::MAX,
             utc_offset: u32::MAX,
-            time_offset: Vec::<u32>::new(),
-            time_mode: Vec::<typedef::TimeMode>::new(),
-            time_zone_offset: Vec::<i8>::new(),
+            time_offset: Vec::new(),
+            time_mode: Vec::new(),
+            time_zone_offset: Vec::new(),
             backlight_mode: typedef::BacklightMode(u8::MAX),
             activity_tracker_enabled: typedef::Bool(u8::MAX),
             clock_time: typedef::DateTime(u32::MAX),
-            pages_enabled: Vec::<u16>::new(),
+            pages_enabled: Vec::new(),
             move_alert_enabled: typedef::Bool(u8::MAX),
             date_mode: typedef::DateMode(u8::MAX),
             display_orientation: typedef::DisplayOrientation(u8::MAX),
             mounting_side: typedef::Side(u8::MAX),
-            default_page: Vec::<u16>::new(),
+            default_page: Vec::new(),
             autosync_min_steps: u16::MAX,
             autosync_min_time: u16::MAX,
             lactate_threshold_autodetect_enabled: typedef::Bool(u8::MAX),
@@ -148,7 +148,7 @@ impl DeviceSettings {
 
     /// Returns `time_zone_offset` in its scaled value. It returns invalid f64 when value is valid.
     pub fn time_zone_offset_scaled(&self) -> Vec<f64> {
-        if self.time_zone_offset == Vec::<i8>::new() {
+        if self.time_zone_offset.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.time_zone_offset.len());
@@ -186,14 +186,14 @@ impl Default for DeviceSettings {
 impl From<&Message> for DeviceSettings {
     /// from creates new DeviceSettings struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 175] = [const { &Value::Invalid }; 175];
+        let mut vals = [const { &Value::Invalid }; 175];
 
         const KNOWN_NUMS: [u64; 4] = [1117105531807338551, 3326148608, 70368744177728, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -206,27 +206,25 @@ impl From<&Message> for DeviceSettings {
         Self {
             active_time_zone: vals[0].as_u8(),
             utc_offset: vals[1].as_u32(),
-            time_offset: vals[2].as_vec_u32(),
+            time_offset: vals[2].to_vec_u32(),
             time_mode: match &vals[4] {
                 Value::VecUint8(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::TimeMode(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::TimeMode(x)));
                     vs
                 }
                 _ => Vec::new(),
             },
-            time_zone_offset: vals[5].as_vec_i8(),
+            time_zone_offset: vals[5].to_vec_i8(),
             backlight_mode: typedef::BacklightMode(vals[12].as_u8()),
             activity_tracker_enabled: typedef::Bool(vals[36].as_u8()),
             clock_time: typedef::DateTime(vals[39].as_u32()),
-            pages_enabled: vals[40].as_vec_u16(),
+            pages_enabled: vals[40].to_vec_u16(),
             move_alert_enabled: typedef::Bool(vals[46].as_u8()),
             date_mode: typedef::DateMode(vals[47].as_u8()),
             display_orientation: typedef::DisplayOrientation(vals[55].as_u8()),
             mounting_side: typedef::Side(vals[56].as_u8()),
-            default_page: vals[57].as_vec_u16(),
+            default_page: vals[57].to_vec_u16(),
             autosync_min_steps: vals[58].as_u16(),
             autosync_min_time: vals[59].as_u16(),
             lactate_threshold_autodetect_enabled: typedef::Bool(vals[80].as_u8()),
@@ -273,7 +271,7 @@ impl From<DeviceSettings> for Message {
             };
             len += 1;
         }
-        if m.time_offset != Vec::<u32>::new() {
+        if !m.time_offset.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
@@ -282,7 +280,7 @@ impl From<DeviceSettings> for Message {
             };
             len += 1;
         }
-        if m.time_mode != Vec::<typedef::TimeMode>::new() {
+        if !m.time_mode.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::TIME_MODE,
@@ -294,7 +292,7 @@ impl From<DeviceSettings> for Message {
             };
             len += 1;
         }
-        if m.time_zone_offset != Vec::<i8>::new() {
+        if !m.time_zone_offset.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::SINT8,
@@ -330,7 +328,7 @@ impl From<DeviceSettings> for Message {
             };
             len += 1;
         }
-        if m.pages_enabled != Vec::<u16>::new() {
+        if !m.pages_enabled.is_empty() {
             arr[len] = Field {
                 num: 40,
                 profile_type: ProfileType::UINT16,
@@ -375,7 +373,7 @@ impl From<DeviceSettings> for Message {
             };
             len += 1;
         }
-        if m.default_page != Vec::<u16>::new() {
+        if !m.default_page.is_empty() {
             arr[len] = Field {
                 num: 57,
                 profile_type: ProfileType::UINT16,
@@ -475,11 +473,11 @@ impl From<DeviceSettings> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::DEVICE_SETTINGS,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields
