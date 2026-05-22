@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -116,12 +117,12 @@ impl From<&Message> for FieldDescription {
             fit_base_type_id: typedef::FitBaseType(vals[2].as_u8()),
             field_name: vals[3].to_vec_string(),
             array: vals[4].as_u8(),
-            components: vals[5].to_string(),
+            components: vals[5].as_str().to_owned(),
             scale: vals[6].as_u8(),
             offset: vals[7].as_i8(),
             units: vals[8].to_vec_string(),
-            bits: vals[9].to_string(),
-            accumulate: vals[10].to_string(),
+            bits: vals[9].as_str().to_owned(),
+            accumulate: vals[10].as_str().to_owned(),
             fit_base_unit_id: typedef::FitBaseUnit(vals[13].as_u16()),
             native_mesg_num: typedef::MesgNum(vals[14].as_u16()),
             native_field_num: vals[15].as_u8(),

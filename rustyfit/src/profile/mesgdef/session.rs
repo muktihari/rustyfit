@@ -9,6 +9,7 @@
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -2583,7 +2584,7 @@ impl From<&Message> for Session {
             active_time: vals[78].as_u32(),
             player_score: vals[82].as_u16(),
             opponent_score: vals[83].as_u16(),
-            opponent_name: vals[84].to_string(),
+            opponent_name: vals[84].as_str().to_owned(),
             stroke_count: vals[85].to_vec_u16(),
             zone_count: vals[86].to_vec_u16(),
             max_ball_speed: vals[87].as_u16(),
@@ -2605,7 +2606,7 @@ impl From<&Message> for Session {
             avg_left_pedal_smoothness: vals[103].as_u8(),
             avg_right_pedal_smoothness: vals[104].as_u8(),
             avg_combined_pedal_smoothness: vals[105].as_u8(),
-            sport_profile_name: vals[110].to_string(),
+            sport_profile_name: vals[110].as_str().to_owned(),
             sport_index: vals[111].as_u8(),
             time_standing: vals[112].as_u32(),
             stand_count: vals[113].as_u16(),

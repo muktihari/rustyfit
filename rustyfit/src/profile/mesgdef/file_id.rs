@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -93,7 +94,7 @@ impl From<&Message> for FileId {
             serial_number: vals[3].as_u32z(),
             time_created: typedef::DateTime(vals[4].as_u32()),
             number: vals[5].as_u16(),
-            product_name: vals[8].to_string(),
+            product_name: vals[8].as_str().to_owned(),
             unknown_fields,
         }
     }

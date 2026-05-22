@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -103,7 +104,7 @@ impl From<&Message> for SegmentFile {
 
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            file_uuid: vals[1].to_string(),
+            file_uuid: vals[1].as_str().to_owned(),
             enabled: typedef::Bool(vals[3].as_u8()),
             user_profile_primary_key: vals[4].as_u32(),
             leader_type: match &vals[7] {

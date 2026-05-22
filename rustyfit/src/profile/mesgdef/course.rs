@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -76,7 +77,7 @@ impl From<&Message> for Course {
 
         Self {
             sport: typedef::Sport(vals[4].as_u8()),
-            name: vals[5].to_string(),
+            name: vals[5].as_str().to_owned(),
             capabilities: typedef::CourseCapabilities(vals[6].as_u32z()),
             sub_sport: typedef::SubSport(vals[7].as_u8()),
             unknown_fields,

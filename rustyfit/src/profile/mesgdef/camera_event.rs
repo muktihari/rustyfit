@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -83,7 +84,7 @@ impl From<&Message> for CameraEvent {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
             camera_event_type: typedef::CameraEventType(vals[1].as_u8()),
-            camera_file_uuid: vals[2].to_string(),
+            camera_file_uuid: vals[2].as_str().to_owned(),
             camera_orientation: typedef::CameraOrientationType(vals[3].as_u8()),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),

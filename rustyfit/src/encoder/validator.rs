@@ -146,10 +146,9 @@ impl MessageValidator {
                     .fields
                     .iter()
                     .find(|field| field.num == mesgdef::DeveloperDataId::DEVELOPER_DATA_INDEX)
+                    && let Value::Uint8(v) = field.value
                 {
-                    if let Value::Uint8(v) = field.value {
-                        self.developer_data_index_seen[(v as usize) >> 6] |= 1 << (v & 63)
-                    }
+                    self.developer_data_index_seen[(v as usize) >> 6] |= 1 << (v & 63)
                 }
             }
             MesgNum::FIELD_DESCRIPTION => self
@@ -223,10 +222,8 @@ impl MessageValidator {
         }
 
         match value {
-            Value::String(v) => {
-                if core::str::from_utf8(v.as_bytes()).is_err() {
-                    return Err(IntegrityError::InvalidUTF8String(v.clone()));
-                }
+            Value::String(v) if core::str::from_utf8(v.as_bytes()).is_err() => {
+                return Err(IntegrityError::InvalidUTF8String(v.clone()));
             }
             Value::VecString(v) => {
                 for x in v.iter() {

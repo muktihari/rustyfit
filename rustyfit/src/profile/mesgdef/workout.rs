@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -121,11 +122,11 @@ impl From<&Message> for Workout {
             sport: typedef::Sport(vals[4].as_u8()),
             capabilities: typedef::WorkoutCapabilities(vals[5].as_u32z()),
             num_valid_steps: vals[6].as_u16(),
-            wkt_name: vals[8].to_string(),
+            wkt_name: vals[8].as_str().to_owned(),
             sub_sport: typedef::SubSport(vals[11].as_u8()),
             pool_length: vals[14].as_u16(),
             pool_length_unit: typedef::DisplayMeasure(vals[15].as_u8()),
-            wkt_description: vals[17].to_string(),
+            wkt_description: vals[17].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

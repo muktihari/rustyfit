@@ -9,6 +9,7 @@
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -129,7 +130,7 @@ impl From<&Message> for CoursePoint {
             position_long: vals[3].as_i32(),
             distance: vals[4].as_u32(),
             r#type: typedef::CoursePoint(vals[5].as_u8()),
-            name: vals[6].to_string(),
+            name: vals[6].as_str().to_owned(),
             favorite: typedef::Bool(vals[8].as_u8()),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),

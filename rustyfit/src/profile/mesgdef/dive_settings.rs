@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -372,7 +373,7 @@ impl From<&Message> for DiveSettings {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            name: vals[0].to_string(),
+            name: vals[0].as_str().to_owned(),
             model: typedef::TissueModelType(vals[1].as_u8()),
             gf_low: vals[2].as_u8(),
             gf_high: vals[3].as_u8(),

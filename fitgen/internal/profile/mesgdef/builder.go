@@ -134,9 +134,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			}
 			if strings.Contains(field.Type, "String") {
 				imports["alloc::string::String"] = struct{}{}
-				if fixedArraySize > 0 {
-					imports["alloc::borrow::ToOwned"] = struct{}{}
-				}
+				imports["alloc::borrow::ToOwned"] = struct{}{}
 			}
 			if field.Units == "semicircles" {
 				imports["crate::semconv"] = struct{}{}
@@ -414,7 +412,7 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 	var value string
 	if array == "" {
 		if rustAsType == "string" {
-			value = fmt.Sprintf(`vals[%d].to_string()`, num)
+			value = fmt.Sprintf(`vals[%d].as_str().to_owned()`, num)
 		} else {
 			value = fmt.Sprintf(`vals[%d].as_%s()`, num, rustAsType)
 		}

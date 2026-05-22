@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -264,7 +265,7 @@ impl From<&Message> for UserProfile {
 
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            friendly_name: vals[0].to_string(),
+            friendly_name: vals[0].as_str().to_owned(),
             gender: typedef::Gender(vals[1].as_u8()),
             age: vals[2].as_u8(),
             height: vals[3].as_u8(),

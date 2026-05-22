@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -92,7 +93,7 @@ impl From<&Message> for Software {
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
             version: vals[3].as_u16(),
-            part_number: vals[5].to_string(),
+            part_number: vals[5].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

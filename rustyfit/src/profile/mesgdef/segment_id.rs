@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -103,8 +104,8 @@ impl From<&Message> for SegmentId {
         }
 
         Self {
-            name: vals[0].to_string(),
-            uuid: vals[1].to_string(),
+            name: vals[0].as_str().to_owned(),
+            uuid: vals[1].as_str().to_owned(),
             sport: typedef::Sport(vals[2].as_u8()),
             enabled: typedef::Bool(vals[3].as_u8()),
             user_profile_primary_key: vals[4].as_u32(),

@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -72,7 +73,7 @@ impl From<&Message> for Sport {
         Self {
             sport: typedef::Sport(vals[0].as_u8()),
             sub_sport: typedef::SubSport(vals[1].as_u8()),
-            name: vals[3].to_string(),
+            name: vals[3].as_str().to_owned(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }

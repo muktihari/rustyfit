@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -116,7 +117,7 @@ impl From<&Message> for Connectivity {
             bluetooth_enabled: typedef::Bool(vals[0].as_u8()),
             bluetooth_le_enabled: typedef::Bool(vals[1].as_u8()),
             ant_enabled: typedef::Bool(vals[2].as_u8()),
-            name: vals[3].to_string(),
+            name: vals[3].as_str().to_owned(),
             live_tracking_enabled: typedef::Bool(vals[4].as_u8()),
             weather_conditions_enabled: typedef::Bool(vals[5].as_u8()),
             weather_alerts_enabled: typedef::Bool(vals[6].as_u8()),

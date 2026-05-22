@@ -1,6 +1,6 @@
 [package]
 edition = "2024"
-rust-version = "1.85"
+rust-version = "1.93"
 name = "rustyfit"
 version = "0.6.1"
 description = """

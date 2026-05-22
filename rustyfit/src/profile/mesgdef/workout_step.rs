@@ -8,6 +8,7 @@
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
+use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
@@ -155,7 +156,7 @@ impl From<&Message> for WorkoutStep {
 
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            wkt_step_name: vals[0].to_string(),
+            wkt_step_name: vals[0].as_str().to_owned(),
             duration_type: typedef::WktStepDuration(vals[1].as_u8()),
             duration_value: vals[2].as_u32(),
             target_type: typedef::WktStepTarget(vals[3].as_u8()),
@@ -163,7 +164,7 @@ impl From<&Message> for WorkoutStep {
             custom_target_value_low: vals[5].as_u32(),
             custom_target_value_high: vals[6].as_u32(),
             intensity: typedef::Intensity(vals[7].as_u8()),
-            notes: vals[8].to_string(),
+            notes: vals[8].as_str().to_owned(),
             equipment: typedef::WorkoutEquipment(vals[9].as_u8()),
             exercise_category: typedef::ExerciseCategory(vals[10].as_u16()),
             exercise_name: vals[11].as_u16(),
