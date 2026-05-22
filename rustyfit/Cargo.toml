@@ -1,21 +1,17 @@
 [package]
-edition = "2024"
-rust-version = "1.93"
 name = "rustyfit"
 version = "0.6.1"
 description = """
 The #![no_std] Rust implementation of The Flexible and Interoperable Data Transfer (FIT) 
 Protocol for decoding and encoding Garmin FIT files, supporting FIT Protocol V2.
 """
-authors = ["Hikmatulloh Hari Mukti <muktihaz@gmail.com>"]
-repository = "https://github.com/muktihari/rustyfit"
 readme = "../README.md"
-license = "BSD-3-Clause"
-include = [
-    "Cargo.toml", 
-    "src/**",
-    "LICENSE-BSD-3-CLAUSE",
-]
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+include.workspace = true
 categories = [
     "encoding",
     "parsing",
