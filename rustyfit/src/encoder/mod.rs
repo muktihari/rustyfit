@@ -292,12 +292,12 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn compress_timestamp_into_header(&mut self, mesg: &mut Message) {
-        let timestamp = mesg
-            .fields
-            .iter()
-            .find(|field| field.num == Field::TIMESTAMP)
-            .map(|field| field.value.as_u32())
-            .unwrap_or(u32::MAX);
+        let mut timestamp = u32::MAX;
+        if let Some(field) = mesg.fields.iter().find(|f| f.num == Field::TIMESTAMP) {
+            if let Value::Uint32(v) = field.value {
+                timestamp = v;
+            }
+        }
 
         if timestamp == u32::MAX || timestamp < DateTime::MIN.0 {
             return;
