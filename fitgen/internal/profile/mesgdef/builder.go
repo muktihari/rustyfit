@@ -132,7 +132,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				FixedArraySize: fixedArraySize,
 				Units:          parserField.Units,
 			}
-			if strings.Contains(field.Type, "String") {
+			if field.BaseType == "STRING" {
 				imports["alloc::string::String"] = struct{}{}
 				imports["alloc::borrow::ToOwned"] = struct{}{}
 			}
@@ -144,13 +144,9 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				field.CanExpand = true
 			}
 
-			if parserField.Array == "" && field.BaseType == "string" {
-				field.InvalidValue += fmt.Sprintf("&& %s != \"\"", field.ComparableValue)
-			}
-
 			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name, field.InvalidValue)
 			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name, field.InvalidValue)
-			if parserField.Array == "[N]" {
+			if parserField.Array == "[N]" || (field.BaseType == "STRING" && parserField.Array == "") {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
 				field.IfNotEqualInvalid = fmt.Sprintf("!m.%s.is_empty()", field.Name)
 			}

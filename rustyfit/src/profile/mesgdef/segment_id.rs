@@ -131,7 +131,7 @@ impl From<SegmentId> for Message {
         }; 9];
         let mut len = 0usize;
 
-        if m.name != String::new() {
+        if !m.name.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
@@ -140,7 +140,7 @@ impl From<SegmentId> for Message {
             };
             len += 1;
         }
-        if m.uuid != String::new() {
+        if !m.uuid.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::STRING,

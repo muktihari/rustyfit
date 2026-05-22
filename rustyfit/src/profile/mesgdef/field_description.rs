@@ -188,7 +188,7 @@ impl From<FieldDescription> for Message {
             };
             len += 1;
         }
-        if m.components != String::new() {
+        if !m.components.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::STRING,
@@ -224,7 +224,7 @@ impl From<FieldDescription> for Message {
             };
             len += 1;
         }
-        if m.bits != String::new() {
+        if !m.bits.is_empty() {
             arr[len] = Field {
                 num: 9,
                 profile_type: ProfileType::STRING,
@@ -233,7 +233,7 @@ impl From<FieldDescription> for Message {
             };
             len += 1;
         }
-        if m.accumulate != String::new() {
+        if !m.accumulate.is_empty() {
             arr[len] = Field {
                 num: 10,
                 profile_type: ProfileType::STRING,

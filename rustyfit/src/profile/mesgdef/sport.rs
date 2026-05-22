@@ -110,7 +110,7 @@ impl From<Sport> for Message {
             };
             len += 1;
         }
-        if m.name != String::new() {
+        if !m.name.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::STRING,

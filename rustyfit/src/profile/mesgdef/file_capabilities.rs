@@ -136,7 +136,7 @@ impl From<FileCapabilities> for Message {
             };
             len += 1;
         }
-        if m.directory != String::new() {
+        if !m.directory.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::STRING,

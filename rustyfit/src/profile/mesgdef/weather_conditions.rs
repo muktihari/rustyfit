@@ -281,7 +281,7 @@ impl From<WeatherConditions> for Message {
             };
             len += 1;
         }
-        if m.location != String::new() {
+        if !m.location.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::STRING,

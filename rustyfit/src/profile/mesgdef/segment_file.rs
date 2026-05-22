@@ -146,7 +146,7 @@ impl From<SegmentFile> for Message {
             };
             len += 1;
         }
-        if m.file_uuid != String::new() {
+        if !m.file_uuid.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::STRING,

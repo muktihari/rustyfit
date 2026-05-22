@@ -131,7 +131,7 @@ impl From<CameraEvent> for Message {
             };
             len += 1;
         }
-        if m.camera_file_uuid != String::new() {
+        if !m.camera_file_uuid.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::STRING,

@@ -329,7 +329,7 @@ impl From<DeviceInfo> for Message {
             };
             len += 1;
         }
-        if m.descriptor != String::new() {
+        if !m.descriptor.is_empty() {
             arr[len] = Field {
                 num: 19,
                 profile_type: ProfileType::STRING,
@@ -374,7 +374,7 @@ impl From<DeviceInfo> for Message {
             };
             len += 1;
         }
-        if m.product_name != String::new() {
+        if !m.product_name.is_empty() {
             arr[len] = Field {
                 num: 27,
                 profile_type: ProfileType::STRING,
