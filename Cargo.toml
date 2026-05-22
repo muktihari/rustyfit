@@ -1,9 +1,23 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = [
     "rustyfit", 
     "examples/no_std_decode",
 ]
 default-members = [
     "rustyfit",
+]
+
+[workspace.package]
+edition = "2024"
+rust-version = "1.93"
+authors = ["Hikmatulloh Hari Mukti <muktihaz@gmail.com>"]
+repository = "https://github.com/muktihari/rustyfit"
+license = "BSD-3-Clause"
+include = [
+    "Cargo.toml",
+    "Cargo.lock",
+    "src/**/*",
+    "LICENSE*",
+    "README.md",
 ]
