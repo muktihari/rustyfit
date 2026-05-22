@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -74,16 +74,16 @@ impl AccelerometerData {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::<u16>::new(),
-            accel_x: Vec::<u16>::new(),
-            accel_y: Vec::<u16>::new(),
-            accel_z: Vec::<u16>::new(),
-            calibrated_accel_x: Vec::<f32>::new(),
-            calibrated_accel_y: Vec::<f32>::new(),
-            calibrated_accel_z: Vec::<f32>::new(),
-            compressed_calibrated_accel_x: Vec::<i16>::new(),
-            compressed_calibrated_accel_y: Vec::<i16>::new(),
-            compressed_calibrated_accel_z: Vec::<i16>::new(),
+            sample_time_offset: Vec::new(),
+            accel_x: Vec::new(),
+            accel_y: Vec::new(),
+            accel_z: Vec::new(),
+            calibrated_accel_x: Vec::new(),
+            calibrated_accel_y: Vec::new(),
+            calibrated_accel_z: Vec::new(),
+            compressed_calibrated_accel_x: Vec::new(),
+            compressed_calibrated_accel_y: Vec::new(),
+            compressed_calibrated_accel_z: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -99,14 +99,14 @@ impl Default for AccelerometerData {
 impl From<&Message> for AccelerometerData {
     /// from creates new AccelerometerData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [2047, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -119,16 +119,16 @@ impl From<&Message> for AccelerometerData {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
-            sample_time_offset: vals[1].as_vec_u16(),
-            accel_x: vals[2].as_vec_u16(),
-            accel_y: vals[3].as_vec_u16(),
-            accel_z: vals[4].as_vec_u16(),
-            calibrated_accel_x: vals[5].as_vec_f32(),
-            calibrated_accel_y: vals[6].as_vec_f32(),
-            calibrated_accel_z: vals[7].as_vec_f32(),
-            compressed_calibrated_accel_x: vals[8].as_vec_i16(),
-            compressed_calibrated_accel_y: vals[9].as_vec_i16(),
-            compressed_calibrated_accel_z: vals[10].as_vec_i16(),
+            sample_time_offset: vals[1].to_vec_u16(),
+            accel_x: vals[2].to_vec_u16(),
+            accel_y: vals[3].to_vec_u16(),
+            accel_z: vals[4].to_vec_u16(),
+            calibrated_accel_x: vals[5].to_vec_f32(),
+            calibrated_accel_y: vals[6].to_vec_f32(),
+            calibrated_accel_z: vals[7].to_vec_f32(),
+            compressed_calibrated_accel_x: vals[8].to_vec_i16(),
+            compressed_calibrated_accel_y: vals[9].to_vec_i16(),
+            compressed_calibrated_accel_z: vals[10].to_vec_i16(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
         }
@@ -165,7 +165,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.sample_time_offset != Vec::<u16>::new() {
+        if !m.sample_time_offset.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
@@ -174,7 +174,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.accel_x != Vec::<u16>::new() {
+        if !m.accel_x.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
@@ -183,7 +183,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.accel_y != Vec::<u16>::new() {
+        if !m.accel_y.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
@@ -192,7 +192,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.accel_z != Vec::<u16>::new() {
+        if !m.accel_z.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
@@ -201,7 +201,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.calibrated_accel_x != Vec::<f32>::new() {
+        if !m.calibrated_accel_x.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::FLOAT32,
@@ -210,7 +210,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.calibrated_accel_y != Vec::<f32>::new() {
+        if !m.calibrated_accel_y.is_empty() {
             arr[len] = Field {
                 num: 6,
                 profile_type: ProfileType::FLOAT32,
@@ -219,7 +219,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.calibrated_accel_z != Vec::<f32>::new() {
+        if !m.calibrated_accel_z.is_empty() {
             arr[len] = Field {
                 num: 7,
                 profile_type: ProfileType::FLOAT32,
@@ -228,7 +228,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.compressed_calibrated_accel_x != Vec::<i16>::new() {
+        if !m.compressed_calibrated_accel_x.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::SINT16,
@@ -237,7 +237,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.compressed_calibrated_accel_y != Vec::<i16>::new() {
+        if !m.compressed_calibrated_accel_y.is_empty() {
             arr[len] = Field {
                 num: 9,
                 profile_type: ProfileType::SINT16,
@@ -246,7 +246,7 @@ impl From<AccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.compressed_calibrated_accel_z != Vec::<i16>::new() {
+        if !m.compressed_calibrated_accel_z.is_empty() {
             arr[len] = Field {
                 num: 10,
                 profile_type: ProfileType::SINT16,
@@ -256,11 +256,11 @@ impl From<AccelerometerData> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::ACCELEROMETER_DATA,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

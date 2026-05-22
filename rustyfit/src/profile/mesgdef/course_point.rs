@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -105,14 +105,14 @@ impl Default for CoursePoint {
 impl From<&Message> for CoursePoint {
     /// from creates new CoursePoint struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
 
         const KNOWN_NUMS: [u64; 4] = [382, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -129,7 +129,7 @@ impl From<&Message> for CoursePoint {
             position_long: vals[3].as_i32(),
             distance: vals[4].as_u32(),
             r#type: typedef::CoursePoint(vals[5].as_u8()),
-            name: vals[6].as_string(),
+            name: vals[6].to_string(),
             favorite: typedef::Bool(vals[8].as_u8()),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -222,11 +222,11 @@ impl From<CoursePoint> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::COURSE_POINT,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

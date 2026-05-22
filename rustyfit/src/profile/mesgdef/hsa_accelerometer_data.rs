@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -55,9 +55,9 @@ impl HsaAccelerometerData {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
             sampling_interval: u16::MAX,
-            accel_x: Vec::<i16>::new(),
-            accel_y: Vec::<i16>::new(),
-            accel_z: Vec::<i16>::new(),
+            accel_x: Vec::new(),
+            accel_y: Vec::new(),
+            accel_z: Vec::new(),
             timestamp_32k: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -66,7 +66,7 @@ impl HsaAccelerometerData {
 
     /// Returns `accel_x` in its scaled value. It returns invalid f64 when value is valid.
     pub fn accel_x_scaled(&self) -> Vec<f64> {
-        if self.accel_x == Vec::<i16>::new() {
+        if self.accel_x.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.accel_x.len());
@@ -96,7 +96,7 @@ impl HsaAccelerometerData {
 
     /// Returns `accel_y` in its scaled value. It returns invalid f64 when value is valid.
     pub fn accel_y_scaled(&self) -> Vec<f64> {
-        if self.accel_y == Vec::<i16>::new() {
+        if self.accel_y.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.accel_y.len());
@@ -126,7 +126,7 @@ impl HsaAccelerometerData {
 
     /// Returns `accel_z` in its scaled value. It returns invalid f64 when value is valid.
     pub fn accel_z_scaled(&self) -> Vec<f64> {
-        if self.accel_z == Vec::<i16>::new() {
+        if self.accel_z.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.accel_z.len());
@@ -164,14 +164,14 @@ impl Default for HsaAccelerometerData {
 impl From<&Message> for HsaAccelerometerData {
     /// from creates new HsaAccelerometerData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [63, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -185,9 +185,9 @@ impl From<&Message> for HsaAccelerometerData {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
             sampling_interval: vals[1].as_u16(),
-            accel_x: vals[2].as_vec_i16(),
-            accel_y: vals[3].as_vec_i16(),
-            accel_z: vals[4].as_vec_i16(),
+            accel_x: vals[2].to_vec_i16(),
+            accel_y: vals[3].to_vec_i16(),
+            accel_z: vals[4].to_vec_i16(),
             timestamp_32k: vals[5].as_u32(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -234,7 +234,7 @@ impl From<HsaAccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.accel_x != Vec::<i16>::new() {
+        if !m.accel_x.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::SINT16,
@@ -243,7 +243,7 @@ impl From<HsaAccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.accel_y != Vec::<i16>::new() {
+        if !m.accel_y.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::SINT16,
@@ -252,7 +252,7 @@ impl From<HsaAccelerometerData> for Message {
             };
             len += 1;
         }
-        if m.accel_z != Vec::<i16>::new() {
+        if !m.accel_z.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::SINT16,
@@ -271,11 +271,11 @@ impl From<HsaAccelerometerData> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::HSA_ACCELEROMETER_DATA,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

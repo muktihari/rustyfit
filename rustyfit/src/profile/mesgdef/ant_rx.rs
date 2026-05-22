@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -55,9 +55,9 @@ impl AntRx {
             timestamp: typedef::DateTime(u32::MAX),
             fractional_timestamp: u16::MAX,
             mesg_id: u8::MAX,
-            mesg_data: Vec::<u8>::new(),
+            mesg_data: Vec::new(),
             channel_number: u8::MAX,
-            data: Vec::<u8>::new(),
+            data: Vec::new(),
             state: [0u8; 1],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -113,7 +113,7 @@ impl Default for AntRx {
 impl From<&Message> for AntRx {
     /// from creates new AntRx struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
         let mut state = [0u8; 1];
 
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 2305843009213693952];
@@ -121,7 +121,7 @@ impl From<&Message> for AntRx {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -138,9 +138,9 @@ impl From<&Message> for AntRx {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             fractional_timestamp: vals[0].as_u16(),
             mesg_id: vals[1].as_u8(),
-            mesg_data: vals[2].as_vec_u8(),
+            mesg_data: vals[2].to_vec_u8(),
             channel_number: vals[3].as_u8(),
-            data: vals[4].as_vec_u8(),
+            data: vals[4].to_vec_u8(),
             state,
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -188,7 +188,7 @@ impl From<AntRx> for Message {
             };
             len += 1;
         }
-        if m.mesg_data != Vec::<u8>::new() {
+        if !m.mesg_data.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::BYTE,
@@ -206,7 +206,7 @@ impl From<AntRx> for Message {
             };
             len += 1;
         }
-        if m.data != Vec::<u8>::new() {
+        if !m.data.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::BYTE,
@@ -216,11 +216,11 @@ impl From<AntRx> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::ANT_RX,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

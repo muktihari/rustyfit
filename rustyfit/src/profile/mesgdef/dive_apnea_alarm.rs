@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -82,7 +82,7 @@ impl DiveApneaAlarm {
             enabled: typedef::Bool(u8::MAX),
             alarm_type: typedef::DiveAlarmType(u8::MAX),
             sound: typedef::Tone(u8::MAX),
-            dive_types: Vec::<typedef::SubSport>::new(),
+            dive_types: Vec::new(),
             id: u32::MAX,
             popup_enabled: typedef::Bool(u8::MAX),
             trigger_on_descent: typedef::Bool(u8::MAX),
@@ -142,14 +142,14 @@ impl Default for DiveApneaAlarm {
 impl From<&Message> for DiveApneaAlarm {
     /// from creates new DiveApneaAlarm struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
 
         const KNOWN_NUMS: [u64; 4] = [4095, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -169,9 +169,7 @@ impl From<&Message> for DiveApneaAlarm {
             dive_types: match &vals[5] {
                 Value::VecUint8(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::SubSport(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::SubSport(x)));
                     vs
                 }
                 _ => Vec::new(),
@@ -254,7 +252,7 @@ impl From<DiveApneaAlarm> for Message {
             };
             len += 1;
         }
-        if m.dive_types != Vec::<typedef::SubSport>::new() {
+        if !m.dive_types.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::SUB_SPORT,
@@ -321,11 +319,11 @@ impl From<DiveApneaAlarm> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::DIVE_APNEA_ALARM,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

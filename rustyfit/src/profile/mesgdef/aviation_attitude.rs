@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -72,16 +72,16 @@ impl AviationAttitude {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            system_time: Vec::<u32>::new(),
-            pitch: Vec::<i16>::new(),
-            roll: Vec::<i16>::new(),
-            accel_lateral: Vec::<i16>::new(),
-            accel_normal: Vec::<i16>::new(),
-            turn_rate: Vec::<i16>::new(),
-            stage: Vec::<typedef::AttitudeStage>::new(),
-            attitude_stage_complete: Vec::<u8>::new(),
-            track: Vec::<u16>::new(),
-            validity: Vec::<typedef::AttitudeValidity>::new(),
+            system_time: Vec::new(),
+            pitch: Vec::new(),
+            roll: Vec::new(),
+            accel_lateral: Vec::new(),
+            accel_normal: Vec::new(),
+            turn_rate: Vec::new(),
+            stage: Vec::new(),
+            attitude_stage_complete: Vec::new(),
+            track: Vec::new(),
+            validity: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -89,7 +89,7 @@ impl AviationAttitude {
 
     /// Returns `pitch` in its scaled value. It returns invalid f64 when value is valid.
     pub fn pitch_scaled(&self) -> Vec<f64> {
-        if self.pitch == Vec::<i16>::new() {
+        if self.pitch.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.pitch.len());
@@ -119,7 +119,7 @@ impl AviationAttitude {
 
     /// Returns `roll` in its scaled value. It returns invalid f64 when value is valid.
     pub fn roll_scaled(&self) -> Vec<f64> {
-        if self.roll == Vec::<i16>::new() {
+        if self.roll.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.roll.len());
@@ -149,7 +149,7 @@ impl AviationAttitude {
 
     /// Returns `accel_lateral` in its scaled value. It returns invalid f64 when value is valid.
     pub fn accel_lateral_scaled(&self) -> Vec<f64> {
-        if self.accel_lateral == Vec::<i16>::new() {
+        if self.accel_lateral.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.accel_lateral.len());
@@ -179,7 +179,7 @@ impl AviationAttitude {
 
     /// Returns `accel_normal` in its scaled value. It returns invalid f64 when value is valid.
     pub fn accel_normal_scaled(&self) -> Vec<f64> {
-        if self.accel_normal == Vec::<i16>::new() {
+        if self.accel_normal.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.accel_normal.len());
@@ -209,7 +209,7 @@ impl AviationAttitude {
 
     /// Returns `turn_rate` in its scaled value. It returns invalid f64 when value is valid.
     pub fn turn_rate_scaled(&self) -> Vec<f64> {
-        if self.turn_rate == Vec::<i16>::new() {
+        if self.turn_rate.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.turn_rate.len());
@@ -239,7 +239,7 @@ impl AviationAttitude {
 
     /// Returns `track` in its scaled value. It returns invalid f64 when value is valid.
     pub fn track_scaled(&self) -> Vec<f64> {
-        if self.track == Vec::<u16>::new() {
+        if self.track.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.track.len());
@@ -277,14 +277,14 @@ impl Default for AviationAttitude {
 impl From<&Message> for AviationAttitude {
     /// from creates new AviationAttitude struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [2047, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -297,30 +297,26 @@ impl From<&Message> for AviationAttitude {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
-            system_time: vals[1].as_vec_u32(),
-            pitch: vals[2].as_vec_i16(),
-            roll: vals[3].as_vec_i16(),
-            accel_lateral: vals[4].as_vec_i16(),
-            accel_normal: vals[5].as_vec_i16(),
-            turn_rate: vals[6].as_vec_i16(),
+            system_time: vals[1].to_vec_u32(),
+            pitch: vals[2].to_vec_i16(),
+            roll: vals[3].to_vec_i16(),
+            accel_lateral: vals[4].to_vec_i16(),
+            accel_normal: vals[5].to_vec_i16(),
+            turn_rate: vals[6].to_vec_i16(),
             stage: match &vals[7] {
                 Value::VecUint8(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::AttitudeStage(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::AttitudeStage(x)));
                     vs
                 }
                 _ => Vec::new(),
             },
-            attitude_stage_complete: vals[8].as_vec_u8(),
-            track: vals[9].as_vec_u16(),
+            attitude_stage_complete: vals[8].to_vec_u8(),
+            track: vals[9].to_vec_u16(),
             validity: match &vals[10] {
                 Value::VecUint16(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::AttitudeValidity(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::AttitudeValidity(x)));
                     vs
                 }
                 _ => Vec::new(),
@@ -361,7 +357,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.system_time != Vec::<u32>::new() {
+        if !m.system_time.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::UINT32,
@@ -370,7 +366,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.pitch != Vec::<i16>::new() {
+        if !m.pitch.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::SINT16,
@@ -379,7 +375,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.roll != Vec::<i16>::new() {
+        if !m.roll.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::SINT16,
@@ -388,7 +384,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.accel_lateral != Vec::<i16>::new() {
+        if !m.accel_lateral.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::SINT16,
@@ -397,7 +393,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.accel_normal != Vec::<i16>::new() {
+        if !m.accel_normal.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::SINT16,
@@ -406,7 +402,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.turn_rate != Vec::<i16>::new() {
+        if !m.turn_rate.is_empty() {
             arr[len] = Field {
                 num: 6,
                 profile_type: ProfileType::SINT16,
@@ -415,7 +411,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.stage != Vec::<typedef::AttitudeStage>::new() {
+        if !m.stage.is_empty() {
             arr[len] = Field {
                 num: 7,
                 profile_type: ProfileType::ATTITUDE_STAGE,
@@ -427,7 +423,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.attitude_stage_complete != Vec::<u8>::new() {
+        if !m.attitude_stage_complete.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
@@ -436,7 +432,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.track != Vec::<u16>::new() {
+        if !m.track.is_empty() {
             arr[len] = Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
@@ -445,7 +441,7 @@ impl From<AviationAttitude> for Message {
             };
             len += 1;
         }
-        if m.validity != Vec::<typedef::AttitudeValidity>::new() {
+        if !m.validity.is_empty() {
             arr[len] = Field {
                 num: 10,
                 profile_type: ProfileType::ATTITUDE_VALIDITY,
@@ -458,11 +454,11 @@ impl From<AviationAttitude> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::AVIATION_ATTITUDE,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

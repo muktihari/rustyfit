@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -58,9 +58,9 @@ impl Hr {
             timestamp: typedef::DateTime(u32::MAX),
             fractional_timestamp: u16::MAX,
             time256: u8::MAX,
-            filtered_bpm: Vec::<u8>::new(),
-            event_timestamp: Vec::<u32>::new(),
-            event_timestamp_12: Vec::<u8>::new(),
+            filtered_bpm: Vec::new(),
+            event_timestamp: Vec::new(),
+            event_timestamp_12: Vec::new(),
             state: [0u8; 2],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -107,7 +107,7 @@ impl Hr {
 
     /// Returns `event_timestamp` in its scaled value. It returns invalid f64 when value is valid.
     pub fn event_timestamp_scaled(&self) -> Vec<f64> {
-        if self.event_timestamp == Vec::<u32>::new() {
+        if self.event_timestamp.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.event_timestamp.len());
@@ -165,7 +165,7 @@ impl Default for Hr {
 impl From<&Message> for Hr {
     /// from creates new Hr struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
         let mut state = [0u8; 2];
 
         const KNOWN_NUMS: [u64; 4] = [1603, 0, 0, 2305843009213693952];
@@ -173,7 +173,7 @@ impl From<&Message> for Hr {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -190,9 +190,9 @@ impl From<&Message> for Hr {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             fractional_timestamp: vals[0].as_u16(),
             time256: vals[1].as_u8(),
-            filtered_bpm: vals[6].as_vec_u8(),
-            event_timestamp: vals[9].as_vec_u32(),
-            event_timestamp_12: vals[10].as_vec_u8(),
+            filtered_bpm: vals[6].to_vec_u8(),
+            event_timestamp: vals[9].to_vec_u32(),
+            event_timestamp_12: vals[10].to_vec_u8(),
             state,
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -240,7 +240,7 @@ impl From<Hr> for Message {
             };
             len += 1;
         }
-        if m.filtered_bpm != Vec::<u8>::new() {
+        if !m.filtered_bpm.is_empty() {
             arr[len] = Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
@@ -249,7 +249,7 @@ impl From<Hr> for Message {
             };
             len += 1;
         }
-        if m.event_timestamp != Vec::<u32>::new() {
+        if !m.event_timestamp.is_empty() {
             arr[len] = Field {
                 num: 9,
                 profile_type: ProfileType::UINT32,
@@ -258,7 +258,7 @@ impl From<Hr> for Message {
             };
             len += 1;
         }
-        if m.event_timestamp_12 != Vec::<u8>::new() {
+        if !m.event_timestamp_12.is_empty() {
             arr[len] = Field {
                 num: 10,
                 profile_type: ProfileType::BYTE,
@@ -268,11 +268,11 @@ impl From<Hr> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::HR,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

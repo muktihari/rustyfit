@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -40,8 +40,8 @@ impl Capabilities {
     /// Create new Capabilities with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
         Self {
-            languages: Vec::<u8>::new(),
-            sports: Vec::<typedef::SportBits0>::new(),
+            languages: Vec::new(),
+            sports: Vec::new(),
             workouts_supported: typedef::WorkoutCapabilities(u32::MIN),
             connectivity_supported: typedef::ConnectivityCapabilities(u32::MIN),
             unknown_fields: Vec::new(),
@@ -59,14 +59,14 @@ impl Default for Capabilities {
 impl From<&Message> for Capabilities {
     /// from creates new Capabilities struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 24] = [const { &Value::Invalid }; 24];
+        let mut vals = [const { &Value::Invalid }; 24];
 
         const KNOWN_NUMS: [u64; 4] = [10485763, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -77,13 +77,11 @@ impl From<&Message> for Capabilities {
         }
 
         Self {
-            languages: vals[0].as_vec_u8(),
+            languages: vals[0].to_vec_u8(),
             sports: match &vals[1] {
                 Value::VecUint8(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::SportBits0(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::SportBits0(x)));
                     vs
                 }
                 _ => Vec::new(),
@@ -108,7 +106,7 @@ impl From<Capabilities> for Message {
         }; 4];
         let mut len = 0usize;
 
-        if m.languages != Vec::<u8>::new() {
+        if !m.languages.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::UINT8Z,
@@ -117,7 +115,7 @@ impl From<Capabilities> for Message {
             };
             len += 1;
         }
-        if m.sports != Vec::<typedef::SportBits0>::new() {
+        if !m.sports.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::SPORT_BITS_0,
@@ -148,11 +146,11 @@ impl From<Capabilities> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::CAPABILITIES,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

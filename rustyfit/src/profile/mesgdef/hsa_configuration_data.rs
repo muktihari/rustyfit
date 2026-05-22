@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -37,7 +37,7 @@ impl HsaConfigurationData {
     pub const fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
-            data: Vec::<u8>::new(),
+            data: Vec::new(),
             data_size: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -54,14 +54,14 @@ impl Default for HsaConfigurationData {
 impl From<&Message> for HsaConfigurationData {
     /// from creates new HsaConfigurationData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [3, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -73,7 +73,7 @@ impl From<&Message> for HsaConfigurationData {
 
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
-            data: vals[0].as_vec_u8(),
+            data: vals[0].to_vec_u8(),
             data_size: vals[1].as_u8(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -102,7 +102,7 @@ impl From<HsaConfigurationData> for Message {
             };
             len += 1;
         }
-        if m.data != Vec::<u8>::new() {
+        if !m.data.is_empty() {
             arr[len] = Field {
                 num: 0,
                 profile_type: ProfileType::BYTE,
@@ -121,11 +121,11 @@ impl From<HsaConfigurationData> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::HSA_CONFIGURATION_DATA,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

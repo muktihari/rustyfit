@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -49,9 +49,9 @@ impl MonitoringInfo {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             local_timestamp: typedef::LocalDateTime(u32::MAX),
-            activity_type: Vec::<typedef::ActivityType>::new(),
-            cycles_to_distance: Vec::<u16>::new(),
-            cycles_to_calories: Vec::<u16>::new(),
+            activity_type: Vec::new(),
+            cycles_to_distance: Vec::new(),
+            cycles_to_calories: Vec::new(),
             resting_metabolic_rate: u16::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -60,7 +60,7 @@ impl MonitoringInfo {
 
     /// Returns `cycles_to_distance` in its scaled value. It returns invalid f64 when value is valid.
     pub fn cycles_to_distance_scaled(&self) -> Vec<f64> {
-        if self.cycles_to_distance == Vec::<u16>::new() {
+        if self.cycles_to_distance.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.cycles_to_distance.len());
@@ -90,7 +90,7 @@ impl MonitoringInfo {
 
     /// Returns `cycles_to_calories` in its scaled value. It returns invalid f64 when value is valid.
     pub fn cycles_to_calories_scaled(&self) -> Vec<f64> {
-        if self.cycles_to_calories == Vec::<u16>::new() {
+        if self.cycles_to_calories.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.cycles_to_calories.len());
@@ -128,14 +128,14 @@ impl Default for MonitoringInfo {
 impl From<&Message> for MonitoringInfo {
     /// from creates new MonitoringInfo struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
 
         const KNOWN_NUMS: [u64; 4] = [59, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -151,15 +151,13 @@ impl From<&Message> for MonitoringInfo {
             activity_type: match &vals[1] {
                 Value::VecUint8(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::ActivityType(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::ActivityType(x)));
                     vs
                 }
                 _ => Vec::new(),
             },
-            cycles_to_distance: vals[3].as_vec_u16(),
-            cycles_to_calories: vals[4].as_vec_u16(),
+            cycles_to_distance: vals[3].to_vec_u16(),
+            cycles_to_calories: vals[4].to_vec_u16(),
             resting_metabolic_rate: vals[5].as_u16(),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -197,7 +195,7 @@ impl From<MonitoringInfo> for Message {
             };
             len += 1;
         }
-        if m.activity_type != Vec::<typedef::ActivityType>::new() {
+        if !m.activity_type.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::ACTIVITY_TYPE,
@@ -209,7 +207,7 @@ impl From<MonitoringInfo> for Message {
             };
             len += 1;
         }
-        if m.cycles_to_distance != Vec::<u16>::new() {
+        if !m.cycles_to_distance.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
@@ -218,7 +216,7 @@ impl From<MonitoringInfo> for Message {
             };
             len += 1;
         }
-        if m.cycles_to_calories != Vec::<u16>::new() {
+        if !m.cycles_to_calories.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
@@ -237,11 +235,11 @@ impl From<MonitoringInfo> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::MONITORING_INFO,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

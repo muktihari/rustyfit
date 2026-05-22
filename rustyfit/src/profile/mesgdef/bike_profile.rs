@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -168,9 +168,9 @@ impl BikeProfile {
             bike_power_ant_id_trans_type: u8::MIN,
             odometer_rollover: u8::MAX,
             front_gear_num: u8::MIN,
-            front_gear: Vec::<u8>::new(),
+            front_gear: Vec::new(),
             rear_gear_num: u8::MIN,
-            rear_gear: Vec::<u8>::new(),
+            rear_gear: Vec::new(),
             shimano_di2_enabled: typedef::Bool(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -301,14 +301,14 @@ impl Default for BikeProfile {
 impl From<&Message> for BikeProfile {
     /// from creates new BikeProfile struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
 
         const KNOWN_NUMS: [u64; 4] = [21852827156479, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -320,7 +320,7 @@ impl From<&Message> for BikeProfile {
 
         Self {
             message_index: typedef::MessageIndex(vals[254].as_u16()),
-            name: vals[0].as_string(),
+            name: vals[0].to_string(),
             sport: typedef::Sport(vals[1].as_u8()),
             sub_sport: typedef::SubSport(vals[2].as_u8()),
             odometer: vals[3].as_u32(),
@@ -347,9 +347,9 @@ impl From<&Message> for BikeProfile {
             bike_power_ant_id_trans_type: vals[24].as_u8z(),
             odometer_rollover: vals[37].as_u8(),
             front_gear_num: vals[38].as_u8z(),
-            front_gear: vals[39].as_vec_u8(),
+            front_gear: vals[39].to_vec_u8(),
             rear_gear_num: vals[40].as_u8z(),
-            rear_gear: vals[41].as_vec_u8(),
+            rear_gear: vals[41].to_vec_u8(),
             shimano_di2_enabled: typedef::Bool(vals[44].as_u8()),
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -621,7 +621,7 @@ impl From<BikeProfile> for Message {
             };
             len += 1;
         }
-        if m.front_gear != Vec::<u8>::new() {
+        if !m.front_gear.is_empty() {
             arr[len] = Field {
                 num: 39,
                 profile_type: ProfileType::UINT8Z,
@@ -639,7 +639,7 @@ impl From<BikeProfile> for Message {
             };
             len += 1;
         }
-        if m.rear_gear != Vec::<u8>::new() {
+        if !m.rear_gear.is_empty() {
             arr[len] = Field {
                 num: 41,
                 profile_type: ProfileType::UINT8Z,
@@ -658,11 +658,11 @@ impl From<BikeProfile> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::BIKE_PROFILE,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

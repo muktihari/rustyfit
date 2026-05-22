@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -57,10 +57,10 @@ impl RawBbi {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            data: Vec::<u16>::new(),
-            time: Vec::<u16>::new(),
-            quality: Vec::<u8>::new(),
-            gap: Vec::<u8>::new(),
+            data: Vec::new(),
+            time: Vec::new(),
+            quality: Vec::new(),
+            gap: Vec::new(),
             state: [0u8; 1],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -97,7 +97,7 @@ impl Default for RawBbi {
 impl From<&Message> for RawBbi {
     /// from creates new RawBbi struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
         let mut state = [0u8; 1];
 
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 2305843009213693952];
@@ -105,7 +105,7 @@ impl From<&Message> for RawBbi {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -121,10 +121,10 @@ impl From<&Message> for RawBbi {
         Self {
             timestamp: typedef::DateTime(vals[253].as_u32()),
             timestamp_ms: vals[0].as_u16(),
-            data: vals[1].as_vec_u16(),
-            time: vals[2].as_vec_u16(),
-            quality: vals[3].as_vec_u8(),
-            gap: vals[4].as_vec_u8(),
+            data: vals[1].to_vec_u16(),
+            time: vals[2].to_vec_u16(),
+            quality: vals[3].to_vec_u8(),
+            gap: vals[4].to_vec_u8(),
             state,
             unknown_fields,
             developer_fields: mesg.developer_fields.clone(),
@@ -163,7 +163,7 @@ impl From<RawBbi> for Message {
             };
             len += 1;
         }
-        if m.data != Vec::<u16>::new() {
+        if !m.data.is_empty() {
             arr[len] = Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
@@ -172,7 +172,7 @@ impl From<RawBbi> for Message {
             };
             len += 1;
         }
-        if m.time != Vec::<u16>::new() {
+        if !m.time.is_empty() {
             arr[len] = Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
@@ -181,7 +181,7 @@ impl From<RawBbi> for Message {
             };
             len += 1;
         }
-        if m.quality != Vec::<u8>::new() {
+        if !m.quality.is_empty() {
             arr[len] = Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
@@ -190,7 +190,7 @@ impl From<RawBbi> for Message {
             };
             len += 1;
         }
-        if m.gap != Vec::<u8>::new() {
+        if !m.gap.is_empty() {
             arr[len] = Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
@@ -200,11 +200,11 @@ impl From<RawBbi> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::RAW_BBI,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

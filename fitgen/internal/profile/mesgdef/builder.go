@@ -150,6 +150,13 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				field.InvalidValue += fmt.Sprintf("&& %s != \"\"", field.ComparableValue)
 			}
 
+			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name, field.InvalidValue)
+			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name, field.InvalidValue)
+			if parserField.Array == "[N]" {
+				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
+				field.IfNotEqualInvalid = fmt.Sprintf("!m.%s.is_empty()", field.Name)
+			}
+
 			// Scale and offset do not apply for field that has more than one components
 			if len(parserField.Components) > 1 {
 				field.Scale, field.Offset = 1, 0
@@ -406,9 +413,13 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 
 	var value string
 	if array == "" {
-		value = fmt.Sprintf(`vals[%d].as_%s()`, num, rustAsType)
+		if rustAsType == "string" {
+			value = fmt.Sprintf(`vals[%d].to_string()`, num)
+		} else {
+			value = fmt.Sprintf(`vals[%d].as_%s()`, num, rustAsType)
+		}
 	} else if fixedArraySize == 0 { // vector
-		value = fmt.Sprintf(`vals[%d].as_vec_%s()`, num, strings.TrimSuffix(rustAsType, "z"))
+		value = fmt.Sprintf(`vals[%d].to_vec_%s()`, num, strings.TrimSuffix(rustAsType, "z"))
 	} else { // array
 		rustType := baseTypeToRustTypeReplacer.Replace(baseType)
 		arrayValue := fmt.Sprintf("[%s::MAX; %d]", rustType, fixedArraySize)
@@ -450,9 +461,7 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 	return fmt.Sprintf(`match &vals[%d] {
 		Value::Vec%s(v) => {
 			let mut vs = Vec::with_capacity(v.len());
-			for x in v {
-				vs.push(%s(*x))
-			}
+			vs.extend(v.iter().map(|&x|%s(x)));
 			vs
 		},
 		_ => Vec::new(),
@@ -476,13 +485,7 @@ func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) s
 
 	if array != "" {
 		if fixedArraySize == 0 { // Slice
-			if baseType == "string" {
-				return "Vec::<String>::new()"
-			}
-			if baseType != fieldType {
-				return fmt.Sprintf("Vec::<typedef::%s>::new()", strutil.ToTitle(fieldType))
-			}
-			return fmt.Sprintf("Vec::<%s>::new()", rustType)
+			return "Vec::new()"
 		}
 		if baseType == "string" {
 			invalid = fmt.Sprintf("const { %s }", invalid)

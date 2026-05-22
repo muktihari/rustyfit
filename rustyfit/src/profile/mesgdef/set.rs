@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -69,8 +69,8 @@ impl Set {
             weight: u16::MAX,
             set_type: typedef::SetType(u8::MAX),
             start_time: typedef::DateTime(u32::MAX),
-            category: Vec::<typedef::ExerciseCategory>::new(),
-            category_subtype: Vec::<u16>::new(),
+            category: Vec::new(),
+            category_subtype: Vec::new(),
             weight_display_unit: typedef::FitBaseUnit(u16::MAX),
             message_index: typedef::MessageIndex(u16::MAX),
             wkt_step_index: typedef::MessageIndex(u16::MAX),
@@ -127,14 +127,14 @@ impl Default for Set {
 impl From<&Message> for Set {
     /// from creates new Set struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
 
         const KNOWN_NUMS: [u64; 4] = [4089, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -154,14 +154,12 @@ impl From<&Message> for Set {
             category: match &vals[7] {
                 Value::VecUint16(v) => {
                     let mut vs = Vec::with_capacity(v.len());
-                    for x in v {
-                        vs.push(typedef::ExerciseCategory(*x))
-                    }
+                    vs.extend(v.iter().map(|&x| typedef::ExerciseCategory(x)));
                     vs
                 }
                 _ => Vec::new(),
             },
-            category_subtype: vals[8].as_vec_u16(),
+            category_subtype: vals[8].to_vec_u16(),
             weight_display_unit: typedef::FitBaseUnit(vals[9].as_u16()),
             message_index: typedef::MessageIndex(vals[10].as_u16()),
             wkt_step_index: typedef::MessageIndex(vals[11].as_u16()),
@@ -237,7 +235,7 @@ impl From<Set> for Message {
             };
             len += 1;
         }
-        if m.category != Vec::<typedef::ExerciseCategory>::new() {
+        if !m.category.is_empty() {
             arr[len] = Field {
                 num: 7,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
@@ -249,7 +247,7 @@ impl From<Set> for Message {
             };
             len += 1;
         }
-        if m.category_subtype != Vec::<u16>::new() {
+        if !m.category_subtype.is_empty() {
             arr[len] = Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
@@ -286,11 +284,11 @@ impl From<Set> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::SET,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

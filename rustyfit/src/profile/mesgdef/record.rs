@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -379,7 +379,7 @@ impl Record {
             time_from_course: i32::MAX,
             cycle_length: u8::MAX,
             temperature: i8::MAX,
-            speed_1s: Vec::<u8>::new(),
+            speed_1s: Vec::new(),
             cycles: u8::MAX,
             total_cycles: u32::MAX,
             compressed_accumulated_power: u16::MAX,
@@ -412,10 +412,10 @@ impl Record {
             device_index: typedef::DeviceIndex(u8::MAX),
             left_pco: i8::MAX,
             right_pco: i8::MAX,
-            left_power_phase: Vec::<u8>::new(),
-            left_power_phase_peak: Vec::<u8>::new(),
-            right_power_phase: Vec::<u8>::new(),
-            right_power_phase_peak: Vec::<u8>::new(),
+            left_power_phase: Vec::new(),
+            left_power_phase_peak: Vec::new(),
+            right_power_phase: Vec::new(),
+            right_power_phase_peak: Vec::new(),
             enhanced_speed: u32::MAX,
             enhanced_altitude: u32::MAX,
             battery_soc: u8::MAX,
@@ -580,7 +580,7 @@ impl Record {
 
     /// Returns `speed_1s` in its scaled value. It returns invalid f64 when value is valid.
     pub fn speed_1s_scaled(&self) -> Vec<f64> {
-        if self.speed_1s == Vec::<u8>::new() {
+        if self.speed_1s.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.speed_1s.len());
@@ -971,7 +971,7 @@ impl Record {
 
     /// Returns `left_power_phase` in its scaled value. It returns invalid f64 when value is valid.
     pub fn left_power_phase_scaled(&self) -> Vec<f64> {
-        if self.left_power_phase == Vec::<u8>::new() {
+        if self.left_power_phase.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.left_power_phase.len());
@@ -1001,7 +1001,7 @@ impl Record {
 
     /// Returns `left_power_phase_peak` in its scaled value. It returns invalid f64 when value is valid.
     pub fn left_power_phase_peak_scaled(&self) -> Vec<f64> {
-        if self.left_power_phase_peak == Vec::<u8>::new() {
+        if self.left_power_phase_peak.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.left_power_phase_peak.len());
@@ -1031,7 +1031,7 @@ impl Record {
 
     /// Returns `right_power_phase` in its scaled value. It returns invalid f64 when value is valid.
     pub fn right_power_phase_scaled(&self) -> Vec<f64> {
-        if self.right_power_phase == Vec::<u8>::new() {
+        if self.right_power_phase.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.right_power_phase.len());
@@ -1061,7 +1061,7 @@ impl Record {
 
     /// Returns `right_power_phase_peak` in its scaled value. It returns invalid f64 when value is valid.
     pub fn right_power_phase_peak_scaled(&self) -> Vec<f64> {
-        if self.right_power_phase_peak == Vec::<u8>::new() {
+        if self.right_power_phase_peak.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.right_power_phase_peak.len());
@@ -1442,7 +1442,7 @@ impl Default for Record {
 impl From<&Message> for Record {
     /// from creates new Record struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 254] = [const { &Value::Invalid }; 254];
+        let mut vals = [const { &Value::Invalid }; 254];
         let mut state = [0u8; 14];
 
         const KNOWN_NUMS: [u64; 4] = [
@@ -1455,7 +1455,7 @@ impl From<&Message> for Record {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -1493,7 +1493,7 @@ impl From<&Message> for Record {
             time_from_course: vals[11].as_i32(),
             cycle_length: vals[12].as_u8(),
             temperature: vals[13].as_i8(),
-            speed_1s: vals[17].as_vec_u8(),
+            speed_1s: vals[17].to_vec_u8(),
             cycles: vals[18].as_u8(),
             total_cycles: vals[19].as_u32(),
             compressed_accumulated_power: vals[28].as_u16(),
@@ -1526,10 +1526,10 @@ impl From<&Message> for Record {
             device_index: typedef::DeviceIndex(vals[62].as_u8()),
             left_pco: vals[67].as_i8(),
             right_pco: vals[68].as_i8(),
-            left_power_phase: vals[69].as_vec_u8(),
-            left_power_phase_peak: vals[70].as_vec_u8(),
-            right_power_phase: vals[71].as_vec_u8(),
-            right_power_phase_peak: vals[72].as_vec_u8(),
+            left_power_phase: vals[69].to_vec_u8(),
+            left_power_phase_peak: vals[70].to_vec_u8(),
+            right_power_phase: vals[71].to_vec_u8(),
+            right_power_phase_peak: vals[72].to_vec_u8(),
             enhanced_speed: vals[73].as_u32(),
             enhanced_altitude: vals[78].as_u32(),
             battery_soc: vals[81].as_u8(),
@@ -1717,7 +1717,7 @@ impl From<Record> for Message {
             };
             len += 1;
         }
-        if m.speed_1s != Vec::<u8>::new() {
+        if !m.speed_1s.is_empty() {
             arr[len] = Field {
                 num: 17,
                 profile_type: ProfileType::UINT8,
@@ -2014,7 +2014,7 @@ impl From<Record> for Message {
             };
             len += 1;
         }
-        if m.left_power_phase != Vec::<u8>::new() {
+        if !m.left_power_phase.is_empty() {
             arr[len] = Field {
                 num: 69,
                 profile_type: ProfileType::UINT8,
@@ -2023,7 +2023,7 @@ impl From<Record> for Message {
             };
             len += 1;
         }
-        if m.left_power_phase_peak != Vec::<u8>::new() {
+        if !m.left_power_phase_peak.is_empty() {
             arr[len] = Field {
                 num: 70,
                 profile_type: ProfileType::UINT8,
@@ -2032,7 +2032,7 @@ impl From<Record> for Message {
             };
             len += 1;
         }
-        if m.right_power_phase != Vec::<u8>::new() {
+        if !m.right_power_phase.is_empty() {
             arr[len] = Field {
                 num: 71,
                 profile_type: ProfileType::UINT8,
@@ -2041,7 +2041,7 @@ impl From<Record> for Message {
             };
             len += 1;
         }
-        if m.right_power_phase_peak != Vec::<u8>::new() {
+        if !m.right_power_phase_peak.is_empty() {
             arr[len] = Field {
                 num: 72,
                 profile_type: ProfileType::UINT8,
@@ -2339,11 +2339,11 @@ impl From<Record> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::RECORD,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

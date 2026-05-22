@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::comparison_to_empty, clippy::manual_range_patterns)]
+#![allow(unused, clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -65,7 +65,7 @@ impl SegmentPoint {
             position_long: i32::MAX,
             distance: u32::MAX,
             altitude: u16::MAX,
-            leader_time: Vec::<u32>::new(),
+            leader_time: Vec::new(),
             enhanced_altitude: u32::MAX,
             state: [0u8; 1],
             unknown_fields: Vec::new(),
@@ -123,7 +123,7 @@ impl SegmentPoint {
 
     /// Returns `leader_time` in its scaled value. It returns invalid f64 when value is valid.
     pub fn leader_time_scaled(&self) -> Vec<f64> {
-        if self.leader_time == Vec::<u32>::new() {
+        if self.leader_time.is_empty() {
             return Vec::new();
         }
         let mut v = Vec::with_capacity(self.leader_time.len());
@@ -200,7 +200,7 @@ impl Default for SegmentPoint {
 impl From<&Message> for SegmentPoint {
     /// from creates new SegmentPoint struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals: [&Value; 255] = [const { &Value::Invalid }; 255];
+        let mut vals = [const { &Value::Invalid }; 255];
         let mut state = [0u8; 1];
 
         const KNOWN_NUMS: [u64; 4] = [126, 0, 0, 4611686018427387904];
@@ -208,7 +208,7 @@ impl From<&Message> for SegmentPoint {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields: Vec<Field> = Vec::with_capacity(n as usize);
+        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
             if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
@@ -227,7 +227,7 @@ impl From<&Message> for SegmentPoint {
             position_long: vals[2].as_i32(),
             distance: vals[3].as_u32(),
             altitude: vals[4].as_u16(),
-            leader_time: vals[5].as_vec_u32(),
+            leader_time: vals[5].to_vec_u32(),
             enhanced_altitude: vals[6].as_u32(),
             state,
             unknown_fields,
@@ -294,7 +294,7 @@ impl From<SegmentPoint> for Message {
             };
             len += 1;
         }
-        if m.leader_time != Vec::<u32>::new() {
+        if !m.leader_time.is_empty() {
             arr[len] = Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
@@ -313,11 +313,11 @@ impl From<SegmentPoint> for Message {
             len += 1;
         }
 
-        Message {
+        Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_POINT,
             fields: {
-                let mut fields: Vec<Field> = Vec::with_capacity(len + m.unknown_fields.len());
+                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
                 fields.extend_from_slice(&arr[..len]);
                 fields.extend_from_slice(&m.unknown_fields);
                 fields

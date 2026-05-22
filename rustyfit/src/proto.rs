@@ -676,208 +676,216 @@ impl Value {
         }
     }
 
-    /// Returns i8 or its invalid value when it's not an i8 value.
-    pub fn as_i8(&self) -> i8 {
+    /// Returns `i8` or its invalid value when it's not an `i8` value.
+    pub(crate) fn as_i8(&self) -> i8 {
         if let Value::Int8(v) = self {
             return *v;
         }
         i8::MAX
     }
 
-    /// Returns u8 or its invalid value when it's not an u8 value.
-    pub fn as_u8(&self) -> u8 {
+    /// Returns `u8` or its invalid value when it's not an `u8` value.
+    pub(crate) fn as_u8(&self) -> u8 {
         if let Value::Uint8(v) = self {
             return *v;
         }
         u8::MAX
     }
 
-    /// Returns u8z or its invalid value when it's not an u8z value.
-    pub fn as_u8z(&self) -> u8 {
+    /// Returns `u8z` or its invalid value when it's not an `u8z` value.
+    pub(crate) fn as_u8z(&self) -> u8 {
         if let Value::Uint8(v) = self {
             return *v;
         }
         0
     }
 
-    /// Returns i16 or its invalid value when it's not an i16 value.
-    pub fn as_i16(&self) -> i16 {
+    /// Returns `i16` or its invalid value when it's not an `i16` value.
+    pub(crate) fn as_i16(&self) -> i16 {
         if let Value::Int16(v) = self {
             return *v;
         }
         i16::MAX
     }
 
-    /// Returns u16 or its invalid value when it's not an u16 value.
-    pub fn as_u16(&self) -> u16 {
+    /// Returns `u16` or its invalid value when it's not an `u16` value.
+    pub(crate) fn as_u16(&self) -> u16 {
         if let Value::Uint16(v) = self {
             return *v;
         }
         u16::MAX
     }
 
-    /// Returns u16z or its invalid value when it's not an u16z value.
-    pub fn as_u16z(&self) -> u16 {
+    /// Returns `u16z` or its invalid value when it's not an `u16z` value.
+    pub(crate) fn as_u16z(&self) -> u16 {
         if let Value::Uint16(v) = self {
             return *v;
         }
         0
     }
 
-    /// Returns i32 or its invalid value when it's not an i32 value.
-    pub fn as_i32(&self) -> i32 {
+    /// Returns `i32` or its invalid value when it's not an `i32` value.
+    pub(crate) fn as_i32(&self) -> i32 {
         if let Value::Int32(v) = self {
             return *v;
         }
         i32::MAX
     }
 
-    /// Returns u32 or its invalid value when it's not an u32 value.
-    pub fn as_u32(&self) -> u32 {
+    /// Returns `u32` or its invalid value when it's not an `u32` value.
+    pub(crate) fn as_u32(&self) -> u32 {
         if let Value::Uint32(v) = self {
             return *v;
         }
         u32::MAX
     }
 
-    /// Returns u32z or its invalid value when it's not an u32z value.
-    pub fn as_u32z(&self) -> u32 {
+    /// Returns `u32z` or its invalid value when it's not an `u32z` value.
+    pub(crate) fn as_u32z(&self) -> u32 {
         if let Value::Uint32(v) = self {
             return *v;
         }
         0
     }
 
-    /// Returns string (clone) or empty string when it's not a string.
-    pub fn as_string(&self) -> String {
+    /// Returns `String` by clone. Return empty string if it's not a `string` value.
+    pub(crate) fn to_string(&self) -> String {
         if let Value::String(v) = self {
             return v.clone();
         }
         String::new()
     }
 
-    /// Returns f32 or its invalid value when it's not a f32 value.
-    pub fn as_f32(&self) -> f32 {
+    /// Returns `f32` or its invalid value when it's not a `f32` value.
+    pub(crate) fn as_f32(&self) -> f32 {
         if let Value::Float32(v) = self {
             return *v;
         }
         f32::MAX
     }
 
-    /// Returns f64 or its invalid value when it's not a f64 value.
-    pub fn as_f64(&self) -> f64 {
+    /// Returns `f64` or its invalid value when it's not a `f64` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn as_f64(&self) -> f64 {
         if let Value::Float64(v) = self {
             return *v;
         }
         f64::MAX
     }
 
-    /// Returns i64 or its invalid value when it's not an i64 value.
-    pub fn as_i64(&self) -> i64 {
+    /// Returns `i64` or its invalid value when it's not an `i64` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn as_i64(&self) -> i64 {
         if let Value::Int64(v) = self {
             return *v;
         }
         i64::MAX
     }
 
-    /// Returns u64 or its invalid value when it's not an u64 value.
-    pub fn as_u64(&self) -> u64 {
+    /// Returns `u64` or its invalid value when it's not an `u64` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn as_u64(&self) -> u64 {
         if let Value::Uint64(v) = self {
             return *v;
         }
         u64::MAX
     }
 
-    /// Returns u64z or its invalid value when it's not an u64z value.
-    pub fn as_u64z(&self) -> u64 {
+    /// Returns `u64z` or its invalid value when it's not an `u64z` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn as_u64z(&self) -> u64 {
         if let Value::Uint64(v) = self {
             return *v;
         }
         0
     }
 
-    /// Returns Vec<i8> (clone) or empty vector when it's not a Vec<i8> value.
-    pub fn as_vec_i8(&self) -> Vec<i8> {
+    /// Returns value as `Vec<i8>` by clone. Return empty vector if it's not a `Vec<i8>` value.
+    pub(crate) fn to_vec_i8(&self) -> Vec<i8> {
         if let Value::VecInt8(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<u8> (clone) or empty vector when it's not a Vec<u8> value.
-    pub fn as_vec_u8(&self) -> Vec<u8> {
+    /// Returns value as `Vec<u8>` by clone. Return empty vector if it's not a `Vec<u8>` value.
+    pub(crate) fn to_vec_u8(&self) -> Vec<u8> {
         if let Value::VecUint8(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<i16> (clone) or empty vector when it's not a Vec<i16> value.
-    pub fn as_vec_i16(&self) -> Vec<i16> {
+    /// Returns value as `Vec<i16>` by clone. Return empty vector if it's not a `Vec<i16>` value.
+    pub(crate) fn to_vec_i16(&self) -> Vec<i16> {
         if let Value::VecInt16(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<u16> (clone) or empty vector when it's not a Vec<u16> value.
-    pub fn as_vec_u16(&self) -> Vec<u16> {
+    /// Returns value as `Vec<u16>` by clone. Return empty vector if it's not a `Vec<u16>` value.
+    pub(crate) fn to_vec_u16(&self) -> Vec<u16> {
         if let Value::VecUint16(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<i32> (clone) or empty vector when it's not a Vec<i32> value.
-    pub fn as_vec_i32(&self) -> Vec<i32> {
+    /// Returns value as `Vec<i32>` by clone. Return empty vector if it's not a `Vec<i32>` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn to_vec_i32(&self) -> Vec<i32> {
         if let Value::VecInt32(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<u32> (clone) or empty vector when it's not a Vec<u32> value.
-    pub fn as_vec_u32(&self) -> Vec<u32> {
+    /// Returns value as `Vec<u32>` by clone. Return empty vector if it's not a `Vec<u32>` value.
+    pub(crate) fn to_vec_u32(&self) -> Vec<u32> {
         if let Value::VecUint32(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<String> (clone) or empty vector when it's not a Vec<String> value.
-    pub fn as_vec_string(&self) -> Vec<String> {
+    /// Returns value as `Vec<String>` by clone. Return empty vector if it's not a `Vec<String>` value.
+    pub(crate) fn to_vec_string(&self) -> Vec<String> {
         if let Value::VecString(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<f32> (clone) or empty vector when it's not a Vec<f32> value.
-    pub fn as_vec_f32(&self) -> Vec<f32> {
+    /// Returns value as `Vec<f32>` by clone. Return empty vector if it's not a `Vec<f32>` value.
+    pub(crate) fn to_vec_f32(&self) -> Vec<f32> {
         if let Value::VecFloat32(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<f64> (clone) or empty vector when it's not a Vec<f64> value.
-    pub fn as_vec_f64(&self) -> Vec<f64> {
+    /// Returns value as `Vec<f64>` by clone. Return empty vector if it's not a `Vec<f64>` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn to_vec_f64(&self) -> Vec<f64> {
         if let Value::VecFloat64(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<i64> (clone) or empty vector when it's not a Vec<i64> value.
-    pub fn as_vec_i64(&self) -> Vec<i64> {
+    /// Returns value as `Vec<i64>` by clone. Return empty vector if it's not a `Vec<i64>` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn to_vec_i64(&self) -> Vec<i64> {
         if let Value::VecInt64(v) = self {
             return v.clone();
         }
         Vec::new()
     }
 
-    /// Returns Vec<u64> (clone) or empty vector when it's not a Vec<u64> value.
-    pub fn as_vec_u64(&self) -> Vec<u64> {
+    /// Returns value as `Vec<u64>` by clone. Return empty vector if it's not a `Vec<u64>` value.
+    #[allow(unused)] // May be used on code generated files.
+    pub(crate) fn to_vec_u64(&self) -> Vec<u64> {
         if let Value::VecUint64(v) = self {
             return v.clone();
         }
@@ -1104,7 +1112,7 @@ impl From<&Message> for LocalFieldDescription {
                 _ => {}
             };
         }
-        return s;
+        s
     }
 }
 
