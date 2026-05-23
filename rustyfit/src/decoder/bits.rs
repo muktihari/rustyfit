@@ -1,6 +1,6 @@
 use crate::{profile::lookup, proto::Value};
 
-const N: usize = ((lookup::MAX_COMPONENT_BITS.div_ceil(8)) + 7).div_ceil(8);
+const N: usize = lookup::MAX_COMPONENT_BITS.div_ceil(64);
 
 #[cfg_attr(test, derive(Debug, PartialEq))]
 pub(super) struct Bits {
