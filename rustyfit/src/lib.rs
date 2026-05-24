@@ -6,7 +6,8 @@ pub use decoder::{
     Builder as DecoderBuilder, Decoder, Error as DecoderError, Event as DecoderEvent,
 };
 pub use encoder::{
-    Builder as EncoderBuilder, Encoder, Endianness, Error as EncoderError, HeaderOption,
+    Builder as EncoderBuilder, Encoder, Endianness, Error as EncoderError, FieldValidationError,
+    HeaderOption, MessageValidationError,
 };
 
 /// The `profile` module represents FIT Global Profile containing types and messages generated from Profile.xlsx.

@@ -5,45 +5,65 @@ use crate::{
         mesgdef,
         typedef::{FitBaseType, MesgNum},
     },
-    proto::{LocalFieldDescription, Message, Value},
+    proto::{LocalFieldDescription, Message, ProtocolVersion, Value},
 };
-use alloc::{string::String, vec::Vec};
+use alloc::vec::Vec;
 
+/// Error occurs during message validation
 #[derive(Debug)]
-pub enum MessageValidatorError {
-    /// Message has no fields.
-    NoFields,
-    /// Field value integrity
-    FieldValueIntegrity {
+#[allow(missing_docs)]
+pub enum MessageValidationError {
+    /// Message has zero fields and zero developer fields.
+    EmptyMessageData,
+    /// Developer data is unsupported in protocol v1.
+    UnsupportedDeveloperData,
+    /// Some base types are unsupported in protocol v1.
+    UnsupportedFitBaseType {
         field_index: usize,
-        err: IntegrityError,
+        base_type: FitBaseType,
     },
-    /// Developer field value integrity
-    DeveloperFieldValueIntegrity {
+    /// Field contains invalid data.
+    FieldValidation {
+        field_index: usize,
+        err: FieldValidationError,
+    },
+    /// DeveloperField contains invalid data.
+    DeveloperFieldValidation {
         developer_field_index: usize,
-        err: IntegrityError,
+        err: FieldValidationError,
     },
-    /// Missing developer data id
+    /// Developer fields must have prior DeveloperDataId message.
     MissingDeveloperDataId { developer_field_index: usize },
-    /// Missing field description
+    /// Developer fields must have prior FieldDescription message.
     MissingFieldDescription { developer_field_index: usize },
 }
 
-impl core::fmt::Display for MessageValidatorError {
+impl core::fmt::Display for MessageValidationError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Self::NoFields => write!(f, "no fields"),
-            Self::FieldValueIntegrity { field_index, err } => write!(
+            Self::EmptyMessageData => {
+                write!(f, "message has zero fields and zero developer fields")
+            }
+            Self::UnsupportedDeveloperData => {
+                write!(f, "developer data is unsupported for protocol v1")
+            }
+            Self::UnsupportedFitBaseType {
+                field_index,
+                base_type,
+            } => write!(
                 f,
-                "value integrity: field index {}, err: {}",
-                field_index, err
+                "fit base type {} on field index {} is unsupported for protocol v1",
+                base_type, field_index
             ),
-            Self::DeveloperFieldValueIntegrity {
+            Self::FieldValidation { field_index, err } => {
+                write!(f, "field validation: field index {}: {}", field_index, err)
+            }
+            Self::DeveloperFieldValidation {
                 developer_field_index,
                 err,
             } => write!(
                 f,
-                "value integrity: developer field index {}, err: {}",
+                "developer field validation: developer field index {}: {}",
                 developer_field_index, err
             ),
             Self::MissingDeveloperDataId {
@@ -64,34 +84,35 @@ impl core::fmt::Display for MessageValidatorError {
     }
 }
 
+impl core::error::Error for MessageValidationError {}
+
+/// Error occurs during value `fields` or `developer_fields` validation.
+/// The context depends on where the validation takes place.
 #[derive(Debug)]
-pub enum IntegrityError {
-    /// Value and base type is not align
-    ValueBaseTypeNotAlign {
-        value: Value,
-        base_type: FitBaseType,
-    },
-    /// Invalid UTF-8 string in a value.
-    InvalidUTF8String(String),
-    /// Value size exceed maximum limit (255 bytes)
-    ValueSizeExceedLimit,
+#[allow(missing_docs)]
+pub enum FieldValidationError {
+    ValueTypeInvalid,
+    StringValueInvalid,
+    ValueSizeLimitExceeded,
+    FieldLimitExceeded,
 }
 
-impl core::fmt::Display for IntegrityError {
+impl core::fmt::Display for FieldValidationError {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
-            Self::ValueBaseTypeNotAlign { value, base_type } => {
-                write!(
-                    f,
-                    "value {:?} is not align with base type {}",
-                    value, base_type
-                )
+            Self::ValueTypeInvalid => write!(f, "value type is invalid"),
+            Self::StringValueInvalid => write!(f, "string value contains invalid UTF-8 characters"),
+            Self::ValueSizeLimitExceeded => {
+                write!(f, "value's size in bytes exceeds 255 bytes limit")
             }
-            Self::InvalidUTF8String(value) => write!(f, "invalid UTF-8 string: {:?}", value),
-            Self::ValueSizeExceedLimit => write!(f, "value's size exceed limit"),
+            Self::FieldLimitExceeded => {
+                write!(f, "fields or developer_fields exceeds 255 items limit")
+            }
         }
     }
 }
+
+impl core::error::Error for FieldValidationError {}
 
 pub(super) struct MessageValidator {
     developer_data_index_seen: [u64; 4],
@@ -109,7 +130,26 @@ impl MessageValidator {
     pub(super) fn validate_message(
         &mut self,
         mesg: &mut Message,
-    ) -> Result<(), MessageValidatorError> {
+        protocol_version: ProtocolVersion,
+    ) -> Result<(), MessageValidationError> {
+        // Some data are unsupported on protocol v1
+        if protocol_version == ProtocolVersion::V1 {
+            if !mesg.developer_fields.is_empty() {
+                return Err(MessageValidationError::UnsupportedDeveloperData);
+            }
+
+            for (i, field) in mesg.fields.iter().enumerate() {
+                if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
+                    > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
+                {
+                    return Err(MessageValidationError::UnsupportedFitBaseType {
+                        base_type: field.profile_type.base_type(),
+                        field_index: i,
+                    });
+                }
+            }
+        }
+
         let mut valid = 0usize;
         for i in 0..mesg.fields.len() {
             let field = &mesg.fields[i];
@@ -117,17 +157,17 @@ impl MessageValidator {
                 continue;
             }
 
-            if let Err(err) = self.value_integrity(&field.value, field.profile_type.base_type()) {
-                return Err(MessageValidatorError::FieldValueIntegrity {
+            if let Err(err) = self.validate_field(&field.value, field.profile_type.base_type()) {
+                return Err(MessageValidationError::FieldValidation {
                     field_index: i,
                     err,
                 });
             }
 
             if valid == 255 {
-                return Err(MessageValidatorError::FieldValueIntegrity {
+                return Err(MessageValidationError::FieldValidation {
                     field_index: i,
-                    err: IntegrityError::ValueSizeExceedLimit,
+                    err: FieldValidationError::FieldLimitExceeded,
                 });
             }
 
@@ -157,13 +197,12 @@ impl MessageValidator {
             _ => {}
         };
 
-        valid = 0;
         for i in 0..mesg.developer_fields.len() {
             let dev_field = &mesg.developer_fields[i];
 
             let x = dev_field.developer_data_index;
             if (self.developer_data_index_seen[(x as usize) >> 6] >> (x & 63)) & 1 == 0 {
-                return Err(MessageValidatorError::MissingDeveloperDataId {
+                return Err(MessageValidationError::MissingDeveloperDataId {
                     developer_field_index: i,
                 });
             }
@@ -173,71 +212,60 @@ impl MessageValidator {
                     && v.field_definition_number == dev_field.num
             }) {
                 Some(v) => {
-                    if !dev_field.value.is_valid(v.fit_base_type_id) {
-                        continue;
-                    }
-                    if let Err(err) = self.value_integrity(&dev_field.value, v.fit_base_type_id) {
-                        return Err(MessageValidatorError::DeveloperFieldValueIntegrity {
+                    if let Err(err) = self.validate_field(&dev_field.value, v.fit_base_type_id) {
+                        return Err(MessageValidationError::DeveloperFieldValidation {
                             developer_field_index: i,
                             err,
                         });
                     }
                 }
                 None => {
-                    return Err(MessageValidatorError::MissingFieldDescription {
+                    return Err(MessageValidationError::MissingFieldDescription {
                         developer_field_index: i,
                     });
                 }
             };
 
-            if valid == 255 {
-                return Err(MessageValidatorError::DeveloperFieldValueIntegrity {
+            if i == 255 {
+                return Err(MessageValidationError::DeveloperFieldValidation {
                     developer_field_index: i,
-                    err: IntegrityError::ValueSizeExceedLimit,
+                    err: FieldValidationError::FieldLimitExceeded,
                 });
             }
-
-            if i != valid {
-                mesg.developer_fields.swap(i, valid);
-            }
-
-            valid += 1;
         }
 
-        mesg.developer_fields.truncate(valid);
-
         if mesg.fields.is_empty() && mesg.developer_fields.is_empty() {
-            return Err(MessageValidatorError::NoFields);
+            return Err(MessageValidationError::EmptyMessageData);
         }
 
         Ok(())
     }
 
-    fn value_integrity(&self, value: &Value, base_type: FitBaseType) -> Result<(), IntegrityError> {
+    fn validate_field(
+        &self,
+        value: &Value,
+        base_type: FitBaseType,
+    ) -> Result<(), FieldValidationError> {
         if !value.is_align(base_type) {
-            return Err(IntegrityError::ValueBaseTypeNotAlign {
-                value: value.clone(),
-                base_type,
-            });
+            return Err(FieldValidationError::ValueTypeInvalid);
         }
 
         match value {
             Value::String(v) if core::str::from_utf8(v.as_bytes()).is_err() => {
-                return Err(IntegrityError::InvalidUTF8String(v.clone()));
+                return Err(FieldValidationError::StringValueInvalid);
             }
             Value::VecString(v) => {
                 for x in v.iter() {
                     if core::str::from_utf8(x.as_bytes()).is_err() {
-                        return Err(IntegrityError::InvalidUTF8String(x.clone()));
+                        return Err(FieldValidationError::StringValueInvalid);
                     }
                 }
             }
             _ => {}
         };
 
-        let size = value.size();
-        if size > 255 {
-            return Err(IntegrityError::ValueSizeExceedLimit);
+        if value.size() > 255 {
+            return Err(FieldValidationError::ValueSizeLimitExceeded);
         }
 
         Ok(())
