@@ -93,7 +93,6 @@ struct Options {
 pub struct Encoder<W> {
     writer: W,
     n: i64,
-    last_file_header_pos: i64,
     data_size: u32,
     crc16: Crc16,
     lru: Lru,
@@ -157,8 +156,6 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn encode_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), Error<W::Error>> {
-        self.last_file_header_pos = self.n;
-
         if file_header.size != 12 {
             file_header.size = 14;
         }
@@ -191,13 +188,12 @@ impl<W: Write + Seek> Encoder<W> {
             self.crc16.reset();
         }
 
-        let size = self.n - self.last_file_header_pos;
-        self.writer.seek(SeekFrom::Current(-size))?;
+        self.writer.seek(SeekFrom::Current(-self.n))?;
 
         self.writer.write_all(&self.buf)?;
 
         let n = self.buf.len() as i64;
-        self.writer.seek(SeekFrom::Current(size - n))?;
+        self.writer.seek(SeekFrom::Current(self.n - n))?;
         Ok(())
     }
 
@@ -302,6 +298,7 @@ impl<W: Write + Seek> Encoder<W> {
     }
 
     fn reset(&mut self) {
+        self.n = 0;
         self.timestamp_reference = 0;
         self.data_size = 0;
         self.lru.reset();
@@ -492,7 +489,6 @@ impl Builder {
         Encoder {
             writer,
             n: 0,
-            last_file_header_pos: 0,
             data_size: 0,
             crc16: Crc16::new(),
             lru: Lru::new(
@@ -522,7 +518,7 @@ mod tests {
         Encoder,
         encoder::write_value_to_vec,
         profile::{mesgdef, typedef},
-        proto::{Message, Value},
+        proto::{FileHeader, Message, ProtocolVersion, Value},
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
@@ -962,5 +958,66 @@ mod tests {
             write_value_to_vec(&mut buf, &tc.value, tc.arch);
             assert_eq!(tc.expected, buf, "input: {:?}", tc.value)
         }
+    }
+
+    struct WriteSeeker {
+        buf: Vec<u8>,
+    }
+
+    impl ErrorType for WriteSeeker {
+        type Error = ErrorKind;
+    }
+
+    impl Write for WriteSeeker {
+        fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
+            Ok(self.buf.write(buf).unwrap())
+        }
+        fn flush(&mut self) -> Result<(), Self::Error> {
+            Ok(())
+        }
+    }
+
+    impl Seek for WriteSeeker {
+        fn seek(&mut self, pos: embedded_io::SeekFrom) -> Result<u64, Self::Error> {
+            match pos {
+                embedded_io::SeekFrom::Current(v) => {
+                    unsafe { self.buf.set_len((self.buf.len() as i64 + v) as usize) };
+                    return Ok(v.wrapping_abs() as u64);
+                }
+                _ => panic!("only support SeekFrom::Current"),
+            }
+        }
+    }
+
+    #[test]
+    fn test_update_file_header() {
+        let mut ws = WriteSeeker {
+            buf: vec![14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0, 64],
+        };
+        let n = ws.buf.len();
+
+        let mut enc = Encoder::new(&mut ws);
+        enc.n = n as i64;
+        enc.data_size = 1;
+
+        let mut file_header = FileHeader {
+            size: 14,
+            protocol_version: ProtocolVersion::V1, // [16]
+            profile_version: 21205,                // [212, 82]
+            data_size: 0,                          // [1, 0, 0, 0] updated
+            data_type: FileHeader::DATA_TYPE,      // [46, 70, 73, 84]
+            crc: 0,                                // [83, 147] updated
+        };
+
+        enc.update_file_header(&mut file_header).unwrap();
+        let pos = ws.buf.len();
+
+        assert_eq!(
+            &ws.buf,
+            &[14, 16, 213, 82, 1, 0, 0, 0, 46, 70, 73, 84, 83, 147, 64],
+            "should write at index 0, and data_size and crc should be updated"
+        );
+
+        assert_eq!(pos, n, "should put offset back to its original position");
     }
 }
