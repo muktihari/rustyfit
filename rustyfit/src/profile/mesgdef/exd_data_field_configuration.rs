@@ -124,13 +124,13 @@ impl From<&Message> for ExdDataFieldConfiguration {
             display_type: typedef::ExdDisplayType(vals[4].as_u8()),
             title: match &vals[5] {
                 Value::VecString(v) => {
-                    let mut arr: [String; 32] = Default::default();
+                    let mut arr = [const { String::new() }; 32];
                     for (i, x) in v.iter().take(32).enumerate() {
                         arr[i] = x.to_owned();
                     }
                     arr
                 }
-                _ => Default::default(),
+                _ => [const { String::new() }; 32],
             },
             state,
             unknown_fields,

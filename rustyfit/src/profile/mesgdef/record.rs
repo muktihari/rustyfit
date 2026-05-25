@@ -1480,7 +1480,7 @@ impl From<&Message> for Record {
             power: vals[7].as_u16(),
             compressed_speed_distance: match &vals[8] {
                 Value::VecUint8(v) => {
-                    let mut arr: [u8; 3] = [u8::MAX; 3];
+                    let mut arr = [u8::MAX; 3];
                     for (i, x) in v.iter().take(3).enumerate() {
                         arr[i] = *x;
                     }

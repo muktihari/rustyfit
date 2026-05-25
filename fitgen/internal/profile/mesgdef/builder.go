@@ -420,13 +420,13 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 		rshValue := "*x"
 
 		if fieldType == "string" {
-			arrayValue = "Default::default()"
+			arrayValue = fmt.Sprintf("[const { String::new() }; %d]", fixedArraySize)
 			rshValue = "x.to_owned()"
 		}
 
 		value = fmt.Sprintf(`match &vals[%d] {
 			Value::Vec%s(v) => {
-				let mut arr: [%s; %d] = %s;
+				let mut arr = %s;
 				for (i, x) in v.iter().take(%d).enumerate() {
 					arr[i] = %s;
 				}
@@ -436,7 +436,7 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 		}`,
 			num,
 			valueEnumType,
-			rustType, fixedArraySize, arrayValue,
+			arrayValue,
 			fixedArraySize,
 			rshValue,
 			arrayValue,
