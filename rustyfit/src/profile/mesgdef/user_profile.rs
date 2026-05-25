@@ -287,7 +287,7 @@ impl From<&Message> for UserProfile {
             local_id: typedef::UserLocalId(vals[22].as_u16()),
             global_id: match &vals[23] {
                 Value::VecUint8(v) => {
-                    let mut arr: [u8; 6] = [u8::MAX; 6];
+                    let mut arr = [u8::MAX; 6];
                     for (i, x) in v.iter().take(6).enumerate() {
                         arr[i] = *x;
                     }
