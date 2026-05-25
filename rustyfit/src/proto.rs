@@ -6,34 +6,6 @@ use crate::profile::{
 };
 use alloc::{string::String, vec::Vec};
 
-/// Defined errors returned from proto module.
-#[cfg_attr(test, derive(PartialEq))]
-#[derive(Debug)]
-pub enum Error {
-    /// Protocol Validator's error when Protocol Version 1.0 constains developer data.
-    ProtocolViolationDeveloperData,
-    /// Protocol Validator's error when Protocol Version 1.0 has base_type number more than byte number.
-    ProtocolViolationUnsupportedBaseType(FitBaseType),
-    /// Marshal error when Value is invalid.
-    InvalidValue,
-}
-
-impl core::fmt::Display for Error {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        match self {
-            Self::ProtocolViolationDeveloperData => {
-                write!(f, "protocol version 1.0 do not support developer data")
-            }
-            Self::ProtocolViolationUnsupportedBaseType(base_type) => {
-                write!(f, "protocol version 1.0 do not support type {}", base_type)
-            }
-            Self::InvalidValue => write!(f, "invalid proto::Value"),
-        }
-    }
-}
-
-impl core::error::Error for Error {}
-
 /// FIT is FIT protocol data representative.
 #[derive(Debug, Default)]
 pub struct FIT {
@@ -953,27 +925,6 @@ impl ProtocolVersion {
     /// Returns minor version.
     pub fn minor(self) -> u8 {
         self.0 | ((1 << 4) - 1)
-    }
-}
-
-impl ProtocolVersion {
-    /// Validates whether the message contains unsupported data for the targeted protocol version.
-    pub(crate) fn validate_message(self, mesg: &Message) -> Result<(), Error> {
-        if self == ProtocolVersion::V1 {
-            if !mesg.developer_fields.is_empty() {
-                return Err(Error::ProtocolViolationDeveloperData);
-            }
-            for field in &mesg.fields {
-                if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
-                    > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
-                {
-                    return Err(Error::ProtocolViolationUnsupportedBaseType(
-                        field.profile_type.base_type(),
-                    ));
-                }
-            }
-        }
-        Ok(())
     }
 }
 

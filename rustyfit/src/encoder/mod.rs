@@ -6,15 +6,13 @@ mod validator;
 use crate::{
     crc16::Crc16,
     encoder::lru::Lru,
-    encoder::validator::{MessageValidator, MessageValidatorError},
-    profile::{
-        PROFILE_VERSION,
-        typedef::{DateTime, MesgNum},
-    },
-    proto::{Error as ProtocolError, *},
+    encoder::validator::MessageValidator,
+    profile::{PROFILE_VERSION, typedef::DateTime},
+    proto::*,
 };
 use alloc::vec::Vec;
 use embedded_io::{Seek, SeekFrom, Write};
+pub use validator::{FieldValidationError, MessageValidationError};
 
 /// Encoder Error
 #[derive(Debug)]
@@ -26,23 +24,12 @@ pub enum Error<E> {
     },
     /// Empty messages, no data to be encoded.
     EmptyMessages,
-    /// Protocol violation related error.
-    Protocol {
-        /// Message index
-        mesg_index: usize,
-        /// Message number
-        mesg_num: MesgNum,
-        /// Protocol error
-        err: ProtocolError,
-    },
     /// Message validation related error.
     MessageValidation {
         /// Message index
         mesg_index: usize,
-        /// Message number
-        mesg_num: MesgNum,
-        /// Message Validator error
-        err: MessageValidatorError,
+        /// Message validation error
+        err: MessageValidationError,
     },
 }
 
@@ -54,17 +41,9 @@ where
         match &self {
             Self::Io { err } => write!(f, "io error: {}", err),
             Self::EmptyMessages => write!(f, "messages is empty"),
-            Self::Protocol {
-                mesg_index,
-                mesg_num,
-                err,
-            } => write!(f, "mesg: index: {}, num: {}: {}", mesg_index, mesg_num, err),
-
-            Self::MessageValidation {
-                mesg_index,
-                mesg_num,
-                err,
-            } => write!(f, "mesg: index: {}, num: {}: {}", mesg_index, mesg_num, err),
+            Self::MessageValidation { mesg_index, err } => {
+                write!(f, "message validation: mesg_index {}: {}", mesg_index, err)
+            }
         }
     }
 }
@@ -137,13 +116,17 @@ impl<W: Write + Seek> Encoder<W> {
         self.validate(fit)?;
 
         self.encode_file_header(&mut fit.file_header)?;
-        self.encode_messages(&mut fit.messages)?;
+
+        for mesg in &mut fit.messages {
+            self.encode_message(mesg)?;
+        }
 
         fit.crc = self.crc16.sum16();
         self.encode_crc()?;
 
         self.update_file_header(&mut fit.file_header)?;
         self.reset();
+
         Ok(())
     }
 
@@ -159,25 +142,17 @@ impl<W: Write + Seek> Encoder<W> {
         if fit.messages.is_empty() {
             return Err(Error::EmptyMessages);
         }
+
         let protocol_version = fit.file_header.protocol_version;
         for (i, mesg) in fit.messages.iter_mut().enumerate() {
-            if let Err(err) = protocol_version.validate_message(mesg) {
-                return Err(Error::Protocol {
-                    mesg_index: i,
-                    mesg_num: mesg.num,
-                    err,
-                });
+            if let Err(err) = self
+                .message_validator
+                .validate_message(mesg, protocol_version)
+            {
+                return Err(Error::MessageValidation { mesg_index: i, err });
             }
         }
-        for (i, mesg) in fit.messages.iter_mut().enumerate() {
-            if let Err(err) = self.message_validator.validate_message(mesg) {
-                return Err(Error::MessageValidation {
-                    mesg_index: i,
-                    mesg_num: mesg.num,
-                    err,
-                });
-            }
-        }
+
         Ok(())
     }
 
@@ -193,15 +168,12 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         file_header.data_type = FileHeader::DATA_TYPE;
-        file_header.crc = 0; // recalculated
 
-        let buf = &mut self.buf;
-        buf.clear();
+        self.buf.clear();
+        write_file_header_to_vec(&mut self.buf, file_header);
 
-        write_file_header_to_vec(buf, file_header);
-
-        self.writer.write_all(buf)?;
-        self.n += buf.len() as i64;
+        self.writer.write_all(&self.buf)?;
+        self.n += self.buf.len() as i64;
 
         Ok(())
     }
@@ -226,13 +198,6 @@ impl<W: Write + Seek> Encoder<W> {
 
         let n = self.buf.len() as i64;
         self.writer.seek(SeekFrom::Current(size - n))?;
-        Ok(())
-    }
-
-    fn encode_messages(&mut self, messages: &mut [Message]) -> Result<(), Error<W::Error>> {
-        for mesg in messages {
-            self.encode_message(mesg)?;
-        }
         Ok(())
     }
 
@@ -371,7 +336,7 @@ fn write_message_definition_to_vec(buf: &mut Vec<u8>, mesg: &Message, arch: u8) 
     for field in &mesg.fields {
         buf.push(field.num);
         buf.push(field.value.size() as u8);
-        buf.push(field.profile_type.base_type().0)
+        buf.push(field.profile_type.base_type().0);
     }
 
     if mesg.developer_fields.is_empty() {
