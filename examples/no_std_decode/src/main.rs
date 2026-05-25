@@ -4,7 +4,6 @@
 extern crate alloc;
 
 use alloc::format;
-use embedded_io_cursor::Cursor;
 use rustyfit::{
     Decoder, DecoderEvent,
     profile::{mesgdef, typedef},
@@ -13,12 +12,12 @@ use talc::{DefaultBinning, source::Claim, sync::TalcLock};
 
 #[global_allocator]
 static A: TalcLock<spinning_top::RawSpinlock, Claim, DefaultBinning> = TalcLock::new(unsafe {
-    const SIZE: usize = 48 * 1024; // 48 KB
+    const SIZE: usize = 40 * 1024; // 40 KB
     static mut HEAP: [u8; SIZE] = [0; SIZE];
     Claim::array(&raw mut HEAP)
 });
 
-const FIT_FILE: &[u8] = include_bytes!("sample.fit"); // Embed file
+static FIT_FILE: &[u8] = include_bytes!("sample.fit"); // Embed file
 
 macro_rules! printf {
     ($($arg:tt)*) => {
@@ -34,8 +33,7 @@ macro_rules! printf {
 fn _start() -> ! {
     printf!("Hello, world!\n");
 
-    let mut cur = Cursor::new(FIT_FILE);
-    let mut dec = Decoder::new(cur.get_mut());
+    let mut dec = Decoder::new(FIT_FILE);
 
     dec.decode_with(|e| match e {
         DecoderEvent::Message(v) => {

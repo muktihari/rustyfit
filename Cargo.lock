@@ -198,12 +198,6 @@ checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
 
 [[package]]
 name = "embedded-io"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
-
-[[package]]
-name = "embedded-io"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9eb1aa714776b75c7e67e1da744b81a129b3ff919c8712b5e1b32252c1f07cc7"
@@ -214,16 +208,7 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c900a1c087f1f7d17cdc84a1290df91521cd90933efa76d68e568385d889f2f4"
 dependencies = [
- "embedded-io 0.7.1",
-]
-
-[[package]]
-name = "embedded-io-cursor"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56af6cdb948cc818e25568dde8dc663d85aa4077cc6f5c338af246a6ab0f1483"
-dependencies = [
- "embedded-io 0.6.1",
+ "embedded-io",
 ]
 
 [[package]]
@@ -319,7 +304,6 @@ checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 name = "no_std_decode"
 version = "0.1.0"
 dependencies = [
- "embedded-io-cursor",
  "rustyfit",
  "spinning_top",
  "talc",
@@ -468,7 +452,7 @@ name = "rustyfit"
 version = "0.7.0"
 dependencies = [
  "criterion",
- "embedded-io 0.7.1",
+ "embedded-io",
  "embedded-io-adapters",
 ]
 
