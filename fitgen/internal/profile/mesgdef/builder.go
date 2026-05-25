@@ -427,7 +427,7 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 		value = fmt.Sprintf(`match &vals[%d] {
 			Value::Vec%s(v) => {
 				let mut arr: [%s; %d] = %s;
-				for (i, x) in v.iter().enumerate() {
+				for (i, x) in v.iter().take(%d).enumerate() {
 					arr[i] = %s;
 				}
 				arr
@@ -437,6 +437,7 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 			num,
 			valueEnumType,
 			rustType, fixedArraySize, arrayValue,
+			fixedArraySize,
 			rshValue,
 			arrayValue,
 		)

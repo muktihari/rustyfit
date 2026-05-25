@@ -422,7 +422,7 @@ impl From<&Message> for Monitoring {
             activity_time: match &vals[16] {
                 Value::VecUint16(v) => {
                     let mut arr: [u16; 8] = [u16::MAX; 8];
-                    for (i, x) in v.iter().enumerate() {
+                    for (i, x) in v.iter().take(8).enumerate() {
                         arr[i] = *x;
                     }
                     arr
