@@ -19,5 +19,4 @@ include = [
     "Cargo.lock",
     "src/**/*",
     "LICENSE*",
-    "README.md",
 ]
