@@ -125,7 +125,7 @@ impl From<&Message> for ExdDataFieldConfiguration {
             title: match &vals[5] {
                 Value::VecString(v) => {
                     let mut arr: [String; 32] = Default::default();
-                    for (i, x) in v.iter().enumerate() {
+                    for (i, x) in v.iter().take(32).enumerate() {
                         arr[i] = x.to_owned();
                     }
                     arr

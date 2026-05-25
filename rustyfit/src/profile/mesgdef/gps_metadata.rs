@@ -206,7 +206,7 @@ impl From<&Message> for GpsMetadata {
             velocity: match &vals[7] {
                 Value::VecInt16(v) => {
                     let mut arr: [i16; 3] = [i16::MAX; 3];
-                    for (i, x) in v.iter().enumerate() {
+                    for (i, x) in v.iter().take(3).enumerate() {
                         arr[i] = *x;
                     }
                     arr

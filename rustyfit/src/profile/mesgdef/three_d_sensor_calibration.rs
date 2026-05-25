@@ -125,7 +125,7 @@ impl From<&Message> for ThreeDSensorCalibration {
             offset_cal: match &vals[4] {
                 Value::VecInt32(v) => {
                     let mut arr: [i32; 3] = [i32::MAX; 3];
-                    for (i, x) in v.iter().enumerate() {
+                    for (i, x) in v.iter().take(3).enumerate() {
                         arr[i] = *x;
                     }
                     arr
@@ -135,7 +135,7 @@ impl From<&Message> for ThreeDSensorCalibration {
             orientation_matrix: match &vals[5] {
                 Value::VecInt32(v) => {
                     let mut arr: [i32; 9] = [i32::MAX; 9];
-                    for (i, x) in v.iter().enumerate() {
+                    for (i, x) in v.iter().take(9).enumerate() {
                         arr[i] = *x;
                     }
                     arr
