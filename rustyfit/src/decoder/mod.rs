@@ -100,13 +100,13 @@ struct Options {
 /// Decoder for decoding FIT file.
 pub struct Decoder<R> {
     reader: R,
-    n: usize,
+    /// Subsequence call to decode will be optional.
+    optional_sequence: bool,
     cur: u32,
     crc16: Crc16,
     mesg_definitions: [MessageDefinition; 16],
     accumulator: Accumulator,
     timestamp: u32,
-    last_time_offset: u8,
     buf_fields: Vec<Field>,
     buf_developer_fields: Vec<DeveloperField>,
     field_descriptions: Vec<LocalFieldDescription>,
@@ -155,9 +155,12 @@ impl<R: Read> Decoder<R> {
             None => return Ok(false),
         };
         f(Event::FileHeader(&file_header));
+
         self.decode_message_with(file_header.data_size, &mut f)?;
+
         let crc = self.decode_crc()?;
         f(Event::Crc(&crc));
+
         self.reset();
         Ok(true)
     }
@@ -166,13 +169,13 @@ impl<R: Read> Decoder<R> {
         let mut arr = [0u8; 14];
         if let Err(err) = self.reader.read_exact(&mut arr[..1]) {
             if let ReadExactError::UnexpectedEof = err
-                && self.n > 0
+                && self.optional_sequence
             {
                 return Ok(None);
             }
             return Err(Error::from(err));
         };
-        self.n += 1;
+        self.optional_sequence = true;
 
         let n = arr[0] as usize;
         if n != 12 && n != 14 {
@@ -180,7 +183,6 @@ impl<R: Read> Decoder<R> {
         }
 
         self.reader.read_exact(&mut arr[1..n])?;
-        self.n += n - 1;
 
         if &arr[8..12] != FileHeader::DATA_TYPE.as_bytes() {
             return Err(Error::NotFITFile);
@@ -215,7 +217,6 @@ impl<R: Read> Decoder<R> {
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
     fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error<R::Error>> {
         self.reader.read_exact(buf)?;
-        self.n += buf.len();
         self.cur += buf.len() as u32;
         if self.options.checksum {
             self.crc16.write(buf);
@@ -337,12 +338,11 @@ impl<R: Read> Decoder<R> {
         mesg_def: &MessageDefinition,
     ) -> Result<(), Error<R::Error>> {
         if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
+            let last_time_offset = (self.timestamp & Message::COMPRESSED_TIME_MASK as u32) as u8;
             let time_offset = mesg.header & Message::COMPRESSED_TIME_MASK;
             self.timestamp = self.timestamp.wrapping_add(
-                (time_offset.wrapping_sub(self.last_time_offset) & Message::COMPRESSED_TIME_MASK)
-                    as u32,
+                (time_offset.wrapping_sub(last_time_offset) & Message::COMPRESSED_TIME_MASK) as u32,
             );
-            self.last_time_offset = time_offset;
 
             mesg.fields.push(Field {
                 num: Field::TIMESTAMP,
@@ -445,7 +445,6 @@ impl<R: Read> Decoder<R> {
                 && let Value::Uint32(v) = value
             {
                 self.timestamp = v;
-                self.last_time_offset = v as u8 & Message::COMPRESSED_TIME_MASK;
             }
 
             if accumulate {
@@ -580,16 +579,14 @@ impl<R: Read> Decoder<R> {
     fn decode_crc(&mut self) -> Result<u16, Error<R::Error>> {
         let mut arr = [0u8; 2];
         self.reader.read_exact(&mut arr)?;
-        self.n += arr.len();
 
-        let crc = u16::from_le_bytes(arr);
-        if self.options.checksum && crc != self.crc16.sum16() {
-            return Err(Error::ChecksumMismatch {
-                found: crc,
-                calculated: self.crc16.sum16(),
-            });
+        let found = u16::from_le_bytes(arr);
+        let calculated = self.crc16.sum16();
+        if self.options.checksum && found != calculated {
+            return Err(Error::ChecksumMismatch { found, calculated });
         }
-        Ok(crc)
+
+        Ok(found)
     }
 
     fn reset(&mut self) {
@@ -600,7 +597,6 @@ impl<R: Read> Decoder<R> {
         }
         self.accumulator.reset();
         self.timestamp = 0;
-        self.last_time_offset = 0;
         self.field_descriptions.clear();
     }
 }
@@ -725,7 +721,7 @@ impl Builder {
     pub fn build<R: Read>(&self, reader: R) -> Decoder<R> {
         Decoder {
             reader,
-            n: 0,
+            optional_sequence: false,
             cur: 0,
             crc16: Crc16::new(),
             mesg_definitions: [const {
@@ -740,7 +736,6 @@ impl Builder {
             }; 16],
             accumulator: Accumulator::new(),
             timestamp: 0,
-            last_time_offset: 0,
             buf_fields: Vec::with_capacity(255),
             buf_developer_fields: Vec::with_capacity(255),
             field_descriptions: Vec::new(),
@@ -757,7 +752,51 @@ impl Default for Builder {
 
 #[cfg(test)]
 mod tests {
-    use crate::{decoder::convert_u64_to_value, profile::typedef::FitBaseType, proto::Value};
+    use crate::{
+        Decoder,
+        decoder::convert_u64_to_value,
+        profile::typedef::FitBaseType,
+        proto::{Message, MessageDefinition, Value},
+    };
+    use embedded_io::{ErrorKind, ErrorType, Read};
+
+    struct Empty;
+
+    impl ErrorType for Empty {
+        type Error = ErrorKind;
+    }
+
+    impl Read for Empty {
+        fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
+            Ok(buf.len())
+        }
+    }
+
+    #[test]
+    fn test_decompress_timestamp_on_decode_message_data() {
+        let mut dec = Decoder::new(Empty {});
+        let timestamp = 1000;
+        dec.timestamp = timestamp;
+        let mesg_def = MessageDefinition::default();
+
+        let time_offset = (timestamp + 1 & Message::COMPRESSED_TIME_MASK as u32) as u8;
+        let mut mesg = Message {
+            header: Message::COMPRESSED_HEADER_MASK | time_offset,
+            ..Default::default()
+        };
+
+        dec.decode_message_data(&mut mesg, &mesg_def).unwrap();
+        assert_eq!(dec.timestamp, timestamp + 1, "time_offset {}", time_offset);
+
+        let time_offset = (timestamp + 10 & Message::COMPRESSED_TIME_MASK as u32) as u8;
+        let mut mesg = Message {
+            header: Message::COMPRESSED_HEADER_MASK | time_offset,
+            ..Default::default()
+        };
+
+        dec.decode_message_data(&mut mesg, &mesg_def).unwrap();
+        assert_eq!(dec.timestamp, timestamp + 10, "time_offset {}", time_offset);
+    }
 
     #[test]
     fn test_convert_u64_to_value() {
