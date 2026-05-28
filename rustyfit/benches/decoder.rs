@@ -10,8 +10,9 @@ pub fn bench_decode(c: &mut Criterion) {
 
     c.bench_function("decode default", |b| {
         b.iter(|| {
-            let mut dec = Decoder::new(black_box(FromStd::new(Cursor::new(&file_bytes))));
-            dec.decode().unwrap();
+            let mut dec = Decoder::new();
+            let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
+            dec.decode(&mut reader).unwrap();
         })
     });
 
@@ -20,15 +21,17 @@ pub fn bench_decode(c: &mut Criterion) {
             let mut dec = Decoder::builder()
                 .checksum(false)
                 .expand_components(false)
-                .build(black_box(FromStd::new(Cursor::new(&file_bytes))));
-            dec.decode().unwrap();
+                .build();
+            let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
+            dec.decode(&mut reader).unwrap();
         })
     });
 
     c.bench_function("decode_with", |b| {
         b.iter(|| {
-            let mut dec = Decoder::new(black_box(FromStd::new(Cursor::new(&file_bytes))));
-            dec.decode_with(|_| {}).unwrap();
+            let mut dec = Decoder::new();
+            let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
+            dec.decode_with(&mut reader, |_| {}).unwrap();
         })
     });
 
@@ -37,8 +40,9 @@ pub fn bench_decode(c: &mut Criterion) {
             let mut dec = Decoder::builder()
                 .checksum(false)
                 .expand_components(false)
-                .build(black_box(FromStd::new(Cursor::new(&file_bytes))));
-            dec.decode_with(|_| {}).unwrap();
+                .build();
+            let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
+            dec.decode_with(&mut reader, |_| {}).unwrap();
         })
     });
 }

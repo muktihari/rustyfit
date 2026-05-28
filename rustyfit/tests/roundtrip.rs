@@ -64,13 +64,16 @@ fn do_roudtrip_with_encoder_options(
     path: &PathBuf,
     encoder_builder: EncoderBuilder,
 ) -> Result<(), Box<dyn Error>> {
+    let mut dec = Decoder::new();
+
     let file = File::open(path).unwrap();
     let br = BufReader::new(file);
-    let mut dec = Decoder::new(FromStd::new(br));
+    let mut reader = FromStd::new(br);
+
     let buf = Vec::<u8>::with_capacity(5000 * 1024); // 5 MB, large enough to avoid realloc.
     let mut cursor = Cursor::new(buf);
 
-    'decode: while let Some(fit) = &mut match dec.decode() {
+    'decode: while let Some(fit) = &mut match dec.decode(&mut reader) {
         Ok(fit) => fit,
         Err(err) => {
             if let DecoderError::ChecksumMismatch { .. } = err {
@@ -89,18 +92,19 @@ fn do_roudtrip_with_encoder_options(
     } {
         cursor.seek(SeekFrom::Start(0)).unwrap();
 
-        let mut enc = encoder_builder.build(FromStd::new(&mut cursor));
+        let mut enc = encoder_builder.build();
 
         let expected_messages = fit.messages.clone(); // Must clone since encoder mutates the value.
 
-        if let Err(err) = enc.encode(fit) {
+        let mut writer = FromStd::new(&mut cursor);
+        if let Err(err) = enc.encode(&mut writer, fit) {
             return Err(format!("encode: {:?}", err).into());
         }
 
         cursor.seek(SeekFrom::Start(0)).unwrap();
 
-        let mut dec = Decoder::new(FromStd::new(&mut cursor));
-        let result_fit = match dec.decode() {
+        let mut dec = Decoder::new();
+        let result_fit = match dec.decode(&mut FromStd::new(&mut cursor)) {
             Ok(result_fit) => result_fit,
             Err(err) => {
                 return Err(format!("re-decode the encoded file: {:?}", err).into());

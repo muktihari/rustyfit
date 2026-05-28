@@ -1,4 +1,4 @@
-use alloc::{vec, vec::Vec};
+use alloc::vec::Vec;
 
 /// Lru is an opinionated `local_mesg_num` redefiner whose algorithm mimics
 /// an LRU cache. When storage is full, the least recently used item is
@@ -10,15 +10,17 @@ pub(super) struct Lru {
 }
 
 impl Lru {
-    pub(super) fn new(n: usize) -> Self {
+    pub(super) const fn new() -> Self {
         Self {
-            items: vec![Vec::new(); n],
-            bucket: Vec::with_capacity(n),
+            items: Vec::new(),
+            bucket: Vec::new(),
         }
     }
 
-    pub(super) fn reset(&mut self) {
+    pub(super) fn reset(&mut self, n: usize) {
         self.bucket.clear();
+        self.bucket.reserve_exact(n);
+        self.items.resize(n, Vec::new());
     }
 
     pub(super) fn put(&mut self, item: &[u8]) -> (u8, bool) {
@@ -111,7 +113,8 @@ mod tests {
     #[test]
     fn test_lru() {
         const SIZE: usize = 16;
-        let mut lru = Lru::new(SIZE);
+        let mut lru = Lru::new();
+        lru.reset(SIZE);
 
         assert_eq!(lru.bucket.len(), 0);
         assert_eq!(lru.bucket.capacity(), SIZE);
@@ -144,7 +147,7 @@ mod tests {
         // check index not exist
         assert!(lru.bucket_index(&[255, 255]).is_none());
 
-        lru.reset();
+        lru.reset(SIZE);
         assert_eq!(lru.bucket.len(), 0);
         assert_eq!(lru.items.len(), SIZE);
     }

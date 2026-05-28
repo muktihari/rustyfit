@@ -90,8 +90,7 @@ struct Options {
 }
 
 /// Encoder for encoding FIT file.
-pub struct Encoder<W> {
-    writer: W,
+pub struct Encoder {
     n: i64,
     data_size: u32,
     crc16: Crc16,
@@ -102,29 +101,38 @@ pub struct Encoder<W> {
     message_validator: MessageValidator,
 }
 
-impl<W: Write + Seek> Encoder<W> {
+impl Encoder {
     /// Create new Encoder for encoding FIT file.
     /// For more options, use `Encoder::builder()` to build the Encoder.
-    pub fn new(writer: W) -> Encoder<W> {
-        Builder::new().build(writer)
+    pub const fn new() -> Encoder {
+        Builder::new().build()
+    }
+
+    /// Create new Encoder with options for encoding FIT file.
+    pub const fn builder() -> Builder {
+        Builder::new()
     }
 
     /// Encode the given `fit` to the writer.
-    pub fn encode(&mut self, fit: &mut FIT) -> Result<(), Error<W::Error>> {
-        self.select_protocol_version(&mut fit.file_header);
-        self.validate(fit)?;
+    pub fn encode<W>(&mut self, mut writer: W, fit: &mut FIT) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
+        self.reset();
 
-        self.encode_file_header(&mut fit.file_header)?;
+        self.select_protocol_version(&mut fit.file_header);
+        self.validate::<W>(fit)?;
+
+        self.encode_file_header(&mut writer, &mut fit.file_header)?;
 
         for mesg in &mut fit.messages {
-            self.encode_message(mesg)?;
+            self.encode_message(&mut writer, mesg)?;
         }
 
         fit.crc = self.crc16.sum16();
-        self.encode_crc()?;
+        self.encode_crc(&mut writer)?;
 
-        self.update_file_header(&mut fit.file_header)?;
-        self.reset();
+        self.update_file_header(&mut writer, &mut fit.file_header)?;
 
         Ok(())
     }
@@ -137,7 +145,10 @@ impl<W: Write + Seek> Encoder<W> {
         }
     }
 
-    fn validate(&mut self, fit: &mut FIT) -> Result<(), Error<W::Error>> {
+    fn validate<W>(&mut self, fit: &mut FIT) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
         if fit.messages.is_empty() {
             return Err(Error::EmptyMessages);
         }
@@ -155,7 +166,14 @@ impl<W: Write + Seek> Encoder<W> {
         Ok(())
     }
 
-    fn encode_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), Error<W::Error>> {
+    fn encode_file_header<W>(
+        &mut self,
+        writer: &mut W,
+        file_header: &mut FileHeader,
+    ) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
         if file_header.size != 12 {
             file_header.size = 14;
         }
@@ -169,13 +187,20 @@ impl<W: Write + Seek> Encoder<W> {
         self.buf.clear();
         write_file_header_to_vec(&mut self.buf, file_header);
 
-        self.writer.write_all(&self.buf)?;
+        writer.write_all(&self.buf)?;
         self.n += self.buf.len() as i64;
 
         Ok(())
     }
 
-    fn update_file_header(&mut self, file_header: &mut FileHeader) -> Result<(), Error<W::Error>> {
+    fn update_file_header<W>(
+        &mut self,
+        writer: &mut W,
+        file_header: &mut FileHeader,
+    ) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
         file_header.data_size = self.data_size;
 
         self.buf.clear();
@@ -188,16 +213,23 @@ impl<W: Write + Seek> Encoder<W> {
             self.crc16.reset();
         }
 
-        self.writer.seek(SeekFrom::Current(-self.n))?;
+        writer.seek(SeekFrom::Current(-self.n))?;
 
-        self.writer.write_all(&self.buf)?;
+        writer.write_all(&self.buf)?;
 
         let n = self.buf.len() as i64;
-        self.writer.seek(SeekFrom::Current(self.n - n))?;
+        writer.seek(SeekFrom::Current(self.n - n))?;
         Ok(())
     }
 
-    fn encode_message(&mut self, mesg: &mut Message) -> Result<(), Error<W::Error>> {
+    fn encode_message<W>(
+        &mut self,
+        writer: &mut W,
+        mesg: &mut Message,
+    ) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
         mesg.header = Message::NORMAL_HEADER_MASK;
 
         if let HeaderOption::Compressed(_) = self.options.header_option {
@@ -222,13 +254,13 @@ impl<W: Write + Seek> Encoder<W> {
         }
 
         if is_new_mesg_def {
-            self.writer.write_all(&self.buf)?;
+            writer.write_all(&self.buf)?;
             self.crc16.write(&self.buf);
             self.n += self.buf.len() as i64;
             self.data_size += self.buf.len() as u32;
         }
 
-        self.write_message_checksum(mesg, self.options.endianness as u8)?;
+        self.write_message_checksum(writer, mesg, self.options.endianness as u8)?;
 
         Ok(())
     }
@@ -257,8 +289,16 @@ impl<W: Write + Seek> Encoder<W> {
 
     /// Write message to the writer and calculate the checksum.
     /// This method writes one Value at a time. At most, we only use 255 bytes of buffer.
-    fn write_message_checksum(&mut self, mesg: &Message, arch: u8) -> Result<(), Error<W::Error>> {
-        self.writer.write_all(&[mesg.header])?;
+    fn write_message_checksum<W>(
+        &mut self,
+        writer: &mut W,
+        mesg: &Message,
+        arch: u8,
+    ) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
+        writer.write_all(&[mesg.header])?;
         self.crc16.write(&[mesg.header]);
 
         self.n += 1;
@@ -268,7 +308,7 @@ impl<W: Write + Seek> Encoder<W> {
             self.buf.clear();
             write_value_to_vec(&mut self.buf, &field.value, arch);
 
-            self.writer.write_all(&self.buf)?;
+            writer.write_all(&self.buf)?;
             self.crc16.write(&self.buf);
 
             self.n += self.buf.len() as i64;
@@ -279,7 +319,7 @@ impl<W: Write + Seek> Encoder<W> {
             self.buf.clear();
             write_value_to_vec(&mut self.buf, &dev_field.value, arch);
 
-            self.writer.write_all(&self.buf)?;
+            writer.write_all(&self.buf)?;
             self.crc16.write(&self.buf);
 
             self.n += self.buf.len() as i64;
@@ -289,9 +329,12 @@ impl<W: Write + Seek> Encoder<W> {
         Ok(())
     }
 
-    fn encode_crc(&mut self) -> Result<(), Error<W::Error>> {
+    fn encode_crc<W>(&mut self, writer: &mut W) -> Result<(), Error<W::Error>>
+    where
+        W: Write + Seek,
+    {
         let crc = self.crc16.sum16();
-        self.writer.write_all(&crc.to_le_bytes())?;
+        writer.write_all(&crc.to_le_bytes())?;
         self.n += 2;
         self.crc16.reset();
         Ok(())
@@ -301,8 +344,23 @@ impl<W: Write + Seek> Encoder<W> {
         self.n = 0;
         self.timestamp_reference = 0;
         self.data_size = 0;
-        self.lru.reset();
         self.message_validator.reset();
+
+        self.buf.clear();
+        self.buf.reserve_exact(1537); // Never realloc. [5+1+(3*255)+1+(3*255) = 1537]
+
+        self.lru.reset(
+            match self.options.header_option {
+                HeaderOption::Normal(interleave) => interleave.min(15) as usize,
+                HeaderOption::Compressed(interleave) => interleave.min(3) as usize,
+            } + 1,
+        );
+    }
+}
+
+impl Default for Encoder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -439,13 +497,6 @@ fn write_value_to_vec(w: &mut Vec<u8>, value: &Value, arch: u8) {
     };
 }
 
-impl Encoder<()> {
-    /// Create new Encoder with options for encoding FIT file.
-    pub const fn builder() -> Builder {
-        Builder::new()
-    }
-}
-
 /// Build Encoder with some options.
 pub struct Builder {
     options: Options,
@@ -485,20 +536,13 @@ impl Builder {
     }
 
     /// Build Encoder based on given options (if any).
-    pub fn build<W: Write + Seek>(&self, writer: W) -> Encoder<W> {
+    pub const fn build(&self) -> Encoder {
         Encoder {
-            writer,
             n: 0,
             data_size: 0,
             crc16: Crc16::new(),
-            lru: Lru::new(
-                match self.options.header_option {
-                    HeaderOption::Normal(interleave) => interleave.min(15) as usize,
-                    HeaderOption::Compressed(interleave) => interleave.min(3) as usize,
-                } + 1,
-            ),
-            // Fixed capacity, never realloc. [5+1+(3*255)+1+(3*255) = 1537]
-            buf: Vec::with_capacity(1537),
+            lru: Lru::new(),
+            buf: Vec::new(),
             timestamp_reference: 0,
             options: self.options,
             message_validator: MessageValidator::new(),
@@ -522,27 +566,6 @@ mod tests {
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
-
-    struct Sink;
-
-    impl ErrorType for Sink {
-        type Error = ErrorKind;
-    }
-
-    impl Write for Sink {
-        fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-            Ok(buf.len())
-        }
-        fn flush(&mut self) -> Result<(), Self::Error> {
-            Ok(())
-        }
-    }
-
-    impl Seek for Sink {
-        fn seek(&mut self, _: embedded_io::SeekFrom) -> Result<u64, Self::Error> {
-            Ok(0)
-        }
-    }
 
     #[test]
     fn compress_timestamp_into_header() {
@@ -603,7 +626,7 @@ mod tests {
             },
         ];
 
-        let mut enc = Encoder::new(Sink {});
+        let mut enc = Encoder::new();
         for mesg in mesgs.iter_mut() {
             enc.compress_timestamp_into_header(mesg);
         }
@@ -996,7 +1019,7 @@ mod tests {
         };
         let n = ws.buf.len();
 
-        let mut enc = Encoder::new(&mut ws);
+        let mut enc = Encoder::new();
         enc.n = n as i64;
         enc.data_size = 1;
 
@@ -1009,7 +1032,7 @@ mod tests {
             crc: 0,                                // [83, 147] updated
         };
 
-        enc.update_file_header(&mut file_header).unwrap();
+        enc.update_file_header(&mut ws, &mut file_header).unwrap();
         let pos = ws.buf.len();
 
         assert_eq!(

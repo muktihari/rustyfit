@@ -8,6 +8,7 @@ use rustyfit::{
     Decoder, DecoderEvent,
     profile::{mesgdef, typedef},
 };
+use spinning_top::Spinlock;
 use talc::{DefaultBinning, source::Claim, sync::TalcLock};
 
 #[global_allocator]
@@ -18,6 +19,8 @@ static A: TalcLock<spinning_top::RawSpinlock, Claim, DefaultBinning> = TalcLock:
 });
 
 static FIT_FILE: &[u8] = include_bytes!("sample.fit"); // Embed file
+
+static DECODER: Spinlock<Decoder> = Spinlock::new(Decoder::new());
 
 macro_rules! printf {
     ($($arg:tt)*) => {
@@ -33,9 +36,9 @@ macro_rules! printf {
 fn _start() -> ! {
     printf!("Hello, world!\n");
 
-    let mut dec = Decoder::new(FIT_FILE);
+    let mut dec = DECODER.lock();
 
-    dec.decode_with(|e| match e {
+    dec.decode_with(FIT_FILE, |e| match e {
         DecoderEvent::Message(v) => {
             if v.num == typedef::MesgNum::SESSION {
                 let ses = mesgdef::Session::from(v);
@@ -60,6 +63,7 @@ fn _start() -> ! {
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(_info: &core::panic::PanicInfo) -> ! {
+    printf!("{}\n", _info);
     loop {}
 }
 

@@ -16,18 +16,20 @@ At the moment, I can't make this library heapless without complicating the code.
 
 ## Usage
 
+> Note: Since the API is still evolving, usage may vary between versions. See [creates.io](https://crates.io/crates/rustyfit) for spesific version. 
+
 For [#![no_std]](https://docs.rust-embedded.org/book/intro/no-std.html), you need to provide [#[global_allocator]](https://doc.rust-lang.org/std/alloc/index.html#the-global_allocator-attribute) since this library requires allocation.
 
 For [std](https://doc.rust-lang.org/std), you need to wrap `std::io`'s [Read](https://doc.rust-lang.org/std/io/trait.Read.html) or [Write](https://doc.rust-lang.org/std/io/trait.Write.html) with [embedded_io_adapters::std:FromStd](https://docs.rs/embedded-io-adapters/0.7.0/embedded_io_adapters/std/struct.FromStd.html). We will provide examples in `std` for a broad audience and simplicity.
 
 ### Decoding
 
+Decoder is stateless and static-friendly. We can reuse it to decode multiple readers or decode same reader multiple times if the reader contains a chained FIT file.
+
 #### Decode
 
 Decoder's `decode` allows us to interact with FIT files directly through their original protocol messages' structure. 
 
-NOTE: First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
-On next call, it may return Ok(None) to indicate that no more FIT sequence in the file.
 
 ```rust
 use embedded_io_adapters::std::FromStd;
@@ -35,13 +37,21 @@ use rustyfit::{Decoder, profile::{mesgdef, typedef}, proto::Value};
 use std::{error::Error, fs::File, io::BufReader};
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let mut dec = Decoder::new();
+
     let name = "Activity.fit";
     let f = File::open(name)?;
     let br = BufReader::new(f);
-    let mut dec = Decoder::new(FromStd::new(br));
+    let mut reader = FromStd::new(br);
 
-    // SAFETY: First decode call is either Ok(Some(fit)) or Err(err), never Ok(None).
-    let fit = dec.decode()?.unwrap(); 
+    let fit = match dec.decode(&mut reader)? {
+        Some(fit) => fit,
+        None => {
+            // First decode call to reader should be `Ok` or `Err`.
+            // Except, reader is already empty to begin with.
+            return Err(Box::from("empty reader"));
+        }
+    };
 
     println!("file_header's data_size: {}", fit.file_header.data_size);
     println!("messages count: {}", fit.messages.len());
@@ -53,21 +63,22 @@ fn main() -> Result<(), Box<dyn Error>> {
             println!("file type: {}", typedef::File(v));
         }
     }
-    
+
     Ok(())
-    
+
     // # Output:
     // file_header's data_size: 94080
     // messages count: 3611
     // file type: activity
 }
+
 ```
 
 The `decode` method can be invoked multiple times to decode chained FIT file until it return Ok(None) or Err(err). 
 We can decode chained FIT file using `while let`, e.g:
 
 ```rust
-    while let Some(fit) = dec.decode()? {
+    while let Some(fit) = dec.decode(&mut reader)? {
         println!("file_header's data_size: {}", fit.file_header.data_size);
         println!("messages count: {}", fit.messages.len());
         for field in &fit.messages[0].fields {
@@ -92,12 +103,14 @@ use rustyfit::{Decoder, DecoderEvent, profile::{mesgdef, typedef}};
 use std::{error::Error, fs::File, io::BufReader};
 
 fn main() -> Result<(), Box<dyn Error>> {
+    let mut dec = Decoder::new();
+
     let name = "Activity.fit";
     let f = File::open(name)?;
     let br = BufReader::new(f);
-    let mut dec = Decoder::new(FromStd::new(br));
+    let mut reader = FromStd::new(br);
 
-    dec.decode_with(|event| match event {
+    dec.decode_with(&mut reader, |event| match event {
         DecoderEvent::FileHeader(_) => {},
         DecoderEvent::MessageDefinition(_) => {},
         DecoderEvent::Message(mesg) => {
@@ -126,7 +139,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 The `decode_with` method can be invoked multiple times to decode chained FIT file until it return Ok(false) or Err(err). 
 
 ```rust
-    while dec.decode_with(|event| {
+    while dec.decode_with(&mut reader, |event| {
         if let DecoderEvent::Message(mesg) = event {
             if mesg.num == typedef::MesgNum::SESSION {
                 // Convert mesg into Session struct
@@ -148,10 +161,12 @@ Create `Decoder` instance with options using `Decoder::builder()` or `DecoderBui
 let mut dec = Decoder::builder()
         .checksum(false)
         .expand_components(false)
-        .build(reader);
+        .build();
 ```
 
 ### Encoding
+
+Encoder is stateless and static-friendly. We can reuse it to encode one or multiple FITs into one or multiple writers.
 
 #### Encode
 
@@ -163,11 +178,6 @@ use rustyfit::{Encoder, profile::{ProfileType, mesgdef, typedef}, proto::{FIT, F
 use std::{error::Error, fs::File, io::{BufWriter, Write}};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let fout_name = "output.fit";
-    let fout = File::create(fout_name)?;
-    let mut bw = BufWriter::new(fout);
-    let mut enc = Encoder::new(FromStd::new(&mut bw));
-
     let mut fit = FIT {
         messages: vec![
             Message {
@@ -222,7 +232,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         ..Default::default()
     };
 
-    enc.encode(&mut fit)?;
+    let mut enc = Encoder::new();
+    
+    let fout_name = "output.fit";
+    let fout = File::create(fout_name)?;
+    let mut bw = BufWriter::new(fout);
+    let mut writer = FromStd::new(&mut bw);
+
+    enc.encode(&mut writer, &mut fit)?;
     bw.flush()?;
 
     Ok(())
@@ -239,11 +256,6 @@ use rustyfit::{Encoder, profile::{mesgdef, typedef}, proto::{FIT, Message}};
 use std::{error::Error, fs::File, io::{BufWriter, Write}};
 
 fn main() -> Result<(), Box<dyn Error>> {
-    let fout_name = "output.fit";
-    let fout = File::create(fout_name)?;
-    let mut bw = BufWriter::new(fout);
-    let mut enc = Encoder::new(FromStd::new(&mut bw));
-
     let mut fit = FIT {
         messages: vec![
             {
@@ -264,7 +276,14 @@ fn main() -> Result<(), Box<dyn Error>> {
         ..Default::default()
     };
 
-    enc.encode(&mut fit)?;
+    let mut enc = Encoder::new();
+    
+    let fout_name = "output.fit";
+    let fout = File::create(fout_name)?;
+    let mut bw = BufWriter::new(fout);
+    let mut writer = FromStd::new(&mut bw);
+
+    enc.encode(&mut writer, &mut fit)?;
     bw.flush()?;
 
     Ok(())
@@ -280,7 +299,7 @@ let mut enc = Encoder::builder()
         .endianness(Endianness::BigEndian)
         .protocol_version(ProtocolVersion::V2)
         .header_option(HeaderOption::Compressed(3))
-        .build(writer);
+        .build();
 ```
 
 ## License
