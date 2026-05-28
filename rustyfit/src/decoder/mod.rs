@@ -98,10 +98,7 @@ struct Options {
 }
 
 /// Decoder for decoding FIT file.
-pub struct Decoder<R> {
-    reader: R,
-    /// Subsequence call to decode will be optional.
-    optional_sequence: bool,
+pub struct Decoder {
     cur: u32,
     crc16: Crc16,
     mesg_definitions: [MessageDefinition; 16],
@@ -113,31 +110,38 @@ pub struct Decoder<R> {
     options: Options,
 }
 
-impl<R: Read> Decoder<R> {
+impl Decoder {
     /// Create new Decoder for decoding FIT file.
     /// For more options, use `Decoder::builder()` to build the Decoder.
-    pub fn new(reader: R) -> Self {
-        Builder::new().build(reader)
+    pub const fn new() -> Self {
+        Builder::new().build()
+    }
+
+    /// Create new Decoder with options for decoding FIT file.
+    pub const fn builder() -> Builder {
+        Builder::new()
     }
 
     /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
-    /// First call will return either Ok(Some(fit)) or Err(err), never Ok(None).
-    /// On next call, it may return Ok(None) to indicate that no more FIT sequence in the file.
-    pub fn decode(&mut self) -> Result<Option<FIT>, Error<R::Error>> {
-        let file_header = match self.decode_file_header()? {
+    pub fn decode<R>(&mut self, mut reader: R) -> Result<Option<FIT>, Error<R::Error>>
+    where
+        R: Read,
+    {
+        self.reset();
+
+        let file_header = match self.decode_file_header(&mut reader)? {
             Some(file_header) => file_header,
             None => return Ok(None),
         };
 
         let mut messages = Vec::new();
-        self.decode_message_with(file_header.data_size, |event| {
+        self.decode_message_with(&mut reader, file_header.data_size, |event| {
             if let Event::Message(mesg) = event {
                 messages.push(mesg.clone())
             }
         })?;
 
-        let crc = self.decode_crc()?;
-        self.reset();
+        let crc = self.decode_crc(&mut reader)?;
         Ok(Some(FIT {
             file_header,
             messages,
@@ -146,43 +150,48 @@ impl<R: Read> Decoder<R> {
     }
 
     /// Similar to Decode but with a closure for retrieving DecoderEvent for the current FIT sequence.
-    pub fn decode_with<F>(&mut self, mut f: F) -> Result<bool, Error<R::Error>>
+    pub fn decode_with<R, F>(&mut self, mut reader: R, mut f: F) -> Result<bool, Error<R::Error>>
     where
+        R: Read,
         F: FnMut(Event),
     {
-        let file_header = match self.decode_file_header()? {
+        self.reset();
+
+        let file_header = match self.decode_file_header(&mut reader)? {
             Some(file_header) => file_header,
             None => return Ok(false),
         };
         f(Event::FileHeader(&file_header));
 
-        self.decode_message_with(file_header.data_size, &mut f)?;
+        self.decode_message_with(&mut reader, file_header.data_size, &mut f)?;
 
-        let crc = self.decode_crc()?;
+        let crc = self.decode_crc(&mut reader)?;
         f(Event::Crc(&crc));
 
-        self.reset();
         Ok(true)
     }
 
-    fn decode_file_header(&mut self) -> Result<Option<FileHeader>, Error<R::Error>> {
+    fn decode_file_header<R>(
+        &mut self,
+        reader: &mut R,
+    ) -> Result<Option<FileHeader>, Error<R::Error>>
+    where
+        R: Read,
+    {
         let mut arr = [0u8; 14];
-        if let Err(err) = self.reader.read_exact(&mut arr[..1]) {
-            if let ReadExactError::UnexpectedEof = err
-                && self.optional_sequence
-            {
+        if let Err(err) = reader.read_exact(&mut arr[..1]) {
+            if let ReadExactError::UnexpectedEof = err {
                 return Ok(None);
             }
             return Err(Error::from(err));
         };
-        self.optional_sequence = true;
 
         let n = arr[0] as usize;
         if n != 12 && n != 14 {
             return Err(Error::NotFITFile);
         }
 
-        self.reader.read_exact(&mut arr[1..n])?;
+        reader.read_exact(&mut arr[1..n])?;
 
         if &arr[8..12] != FileHeader::DATA_TYPE.as_bytes() {
             return Err(Error::NotFITFile);
@@ -215,8 +224,11 @@ impl<R: Read> Decoder<R> {
     }
 
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
-    fn read_exact_inc(&mut self, buf: &mut [u8]) -> Result<(), Error<R::Error>> {
-        self.reader.read_exact(buf)?;
+    fn read_exact_inc<R>(&mut self, reader: &mut R, buf: &mut [u8]) -> Result<(), Error<R::Error>>
+    where
+        R: Read,
+    {
+        reader.read_exact(buf)?;
         self.cur += buf.len() as u32;
         if self.options.checksum {
             self.crc16.write(buf);
@@ -224,14 +236,20 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_with<F>(&mut self, data_size: u32, mut f: F) -> Result<(), Error<R::Error>>
+    fn decode_message_with<R, F>(
+        &mut self,
+        reader: &mut R,
+        data_size: u32,
+        mut f: F,
+    ) -> Result<(), Error<R::Error>>
     where
+        R: Read,
         F: FnMut(Event),
     {
         let mut arr = [0u8; 1];
 
         while self.cur < data_size {
-            self.read_exact_inc(&mut arr)?;
+            self.read_exact_inc(reader, &mut arr)?;
 
             let header = arr[0];
 
@@ -240,7 +258,7 @@ impl<R: Read> Decoder<R> {
                 let mut mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
                 mesg_def.header = header;
 
-                self.decode_message_definition(&mut mesg_def)?;
+                self.decode_message_definition(reader, &mut mesg_def)?;
 
                 f(Event::MessageDefinition(&mesg_def));
 
@@ -270,7 +288,7 @@ impl<R: Read> Decoder<R> {
                 developer_fields: mem::take(&mut self.buf_developer_fields),
             };
 
-            self.decode_message_data(&mut mesg, &mesg_def)?;
+            self.decode_message_data(reader, &mut mesg, &mesg_def)?;
 
             self.mesg_definitions[local_mesg_num as usize] = mesg_def;
 
@@ -283,12 +301,16 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_definition(
+    fn decode_message_definition<R>(
         &mut self,
+        reader: &mut R,
         mesg_def: &mut MessageDefinition,
-    ) -> Result<(), Error<R::Error>> {
+    ) -> Result<(), Error<R::Error>>
+    where
+        R: Read,
+    {
         let mut arr = [0u8; 765];
-        self.read_exact_inc(&mut arr[..5])?;
+        self.read_exact_inc(reader, &mut arr[..5])?;
 
         mesg_def.reserved = arr[0];
         mesg_def.arch = arr[1];
@@ -300,7 +322,7 @@ impl<R: Read> Decoder<R> {
         mesg_def.developer_field_definitions.clear();
 
         let n = arr[4] as usize * 3;
-        self.read_exact_inc(&mut arr[..n])?;
+        self.read_exact_inc(reader, &mut arr[..n])?;
 
         mesg_def.field_definitions.reserve_exact(255);
 
@@ -313,10 +335,10 @@ impl<R: Read> Decoder<R> {
             }));
 
         if mesg_def.header & Message::DEV_DATA_MASK == Message::DEV_DATA_MASK {
-            self.read_exact_inc(&mut arr[..1])?;
+            self.read_exact_inc(reader, &mut arr[..1])?;
 
             let n = arr[0] as usize * 3;
-            self.read_exact_inc(&mut arr[..n])?;
+            self.read_exact_inc(reader, &mut arr[..n])?;
 
             mesg_def.developer_field_definitions.reserve_exact(255);
 
@@ -332,11 +354,15 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_message_data(
+    fn decode_message_data<R>(
         &mut self,
+        reader: &mut R,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), Error<R::Error>> {
+    ) -> Result<(), Error<R::Error>>
+    where
+        R: Read,
+    {
         if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
             let last_time_offset = (self.timestamp & Message::COMPRESSED_TIME_MASK as u32) as u8;
             let time_offset = mesg.header & Message::COMPRESSED_TIME_MASK;
@@ -352,9 +378,9 @@ impl<R: Read> Decoder<R> {
             });
         }
 
-        self.decode_fields(mesg, mesg_def)?;
+        self.decode_fields(reader, mesg, mesg_def)?;
 
-        self.decode_developer_fields(mesg, mesg_def)?;
+        self.decode_developer_fields(reader, mesg, mesg_def)?;
 
         // Developer Data Lookup, currently we allow missing developer_data_id
         if mesg.num == MesgNum::FIELD_DESCRIPTION {
@@ -391,16 +417,20 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_fields(
+    fn decode_fields<R>(
         &mut self,
+        reader: &mut R,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), Error<R::Error>> {
+    ) -> Result<(), Error<R::Error>>
+    where
+        R: Read,
+    {
         let mut arr = [0u8; 255];
 
         for field_def in &mesg_def.field_definitions {
             let mut buf = &mut arr[..field_def.size as usize];
-            self.read_exact_inc(buf)?;
+            self.read_exact_inc(reader, buf)?;
 
             let num = field_def.num;
             let base_type: FitBaseType;
@@ -529,16 +559,20 @@ impl<R: Read> Decoder<R> {
         }
     }
 
-    fn decode_developer_fields(
+    fn decode_developer_fields<R>(
         &mut self,
+        reader: &mut R,
         mesg: &mut Message,
         mesg_def: &MessageDefinition,
-    ) -> Result<(), Error<R::Error>> {
+    ) -> Result<(), Error<R::Error>>
+    where
+        R: Read,
+    {
         let mut arr = [0u8; 255];
 
         for dev_field_def in &mesg_def.developer_field_definitions {
             let mut buf = &mut arr[..dev_field_def.size as usize];
-            self.read_exact_inc(buf)?;
+            self.read_exact_inc(reader, buf)?;
 
             let field_desc = match self.field_descriptions.iter().find(|v| {
                 v.developer_data_index == dev_field_def.developer_data_index
@@ -576,9 +610,12 @@ impl<R: Read> Decoder<R> {
         Ok(())
     }
 
-    fn decode_crc(&mut self) -> Result<u16, Error<R::Error>> {
+    fn decode_crc<R>(&mut self, reader: &mut R) -> Result<u16, Error<R::Error>>
+    where
+        R: Read,
+    {
         let mut arr = [0u8; 2];
-        self.reader.read_exact(&mut arr)?;
+        reader.read_exact(&mut arr)?;
 
         let found = u16::from_le_bytes(arr);
         let calculated = self.crc16.sum16();
@@ -592,12 +629,25 @@ impl<R: Read> Decoder<R> {
     fn reset(&mut self) {
         self.cur = 0;
         self.crc16.reset();
-        for mesg_def in &mut self.mesg_definitions {
-            mesg_def.header = 0;
-        }
         self.accumulator.reset();
         self.timestamp = 0;
         self.field_descriptions.clear();
+
+        for mesg_def in &mut self.mesg_definitions {
+            mesg_def.header = 0;
+        }
+
+        self.buf_fields.clear();
+        self.buf_fields.reserve_exact(255);
+
+        self.buf_developer_fields.clear();
+        self.buf_developer_fields.reserve_exact(255);
+    }
+}
+
+impl Default for Decoder {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -681,13 +731,6 @@ fn push_value_to_vec(vec_value: &mut Value, value: &Value) {
     }
 }
 
-impl Decoder<()> {
-    /// Create new Decoder with options for decoding FIT file.
-    pub const fn builder() -> Builder {
-        Builder::new()
-    }
-}
-
 /// Build Decoder with some options.
 pub struct Builder {
     options: Options,
@@ -718,10 +761,8 @@ impl Builder {
     }
 
     /// Build Decoder based on given options (if any).
-    pub fn build<R: Read>(&self, reader: R) -> Decoder<R> {
+    pub const fn build(&self) -> Decoder {
         Decoder {
-            reader,
-            optional_sequence: false,
             cur: 0,
             crc16: Crc16::new(),
             mesg_definitions: [const {
@@ -736,8 +777,8 @@ impl Builder {
             }; 16],
             accumulator: Accumulator::new(),
             timestamp: 0,
-            buf_fields: Vec::with_capacity(255),
-            buf_developer_fields: Vec::with_capacity(255),
+            buf_fields: Vec::new(),
+            buf_developer_fields: Vec::new(),
             field_descriptions: Vec::new(),
             options: self.options,
         }
@@ -774,7 +815,7 @@ mod tests {
 
     #[test]
     fn test_decompress_timestamp_on_decode_message_data() {
-        let mut dec = Decoder::new(Empty {});
+        let mut dec = Decoder::new();
         let timestamp = 1000;
         dec.timestamp = timestamp;
         let mesg_def = MessageDefinition::default();
@@ -785,7 +826,9 @@ mod tests {
             ..Default::default()
         };
 
-        dec.decode_message_data(&mut mesg, &mesg_def).unwrap();
+        let mut empty = Empty {};
+        dec.decode_message_data(&mut empty, &mut mesg, &mesg_def)
+            .unwrap();
         assert_eq!(dec.timestamp, timestamp + 1, "time_offset {}", time_offset);
 
         let time_offset = (timestamp + 10 & Message::COMPRESSED_TIME_MASK as u32) as u8;
@@ -794,7 +837,8 @@ mod tests {
             ..Default::default()
         };
 
-        dec.decode_message_data(&mut mesg, &mesg_def).unwrap();
+        dec.decode_message_data(&mut empty, &mut mesg, &mesg_def)
+            .unwrap();
         assert_eq!(dec.timestamp, timestamp + 10, "time_offset {}", time_offset);
     }
 
