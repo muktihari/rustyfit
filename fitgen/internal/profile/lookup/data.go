@@ -6,6 +6,8 @@ package rustfactory2
 
 // Data represent factory.tmpl
 type Data struct {
-	MaxComponentBits int
-	Refs             string
+	MaxComponentBits    int
+	TotalAccumulate     int
+	TotalAccumulateList string
+	Refs                string
 }

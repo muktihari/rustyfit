@@ -1,13 +1,29 @@
-use crate::{profile::typedef::MesgNum, proto::Value};
-use alloc::vec::Vec;
+use crate::{
+    profile::{lookup, typedef::MesgNum},
+    proto::Value,
+};
 
 pub(super) struct Accumulator {
-    values: Vec<AccuValue>,
+    /// Value's unique identifier is a combination of `mesg_num` and `field_num`.
+    /// Only messages defined in the `Profile.xlsx` can be accumulated, so max capacity
+    /// can be calculated. Since it's relatively small, Array is used to avoid allocation.
+    values: [AccuValue; lookup::TOTAL_ACCUMULATE],
+    len: usize,
 }
 
 impl Accumulator {
     pub(super) const fn new() -> Self {
-        Self { values: Vec::new() }
+        Self {
+            values: [const {
+                AccuValue {
+                    mesg_num: MesgNum(0),
+                    field_num: 0,
+                    value: 0,
+                    last: 0,
+                }
+            }; lookup::TOTAL_ACCUMULATE],
+            len: 0,
+        }
     }
 
     pub(super) fn collect(&mut self, mesg_num: MesgNum, field_num: u8, value: &Value) {
@@ -80,18 +96,20 @@ impl Accumulator {
         if let Some(v) = self
             .values
             .iter_mut()
+            .take(self.len)
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
         {
             v.value = value;
             v.last = value;
             return;
         }
-        self.values.push(AccuValue {
+        self.values[self.len] = AccuValue {
             mesg_num,
             field_num,
             value,
             last: value,
-        });
+        };
+        self.len += 1;
     }
 
     pub(super) fn accumulate(
@@ -104,6 +122,7 @@ impl Accumulator {
         if let Some(v) = self
             .values
             .iter_mut()
+            .take(self.len)
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
         {
             let mask: u64 = (1 << bits) - 1;
@@ -111,17 +130,18 @@ impl Accumulator {
             v.last = value;
             return v.value;
         }
-        self.values.push(AccuValue {
+        self.values[self.len] = AccuValue {
             mesg_num,
             field_num,
             value,
             last: value,
-        });
+        };
+        self.len += 1;
         value
     }
 
     pub(super) fn reset(&mut self) {
-        self.values.clear();
+        self.len = 0;
     }
 }
 
@@ -140,11 +160,11 @@ mod tests {
         profile::typedef::MesgNum,
         proto::Value,
     };
-    use alloc::{string::String, vec, vec::Vec};
+    use alloc::{string::String, vec};
 
     #[test]
     fn test_collect() {
-        let expected = vec![AccuValue {
+        let expected = &[AccuValue {
             mesg_num: MesgNum(1),
             field_num: 1,
             value: 2,
@@ -177,7 +197,7 @@ mod tests {
         for tc in tt {
             let mut accumu = Accumulator::new();
             accumu.collect(MesgNum(1), 1, &tc);
-            assert_eq!(expected, accumu.values, "case: {:?}", tc);
+            assert_eq!(expected, &accumu.values[..accumu.len], "case: {:?}", tc);
         }
 
         let tt = [
@@ -189,7 +209,7 @@ mod tests {
         for tc in tt {
             let mut accumu = Accumulator::new();
             accumu.collect(MesgNum(1), 1, &tc);
-            assert_eq!(Vec::<AccuValue>::new(), accumu.values, "case: {:?}", tc);
+            assert!(accumu.values[..accumu.len].is_empty(), "case: {:?}", tc);
         }
     }
 
@@ -199,29 +219,29 @@ mod tests {
 
         accumu.collect_u64(MesgNum(0), 0, 10);
         assert_eq!(
-            vec![AccuValue {
+            &[AccuValue {
                 mesg_num: MesgNum(0),
                 field_num: 0,
                 value: 10,
                 last: 10
             }],
-            accumu.values,
+            &accumu.values[..accumu.len],
         );
 
         accumu.collect_u64(MesgNum(0), 0, 11);
         assert_eq!(
-            vec![AccuValue {
+            &[AccuValue {
                 mesg_num: MesgNum(0),
                 field_num: 0,
                 value: 11,
                 last: 11
             }],
-            accumu.values,
+            &accumu.values[..accumu.len],
         );
 
         accumu.collect_u64(MesgNum(0), 1, 11);
         assert_eq!(
-            vec![
+            &[
                 AccuValue {
                     mesg_num: MesgNum(0),
                     field_num: 0,
@@ -235,7 +255,7 @@ mod tests {
                     last: 11
                 }
             ],
-            accumu.values,
+            &accumu.values[..accumu.len],
         );
     }
 
@@ -250,7 +270,7 @@ mod tests {
         let val = accumu.accumulate(MesgNum(1), 1, 10, 8);
         assert_eq!(10, val, "accumulate first value");
         assert_eq!(
-            vec![
+            &[
                 AccuValue {
                     mesg_num: MesgNum(1),
                     field_num: 1,
@@ -264,7 +284,7 @@ mod tests {
                     last: 2,
                 }
             ],
-            accumu.values,
+            &accumu.values[..accumu.len],
             "first value is updated, non-existing value is appended"
         );
     }
@@ -273,8 +293,8 @@ mod tests {
     fn reset() {
         let mut accumu = Accumulator::new();
         accumu.collect_u64(MesgNum(1), 1, 1);
-        assert_eq!(1, accumu.values.len());
+        assert_eq!(1, accumu.len);
         accumu.reset();
-        assert_eq!(0, accumu.values.len());
+        assert_eq!(0, accumu.len);
     }
 }
