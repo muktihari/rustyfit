@@ -35,7 +35,9 @@ type Builder struct {
 	messages []parser.Message // messages parsed from profile.xlsx
 	types    []parser.Type
 
-	maxComponentBits int
+	maxComponentBits    int
+	totalAccumulate     int
+	totalAccumulateList string
 }
 
 var _ generator.Builder = (*Builder)(nil)
@@ -108,8 +110,10 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Path:         b.path,
 			Filename:     "lookup.rs",
 			Data: Data{
-				MaxComponentBits: b.maxComponentBits,
-				Refs:             buf.String(),
+				MaxComponentBits:    b.maxComponentBits,
+				TotalAccumulate:     b.totalAccumulate,
+				TotalAccumulateList: b.totalAccumulateList,
+				Refs:                buf.String(),
 			},
 		},
 	}, nil
@@ -141,6 +145,8 @@ func (b *Builder) makeFieldRefs(message parser.Message) string {
 		accumulate := accumulateOrDefault(field.Accumulate, 0)
 		if accumulate {
 			fmt.Fprintf(buf, "accumulate: %t, ", accumulate)
+			b.totalAccumulate += 1
+			b.totalAccumulateList += fmt.Sprintf("/// - `%s`: %s\n", message.Name, field.Name)
 		}
 
 		if scale != 1 {

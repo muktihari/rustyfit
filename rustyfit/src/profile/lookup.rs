@@ -14,6 +14,16 @@ use crate::proto::*;
 
 pub(crate) const MAX_COMPONENT_BITS: usize = 240;
 
+/// Messages eligible for accumulation:
+/// - `record`: distance
+/// - `record`: cycles
+/// - `record`: total_cycles
+/// - `record`: compressed_accumulated_power
+/// - `record`: accumulated_power
+/// - `hr`: event_timestamp
+/// - `hr`: event_timestamp_12
+pub(crate) const TOTAL_ACCUMULATE: usize = 7;
+
 const FR_DEF: FieldReference = FieldReference { num: 0, name: "", base_type: FitBaseType(u8::MAX), profile_type: ProfileType(u16::MAX), array: false, accumulate: false, scale: 1.0, offset: 0.0, units: "", components: &[], sub_fields: &[] };
 const SF_DEF: SubField = SubField { name: "", profile_type: ProfileType(u16::MAX), scale: 1.0, offset: 0.0, units: "", components: &[], maps: &[] };
 
