@@ -274,5 +274,6 @@ impl MessageValidator {
     pub(super) fn reset(&mut self) {
         self.developer_data_index_seen.fill(0);
         self.field_descriptions.clear();
+        self.field_descriptions.reserve_exact(32);
     }
 }

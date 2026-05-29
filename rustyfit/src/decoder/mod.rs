@@ -631,7 +631,9 @@ impl Decoder {
         self.crc16.reset();
         self.accumulator.reset();
         self.timestamp = 0;
+
         self.field_descriptions.clear();
+        self.field_descriptions.reserve_exact(32);
 
         for mesg_def in &mut self.mesg_definitions {
             mesg_def.header = 0;
