@@ -104,8 +104,7 @@ pub struct Decoder {
     mesg_definitions: [MessageDefinition; 16],
     accumulator: Accumulator,
     timestamp: u32,
-    buf_fields: Vec<Field>,
-    buf_developer_fields: Vec<DeveloperField>,
+    mesg: Message,
     field_descriptions: Vec<LocalFieldDescription>,
     options: Options,
 }
@@ -122,6 +121,32 @@ impl Decoder {
         Builder::new()
     }
 
+    /// Creates a `Stream` from a mutably borrowed `Decoder` for streaming decoding of the given `reader`.
+    ///
+    /// Example:
+    ///
+    /// ```ignore
+    /// // ...
+    /// let mut dec = Decoder::new();
+    /// let mut stream = dec.stream(&mut reader);
+    ///
+    /// while let Some(item) = stream.next() {
+    ///    // do something with the borrowed item
+    /// }
+    ///
+    /// ```
+    pub fn stream<'a, R>(&'a mut self, reader: R) -> Stream<'a, R> {
+        self.reset();
+
+        Stream {
+            reader,
+            decoder: self,
+            state: State::FileHeader,
+            file_header: FileHeader::default(),
+            crc: 0,
+        }
+    }
+
     /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
     pub fn decode<R>(&mut self, mut reader: R) -> Result<Option<FIT>, Error<R::Error>>
     where
@@ -135,40 +160,53 @@ impl Decoder {
         };
 
         let mut messages = Vec::new();
-        self.decode_message_with(&mut reader, file_header.data_size, |event| {
-            if let Event::Message(mesg) = event {
-                messages.push(mesg.clone())
+
+        while self.cur < file_header.data_size {
+            let mut arr = [0u8; 1];
+            self.read_exact_inc(&mut reader, &mut arr)?;
+
+            let header = arr[0];
+
+            if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
+                let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
+                let mut mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
+
+                mesg_def.header = header;
+
+                let result = self.decode_message_definition(&mut reader, &mut mesg_def);
+                self.mesg_definitions[local_mesg_num] = mesg_def;
+                result?;
+
+                continue;
             }
-        })?;
+
+            let local_mesg_num = local_mesg_num_from_mesg_header(header);
+            if self.mesg_definitions[local_mesg_num].header == 0 {
+                return Err(Error::MissingMessageDefinition {
+                    local_mesg_num: local_mesg_num as u8,
+                });
+            }
+
+            let mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
+            let mut mesg = mem::take(&mut self.mesg);
+
+            mesg.header = header;
+
+            let result = self.decode_message_data(&mut reader, &mut mesg, &mesg_def);
+            self.mesg_definitions[local_mesg_num] = mesg_def;
+            self.mesg = mesg;
+            result?;
+
+            messages.push(self.mesg.clone());
+        }
 
         let crc = self.decode_crc(&mut reader)?;
+
         Ok(Some(FIT {
             file_header,
             messages,
             crc,
         }))
-    }
-
-    /// Similar to Decode but with a closure for retrieving DecoderEvent for the current FIT sequence.
-    pub fn decode_with<R, F>(&mut self, mut reader: R, mut f: F) -> Result<bool, Error<R::Error>>
-    where
-        R: Read,
-        F: FnMut(Event),
-    {
-        self.reset();
-
-        let file_header = match self.decode_file_header(&mut reader)? {
-            Some(file_header) => file_header,
-            None => return Ok(false),
-        };
-        f(Event::FileHeader(&file_header));
-
-        self.decode_message_with(&mut reader, file_header.data_size, &mut f)?;
-
-        let crc = self.decode_crc(&mut reader)?;
-        f(Event::Crc(&crc));
-
-        Ok(true)
     }
 
     fn decode_file_header<R>(
@@ -236,71 +274,6 @@ impl Decoder {
         Ok(())
     }
 
-    fn decode_message_with<R, F>(
-        &mut self,
-        reader: &mut R,
-        data_size: u32,
-        mut f: F,
-    ) -> Result<(), Error<R::Error>>
-    where
-        R: Read,
-        F: FnMut(Event),
-    {
-        let mut arr = [0u8; 1];
-
-        while self.cur < data_size {
-            self.read_exact_inc(reader, &mut arr)?;
-
-            let header = arr[0];
-
-            if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
-                let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
-                let mut mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
-                mesg_def.header = header;
-
-                self.decode_message_definition(reader, &mut mesg_def)?;
-
-                f(Event::MessageDefinition(&mesg_def));
-
-                self.mesg_definitions[local_mesg_num] = mesg_def;
-                continue;
-            }
-
-            let local_mesg_num = match header & Message::COMPRESSED_HEADER_MASK {
-                Message::COMPRESSED_HEADER_MASK => {
-                    (header & Message::COMPRESSED_LOCAL_NUM_MASK) >> Message::COMPRESSED_BIT_SHIFT
-                }
-                _ => header,
-            } & Message::LOCAL_NUM_MASK;
-
-            let mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num as usize]);
-            if mesg_def.header == 0 {
-                return Err(Error::MissingMessageDefinition { local_mesg_num });
-            }
-
-            self.buf_fields.clear();
-            self.buf_developer_fields.clear();
-
-            let mut mesg = Message {
-                header,
-                num: mesg_def.mesg_num,
-                fields: mem::take(&mut self.buf_fields),
-                developer_fields: mem::take(&mut self.buf_developer_fields),
-            };
-
-            self.decode_message_data(reader, &mut mesg, &mesg_def)?;
-
-            self.mesg_definitions[local_mesg_num as usize] = mesg_def;
-
-            f(Event::Message(&mesg));
-
-            self.buf_fields = mesg.fields;
-            self.buf_developer_fields = mesg.developer_fields;
-        }
-
-        Ok(())
-    }
-
     fn decode_message_definition<R>(
         &mut self,
         reader: &mut R,
@@ -363,6 +336,10 @@ impl Decoder {
     where
         R: Read,
     {
+        mesg.num = mesg_def.mesg_num;
+        mesg.fields.clear();
+        mesg.developer_fields.clear();
+
         if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
             let last_time_offset = (self.timestamp & Message::COMPRESSED_TIME_MASK as u32) as u8;
             let time_offset = mesg.header & Message::COMPRESSED_TIME_MASK;
@@ -639,11 +616,11 @@ impl Decoder {
             mesg_def.header = 0;
         }
 
-        self.buf_fields.clear();
-        self.buf_fields.reserve_exact(255);
+        self.mesg.fields.clear();
+        self.mesg.fields.reserve_exact(255);
 
-        self.buf_developer_fields.clear();
-        self.buf_developer_fields.reserve_exact(255);
+        self.mesg.developer_fields.clear();
+        self.mesg.developer_fields.reserve_exact(255);
     }
 }
 
@@ -651,6 +628,15 @@ impl Default for Decoder {
     fn default() -> Self {
         Self::new()
     }
+}
+
+fn local_mesg_num_from_mesg_header(header: u8) -> usize {
+    (match header & Message::COMPRESSED_HEADER_MASK {
+        Message::COMPRESSED_HEADER_MASK => {
+            (header & Message::COMPRESSED_LOCAL_NUM_MASK) >> Message::COMPRESSED_BIT_SHIFT
+        }
+        _ => header,
+    } & Message::LOCAL_NUM_MASK) as usize
 }
 
 fn slice_buffer_to_match_type_size(
@@ -779,8 +765,12 @@ impl Builder {
             }; 16],
             accumulator: Accumulator::new(),
             timestamp: 0,
-            buf_fields: Vec::new(),
-            buf_developer_fields: Vec::new(),
+            mesg: Message {
+                header: 0,
+                num: MesgNum(0),
+                fields: Vec::new(),
+                developer_fields: Vec::new(),
+            },
             field_descriptions: Vec::new(),
             options: self.options,
         }
@@ -793,27 +783,156 @@ impl Default for Builder {
     }
 }
 
+enum State {
+    FileHeader,
+    Message,
+    Crc,
+}
+
+/// Creates a `Stream` from a mutably borrowed `Decoder` for streaming decoding.
+pub struct Stream<'a, R> {
+    reader: R,
+    decoder: &'a mut Decoder,
+    state: State,
+    file_header: FileHeader,
+    crc: u16,
+}
+
+impl<'a, R: Read> Stream<'a, R> {
+    /// Discard this current sequence and make `Stream` pointing to the next sequence.
+    pub fn discard(&mut self) -> Result<(), Error<R::Error>> {
+        let mut arr = [0u8; 256];
+        while self.decoder.cur < self.file_header.data_size {
+            let n = self.file_header.data_size - self.decoder.cur;
+            self.reader.read_exact(&mut arr[..n.min(256) as usize])?;
+            self.decoder.cur += n;
+        }
+
+        self.reader.read_exact(&mut arr[..2])?;
+        self.decoder.reset();
+        self.state = State::FileHeader;
+
+        Ok(())
+    }
+}
+
+/// An Iterator-like trait that return borrowed Item rather than owned Item.
+/// StreamingIterator is lazy and do nothing unless `next()` is called.
+pub trait StreamingIterator {
+    /// The type of the elements being iterated over.
+    type Item<'a>
+    where
+        Self: 'a;
+
+    /// Advances the iterator and returns the next value.
+    /// Returns [`None`] when iteration is finished.
+    fn next(&mut self) -> Option<Self::Item<'_>>;
+}
+
+impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
+    type Item<'b>
+        = Result<Event<'b>, Error<R::Error>>
+    where
+        Self: 'b;
+
+    /// Decode next `DecoderEvent` until it returns `None` indicating no more data is available from the `reader`.
+    /// Since this is lazily evaluated, users can decide when to stop without required to read the whole reader.
+    fn next(&mut self) -> Option<Result<Event<'_>, Error<R::Error>>> {
+        match self.state {
+            State::FileHeader => {
+                self.file_header = match self.decoder.decode_file_header(&mut self.reader) {
+                    Ok(file_header) => file_header,
+                    Err(err) => return Some(Err(err)),
+                }?;
+                self.state = State::Message;
+                Some(Ok(Event::FileHeader(&self.file_header)))
+            }
+            State::Message => {
+                let mut arr = [0u8; 1];
+                if let Err(err) = self.decoder.read_exact_inc(&mut self.reader, &mut arr) {
+                    return Some(Err(err));
+                }
+
+                let header = arr[0];
+
+                if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
+                    let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
+                    let mut mesg_def =
+                        mem::take(&mut self.decoder.mesg_definitions[local_mesg_num]);
+
+                    mesg_def.header = header;
+
+                    let result = self
+                        .decoder
+                        .decode_message_definition(&mut self.reader, &mut mesg_def);
+
+                    self.decoder.mesg_definitions[local_mesg_num] = mesg_def;
+
+                    if let Err(err) = result {
+                        return Some(Err(err));
+                    }
+
+                    return Some(Ok(Event::MessageDefinition(
+                        &self.decoder.mesg_definitions[local_mesg_num],
+                    )));
+                }
+
+                let local_mesg_num = local_mesg_num_from_mesg_header(header);
+                if self.decoder.mesg_definitions[local_mesg_num].header == 0 {
+                    return Some(Err(Error::MissingMessageDefinition {
+                        local_mesg_num: local_mesg_num as u8,
+                    }));
+                }
+
+                let mesg_def = mem::take(&mut self.decoder.mesg_definitions[local_mesg_num]);
+                let mut mesg = mem::take(&mut self.decoder.mesg);
+
+                mesg.header = header;
+
+                let result =
+                    self.decoder
+                        .decode_message_data(&mut self.reader, &mut mesg, &mesg_def);
+
+                self.decoder.mesg_definitions[local_mesg_num] = mesg_def;
+                self.decoder.mesg = mesg;
+
+                if let Err(err) = result {
+                    return Some(Err(err));
+                }
+
+                if self.decoder.cur >= self.file_header.data_size {
+                    self.state = State::Crc;
+                }
+
+                Some(Ok(Event::Message(&self.decoder.mesg)))
+            }
+            State::Crc => {
+                self.crc = match self.decoder.decode_crc(&mut self.reader) {
+                    Ok(crc) => crc,
+                    Err(err) => return Some(Err(err)),
+                };
+                self.decoder.reset();
+                self.state = State::FileHeader;
+                Some(Ok(Event::Crc(&self.crc)))
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::{
+        fs::File,
+        io::{BufReader, empty},
+    };
+
     use crate::{
-        Decoder,
+        Decoder, StreamingIterator,
         decoder::convert_u64_to_value,
         profile::typedef::FitBaseType,
         proto::{Message, MessageDefinition, Value},
     };
-    use embedded_io::{ErrorKind, ErrorType, Read};
-
-    struct Empty;
-
-    impl ErrorType for Empty {
-        type Error = ErrorKind;
-    }
-
-    impl Read for Empty {
-        fn read(&mut self, buf: &mut [u8]) -> Result<usize, Self::Error> {
-            Ok(buf.len())
-        }
-    }
+    use embedded_io_adapters::std::FromStd;
 
     #[test]
     fn test_decompress_timestamp_on_decode_message_data() {
@@ -828,7 +947,7 @@ mod tests {
             ..Default::default()
         };
 
-        let mut empty = Empty {};
+        let mut empty = FromStd::new(empty());
         dec.decode_message_data(&mut empty, &mut mesg, &mesg_def)
             .unwrap();
         assert_eq!(dec.timestamp, timestamp + 1, "time_offset {}", time_offset);
@@ -870,6 +989,20 @@ mod tests {
         for tc in tt {
             let val = convert_u64_to_value(input, tc.0);
             assert_eq!(tc.1, val, "input: {:?}", tc);
+        }
+    }
+
+    #[test]
+    fn test_stream() {
+        let file = File::open("tests/data/large.fit").unwrap();
+        let br = BufReader::new(file);
+        let mut reader = FromStd::new(br);
+
+        let mut dec = Decoder::new();
+        let mut stream = dec.stream(&mut reader);
+
+        while let Some(event) = stream.next() {
+            event.unwrap();
         }
     }
 }
