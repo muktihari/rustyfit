@@ -1,6 +1,6 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use embedded_io_adapters::std::FromStd;
-use rustyfit::Decoder;
+use rustyfit::{Decoder, StreamingIterator};
 use std::{hint::black_box, io::Cursor};
 
 const TEST_FILE: &str = "tests/data/large.fit";
@@ -27,22 +27,28 @@ pub fn bench_decode(c: &mut Criterion) {
         })
     });
 
-    c.bench_function("decode_with", |b| {
+    c.bench_function("decode stream", |b| {
         b.iter(|| {
             let mut dec = Decoder::new();
             let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
-            dec.decode_with(&mut reader, |_| {}).unwrap();
+            let mut stream = dec.stream(&mut reader);
+            while let Some(event) = stream.next() {
+                event.unwrap();
+            }
         })
     });
 
-    c.bench_function("decode_with no checksum no expand", |b| {
+    c.bench_function("decode stream no checksum no expand", |b| {
         b.iter(|| {
             let mut dec = Decoder::builder()
                 .checksum(false)
                 .expand_components(false)
                 .build();
             let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
-            dec.decode_with(&mut reader, |_| {}).unwrap();
+            let mut stream = dec.stream(&mut reader);
+            while let Some(event) = stream.next() {
+                event.unwrap();
+            }
         })
     });
 }

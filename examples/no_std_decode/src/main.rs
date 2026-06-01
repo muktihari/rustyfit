@@ -5,7 +5,7 @@ extern crate alloc;
 
 use alloc::format;
 use rustyfit::{
-    Decoder, DecoderEvent,
+    Decoder, DecoderEvent, StreamingIterator,
     profile::{mesgdef, typedef},
 };
 use spinning_top::Spinlock;
@@ -37,9 +37,10 @@ fn _start() -> ! {
     printf!("Hello, world!\n");
 
     let mut dec = DECODER.lock();
+    let mut stream = dec.stream(FIT_FILE);
 
-    dec.decode_with(FIT_FILE, |e| match e {
-        DecoderEvent::Message(v) => {
+    while let Some(event) = stream.next() {
+        if let DecoderEvent::Message(v) = event.unwrap() {
             if v.num == typedef::MesgNum::SESSION {
                 let ses = mesgdef::Session::from(v);
                 let sport = ses.sport;
@@ -47,9 +48,7 @@ fn _start() -> ! {
                 printf!("> sport: {sport:}, total_distance: {total_distance:.2} km\n");
             }
         }
-        _ => {}
-    })
-    .unwrap();
+    }
 
     printf!("Goodbye, world!\n");
     sys_exit(0);
