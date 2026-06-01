@@ -22,6 +22,16 @@
 //!
 //! We will provide examples in `std` for simplicity and a wider audience, since `#![no_std]` is platform-dependent.
 //!
+//! - [Decoding](#decoding)
+//!   - [Streaming Decoding](#streaming-decoding)
+//!   - [DecoderBuilder](#decoderbuilder)
+//! - [Encoding](#encoding)
+//!   - [Encode using mesgdef module](#encode-using-mesgdef-module)
+//!   - [Streaming Encoding](#streaming-encoding)
+//!   - [EncoderBuilder](#encoderbuilder)
+//!
+//! ####
+//!
 //! ### Decoding
 //!
 //! `Decoder`'s `decode` method allows us to interact with FIT files directly through their original protocol messages' structure.
@@ -88,7 +98,7 @@
 //!     let mut reader = FromStd::new(br);
 //!
 //!     let mut dec = Decoder::new();              // stateless and static-friendly
-//!     let mut stream = dec.stream(&mut reader);  // stateful but small since it borrow Decoder.
+//!     let mut stream = dec.stream(&mut reader);  // stateful but small since it borrows Decoder.
 //!
 //!     while let Some(event) = stream.next() {
 //!         match event? {
@@ -163,6 +173,200 @@
 //!
 //! These associated functions and method are `const fn`, so we can use it to declare a static variable
 //! as long as we wrap it with a lock, e.g. `Mutex`. This is useful on microcrontrollers where RAM is only hundred KBs.
+//!
+//! ####
+//!
+//! ### Encoding
+//!
+//! Here is the example of manually encode FIT protocol using this library to give the idea how it works.
+//!
+//! ```
+//! use embedded_io_adapters::std::FromStd;
+//! use rustyfit::{Encoder, profile::{ProfileType, mesgdef, typedef}, proto::{FIT, Field, Message, Value}};
+//! use std::{error::Error, fs::File, io::{BufWriter, Write}};
+//!
+//! fn main() -> Result<(), Box<dyn Error>> {
+//!     let mut fit = FIT {
+//!         messages: vec![
+//!             Message {
+//!                 num: typedef::MesgNum::FILE_ID,
+//!                 fields: vec![
+//!                     Field {
+//!                         num: mesgdef::FileId::MANUFACTURER,
+//!                         profile_type: ProfileType::MANUFACTURER, // or ProfileType::UINT16 is also valid
+//!                         value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
+//!                         is_expanded: false,
+//!                     },
+//!                     Field {
+//!                         num: mesgdef::FileId::PRODUCT,
+//!                         profile_type: ProfileType::UINT16,
+//!                         value: Value::Uint16(typedef::GarminProduct::FENIX8_SOLAR.0),
+//!                         is_expanded: false,
+//!                     },
+//!                     Field {
+//!                         num: mesgdef::FileId::TYPE,
+//!                         profile_type: ProfileType::UINT8,
+//!                         value: Value::Uint8(typedef::File::ACTIVITY.0),
+//!                         is_expanded: false,
+//!                     },
+//!                 ],
+//!                 ..Default::default()
+//!             },
+//!             Message {
+//!                 num: typedef::MesgNum::RECORD,
+//!                 fields: vec![
+//!                     Field {
+//!                         num: mesgdef::Record::DISTANCE,
+//!                         profile_type: ProfileType::UINT32,
+//!                         value: Value::Uint32(100 * 100), // 100 m
+//!                         is_expanded: false,
+//!                     },
+//!                     Field {
+//!                         num: mesgdef::Record::HEART_RATE,
+//!                         profile_type: ProfileType::UINT8,
+//!                         value: Value::Uint8(70), // 70 bpm
+//!                         is_expanded: false,
+//!                     },
+//!                     Field {
+//!                         num: mesgdef::Record::SPEED,
+//!                         profile_type: ProfileType::UINT16,
+//!                         value: Value::Uint16(2 * 1000), // 2 m/s
+//!                         is_expanded: false,
+//!                     },
+//!                 ],
+//!                 ..Default::default()
+//!             },
+//!         ],
+//!         ..Default::default()
+//!     };
+//!
+//!     let fout_name = "output.fit";
+//!     let fout = File::create(fout_name)?;
+//!     let mut bw = BufWriter::new(fout);
+//!     let mut writer = FromStd::new(&mut bw);
+//!
+//!     let mut enc = Encoder::new();
+//!     enc.encode(&mut writer, &mut fit)?;
+//!     bw.flush()?;
+//!     # let _ = std::fs::remove_file(fout_name);
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! #### Encode using mesgdef module
+//!
+//! Alternatively, users can create messages using the mesgdef module for convenience.
+//!
+//! ```
+//! use embedded_io_adapters::std::FromStd;
+//! use rustyfit::{Encoder, profile::{mesgdef, typedef}, proto::{FIT, Message}};
+//! use std::{error::Error, fs::File, io::{BufWriter, Write}};
+//!
+//! fn main() -> Result<(), Box<dyn Error>> {
+//!     let mut fit = FIT {
+//!         messages: vec![
+//!             {
+//!                 let mut file_id = mesgdef::FileId::new();
+//!                 file_id.manufacturer = typedef::Manufacturer::GARMIN;
+//!                 file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
+//!                 file_id.r#type = typedef::File::ACTIVITY;
+//!                 Message::from(file_id)
+//!             },
+//!             {
+//!                 let mut record = mesgdef::Record::new();
+//!                 record.distance = 100 * 100; // 100 m
+//!                 record.heart_rate = 70; // 70 bpm
+//!                 record.speed = 2 * 1000; // 2 m/s
+//!                 Message::from(record)
+//!             },
+//!         ],
+//!         ..Default::default()
+//!     };
+//!     
+//!     let fout_name = "output.fit";
+//!     let fout = File::create(fout_name)?;
+//!     let mut bw = BufWriter::new(fout);
+//!     let mut writer = FromStd::new(&mut bw);
+//!
+//!     let mut enc = Encoder::new();
+//!     enc.encode(&mut writer, &mut fit)?;
+//!     bw.flush()?;
+//!     # let _ = std::fs::remove_file(fout_name);
+//!
+//!     Ok(())
+//! }
+//! ```
+//!
+//! #### Streaming Encoding
+//!
+//! `StreamEncoder` allows us to encode in streaming fashion. Write each message directly without retain them first in the memory.
+//! This is useful when the device is the one who produce the data such as smartwatch, cycling computer or other health devices.
+//!
+//!
+//! ```
+//! use embedded_io_adapters::std::FromStd;
+//! use rustyfit::{Encoder, profile::{mesgdef, typedef}, proto::Message};
+//! use std::{error::Error, fs::File, io::{BufWriter, Write}};
+//!
+//! fn main() -> Result<(), Box<dyn Error>> {
+//!     let fout_name = "output.fit";
+//!     let fout = File::create(fout_name)?;
+//!     let mut bw = BufWriter::new(fout);
+//!     let mut writer = FromStd::new(&mut bw);
+//!
+//!     let mut enc = Encoder::new();             // stateless and static-friendly
+//!     let mut stream = enc.stream(&mut writer); // stateful but small since it borrows Encoder.
+//!
+//!     stream.write_message(&mut {
+//!         let mut file_id = mesgdef::FileId::new();
+//!         file_id.manufacturer = typedef::Manufacturer::GARMIN;
+//!         file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
+//!         file_id.r#type = typedef::File::ACTIVITY;
+//!         Message::from(file_id)
+//!     })?;
+//!
+//!     stream.write_message(&mut {
+//!         let mut record = mesgdef::Record::new();
+//!         record.distance = 100 * 100; // 100 m
+//!         record.heart_rate = 70; // 70 bpm
+//!         record.speed = 2 * 1000; // 2 m/s
+//!         Message::from(record)
+//!     })?;
+//!
+//!     stream.finish()?;
+//!     bw.flush()?;
+//!     # let _ = std::fs::remove_file(fout_name);
+//!
+//!     Ok(())
+//! }
+//!
+//! ```
+//!
+//! NOTE:
+//! - For `#![no_std]` on MCU with only few hundred KBs of RAM, we recommend allocating a Message once
+//! and reuse it instead of using these `mesgdef` building blocks which might yield few KBs stack memory.
+//! MCU may only has 2KB or less stack memory configuration.
+//!
+//! - For `std`, you don't need to worry about this, on Linux for example, stack can have a range from 2MB to 8MB,
+//! which is abundant.
+//!
+//! #### EncoderBuilder
+//!
+//! Create `Encoder` instance with options using `Encoder::builder()` or `EncoderBuilder::new()`.
+//!
+//! ```
+//! # use rustyfit::{Encoder, HeaderOption, Endianness};
+//! # use rustyfit::proto::ProtocolVersion;
+//! let mut enc = Encoder::builder()
+//!         .endianness(Endianness::BigEndian)
+//!         .protocol_version(ProtocolVersion::V2)
+//!         .header_option(HeaderOption::Compressed(3))
+//!         .build();
+//! ```
+//!
+//! These associated functions and method are `const fn`, so we can use it to declare a static variable
+//! as long as we wrap it with a lock, e.g. `Mutex`. This is useful on microcrontrollers where RAM is only hundred KBs.
 
 #![cfg_attr(not(test), no_std)]
 
@@ -174,7 +378,7 @@ pub use decoder::{
 };
 pub use encoder::{
     Builder as EncoderBuilder, Encoder, Endianness, Error as EncoderError, FieldValidationError,
-    HeaderOption, MessageValidationError,
+    HeaderOption, MessageValidationError, Stream as StreamEncoder,
 };
 
 /// The `profile` module represents FIT Global Profile containing types and messages generated from Profile.xlsx.
