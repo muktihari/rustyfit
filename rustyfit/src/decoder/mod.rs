@@ -78,19 +78,6 @@ impl<E> From<ReadExactError<E>> for Error<E> {
 
 impl<E> core::error::Error for Error<E> where E: core::fmt::Debug + core::fmt::Display {}
 
-/// Event is FIT segments encountered by the Decoder.
-#[derive(Debug)]
-pub enum Event<'a> {
-    /// Returned when the Decoder encounter FileHeader.
-    FileHeader(&'a FileHeader),
-    /// Returned when the Decoder encounter MessageDefinition.
-    MessageDefinition(&'a MessageDefinition),
-    /// Returned when the Decoder encounter Message.
-    Message(&'a Message),
-    /// Returned when the Decoder encounter File's CRC.
-    Crc(&'a u16),
-}
-
 #[derive(Clone, Copy)]
 struct Options {
     checksum: bool,
@@ -781,6 +768,19 @@ impl Default for Builder {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// Event is FIT segments encountered by the `StreamDecoder`.
+#[derive(Debug)]
+pub enum Event<'a> {
+    /// Returned when the `StreamDecoder` encounter a `FileHeader`.
+    FileHeader(&'a FileHeader),
+    /// Returned when the `StreamDecoder` encounter a `MessageDefinition`.
+    MessageDefinition(&'a MessageDefinition),
+    /// Returned when the `StreamDecoder` encounter a `Message`.
+    Message(&'a Message),
+    /// Returned when the `StreamDecoder` encounter a `File`'s CRC.
+    Crc(&'a u16),
 }
 
 enum State {
