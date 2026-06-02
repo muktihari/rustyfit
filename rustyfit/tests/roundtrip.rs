@@ -1,5 +1,8 @@
 use embedded_io_adapters::std::FromStd;
-use rustyfit::{Decoder, DecoderError, EncoderBuilder, Endianness, HeaderOption};
+use rustyfit::{
+    Decoder, DecoderError, DecoderEvent, Encoder, EncoderBuilder, Endianness, HeaderOption,
+    StreamingIterator, proto::Message,
+};
 use std::{
     error::Error,
     fs::{self, File},
@@ -35,6 +38,15 @@ fn decode_encode_roundtrip_compressed() {
                     .header_option(HeaderOption::Compressed(3)),
             )
         },
+    )
+    .unwrap();
+}
+
+#[test]
+fn streaming_decode_encode_roundtrip() {
+    walk_path(
+        &Path::new("tests/data").to_path_buf(),
+        &mut |path: &PathBuf| do_roudtrip_by_streaming(path),
     )
     .unwrap();
 }
@@ -147,5 +159,93 @@ fn do_roudtrip_with_encoder_options(
             }
         }
     }
+    Ok(())
+}
+
+fn do_roudtrip_by_streaming(path: &PathBuf) -> Result<(), Box<dyn Error>> {
+    if let Some(file_name) = path.file_name() {
+        if ["WeightScaleMultiUser.fit", "Settings.fit"]
+            .iter()
+            .any(|x| *x == file_name)
+        {
+            return Ok(());
+        }
+    }
+
+    let file = File::open(path).unwrap();
+    let br = BufReader::new(file);
+    let mut reader = FromStd::new(br);
+
+    let buf = Vec::<u8>::with_capacity(5000 * 1024); // 5 MB, large enough to avoid realloc.
+    let mut cursor = Cursor::new(buf);
+
+    let mut dec = Decoder::new();
+    let mut stream_dec = dec.stream(&mut reader);
+
+    let mut expected_messages = Vec::<Message>::new();
+    while let Some(event) = stream_dec.next() {
+        if let DecoderEvent::Message(v) = event? {
+            expected_messages.push(v.clone());
+        }
+    }
+
+    cursor.seek(SeekFrom::Start(0)).unwrap();
+    let mut writer = FromStd::new(&mut cursor);
+
+    let mut enc = Encoder::new();
+    let mut stream_enc = enc.stream(&mut writer);
+
+    for mesg in expected_messages.clone().iter_mut() {
+        stream_enc.write_message(mesg)?;
+    }
+    stream_enc.finish()?;
+
+    cursor.seek(SeekFrom::Start(0)).unwrap();
+    let mut reader = FromStd::new(&mut cursor);
+
+    let mut dec = Decoder::new();
+    let mut stream_dec = dec.stream(&mut reader);
+
+    let mut result_messages = Vec::<Message>::new();
+    while let Some(event) = stream_dec.next() {
+        if let DecoderEvent::Message(v) = event? {
+            result_messages.push(v.clone())
+        }
+    }
+
+    if result_messages.len() == 0 || result_messages.len() != expected_messages.len() {
+        return Err(format!(
+            "unexpected messages len, expected: {}, got: {}",
+            expected_messages.len(),
+            result_messages.len()
+        )
+        .into());
+    }
+
+    for (i, mesg) in expected_messages
+        .iter()
+        .zip(result_messages.iter())
+        .enumerate()
+    {
+        if mesg.0.num != mesg.1.num {
+            return Err(format!(
+                "mesg num mismatch for mesg index {}, expected: {}, got: {}",
+                i, mesg.0.num, mesg.1.num
+            )
+            .into());
+        }
+
+        if mesg.0.fields.len() != mesg.1.fields.len() {
+            return Err(format!(
+                "fields len mismatch for mesg index {} num {}, expected: {}, got: {}",
+                i,
+                mesg.0.num,
+                mesg.0.fields.len(),
+                mesg.1.fields.len()
+            )
+            .into());
+        }
+    }
+
     Ok(())
 }
