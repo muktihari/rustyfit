@@ -1,6 +1,6 @@
 [package]
 name = "rustyfit"
-version = "0.7.0"
+version = "0.8.0"
 description = """
 The #![no_std] Rust implementation of The Flexible and Interoperable Data Transfer (FIT) 
 Protocol for decoding and encoding Garmin FIT files, supporting FIT Protocol V2.
