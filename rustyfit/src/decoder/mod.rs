@@ -112,13 +112,18 @@ impl Decoder {
     ///
     /// Example:
     ///
-    /// ```ignore
+    /// ```
+    /// # use embedded_io_adapters::std::FromStd;
+    /// # use rustyfit::{Decoder, StreamingIterator};
+    /// # use std::fs::File;
+    /// # let f = File::open("tests/data/from_official_sdk/Activity.fit").unwrap();
+    /// # let mut reader = FromStd::new(f);
     /// // ...
     /// let mut dec = Decoder::new();
     /// let mut stream = dec.stream(&mut reader);
     ///
-    /// while let Some(item) = stream.next() {
-    ///    // do something with the borrowed item
+    /// while let Some(event) = stream.next() {
+    ///    // do something with event having borrowed data
     /// }
     ///
     /// ```
