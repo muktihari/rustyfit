@@ -345,11 +345,11 @@
 //!
 //! NOTE:
 //! - For `#![no_std]` on MCU with only few hundred KBs of RAM, we recommend allocating a Message once
-//! and reuse it instead of using these `mesgdef` building blocks which might yield few KBs stack memory.
-//! MCU may only has 2KB or less stack memory configuration.
+//!   and reuse it instead of using these `mesgdef` building blocks which might yield few KBs stack memory.
+//!   MCU may only has 2KB or less stack memory configuration.
 //!
 //! - For `std`, you don't need to worry about this, on Linux for example, stack can have a range from 2MB to 8MB,
-//! which is abundant.
+//!   which is abundant.
 //!
 //! #### EncoderBuilder
 //!
