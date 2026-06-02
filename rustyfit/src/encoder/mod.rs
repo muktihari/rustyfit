@@ -5,8 +5,7 @@ mod validator;
 
 use crate::{
     crc16::Crc16,
-    encoder::lru::Lru,
-    encoder::validator::MessageValidator,
+    encoder::{lru::Lru, validator::MessageValidator},
     profile::{PROFILE_VERSION, typedef::DateTime},
     proto::*,
 };
@@ -111,6 +110,20 @@ impl Encoder {
     /// Create new Encoder with options for encoding FIT file.
     pub const fn builder() -> Builder {
         Builder::new()
+    }
+
+    /// Creates a `Stream` from a mutably borrowed `Encoder` for streaming encoding of the given `writer`.
+    pub fn stream<'a, W>(&'a mut self, writer: W) -> Stream<'a, W>
+    where
+        W: Write + Seek,
+    {
+        self.reset();
+
+        Stream {
+            writer,
+            encoder: self,
+            counter: 0,
+        }
     }
 
     /// Encode the given `fit` to the writer.
@@ -556,16 +569,96 @@ impl Default for Builder {
     }
 }
 
+/// A `Stream` from a mutably borrowed `Encoder` for streaming encoding.
+pub struct Stream<'a, W> {
+    writer: W,
+    encoder: &'a mut Encoder,
+    counter: usize,
+}
+
+impl<'a, W: Write + Seek> Stream<'a, W> {
+    /// Write message to the `writer`. When done writing all messages,
+    /// call `finish()` to complete this FIT sequence.
+    pub fn write_message(&mut self, mesg: &mut Message) -> Result<(), Error<W::Error>> {
+        if self.counter == 0 {
+            self.writer.write_all(&[0u8; 14])?; // Reserve 14 bytes for FileHeader
+            self.encoder.n += 14;
+        }
+
+        if let Err(err) = self
+            .encoder
+            .message_validator
+            .validate_message(mesg, self.encoder.options.protocol_version)
+        {
+            return Err(Error::MessageValidation {
+                mesg_index: self.counter,
+                err,
+            });
+        }
+
+        self.encoder.encode_message(&mut self.writer, mesg)?;
+        self.counter += 1;
+
+        Ok(())
+    }
+
+    /// Finish the current FIT sequence by finalizing the correct FileHeader.
+    ///
+    /// Calling `write_message()` after this point will write message for the next
+    /// FIT sequence on the same `writer`, and `finish()` MUST be called again.
+    pub fn finish(&mut self) -> Result<(), Error<W::Error>> {
+        if self.counter == 0 {
+            return Err(Error::EmptyMessages);
+        }
+
+        self.encoder.encode_crc(&mut self.writer)?;
+
+        let mut protocol_version = self.encoder.options.protocol_version;
+        if protocol_version == ProtocolVersion(0) {
+            protocol_version = ProtocolVersion::V1;
+        }
+
+        let file_header = FileHeader {
+            size: 14,
+            protocol_version,
+            profile_version: PROFILE_VERSION,
+            data_size: self.encoder.data_size,
+            data_type: FileHeader::DATA_TYPE,
+            crc: 0, // calculated
+        };
+
+        self.encoder.buf.clear();
+        write_file_header_to_vec(&mut self.encoder.buf, &file_header);
+
+        self.encoder.crc16.write(&self.encoder.buf[..12]);
+        let crc = self.encoder.crc16.sum16();
+        self.encoder.buf[12..14].copy_from_slice(&crc.to_le_bytes());
+        self.encoder.crc16.reset();
+
+        self.writer.seek(SeekFrom::Current(-self.encoder.n))?;
+        self.writer.write_all(&self.encoder.buf)?;
+        self.writer.seek(SeekFrom::Current(self.encoder.n - 14))?;
+
+        self.counter = 0;
+        self.encoder.reset();
+
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use std::io::Cursor;
+
     use crate::{
         Encoder,
         encoder::write_value_to_vec,
         profile::{mesgdef, typedef},
-        proto::{FileHeader, Message, ProtocolVersion, Value},
+        proto::{FIT, FileHeader, Message, ProtocolVersion, Value},
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
+    use embedded_io_adapters::std::FromStd;
 
     #[test]
     fn compress_timestamp_into_header() {
@@ -1042,5 +1135,50 @@ mod tests {
         );
 
         assert_eq!(pos, n, "should put offset back to its original position");
+    }
+
+    #[test]
+    fn test_compare_encoder_and_stream_result() {
+        let mut fit = FIT {
+            messages: vec![
+                {
+                    let mut file_id = mesgdef::FileId::new();
+                    file_id.manufacturer = typedef::Manufacturer::GARMIN;
+                    file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
+                    file_id.r#type = typedef::File::ACTIVITY;
+                    Message::from(file_id)
+                },
+                {
+                    let mut record = mesgdef::Record::new();
+                    record.distance = 100 * 100; // 100 m
+                    record.heart_rate = 70; // 70 bpm
+                    record.speed = 2 * 1000; // 2 m/s
+                    Message::from(record)
+                },
+            ],
+            ..Default::default()
+        };
+
+        let mut enc_storage = Vec::<u8>::new();
+        let mut enc_writer = FromStd::new(Cursor::new(&mut enc_storage));
+
+        let mut enc = Encoder::new();
+        enc.encode(&mut enc_writer, &mut fit).unwrap();
+
+        let mut stream_storage = Vec::<u8>::new();
+        let mut stream_writer = FromStd::new(Cursor::new(&mut stream_storage));
+
+        let mut enc2 = Encoder::new();
+        let mut stream = enc2.stream(&mut stream_writer);
+
+        for mut mesg in fit.messages.iter_mut() {
+            stream.write_message(&mut mesg).unwrap();
+        }
+        stream.finish().unwrap();
+
+        assert_eq!(
+            enc_storage, stream_storage,
+            "Encoder and Stream should produce same result"
+        );
     }
 }
