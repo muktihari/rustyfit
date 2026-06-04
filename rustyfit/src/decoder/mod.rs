@@ -794,7 +794,7 @@ enum State {
     Crc,
 }
 
-/// Creates a `Stream` from a mutably borrowed `Decoder` for streaming decoding.
+/// A `Stream` from a mutably borrowed `Decoder` for streaming decoding.
 pub struct Stream<'a, R> {
     reader: R,
     decoder: &'a mut Decoder,
@@ -807,15 +807,38 @@ impl<'a, R: Read> Stream<'a, R> {
     /// Discard this current sequence and make `Stream` pointing to the next sequence.
     pub fn discard(&mut self) -> Result<(), Error<R::Error>> {
         let mut arr = [0u8; 256];
-        while self.decoder.cur < self.file_header.data_size {
-            let n = self.file_header.data_size - self.decoder.cur;
-            self.reader.read_exact(&mut arr[..n.min(256) as usize])?;
-            self.decoder.cur += n;
-        }
+        loop {
+            match self.state {
+                State::FileHeader => {
+                    let checksum = self.decoder.options.checksum;
+                    self.decoder.options.checksum = false; // no checksum
 
-        self.reader.read_exact(&mut arr[..2])?;
+                    let result = self.decoder.decode_file_header(&mut self.reader);
+                    self.decoder.options.checksum = checksum; // restore checksum
+                    self.file_header = match result? {
+                        Some(file_header) => file_header,
+                        None => break,
+                    };
+
+                    self.state = State::Message;
+                }
+                State::Message => {
+                    while self.decoder.cur < self.file_header.data_size {
+                        let remaining = self.file_header.data_size - self.decoder.cur;
+                        let n = (remaining as usize).min(arr.len());
+                        self.reader.read_exact(&mut arr[..n])?;
+                        self.decoder.cur += n as u32;
+                    }
+                    self.state = State::Crc;
+                }
+                State::Crc => {
+                    self.reader.read_exact(&mut arr[..2])?;
+                    self.state = State::FileHeader;
+                    break;
+                }
+            }
+        }
         self.decoder.reset();
-        self.state = State::FileHeader;
 
         Ok(())
     }
@@ -928,14 +951,14 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
 mod tests {
     use std::{
         fs::File,
-        io::{BufReader, empty},
+        io::{BufReader, Cursor, Seek, SeekFrom, Write, empty},
     };
 
     use crate::{
         Decoder, StreamingIterator,
         decoder::convert_u64_to_value,
-        profile::typedef::FitBaseType,
-        proto::{Message, MessageDefinition, Value},
+        profile::{PROFILE_VERSION, typedef::FitBaseType},
+        proto::{FileHeader, Message, MessageDefinition, ProtocolVersion, Value},
     };
     use embedded_io_adapters::std::FromStd;
 
@@ -1009,5 +1032,32 @@ mod tests {
         while let Some(event) = stream.next() {
             event.unwrap();
         }
+    }
+
+    #[test]
+    fn test_discard() {
+        const DATA_SIZE: u32 = 1008;
+
+        let mut cursor = Cursor::new(Vec::<u8>::with_capacity(14 + DATA_SIZE as usize + 2));
+        cursor.write_all(&[14, ProtocolVersion::V1.0]).unwrap();
+        cursor.write_all(&PROFILE_VERSION.to_le_bytes()).unwrap();
+        cursor.write_all(&DATA_SIZE.to_le_bytes()).unwrap();
+        cursor.write_all(FileHeader::DATA_TYPE.as_bytes()).unwrap();
+        cursor.write_all(&[0, 0]).unwrap(); // FileHeader's CRC
+        cursor.write_all(&[0u8; DATA_SIZE as usize]).unwrap();
+        cursor.write_all(&[0, 0]).unwrap(); // CRC
+
+        cursor.seek(SeekFrom::Start(0)).unwrap();
+
+        let mut dec = Decoder::new();
+        let mut stream = dec.stream(FromStd::new(cursor));
+
+        stream
+            .discard()
+            .expect("should return Ok since reader is valid");
+
+        stream
+            .discard()
+            .expect("should return Ok since reader is already empty");
     }
 }
