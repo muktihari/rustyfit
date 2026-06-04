@@ -86,6 +86,7 @@ struct Options {
 
 /// Decoder for decoding FIT file.
 pub struct Decoder {
+    buf: [u8; 765],
     cur: u32,
     crc16: Crc16,
     mesg_definitions: [MessageDefinition; 16],
@@ -154,10 +155,9 @@ impl Decoder {
         let mut messages = Vec::new();
 
         while self.cur < file_header.data_size {
-            let mut arr = [0u8; 1];
-            self.read_exact_inc(&mut reader, &mut arr)?;
+            self.read_exact_inc(&mut reader, 1)?;
 
-            let header = arr[0];
+            let header = self.buf[0];
 
             if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
                 let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
@@ -208,32 +208,31 @@ impl Decoder {
     where
         R: Read,
     {
-        let mut arr = [0u8; 14];
-        if let Err(err) = reader.read_exact(&mut arr[..1]) {
+        if let Err(err) = reader.read_exact(&mut self.buf[..1]) {
             if let ReadExactError::UnexpectedEof = err {
                 return Ok(None);
             }
             return Err(Error::from(err));
         };
 
-        let n = arr[0] as usize;
-        if n != 12 && n != 14 {
+        let size = self.buf[0];
+        if size != 12 && size != 14 {
             return Err(Error::NotFITFile);
         }
 
-        reader.read_exact(&mut arr[1..n])?;
+        reader.read_exact(&mut self.buf[1..size as usize])?;
 
-        if &arr[8..12] != FileHeader::DATA_TYPE.as_bytes() {
+        if &self.buf[8..12] != FileHeader::DATA_TYPE.as_bytes() {
             return Err(Error::NotFITFile);
         }
 
-        let crc = match n {
-            14 => u16::from_le_bytes([arr[12], arr[13]]),
+        let crc = match size {
+            14 => u16::from_le_bytes([self.buf[12], self.buf[13]]),
             _ => 0,
         };
 
-        if n == 14 && crc != 0 {
-            self.crc16.write(&arr[..12]);
+        if size == 14 && crc != 0 {
+            self.crc16.write(&self.buf[..12]);
             if self.options.checksum && crc != self.crc16.sum16() {
                 return Err(Error::ChecksumMismatch {
                     found: crc,
@@ -244,24 +243,24 @@ impl Decoder {
         }
 
         Ok(Some(FileHeader {
-            size: n as u8,
-            protocol_version: ProtocolVersion(arr[1]),
-            profile_version: u16::from_le_bytes([arr[2], arr[3]]),
-            data_size: u32::from_le_bytes(arr[4..8].try_into().unwrap()),
+            size,
+            protocol_version: ProtocolVersion(self.buf[1]),
+            profile_version: u16::from_le_bytes([self.buf[2], self.buf[3]]),
+            data_size: u32::from_le_bytes(self.buf[4..8].try_into().unwrap()),
             data_type: FileHeader::DATA_TYPE,
             crc,
         }))
     }
 
     /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
-    fn read_exact_inc<R>(&mut self, reader: &mut R, buf: &mut [u8]) -> Result<(), Error<R::Error>>
+    fn read_exact_inc<R>(&mut self, reader: &mut R, n: usize) -> Result<(), Error<R::Error>>
     where
         R: Read,
     {
-        reader.read_exact(buf)?;
-        self.cur += buf.len() as u32;
+        reader.read_exact(&mut self.buf[..n])?;
+        self.cur += n as u32;
         if self.options.checksum {
-            self.crc16.write(buf);
+            self.crc16.write(&self.buf[..n]);
         }
         Ok(())
     }
@@ -274,46 +273,49 @@ impl Decoder {
     where
         R: Read,
     {
-        let mut arr = [0u8; 765];
-        self.read_exact_inc(reader, &mut arr[..5])?;
+        self.read_exact_inc(reader, 5)?;
 
-        mesg_def.reserved = arr[0];
-        mesg_def.arch = arr[1];
+        mesg_def.reserved = self.buf[0];
+        mesg_def.arch = self.buf[1];
         mesg_def.mesg_num = MesgNum(match mesg_def.arch {
-            0 => u16::from_le_bytes([arr[2], arr[3]]),
-            _ => u16::from_be_bytes([arr[2], arr[3]]),
+            0 => u16::from_le_bytes([self.buf[2], self.buf[3]]),
+            _ => u16::from_be_bytes([self.buf[2], self.buf[3]]),
         });
         mesg_def.field_definitions.clear();
         mesg_def.developer_field_definitions.clear();
 
-        let n = arr[4] as usize * 3;
-        self.read_exact_inc(reader, &mut arr[..n])?;
+        let n = self.buf[4] as usize * 3;
+        self.read_exact_inc(reader, n)?;
 
         mesg_def.field_definitions.reserve_exact(255);
 
         mesg_def
             .field_definitions
-            .extend(arr[..n].chunks_exact(3).map(|b| FieldDefinition {
+            .extend(self.buf[..n].chunks_exact(3).map(|b| FieldDefinition {
                 num: b[0],
                 size: b[1],
                 base_type: FitBaseType(b[2]),
             }));
 
         if mesg_def.header & Message::DEV_DATA_MASK == Message::DEV_DATA_MASK {
-            self.read_exact_inc(reader, &mut arr[..1])?;
+            self.read_exact_inc(reader, 1)?;
 
-            let n = arr[0] as usize * 3;
-            self.read_exact_inc(reader, &mut arr[..n])?;
+            let n = self.buf[0] as usize * 3;
+            self.read_exact_inc(reader, n)?;
 
             mesg_def.developer_field_definitions.reserve_exact(255);
 
             mesg_def
                 .developer_field_definitions
-                .extend(arr[..n].chunks_exact(3).map(|b| DeveloperFieldDefinition {
-                    num: b[0],
-                    size: b[1],
-                    developer_data_index: b[2],
-                }));
+                .extend(
+                    self.buf[..n]
+                        .chunks_exact(3)
+                        .map(|b| DeveloperFieldDefinition {
+                            num: b[0],
+                            size: b[1],
+                            developer_data_index: b[2],
+                        }),
+                );
         }
 
         Ok(())
@@ -395,11 +397,9 @@ impl Decoder {
     where
         R: Read,
     {
-        let mut arr = [0u8; 255];
-
         for field_def in &mesg_def.field_definitions {
-            let mut buf = &mut arr[..field_def.size as usize];
-            self.read_exact_inc(reader, buf)?;
+            self.read_exact_inc(reader, field_def.size as usize)?;
+            let mut buf = &self.buf[..field_def.size as usize];
 
             let num = field_def.num;
             let base_type: FitBaseType;
@@ -430,7 +430,7 @@ impl Decoder {
 
             if field_def.size < base_type.size() {
                 buf = slice_buffer_to_match_type_size(
-                    &mut arr,
+                    &mut self.buf,
                     mesg_def.arch,
                     field_def.size as usize,
                     base_type.size() as usize,
@@ -537,11 +537,9 @@ impl Decoder {
     where
         R: Read,
     {
-        let mut arr = [0u8; 255];
-
         for dev_field_def in &mesg_def.developer_field_definitions {
-            let mut buf = &mut arr[..dev_field_def.size as usize];
-            self.read_exact_inc(reader, buf)?;
+            self.read_exact_inc(reader, dev_field_def.size as usize)?;
+            let mut buf = &self.buf[..dev_field_def.size as usize];
 
             let field_desc = match self.field_descriptions.iter().find(|v| {
                 v.developer_data_index == dev_field_def.developer_data_index
@@ -554,7 +552,7 @@ impl Decoder {
             let base_type = field_desc.fit_base_type_id;
             if dev_field_def.size < base_type.size() {
                 buf = slice_buffer_to_match_type_size(
-                    &mut arr,
+                    &mut self.buf,
                     mesg_def.arch,
                     dev_field_def.size as usize,
                     base_type.size() as usize,
@@ -632,18 +630,18 @@ fn local_mesg_num_from_mesg_header(header: u8) -> usize {
 }
 
 fn slice_buffer_to_match_type_size(
-    arr: &mut [u8; 255],
+    arr: &mut [u8; 765],
     arch: u8,
     current_len: usize,
     target_len: usize,
-) -> &mut [u8] {
+) -> &[u8] {
     if arch == 0 {
         arr[current_len..target_len].fill(0);
-        &mut arr[..target_len]
+        &arr[..target_len]
     } else {
         arr.copy_within(..current_len, target_len - current_len);
         arr[..target_len - current_len].fill(0);
-        &mut arr[..target_len]
+        &arr[..target_len]
     }
 }
 
@@ -743,6 +741,7 @@ impl Builder {
     /// Build Decoder based on given options (if any).
     pub const fn build(&self) -> Decoder {
         Decoder {
+            buf: [0u8; 765],
             cur: 0,
             crc16: Crc16::new(),
             mesg_definitions: [const {
@@ -806,7 +805,6 @@ pub struct Stream<'a, R> {
 impl<'a, R: Read> Stream<'a, R> {
     /// Discard this current sequence and make `Stream` pointing to the next sequence.
     pub fn discard(&mut self) -> Result<(), Error<R::Error>> {
-        let mut arr = [0u8; 256];
         loop {
             match self.state {
                 State::FileHeader => {
@@ -824,15 +822,16 @@ impl<'a, R: Read> Stream<'a, R> {
                 }
                 State::Message => {
                     while self.decoder.cur < self.file_header.data_size {
+                        let buf = &mut self.decoder.buf[..256];
                         let remaining = self.file_header.data_size - self.decoder.cur;
-                        let n = (remaining as usize).min(arr.len());
-                        self.reader.read_exact(&mut arr[..n])?;
+                        let n = (remaining as usize).min(buf.len());
+                        self.reader.read_exact(&mut buf[..n])?;
                         self.decoder.cur += n as u32;
                     }
                     self.state = State::Crc;
                 }
                 State::Crc => {
-                    self.reader.read_exact(&mut arr[..2])?;
+                    self.reader.read_exact(&mut self.decoder.buf[..2])?;
                     self.state = State::FileHeader;
                     break;
                 }
@@ -876,12 +875,11 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
                 Some(Ok(Event::FileHeader(&self.file_header)))
             }
             State::Message => {
-                let mut arr = [0u8; 1];
-                if let Err(err) = self.decoder.read_exact_inc(&mut self.reader, &mut arr) {
+                if let Err(err) = self.decoder.read_exact_inc(&mut self.reader, 1) {
                     return Some(Err(err));
                 }
 
-                let header = arr[0];
+                let header = self.decoder.buf[0];
 
                 if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
                     let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
