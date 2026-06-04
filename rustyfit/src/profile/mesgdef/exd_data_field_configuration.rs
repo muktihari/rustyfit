@@ -84,6 +84,15 @@ impl ExdDataFieldConfiguration {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.screen_index != u8::MAX) as usize
+            + (self.concept_field != u8::MAX) as usize
+            + (self.field_id != u8::MAX) as usize
+            + (self.concept_count != u8::MAX) as usize
+            + (self.display_type != typedef::ExdDisplayType(u8::MAX)) as usize
+            + (self.title != [const { String::new() }; 32]) as usize
+    }
 }
 
 impl Default for ExdDataFieldConfiguration {
@@ -95,127 +104,109 @@ impl Default for ExdDataFieldConfiguration {
 impl From<&Message> for ExdDataFieldConfiguration {
     /// from creates new ExdDataFieldConfiguration struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 6];
-        let mut state = [0u8; 1];
-
         const KNOWN_NUMS: [u64; 4] = [63, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                0 => v.screen_index = field.value.as_u8(),
+                1 => v.concept_field = field.value.as_u8(),
+                2 => v.field_id = field.value.as_u8(),
+                3 => v.concept_count = field.value.as_u8(),
+                4 => v.display_type = typedef::ExdDisplayType(field.value.as_u8()),
+                5 => {
+                    v.title = match &field.value {
+                        Value::VecString(v) => {
+                            let mut arr = [const { String::new() }; 32];
+                            for (i, x) in v.iter().take(32).enumerate() {
+                                arr[i] = x.to_owned();
+                            }
+                            arr
+                        }
+                        _ => [const { String::new() }; 32],
+                    }
+                }
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 4 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            screen_index: vals[0].as_u8(),
-            concept_field: vals[1].as_u8(),
-            field_id: vals[2].as_u8(),
-            concept_count: vals[3].as_u8(),
-            display_type: typedef::ExdDisplayType(vals[4].as_u8()),
-            title: match &vals[5] {
-                Value::VecString(v) => {
-                    let mut arr = [const { String::new() }; 32];
-                    for (i, x) in v.iter().take(32).enumerate() {
-                        arr[i] = x.to_owned();
-                    }
-                    arr
-                }
-                _ => [const { String::new() }; 32],
-            },
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ExdDataFieldConfiguration> for Message {
     fn from(m: ExdDataFieldConfiguration) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.screen_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.concept_field != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.concept_field),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.field_id != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_id),
-                is_expanded: is_expanded(&state, 2),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 2),
+            });
+        };
         if m.concept_count != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.concept_count),
-                is_expanded: is_expanded(&state, 3),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 3),
+            });
+        };
         if m.display_type != typedef::ExdDisplayType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::EXD_DISPLAY_TYPE,
                 value: Value::Uint8(m.display_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.title != [const { String::new() }; 32] {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(Vec::from(&m.title)),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::EXD_DATA_FIELD_CONFIGURATION,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

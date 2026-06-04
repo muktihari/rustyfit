@@ -48,6 +48,14 @@ impl ZonesTarget {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.max_heart_rate != u8::MAX) as usize
+            + (self.threshold_heart_rate != u8::MAX) as usize
+            + (self.functional_threshold_power != u16::MAX) as usize
+            + (self.hr_calc_type != typedef::HrZoneCalc(u8::MAX)) as usize
+            + (self.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX)) as usize
+    }
 }
 
 impl Default for ZonesTarget {
@@ -59,102 +67,83 @@ impl Default for ZonesTarget {
 impl From<&Message> for ZonesTarget {
     /// from creates new ZonesTarget struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 8];
-
         const KNOWN_NUMS: [u64; 4] = [174, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                1 => v.max_heart_rate = field.value.as_u8(),
+                2 => v.threshold_heart_rate = field.value.as_u8(),
+                3 => v.functional_threshold_power = field.value.as_u16(),
+                5 => v.hr_calc_type = typedef::HrZoneCalc(field.value.as_u8()),
+                7 => v.pwr_calc_type = typedef::PwrZoneCalc(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            max_heart_rate: vals[1].as_u8(),
-            threshold_heart_rate: vals[2].as_u8(),
-            functional_threshold_power: vals[3].as_u16(),
-            hr_calc_type: typedef::HrZoneCalc(vals[5].as_u8()),
-            pwr_calc_type: typedef::PwrZoneCalc(vals[7].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ZonesTarget> for Message {
     fn from(m: ZonesTarget) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 5];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.max_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.threshold_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.threshold_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.functional_threshold_power != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.functional_threshold_power),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hr_calc_type != typedef::HrZoneCalc(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::HR_ZONE_CALC,
                 value: Value::Uint8(m.hr_calc_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::PWR_ZONE_CALC,
                 value: Value::Uint8(m.pwr_calc_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::ZONES_TARGET,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

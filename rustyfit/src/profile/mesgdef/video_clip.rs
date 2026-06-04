@@ -58,6 +58,16 @@ impl VideoClip {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.clip_number != u16::MAX) as usize
+            + (self.start_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.start_timestamp_ms != u16::MAX) as usize
+            + (self.end_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.end_timestamp_ms != u16::MAX) as usize
+            + (self.clip_start != u32::MAX) as usize
+            + (self.clip_end != u32::MAX) as usize
+    }
 }
 
 impl Default for VideoClip {
@@ -69,122 +79,101 @@ impl Default for VideoClip {
 impl From<&Message> for VideoClip {
     /// from creates new VideoClip struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 8];
-
         const KNOWN_NUMS: [u64; 4] = [223, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.clip_number = field.value.as_u16(),
+                1 => v.start_timestamp = typedef::DateTime(field.value.as_u32()),
+                2 => v.start_timestamp_ms = field.value.as_u16(),
+                3 => v.end_timestamp = typedef::DateTime(field.value.as_u32()),
+                4 => v.end_timestamp_ms = field.value.as_u16(),
+                6 => v.clip_start = field.value.as_u32(),
+                7 => v.clip_end = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            clip_number: vals[0].as_u16(),
-            start_timestamp: typedef::DateTime(vals[1].as_u32()),
-            start_timestamp_ms: vals[2].as_u16(),
-            end_timestamp: typedef::DateTime(vals[3].as_u32()),
-            end_timestamp_ms: vals[4].as_u16(),
-            clip_start: vals[6].as_u32(),
-            clip_end: vals[7].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<VideoClip> for Message {
     fn from(m: VideoClip) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 7];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.clip_number != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.clip_number),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.end_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.end_timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.clip_start != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.clip_start),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.clip_end != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.clip_end),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::VIDEO_CLIP,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

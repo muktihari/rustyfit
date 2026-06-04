@@ -266,6 +266,21 @@ impl AviationAttitude {
         }
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.timestamp_ms != u16::MAX) as usize
+            + (!self.system_time.is_empty()) as usize
+            + (!self.pitch.is_empty()) as usize
+            + (!self.roll.is_empty()) as usize
+            + (!self.accel_lateral.is_empty()) as usize
+            + (!self.accel_normal.is_empty()) as usize
+            + (!self.turn_rate.is_empty()) as usize
+            + (!self.stage.is_empty()) as usize
+            + (!self.attitude_stage_complete.is_empty()) as usize
+            + (!self.track.is_empty()) as usize
+            + (!self.validity.is_empty()) as usize
+    }
 }
 
 impl Default for AviationAttitude {
@@ -277,142 +292,127 @@ impl Default for AviationAttitude {
 impl From<&Message> for AviationAttitude {
     /// from creates new AviationAttitude struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [2047, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.timestamp_ms = field.value.as_u16(),
+                1 => v.system_time = field.value.to_vec_u32(),
+                2 => v.pitch = field.value.to_vec_i16(),
+                3 => v.roll = field.value.to_vec_i16(),
+                4 => v.accel_lateral = field.value.to_vec_i16(),
+                5 => v.accel_normal = field.value.to_vec_i16(),
+                6 => v.turn_rate = field.value.to_vec_i16(),
+                7 => {
+                    v.stage = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::AttitudeStage(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                8 => v.attitude_stage_complete = field.value.to_vec_u8(),
+                9 => v.track = field.value.to_vec_u16(),
+                10 => {
+                    v.validity = match &field.value {
+                        Value::VecUint16(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::AttitudeValidity(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            timestamp_ms: vals[0].as_u16(),
-            system_time: vals[1].to_vec_u32(),
-            pitch: vals[2].to_vec_i16(),
-            roll: vals[3].to_vec_i16(),
-            accel_lateral: vals[4].to_vec_i16(),
-            accel_normal: vals[5].to_vec_i16(),
-            turn_rate: vals[6].to_vec_i16(),
-            stage: match &vals[7] {
-                Value::VecUint8(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::AttitudeStage(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            attitude_stage_complete: vals[8].to_vec_u8(),
-            track: vals[9].to_vec_u16(),
-            validity: match &vals[10] {
-                Value::VecUint16(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::AttitudeValidity(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<AviationAttitude> for Message {
     fn from(m: AviationAttitude) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 12];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.system_time.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.system_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.pitch.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.pitch),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.roll.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.roll),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.accel_lateral.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_lateral),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.accel_normal.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.accel_normal),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.turn_rate.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.turn_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.stage.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::ATTITUDE_STAGE,
                 value: Value::VecUint8({
@@ -420,29 +420,26 @@ impl From<AviationAttitude> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.attitude_stage_complete.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.attitude_stage_complete),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.track.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.track),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.validity.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::ATTITUDE_VALIDITY,
                 value: Value::VecUint16({
@@ -450,19 +447,15 @@ impl From<AviationAttitude> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::AVIATION_ATTITUDE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

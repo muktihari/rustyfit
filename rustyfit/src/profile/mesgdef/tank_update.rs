@@ -62,6 +62,12 @@ impl TankUpdate {
         self.pressure = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.sensor != typedef::AntChannelId(u32::MIN)) as usize
+            + (self.pressure != u16::MAX) as usize
+    }
 }
 
 impl Default for TankUpdate {
@@ -73,82 +79,65 @@ impl Default for TankUpdate {
 impl From<&Message> for TankUpdate {
     /// from creates new TankUpdate struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [3, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.sensor = typedef::AntChannelId(field.value.as_u32z()),
+                1 => v.pressure = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            sensor: typedef::AntChannelId(vals[0].as_u32z()),
-            pressure: vals[1].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<TankUpdate> for Message {
     fn from(m: TankUpdate) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 3];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sensor != typedef::AntChannelId(u32::MIN) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::ANT_CHANNEL_ID,
                 value: Value::Uint32(m.sensor.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pressure != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pressure),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::TANK_UPDATE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -291,6 +291,41 @@ impl BikeProfile {
         self.crank_length = unscaled as u8;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (!self.name.is_empty()) as usize
+            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.odometer != u32::MAX) as usize
+            + (self.bike_spd_ant_id != u16::MIN) as usize
+            + (self.bike_cad_ant_id != u16::MIN) as usize
+            + (self.bike_spdcad_ant_id != u16::MIN) as usize
+            + (self.bike_power_ant_id != u16::MIN) as usize
+            + (self.custom_wheelsize != u16::MAX) as usize
+            + (self.auto_wheelsize != u16::MAX) as usize
+            + (self.bike_weight != u16::MAX) as usize
+            + (self.power_cal_factor != u16::MAX) as usize
+            + (self.auto_wheel_cal != typedef::Bool(u8::MAX)) as usize
+            + (self.auto_power_zero != typedef::Bool(u8::MAX)) as usize
+            + (self.id != u8::MAX) as usize
+            + (self.spd_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.cad_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.spdcad_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.power_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.crank_length != u8::MAX) as usize
+            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.bike_spd_ant_id_trans_type != u8::MIN) as usize
+            + (self.bike_cad_ant_id_trans_type != u8::MIN) as usize
+            + (self.bike_spdcad_ant_id_trans_type != u8::MIN) as usize
+            + (self.bike_power_ant_id_trans_type != u8::MIN) as usize
+            + (self.odometer_rollover != u8::MAX) as usize
+            + (self.front_gear_num != u8::MIN) as usize
+            + (!self.front_gear.is_empty()) as usize
+            + (self.rear_gear_num != u8::MIN) as usize
+            + (!self.rear_gear.is_empty()) as usize
+            + (self.shimano_di2_enabled != typedef::Bool(u8::MAX)) as usize
+    }
 }
 
 impl Default for BikeProfile {
@@ -302,372 +337,326 @@ impl Default for BikeProfile {
 impl From<&Message> for BikeProfile {
     /// from creates new BikeProfile struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [21852827156479, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.name = field.value.as_str().to_owned(),
+                1 => v.sport = typedef::Sport(field.value.as_u8()),
+                2 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
+                3 => v.odometer = field.value.as_u32(),
+                4 => v.bike_spd_ant_id = field.value.as_u16z(),
+                5 => v.bike_cad_ant_id = field.value.as_u16z(),
+                6 => v.bike_spdcad_ant_id = field.value.as_u16z(),
+                7 => v.bike_power_ant_id = field.value.as_u16z(),
+                8 => v.custom_wheelsize = field.value.as_u16(),
+                9 => v.auto_wheelsize = field.value.as_u16(),
+                10 => v.bike_weight = field.value.as_u16(),
+                11 => v.power_cal_factor = field.value.as_u16(),
+                12 => v.auto_wheel_cal = typedef::Bool(field.value.as_u8()),
+                13 => v.auto_power_zero = typedef::Bool(field.value.as_u8()),
+                14 => v.id = field.value.as_u8(),
+                15 => v.spd_enabled = typedef::Bool(field.value.as_u8()),
+                16 => v.cad_enabled = typedef::Bool(field.value.as_u8()),
+                17 => v.spdcad_enabled = typedef::Bool(field.value.as_u8()),
+                18 => v.power_enabled = typedef::Bool(field.value.as_u8()),
+                19 => v.crank_length = field.value.as_u8(),
+                20 => v.enabled = typedef::Bool(field.value.as_u8()),
+                21 => v.bike_spd_ant_id_trans_type = field.value.as_u8z(),
+                22 => v.bike_cad_ant_id_trans_type = field.value.as_u8z(),
+                23 => v.bike_spdcad_ant_id_trans_type = field.value.as_u8z(),
+                24 => v.bike_power_ant_id_trans_type = field.value.as_u8z(),
+                37 => v.odometer_rollover = field.value.as_u8(),
+                38 => v.front_gear_num = field.value.as_u8z(),
+                39 => v.front_gear = field.value.to_vec_u8(),
+                40 => v.rear_gear_num = field.value.as_u8z(),
+                41 => v.rear_gear = field.value.to_vec_u8(),
+                44 => v.shimano_di2_enabled = typedef::Bool(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            name: vals[0].as_str().to_owned(),
-            sport: typedef::Sport(vals[1].as_u8()),
-            sub_sport: typedef::SubSport(vals[2].as_u8()),
-            odometer: vals[3].as_u32(),
-            bike_spd_ant_id: vals[4].as_u16z(),
-            bike_cad_ant_id: vals[5].as_u16z(),
-            bike_spdcad_ant_id: vals[6].as_u16z(),
-            bike_power_ant_id: vals[7].as_u16z(),
-            custom_wheelsize: vals[8].as_u16(),
-            auto_wheelsize: vals[9].as_u16(),
-            bike_weight: vals[10].as_u16(),
-            power_cal_factor: vals[11].as_u16(),
-            auto_wheel_cal: typedef::Bool(vals[12].as_u8()),
-            auto_power_zero: typedef::Bool(vals[13].as_u8()),
-            id: vals[14].as_u8(),
-            spd_enabled: typedef::Bool(vals[15].as_u8()),
-            cad_enabled: typedef::Bool(vals[16].as_u8()),
-            spdcad_enabled: typedef::Bool(vals[17].as_u8()),
-            power_enabled: typedef::Bool(vals[18].as_u8()),
-            crank_length: vals[19].as_u8(),
-            enabled: typedef::Bool(vals[20].as_u8()),
-            bike_spd_ant_id_trans_type: vals[21].as_u8z(),
-            bike_cad_ant_id_trans_type: vals[22].as_u8z(),
-            bike_spdcad_ant_id_trans_type: vals[23].as_u8z(),
-            bike_power_ant_id_trans_type: vals[24].as_u8z(),
-            odometer_rollover: vals[37].as_u8(),
-            front_gear_num: vals[38].as_u8z(),
-            front_gear: vals[39].to_vec_u8(),
-            rear_gear_num: vals[40].as_u8z(),
-            rear_gear: vals[41].to_vec_u8(),
-            shimano_di2_enabled: typedef::Bool(vals[44].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<BikeProfile> for Message {
     fn from(m: BikeProfile) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 32];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport != typedef::Sport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sub_sport != typedef::SubSport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.odometer != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.odometer),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_spd_ant_id != u16::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_spd_ant_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_cad_ant_id != u16::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_cad_ant_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_spdcad_ant_id != u16::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_spdcad_ant_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_power_ant_id != u16::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.bike_power_ant_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.custom_wheelsize != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.custom_wheelsize),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.auto_wheelsize != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.auto_wheelsize),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_weight != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.bike_weight),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.power_cal_factor != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.power_cal_factor),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.auto_wheel_cal != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.auto_wheel_cal.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.auto_power_zero != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.auto_power_zero.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.id != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.spd_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.spd_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cad_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.cad_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.spdcad_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.spdcad_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.power_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.power_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.crank_length != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.crank_length),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 20,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_spd_ant_id_trans_type != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_spd_ant_id_trans_type),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_cad_ant_id_trans_type != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_cad_ant_id_trans_type),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_spdcad_ant_id_trans_type != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_spdcad_ant_id_trans_type),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bike_power_ant_id_trans_type != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.bike_power_ant_id_trans_type),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.odometer_rollover != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 37,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.odometer_rollover),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.front_gear_num != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 38,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.front_gear_num),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.front_gear.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 39,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.front_gear),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.rear_gear_num != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 40,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.rear_gear_num),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.rear_gear.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 41,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.rear_gear),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.shimano_di2_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 44,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.shimano_di2_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::BIKE_PROFILE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

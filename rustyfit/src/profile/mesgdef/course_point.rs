@@ -95,6 +95,17 @@ impl CoursePoint {
         self.distance = unscaled as u32;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.position_lat != i32::MAX) as usize
+            + (self.position_long != i32::MAX) as usize
+            + (self.distance != u32::MAX) as usize
+            + (self.r#type != typedef::CoursePoint(u8::MAX)) as usize
+            + (!self.name.is_empty()) as usize
+            + (self.favorite != typedef::Bool(u8::MAX)) as usize
+    }
 }
 
 impl Default for CoursePoint {
@@ -106,132 +117,110 @@ impl Default for CoursePoint {
 impl From<&Message> for CoursePoint {
     /// from creates new CoursePoint struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [382, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                1 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                2 => v.position_lat = field.value.as_i32(),
+                3 => v.position_long = field.value.as_i32(),
+                4 => v.distance = field.value.as_u32(),
+                5 => v.r#type = typedef::CoursePoint(field.value.as_u8()),
+                6 => v.name = field.value.as_str().to_owned(),
+                8 => v.favorite = typedef::Bool(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            timestamp: typedef::DateTime(vals[1].as_u32()),
-            position_lat: vals[2].as_i32(),
-            position_long: vals[3].as_i32(),
-            distance: vals[4].as_u32(),
-            r#type: typedef::CoursePoint(vals[5].as_u8()),
-            name: vals[6].as_str().to_owned(),
-            favorite: typedef::Bool(vals[8].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<CoursePoint> for Message {
     fn from(m: CoursePoint) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 8];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_lat != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_long != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.r#type != typedef::CoursePoint(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::COURSE_POINT,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.favorite != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.favorite.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::COURSE_POINT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

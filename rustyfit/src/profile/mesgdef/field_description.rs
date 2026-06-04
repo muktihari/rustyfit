@@ -83,6 +83,23 @@ impl FieldDescription {
             unknown_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.developer_data_index != u8::MAX) as usize
+            + (self.field_definition_number != u8::MAX) as usize
+            + (self.fit_base_type_id != typedef::FitBaseType(u8::MAX)) as usize
+            + (!self.field_name.is_empty()) as usize
+            + (self.array != u8::MAX) as usize
+            + (!self.components.is_empty()) as usize
+            + (self.scale != u8::MAX) as usize
+            + (self.offset != i8::MAX) as usize
+            + (!self.units.is_empty()) as usize
+            + (!self.bits.is_empty()) as usize
+            + (!self.accumulate.is_empty()) as usize
+            + (self.fit_base_unit_id != typedef::FitBaseUnit(u16::MAX)) as usize
+            + (self.native_mesg_num != typedef::MesgNum(u16::MAX)) as usize
+            + (self.native_field_num != u8::MAX) as usize
+    }
 }
 
 impl Default for FieldDescription {
@@ -94,191 +111,163 @@ impl Default for FieldDescription {
 impl From<&Message> for FieldDescription {
     /// from creates new FieldDescription struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 16];
-
         const KNOWN_NUMS: [u64; 4] = [59391, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.developer_data_index = field.value.as_u8(),
+                1 => v.field_definition_number = field.value.as_u8(),
+                2 => v.fit_base_type_id = typedef::FitBaseType(field.value.as_u8()),
+                3 => v.field_name = field.value.to_vec_string(),
+                4 => v.array = field.value.as_u8(),
+                5 => v.components = field.value.as_str().to_owned(),
+                6 => v.scale = field.value.as_u8(),
+                7 => v.offset = field.value.as_i8(),
+                8 => v.units = field.value.to_vec_string(),
+                9 => v.bits = field.value.as_str().to_owned(),
+                10 => v.accumulate = field.value.as_str().to_owned(),
+                13 => v.fit_base_unit_id = typedef::FitBaseUnit(field.value.as_u16()),
+                14 => v.native_mesg_num = typedef::MesgNum(field.value.as_u16()),
+                15 => v.native_field_num = field.value.as_u8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            developer_data_index: vals[0].as_u8(),
-            field_definition_number: vals[1].as_u8(),
-            fit_base_type_id: typedef::FitBaseType(vals[2].as_u8()),
-            field_name: vals[3].to_vec_string(),
-            array: vals[4].as_u8(),
-            components: vals[5].as_str().to_owned(),
-            scale: vals[6].as_u8(),
-            offset: vals[7].as_i8(),
-            units: vals[8].to_vec_string(),
-            bits: vals[9].as_str().to_owned(),
-            accumulate: vals[10].as_str().to_owned(),
-            fit_base_unit_id: typedef::FitBaseUnit(vals[13].as_u16()),
-            native_mesg_num: typedef::MesgNum(vals[14].as_u16()),
-            native_field_num: vals[15].as_u8(),
-            unknown_fields,
-        }
+        v
     }
 }
 
 impl From<FieldDescription> for Message {
     fn from(m: FieldDescription) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 14];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.developer_data_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.developer_data_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.field_definition_number != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_definition_number),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.fit_base_type_id != typedef::FitBaseType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::FIT_BASE_TYPE,
                 value: Value::Uint8(m.fit_base_type_id.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.field_name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.field_name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.array != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.array),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.components.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.components),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.scale != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.scale),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.offset != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.units.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.units),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.bits.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.bits),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.accumulate.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.accumulate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.fit_base_unit_id != typedef::FitBaseUnit(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::FIT_BASE_UNIT,
                 value: Value::Uint16(m.fit_base_unit_id.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.native_mesg_num != typedef::MesgNum(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.native_mesg_num.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.native_field_num != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.native_field_num),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::FIELD_DESCRIPTION,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: Vec::new(),
         }
     }

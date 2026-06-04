@@ -251,6 +251,31 @@ impl Length {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.event != typedef::Event(u8::MAX)) as usize
+            + (self.event_type != typedef::EventType(u8::MAX)) as usize
+            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.total_elapsed_time != u32::MAX) as usize
+            + (self.total_timer_time != u32::MAX) as usize
+            + (self.total_strokes != u16::MAX) as usize
+            + (self.avg_speed != u16::MAX) as usize
+            + (self.swim_stroke != typedef::SwimStroke(u8::MAX)) as usize
+            + (self.avg_swimming_cadence != u8::MAX) as usize
+            + (self.event_group != u8::MAX) as usize
+            + (self.total_calories != u16::MAX) as usize
+            + (self.length_type != typedef::LengthType(u8::MAX)) as usize
+            + (self.player_score != u16::MAX) as usize
+            + (self.opponent_score != u16::MAX) as usize
+            + (!self.stroke_count.is_empty()) as usize
+            + (!self.zone_count.is_empty()) as usize
+            + (self.enhanced_avg_respiration_rate != u16::MAX) as usize
+            + (self.enhanced_max_respiration_rate != u16::MAX) as usize
+            + (self.avg_respiration_rate != u8::MAX) as usize
+            + (self.max_respiration_rate != u8::MAX) as usize
+    }
 }
 
 impl Default for Length {
@@ -262,278 +287,242 @@ impl Default for Length {
 impl From<&Message> for Length {
     /// from creates new Length struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-        let mut state = [0u8; 3];
-
         const KNOWN_NUMS: [u64; 4] = [66854655, 0, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.event = typedef::Event(field.value.as_u8()),
+                1 => v.event_type = typedef::EventType(field.value.as_u8()),
+                2 => v.start_time = typedef::DateTime(field.value.as_u32()),
+                3 => v.total_elapsed_time = field.value.as_u32(),
+                4 => v.total_timer_time = field.value.as_u32(),
+                5 => v.total_strokes = field.value.as_u16(),
+                6 => v.avg_speed = field.value.as_u16(),
+                7 => v.swim_stroke = typedef::SwimStroke(field.value.as_u8()),
+                9 => v.avg_swimming_cadence = field.value.as_u8(),
+                10 => v.event_group = field.value.as_u8(),
+                11 => v.total_calories = field.value.as_u16(),
+                12 => v.length_type = typedef::LengthType(field.value.as_u8()),
+                18 => v.player_score = field.value.as_u16(),
+                19 => v.opponent_score = field.value.as_u16(),
+                20 => v.stroke_count = field.value.to_vec_u16(),
+                21 => v.zone_count = field.value.to_vec_u16(),
+                22 => v.enhanced_avg_respiration_rate = field.value.as_u16(),
+                23 => v.enhanced_max_respiration_rate = field.value.as_u16(),
+                24 => v.avg_respiration_rate = field.value.as_u8(),
+                25 => v.max_respiration_rate = field.value.as_u8(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 24 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            event: typedef::Event(vals[0].as_u8()),
-            event_type: typedef::EventType(vals[1].as_u8()),
-            start_time: typedef::DateTime(vals[2].as_u32()),
-            total_elapsed_time: vals[3].as_u32(),
-            total_timer_time: vals[4].as_u32(),
-            total_strokes: vals[5].as_u16(),
-            avg_speed: vals[6].as_u16(),
-            swim_stroke: typedef::SwimStroke(vals[7].as_u8()),
-            avg_swimming_cadence: vals[9].as_u8(),
-            event_group: vals[10].as_u8(),
-            total_calories: vals[11].as_u16(),
-            length_type: typedef::LengthType(vals[12].as_u8()),
-            player_score: vals[18].as_u16(),
-            opponent_score: vals[19].as_u16(),
-            stroke_count: vals[20].to_vec_u16(),
-            zone_count: vals[21].to_vec_u16(),
-            enhanced_avg_respiration_rate: vals[22].as_u16(),
-            enhanced_max_respiration_rate: vals[23].as_u16(),
-            avg_respiration_rate: vals[24].as_u8(),
-            max_respiration_rate: vals[25].as_u8(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Length> for Message {
     fn from(m: Length) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 22];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.event != typedef::Event(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EVENT,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.event_type != typedef::EventType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::EVENT_TYPE,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_elapsed_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_elapsed_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_timer_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_strokes != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_strokes),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_speed != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.swim_stroke != typedef::SwimStroke(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SWIM_STROKE,
                 value: Value::Uint8(m.swim_stroke.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_swimming_cadence != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_swimming_cadence),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.event_group != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_calories != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.length_type != typedef::LengthType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::LENGTH_TYPE,
                 value: Value::Uint8(m.length_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.player_score != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.player_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.opponent_score != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.stroke_count.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 20,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.stroke_count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.zone_count.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.zone_count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enhanced_avg_respiration_rate != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_avg_respiration_rate),
-                is_expanded: is_expanded(&state, 22),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 22),
+            });
+        };
         if m.enhanced_max_respiration_rate != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_max_respiration_rate),
-                is_expanded: is_expanded(&state, 23),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 23),
+            });
+        };
         if m.avg_respiration_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_respiration_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_respiration_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_respiration_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::LENGTH,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -36,6 +36,10 @@ impl FileCreator {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.software_version != u16::MAX) as usize + (self.hardware_version != u8::MAX) as usize
+    }
 }
 
 impl Default for FileCreator {
@@ -47,72 +51,56 @@ impl Default for FileCreator {
 impl From<&Message> for FileCreator {
     /// from creates new FileCreator struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 2];
-
         const KNOWN_NUMS: [u64; 4] = [3, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.software_version = field.value.as_u16(),
+                1 => v.hardware_version = field.value.as_u8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            software_version: vals[0].as_u16(),
-            hardware_version: vals[1].as_u8(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<FileCreator> for Message {
     fn from(m: FileCreator) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 2];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.software_version != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.software_version),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hardware_version != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.hardware_version),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::FILE_CREATOR,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

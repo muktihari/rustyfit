@@ -47,6 +47,13 @@ impl Spo2Data {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.reading_spo2 != u8::MAX) as usize
+            + (self.reading_confidence != u8::MAX) as usize
+            + (self.mode != typedef::Spo2MeasurementType(u8::MAX)) as usize
+    }
 }
 
 impl Default for Spo2Data {
@@ -58,92 +65,74 @@ impl Default for Spo2Data {
 impl From<&Message> for Spo2Data {
     /// from creates new Spo2Data struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [7, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.reading_spo2 = field.value.as_u8(),
+                1 => v.reading_confidence = field.value.as_u8(),
+                2 => v.mode = typedef::Spo2MeasurementType(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            reading_spo2: vals[0].as_u8(),
-            reading_confidence: vals[1].as_u8(),
-            mode: typedef::Spo2MeasurementType(vals[2].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Spo2Data> for Message {
     fn from(m: Spo2Data) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 4];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.reading_spo2 != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.reading_spo2),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.reading_confidence != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.reading_confidence),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.mode != typedef::Spo2MeasurementType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SPO2_MEASUREMENT_TYPE,
                 value: Value::Uint8(m.mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SPO2_DATA,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

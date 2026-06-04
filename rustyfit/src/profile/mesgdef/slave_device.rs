@@ -36,6 +36,11 @@ impl SlaveDevice {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.product != u16::MAX) as usize
+    }
 }
 
 impl Default for SlaveDevice {
@@ -47,72 +52,56 @@ impl Default for SlaveDevice {
 impl From<&Message> for SlaveDevice {
     /// from creates new SlaveDevice struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 2];
-
         const KNOWN_NUMS: [u64; 4] = [3, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.manufacturer = typedef::Manufacturer(field.value.as_u16()),
+                1 => v.product = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            manufacturer: typedef::Manufacturer(vals[0].as_u16()),
-            product: vals[1].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SlaveDevice> for Message {
     fn from(m: SlaveDevice) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 2];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.product != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SLAVE_DEVICE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

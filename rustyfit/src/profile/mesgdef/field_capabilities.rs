@@ -48,6 +48,14 @@ impl FieldCapabilities {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.file != typedef::File(u8::MAX)) as usize
+            + (self.mesg_num != typedef::MesgNum(u16::MAX)) as usize
+            + (self.field_num != u8::MAX) as usize
+            + (self.count != u16::MAX) as usize
+    }
 }
 
 impl Default for FieldCapabilities {
@@ -59,102 +67,83 @@ impl Default for FieldCapabilities {
 impl From<&Message> for FieldCapabilities {
     /// from creates new FieldCapabilities struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [15, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.file = typedef::File(field.value.as_u8()),
+                1 => v.mesg_num = typedef::MesgNum(field.value.as_u16()),
+                2 => v.field_num = field.value.as_u8(),
+                3 => v.count = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            file: typedef::File(vals[0].as_u8()),
-            mesg_num: typedef::MesgNum(vals[1].as_u16()),
-            field_num: vals[2].as_u8(),
-            count: vals[3].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<FieldCapabilities> for Message {
     fn from(m: FieldCapabilities) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 5];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.file != typedef::File(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::FILE,
                 value: Value::Uint8(m.file.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.mesg_num != typedef::MesgNum(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.mesg_num.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.field_num != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_num),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.count != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::FIELD_CAPABILITIES,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

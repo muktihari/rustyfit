@@ -51,6 +51,14 @@ impl SkinTempOvernight {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.local_timestamp != typedef::LocalDateTime(u32::MAX)) as usize
+            + (self.average_deviation != f32::MAX) as usize
+            + (self.average_7_day_deviation != f32::MAX) as usize
+            + (self.nightly_value != f32::MAX) as usize
+    }
 }
 
 impl Default for SkinTempOvernight {
@@ -62,102 +70,83 @@ impl Default for SkinTempOvernight {
 impl From<&Message> for SkinTempOvernight {
     /// from creates new SkinTempOvernight struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [23, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.local_timestamp = typedef::LocalDateTime(field.value.as_u32()),
+                1 => v.average_deviation = field.value.as_f32(),
+                2 => v.average_7_day_deviation = field.value.as_f32(),
+                4 => v.nightly_value = field.value.as_f32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            local_timestamp: typedef::LocalDateTime(vals[0].as_u32()),
-            average_deviation: vals[1].as_f32(),
-            average_7_day_deviation: vals[2].as_f32(),
-            nightly_value: vals[4].as_f32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SkinTempOvernight> for Message {
     fn from(m: SkinTempOvernight) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 5];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.average_deviation != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.average_deviation),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.average_7_day_deviation != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.average_7_day_deviation),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.nightly_value != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.nightly_value),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SKIN_TEMP_OVERNIGHT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

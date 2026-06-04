@@ -116,6 +116,20 @@ impl Set {
         self.weight = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.duration != u32::MAX) as usize
+            + (self.repetitions != u16::MAX) as usize
+            + (self.weight != u16::MAX) as usize
+            + (self.set_type != typedef::SetType(u8::MAX)) as usize
+            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+            + (!self.category.is_empty()) as usize
+            + (!self.category_subtype.is_empty()) as usize
+            + (self.weight_display_unit != typedef::FitBaseUnit(u16::MAX)) as usize
+            + (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.wkt_step_index != typedef::MessageIndex(u16::MAX)) as usize
+    }
 }
 
 impl Default for Set {
@@ -127,116 +141,101 @@ impl Default for Set {
 impl From<&Message> for Set {
     /// from creates new Set struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [4089, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.duration = field.value.as_u32(),
+                3 => v.repetitions = field.value.as_u16(),
+                4 => v.weight = field.value.as_u16(),
+                5 => v.set_type = typedef::SetType(field.value.as_u8()),
+                6 => v.start_time = typedef::DateTime(field.value.as_u32()),
+                7 => {
+                    v.category = match &field.value {
+                        Value::VecUint16(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::ExerciseCategory(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                8 => v.category_subtype = field.value.to_vec_u16(),
+                9 => v.weight_display_unit = typedef::FitBaseUnit(field.value.as_u16()),
+                10 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                11 => v.wkt_step_index = typedef::MessageIndex(field.value.as_u16()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[254].as_u32()),
-            duration: vals[0].as_u32(),
-            repetitions: vals[3].as_u16(),
-            weight: vals[4].as_u16(),
-            set_type: typedef::SetType(vals[5].as_u8()),
-            start_time: typedef::DateTime(vals[6].as_u32()),
-            category: match &vals[7] {
-                Value::VecUint16(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::ExerciseCategory(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            category_subtype: vals[8].to_vec_u16(),
-            weight_display_unit: typedef::FitBaseUnit(vals[9].as_u16()),
-            message_index: typedef::MessageIndex(vals[10].as_u16()),
-            wkt_step_index: typedef::MessageIndex(vals[11].as_u16()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Set> for Message {
     fn from(m: Set) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 11];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.duration != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.repetitions != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.repetitions),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weight != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.weight),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.set_type != typedef::SetType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SET_TYPE,
                 value: Value::Uint8(m.set_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.category.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
                 value: Value::VecUint16({
@@ -244,55 +243,47 @@ impl From<Set> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.category_subtype.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.category_subtype),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weight_display_unit != typedef::FitBaseUnit(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::FIT_BASE_UNIT,
                 value: Value::Uint16(m.weight_display_unit.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.wkt_step_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.wkt_step_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SET,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

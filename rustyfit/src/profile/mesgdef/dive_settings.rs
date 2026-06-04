@@ -342,6 +342,46 @@ impl DiveSettings {
         self.last_stop_multiple = unscaled as u8;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (!self.name.is_empty()) as usize
+            + (self.model != typedef::TissueModelType(u8::MAX)) as usize
+            + (self.gf_low != u8::MAX) as usize
+            + (self.gf_high != u8::MAX) as usize
+            + (self.water_type != typedef::WaterType(u8::MAX)) as usize
+            + (self.water_density != f32::MAX) as usize
+            + (self.po2_warn != u8::MAX) as usize
+            + (self.po2_critical != u8::MAX) as usize
+            + (self.po2_deco != u8::MAX) as usize
+            + (self.safety_stop_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.bottom_depth != f32::MAX) as usize
+            + (self.bottom_time != u32::MAX) as usize
+            + (self.apnea_countdown_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.apnea_countdown_time != u32::MAX) as usize
+            + (self.backlight_mode != typedef::DiveBacklightMode(u8::MAX)) as usize
+            + (self.backlight_brightness != u8::MAX) as usize
+            + (self.backlight_timeout != typedef::BacklightTimeout(u8::MAX)) as usize
+            + (self.repeat_dive_interval != u16::MAX) as usize
+            + (self.safety_stop_time != u16::MAX) as usize
+            + (self.heart_rate_source_type != typedef::SourceType(u8::MAX)) as usize
+            + (self.heart_rate_source != u8::MAX) as usize
+            + (self.travel_gas != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.ccr_low_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX))
+                as usize
+            + (self.ccr_low_setpoint != u8::MAX) as usize
+            + (self.ccr_low_setpoint_depth != u32::MAX) as usize
+            + (self.ccr_high_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX))
+                as usize
+            + (self.ccr_high_setpoint != u8::MAX) as usize
+            + (self.ccr_high_setpoint_depth != u32::MAX) as usize
+            + (self.gas_consumption_display != typedef::GasConsumptionRateType(u8::MAX)) as usize
+            + (self.up_key_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.dive_sounds != typedef::Tone(u8::MAX)) as usize
+            + (self.last_stop_multiple != u8::MAX) as usize
+            + (self.no_fly_time_mode != typedef::NoFlyTimeMode(u8::MAX)) as usize
+    }
 }
 
 impl Default for DiveSettings {
@@ -353,402 +393,361 @@ impl Default for DiveSettings {
 impl From<&Message> for DiveSettings {
     /// from creates new DiveSettings struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [242397216767, 0, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.name = field.value.as_str().to_owned(),
+                1 => v.model = typedef::TissueModelType(field.value.as_u8()),
+                2 => v.gf_low = field.value.as_u8(),
+                3 => v.gf_high = field.value.as_u8(),
+                4 => v.water_type = typedef::WaterType(field.value.as_u8()),
+                5 => v.water_density = field.value.as_f32(),
+                6 => v.po2_warn = field.value.as_u8(),
+                7 => v.po2_critical = field.value.as_u8(),
+                8 => v.po2_deco = field.value.as_u8(),
+                9 => v.safety_stop_enabled = typedef::Bool(field.value.as_u8()),
+                10 => v.bottom_depth = field.value.as_f32(),
+                11 => v.bottom_time = field.value.as_u32(),
+                12 => v.apnea_countdown_enabled = typedef::Bool(field.value.as_u8()),
+                13 => v.apnea_countdown_time = field.value.as_u32(),
+                14 => v.backlight_mode = typedef::DiveBacklightMode(field.value.as_u8()),
+                15 => v.backlight_brightness = field.value.as_u8(),
+                16 => v.backlight_timeout = typedef::BacklightTimeout(field.value.as_u8()),
+                17 => v.repeat_dive_interval = field.value.as_u16(),
+                18 => v.safety_stop_time = field.value.as_u16(),
+                19 => v.heart_rate_source_type = typedef::SourceType(field.value.as_u8()),
+                20 => v.heart_rate_source = field.value.as_u8(),
+                21 => v.travel_gas = typedef::MessageIndex(field.value.as_u16()),
+                22 => {
+                    v.ccr_low_setpoint_switch_mode =
+                        typedef::CcrSetpointSwitchMode(field.value.as_u8())
+                }
+                23 => v.ccr_low_setpoint = field.value.as_u8(),
+                24 => v.ccr_low_setpoint_depth = field.value.as_u32(),
+                25 => {
+                    v.ccr_high_setpoint_switch_mode =
+                        typedef::CcrSetpointSwitchMode(field.value.as_u8())
+                }
+                26 => v.ccr_high_setpoint = field.value.as_u8(),
+                27 => v.ccr_high_setpoint_depth = field.value.as_u32(),
+                29 => {
+                    v.gas_consumption_display = typedef::GasConsumptionRateType(field.value.as_u8())
+                }
+                30 => v.up_key_enabled = typedef::Bool(field.value.as_u8()),
+                35 => v.dive_sounds = typedef::Tone(field.value.as_u8()),
+                36 => v.last_stop_multiple = field.value.as_u8(),
+                37 => v.no_fly_time_mode = typedef::NoFlyTimeMode(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            name: vals[0].as_str().to_owned(),
-            model: typedef::TissueModelType(vals[1].as_u8()),
-            gf_low: vals[2].as_u8(),
-            gf_high: vals[3].as_u8(),
-            water_type: typedef::WaterType(vals[4].as_u8()),
-            water_density: vals[5].as_f32(),
-            po2_warn: vals[6].as_u8(),
-            po2_critical: vals[7].as_u8(),
-            po2_deco: vals[8].as_u8(),
-            safety_stop_enabled: typedef::Bool(vals[9].as_u8()),
-            bottom_depth: vals[10].as_f32(),
-            bottom_time: vals[11].as_u32(),
-            apnea_countdown_enabled: typedef::Bool(vals[12].as_u8()),
-            apnea_countdown_time: vals[13].as_u32(),
-            backlight_mode: typedef::DiveBacklightMode(vals[14].as_u8()),
-            backlight_brightness: vals[15].as_u8(),
-            backlight_timeout: typedef::BacklightTimeout(vals[16].as_u8()),
-            repeat_dive_interval: vals[17].as_u16(),
-            safety_stop_time: vals[18].as_u16(),
-            heart_rate_source_type: typedef::SourceType(vals[19].as_u8()),
-            heart_rate_source: vals[20].as_u8(),
-            travel_gas: typedef::MessageIndex(vals[21].as_u16()),
-            ccr_low_setpoint_switch_mode: typedef::CcrSetpointSwitchMode(vals[22].as_u8()),
-            ccr_low_setpoint: vals[23].as_u8(),
-            ccr_low_setpoint_depth: vals[24].as_u32(),
-            ccr_high_setpoint_switch_mode: typedef::CcrSetpointSwitchMode(vals[25].as_u8()),
-            ccr_high_setpoint: vals[26].as_u8(),
-            ccr_high_setpoint_depth: vals[27].as_u32(),
-            gas_consumption_display: typedef::GasConsumptionRateType(vals[29].as_u8()),
-            up_key_enabled: typedef::Bool(vals[30].as_u8()),
-            dive_sounds: typedef::Tone(vals[35].as_u8()),
-            last_stop_multiple: vals[36].as_u8(),
-            no_fly_time_mode: typedef::NoFlyTimeMode(vals[37].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<DiveSettings> for Message {
     fn from(m: DiveSettings) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 35];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.model != typedef::TissueModelType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::TISSUE_MODEL_TYPE,
                 value: Value::Uint8(m.model.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.gf_low != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gf_low),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.gf_high != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gf_high),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.water_type != typedef::WaterType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::WATER_TYPE,
                 value: Value::Uint8(m.water_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.water_density != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.water_density),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.po2_warn != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2_warn),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.po2_critical != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2_critical),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.po2_deco != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2_deco),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.safety_stop_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.safety_stop_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bottom_depth != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.bottom_depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bottom_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.bottom_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.apnea_countdown_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.apnea_countdown_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.apnea_countdown_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.apnea_countdown_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.backlight_mode != typedef::DiveBacklightMode(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::DIVE_BACKLIGHT_MODE,
                 value: Value::Uint8(m.backlight_mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.backlight_brightness != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.backlight_brightness),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.backlight_timeout != typedef::BacklightTimeout(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::BACKLIGHT_TIMEOUT,
                 value: Value::Uint8(m.backlight_timeout.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.repeat_dive_interval != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.repeat_dive_interval),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.safety_stop_time != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.safety_stop_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.heart_rate_source_type != typedef::SourceType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::SOURCE_TYPE,
                 value: Value::Uint8(m.heart_rate_source_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.heart_rate_source != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 20,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate_source),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.travel_gas != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.travel_gas.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ccr_low_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
                 value: Value::Uint8(m.ccr_low_setpoint_switch_mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ccr_low_setpoint != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ccr_low_setpoint),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ccr_low_setpoint_depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ccr_low_setpoint_depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ccr_high_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
                 value: Value::Uint8(m.ccr_high_setpoint_switch_mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ccr_high_setpoint != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 26,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ccr_high_setpoint),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ccr_high_setpoint_depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 27,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ccr_high_setpoint_depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.gas_consumption_display != typedef::GasConsumptionRateType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 29,
                 profile_type: ProfileType::GAS_CONSUMPTION_RATE_TYPE,
                 value: Value::Uint8(m.gas_consumption_display.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.up_key_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.up_key_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.dive_sounds != typedef::Tone(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 35,
                 profile_type: ProfileType::TONE,
                 value: Value::Uint8(m.dive_sounds.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.last_stop_multiple != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 36,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.last_stop_multiple),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.no_fly_time_mode != typedef::NoFlyTimeMode(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 37,
                 profile_type: ProfileType::NO_FLY_TIME_MODE,
                 value: Value::Uint8(m.no_fly_time_mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::DIVE_SETTINGS,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -73,6 +73,19 @@ impl NapEvent {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.start_timezone_offset != i16::MAX) as usize
+            + (self.end_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.end_timezone_offset != i16::MAX) as usize
+            + (self.feedback != typedef::NapPeriodFeedback(u8::MAX)) as usize
+            + (self.is_deleted != typedef::Bool(u8::MAX)) as usize
+            + (self.source != typedef::NapSource(u8::MAX)) as usize
+            + (self.update_timestamp != typedef::DateTime(u32::MAX)) as usize
+    }
 }
 
 impl Default for NapEvent {
@@ -84,152 +97,128 @@ impl Default for NapEvent {
 impl From<&Message> for NapEvent {
     /// from creates new NapEvent struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [255, 0, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.start_time = typedef::DateTime(field.value.as_u32()),
+                1 => v.start_timezone_offset = field.value.as_i16(),
+                2 => v.end_time = typedef::DateTime(field.value.as_u32()),
+                3 => v.end_timezone_offset = field.value.as_i16(),
+                4 => v.feedback = typedef::NapPeriodFeedback(field.value.as_u8()),
+                5 => v.is_deleted = typedef::Bool(field.value.as_u8()),
+                6 => v.source = typedef::NapSource(field.value.as_u8()),
+                7 => v.update_timestamp = typedef::DateTime(field.value.as_u32()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            start_time: typedef::DateTime(vals[0].as_u32()),
-            start_timezone_offset: vals[1].as_i16(),
-            end_time: typedef::DateTime(vals[2].as_u32()),
-            end_timezone_offset: vals[3].as_i16(),
-            feedback: typedef::NapPeriodFeedback(vals[4].as_u8()),
-            is_deleted: typedef::Bool(vals[5].as_u8()),
-            source: typedef::NapSource(vals[6].as_u8()),
-            update_timestamp: typedef::DateTime(vals[7].as_u32()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<NapEvent> for Message {
     fn from(m: NapEvent) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 10];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_timezone_offset != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.start_timezone_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.end_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_timezone_offset != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.end_timezone_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.feedback != typedef::NapPeriodFeedback(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::NAP_PERIOD_FEEDBACK,
                 value: Value::Uint8(m.feedback.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.is_deleted != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.is_deleted.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.source != typedef::NapSource(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::NAP_SOURCE,
                 value: Value::Uint8(m.source.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.update_timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.update_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::NAP_EVENT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

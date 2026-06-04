@@ -267,6 +267,23 @@ impl WeightScale {
         self.bmi = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.weight != typedef::Weight(u16::MAX)) as usize
+            + (self.percent_fat != u16::MAX) as usize
+            + (self.percent_hydration != u16::MAX) as usize
+            + (self.visceral_fat_mass != u16::MAX) as usize
+            + (self.bone_mass != u16::MAX) as usize
+            + (self.muscle_mass != u16::MAX) as usize
+            + (self.basal_met != u16::MAX) as usize
+            + (self.physique_rating != u8::MAX) as usize
+            + (self.active_met != u16::MAX) as usize
+            + (self.metabolic_age != u8::MAX) as usize
+            + (self.visceral_fat_rating != u8::MAX) as usize
+            + (self.user_profile_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.bmi != u16::MAX) as usize
+    }
 }
 
 impl Default for WeightScale {
@@ -278,192 +295,164 @@ impl Default for WeightScale {
 impl From<&Message> for WeightScale {
     /// from creates new WeightScale struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [16319, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.weight = typedef::Weight(field.value.as_u16()),
+                1 => v.percent_fat = field.value.as_u16(),
+                2 => v.percent_hydration = field.value.as_u16(),
+                3 => v.visceral_fat_mass = field.value.as_u16(),
+                4 => v.bone_mass = field.value.as_u16(),
+                5 => v.muscle_mass = field.value.as_u16(),
+                7 => v.basal_met = field.value.as_u16(),
+                8 => v.physique_rating = field.value.as_u8(),
+                9 => v.active_met = field.value.as_u16(),
+                10 => v.metabolic_age = field.value.as_u8(),
+                11 => v.visceral_fat_rating = field.value.as_u8(),
+                12 => v.user_profile_index = typedef::MessageIndex(field.value.as_u16()),
+                13 => v.bmi = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            weight: typedef::Weight(vals[0].as_u16()),
-            percent_fat: vals[1].as_u16(),
-            percent_hydration: vals[2].as_u16(),
-            visceral_fat_mass: vals[3].as_u16(),
-            bone_mass: vals[4].as_u16(),
-            muscle_mass: vals[5].as_u16(),
-            basal_met: vals[7].as_u16(),
-            physique_rating: vals[8].as_u8(),
-            active_met: vals[9].as_u16(),
-            metabolic_age: vals[10].as_u8(),
-            visceral_fat_rating: vals[11].as_u8(),
-            user_profile_index: typedef::MessageIndex(vals[12].as_u16()),
-            bmi: vals[13].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<WeightScale> for Message {
     fn from(m: WeightScale) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 14];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weight != typedef::Weight(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::WEIGHT,
                 value: Value::Uint16(m.weight.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.percent_fat != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.percent_fat),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.percent_hydration != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.percent_hydration),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.visceral_fat_mass != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.visceral_fat_mass),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bone_mass != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.bone_mass),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.muscle_mass != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.muscle_mass),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.basal_met != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.basal_met),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.physique_rating != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.physique_rating),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.active_met != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.active_met),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.metabolic_age != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.metabolic_age),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.visceral_fat_rating != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.visceral_fat_rating),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.user_profile_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.user_profile_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bmi != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.bmi),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::WEIGHT_SCALE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

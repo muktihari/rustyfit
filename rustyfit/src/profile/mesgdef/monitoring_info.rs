@@ -117,6 +117,15 @@ impl MonitoringInfo {
         }
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.local_timestamp != typedef::LocalDateTime(u32::MAX)) as usize
+            + (!self.activity_type.is_empty()) as usize
+            + (!self.cycles_to_distance.is_empty()) as usize
+            + (!self.cycles_to_calories.is_empty()) as usize
+            + (self.resting_metabolic_rate != u16::MAX) as usize
+    }
 }
 
 impl Default for MonitoringInfo {
@@ -128,75 +137,64 @@ impl Default for MonitoringInfo {
 impl From<&Message> for MonitoringInfo {
     /// from creates new MonitoringInfo struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [59, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.local_timestamp = typedef::LocalDateTime(field.value.as_u32()),
+                1 => {
+                    v.activity_type = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::ActivityType(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                3 => v.cycles_to_distance = field.value.to_vec_u16(),
+                4 => v.cycles_to_calories = field.value.to_vec_u16(),
+                5 => v.resting_metabolic_rate = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            local_timestamp: typedef::LocalDateTime(vals[0].as_u32()),
-            activity_type: match &vals[1] {
-                Value::VecUint8(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::ActivityType(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            cycles_to_distance: vals[3].to_vec_u16(),
-            cycles_to_calories: vals[4].to_vec_u16(),
-            resting_metabolic_rate: vals[5].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<MonitoringInfo> for Message {
     fn from(m: MonitoringInfo) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.activity_type.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::VecUint8({
@@ -204,46 +202,39 @@ impl From<MonitoringInfo> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.cycles_to_distance.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.cycles_to_distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.cycles_to_calories.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.cycles_to_calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.resting_metabolic_rate != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.resting_metabolic_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::MONITORING_INFO,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

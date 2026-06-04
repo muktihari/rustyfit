@@ -131,6 +131,22 @@ impl DiveApneaAlarm {
         self.speed = unscaled as i32;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.depth != u32::MAX) as usize
+            + (self.time != i32::MAX) as usize
+            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.alarm_type != typedef::DiveAlarmType(u8::MAX)) as usize
+            + (self.sound != typedef::Tone(u8::MAX)) as usize
+            + (!self.dive_types.is_empty()) as usize
+            + (self.id != u32::MAX) as usize
+            + (self.popup_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.trigger_on_descent != typedef::Bool(u8::MAX)) as usize
+            + (self.trigger_on_ascent != typedef::Bool(u8::MAX)) as usize
+            + (self.repeating != typedef::Bool(u8::MAX)) as usize
+            + (self.speed != i32::MAX) as usize
+    }
 }
 
 impl Default for DiveApneaAlarm {
@@ -142,118 +158,103 @@ impl Default for DiveApneaAlarm {
 impl From<&Message> for DiveApneaAlarm {
     /// from creates new DiveApneaAlarm struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [4095, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.depth = field.value.as_u32(),
+                1 => v.time = field.value.as_i32(),
+                2 => v.enabled = typedef::Bool(field.value.as_u8()),
+                3 => v.alarm_type = typedef::DiveAlarmType(field.value.as_u8()),
+                4 => v.sound = typedef::Tone(field.value.as_u8()),
+                5 => {
+                    v.dive_types = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::SubSport(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                6 => v.id = field.value.as_u32(),
+                7 => v.popup_enabled = typedef::Bool(field.value.as_u8()),
+                8 => v.trigger_on_descent = typedef::Bool(field.value.as_u8()),
+                9 => v.trigger_on_ascent = typedef::Bool(field.value.as_u8()),
+                10 => v.repeating = typedef::Bool(field.value.as_u8()),
+                11 => v.speed = field.value.as_i32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            depth: vals[0].as_u32(),
-            time: vals[1].as_i32(),
-            enabled: typedef::Bool(vals[2].as_u8()),
-            alarm_type: typedef::DiveAlarmType(vals[3].as_u8()),
-            sound: typedef::Tone(vals[4].as_u8()),
-            dive_types: match &vals[5] {
-                Value::VecUint8(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::SubSport(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            id: vals[6].as_u32(),
-            popup_enabled: typedef::Bool(vals[7].as_u8()),
-            trigger_on_descent: typedef::Bool(vals[8].as_u8()),
-            trigger_on_ascent: typedef::Bool(vals[9].as_u8()),
-            repeating: typedef::Bool(vals[10].as_u8()),
-            speed: vals[11].as_i32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<DiveApneaAlarm> for Message {
     fn from(m: DiveApneaAlarm) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 13];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.alarm_type != typedef::DiveAlarmType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DIVE_ALARM_TYPE,
                 value: Value::Uint8(m.alarm_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sound != typedef::Tone(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::TONE,
                 value: Value::Uint8(m.sound.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.dive_types.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::VecUint8({
@@ -261,73 +262,63 @@ impl From<DiveApneaAlarm> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.id != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.popup_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.popup_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.trigger_on_descent != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.trigger_on_descent.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.trigger_on_ascent != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.trigger_on_ascent.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.repeating != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.repeating.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.speed != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::DIVE_APNEA_ALARM,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

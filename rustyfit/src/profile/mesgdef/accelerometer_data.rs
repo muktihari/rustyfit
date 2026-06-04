@@ -88,6 +88,21 @@ impl AccelerometerData {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.timestamp_ms != u16::MAX) as usize
+            + (!self.sample_time_offset.is_empty()) as usize
+            + (!self.accel_x.is_empty()) as usize
+            + (!self.accel_y.is_empty()) as usize
+            + (!self.accel_z.is_empty()) as usize
+            + (!self.calibrated_accel_x.is_empty()) as usize
+            + (!self.calibrated_accel_y.is_empty()) as usize
+            + (!self.calibrated_accel_z.is_empty()) as usize
+            + (!self.compressed_calibrated_accel_x.is_empty()) as usize
+            + (!self.compressed_calibrated_accel_y.is_empty()) as usize
+            + (!self.compressed_calibrated_accel_z.is_empty()) as usize
+    }
 }
 
 impl Default for AccelerometerData {
@@ -99,172 +114,146 @@ impl Default for AccelerometerData {
 impl From<&Message> for AccelerometerData {
     /// from creates new AccelerometerData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [2047, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.timestamp_ms = field.value.as_u16(),
+                1 => v.sample_time_offset = field.value.to_vec_u16(),
+                2 => v.accel_x = field.value.to_vec_u16(),
+                3 => v.accel_y = field.value.to_vec_u16(),
+                4 => v.accel_z = field.value.to_vec_u16(),
+                5 => v.calibrated_accel_x = field.value.to_vec_f32(),
+                6 => v.calibrated_accel_y = field.value.to_vec_f32(),
+                7 => v.calibrated_accel_z = field.value.to_vec_f32(),
+                8 => v.compressed_calibrated_accel_x = field.value.to_vec_i16(),
+                9 => v.compressed_calibrated_accel_y = field.value.to_vec_i16(),
+                10 => v.compressed_calibrated_accel_z = field.value.to_vec_i16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            timestamp_ms: vals[0].as_u16(),
-            sample_time_offset: vals[1].to_vec_u16(),
-            accel_x: vals[2].to_vec_u16(),
-            accel_y: vals[3].to_vec_u16(),
-            accel_z: vals[4].to_vec_u16(),
-            calibrated_accel_x: vals[5].to_vec_f32(),
-            calibrated_accel_y: vals[6].to_vec_f32(),
-            calibrated_accel_z: vals[7].to_vec_f32(),
-            compressed_calibrated_accel_x: vals[8].to_vec_i16(),
-            compressed_calibrated_accel_y: vals[9].to_vec_i16(),
-            compressed_calibrated_accel_z: vals[10].to_vec_i16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<AccelerometerData> for Message {
     fn from(m: AccelerometerData) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 12];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.sample_time_offset.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.sample_time_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.accel_x.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.accel_x),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.accel_y.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.accel_y),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.accel_z.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.accel_z),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.calibrated_accel_x.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_accel_x),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.calibrated_accel_y.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_accel_y),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.calibrated_accel_z.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_accel_z),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.compressed_calibrated_accel_x.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.compressed_calibrated_accel_x),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.compressed_calibrated_accel_y.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.compressed_calibrated_accel_y),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.compressed_calibrated_accel_z.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.compressed_calibrated_accel_z),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::ACCELEROMETER_DATA,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

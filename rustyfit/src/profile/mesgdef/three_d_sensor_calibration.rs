@@ -88,6 +88,16 @@ impl ThreeDSensorCalibration {
         }
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.sensor_type != typedef::SensorType(u8::MAX)) as usize
+            + (self.calibration_factor != u32::MAX) as usize
+            + (self.calibration_divisor != u32::MAX) as usize
+            + (self.level_shift != u32::MAX) as usize
+            + (self.offset_cal != [i32::MAX; 3]) as usize
+            + (self.orientation_matrix != [i32::MAX; 9]) as usize
+    }
 }
 
 impl Default for ThreeDSensorCalibration {
@@ -99,140 +109,123 @@ impl Default for ThreeDSensorCalibration {
 impl From<&Message> for ThreeDSensorCalibration {
     /// from creates new ThreeDSensorCalibration struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [63, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.sensor_type = typedef::SensorType(field.value.as_u8()),
+                1 => v.calibration_factor = field.value.as_u32(),
+                2 => v.calibration_divisor = field.value.as_u32(),
+                3 => v.level_shift = field.value.as_u32(),
+                4 => {
+                    v.offset_cal = match &field.value {
+                        Value::VecInt32(v) => {
+                            let mut arr = [i32::MAX; 3];
+                            for (i, x) in v.iter().take(3).enumerate() {
+                                arr[i] = *x;
+                            }
+                            arr
+                        }
+                        _ => [i32::MAX; 3],
+                    }
+                }
+                5 => {
+                    v.orientation_matrix = match &field.value {
+                        Value::VecInt32(v) => {
+                            let mut arr = [i32::MAX; 9];
+                            for (i, x) in v.iter().take(9).enumerate() {
+                                arr[i] = *x;
+                            }
+                            arr
+                        }
+                        _ => [i32::MAX; 9],
+                    }
+                }
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            sensor_type: typedef::SensorType(vals[0].as_u8()),
-            calibration_factor: vals[1].as_u32(),
-            calibration_divisor: vals[2].as_u32(),
-            level_shift: vals[3].as_u32(),
-            offset_cal: match &vals[4] {
-                Value::VecInt32(v) => {
-                    let mut arr = [i32::MAX; 3];
-                    for (i, x) in v.iter().take(3).enumerate() {
-                        arr[i] = *x;
-                    }
-                    arr
-                }
-                _ => [i32::MAX; 3],
-            },
-            orientation_matrix: match &vals[5] {
-                Value::VecInt32(v) => {
-                    let mut arr = [i32::MAX; 9];
-                    for (i, x) in v.iter().take(9).enumerate() {
-                        arr[i] = *x;
-                    }
-                    arr
-                }
-                _ => [i32::MAX; 9],
-            },
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ThreeDSensorCalibration> for Message {
     fn from(m: ThreeDSensorCalibration) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 7];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sensor_type != typedef::SensorType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SENSOR_TYPE,
                 value: Value::Uint8(m.sensor_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.calibration_factor != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.calibration_factor),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.calibration_divisor != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.calibration_divisor),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.level_shift != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.level_shift),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.offset_cal != [i32::MAX; 3] {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::SINT32,
                 value: Value::VecInt32(Vec::from(&m.offset_cal)),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.orientation_matrix != [i32::MAX; 9] {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SINT32,
                 value: Value::VecInt32(Vec::from(&m.orientation_matrix)),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::THREE_D_SENSOR_CALIBRATION,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

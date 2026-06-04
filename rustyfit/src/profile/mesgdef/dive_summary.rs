@@ -387,6 +387,32 @@ impl DiveSummary {
         self.hang_time = unscaled as u32;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.reference_mesg != typedef::MesgNum(u16::MAX)) as usize
+            + (self.reference_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.avg_depth != u32::MAX) as usize
+            + (self.max_depth != u32::MAX) as usize
+            + (self.surface_interval != u32::MAX) as usize
+            + (self.start_cns != u8::MAX) as usize
+            + (self.end_cns != u8::MAX) as usize
+            + (self.start_n2 != u16::MAX) as usize
+            + (self.end_n2 != u16::MAX) as usize
+            + (self.o2_toxicity != u16::MAX) as usize
+            + (self.dive_number != u32::MAX) as usize
+            + (self.bottom_time != u32::MAX) as usize
+            + (self.avg_pressure_sac != u16::MAX) as usize
+            + (self.avg_volume_sac != u16::MAX) as usize
+            + (self.avg_rmv != u16::MAX) as usize
+            + (self.descent_time != u32::MAX) as usize
+            + (self.ascent_time != u32::MAX) as usize
+            + (self.avg_ascent_rate != i32::MAX) as usize
+            + (self.avg_descent_rate != u32::MAX) as usize
+            + (self.max_ascent_rate != u32::MAX) as usize
+            + (self.max_descent_rate != u32::MAX) as usize
+            + (self.hang_time != u32::MAX) as usize
+    }
 }
 
 impl Default for DiveSummary {
@@ -398,282 +424,245 @@ impl Default for DiveSummary {
 impl From<&Message> for DiveSummary {
     /// from creates new DiveSummary struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [63176703, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.reference_mesg = typedef::MesgNum(field.value.as_u16()),
+                1 => v.reference_index = typedef::MessageIndex(field.value.as_u16()),
+                2 => v.avg_depth = field.value.as_u32(),
+                3 => v.max_depth = field.value.as_u32(),
+                4 => v.surface_interval = field.value.as_u32(),
+                5 => v.start_cns = field.value.as_u8(),
+                6 => v.end_cns = field.value.as_u8(),
+                7 => v.start_n2 = field.value.as_u16(),
+                8 => v.end_n2 = field.value.as_u16(),
+                9 => v.o2_toxicity = field.value.as_u16(),
+                10 => v.dive_number = field.value.as_u32(),
+                11 => v.bottom_time = field.value.as_u32(),
+                12 => v.avg_pressure_sac = field.value.as_u16(),
+                13 => v.avg_volume_sac = field.value.as_u16(),
+                14 => v.avg_rmv = field.value.as_u16(),
+                15 => v.descent_time = field.value.as_u32(),
+                16 => v.ascent_time = field.value.as_u32(),
+                17 => v.avg_ascent_rate = field.value.as_i32(),
+                22 => v.avg_descent_rate = field.value.as_u32(),
+                23 => v.max_ascent_rate = field.value.as_u32(),
+                24 => v.max_descent_rate = field.value.as_u32(),
+                25 => v.hang_time = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            reference_mesg: typedef::MesgNum(vals[0].as_u16()),
-            reference_index: typedef::MessageIndex(vals[1].as_u16()),
-            avg_depth: vals[2].as_u32(),
-            max_depth: vals[3].as_u32(),
-            surface_interval: vals[4].as_u32(),
-            start_cns: vals[5].as_u8(),
-            end_cns: vals[6].as_u8(),
-            start_n2: vals[7].as_u16(),
-            end_n2: vals[8].as_u16(),
-            o2_toxicity: vals[9].as_u16(),
-            dive_number: vals[10].as_u32(),
-            bottom_time: vals[11].as_u32(),
-            avg_pressure_sac: vals[12].as_u16(),
-            avg_volume_sac: vals[13].as_u16(),
-            avg_rmv: vals[14].as_u16(),
-            descent_time: vals[15].as_u32(),
-            ascent_time: vals[16].as_u32(),
-            avg_ascent_rate: vals[17].as_i32(),
-            avg_descent_rate: vals[22].as_u32(),
-            max_ascent_rate: vals[23].as_u32(),
-            max_descent_rate: vals[24].as_u32(),
-            hang_time: vals[25].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<DiveSummary> for Message {
     fn from(m: DiveSummary) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 23];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.reference_mesg != typedef::MesgNum(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.reference_mesg.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.reference_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.reference_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.surface_interval != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.surface_interval),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_cns != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.start_cns),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_cns != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.end_cns),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_n2 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_n2),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_n2 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.end_n2),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.o2_toxicity != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.o2_toxicity),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.dive_number != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.dive_number),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bottom_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.bottom_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_pressure_sac != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_pressure_sac),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_volume_sac != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_volume_sac),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_rmv != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.avg_rmv),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.descent_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.descent_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ascent_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ascent_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_ascent_rate != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.avg_ascent_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_descent_rate != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_descent_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_ascent_rate != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_ascent_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_descent_rate != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_descent_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hang_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.hang_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::DIVE_SUMMARY,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

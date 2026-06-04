@@ -255,6 +255,26 @@ impl TimeInZone {
         }
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.reference_mesg != typedef::MesgNum(u16::MAX)) as usize
+            + (self.reference_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (!self.time_in_hr_zone.is_empty()) as usize
+            + (!self.time_in_speed_zone.is_empty()) as usize
+            + (!self.time_in_cadence_zone.is_empty()) as usize
+            + (!self.time_in_power_zone.is_empty()) as usize
+            + (!self.hr_zone_high_boundary.is_empty()) as usize
+            + (!self.speed_zone_high_boundary.is_empty()) as usize
+            + (!self.cadence_zone_high_boundary.is_empty()) as usize
+            + (!self.power_zone_high_boundary.is_empty()) as usize
+            + (self.hr_calc_type != typedef::HrZoneCalc(u8::MAX)) as usize
+            + (self.max_heart_rate != u8::MAX) as usize
+            + (self.resting_heart_rate != u8::MAX) as usize
+            + (self.threshold_heart_rate != u8::MAX) as usize
+            + (self.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX)) as usize
+            + (self.functional_threshold_power != u16::MAX) as usize
+    }
 }
 
 impl Default for TimeInZone {
@@ -266,222 +286,191 @@ impl Default for TimeInZone {
 impl From<&Message> for TimeInZone {
     /// from creates new TimeInZone struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [65535, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.reference_mesg = typedef::MesgNum(field.value.as_u16()),
+                1 => v.reference_index = typedef::MessageIndex(field.value.as_u16()),
+                2 => v.time_in_hr_zone = field.value.to_vec_u32(),
+                3 => v.time_in_speed_zone = field.value.to_vec_u32(),
+                4 => v.time_in_cadence_zone = field.value.to_vec_u32(),
+                5 => v.time_in_power_zone = field.value.to_vec_u32(),
+                6 => v.hr_zone_high_boundary = field.value.to_vec_u8(),
+                7 => v.speed_zone_high_boundary = field.value.to_vec_u16(),
+                8 => v.cadence_zone_high_boundary = field.value.to_vec_u8(),
+                9 => v.power_zone_high_boundary = field.value.to_vec_u16(),
+                10 => v.hr_calc_type = typedef::HrZoneCalc(field.value.as_u8()),
+                11 => v.max_heart_rate = field.value.as_u8(),
+                12 => v.resting_heart_rate = field.value.as_u8(),
+                13 => v.threshold_heart_rate = field.value.as_u8(),
+                14 => v.pwr_calc_type = typedef::PwrZoneCalc(field.value.as_u8()),
+                15 => v.functional_threshold_power = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            reference_mesg: typedef::MesgNum(vals[0].as_u16()),
-            reference_index: typedef::MessageIndex(vals[1].as_u16()),
-            time_in_hr_zone: vals[2].to_vec_u32(),
-            time_in_speed_zone: vals[3].to_vec_u32(),
-            time_in_cadence_zone: vals[4].to_vec_u32(),
-            time_in_power_zone: vals[5].to_vec_u32(),
-            hr_zone_high_boundary: vals[6].to_vec_u8(),
-            speed_zone_high_boundary: vals[7].to_vec_u16(),
-            cadence_zone_high_boundary: vals[8].to_vec_u8(),
-            power_zone_high_boundary: vals[9].to_vec_u16(),
-            hr_calc_type: typedef::HrZoneCalc(vals[10].as_u8()),
-            max_heart_rate: vals[11].as_u8(),
-            resting_heart_rate: vals[12].as_u8(),
-            threshold_heart_rate: vals[13].as_u8(),
-            pwr_calc_type: typedef::PwrZoneCalc(vals[14].as_u8()),
-            functional_threshold_power: vals[15].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<TimeInZone> for Message {
     fn from(m: TimeInZone) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 17];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.reference_mesg != typedef::MesgNum(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.reference_mesg.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.reference_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.reference_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_in_hr_zone.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_hr_zone),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_in_speed_zone.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_speed_zone),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_in_cadence_zone.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_cadence_zone),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_in_power_zone.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_in_power_zone),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.hr_zone_high_boundary.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.hr_zone_high_boundary),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.speed_zone_high_boundary.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.speed_zone_high_boundary),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.cadence_zone_high_boundary.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.cadence_zone_high_boundary),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.power_zone_high_boundary.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.power_zone_high_boundary),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hr_calc_type != typedef::HrZoneCalc(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::HR_ZONE_CALC,
                 value: Value::Uint8(m.hr_calc_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.resting_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resting_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.threshold_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.threshold_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::PWR_ZONE_CALC,
                 value: Value::Uint8(m.pwr_calc_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.functional_threshold_power != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.functional_threshold_power),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::TIME_IN_ZONE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -56,6 +56,15 @@ impl FileCapabilities {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.r#type != typedef::File(u8::MAX)) as usize
+            + (self.flags != typedef::FileFlags(u8::MIN)) as usize
+            + (!self.directory.is_empty()) as usize
+            + (self.max_count != u16::MAX) as usize
+            + (self.max_size != u32::MAX) as usize
+    }
 }
 
 impl Default for FileCapabilities {
@@ -67,112 +76,92 @@ impl Default for FileCapabilities {
 impl From<&Message> for FileCapabilities {
     /// from creates new FileCapabilities struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.r#type = typedef::File(field.value.as_u8()),
+                1 => v.flags = typedef::FileFlags(field.value.as_u8z()),
+                2 => v.directory = field.value.as_str().to_owned(),
+                3 => v.max_count = field.value.as_u16(),
+                4 => v.max_size = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            r#type: typedef::File(vals[0].as_u8()),
-            flags: typedef::FileFlags(vals[1].as_u8z()),
-            directory: vals[2].as_str().to_owned(),
-            max_count: vals[3].as_u16(),
-            max_size: vals[4].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<FileCapabilities> for Message {
     fn from(m: FileCapabilities) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.r#type != typedef::File(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::FILE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.flags != typedef::FileFlags(u8::MIN) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::FILE_FLAGS,
                 value: Value::Uint8(m.flags.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.directory.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.directory),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_count != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.max_count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_size != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_size),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::FILE_CAPABILITIES,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

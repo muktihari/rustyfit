@@ -80,6 +80,22 @@ impl Goal {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.start_date != typedef::DateTime(u32::MAX)) as usize
+            + (self.end_date != typedef::DateTime(u32::MAX)) as usize
+            + (self.r#type != typedef::Goal(u8::MAX)) as usize
+            + (self.value != u32::MAX) as usize
+            + (self.repeat != typedef::Bool(u8::MAX)) as usize
+            + (self.target_value != u32::MAX) as usize
+            + (self.recurrence != typedef::GoalRecurrence(u8::MAX)) as usize
+            + (self.recurrence_value != u16::MAX) as usize
+            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.source != typedef::GoalSource(u8::MAX)) as usize
+    }
 }
 
 impl Default for Goal {
@@ -91,182 +107,155 @@ impl Default for Goal {
 impl From<&Message> for Goal {
     /// from creates new Goal struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [4095, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.sport = typedef::Sport(field.value.as_u8()),
+                1 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
+                2 => v.start_date = typedef::DateTime(field.value.as_u32()),
+                3 => v.end_date = typedef::DateTime(field.value.as_u32()),
+                4 => v.r#type = typedef::Goal(field.value.as_u8()),
+                5 => v.value = field.value.as_u32(),
+                6 => v.repeat = typedef::Bool(field.value.as_u8()),
+                7 => v.target_value = field.value.as_u32(),
+                8 => v.recurrence = typedef::GoalRecurrence(field.value.as_u8()),
+                9 => v.recurrence_value = field.value.as_u16(),
+                10 => v.enabled = typedef::Bool(field.value.as_u8()),
+                11 => v.source = typedef::GoalSource(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            sport: typedef::Sport(vals[0].as_u8()),
-            sub_sport: typedef::SubSport(vals[1].as_u8()),
-            start_date: typedef::DateTime(vals[2].as_u32()),
-            end_date: typedef::DateTime(vals[3].as_u32()),
-            r#type: typedef::Goal(vals[4].as_u8()),
-            value: vals[5].as_u32(),
-            repeat: typedef::Bool(vals[6].as_u8()),
-            target_value: vals[7].as_u32(),
-            recurrence: typedef::GoalRecurrence(vals[8].as_u8()),
-            recurrence_value: vals[9].as_u16(),
-            enabled: typedef::Bool(vals[10].as_u8()),
-            source: typedef::GoalSource(vals[11].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Goal> for Message {
     fn from(m: Goal) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 13];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport != typedef::Sport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sub_sport != typedef::SubSport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_date != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_date.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.end_date != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.end_date.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.r#type != typedef::Goal(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::GOAL,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.value != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.value),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.repeat != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.repeat.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.target_value != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.target_value),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.recurrence != typedef::GoalRecurrence(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::GOAL_RECURRENCE,
                 value: Value::Uint8(m.recurrence.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.recurrence_value != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.recurrence_value),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.source != typedef::GoalSource(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::GOAL_SOURCE,
                 value: Value::Uint8(m.source.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::GOAL,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

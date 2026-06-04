@@ -76,6 +76,15 @@ impl AadAccelFeatures {
         self.time_above_threshold = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.time != u16::MAX) as usize
+            + (self.energy_total != u32::MAX) as usize
+            + (self.zero_cross_cnt != u16::MAX) as usize
+            + (self.instance != u8::MAX) as usize
+            + (self.time_above_threshold != u16::MAX) as usize
+    }
 }
 
 impl Default for AadAccelFeatures {
@@ -87,112 +96,92 @@ impl Default for AadAccelFeatures {
 impl From<&Message> for AadAccelFeatures {
     /// from creates new AadAccelFeatures struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.time = field.value.as_u16(),
+                1 => v.energy_total = field.value.as_u32(),
+                2 => v.zero_cross_cnt = field.value.as_u16(),
+                3 => v.instance = field.value.as_u8(),
+                4 => v.time_above_threshold = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            time: vals[0].as_u16(),
-            energy_total: vals[1].as_u32(),
-            zero_cross_cnt: vals[2].as_u16(),
-            instance: vals[3].as_u8(),
-            time_above_threshold: vals[4].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<AadAccelFeatures> for Message {
     fn from(m: AadAccelFeatures) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.energy_total != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.energy_total),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.zero_cross_cnt != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.zero_cross_cnt),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.instance != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.instance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time_above_threshold != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.time_above_threshold),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::AAD_ACCEL_FEATURES,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

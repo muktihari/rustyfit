@@ -89,6 +89,18 @@ impl Workout {
         self.pool_length = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.capabilities != typedef::WorkoutCapabilities(u32::MIN)) as usize
+            + (self.num_valid_steps != u16::MAX) as usize
+            + (!self.wkt_name.is_empty()) as usize
+            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.pool_length != u16::MAX) as usize
+            + (self.pool_length_unit != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (!self.wkt_description.is_empty()) as usize
+    }
 }
 
 impl Default for Workout {
@@ -100,142 +112,119 @@ impl Default for Workout {
 impl From<&Message> for Workout {
     /// from creates new Workout struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [182640, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                4 => v.sport = typedef::Sport(field.value.as_u8()),
+                5 => v.capabilities = typedef::WorkoutCapabilities(field.value.as_u32z()),
+                6 => v.num_valid_steps = field.value.as_u16(),
+                8 => v.wkt_name = field.value.as_str().to_owned(),
+                11 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
+                14 => v.pool_length = field.value.as_u16(),
+                15 => v.pool_length_unit = typedef::DisplayMeasure(field.value.as_u8()),
+                17 => v.wkt_description = field.value.as_str().to_owned(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            sport: typedef::Sport(vals[4].as_u8()),
-            capabilities: typedef::WorkoutCapabilities(vals[5].as_u32z()),
-            num_valid_steps: vals[6].as_u16(),
-            wkt_name: vals[8].as_str().to_owned(),
-            sub_sport: typedef::SubSport(vals[11].as_u8()),
-            pool_length: vals[14].as_u16(),
-            pool_length_unit: typedef::DisplayMeasure(vals[15].as_u8()),
-            wkt_description: vals[17].as_str().to_owned(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Workout> for Message {
     fn from(m: Workout) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 9];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport != typedef::Sport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.capabilities != typedef::WorkoutCapabilities(u32::MIN) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::WORKOUT_CAPABILITIES,
                 value: Value::Uint32(m.capabilities.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.num_valid_steps != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_valid_steps),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.wkt_name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.wkt_name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sub_sport != typedef::SubSport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pool_length != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pool_length),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pool_length_unit != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.pool_length_unit.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.wkt_description.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.wkt_description),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::WORKOUT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

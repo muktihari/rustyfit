@@ -53,6 +53,15 @@ impl TrainingFile {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.r#type != typedef::File(u8::MAX)) as usize
+            + (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.product != u16::MAX) as usize
+            + (self.serial_number != u32::MIN) as usize
+            + (self.time_created != typedef::DateTime(u32::MAX)) as usize
+    }
 }
 
 impl Default for TrainingFile {
@@ -64,112 +73,92 @@ impl Default for TrainingFile {
 impl From<&Message> for TrainingFile {
     /// from creates new TrainingFile struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.r#type = typedef::File(field.value.as_u8()),
+                1 => v.manufacturer = typedef::Manufacturer(field.value.as_u16()),
+                2 => v.product = field.value.as_u16(),
+                3 => v.serial_number = field.value.as_u32z(),
+                4 => v.time_created = typedef::DateTime(field.value.as_u32()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            r#type: typedef::File(vals[0].as_u8()),
-            manufacturer: typedef::Manufacturer(vals[1].as_u16()),
-            product: vals[2].as_u16(),
-            serial_number: vals[3].as_u32z(),
-            time_created: typedef::DateTime(vals[4].as_u32()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<TrainingFile> for Message {
     fn from(m: TrainingFile) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.r#type != typedef::File(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::FILE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.product != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.serial_number != u32::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32Z,
                 value: Value::Uint32(m.serial_number),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time_created != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.time_created.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::TRAINING_FILE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

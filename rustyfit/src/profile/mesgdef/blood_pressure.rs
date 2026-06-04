@@ -81,6 +81,20 @@ impl BloodPressure {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.systolic_pressure != u16::MAX) as usize
+            + (self.diastolic_pressure != u16::MAX) as usize
+            + (self.mean_arterial_pressure != u16::MAX) as usize
+            + (self.map_3_sample_mean != u16::MAX) as usize
+            + (self.map_morning_values != u16::MAX) as usize
+            + (self.map_evening_values != u16::MAX) as usize
+            + (self.heart_rate != u8::MAX) as usize
+            + (self.heart_rate_type != typedef::HrType(u8::MAX)) as usize
+            + (self.status != typedef::BpStatus(u8::MAX)) as usize
+            + (self.user_profile_index != typedef::MessageIndex(u16::MAX)) as usize
+    }
 }
 
 impl Default for BloodPressure {
@@ -92,162 +106,137 @@ impl Default for BloodPressure {
 impl From<&Message> for BloodPressure {
     /// from creates new BloodPressure struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [1023, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.systolic_pressure = field.value.as_u16(),
+                1 => v.diastolic_pressure = field.value.as_u16(),
+                2 => v.mean_arterial_pressure = field.value.as_u16(),
+                3 => v.map_3_sample_mean = field.value.as_u16(),
+                4 => v.map_morning_values = field.value.as_u16(),
+                5 => v.map_evening_values = field.value.as_u16(),
+                6 => v.heart_rate = field.value.as_u8(),
+                7 => v.heart_rate_type = typedef::HrType(field.value.as_u8()),
+                8 => v.status = typedef::BpStatus(field.value.as_u8()),
+                9 => v.user_profile_index = typedef::MessageIndex(field.value.as_u16()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            systolic_pressure: vals[0].as_u16(),
-            diastolic_pressure: vals[1].as_u16(),
-            mean_arterial_pressure: vals[2].as_u16(),
-            map_3_sample_mean: vals[3].as_u16(),
-            map_morning_values: vals[4].as_u16(),
-            map_evening_values: vals[5].as_u16(),
-            heart_rate: vals[6].as_u8(),
-            heart_rate_type: typedef::HrType(vals[7].as_u8()),
-            status: typedef::BpStatus(vals[8].as_u8()),
-            user_profile_index: typedef::MessageIndex(vals[9].as_u16()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<BloodPressure> for Message {
     fn from(m: BloodPressure) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 11];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.systolic_pressure != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.systolic_pressure),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.diastolic_pressure != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.diastolic_pressure),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.mean_arterial_pressure != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.mean_arterial_pressure),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.map_3_sample_mean != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.map_3_sample_mean),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.map_morning_values != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.map_morning_values),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.map_evening_values != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.map_evening_values),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.heart_rate_type != typedef::HrType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::HR_TYPE,
                 value: Value::Uint8(m.heart_rate_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.status != typedef::BpStatus(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BP_STATUS,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.user_profile_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.user_profile_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::BLOOD_PRESSURE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

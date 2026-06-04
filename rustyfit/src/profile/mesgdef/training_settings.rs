@@ -105,6 +105,13 @@ impl TrainingSettings {
         self.precise_target_speed = unscaled as u32;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.target_distance != u32::MAX) as usize
+            + (self.target_speed != u16::MAX) as usize
+            + (self.target_time != u32::MAX) as usize
+            + (self.precise_target_speed != u32::MAX) as usize
+    }
 }
 
 impl Default for TrainingSettings {
@@ -116,92 +123,74 @@ impl Default for TrainingSettings {
 impl From<&Message> for TrainingSettings {
     /// from creates new TrainingSettings struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 154];
-
         const KNOWN_NUMS: [u64; 4] = [15032385536, 0, 33554432, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                31 => v.target_distance = field.value.as_u32(),
+                32 => v.target_speed = field.value.as_u16(),
+                33 => v.target_time = field.value.as_u32(),
+                153 => v.precise_target_speed = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            target_distance: vals[31].as_u32(),
-            target_speed: vals[32].as_u16(),
-            target_time: vals[33].as_u32(),
-            precise_target_speed: vals[153].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<TrainingSettings> for Message {
     fn from(m: TrainingSettings) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 4];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.target_distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 31,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.target_distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.target_speed != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 32,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.target_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.target_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 33,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.target_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.precise_target_speed != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 153,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.precise_target_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::TRAINING_SETTINGS,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -58,6 +58,15 @@ impl MemoGlob {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.part_index != u32::MAX) as usize
+            + (!self.memo.is_empty()) as usize
+            + (self.mesg_num != typedef::MesgNum(u16::MAX)) as usize
+            + (self.parent_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.field_num != u8::MAX) as usize
+            + (!self.data.is_empty()) as usize
+    }
 }
 
 impl Default for MemoGlob {
@@ -69,112 +78,92 @@ impl Default for MemoGlob {
 impl From<&Message> for MemoGlob {
     /// from creates new MemoGlob struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 251];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 288230376151711744];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                250 => v.part_index = field.value.as_u32(),
+                0 => v.memo = field.value.to_vec_u8(),
+                1 => v.mesg_num = typedef::MesgNum(field.value.as_u16()),
+                2 => v.parent_index = typedef::MessageIndex(field.value.as_u16()),
+                3 => v.field_num = field.value.as_u8(),
+                4 => v.data = field.value.to_vec_u8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            part_index: vals[250].as_u32(),
-            memo: vals[0].to_vec_u8(),
-            mesg_num: typedef::MesgNum(vals[1].as_u16()),
-            parent_index: typedef::MessageIndex(vals[2].as_u16()),
-            field_num: vals[3].as_u8(),
-            data: vals[4].to_vec_u8(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<MemoGlob> for Message {
     fn from(m: MemoGlob) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.part_index != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 250,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.part_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.memo.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.memo),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.mesg_num != typedef::MesgNum(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESG_NUM,
                 value: Value::Uint16(m.mesg_num.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.parent_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.parent_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.field_num != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_num),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.data.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.data),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::MEMO_GLOB,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

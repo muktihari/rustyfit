@@ -84,6 +84,17 @@ impl MaxMetData {
         self.vo2_max = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.update_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.vo2_max != u16::MAX) as usize
+            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.max_met_category != typedef::MaxMetCategory(u8::MAX)) as usize
+            + (self.calibrated_data != typedef::Bool(u8::MAX)) as usize
+            + (self.hr_source != typedef::MaxMetHeartRateSource(u8::MAX)) as usize
+            + (self.speed_source != typedef::MaxMetSpeedSource(u8::MAX)) as usize
+    }
 }
 
 impl Default for MaxMetData {
@@ -95,132 +106,110 @@ impl Default for MaxMetData {
 impl From<&Message> for MaxMetData {
     /// from creates new MaxMetData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 14];
-
         const KNOWN_NUMS: [u64; 4] = [13157, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.update_time = typedef::DateTime(field.value.as_u32()),
+                2 => v.vo2_max = field.value.as_u16(),
+                5 => v.sport = typedef::Sport(field.value.as_u8()),
+                6 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
+                8 => v.max_met_category = typedef::MaxMetCategory(field.value.as_u8()),
+                9 => v.calibrated_data = typedef::Bool(field.value.as_u8()),
+                12 => v.hr_source = typedef::MaxMetHeartRateSource(field.value.as_u8()),
+                13 => v.speed_source = typedef::MaxMetSpeedSource(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            update_time: typedef::DateTime(vals[0].as_u32()),
-            vo2_max: vals[2].as_u16(),
-            sport: typedef::Sport(vals[5].as_u8()),
-            sub_sport: typedef::SubSport(vals[6].as_u8()),
-            max_met_category: typedef::MaxMetCategory(vals[8].as_u8()),
-            calibrated_data: typedef::Bool(vals[9].as_u8()),
-            hr_source: typedef::MaxMetHeartRateSource(vals[12].as_u8()),
-            speed_source: typedef::MaxMetSpeedSource(vals[13].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<MaxMetData> for Message {
     fn from(m: MaxMetData) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 8];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.update_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.update_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.vo2_max != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vo2_max),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport != typedef::Sport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sub_sport != typedef::SubSport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::SUB_SPORT,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_met_category != typedef::MaxMetCategory(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::MAX_MET_CATEGORY,
                 value: Value::Uint8(m.max_met_category.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.calibrated_data != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.calibrated_data.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hr_source != typedef::MaxMetHeartRateSource(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::MAX_MET_HEART_RATE_SOURCE,
                 value: Value::Uint8(m.hr_source.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.speed_source != typedef::MaxMetSpeedSource(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::MAX_MET_SPEED_SOURCE,
                 value: Value::Uint8(m.speed_source.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::MAX_MET_DATA,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

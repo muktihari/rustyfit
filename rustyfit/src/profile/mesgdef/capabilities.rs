@@ -48,6 +48,13 @@ impl Capabilities {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (!self.languages.is_empty()) as usize
+            + (!self.sports.is_empty()) as usize
+            + (self.workouts_supported != typedef::WorkoutCapabilities(u32::MIN)) as usize
+            + (self.connectivity_supported != typedef::ConnectivityCapabilities(u32::MIN)) as usize
+    }
 }
 
 impl Default for Capabilities {
@@ -59,64 +66,57 @@ impl Default for Capabilities {
 impl From<&Message> for Capabilities {
     /// from creates new Capabilities struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 24];
-
         const KNOWN_NUMS: [u64; 4] = [10485763, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.languages = field.value.to_vec_u8(),
+                1 => {
+                    v.sports = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::SportBits0(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                21 => v.workouts_supported = typedef::WorkoutCapabilities(field.value.as_u32z()),
+                23 => {
+                    v.connectivity_supported =
+                        typedef::ConnectivityCapabilities(field.value.as_u32z())
+                }
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            languages: vals[0].to_vec_u8(),
-            sports: match &vals[1] {
-                Value::VecUint8(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::SportBits0(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            workouts_supported: typedef::WorkoutCapabilities(vals[21].as_u32z()),
-            connectivity_supported: typedef::ConnectivityCapabilities(vals[23].as_u32z()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Capabilities> for Message {
     fn from(m: Capabilities) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 4];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if !m.languages.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::VecUint8(m.languages),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.sports.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SPORT_BITS_0,
                 value: Value::VecUint8({
@@ -124,37 +124,31 @@ impl From<Capabilities> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.workouts_supported != typedef::WorkoutCapabilities(u32::MIN) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::WORKOUT_CAPABILITIES,
                 value: Value::Uint32(m.workouts_supported.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.connectivity_supported != typedef::ConnectivityCapabilities(u32::MIN) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::CONNECTIVITY_CAPABILITIES,
                 value: Value::Uint32(m.connectivity_supported.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::CAPABILITIES,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

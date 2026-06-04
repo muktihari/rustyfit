@@ -85,6 +85,22 @@ impl Connectivity {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.bluetooth_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.bluetooth_le_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.ant_enabled != typedef::Bool(u8::MAX)) as usize
+            + (!self.name.is_empty()) as usize
+            + (self.live_tracking_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.weather_conditions_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.weather_alerts_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.auto_activity_upload_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.course_download_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.workout_download_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.gps_ephemeris_download_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.incident_detection_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.grouptrack_enabled != typedef::Bool(u8::MAX)) as usize
+    }
 }
 
 impl Default for Connectivity {
@@ -96,182 +112,155 @@ impl Default for Connectivity {
 impl From<&Message> for Connectivity {
     /// from creates new Connectivity struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 13];
-
         const KNOWN_NUMS: [u64; 4] = [8191, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.bluetooth_enabled = typedef::Bool(field.value.as_u8()),
+                1 => v.bluetooth_le_enabled = typedef::Bool(field.value.as_u8()),
+                2 => v.ant_enabled = typedef::Bool(field.value.as_u8()),
+                3 => v.name = field.value.as_str().to_owned(),
+                4 => v.live_tracking_enabled = typedef::Bool(field.value.as_u8()),
+                5 => v.weather_conditions_enabled = typedef::Bool(field.value.as_u8()),
+                6 => v.weather_alerts_enabled = typedef::Bool(field.value.as_u8()),
+                7 => v.auto_activity_upload_enabled = typedef::Bool(field.value.as_u8()),
+                8 => v.course_download_enabled = typedef::Bool(field.value.as_u8()),
+                9 => v.workout_download_enabled = typedef::Bool(field.value.as_u8()),
+                10 => v.gps_ephemeris_download_enabled = typedef::Bool(field.value.as_u8()),
+                11 => v.incident_detection_enabled = typedef::Bool(field.value.as_u8()),
+                12 => v.grouptrack_enabled = typedef::Bool(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            bluetooth_enabled: typedef::Bool(vals[0].as_u8()),
-            bluetooth_le_enabled: typedef::Bool(vals[1].as_u8()),
-            ant_enabled: typedef::Bool(vals[2].as_u8()),
-            name: vals[3].as_str().to_owned(),
-            live_tracking_enabled: typedef::Bool(vals[4].as_u8()),
-            weather_conditions_enabled: typedef::Bool(vals[5].as_u8()),
-            weather_alerts_enabled: typedef::Bool(vals[6].as_u8()),
-            auto_activity_upload_enabled: typedef::Bool(vals[7].as_u8()),
-            course_download_enabled: typedef::Bool(vals[8].as_u8()),
-            workout_download_enabled: typedef::Bool(vals[9].as_u8()),
-            gps_ephemeris_download_enabled: typedef::Bool(vals[10].as_u8()),
-            incident_detection_enabled: typedef::Bool(vals[11].as_u8()),
-            grouptrack_enabled: typedef::Bool(vals[12].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Connectivity> for Message {
     fn from(m: Connectivity) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 13];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.bluetooth_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.bluetooth_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.bluetooth_le_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.bluetooth_le_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ant_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.ant_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.live_tracking_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.live_tracking_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weather_conditions_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.weather_conditions_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weather_alerts_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.weather_alerts_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.auto_activity_upload_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.auto_activity_upload_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.course_download_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.course_download_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.workout_download_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.workout_download_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.gps_ephemeris_download_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.gps_ephemeris_download_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.incident_detection_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.incident_detection_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.grouptrack_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.grouptrack_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::CONNECTIVITY,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

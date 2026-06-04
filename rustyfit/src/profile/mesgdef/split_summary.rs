@@ -233,6 +233,24 @@ impl SplitSummary {
         self.total_moving_time = unscaled as u32;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.split_type != typedef::SplitType(u8::MAX)) as usize
+            + (self.num_splits != u16::MAX) as usize
+            + (self.total_timer_time != u32::MAX) as usize
+            + (self.total_distance != u32::MAX) as usize
+            + (self.avg_speed != u32::MAX) as usize
+            + (self.max_speed != u32::MAX) as usize
+            + (self.total_ascent != u16::MAX) as usize
+            + (self.total_descent != u16::MAX) as usize
+            + (self.avg_heart_rate != u8::MAX) as usize
+            + (self.max_heart_rate != u8::MAX) as usize
+            + (self.avg_vert_speed != i32::MAX) as usize
+            + (self.total_calories != u32::MAX) as usize
+            + (self.active_time != u32::MAX) as usize
+            + (self.total_moving_time != u32::MAX) as usize
+    }
 }
 
 impl Default for SplitSummary {
@@ -244,202 +262,173 @@ impl Default for SplitSummary {
 impl From<&Message> for SplitSummary {
     /// from creates new SplitSummary struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [16377, 8194, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.split_type = typedef::SplitType(field.value.as_u8()),
+                3 => v.num_splits = field.value.as_u16(),
+                4 => v.total_timer_time = field.value.as_u32(),
+                5 => v.total_distance = field.value.as_u32(),
+                6 => v.avg_speed = field.value.as_u32(),
+                7 => v.max_speed = field.value.as_u32(),
+                8 => v.total_ascent = field.value.as_u16(),
+                9 => v.total_descent = field.value.as_u16(),
+                10 => v.avg_heart_rate = field.value.as_u8(),
+                11 => v.max_heart_rate = field.value.as_u8(),
+                12 => v.avg_vert_speed = field.value.as_i32(),
+                13 => v.total_calories = field.value.as_u32(),
+                65 => v.active_time = field.value.as_u32(),
+                77 => v.total_moving_time = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            split_type: typedef::SplitType(vals[0].as_u8()),
-            num_splits: vals[3].as_u16(),
-            total_timer_time: vals[4].as_u32(),
-            total_distance: vals[5].as_u32(),
-            avg_speed: vals[6].as_u32(),
-            max_speed: vals[7].as_u32(),
-            total_ascent: vals[8].as_u16(),
-            total_descent: vals[9].as_u16(),
-            avg_heart_rate: vals[10].as_u8(),
-            max_heart_rate: vals[11].as_u8(),
-            avg_vert_speed: vals[12].as_i32(),
-            total_calories: vals[13].as_u32(),
-            active_time: vals[65].as_u32(),
-            total_moving_time: vals[77].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SplitSummary> for Message {
     fn from(m: SplitSummary) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 15];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.split_type != typedef::SplitType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SPLIT_TYPE,
                 value: Value::Uint8(m.split_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.num_splits != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.num_splits),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_timer_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_speed != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.avg_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_speed != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.max_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_ascent != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_ascent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_descent != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_descent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.avg_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.max_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.avg_vert_speed != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.avg_vert_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_calories != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.active_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 65,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_moving_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 77,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_moving_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SPLIT_SUMMARY,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

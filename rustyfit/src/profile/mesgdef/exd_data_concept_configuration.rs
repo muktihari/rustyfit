@@ -101,6 +101,20 @@ impl ExdDataConceptConfiguration {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.screen_index != u8::MAX) as usize
+            + (self.concept_field != u8::MAX) as usize
+            + (self.field_id != u8::MAX) as usize
+            + (self.concept_index != u8::MAX) as usize
+            + (self.data_page != u8::MAX) as usize
+            + (self.concept_key != u8::MAX) as usize
+            + (self.scaling != u8::MAX) as usize
+            + (self.data_units != typedef::ExdDataUnits(u8::MAX)) as usize
+            + (self.qualifier != typedef::ExdQualifiers(u8::MAX)) as usize
+            + (self.descriptor != typedef::ExdDescriptors(u8::MAX)) as usize
+            + (self.is_signed != typedef::Bool(u8::MAX)) as usize
+    }
 }
 
 impl Default for ExdDataConceptConfiguration {
@@ -112,168 +126,143 @@ impl Default for ExdDataConceptConfiguration {
 impl From<&Message> for ExdDataConceptConfiguration {
     /// from creates new ExdDataConceptConfiguration struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 12];
-        let mut state = [0u8; 1];
-
         const KNOWN_NUMS: [u64; 4] = [3967, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                0 => v.screen_index = field.value.as_u8(),
+                1 => v.concept_field = field.value.as_u8(),
+                2 => v.field_id = field.value.as_u8(),
+                3 => v.concept_index = field.value.as_u8(),
+                4 => v.data_page = field.value.as_u8(),
+                5 => v.concept_key = field.value.as_u8(),
+                6 => v.scaling = field.value.as_u8(),
+                8 => v.data_units = typedef::ExdDataUnits(field.value.as_u8()),
+                9 => v.qualifier = typedef::ExdQualifiers(field.value.as_u8()),
+                10 => v.descriptor = typedef::ExdDescriptors(field.value.as_u8()),
+                11 => v.is_signed = typedef::Bool(field.value.as_u8()),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 4 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            screen_index: vals[0].as_u8(),
-            concept_field: vals[1].as_u8(),
-            field_id: vals[2].as_u8(),
-            concept_index: vals[3].as_u8(),
-            data_page: vals[4].as_u8(),
-            concept_key: vals[5].as_u8(),
-            scaling: vals[6].as_u8(),
-            data_units: typedef::ExdDataUnits(vals[8].as_u8()),
-            qualifier: typedef::ExdQualifiers(vals[9].as_u8()),
-            descriptor: typedef::ExdDescriptors(vals[10].as_u8()),
-            is_signed: typedef::Bool(vals[11].as_u8()),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ExdDataConceptConfiguration> for Message {
     fn from(m: ExdDataConceptConfiguration) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 11];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.screen_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.concept_field != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.concept_field),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.field_id != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_id),
-                is_expanded: is_expanded(&state, 2),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 2),
+            });
+        };
         if m.concept_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.concept_index),
-                is_expanded: is_expanded(&state, 3),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 3),
+            });
+        };
         if m.data_page != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.data_page),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.concept_key != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.concept_key),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.scaling != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.scaling),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.data_units != typedef::ExdDataUnits(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::EXD_DATA_UNITS,
                 value: Value::Uint8(m.data_units.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.qualifier != typedef::ExdQualifiers(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::EXD_QUALIFIERS,
                 value: Value::Uint8(m.qualifier.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.descriptor != typedef::ExdDescriptors(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::EXD_DESCRIPTORS,
                 value: Value::Uint8(m.descriptor.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.is_signed != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.is_signed.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::EXD_DATA_CONCEPT_CONFIGURATION,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

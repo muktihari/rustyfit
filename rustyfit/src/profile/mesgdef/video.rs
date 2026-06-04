@@ -43,6 +43,12 @@ impl Video {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (!self.url.is_empty()) as usize
+            + (!self.hosting_provider.is_empty()) as usize
+            + (self.duration != u32::MAX) as usize
+    }
 }
 
 impl Default for Video {
@@ -54,82 +60,65 @@ impl Default for Video {
 impl From<&Message> for Video {
     /// from creates new Video struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 3];
-
         const KNOWN_NUMS: [u64; 4] = [7, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.url = field.value.as_str().to_owned(),
+                1 => v.hosting_provider = field.value.as_str().to_owned(),
+                2 => v.duration = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            url: vals[0].as_str().to_owned(),
-            hosting_provider: vals[1].as_str().to_owned(),
-            duration: vals[2].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Video> for Message {
     fn from(m: Video) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 3];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if !m.url.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.url),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.hosting_provider.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.hosting_provider),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.duration != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::VIDEO,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

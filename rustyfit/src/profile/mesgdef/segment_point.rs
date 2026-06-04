@@ -189,6 +189,16 @@ impl SegmentPoint {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.position_lat != i32::MAX) as usize
+            + (self.position_long != i32::MAX) as usize
+            + (self.distance != u32::MAX) as usize
+            + (self.altitude != u16::MAX) as usize
+            + (!self.leader_time.is_empty()) as usize
+            + (self.enhanced_altitude != u32::MAX) as usize
+    }
 }
 
 impl Default for SegmentPoint {
@@ -200,128 +210,107 @@ impl Default for SegmentPoint {
 impl From<&Message> for SegmentPoint {
     /// from creates new SegmentPoint struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-        let mut state = [0u8; 1];
-
         const KNOWN_NUMS: [u64; 4] = [126, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                1 => v.position_lat = field.value.as_i32(),
+                2 => v.position_long = field.value.as_i32(),
+                3 => v.distance = field.value.as_u32(),
+                4 => v.altitude = field.value.as_u16(),
+                5 => v.leader_time = field.value.to_vec_u32(),
+                6 => v.enhanced_altitude = field.value.as_u32(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 7 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            position_lat: vals[1].as_i32(),
-            position_long: vals[2].as_i32(),
-            distance: vals[3].as_u32(),
-            altitude: vals[4].as_u16(),
-            leader_time: vals[5].to_vec_u32(),
-            enhanced_altitude: vals[6].as_u32(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SegmentPoint> for Message {
     fn from(m: SegmentPoint) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 7];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_lat != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_long != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.altitude != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.altitude),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.leader_time.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.leader_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enhanced_altitude != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_altitude),
-                is_expanded: is_expanded(&state, 6),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 6),
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_POINT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }
