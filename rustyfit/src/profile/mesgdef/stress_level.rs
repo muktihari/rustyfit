@@ -37,6 +37,11 @@ impl StressLevel {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.stress_level_value != i16::MAX) as usize
+            + (self.stress_level_time != typedef::DateTime(u32::MAX)) as usize
+    }
 }
 
 impl Default for StressLevel {
@@ -48,72 +53,56 @@ impl Default for StressLevel {
 impl From<&Message> for StressLevel {
     /// from creates new StressLevel struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 2];
-
         const KNOWN_NUMS: [u64; 4] = [3, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.stress_level_value = field.value.as_i16(),
+                1 => v.stress_level_time = typedef::DateTime(field.value.as_u32()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            stress_level_value: vals[0].as_i16(),
-            stress_level_time: typedef::DateTime(vals[1].as_u32()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<StressLevel> for Message {
     fn from(m: StressLevel) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 2];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.stress_level_value != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.stress_level_value),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.stress_level_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.stress_level_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::STRESS_LEVEL,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

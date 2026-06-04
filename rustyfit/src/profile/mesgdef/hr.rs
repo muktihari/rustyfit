@@ -154,6 +154,15 @@ impl Hr {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.fractional_timestamp != u16::MAX) as usize
+            + (self.time256 != u8::MAX) as usize
+            + (!self.filtered_bpm.is_empty()) as usize
+            + (!self.event_timestamp.is_empty()) as usize
+            + (!self.event_timestamp_12.is_empty()) as usize
+    }
 }
 
 impl Default for Hr {
@@ -165,118 +174,98 @@ impl Default for Hr {
 impl From<&Message> for Hr {
     /// from creates new Hr struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-        let mut state = [0u8; 2];
-
         const KNOWN_NUMS: [u64; 4] = [1603, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.fractional_timestamp = field.value.as_u16(),
+                1 => v.time256 = field.value.as_u8(),
+                6 => v.filtered_bpm = field.value.to_vec_u8(),
+                9 => v.event_timestamp = field.value.to_vec_u32(),
+                10 => v.event_timestamp_12 = field.value.to_vec_u8(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 10 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            fractional_timestamp: vals[0].as_u16(),
-            time256: vals[1].as_u8(),
-            filtered_bpm: vals[6].to_vec_u8(),
-            event_timestamp: vals[9].to_vec_u32(),
-            event_timestamp_12: vals[10].to_vec_u8(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Hr> for Message {
     fn from(m: Hr) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.fractional_timestamp != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
-                is_expanded: is_expanded(&state, 0),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 0),
+            });
+        };
         if m.time256 != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.time256),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.filtered_bpm.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.filtered_bpm),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.event_timestamp.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.event_timestamp),
-                is_expanded: is_expanded(&state, 9),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 9),
+            });
+        };
         if !m.event_timestamp_12.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.event_timestamp_12),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::HR,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

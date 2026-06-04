@@ -45,6 +45,14 @@ impl DeveloperDataId {
             unknown_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (!self.developer_id.is_empty()) as usize
+            + (!self.application_id.is_empty()) as usize
+            + (self.manufacturer_id != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.developer_data_index != u8::MAX) as usize
+            + (self.application_version != u32::MAX) as usize
+    }
 }
 
 impl Default for DeveloperDataId {
@@ -56,101 +64,82 @@ impl Default for DeveloperDataId {
 impl From<&Message> for DeveloperDataId {
     /// from creates new DeveloperDataId struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 5];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.developer_id = field.value.to_vec_u8(),
+                1 => v.application_id = field.value.to_vec_u8(),
+                2 => v.manufacturer_id = typedef::Manufacturer(field.value.as_u16()),
+                3 => v.developer_data_index = field.value.as_u8(),
+                4 => v.application_version = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            developer_id: vals[0].to_vec_u8(),
-            application_id: vals[1].to_vec_u8(),
-            manufacturer_id: typedef::Manufacturer(vals[2].as_u16()),
-            developer_data_index: vals[3].as_u8(),
-            application_version: vals[4].as_u32(),
-            unknown_fields,
-        }
+        v
     }
 }
 
 impl From<DeveloperDataId> for Message {
     fn from(m: DeveloperDataId) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 5];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if !m.developer_id.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.developer_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.application_id.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.application_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.manufacturer_id != typedef::Manufacturer(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer_id.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.developer_data_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.developer_data_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.application_version != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.application_version),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::DEVELOPER_DATA_ID,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: Vec::new(),
         }
     }

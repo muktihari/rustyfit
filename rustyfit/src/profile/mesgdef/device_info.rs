@@ -155,6 +155,28 @@ impl DeviceInfo {
         self.battery_voltage = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+            + (self.device_type != u8::MAX) as usize
+            + (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.serial_number != u32::MIN) as usize
+            + (self.product != u16::MAX) as usize
+            + (self.software_version != u16::MAX) as usize
+            + (self.hardware_version != u8::MAX) as usize
+            + (self.cum_operating_time != u32::MAX) as usize
+            + (self.battery_voltage != u16::MAX) as usize
+            + (self.battery_status != typedef::BatteryStatus(u8::MAX)) as usize
+            + (self.sensor_position != typedef::BodyLocation(u8::MAX)) as usize
+            + (!self.descriptor.is_empty()) as usize
+            + (self.ant_transmission_type != u8::MIN) as usize
+            + (self.ant_device_number != u16::MIN) as usize
+            + (self.ant_network != typedef::AntNetwork(u8::MAX)) as usize
+            + (self.source_type != typedef::SourceType(u8::MAX)) as usize
+            + (!self.product_name.is_empty()) as usize
+            + (self.battery_level != u8::MAX) as usize
+    }
 }
 
 impl Default for DeviceInfo {
@@ -166,242 +188,209 @@ impl Default for DeviceInfo {
 impl From<&Message> for DeviceInfo {
     /// from creates new DeviceInfo struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [4470869247, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.device_index = typedef::DeviceIndex(field.value.as_u8()),
+                1 => v.device_type = field.value.as_u8(),
+                2 => v.manufacturer = typedef::Manufacturer(field.value.as_u16()),
+                3 => v.serial_number = field.value.as_u32z(),
+                4 => v.product = field.value.as_u16(),
+                5 => v.software_version = field.value.as_u16(),
+                6 => v.hardware_version = field.value.as_u8(),
+                7 => v.cum_operating_time = field.value.as_u32(),
+                10 => v.battery_voltage = field.value.as_u16(),
+                11 => v.battery_status = typedef::BatteryStatus(field.value.as_u8()),
+                18 => v.sensor_position = typedef::BodyLocation(field.value.as_u8()),
+                19 => v.descriptor = field.value.as_str().to_owned(),
+                20 => v.ant_transmission_type = field.value.as_u8z(),
+                21 => v.ant_device_number = field.value.as_u16z(),
+                22 => v.ant_network = typedef::AntNetwork(field.value.as_u8()),
+                25 => v.source_type = typedef::SourceType(field.value.as_u8()),
+                27 => v.product_name = field.value.as_str().to_owned(),
+                32 => v.battery_level = field.value.as_u8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            device_index: typedef::DeviceIndex(vals[0].as_u8()),
-            device_type: vals[1].as_u8(),
-            manufacturer: typedef::Manufacturer(vals[2].as_u16()),
-            serial_number: vals[3].as_u32z(),
-            product: vals[4].as_u16(),
-            software_version: vals[5].as_u16(),
-            hardware_version: vals[6].as_u8(),
-            cum_operating_time: vals[7].as_u32(),
-            battery_voltage: vals[10].as_u16(),
-            battery_status: typedef::BatteryStatus(vals[11].as_u8()),
-            sensor_position: typedef::BodyLocation(vals[18].as_u8()),
-            descriptor: vals[19].as_str().to_owned(),
-            ant_transmission_type: vals[20].as_u8z(),
-            ant_device_number: vals[21].as_u16z(),
-            ant_network: typedef::AntNetwork(vals[22].as_u8()),
-            source_type: typedef::SourceType(vals[25].as_u8()),
-            product_name: vals[27].as_str().to_owned(),
-            battery_level: vals[32].as_u8(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<DeviceInfo> for Message {
     fn from(m: DeviceInfo) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 19];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.device_type != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.device_type),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.manufacturer != typedef::Manufacturer(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::MANUFACTURER,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.serial_number != u32::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32Z,
                 value: Value::Uint32(m.serial_number),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.product != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.software_version != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.software_version),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hardware_version != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.hardware_version),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cum_operating_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.cum_operating_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.battery_voltage != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.battery_voltage),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.battery_status != typedef::BatteryStatus(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::BATTERY_STATUS,
                 value: Value::Uint8(m.battery_status.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sensor_position != typedef::BodyLocation(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::BODY_LOCATION,
                 value: Value::Uint8(m.sensor_position.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.descriptor.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.descriptor),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ant_transmission_type != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 20,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.ant_transmission_type),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ant_device_number != u16::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::UINT16Z,
                 value: Value::Uint16(m.ant_device_number),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ant_network != typedef::AntNetwork(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::ANT_NETWORK,
                 value: Value::Uint8(m.ant_network.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.source_type != typedef::SourceType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::SOURCE_TYPE,
                 value: Value::Uint8(m.source_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.product_name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 27,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.product_name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.battery_level != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 32,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.battery_level),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::DEVICE_INFO,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

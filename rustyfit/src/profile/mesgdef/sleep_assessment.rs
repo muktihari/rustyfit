@@ -117,6 +117,23 @@ impl SleepAssessment {
         self.average_stress_during_sleep = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.combined_awake_score != u8::MAX) as usize
+            + (self.awake_time_score != u8::MAX) as usize
+            + (self.awakenings_count_score != u8::MAX) as usize
+            + (self.deep_sleep_score != u8::MAX) as usize
+            + (self.sleep_duration_score != u8::MAX) as usize
+            + (self.light_sleep_score != u8::MAX) as usize
+            + (self.overall_sleep_score != u8::MAX) as usize
+            + (self.sleep_quality_score != u8::MAX) as usize
+            + (self.sleep_recovery_score != u8::MAX) as usize
+            + (self.rem_sleep_score != u8::MAX) as usize
+            + (self.sleep_restlessness_score != u8::MAX) as usize
+            + (self.awakenings_count != u8::MAX) as usize
+            + (self.interruptions_score != u8::MAX) as usize
+            + (self.average_stress_during_sleep != u16::MAX) as usize
+    }
 }
 
 impl Default for SleepAssessment {
@@ -128,192 +145,164 @@ impl Default for SleepAssessment {
 impl From<&Message> for SleepAssessment {
     /// from creates new SleepAssessment struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 16];
-
         const KNOWN_NUMS: [u64; 4] = [53247, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.combined_awake_score = field.value.as_u8(),
+                1 => v.awake_time_score = field.value.as_u8(),
+                2 => v.awakenings_count_score = field.value.as_u8(),
+                3 => v.deep_sleep_score = field.value.as_u8(),
+                4 => v.sleep_duration_score = field.value.as_u8(),
+                5 => v.light_sleep_score = field.value.as_u8(),
+                6 => v.overall_sleep_score = field.value.as_u8(),
+                7 => v.sleep_quality_score = field.value.as_u8(),
+                8 => v.sleep_recovery_score = field.value.as_u8(),
+                9 => v.rem_sleep_score = field.value.as_u8(),
+                10 => v.sleep_restlessness_score = field.value.as_u8(),
+                11 => v.awakenings_count = field.value.as_u8(),
+                14 => v.interruptions_score = field.value.as_u8(),
+                15 => v.average_stress_during_sleep = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            combined_awake_score: vals[0].as_u8(),
-            awake_time_score: vals[1].as_u8(),
-            awakenings_count_score: vals[2].as_u8(),
-            deep_sleep_score: vals[3].as_u8(),
-            sleep_duration_score: vals[4].as_u8(),
-            light_sleep_score: vals[5].as_u8(),
-            overall_sleep_score: vals[6].as_u8(),
-            sleep_quality_score: vals[7].as_u8(),
-            sleep_recovery_score: vals[8].as_u8(),
-            rem_sleep_score: vals[9].as_u8(),
-            sleep_restlessness_score: vals[10].as_u8(),
-            awakenings_count: vals[11].as_u8(),
-            interruptions_score: vals[14].as_u8(),
-            average_stress_during_sleep: vals[15].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SleepAssessment> for Message {
     fn from(m: SleepAssessment) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 14];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.combined_awake_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.combined_awake_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.awake_time_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.awake_time_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.awakenings_count_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.awakenings_count_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.deep_sleep_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.deep_sleep_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sleep_duration_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_duration_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.light_sleep_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.light_sleep_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.overall_sleep_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.overall_sleep_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sleep_quality_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_quality_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sleep_recovery_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_recovery_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.rem_sleep_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.rem_sleep_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sleep_restlessness_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sleep_restlessness_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.awakenings_count != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.awakenings_count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.interruptions_score != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.interruptions_score),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.average_stress_during_sleep != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.average_stress_during_sleep),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SLEEP_ASSESSMENT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

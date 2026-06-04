@@ -1431,6 +1431,93 @@ impl Record {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.position_lat != i32::MAX) as usize
+            + (self.position_long != i32::MAX) as usize
+            + (self.altitude != u16::MAX) as usize
+            + (self.heart_rate != u8::MAX) as usize
+            + (self.cadence != u8::MAX) as usize
+            + (self.distance != u32::MAX) as usize
+            + (self.speed != u16::MAX) as usize
+            + (self.power != u16::MAX) as usize
+            + (self.compressed_speed_distance != [u8::MAX; 3]) as usize
+            + (self.grade != i16::MAX) as usize
+            + (self.resistance != u8::MAX) as usize
+            + (self.time_from_course != i32::MAX) as usize
+            + (self.cycle_length != u8::MAX) as usize
+            + (self.temperature != i8::MAX) as usize
+            + (!self.speed_1s.is_empty()) as usize
+            + (self.cycles != u8::MAX) as usize
+            + (self.total_cycles != u32::MAX) as usize
+            + (self.compressed_accumulated_power != u16::MAX) as usize
+            + (self.accumulated_power != u32::MAX) as usize
+            + (self.left_right_balance != typedef::LeftRightBalance(u8::MAX)) as usize
+            + (self.gps_accuracy != u8::MAX) as usize
+            + (self.vertical_speed != i16::MAX) as usize
+            + (self.calories != u16::MAX) as usize
+            + (self.vertical_oscillation != u16::MAX) as usize
+            + (self.stance_time_percent != u16::MAX) as usize
+            + (self.stance_time != u16::MAX) as usize
+            + (self.activity_type != typedef::ActivityType(u8::MAX)) as usize
+            + (self.left_torque_effectiveness != u8::MAX) as usize
+            + (self.right_torque_effectiveness != u8::MAX) as usize
+            + (self.left_pedal_smoothness != u8::MAX) as usize
+            + (self.right_pedal_smoothness != u8::MAX) as usize
+            + (self.combined_pedal_smoothness != u8::MAX) as usize
+            + (self.time128 != u8::MAX) as usize
+            + (self.stroke_type != typedef::StrokeType(u8::MAX)) as usize
+            + (self.zone != u8::MAX) as usize
+            + (self.ball_speed != u16::MAX) as usize
+            + (self.cadence256 != u16::MAX) as usize
+            + (self.fractional_cadence != u8::MAX) as usize
+            + (self.total_hemoglobin_conc != u16::MAX) as usize
+            + (self.total_hemoglobin_conc_min != u16::MAX) as usize
+            + (self.total_hemoglobin_conc_max != u16::MAX) as usize
+            + (self.saturated_hemoglobin_percent != u16::MAX) as usize
+            + (self.saturated_hemoglobin_percent_min != u16::MAX) as usize
+            + (self.saturated_hemoglobin_percent_max != u16::MAX) as usize
+            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+            + (self.left_pco != i8::MAX) as usize
+            + (self.right_pco != i8::MAX) as usize
+            + (!self.left_power_phase.is_empty()) as usize
+            + (!self.left_power_phase_peak.is_empty()) as usize
+            + (!self.right_power_phase.is_empty()) as usize
+            + (!self.right_power_phase_peak.is_empty()) as usize
+            + (self.enhanced_speed != u32::MAX) as usize
+            + (self.enhanced_altitude != u32::MAX) as usize
+            + (self.battery_soc != u8::MAX) as usize
+            + (self.motor_power != u16::MAX) as usize
+            + (self.vertical_ratio != u16::MAX) as usize
+            + (self.stance_time_balance != u16::MAX) as usize
+            + (self.step_length != u16::MAX) as usize
+            + (self.cycle_length16 != u16::MAX) as usize
+            + (self.absolute_pressure != u32::MAX) as usize
+            + (self.depth != u32::MAX) as usize
+            + (self.next_stop_depth != u32::MAX) as usize
+            + (self.next_stop_time != u32::MAX) as usize
+            + (self.time_to_surface != u32::MAX) as usize
+            + (self.ndl_time != u32::MAX) as usize
+            + (self.cns_load != u8::MAX) as usize
+            + (self.n2_load != u16::MAX) as usize
+            + (self.respiration_rate != u8::MAX) as usize
+            + (self.enhanced_respiration_rate != u16::MAX) as usize
+            + (self.grit != f32::MAX) as usize
+            + (self.flow != f32::MAX) as usize
+            + (self.current_stress != u16::MAX) as usize
+            + (self.ebike_travel_range != u16::MAX) as usize
+            + (self.ebike_battery_level != u8::MAX) as usize
+            + (self.ebike_assist_mode != u8::MAX) as usize
+            + (self.ebike_assist_level_percent != u8::MAX) as usize
+            + (self.air_time_remaining != u32::MAX) as usize
+            + (self.pressure_sac != u16::MAX) as usize
+            + (self.volume_sac != u16::MAX) as usize
+            + (self.rmv != u16::MAX) as usize
+            + (self.ascent_rate != i32::MAX) as usize
+            + (self.po2 != u8::MAX) as usize
+            + (self.core_temperature != u16::MAX) as usize
+    }
 }
 
 impl Default for Record {
@@ -1442,9 +1529,6 @@ impl Default for Record {
 impl From<&Message> for Record {
     /// from creates new Record struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-        let mut state = [0u8; 14];
-
         const KNOWN_NUMS: [u64; 4] = [
             5764606990190788607,
             18013290270358914040,
@@ -1455,899 +1539,806 @@ impl From<&Message> for Record {
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.position_lat = field.value.as_i32(),
+                1 => v.position_long = field.value.as_i32(),
+                2 => v.altitude = field.value.as_u16(),
+                3 => v.heart_rate = field.value.as_u8(),
+                4 => v.cadence = field.value.as_u8(),
+                5 => v.distance = field.value.as_u32(),
+                6 => v.speed = field.value.as_u16(),
+                7 => v.power = field.value.as_u16(),
+                8 => {
+                    v.compressed_speed_distance = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut arr = [u8::MAX; 3];
+                            for (i, x) in v.iter().take(3).enumerate() {
+                                arr[i] = *x;
+                            }
+                            arr
+                        }
+                        _ => [u8::MAX; 3],
+                    }
+                }
+                9 => v.grade = field.value.as_i16(),
+                10 => v.resistance = field.value.as_u8(),
+                11 => v.time_from_course = field.value.as_i32(),
+                12 => v.cycle_length = field.value.as_u8(),
+                13 => v.temperature = field.value.as_i8(),
+                17 => v.speed_1s = field.value.to_vec_u8(),
+                18 => v.cycles = field.value.as_u8(),
+                19 => v.total_cycles = field.value.as_u32(),
+                28 => v.compressed_accumulated_power = field.value.as_u16(),
+                29 => v.accumulated_power = field.value.as_u32(),
+                30 => v.left_right_balance = typedef::LeftRightBalance(field.value.as_u8()),
+                31 => v.gps_accuracy = field.value.as_u8(),
+                32 => v.vertical_speed = field.value.as_i16(),
+                33 => v.calories = field.value.as_u16(),
+                39 => v.vertical_oscillation = field.value.as_u16(),
+                40 => v.stance_time_percent = field.value.as_u16(),
+                41 => v.stance_time = field.value.as_u16(),
+                42 => v.activity_type = typedef::ActivityType(field.value.as_u8()),
+                43 => v.left_torque_effectiveness = field.value.as_u8(),
+                44 => v.right_torque_effectiveness = field.value.as_u8(),
+                45 => v.left_pedal_smoothness = field.value.as_u8(),
+                46 => v.right_pedal_smoothness = field.value.as_u8(),
+                47 => v.combined_pedal_smoothness = field.value.as_u8(),
+                48 => v.time128 = field.value.as_u8(),
+                49 => v.stroke_type = typedef::StrokeType(field.value.as_u8()),
+                50 => v.zone = field.value.as_u8(),
+                51 => v.ball_speed = field.value.as_u16(),
+                52 => v.cadence256 = field.value.as_u16(),
+                53 => v.fractional_cadence = field.value.as_u8(),
+                54 => v.total_hemoglobin_conc = field.value.as_u16(),
+                55 => v.total_hemoglobin_conc_min = field.value.as_u16(),
+                56 => v.total_hemoglobin_conc_max = field.value.as_u16(),
+                57 => v.saturated_hemoglobin_percent = field.value.as_u16(),
+                58 => v.saturated_hemoglobin_percent_min = field.value.as_u16(),
+                59 => v.saturated_hemoglobin_percent_max = field.value.as_u16(),
+                62 => v.device_index = typedef::DeviceIndex(field.value.as_u8()),
+                67 => v.left_pco = field.value.as_i8(),
+                68 => v.right_pco = field.value.as_i8(),
+                69 => v.left_power_phase = field.value.to_vec_u8(),
+                70 => v.left_power_phase_peak = field.value.to_vec_u8(),
+                71 => v.right_power_phase = field.value.to_vec_u8(),
+                72 => v.right_power_phase_peak = field.value.to_vec_u8(),
+                73 => v.enhanced_speed = field.value.as_u32(),
+                78 => v.enhanced_altitude = field.value.as_u32(),
+                81 => v.battery_soc = field.value.as_u8(),
+                82 => v.motor_power = field.value.as_u16(),
+                83 => v.vertical_ratio = field.value.as_u16(),
+                84 => v.stance_time_balance = field.value.as_u16(),
+                85 => v.step_length = field.value.as_u16(),
+                87 => v.cycle_length16 = field.value.as_u16(),
+                91 => v.absolute_pressure = field.value.as_u32(),
+                92 => v.depth = field.value.as_u32(),
+                93 => v.next_stop_depth = field.value.as_u32(),
+                94 => v.next_stop_time = field.value.as_u32(),
+                95 => v.time_to_surface = field.value.as_u32(),
+                96 => v.ndl_time = field.value.as_u32(),
+                97 => v.cns_load = field.value.as_u8(),
+                98 => v.n2_load = field.value.as_u16(),
+                99 => v.respiration_rate = field.value.as_u8(),
+                108 => v.enhanced_respiration_rate = field.value.as_u16(),
+                114 => v.grit = field.value.as_f32(),
+                115 => v.flow = field.value.as_f32(),
+                116 => v.current_stress = field.value.as_u16(),
+                117 => v.ebike_travel_range = field.value.as_u16(),
+                118 => v.ebike_battery_level = field.value.as_u8(),
+                119 => v.ebike_assist_mode = field.value.as_u8(),
+                120 => v.ebike_assist_level_percent = field.value.as_u8(),
+                123 => v.air_time_remaining = field.value.as_u32(),
+                124 => v.pressure_sac = field.value.as_u16(),
+                125 => v.volume_sac = field.value.as_u16(),
+                126 => v.rmv = field.value.as_u16(),
+                127 => v.ascent_rate = field.value.as_i32(),
+                129 => v.po2 = field.value.as_u8(),
+                139 => v.core_temperature = field.value.as_u16(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 109 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            position_lat: vals[0].as_i32(),
-            position_long: vals[1].as_i32(),
-            altitude: vals[2].as_u16(),
-            heart_rate: vals[3].as_u8(),
-            cadence: vals[4].as_u8(),
-            distance: vals[5].as_u32(),
-            speed: vals[6].as_u16(),
-            power: vals[7].as_u16(),
-            compressed_speed_distance: match &vals[8] {
-                Value::VecUint8(v) => {
-                    let mut arr = [u8::MAX; 3];
-                    for (i, x) in v.iter().take(3).enumerate() {
-                        arr[i] = *x;
-                    }
-                    arr
-                }
-                _ => [u8::MAX; 3],
-            },
-            grade: vals[9].as_i16(),
-            resistance: vals[10].as_u8(),
-            time_from_course: vals[11].as_i32(),
-            cycle_length: vals[12].as_u8(),
-            temperature: vals[13].as_i8(),
-            speed_1s: vals[17].to_vec_u8(),
-            cycles: vals[18].as_u8(),
-            total_cycles: vals[19].as_u32(),
-            compressed_accumulated_power: vals[28].as_u16(),
-            accumulated_power: vals[29].as_u32(),
-            left_right_balance: typedef::LeftRightBalance(vals[30].as_u8()),
-            gps_accuracy: vals[31].as_u8(),
-            vertical_speed: vals[32].as_i16(),
-            calories: vals[33].as_u16(),
-            vertical_oscillation: vals[39].as_u16(),
-            stance_time_percent: vals[40].as_u16(),
-            stance_time: vals[41].as_u16(),
-            activity_type: typedef::ActivityType(vals[42].as_u8()),
-            left_torque_effectiveness: vals[43].as_u8(),
-            right_torque_effectiveness: vals[44].as_u8(),
-            left_pedal_smoothness: vals[45].as_u8(),
-            right_pedal_smoothness: vals[46].as_u8(),
-            combined_pedal_smoothness: vals[47].as_u8(),
-            time128: vals[48].as_u8(),
-            stroke_type: typedef::StrokeType(vals[49].as_u8()),
-            zone: vals[50].as_u8(),
-            ball_speed: vals[51].as_u16(),
-            cadence256: vals[52].as_u16(),
-            fractional_cadence: vals[53].as_u8(),
-            total_hemoglobin_conc: vals[54].as_u16(),
-            total_hemoglobin_conc_min: vals[55].as_u16(),
-            total_hemoglobin_conc_max: vals[56].as_u16(),
-            saturated_hemoglobin_percent: vals[57].as_u16(),
-            saturated_hemoglobin_percent_min: vals[58].as_u16(),
-            saturated_hemoglobin_percent_max: vals[59].as_u16(),
-            device_index: typedef::DeviceIndex(vals[62].as_u8()),
-            left_pco: vals[67].as_i8(),
-            right_pco: vals[68].as_i8(),
-            left_power_phase: vals[69].to_vec_u8(),
-            left_power_phase_peak: vals[70].to_vec_u8(),
-            right_power_phase: vals[71].to_vec_u8(),
-            right_power_phase_peak: vals[72].to_vec_u8(),
-            enhanced_speed: vals[73].as_u32(),
-            enhanced_altitude: vals[78].as_u32(),
-            battery_soc: vals[81].as_u8(),
-            motor_power: vals[82].as_u16(),
-            vertical_ratio: vals[83].as_u16(),
-            stance_time_balance: vals[84].as_u16(),
-            step_length: vals[85].as_u16(),
-            cycle_length16: vals[87].as_u16(),
-            absolute_pressure: vals[91].as_u32(),
-            depth: vals[92].as_u32(),
-            next_stop_depth: vals[93].as_u32(),
-            next_stop_time: vals[94].as_u32(),
-            time_to_surface: vals[95].as_u32(),
-            ndl_time: vals[96].as_u32(),
-            cns_load: vals[97].as_u8(),
-            n2_load: vals[98].as_u16(),
-            respiration_rate: vals[99].as_u8(),
-            enhanced_respiration_rate: vals[108].as_u16(),
-            grit: vals[114].as_f32(),
-            flow: vals[115].as_f32(),
-            current_stress: vals[116].as_u16(),
-            ebike_travel_range: vals[117].as_u16(),
-            ebike_battery_level: vals[118].as_u8(),
-            ebike_assist_mode: vals[119].as_u8(),
-            ebike_assist_level_percent: vals[120].as_u8(),
-            air_time_remaining: vals[123].as_u32(),
-            pressure_sac: vals[124].as_u16(),
-            volume_sac: vals[125].as_u16(),
-            rmv: vals[126].as_u16(),
-            ascent_rate: vals[127].as_i32(),
-            po2: vals[129].as_u8(),
-            core_temperature: vals[139].as_u16(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Record> for Message {
     fn from(m: Record) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 84];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_lat != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_long != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.altitude != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.altitude),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cadence != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cadence),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
-                is_expanded: is_expanded(&state, 5),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 5),
+            });
+        };
         if m.speed != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.speed),
-                is_expanded: is_expanded(&state, 6),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 6),
+            });
+        };
         if m.power != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.power),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.compressed_speed_distance != [u8::MAX; 3] {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(Vec::from(&m.compressed_speed_distance)),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.grade != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.grade),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.resistance != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resistance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time_from_course != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.time_from_course),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cycle_length != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cycle_length),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.temperature),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.speed_1s.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.speed_1s),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cycles != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cycles),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_cycles != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.total_cycles),
-                is_expanded: is_expanded(&state, 19),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 19),
+            });
+        };
         if m.compressed_accumulated_power != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 28,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.compressed_accumulated_power),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.accumulated_power != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 29,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.accumulated_power),
-                is_expanded: is_expanded(&state, 29),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 29),
+            });
+        };
         if m.left_right_balance != typedef::LeftRightBalance(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::LEFT_RIGHT_BALANCE,
                 value: Value::Uint8(m.left_right_balance.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.gps_accuracy != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 31,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.gps_accuracy),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.vertical_speed != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 32,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.vertical_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.calories != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 33,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.vertical_oscillation != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 39,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vertical_oscillation),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.stance_time_percent != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 40,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stance_time_percent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.stance_time != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 41,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stance_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_type != typedef::ActivityType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 42,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.left_torque_effectiveness != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 43,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.left_torque_effectiveness),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.right_torque_effectiveness != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 44,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.right_torque_effectiveness),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.left_pedal_smoothness != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 45,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.left_pedal_smoothness),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.right_pedal_smoothness != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 46,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.right_pedal_smoothness),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.combined_pedal_smoothness != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 47,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.combined_pedal_smoothness),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time128 != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 48,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.time128),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.stroke_type != typedef::StrokeType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 49,
                 profile_type: ProfileType::STROKE_TYPE,
                 value: Value::Uint8(m.stroke_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.zone != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 50,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.zone),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ball_speed != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 51,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.ball_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cadence256 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 52,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.cadence256),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.fractional_cadence != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 53,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.fractional_cadence),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_hemoglobin_conc != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 54,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_hemoglobin_conc),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_hemoglobin_conc_min != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 55,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_hemoglobin_conc_min),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.total_hemoglobin_conc_max != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 56,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.total_hemoglobin_conc_max),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.saturated_hemoglobin_percent != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 57,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.saturated_hemoglobin_percent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.saturated_hemoglobin_percent_min != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 58,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.saturated_hemoglobin_percent_min),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.saturated_hemoglobin_percent_max != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 59,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.saturated_hemoglobin_percent_max),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 62,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.left_pco != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 67,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.left_pco),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.right_pco != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 68,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.right_pco),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.left_power_phase.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 69,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.left_power_phase),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.left_power_phase_peak.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 70,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.left_power_phase_peak),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.right_power_phase.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 71,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.right_power_phase),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.right_power_phase_peak.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 72,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.right_power_phase_peak),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enhanced_speed != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 73,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_speed),
-                is_expanded: is_expanded(&state, 73),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 73),
+            });
+        };
         if m.enhanced_altitude != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 78,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.enhanced_altitude),
-                is_expanded: is_expanded(&state, 78),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 78),
+            });
+        };
         if m.battery_soc != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 81,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.battery_soc),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.motor_power != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 82,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.motor_power),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.vertical_ratio != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 83,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vertical_ratio),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.stance_time_balance != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 84,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.stance_time_balance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.step_length != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 85,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.step_length),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cycle_length16 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 87,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.cycle_length16),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.absolute_pressure != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 91,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.absolute_pressure),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 92,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.next_stop_depth != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 93,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.next_stop_depth),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.next_stop_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 94,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.next_stop_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.time_to_surface != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 95,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.time_to_surface),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ndl_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 96,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ndl_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cns_load != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 97,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.cns_load),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.n2_load != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 98,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.n2_load),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.respiration_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 99,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.respiration_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enhanced_respiration_rate != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 108,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.enhanced_respiration_rate),
-                is_expanded: is_expanded(&state, 108),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 108),
+            });
+        };
         if m.grit != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 114,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.grit),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.flow != f32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 115,
                 profile_type: ProfileType::FLOAT32,
                 value: Value::Float32(m.flow),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.current_stress != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 116,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.current_stress),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ebike_travel_range != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 117,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.ebike_travel_range),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ebike_battery_level != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 118,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ebike_battery_level),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ebike_assist_mode != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 119,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ebike_assist_mode),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ebike_assist_level_percent != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 120,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.ebike_assist_level_percent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.air_time_remaining != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 123,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.air_time_remaining),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pressure_sac != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 124,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.pressure_sac),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.volume_sac != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 125,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.volume_sac),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.rmv != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 126,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.rmv),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ascent_rate != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 127,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.ascent_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.po2 != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 129,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.po2),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.core_temperature != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 139,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.core_temperature),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::RECORD,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

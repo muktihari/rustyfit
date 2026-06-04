@@ -36,6 +36,23 @@ pub fn bench_from(c: &mut Criterion) {
             let _ = Record::from(black_box(&mesg));
         })
     });
+
+    c.bench_function("mesgdef From<Record>", |b| {
+        b.iter(|| {
+            let mut record = Record::new();
+            record.distance = 1000;
+            record.speed = 1000;
+            record.power = 1000;
+            record.temperature = 29;
+            record.position_lat = 0;
+            record.position_long = 0;
+            record.altitude = 6000;
+
+            let mesg = Message::from(record);
+            assert_eq!(mesg.fields.len(), 7);
+            assert_eq!(mesg.fields.capacity(), 7);
+        })
+    });
 }
 
 pub fn bench_new(c: &mut Criterion) {

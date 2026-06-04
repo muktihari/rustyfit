@@ -73,6 +73,18 @@ impl ObdiiData {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.timestamp_ms != u16::MAX) as usize
+            + (!self.time_offset.is_empty()) as usize
+            + (self.pid != u8::MAX) as usize
+            + (!self.raw_data.is_empty()) as usize
+            + (!self.pid_data_size.is_empty()) as usize
+            + (!self.system_time.is_empty()) as usize
+            + (self.start_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.start_timestamp_ms != u16::MAX) as usize
+    }
 }
 
 impl Default for ObdiiData {
@@ -84,142 +96,119 @@ impl Default for ObdiiData {
 impl From<&Message> for ObdiiData {
     /// from creates new ObdiiData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [255, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.timestamp_ms = field.value.as_u16(),
+                1 => v.time_offset = field.value.to_vec_u16(),
+                2 => v.pid = field.value.as_u8(),
+                3 => v.raw_data = field.value.to_vec_u8(),
+                4 => v.pid_data_size = field.value.to_vec_u8(),
+                5 => v.system_time = field.value.to_vec_u32(),
+                6 => v.start_timestamp = typedef::DateTime(field.value.as_u32()),
+                7 => v.start_timestamp_ms = field.value.as_u16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            timestamp_ms: vals[0].as_u16(),
-            time_offset: vals[1].to_vec_u16(),
-            pid: vals[2].as_u8(),
-            raw_data: vals[3].to_vec_u8(),
-            pid_data_size: vals[4].to_vec_u8(),
-            system_time: vals[5].to_vec_u32(),
-            start_timestamp: typedef::DateTime(vals[6].as_u32()),
-            start_timestamp_ms: vals[7].as_u16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ObdiiData> for Message {
     fn from(m: ObdiiData) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 9];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_offset.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.time_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.pid != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.pid),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.raw_data.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.raw_data),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.pid_data_size.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.pid_data_size),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.system_time.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.system_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.start_timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::OBDII_DATA,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -74,6 +74,19 @@ impl Totals {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.timer_time != u32::MAX) as usize
+            + (self.distance != u32::MAX) as usize
+            + (self.calories != u32::MAX) as usize
+            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.elapsed_time != u32::MAX) as usize
+            + (self.sessions != u16::MAX) as usize
+            + (self.active_time != u32::MAX) as usize
+            + (self.sport_index != u8::MAX) as usize
+    }
 }
 
 impl Default for Totals {
@@ -85,152 +98,128 @@ impl Default for Totals {
 impl From<&Message> for Totals {
     /// from creates new Totals struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [639, 0, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.timer_time = field.value.as_u32(),
+                1 => v.distance = field.value.as_u32(),
+                2 => v.calories = field.value.as_u32(),
+                3 => v.sport = typedef::Sport(field.value.as_u8()),
+                4 => v.elapsed_time = field.value.as_u32(),
+                5 => v.sessions = field.value.as_u16(),
+                6 => v.active_time = field.value.as_u32(),
+                9 => v.sport_index = field.value.as_u8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            timer_time: vals[0].as_u32(),
-            distance: vals[1].as_u32(),
-            calories: vals[2].as_u32(),
-            sport: typedef::Sport(vals[3].as_u8()),
-            elapsed_time: vals[4].as_u32(),
-            sessions: vals[5].as_u16(),
-            active_time: vals[6].as_u32(),
-            sport_index: vals[9].as_u8(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Totals> for Message {
     fn from(m: Totals) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 10];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timer_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.timer_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.calories != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport != typedef::Sport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.elapsed_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.elapsed_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sessions != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.sessions),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.active_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.sport_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::TOTALS,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

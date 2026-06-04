@@ -46,6 +46,13 @@ impl ExerciseTitle {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.exercise_category != typedef::ExerciseCategory(u16::MAX)) as usize
+            + (self.exercise_name != u16::MAX) as usize
+            + (!self.wkt_step_name.is_empty()) as usize
+    }
 }
 
 impl Default for ExerciseTitle {
@@ -57,92 +64,74 @@ impl Default for ExerciseTitle {
 impl From<&Message> for ExerciseTitle {
     /// from creates new ExerciseTitle struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [7, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.exercise_category = typedef::ExerciseCategory(field.value.as_u16()),
+                1 => v.exercise_name = field.value.as_u16(),
+                2 => v.wkt_step_name = field.value.to_vec_string(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            exercise_category: typedef::ExerciseCategory(vals[0].as_u16()),
-            exercise_name: vals[1].as_u16(),
-            wkt_step_name: vals[2].to_vec_string(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ExerciseTitle> for Message {
     fn from(m: ExerciseTitle) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 4];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.exercise_category != typedef::ExerciseCategory(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
                 value: Value::Uint16(m.exercise_category.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.exercise_name != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.exercise_name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.wkt_step_name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.wkt_step_name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::EXERCISE_TITLE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

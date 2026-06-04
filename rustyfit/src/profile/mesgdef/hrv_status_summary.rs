@@ -180,6 +180,17 @@ impl HrvStatusSummary {
         self.baseline_balanced_upper = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.weekly_average != u16::MAX) as usize
+            + (self.last_night_average != u16::MAX) as usize
+            + (self.last_night_5_min_high != u16::MAX) as usize
+            + (self.baseline_low_upper != u16::MAX) as usize
+            + (self.baseline_balanced_lower != u16::MAX) as usize
+            + (self.baseline_balanced_upper != u16::MAX) as usize
+            + (self.status != typedef::HrvStatus(u8::MAX)) as usize
+    }
 }
 
 impl Default for HrvStatusSummary {
@@ -191,132 +202,110 @@ impl Default for HrvStatusSummary {
 impl From<&Message> for HrvStatusSummary {
     /// from creates new HrvStatusSummary struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [127, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.weekly_average = field.value.as_u16(),
+                1 => v.last_night_average = field.value.as_u16(),
+                2 => v.last_night_5_min_high = field.value.as_u16(),
+                3 => v.baseline_low_upper = field.value.as_u16(),
+                4 => v.baseline_balanced_lower = field.value.as_u16(),
+                5 => v.baseline_balanced_upper = field.value.as_u16(),
+                6 => v.status = typedef::HrvStatus(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            weekly_average: vals[0].as_u16(),
-            last_night_average: vals[1].as_u16(),
-            last_night_5_min_high: vals[2].as_u16(),
-            baseline_low_upper: vals[3].as_u16(),
-            baseline_balanced_lower: vals[4].as_u16(),
-            baseline_balanced_upper: vals[5].as_u16(),
-            status: typedef::HrvStatus(vals[6].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<HrvStatusSummary> for Message {
     fn from(m: HrvStatusSummary) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 8];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weekly_average != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.weekly_average),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.last_night_average != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.last_night_average),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.last_night_5_min_high != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.last_night_5_min_high),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.baseline_low_upper != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.baseline_low_upper),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.baseline_balanced_lower != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.baseline_balanced_lower),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.baseline_balanced_upper != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.baseline_balanced_upper),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.status != typedef::HrvStatus(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::HRV_STATUS,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::HRV_STATUS_SUMMARY,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

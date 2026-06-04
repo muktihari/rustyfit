@@ -75,6 +75,18 @@ impl SegmentId {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (!self.name.is_empty()) as usize
+            + (!self.uuid.is_empty()) as usize
+            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.user_profile_primary_key != u32::MAX) as usize
+            + (self.device_id != u32::MAX) as usize
+            + (self.default_race_leader != u8::MAX) as usize
+            + (self.delete_status != typedef::SegmentDeleteStatus(u8::MAX)) as usize
+            + (self.selection_type != typedef::SegmentSelectionType(u8::MAX)) as usize
+    }
 }
 
 impl Default for SegmentId {
@@ -86,142 +98,119 @@ impl Default for SegmentId {
 impl From<&Message> for SegmentId {
     /// from creates new SegmentId struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 9];
-
         const KNOWN_NUMS: [u64; 4] = [511, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.name = field.value.as_str().to_owned(),
+                1 => v.uuid = field.value.as_str().to_owned(),
+                2 => v.sport = typedef::Sport(field.value.as_u8()),
+                3 => v.enabled = typedef::Bool(field.value.as_u8()),
+                4 => v.user_profile_primary_key = field.value.as_u32(),
+                5 => v.device_id = field.value.as_u32(),
+                6 => v.default_race_leader = field.value.as_u8(),
+                7 => v.delete_status = typedef::SegmentDeleteStatus(field.value.as_u8()),
+                8 => v.selection_type = typedef::SegmentSelectionType(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            name: vals[0].as_str().to_owned(),
-            uuid: vals[1].as_str().to_owned(),
-            sport: typedef::Sport(vals[2].as_u8()),
-            enabled: typedef::Bool(vals[3].as_u8()),
-            user_profile_primary_key: vals[4].as_u32(),
-            device_id: vals[5].as_u32(),
-            default_race_leader: vals[6].as_u8(),
-            delete_status: typedef::SegmentDeleteStatus(vals[7].as_u8()),
-            selection_type: typedef::SegmentSelectionType(vals[8].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SegmentId> for Message {
     fn from(m: SegmentId) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 9];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if !m.name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.uuid.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.uuid),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sport != typedef::Sport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SPORT,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.user_profile_primary_key != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.user_profile_primary_key),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.device_id != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.device_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.default_race_leader != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_race_leader),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.delete_status != typedef::SegmentDeleteStatus(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SEGMENT_DELETE_STATUS,
                 value: Value::Uint8(m.delete_status.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.selection_type != typedef::SegmentSelectionType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::SEGMENT_SELECTION_TYPE,
                 value: Value::Uint8(m.selection_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_ID,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

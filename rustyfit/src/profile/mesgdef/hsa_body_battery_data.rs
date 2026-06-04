@@ -53,6 +53,14 @@ impl HsaBodyBatteryData {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.processing_interval != u16::MAX) as usize
+            + (!self.level.is_empty()) as usize
+            + (!self.charged.is_empty()) as usize
+            + (!self.uncharged.is_empty()) as usize
+    }
 }
 
 impl Default for HsaBodyBatteryData {
@@ -64,102 +72,83 @@ impl Default for HsaBodyBatteryData {
 impl From<&Message> for HsaBodyBatteryData {
     /// from creates new HsaBodyBatteryData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [15, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.processing_interval = field.value.as_u16(),
+                1 => v.level = field.value.to_vec_i8(),
+                2 => v.charged = field.value.to_vec_i16(),
+                3 => v.uncharged = field.value.to_vec_i16(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            processing_interval: vals[0].as_u16(),
-            level: vals[1].to_vec_i8(),
-            charged: vals[2].to_vec_i16(),
-            uncharged: vals[3].to_vec_i16(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<HsaBodyBatteryData> for Message {
     fn from(m: HsaBodyBatteryData) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 5];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.processing_interval != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.processing_interval),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.level.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SINT8,
                 value: Value::VecInt8(m.level),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.charged.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.charged),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.uncharged.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::SINT16,
                 value: Value::VecInt16(m.uncharged),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::HSA_BODY_BATTERY_DATA,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

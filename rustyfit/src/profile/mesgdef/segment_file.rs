@@ -74,6 +74,18 @@ impl SegmentFile {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (!self.file_uuid.is_empty()) as usize
+            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.user_profile_primary_key != u32::MAX) as usize
+            + (!self.leader_type.is_empty()) as usize
+            + (!self.leader_group_primary_key.is_empty()) as usize
+            + (!self.leader_activity_id.is_empty()) as usize
+            + (!self.leader_activity_id_string.is_empty()) as usize
+            + (self.default_race_leader != u8::MAX) as usize
+    }
 }
 
 impl Default for SegmentFile {
@@ -85,96 +97,83 @@ impl Default for SegmentFile {
 impl From<&Message> for SegmentFile {
     /// from creates new SegmentFile struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [3994, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                1 => v.file_uuid = field.value.as_str().to_owned(),
+                3 => v.enabled = typedef::Bool(field.value.as_u8()),
+                4 => v.user_profile_primary_key = field.value.as_u32(),
+                7 => {
+                    v.leader_type = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::SegmentLeaderboardType(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                8 => v.leader_group_primary_key = field.value.to_vec_u32(),
+                9 => v.leader_activity_id = field.value.to_vec_u32(),
+                10 => v.leader_activity_id_string = field.value.to_vec_string(),
+                11 => v.default_race_leader = field.value.as_u8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            file_uuid: vals[1].as_str().to_owned(),
-            enabled: typedef::Bool(vals[3].as_u8()),
-            user_profile_primary_key: vals[4].as_u32(),
-            leader_type: match &vals[7] {
-                Value::VecUint8(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::SegmentLeaderboardType(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            leader_group_primary_key: vals[8].to_vec_u32(),
-            leader_activity_id: vals[9].to_vec_u32(),
-            leader_activity_id_string: vals[10].to_vec_string(),
-            default_race_leader: vals[11].as_u8(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SegmentFile> for Message {
     fn from(m: SegmentFile) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 9];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.file_uuid.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.file_uuid),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.user_profile_primary_key != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.user_profile_primary_key),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.leader_type.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
                 value: Value::VecUint8({
@@ -182,55 +181,47 @@ impl From<SegmentFile> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.leader_group_primary_key.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.leader_group_primary_key),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.leader_activity_id.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.leader_activity_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.leader_activity_id_string.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::STRING,
                 value: Value::VecString(m.leader_activity_id_string),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.default_race_leader != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_race_leader),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_FILE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

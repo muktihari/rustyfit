@@ -370,6 +370,38 @@ impl Monitoring {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+            + (self.calories != u16::MAX) as usize
+            + (self.distance != u32::MAX) as usize
+            + (self.cycles != u32::MAX) as usize
+            + (self.active_time != u32::MAX) as usize
+            + (self.activity_type != typedef::ActivityType(u8::MAX)) as usize
+            + (self.activity_subtype != typedef::ActivitySubtype(u8::MAX)) as usize
+            + (self.activity_level != typedef::ActivityLevel(u8::MAX)) as usize
+            + (self.distance_16 != u16::MAX) as usize
+            + (self.cycles_16 != u16::MAX) as usize
+            + (self.active_time_16 != u16::MAX) as usize
+            + (self.local_timestamp != typedef::LocalDateTime(u32::MAX)) as usize
+            + (self.temperature != i16::MAX) as usize
+            + (self.temperature_min != i16::MAX) as usize
+            + (self.temperature_max != i16::MAX) as usize
+            + (self.activity_time != [u16::MAX; 8]) as usize
+            + (self.active_calories != u16::MAX) as usize
+            + (self.current_activity_type_intensity != u8::MAX) as usize
+            + (self.timestamp_min_8 != u8::MAX) as usize
+            + (self.timestamp_16 != u16::MAX) as usize
+            + (self.heart_rate != u8::MAX) as usize
+            + (self.intensity != u8::MAX) as usize
+            + (self.duration_min != u16::MAX) as usize
+            + (self.duration != u32::MAX) as usize
+            + (self.ascent != u32::MAX) as usize
+            + (self.descent != u32::MAX) as usize
+            + (self.moderate_activity_minutes != u16::MAX) as usize
+            + (self.vigorous_activity_minutes != u16::MAX) as usize
+    }
 }
 
 impl Default for Monitoring {
@@ -381,357 +413,316 @@ impl Default for Monitoring {
 impl From<&Message> for Monitoring {
     /// from creates new Monitoring struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-        let mut state = [0u8; 4];
-
         const KNOWN_NUMS: [u64; 4] = [34343608319, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.device_index = typedef::DeviceIndex(field.value.as_u8()),
+                1 => v.calories = field.value.as_u16(),
+                2 => v.distance = field.value.as_u32(),
+                3 => v.cycles = field.value.as_u32(),
+                4 => v.active_time = field.value.as_u32(),
+                5 => v.activity_type = typedef::ActivityType(field.value.as_u8()),
+                6 => v.activity_subtype = typedef::ActivitySubtype(field.value.as_u8()),
+                7 => v.activity_level = typedef::ActivityLevel(field.value.as_u8()),
+                8 => v.distance_16 = field.value.as_u16(),
+                9 => v.cycles_16 = field.value.as_u16(),
+                10 => v.active_time_16 = field.value.as_u16(),
+                11 => v.local_timestamp = typedef::LocalDateTime(field.value.as_u32()),
+                12 => v.temperature = field.value.as_i16(),
+                14 => v.temperature_min = field.value.as_i16(),
+                15 => v.temperature_max = field.value.as_i16(),
+                16 => {
+                    v.activity_time = match &field.value {
+                        Value::VecUint16(v) => {
+                            let mut arr = [u16::MAX; 8];
+                            for (i, x) in v.iter().take(8).enumerate() {
+                                arr[i] = *x;
+                            }
+                            arr
+                        }
+                        _ => [u16::MAX; 8],
+                    }
+                }
+                19 => v.active_calories = field.value.as_u16(),
+                24 => v.current_activity_type_intensity = field.value.as_u8(),
+                25 => v.timestamp_min_8 = field.value.as_u8(),
+                26 => v.timestamp_16 = field.value.as_u16(),
+                27 => v.heart_rate = field.value.as_u8(),
+                28 => v.intensity = field.value.as_u8(),
+                29 => v.duration_min = field.value.as_u16(),
+                30 => v.duration = field.value.as_u32(),
+                31 => v.ascent = field.value.as_u32(),
+                32 => v.descent = field.value.as_u32(),
+                33 => v.moderate_activity_minutes = field.value.as_u16(),
+                34 => v.vigorous_activity_minutes = field.value.as_u16(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 29 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            device_index: typedef::DeviceIndex(vals[0].as_u8()),
-            calories: vals[1].as_u16(),
-            distance: vals[2].as_u32(),
-            cycles: vals[3].as_u32(),
-            active_time: vals[4].as_u32(),
-            activity_type: typedef::ActivityType(vals[5].as_u8()),
-            activity_subtype: typedef::ActivitySubtype(vals[6].as_u8()),
-            activity_level: typedef::ActivityLevel(vals[7].as_u8()),
-            distance_16: vals[8].as_u16(),
-            cycles_16: vals[9].as_u16(),
-            active_time_16: vals[10].as_u16(),
-            local_timestamp: typedef::LocalDateTime(vals[11].as_u32()),
-            temperature: vals[12].as_i16(),
-            temperature_min: vals[14].as_i16(),
-            temperature_max: vals[15].as_i16(),
-            activity_time: match &vals[16] {
-                Value::VecUint16(v) => {
-                    let mut arr = [u16::MAX; 8];
-                    for (i, x) in v.iter().take(8).enumerate() {
-                        arr[i] = *x;
-                    }
-                    arr
-                }
-                _ => [u16::MAX; 8],
-            },
-            active_calories: vals[19].as_u16(),
-            current_activity_type_intensity: vals[24].as_u8(),
-            timestamp_min_8: vals[25].as_u8(),
-            timestamp_16: vals[26].as_u16(),
-            heart_rate: vals[27].as_u8(),
-            intensity: vals[28].as_u8(),
-            duration_min: vals[29].as_u16(),
-            duration: vals[30].as_u32(),
-            ascent: vals[31].as_u32(),
-            descent: vals[32].as_u32(),
-            moderate_activity_minutes: vals[33].as_u16(),
-            vigorous_activity_minutes: vals[34].as_u16(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Monitoring> for Message {
     fn from(m: Monitoring) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 29];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.calories != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.distance != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cycles != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.cycles),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.active_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_type != typedef::ActivityType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::Uint8(m.activity_type.0),
-                is_expanded: is_expanded(&state, 5),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 5),
+            });
+        };
         if m.activity_subtype != typedef::ActivitySubtype(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::ACTIVITY_SUBTYPE,
                 value: Value::Uint8(m.activity_subtype.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_level != typedef::ActivityLevel(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::ACTIVITY_LEVEL,
                 value: Value::Uint8(m.activity_level.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.distance_16 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.distance_16),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.cycles_16 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.cycles_16),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.active_time_16 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.active_time_16),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::LOCAL_DATE_TIME,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.temperature),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature_min != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.temperature_min),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature_max != i16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::SINT16,
                 value: Value::Int16(m.temperature_max),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_time != [u16::MAX; 8] {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(Vec::from(&m.activity_time)),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.active_calories != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.active_calories),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.current_activity_type_intensity != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.current_activity_type_intensity),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp_min_8 != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.timestamp_min_8),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp_16 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 26,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_16),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 27,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.intensity != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 28,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.intensity),
-                is_expanded: is_expanded(&state, 28),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 28),
+            });
+        };
         if m.duration_min != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 29,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.duration_min),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.duration != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ascent != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 31,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.ascent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.descent != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 32,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.descent),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.moderate_activity_minutes != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 33,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.moderate_activity_minutes),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.vigorous_activity_minutes != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 34,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.vigorous_activity_minutes),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::MONITORING,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -83,6 +83,16 @@ impl SegmentLeaderboardEntry {
         self.segment_time = unscaled as u32;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (!self.name.is_empty()) as usize
+            + (self.r#type != typedef::SegmentLeaderboardType(u8::MAX)) as usize
+            + (self.group_primary_key != u32::MAX) as usize
+            + (self.activity_id != u32::MAX) as usize
+            + (self.segment_time != u32::MAX) as usize
+            + (!self.activity_id_string.is_empty()) as usize
+    }
 }
 
 impl Default for SegmentLeaderboardEntry {
@@ -94,122 +104,101 @@ impl Default for SegmentLeaderboardEntry {
 impl From<&Message> for SegmentLeaderboardEntry {
     /// from creates new SegmentLeaderboardEntry struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [63, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.name = field.value.as_str().to_owned(),
+                1 => v.r#type = typedef::SegmentLeaderboardType(field.value.as_u8()),
+                2 => v.group_primary_key = field.value.as_u32(),
+                3 => v.activity_id = field.value.as_u32(),
+                4 => v.segment_time = field.value.as_u32(),
+                5 => v.activity_id_string = field.value.as_str().to_owned(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            name: vals[0].as_str().to_owned(),
-            r#type: typedef::SegmentLeaderboardType(vals[1].as_u8()),
-            group_primary_key: vals[2].as_u32(),
-            activity_id: vals[3].as_u32(),
-            segment_time: vals[4].as_u32(),
-            activity_id_string: vals[5].as_str().to_owned(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<SegmentLeaderboardEntry> for Message {
     fn from(m: SegmentLeaderboardEntry) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 7];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.r#type != typedef::SegmentLeaderboardType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.group_primary_key != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.group_primary_key),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_id != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.activity_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.segment_time != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.segment_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.activity_id_string.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.activity_id_string),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::SEGMENT_LEADERBOARD_ENTRY,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

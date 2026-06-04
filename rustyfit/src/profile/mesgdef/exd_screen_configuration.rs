@@ -45,6 +45,13 @@ impl ExdScreenConfiguration {
             developer_fields: Vec::new(),
         }
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.screen_index != u8::MAX) as usize
+            + (self.field_count != u8::MAX) as usize
+            + (self.layout != typedef::ExdLayout(u8::MAX)) as usize
+            + (self.screen_enabled != typedef::Bool(u8::MAX)) as usize
+    }
 }
 
 impl Default for ExdScreenConfiguration {
@@ -56,92 +63,74 @@ impl Default for ExdScreenConfiguration {
 impl From<&Message> for ExdScreenConfiguration {
     /// from creates new ExdScreenConfiguration struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 4];
-
         const KNOWN_NUMS: [u64; 4] = [15, 0, 0, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.screen_index = field.value.as_u8(),
+                1 => v.field_count = field.value.as_u8(),
+                2 => v.layout = typedef::ExdLayout(field.value.as_u8()),
+                3 => v.screen_enabled = typedef::Bool(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            screen_index: vals[0].as_u8(),
-            field_count: vals[1].as_u8(),
-            layout: typedef::ExdLayout(vals[2].as_u8()),
-            screen_enabled: typedef::Bool(vals[3].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<ExdScreenConfiguration> for Message {
     fn from(m: ExdScreenConfiguration) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 4];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.screen_index != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.field_count != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.field_count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.layout != typedef::ExdLayout(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::EXD_LAYOUT,
                 value: Value::Uint8(m.layout.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.screen_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.screen_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::EXD_SCREEN_CONFIGURATION,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

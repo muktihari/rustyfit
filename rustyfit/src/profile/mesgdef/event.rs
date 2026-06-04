@@ -186,6 +186,28 @@ impl Event {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.event != typedef::Event(u8::MAX)) as usize
+            + (self.event_type != typedef::EventType(u8::MAX)) as usize
+            + (self.data16 != u16::MAX) as usize
+            + (self.data != u32::MAX) as usize
+            + (self.event_group != u8::MAX) as usize
+            + (self.score != u16::MAX) as usize
+            + (self.opponent_score != u16::MAX) as usize
+            + (self.front_gear_num != u8::MIN) as usize
+            + (self.front_gear != u8::MIN) as usize
+            + (self.rear_gear_num != u8::MIN) as usize
+            + (self.rear_gear != u8::MIN) as usize
+            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+            + (self.activity_type != typedef::ActivityType(u8::MAX)) as usize
+            + (self.start_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.radar_threat_level_max != typedef::RadarThreatLevelType(u8::MAX)) as usize
+            + (self.radar_threat_count != u8::MAX) as usize
+            + (self.radar_threat_avg_approach_speed != u8::MAX) as usize
+            + (self.radar_threat_max_approach_speed != u8::MAX) as usize
+    }
 }
 
 impl Default for Event {
@@ -197,248 +219,215 @@ impl Default for Event {
 impl From<&Message> for Event {
     /// from creates new Event struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-        let mut state = [0u8; 4];
-
         const KNOWN_NUMS: [u64; 4] = [31522719, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.event = typedef::Event(field.value.as_u8()),
+                1 => v.event_type = typedef::EventType(field.value.as_u8()),
+                2 => v.data16 = field.value.as_u16(),
+                3 => v.data = field.value.as_u32(),
+                4 => v.event_group = field.value.as_u8(),
+                7 => v.score = field.value.as_u16(),
+                8 => v.opponent_score = field.value.as_u16(),
+                9 => v.front_gear_num = field.value.as_u8z(),
+                10 => v.front_gear = field.value.as_u8z(),
+                11 => v.rear_gear_num = field.value.as_u8z(),
+                12 => v.rear_gear = field.value.as_u8z(),
+                13 => v.device_index = typedef::DeviceIndex(field.value.as_u8()),
+                14 => v.activity_type = typedef::ActivityType(field.value.as_u8()),
+                15 => v.start_timestamp = typedef::DateTime(field.value.as_u32()),
+                21 => v.radar_threat_level_max = typedef::RadarThreatLevelType(field.value.as_u8()),
+                22 => v.radar_threat_count = field.value.as_u8(),
+                23 => v.radar_threat_avg_approach_speed = field.value.as_u8(),
+                24 => v.radar_threat_max_approach_speed = field.value.as_u8(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 25 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            event: typedef::Event(vals[0].as_u8()),
-            event_type: typedef::EventType(vals[1].as_u8()),
-            data16: vals[2].as_u16(),
-            data: vals[3].as_u32(),
-            event_group: vals[4].as_u8(),
-            score: vals[7].as_u16(),
-            opponent_score: vals[8].as_u16(),
-            front_gear_num: vals[9].as_u8z(),
-            front_gear: vals[10].as_u8z(),
-            rear_gear_num: vals[11].as_u8z(),
-            rear_gear: vals[12].as_u8z(),
-            device_index: typedef::DeviceIndex(vals[13].as_u8()),
-            activity_type: typedef::ActivityType(vals[14].as_u8()),
-            start_timestamp: typedef::DateTime(vals[15].as_u32()),
-            radar_threat_level_max: typedef::RadarThreatLevelType(vals[21].as_u8()),
-            radar_threat_count: vals[22].as_u8(),
-            radar_threat_avg_approach_speed: vals[23].as_u8(),
-            radar_threat_max_approach_speed: vals[24].as_u8(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<Event> for Message {
     fn from(m: Event) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 19];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.event != typedef::Event(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EVENT,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.event_type != typedef::EventType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::EVENT_TYPE,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.data16 != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.data16),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.data != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.data),
-                is_expanded: is_expanded(&state, 3),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 3),
+            });
+        };
         if m.event_group != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.score != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.score),
-                is_expanded: is_expanded(&state, 7),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 7),
+            });
+        };
         if m.opponent_score != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.opponent_score),
-                is_expanded: is_expanded(&state, 8),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 8),
+            });
+        };
         if m.front_gear_num != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.front_gear_num),
-                is_expanded: is_expanded(&state, 9),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 9),
+            });
+        };
         if m.front_gear != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.front_gear),
-                is_expanded: is_expanded(&state, 10),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 10),
+            });
+        };
         if m.rear_gear_num != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.rear_gear_num),
-                is_expanded: is_expanded(&state, 11),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 11),
+            });
+        };
         if m.rear_gear != u8::MIN {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::UINT8Z,
                 value: Value::Uint8(m.rear_gear),
-                is_expanded: is_expanded(&state, 12),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 12),
+            });
+        };
         if m.device_index != typedef::DeviceIndex(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::DEVICE_INDEX,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_type != typedef::ActivityType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::ACTIVITY_TYPE,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.start_timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.radar_threat_level_max != typedef::RadarThreatLevelType(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::RADAR_THREAT_LEVEL_TYPE,
                 value: Value::Uint8(m.radar_threat_level_max.0),
-                is_expanded: is_expanded(&state, 21),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 21),
+            });
+        };
         if m.radar_threat_count != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.radar_threat_count),
-                is_expanded: is_expanded(&state, 22),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 22),
+            });
+        };
         if m.radar_threat_avg_approach_speed != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.radar_threat_avg_approach_speed),
-                is_expanded: is_expanded(&state, 23),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 23),
+            });
+        };
         if m.radar_threat_max_approach_speed != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.radar_threat_max_approach_speed),
-                is_expanded: is_expanded(&state, 24),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 24),
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::EVENT,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

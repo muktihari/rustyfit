@@ -137,6 +137,25 @@ impl WeatherConditions {
         self.wind_speed = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.weather_report != typedef::WeatherReport(u8::MAX)) as usize
+            + (self.temperature != i8::MAX) as usize
+            + (self.condition != typedef::WeatherStatus(u8::MAX)) as usize
+            + (self.wind_direction != u16::MAX) as usize
+            + (self.wind_speed != u16::MAX) as usize
+            + (self.precipitation_probability != u8::MAX) as usize
+            + (self.temperature_feels_like != i8::MAX) as usize
+            + (self.relative_humidity != u8::MAX) as usize
+            + (!self.location.is_empty()) as usize
+            + (self.observed_at_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.observed_location_lat != i32::MAX) as usize
+            + (self.observed_location_long != i32::MAX) as usize
+            + (self.day_of_week != typedef::DayOfWeek(u8::MAX)) as usize
+            + (self.high_temperature != i8::MAX) as usize
+            + (self.low_temperature != i8::MAX) as usize
+    }
 }
 
 impl Default for WeatherConditions {
@@ -148,212 +167,182 @@ impl Default for WeatherConditions {
 impl From<&Message> for WeatherConditions {
     /// from creates new WeatherConditions struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-
         const KNOWN_NUMS: [u64; 4] = [32767, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.weather_report = typedef::WeatherReport(field.value.as_u8()),
+                1 => v.temperature = field.value.as_i8(),
+                2 => v.condition = typedef::WeatherStatus(field.value.as_u8()),
+                3 => v.wind_direction = field.value.as_u16(),
+                4 => v.wind_speed = field.value.as_u16(),
+                5 => v.precipitation_probability = field.value.as_u8(),
+                6 => v.temperature_feels_like = field.value.as_i8(),
+                7 => v.relative_humidity = field.value.as_u8(),
+                8 => v.location = field.value.as_str().to_owned(),
+                9 => v.observed_at_time = typedef::DateTime(field.value.as_u32()),
+                10 => v.observed_location_lat = field.value.as_i32(),
+                11 => v.observed_location_long = field.value.as_i32(),
+                12 => v.day_of_week = typedef::DayOfWeek(field.value.as_u8()),
+                13 => v.high_temperature = field.value.as_i8(),
+                14 => v.low_temperature = field.value.as_i8(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            weather_report: typedef::WeatherReport(vals[0].as_u8()),
-            temperature: vals[1].as_i8(),
-            condition: typedef::WeatherStatus(vals[2].as_u8()),
-            wind_direction: vals[3].as_u16(),
-            wind_speed: vals[4].as_u16(),
-            precipitation_probability: vals[5].as_u8(),
-            temperature_feels_like: vals[6].as_i8(),
-            relative_humidity: vals[7].as_u8(),
-            location: vals[8].as_str().to_owned(),
-            observed_at_time: typedef::DateTime(vals[9].as_u32()),
-            observed_location_lat: vals[10].as_i32(),
-            observed_location_long: vals[11].as_i32(),
-            day_of_week: typedef::DayOfWeek(vals[12].as_u8()),
-            high_temperature: vals[13].as_i8(),
-            low_temperature: vals[14].as_i8(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<WeatherConditions> for Message {
     fn from(m: WeatherConditions) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 16];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weather_report != typedef::WeatherReport(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::WEATHER_REPORT,
                 value: Value::Uint8(m.weather_report.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.temperature),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.condition != typedef::WeatherStatus(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::WEATHER_STATUS,
                 value: Value::Uint8(m.condition.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.wind_direction != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.wind_direction),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.wind_speed != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.wind_speed),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.precipitation_probability != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.precipitation_probability),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature_feels_like != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.temperature_feels_like),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.relative_humidity != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.relative_humidity),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.location.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.location),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.observed_at_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.observed_at_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.observed_location_lat != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.observed_location_lat),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.observed_location_long != i32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::SINT32,
                 value: Value::Int32(m.observed_location_long),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.day_of_week != typedef::DayOfWeek(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::DAY_OF_WEEK,
                 value: Value::Uint8(m.day_of_week.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.high_temperature != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.high_temperature),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.low_temperature != i8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::SINT8,
                 value: Value::Int8(m.low_temperature),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::WEATHER_CONDITIONS,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

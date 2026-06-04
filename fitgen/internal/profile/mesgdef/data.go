@@ -21,38 +21,38 @@ type Message struct {
 	DynamicFields     []DynamicField
 	KnownNums         [4]uint64
 	StateSize         byte
-	MaxFieldNum       byte
 	MaxFieldExpandNum byte
 	Imports           map[string]struct{}
 }
 
 type Field struct {
-	Num                byte
-	Name               string
-	Name0              string // Name but with .0 if it's typedef
-	NameUpperCase      string
-	String             string
-	ProfileType        string
-	BaseType           string
-	BaseType0          string // Underlying base_type, typedef::Weight -> u16
-	BaseType0Invalid   string // Invalid value of the underlying base type.
-	MaxValue           string // Only if numeric
-	Size               byte
-	Type               string
-	TypedValue         string
-	PrimitiveValue     string
-	ProtoValue         string
-	IsValidValue       string
-	ComparableValue    string
-	InvalidValue       string
-	Comment            string
-	Units              string
-	Scale              float64
-	Offset             float64
-	Array              bool
-	CanExpand          bool
-	IfSelfEqualInvalid string
-	IfNotEqualInvalid  string
+	Num                   byte
+	Name                  string
+	Name0                 string // Name but with .0 if it's typedef
+	NameUpperCase         string
+	String                string
+	ProfileType           string
+	BaseType              string
+	BaseType0             string // Underlying base_type, typedef::Weight -> u16
+	BaseType0Invalid      string // Invalid value of the underlying base type.
+	MaxValue              string // Only if numeric
+	Size                  byte
+	Type                  string
+	TypedValue            string
+	PrimitiveValue        string
+	ProtoValue            string
+	IsValidValue          string
+	ComparableValue       string
+	InvalidValue          string
+	Comment               string
+	Units                 string
+	Scale                 float64
+	Offset                float64
+	Array                 bool
+	CanExpand             bool
+	IfSelfEqualInvalid    string
+	IfSelfNotEqualInvalid string
+	IfNotEqualInvalid     string
 
 	FixedArraySize          byte
 	InvalidArrayValueScaled string

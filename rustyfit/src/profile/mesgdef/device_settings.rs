@@ -175,6 +175,34 @@ impl DeviceSettings {
         }
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.active_time_zone != u8::MAX) as usize
+            + (self.utc_offset != u32::MAX) as usize
+            + (!self.time_offset.is_empty()) as usize
+            + (!self.time_mode.is_empty()) as usize
+            + (!self.time_zone_offset.is_empty()) as usize
+            + (self.backlight_mode != typedef::BacklightMode(u8::MAX)) as usize
+            + (self.activity_tracker_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.clock_time != typedef::DateTime(u32::MAX)) as usize
+            + (!self.pages_enabled.is_empty()) as usize
+            + (self.move_alert_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.date_mode != typedef::DateMode(u8::MAX)) as usize
+            + (self.display_orientation != typedef::DisplayOrientation(u8::MAX)) as usize
+            + (self.mounting_side != typedef::Side(u8::MAX)) as usize
+            + (!self.default_page.is_empty()) as usize
+            + (self.autosync_min_steps != u16::MAX) as usize
+            + (self.autosync_min_time != u16::MAX) as usize
+            + (self.lactate_threshold_autodetect_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.ble_auto_upload_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.auto_sync_frequency != typedef::AutoSyncFrequency(u8::MAX)) as usize
+            + (self.auto_activity_detect != typedef::AutoActivityDetect(u32::MAX)) as usize
+            + (self.number_of_screens != u8::MAX) as usize
+            + (self.smart_notification_display_orientation != typedef::DisplayOrientation(u8::MAX))
+                as usize
+            + (self.tap_interface != typedef::Switch(u8::MAX)) as usize
+            + (self.tap_sensitivity != typedef::TapSensitivity(u8::MAX)) as usize
+    }
 }
 
 impl Default for DeviceSettings {
@@ -186,102 +214,93 @@ impl Default for DeviceSettings {
 impl From<&Message> for DeviceSettings {
     /// from creates new DeviceSettings struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 175];
-
         const KNOWN_NUMS: [u64; 4] = [1117105531807338551, 3326148608, 70368744177728, 0];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                0 => v.active_time_zone = field.value.as_u8(),
+                1 => v.utc_offset = field.value.as_u32(),
+                2 => v.time_offset = field.value.to_vec_u32(),
+                4 => {
+                    v.time_mode = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut vs = Vec::with_capacity(v.len());
+                            vs.extend(v.iter().map(|&x| typedef::TimeMode(x)));
+                            vs
+                        }
+                        _ => Vec::new(),
+                    }
+                }
+                5 => v.time_zone_offset = field.value.to_vec_i8(),
+                12 => v.backlight_mode = typedef::BacklightMode(field.value.as_u8()),
+                36 => v.activity_tracker_enabled = typedef::Bool(field.value.as_u8()),
+                39 => v.clock_time = typedef::DateTime(field.value.as_u32()),
+                40 => v.pages_enabled = field.value.to_vec_u16(),
+                46 => v.move_alert_enabled = typedef::Bool(field.value.as_u8()),
+                47 => v.date_mode = typedef::DateMode(field.value.as_u8()),
+                55 => v.display_orientation = typedef::DisplayOrientation(field.value.as_u8()),
+                56 => v.mounting_side = typedef::Side(field.value.as_u8()),
+                57 => v.default_page = field.value.to_vec_u16(),
+                58 => v.autosync_min_steps = field.value.as_u16(),
+                59 => v.autosync_min_time = field.value.as_u16(),
+                80 => v.lactate_threshold_autodetect_enabled = typedef::Bool(field.value.as_u8()),
+                86 => v.ble_auto_upload_enabled = typedef::Bool(field.value.as_u8()),
+                89 => v.auto_sync_frequency = typedef::AutoSyncFrequency(field.value.as_u8()),
+                90 => v.auto_activity_detect = typedef::AutoActivityDetect(field.value.as_u32()),
+                94 => v.number_of_screens = field.value.as_u8(),
+                95 => {
+                    v.smart_notification_display_orientation =
+                        typedef::DisplayOrientation(field.value.as_u8())
+                }
+                134 => v.tap_interface = typedef::Switch(field.value.as_u8()),
+                174 => v.tap_sensitivity = typedef::TapSensitivity(field.value.as_u8()),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            active_time_zone: vals[0].as_u8(),
-            utc_offset: vals[1].as_u32(),
-            time_offset: vals[2].to_vec_u32(),
-            time_mode: match &vals[4] {
-                Value::VecUint8(v) => {
-                    let mut vs = Vec::with_capacity(v.len());
-                    vs.extend(v.iter().map(|&x| typedef::TimeMode(x)));
-                    vs
-                }
-                _ => Vec::new(),
-            },
-            time_zone_offset: vals[5].to_vec_i8(),
-            backlight_mode: typedef::BacklightMode(vals[12].as_u8()),
-            activity_tracker_enabled: typedef::Bool(vals[36].as_u8()),
-            clock_time: typedef::DateTime(vals[39].as_u32()),
-            pages_enabled: vals[40].to_vec_u16(),
-            move_alert_enabled: typedef::Bool(vals[46].as_u8()),
-            date_mode: typedef::DateMode(vals[47].as_u8()),
-            display_orientation: typedef::DisplayOrientation(vals[55].as_u8()),
-            mounting_side: typedef::Side(vals[56].as_u8()),
-            default_page: vals[57].to_vec_u16(),
-            autosync_min_steps: vals[58].as_u16(),
-            autosync_min_time: vals[59].as_u16(),
-            lactate_threshold_autodetect_enabled: typedef::Bool(vals[80].as_u8()),
-            ble_auto_upload_enabled: typedef::Bool(vals[86].as_u8()),
-            auto_sync_frequency: typedef::AutoSyncFrequency(vals[89].as_u8()),
-            auto_activity_detect: typedef::AutoActivityDetect(vals[90].as_u32()),
-            number_of_screens: vals[94].as_u8(),
-            smart_notification_display_orientation: typedef::DisplayOrientation(vals[95].as_u8()),
-            tap_interface: typedef::Switch(vals[134].as_u8()),
-            tap_sensitivity: typedef::TapSensitivity(vals[174].as_u8()),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<DeviceSettings> for Message {
     fn from(m: DeviceSettings) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 24];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.active_time_zone != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.active_time_zone),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.utc_offset != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.utc_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_offset.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT32,
                 value: Value::VecUint32(m.time_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_mode.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::TIME_MODE,
                 value: Value::VecUint8({
@@ -289,199 +308,175 @@ impl From<DeviceSettings> for Message {
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
                 }),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time_zone_offset.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SINT8,
                 value: Value::VecInt8(m.time_zone_offset),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.backlight_mode != typedef::BacklightMode(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BACKLIGHT_MODE,
                 value: Value::Uint8(m.backlight_mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_tracker_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 36,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.activity_tracker_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.clock_time != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 39,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.clock_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.pages_enabled.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 40,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.pages_enabled),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.move_alert_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 46,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.move_alert_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.date_mode != typedef::DateMode(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 47,
                 profile_type: ProfileType::DATE_MODE,
                 value: Value::Uint8(m.date_mode.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.display_orientation != typedef::DisplayOrientation(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 55,
                 profile_type: ProfileType::DISPLAY_ORIENTATION,
                 value: Value::Uint8(m.display_orientation.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.mounting_side != typedef::Side(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 56,
                 profile_type: ProfileType::SIDE,
                 value: Value::Uint8(m.mounting_side.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.default_page.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 57,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.default_page),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.autosync_min_steps != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 58,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.autosync_min_steps),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.autosync_min_time != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 59,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.autosync_min_time),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.lactate_threshold_autodetect_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 80,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.lactate_threshold_autodetect_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.ble_auto_upload_enabled != typedef::Bool(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 86,
                 profile_type: ProfileType::BOOL,
                 value: Value::Uint8(m.ble_auto_upload_enabled.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.auto_sync_frequency != typedef::AutoSyncFrequency(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 89,
                 profile_type: ProfileType::AUTO_SYNC_FREQUENCY,
                 value: Value::Uint8(m.auto_sync_frequency.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.auto_activity_detect != typedef::AutoActivityDetect(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 90,
                 profile_type: ProfileType::AUTO_ACTIVITY_DETECT,
                 value: Value::Uint32(m.auto_activity_detect.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.number_of_screens != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 94,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.number_of_screens),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.smart_notification_display_orientation != typedef::DisplayOrientation(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 95,
                 profile_type: ProfileType::DISPLAY_ORIENTATION,
                 value: Value::Uint8(m.smart_notification_display_orientation.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.tap_interface != typedef::Switch(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 134,
                 profile_type: ProfileType::SWITCH,
                 value: Value::Uint8(m.tap_interface.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.tap_sensitivity != typedef::TapSensitivity(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 174,
                 profile_type: ProfileType::TAP_SENSITIVITY,
                 value: Value::Uint8(m.tap_sensitivity.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::DEVICE_SETTINGS,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

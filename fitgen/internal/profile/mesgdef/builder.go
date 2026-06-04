@@ -46,6 +46,9 @@ func NewBuilder(path string, lookup *lookup.Lookup, message []parser.Message, ty
 					return strconv.FormatFloat(f, 'g', -1, 64)
 				},
 				"hasSuffix": strings.HasSuffix,
+				"sub": func(v, sub int) int {
+					return v - sub
+				},
 			}).
 			ParseFiles(filepath.Join(cd, "mesgdef.tmpl"))),
 		templateExec: "mesgdef",
@@ -70,15 +73,11 @@ func (b *Builder) Build() ([]generator.Data, error) {
 		}
 		var (
 			knownNums     [4]uint64
-			maxFieldNum   byte
 			dynamicFields []DynamicField
 			fields        = make([]Field, 0, len(mesg.Fields))
 		)
 		for _, parserField := range mesg.Fields {
 			knownNums[parserField.Num>>6] |= 1 << (parserField.Num & 63)
-			if parserField.Num > maxFieldNum {
-				maxFieldNum = parserField.Num
-			}
 
 			var fixedArraySize uint8
 			if len(parserField.Array) > 1 && parserField.Array[1] != 'N' {
@@ -122,7 +121,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 					return fmt.Sprintf("%s::MAX", rustType)
 				}(),
 				Type:           b.transformType(parserField.Type, parserField.Array, fixedArraySize),
-				TypedValue:     b.transformTypedValue(parserField.Num, parserField.Type, parserField.Array, fixedArraySize),
+				TypedValue:     b.transformTypedValue(parserField.Type, parserField.Array, fixedArraySize),
 				ProtoValue:     b.transformToProtoValue(strutil.ToNonRustIdent(parserField.Name), parserField.Type, parserField.Array, fixedArraySize),
 				InvalidValue:   b.invalidValueOf(parserField.Type, parserField.Array, fixedArraySize),
 				Comment:        parserField.Comment,
@@ -145,9 +144,11 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			}
 
 			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name, field.InvalidValue)
+			field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s != %s", field.Name, field.InvalidValue)
 			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name, field.InvalidValue)
 			if parserField.Array == "[N]" || (field.BaseType == "STRING" && parserField.Array == "") {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
+				field.IfSelfNotEqualInvalid = fmt.Sprintf("!self.%s.is_empty()", field.Name)
 				field.IfNotEqualInvalid = fmt.Sprintf("!m.%s.is_empty()", field.Name)
 			}
 
@@ -182,7 +183,6 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			DynamicFields:     dynamicFields,
 			KnownNums:         knownNums,
 			StateSize:         (maxFieldExpandNum + 8) / 8,
-			MaxFieldNum:       maxFieldNum + 1,
 			MaxFieldExpandNum: maxFieldExpandNum + 1,
 			Imports:           imports,
 		})
@@ -393,7 +393,7 @@ func (b *Builder) transformToProtoValue(fieldName, fieldType, array string, fixe
 	return fmt.Sprintf("Value::%s(m.%s)", valueEnum, fieldName)
 }
 
-func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedArraySize uint8) string {
+func (b *Builder) transformTypedValue(fieldType, array string, fixedArraySize uint8) string {
 	baseType := b.lookup.BaseType(fieldType).String()
 	baseTypeTitleCase := strutil.ToTitle(baseType)
 	valueEnumType := baseTypeToValueEnumReplacer.Replace(baseTypeTitleCase)
@@ -408,12 +408,12 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 	var value string
 	if array == "" {
 		if rustAsType == "string" {
-			value = fmt.Sprintf(`vals[%d].as_str().to_owned()`, num)
+			value = "field.value.as_str().to_owned()"
 		} else {
-			value = fmt.Sprintf(`vals[%d].as_%s()`, num, rustAsType)
+			value = fmt.Sprintf(`field.value.as_%s()`, rustAsType)
 		}
 	} else if fixedArraySize == 0 { // vector
-		value = fmt.Sprintf(`vals[%d].to_vec_%s()`, num, strings.TrimSuffix(rustAsType, "z"))
+		value = fmt.Sprintf(`field.value.to_vec_%s()`, strings.TrimSuffix(rustAsType, "z"))
 	} else { // array
 		rustType := baseTypeToRustTypeReplacer.Replace(baseType)
 		arrayValue := fmt.Sprintf("[%s::MAX; %d]", rustType, fixedArraySize)
@@ -424,7 +424,7 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 			rshValue = "x.to_owned()"
 		}
 
-		value = fmt.Sprintf(`match &vals[%d] {
+		value = fmt.Sprintf(`match &field.value {
 			Value::Vec%s(v) => {
 				let mut arr = %s;
 				for (i, x) in v.iter().take(%d).enumerate() {
@@ -434,7 +434,6 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 			},
 			_ => %s,
 		}`,
-			num,
 			valueEnumType,
 			arrayValue,
 			fixedArraySize,
@@ -453,14 +452,14 @@ func (b *Builder) transformTypedValue(num byte, fieldType, array string, fixedAr
 		return fmt.Sprintf("%s(%s)", typdef, value)
 	}
 
-	return fmt.Sprintf(`match &vals[%d] {
+	return fmt.Sprintf(`match &field.value {
 		Value::Vec%s(v) => {
 			let mut vs = Vec::with_capacity(v.len());
 			vs.extend(v.iter().map(|&x|%s(x)));
 			vs
 		},
 		_ => Vec::new(),
-	}`, num, strings.TrimSuffix(valueEnumType, "z"), typdef)
+	}`, strings.TrimSuffix(valueEnumType, "z"), typdef)
 }
 
 func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) string {

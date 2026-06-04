@@ -235,6 +235,38 @@ impl UserProfile {
         self.user_walking_step_length = unscaled as u16;
         self
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (!self.friendly_name.is_empty()) as usize
+            + (self.gender != typedef::Gender(u8::MAX)) as usize
+            + (self.age != u8::MAX) as usize
+            + (self.height != u8::MAX) as usize
+            + (self.weight != u16::MAX) as usize
+            + (self.language != typedef::Language(u8::MAX)) as usize
+            + (self.elev_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.weight_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.resting_heart_rate != u8::MAX) as usize
+            + (self.default_max_running_heart_rate != u8::MAX) as usize
+            + (self.default_max_biking_heart_rate != u8::MAX) as usize
+            + (self.default_max_heart_rate != u8::MAX) as usize
+            + (self.hr_setting != typedef::DisplayHeart(u8::MAX)) as usize
+            + (self.speed_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.dist_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.power_setting != typedef::DisplayPower(u8::MAX)) as usize
+            + (self.activity_class != typedef::ActivityClass(u8::MAX)) as usize
+            + (self.position_setting != typedef::DisplayPosition(u8::MAX)) as usize
+            + (self.temperature_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.local_id != typedef::UserLocalId(u16::MAX)) as usize
+            + (self.global_id != [u8::MAX; 6]) as usize
+            + (self.wake_time != typedef::LocaltimeIntoDay(u32::MAX)) as usize
+            + (self.sleep_time != typedef::LocaltimeIntoDay(u32::MAX)) as usize
+            + (self.height_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.user_running_step_length != u16::MAX) as usize
+            + (self.user_walking_step_length != u16::MAX) as usize
+            + (self.depth_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.dive_count != u32::MAX) as usize
+    }
 }
 
 impl Default for UserProfile {
@@ -246,351 +278,310 @@ impl Default for UserProfile {
 impl From<&Message> for UserProfile {
     /// from creates new UserProfile struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 255];
-
         const KNOWN_NUMS: [u64; 4] = [703695778447359, 0, 0, 4611686018427387904];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-            vals[field.num as usize] = &field.value;
+            match field.num {
+                254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                0 => v.friendly_name = field.value.as_str().to_owned(),
+                1 => v.gender = typedef::Gender(field.value.as_u8()),
+                2 => v.age = field.value.as_u8(),
+                3 => v.height = field.value.as_u8(),
+                4 => v.weight = field.value.as_u16(),
+                5 => v.language = typedef::Language(field.value.as_u8()),
+                6 => v.elev_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                7 => v.weight_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                8 => v.resting_heart_rate = field.value.as_u8(),
+                9 => v.default_max_running_heart_rate = field.value.as_u8(),
+                10 => v.default_max_biking_heart_rate = field.value.as_u8(),
+                11 => v.default_max_heart_rate = field.value.as_u8(),
+                12 => v.hr_setting = typedef::DisplayHeart(field.value.as_u8()),
+                13 => v.speed_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                14 => v.dist_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                16 => v.power_setting = typedef::DisplayPower(field.value.as_u8()),
+                17 => v.activity_class = typedef::ActivityClass(field.value.as_u8()),
+                18 => v.position_setting = typedef::DisplayPosition(field.value.as_u8()),
+                21 => v.temperature_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                22 => v.local_id = typedef::UserLocalId(field.value.as_u16()),
+                23 => {
+                    v.global_id = match &field.value {
+                        Value::VecUint8(v) => {
+                            let mut arr = [u8::MAX; 6];
+                            for (i, x) in v.iter().take(6).enumerate() {
+                                arr[i] = *x;
+                            }
+                            arr
+                        }
+                        _ => [u8::MAX; 6],
+                    }
+                }
+                28 => v.wake_time = typedef::LocaltimeIntoDay(field.value.as_u32()),
+                29 => v.sleep_time = typedef::LocaltimeIntoDay(field.value.as_u32()),
+                30 => v.height_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                31 => v.user_running_step_length = field.value.as_u16(),
+                32 => v.user_walking_step_length = field.value.as_u16(),
+                47 => v.depth_setting = typedef::DisplayMeasure(field.value.as_u8()),
+                49 => v.dive_count = field.value.as_u32(),
+                _ => v.unknown_fields.push(field.clone()),
+            };
         }
 
-        Self {
-            message_index: typedef::MessageIndex(vals[254].as_u16()),
-            friendly_name: vals[0].as_str().to_owned(),
-            gender: typedef::Gender(vals[1].as_u8()),
-            age: vals[2].as_u8(),
-            height: vals[3].as_u8(),
-            weight: vals[4].as_u16(),
-            language: typedef::Language(vals[5].as_u8()),
-            elev_setting: typedef::DisplayMeasure(vals[6].as_u8()),
-            weight_setting: typedef::DisplayMeasure(vals[7].as_u8()),
-            resting_heart_rate: vals[8].as_u8(),
-            default_max_running_heart_rate: vals[9].as_u8(),
-            default_max_biking_heart_rate: vals[10].as_u8(),
-            default_max_heart_rate: vals[11].as_u8(),
-            hr_setting: typedef::DisplayHeart(vals[12].as_u8()),
-            speed_setting: typedef::DisplayMeasure(vals[13].as_u8()),
-            dist_setting: typedef::DisplayMeasure(vals[14].as_u8()),
-            power_setting: typedef::DisplayPower(vals[16].as_u8()),
-            activity_class: typedef::ActivityClass(vals[17].as_u8()),
-            position_setting: typedef::DisplayPosition(vals[18].as_u8()),
-            temperature_setting: typedef::DisplayMeasure(vals[21].as_u8()),
-            local_id: typedef::UserLocalId(vals[22].as_u16()),
-            global_id: match &vals[23] {
-                Value::VecUint8(v) => {
-                    let mut arr = [u8::MAX; 6];
-                    for (i, x) in v.iter().take(6).enumerate() {
-                        arr[i] = *x;
-                    }
-                    arr
-                }
-                _ => [u8::MAX; 6],
-            },
-            wake_time: typedef::LocaltimeIntoDay(vals[28].as_u32()),
-            sleep_time: typedef::LocaltimeIntoDay(vals[29].as_u32()),
-            height_setting: typedef::DisplayMeasure(vals[30].as_u8()),
-            user_running_step_length: vals[31].as_u16(),
-            user_walking_step_length: vals[32].as_u16(),
-            depth_setting: typedef::DisplayMeasure(vals[47].as_u8()),
-            dive_count: vals[49].as_u32(),
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<UserProfile> for Message {
     fn from(m: UserProfile) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 29];
-        let mut len = 0usize;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.message_index != typedef::MessageIndex(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.friendly_name.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::STRING,
                 value: Value::String(m.friendly_name),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.gender != typedef::Gender(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::GENDER,
                 value: Value::Uint8(m.gender.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.age != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.age),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.height != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.height),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weight != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.weight),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.language != typedef::Language(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::LANGUAGE,
                 value: Value::Uint8(m.language.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.elev_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.elev_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.weight_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.weight_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.resting_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.resting_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.default_max_running_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_max_running_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.default_max_biking_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_max_biking_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.default_max_heart_rate != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.default_max_heart_rate),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.hr_setting != typedef::DisplayHeart(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::DISPLAY_HEART,
                 value: Value::Uint8(m.hr_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.speed_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.speed_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.dist_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.dist_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.power_setting != typedef::DisplayPower(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::DISPLAY_POWER,
                 value: Value::Uint8(m.power_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.activity_class != typedef::ActivityClass(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::ACTIVITY_CLASS,
                 value: Value::Uint8(m.activity_class.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.position_setting != typedef::DisplayPosition(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::DISPLAY_POSITION,
                 value: Value::Uint8(m.position_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.temperature_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.temperature_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.local_id != typedef::UserLocalId(u16::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::USER_LOCAL_ID,
                 value: Value::Uint16(m.local_id.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.global_id != [u8::MAX; 6] {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(Vec::from(&m.global_id)),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.wake_time != typedef::LocaltimeIntoDay(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 28,
                 profile_type: ProfileType::LOCALTIME_INTO_DAY,
                 value: Value::Uint32(m.wake_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.sleep_time != typedef::LocaltimeIntoDay(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 29,
                 profile_type: ProfileType::LOCALTIME_INTO_DAY,
                 value: Value::Uint32(m.sleep_time.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.height_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.height_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.user_running_step_length != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 31,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.user_running_step_length),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.user_walking_step_length != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 32,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.user_walking_step_length),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.depth_setting != typedef::DisplayMeasure(u8::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 47,
                 profile_type: ProfileType::DISPLAY_MEASURE,
                 value: Value::Uint8(m.depth_setting.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.dive_count != u32::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 49,
                 profile_type: ProfileType::UINT32,
                 value: Value::Uint32(m.dive_count),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::USER_PROFILE,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

@@ -102,6 +102,15 @@ impl AntTx {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.fractional_timestamp != u16::MAX) as usize
+            + (self.mesg_id != u8::MAX) as usize
+            + (!self.mesg_data.is_empty()) as usize
+            + (self.channel_number != u8::MAX) as usize
+            + (!self.data.is_empty()) as usize
+    }
 }
 
 impl Default for AntTx {
@@ -113,118 +122,98 @@ impl Default for AntTx {
 impl From<&Message> for AntTx {
     /// from creates new AntTx struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-        let mut state = [0u8; 1];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.fractional_timestamp = field.value.as_u16(),
+                1 => v.mesg_id = field.value.as_u8(),
+                2 => v.mesg_data = field.value.to_vec_u8(),
+                3 => v.channel_number = field.value.as_u8(),
+                4 => v.data = field.value.to_vec_u8(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 5 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            fractional_timestamp: vals[0].as_u16(),
-            mesg_id: vals[1].as_u8(),
-            mesg_data: vals[2].to_vec_u8(),
-            channel_number: vals[3].as_u8(),
-            data: vals[4].to_vec_u8(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<AntTx> for Message {
     fn from(m: AntTx) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.fractional_timestamp != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.mesg_id != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::BYTE,
                 value: Value::Uint8(m.mesg_id),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.mesg_data.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.mesg_data),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.channel_number != u8::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::Uint8(m.channel_number),
-                is_expanded: is_expanded(&state, 3),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 3),
+            });
+        };
         if !m.data.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::BYTE,
                 value: Value::VecUint8(m.data),
-                is_expanded: is_expanded(&state, 4),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 4),
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::ANT_TX,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

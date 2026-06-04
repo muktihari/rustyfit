@@ -86,6 +86,15 @@ impl RawBbi {
     pub fn is_expanded(&self, num: u8) -> bool {
         is_expanded(&self.state, num)
     }
+
+    fn count_valid_fields(&self) -> usize {
+        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.timestamp_ms != u16::MAX) as usize
+            + (!self.data.is_empty()) as usize
+            + (!self.time.is_empty()) as usize
+            + (!self.quality.is_empty()) as usize
+            + (!self.gap.is_empty()) as usize
+    }
 }
 
 impl Default for RawBbi {
@@ -97,118 +106,98 @@ impl Default for RawBbi {
 impl From<&Message> for RawBbi {
     /// from creates new RawBbi struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; 254];
-        let mut state = [0u8; 1];
-
         const KNOWN_NUMS: [u64; 4] = [31, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        v.developer_fields = mesg.developer_fields.clone();
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
+            match field.num {
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
+                0 => v.timestamp_ms = field.value.as_u16(),
+                1 => v.data = field.value.to_vec_u16(),
+                2 => v.time = field.value.to_vec_u16(),
+                3 => v.quality = field.value.to_vec_u8(),
+                4 => v.gap = field.value.to_vec_u8(),
+                _ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                }
+            };
             if field.is_expanded && field.num < 5 {
-                state[field.num as usize >> 3] |= 1 << (field.num & 7)
+                v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
             }
-            vals[field.num as usize] = &field.value;
         }
 
-        Self {
-            timestamp: typedef::DateTime(vals[253].as_u32()),
-            timestamp_ms: vals[0].as_u16(),
-            data: vals[1].to_vec_u16(),
-            time: vals[2].to_vec_u16(),
-            quality: vals[3].to_vec_u8(),
-            gap: vals[4].to_vec_u8(),
-            state,
-            unknown_fields,
-            developer_fields: mesg.developer_fields.clone(),
-        }
+        v
     }
 }
 
 impl From<RawBbi> for Message {
     fn from(m: RawBbi) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; 6];
-        let mut len = 0usize;
-        let state = m.state;
+        let mut fields =
+            Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         if m.timestamp != typedef::DateTime(u32::MAX) {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if m.timestamp_ms != u16::MAX {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.data.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.data),
                 is_expanded: false,
-            };
-            len += 1;
-        }
+            });
+        };
         if !m.time.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::UINT16,
                 value: Value::VecUint16(m.time),
-                is_expanded: is_expanded(&state, 2),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 2),
+            });
+        };
         if !m.quality.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.quality),
-                is_expanded: is_expanded(&state, 3),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 3),
+            });
+        };
         if !m.gap.is_empty() {
-            arr[len] = Field {
+            fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::UINT8,
                 value: Value::VecUint8(m.gap),
-                is_expanded: is_expanded(&state, 4),
-            };
-            len += 1;
-        }
+                is_expanded: is_expanded(&m.state, 4),
+            });
+        };
+
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::RAW_BBI,
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             developer_fields: m.developer_fields,
         }
     }

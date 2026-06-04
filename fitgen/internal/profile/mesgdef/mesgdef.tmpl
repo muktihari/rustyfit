@@ -189,6 +189,12 @@ impl {{ .Name }} {
         is_expanded(&self.state, num)
     }
     {{ end }}
+
+    fn count_valid_fields(&self) -> usize {
+    	{{ range $i, $v := .Fields -}}
+     		({{ .IfSelfNotEqualInvalid }}) as usize {{ if lt $i (sub (len $.Fields) 1) }} + {{ end }}
+     	{{ end }}
+    }
 }
 
 impl Default for {{ .Name }} {
@@ -200,81 +206,65 @@ impl Default for {{ .Name }} {
 impl From<&Message> for {{ .Name }} {
     /// from creates new {{ .Name }} struct based on given mesg. 
     fn from(mesg: &Message) -> Self {
-        let mut vals = [const { &Value::Invalid }; {{ .MaxFieldNum }}];
-        {{ if gt .MaxFieldExpandNum 1 -}}
-		let mut state = [0u8; {{ .StateSize }}];
-		{{ end }}
-		
         {{/* 256 bits flags for indicating known Field Number declared in Profile.xslx */ -}}
         const KNOWN_NUMS: [u64; 4] = [{{- range $_, $v := .KnownNums }} {{ $v -}}, {{ end -}}];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize>>6]>>(field.num&63))&1 ^ 1
         }
-        let mut unknown_fields = Vec::<Field>::with_capacity(n as usize);
+
+        let mut v = Self::new();
+        v.unknown_fields = Vec::<Field>::with_capacity(n as usize);
+        {{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription"))  }}
+        v.developer_fields= mesg.developer_fields.clone();
+        {{ end }}
 
         for field in &mesg.fields {
-            if (KNOWN_NUMS[field.num as usize>>6]>>(field.num&63))&1 == 0 {
-                unknown_fields.push(field.clone());
-                continue;
-            }
-			{{ if gt .MaxFieldExpandNum 1 -}}
+			match field.num {	
+				{{ range .Fields -}}
+	            {{ .Num }} => v.{{ .Name }} = {{ .TypedValue }} ,
+	            {{ end -}}
+                {{ if gt .MaxFieldExpandNum 1 -}}
+            	_ => {
+                    v.unknown_fields.push(field.clone());
+                    continue;
+                },
+                {{ else -}}
+                _ => v.unknown_fields.push(field.clone()),
+                {{ end }}
+        	};
+            {{ if gt .MaxFieldExpandNum 1 -}}
 			if field.is_expanded && field.num < {{ .MaxFieldExpandNum }} {
-				state[field.num as usize >> 3] |= 1 << (field.num & 7)
+				v.state[field.num as usize >> 3] |= 1 << (field.num & 7)
 			}
 			{{ end -}}
-			vals[field.num as usize] = &field.value;
 		}
 
-        Self {
-            {{ range .Fields -}}
-                {{ .Name }}: {{ .TypedValue }},
-            {{ end -}}
-            {{ if gt .MaxFieldExpandNum 1 -}}
-            state,
-            {{ end -}}
-            unknown_fields,
-            {{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription"))  }}
-            developer_fields: mesg.developer_fields.clone(),
-            {{ end }}
-        }
+        v
     }
 }
 
 impl From<{{ .Name }}> for Message {
     fn from(m: {{ .Name }}) -> Self {
-        let mut arr = [const {
-            Field {
-                num: 0,
-                profile_type: ProfileType(0),
-                value: Value::Invalid,
-                is_expanded: false,
-            }
-        }; {{ len .Fields }}];
-        let mut len = 0usize;
-        {{ if gt .MaxFieldExpandNum 1 -}} let state = m.state; {{ end }}
+        let mut fields = Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
         {{ range .Fields -}}
         if {{ .IfNotEqualInvalid }} {
-            arr[len] = Field {
+            fields.push(Field {
                 num: {{ .Num }},
                 profile_type: {{ .ProfileType }},
                 value: {{ .ProtoValue }},
-                {{ if .CanExpand }} is_expanded: is_expanded(&state, {{ .Num }}), {{ else }} is_expanded: false, {{ end }}
-            };
-            len += 1;
-        }
+                {{ if .CanExpand }} is_expanded: is_expanded(&m.state, {{ .Num }}), {{ else }} is_expanded: false, {{ end }}
+            });
+        };
         {{- end }}
+        
+        fields.extend_from_slice(&m.unknown_fields);
 
         Self {
             header: 0,
             num: typedef::MesgNum::{{ .Num }},
-            fields: {
-                let mut fields = Vec::<Field>::with_capacity(len + m.unknown_fields.len());
-                fields.extend_from_slice(&arr[..len]);
-                fields.extend_from_slice(&m.unknown_fields);
-                fields
-            },
+            fields,
             {{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription"))  }}
             developer_fields: m.developer_fields, {{ else }} developer_fields: Vec::new(),
             {{ end }}
