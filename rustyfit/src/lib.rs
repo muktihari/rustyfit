@@ -9,7 +9,7 @@
 //! This library is a rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) and is designed to run on
 //! baremetal Rust, where performance and memory efficiency is carefully considered.
 //!
-//! ## Usage
+//! # Usage
 //!
 //! For [`#![no_std]`](https://docs.rust-embedded.org/book/intro/no-std.html), you need to provide
 //! [`#[global_allocator]`](https://doc.rust-lang.org/std/alloc/index.html#the-global_allocator-attribute)
@@ -21,18 +21,12 @@
 //! [embedded_io_adapters::std:FromStd](https://docs.rs/embedded-io-adapters/0.7.0/embedded_io_adapters/std/struct.FromStd.html).
 //!
 //! We will provide examples in `std` for simplicity and a wider audience, since `#![no_std]` is platform-dependent.
-//!
-//! - [Decoding](#decoding)
-//!   - [Streaming Decoding](#streaming-decoding)
-//!   - [DecoderBuilder](#decoderbuilder)
-//! - [Encoding](#encoding)
-//!   - [Encode using mesgdef module](#encode-using-mesgdef-module)
-//!   - [Streaming Encoding](#streaming-encoding)
-//!   - [EncoderBuilder](#encoderbuilder)
+//! For additional examples, including `#![no_std]` use cases, please refer to the
+//! [examples](https://github.com/muktihari/rustyfit/tree/master/examples) directory in the repository.
 //!
 //! ####
 //!
-//! ### Decoding
+//! ## Decoding
 //!
 //! `Decoder`'s `decode` method allows us to interact with FIT files directly through their original protocol messages' structure.
 //! This method can be invoked multiple times to decode chained FIT file until it return Ok(None) or Err(err).
@@ -80,11 +74,11 @@
 //!
 //! ```
 //!
-//! #### Streaming Decoding
+//! ## Streaming Decoding
 //!
-//! `StreamDecoder` allows us to retrieve event data (`FileHeader`, `MessageDefinition`, `Message`, `CRC`) as soon as it is being decoded.
-//! This way, users can have fine-grained control on how to interact with the data efficiently. And since this is lazily evaluated, users can
-//! decide when to stop without required to read the whole reader.
+//! `StreamDecoder` allows us to retrieve an enum, `DecoderEvent`, as soon as it is being decoded. The enum can hold a reference
+//! to either a `FileHeader`, `MessageDefinition`, `Message` or `CRC`. This way, users can have fine-grained control on how to interact
+//! with the data. And since this is lazily evaluated, users can decide when to stop without being required to read the entire reader.
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -129,7 +123,7 @@
 //! ```
 //!
 //! Users can also use `discard()` to discard this current FIT sequence and direct the `StreamDecoder`
-//! to point to next FIT sequence in the reader. If desired, users can also stop the process entirely.
+//! to point to next FIT sequence in the reader in the case of chained FIT File.
 //!
 //! ```
 //! # use std::{error::Error, fs::File, io::BufReader};
@@ -159,7 +153,7 @@
 //! # }
 //! ```
 //!
-//! #### DecoderBuilder
+//! ## DecoderBuilder
 //!
 //! Create `Decoder` instance with options using `Decoder::builder()` or `DecoderBuilder::new()`.
 //!
@@ -176,7 +170,7 @@
 //!
 //! ####
 //!
-//! ### Encoding
+//! ## Encoding
 //!
 //! Here is the example of manually encode FIT protocol using this library to give the idea how it works.
 //!
@@ -254,7 +248,7 @@
 //! }
 //! ```
 //!
-//! #### Encode using mesgdef module
+//! ## Encode using mesgdef module
 //!
 //! Alternatively, users can create messages using the mesgdef module for convenience.
 //!
@@ -298,7 +292,7 @@
 //! }
 //! ```
 //!
-//! #### Streaming Encoding
+//! ## Streaming Encoding
 //!
 //! `StreamEncoder` allows us to encode in streaming fashion. Write each message directly without retain them first in the memory.
 //! This is useful when the device is the one who produce the data such as smartwatch, cycling computer or other health devices.
@@ -343,15 +337,7 @@
 //!
 //! ```
 //!
-//! NOTE:
-//! - For `#![no_std]` on MCU with only few hundred KBs of RAM, we recommend allocating a Message once
-//!   and reuse it instead of using these `mesgdef` building blocks which might yield few KBs stack memory.
-//!   MCU may only has 2KB or less stack memory configuration.
-//!
-//! - For `std`, you don't need to worry about this, on Linux for example, stack can have a range from 2MB to 8MB,
-//!   which is abundant.
-//!
-//! #### EncoderBuilder
+//! ## EncoderBuilder
 //!
 //! Create `Encoder` instance with options using `Encoder::builder()` or `EncoderBuilder::new()`.
 //!
