@@ -62,11 +62,13 @@ impl<E> core::error::Error for Error<E> where E: core::fmt::Debug + core::fmt::D
 /// Default: Normal(0)
 #[derive(Clone, Copy)]
 pub enum HeaderOption {
-    /// Set Normal Header with the number of maximum message definition interleave allowed.
-    /// Valid value: 0-15;
+    /// Set Normal Header with the number of maximum message definition interleave allowed (valid value: 0-15).
     Normal(u8),
-    /// Set Compressed Header with the number of maximum message definition interleave allowed.
-    /// Valid value: 0-3;
+    /// Set Compressed Header with the number of maximum message definition interleave allowed (valid value: 0-3).
+    ///
+    /// This has smaller interleave than `Normal Header` since some of bits are used for storing compressed timestamp
+    /// from a field, optimizing file size in different way. Saves 7 bytes per message when its timestamp
+    /// is compressed: 3 bytes for field definition and 4 bytes for the uint32 timestamp value.
     Compressed(u8),
 }
 
@@ -224,9 +226,7 @@ impl Encoder {
         }
 
         writer.seek(SeekFrom::Current(-self.n))?;
-
         writer.write_all(&self.buf[..n])?;
-
         writer.seek(SeekFrom::Current(self.n - n as i64))?;
 
         Ok(())
@@ -631,11 +631,11 @@ impl Builder {
     /// Build Encoder based on given options (if any).
     pub const fn build(&self) -> Encoder {
         Encoder {
+            buf: [0u8; 1537],
             n: 0,
             data_size: 0,
             crc16: Crc16::new(),
             lru: Lru::new(),
-            buf: [0u8; 1537],
             timestamp_reference: 0,
             options: self.options,
             message_validator: MessageValidator::new(),
