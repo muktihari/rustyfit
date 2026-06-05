@@ -1,9 +1,11 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{Decoder, StreamingIterator};
-use std::{hint::black_box, io::Cursor};
+use std::{hint::black_box, io::Cursor, sync::Mutex};
 
 const TEST_FILE: &str = "tests/data/large.fit";
+
+static DECODER: Mutex<Decoder> = Mutex::new(Decoder::new());
 
 pub fn bench_decode(c: &mut Criterion) {
     let file_bytes = std::fs::read(TEST_FILE).unwrap();
@@ -11,6 +13,14 @@ pub fn bench_decode(c: &mut Criterion) {
     c.bench_function("decode default", |b| {
         b.iter(|| {
             let mut dec = Decoder::new();
+            let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
+            dec.decode(&mut reader).unwrap();
+        })
+    });
+
+    c.bench_function("decode default - static", |b| {
+        b.iter(|| {
+            let mut dec = DECODER.lock().unwrap();
             let mut reader = black_box(FromStd::new(Cursor::new(&file_bytes)));
             dec.decode(&mut reader).unwrap();
         })
