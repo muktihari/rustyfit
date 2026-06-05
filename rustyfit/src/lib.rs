@@ -248,7 +248,7 @@
 //! }
 //! ```
 //!
-//! ## Encode using mesgdef module
+//! ## Encode with mesgdef
 //!
 //! Alternatively, users can create messages using the mesgdef module for convenience.
 //!
@@ -367,7 +367,9 @@ pub use encoder::{
     HeaderOption, MessageValidationError, Stream as StreamEncoder,
 };
 
-/// The `profile` module represents FIT Global Profile containing types and messages generated from Profile.xlsx.
+/// The `profile` module represents FIT Global Profile containing types ([typedef](crate::profile::typedef)) and messages
+/// ([mesgdef](crate::profile::mesgdef)) generated from Profile.xlsx. And also a [lookup](crate::profile::lookup) function
+/// to find field references defined in Profile.xlsx.
 pub mod profile;
 /// The `proto` module provides FIT Protocol low level representation.
 pub mod proto;

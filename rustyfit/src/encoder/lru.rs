@@ -75,7 +75,7 @@ impl Lru {
 ///
 /// NOTE: Clear vector before passing.
 fn reserve_with_capacity_tiers(v: &mut Vec<u8>, mut n: usize) {
-    if n < v.capacity() {
+    if n <= v.capacity() {
         return;
     }
 
