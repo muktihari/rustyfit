@@ -1,9 +1,11 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{Decoder, Encoder, HeaderOption};
-use std::{hint::black_box, io::Cursor};
+use std::{hint::black_box, io::Cursor, sync::Mutex};
 
 const TEST_FILE: &str = "tests/data/large.fit";
+
+static ENCODER: Mutex<Encoder> = Mutex::new(Encoder::new());
 
 pub fn bench_encode(c: &mut Criterion) {
     let mut dec = Decoder::new();
@@ -17,6 +19,16 @@ pub fn bench_encode(c: &mut Criterion) {
             b.iter(|| {
                 let cur = Cursor::new(&mut buf);
                 let mut enc = Encoder::new();
+                let mut writer = black_box(FromStd::new(cur));
+                enc.encode(&mut writer, fit).unwrap();
+                buf.clear();
+            })
+        });
+
+        c.bench_function("encode default - static", |b| {
+            b.iter(|| {
+                let cur = Cursor::new(&mut buf);
+                let mut enc = ENCODER.lock().unwrap();
                 let mut writer = black_box(FromStd::new(cur));
                 enc.encode(&mut writer, fit).unwrap();
                 buf.clear();
