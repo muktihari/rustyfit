@@ -19,6 +19,7 @@ pub struct FIT {
 
 /// FileHeader is a FIT's FileHeader with either 12 bytes size without CRC or a 14 bytes size with CRC,
 /// while 14 bytes size is the preferred size.
+#[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug, Default, Clone, Copy)]
 pub struct FileHeader {
     /// File header size either 12 (legacy) or 14.

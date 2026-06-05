@@ -246,7 +246,7 @@ impl Decoder {
         Ok(Some(FileHeader {
             size: n as u8,
             protocol_version: ProtocolVersion(arr[1]),
-            profile_version: u16::from_le_bytes([arr[12], arr[13]]),
+            profile_version: u16::from_le_bytes([arr[2], arr[3]]),
             data_size: u32::from_le_bytes(arr[4..8].try_into().unwrap()),
             data_type: FileHeader::DATA_TYPE,
             crc,
@@ -961,6 +961,33 @@ mod tests {
         proto::{FileHeader, Message, MessageDefinition, ProtocolVersion, Value},
     };
     use embedded_io_adapters::std::FromStd;
+
+    #[test]
+    fn test_decode_file_header() {
+        let mut reader = [
+            14, // header
+            32, // protocol version
+            84, 8, // profile version: 2132
+            214, 204, 9, 0, // data size: 642262
+            46, 70, 73, 84, // data type: .FIT
+            56, 50, // crc: 12856
+        ]
+        .as_ref();
+
+        let expected = FileHeader {
+            size: 14,
+            protocol_version: ProtocolVersion::V2,
+            profile_version: 2132,
+            data_size: 642262,
+            data_type: FileHeader::DATA_TYPE,
+            crc: 12856,
+        };
+
+        let mut dec = Decoder::new();
+        let file_header = dec.decode_file_header(&mut reader).unwrap().unwrap();
+
+        assert_eq!(file_header, expected)
+    }
 
     #[test]
     fn test_decompress_timestamp_on_decode_message_data() {
