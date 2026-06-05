@@ -9,7 +9,6 @@ use crate::{
     profile::{PROFILE_VERSION, typedef::DateTime},
     proto::*,
 };
-use alloc::vec::Vec;
 use embedded_io::{Seek, SeekFrom, Write};
 pub use validator::{FieldValidationError, MessageValidationError};
 
@@ -90,11 +89,11 @@ struct Options {
 
 /// Encoder for encoding FIT file.
 pub struct Encoder {
+    buf: [u8; 1537], // 5+1+(3*255)+1+(3*255)
     n: i64,
     data_size: u32,
     crc16: Crc16,
     lru: Lru,
-    buf: Vec<u8>,
     timestamp_reference: u32,
     options: Options,
     message_validator: MessageValidator,
@@ -197,11 +196,10 @@ impl Encoder {
 
         file_header.data_type = FileHeader::DATA_TYPE;
 
-        self.buf.clear();
-        write_file_header_to_vec(&mut self.buf, file_header);
+        let n = write_file_header(&mut self.buf, file_header);
 
-        writer.write_all(&self.buf)?;
-        self.n += self.buf.len() as i64;
+        writer.write_all(&self.buf[..n])?;
+        self.n += n as i64;
 
         Ok(())
     }
@@ -216,8 +214,7 @@ impl Encoder {
     {
         file_header.data_size = self.data_size;
 
-        self.buf.clear();
-        write_file_header_to_vec(&mut self.buf, file_header);
+        let n = write_file_header(&mut self.buf, file_header);
 
         if file_header.size == 14 {
             self.crc16.write(&self.buf[..12]);
@@ -228,10 +225,10 @@ impl Encoder {
 
         writer.seek(SeekFrom::Current(-self.n))?;
 
-        writer.write_all(&self.buf)?;
+        writer.write_all(&self.buf[..n])?;
 
-        let n = self.buf.len() as i64;
-        writer.seek(SeekFrom::Current(self.n - n))?;
+        writer.seek(SeekFrom::Current(self.n - n as i64))?;
+
         Ok(())
     }
 
@@ -249,15 +246,8 @@ impl Encoder {
             self.compress_timestamp_into_header(mesg);
         }
 
-        self.buf.clear();
-
-        // We write all at once because we need to store the whole message definition bytes
-        // in Lru for redefining `local_mesg_num`. We can use `hash` to optimize this, but
-        // we have to deal with collision. Currently, this is efficient enough. At most:
-        //  - We only use 1537 bytes of buffer per write.
-        //  - Lru can store up to 24592 bytes for 16 interleaves but it's practically impossible.
-        write_message_definition_to_vec(&mut self.buf, mesg, self.options.endianness as u8);
-        let (local_mesg_num, is_new_mesg_def) = self.lru.put(&self.buf);
+        let n = write_message_definition(&mut self.buf, mesg, self.options.endianness as u8);
+        let (local_mesg_num, is_new_mesg_def) = self.lru.put(&self.buf[..n]);
 
         self.buf[0] |= local_mesg_num;
         if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
@@ -267,10 +257,10 @@ impl Encoder {
         }
 
         if is_new_mesg_def {
-            writer.write_all(&self.buf)?;
-            self.crc16.write(&self.buf);
-            self.n += self.buf.len() as i64;
-            self.data_size += self.buf.len() as u32;
+            writer.write_all(&self.buf[..n])?;
+            self.crc16.write(&self.buf[..n]);
+            self.n += n as i64;
+            self.data_size += n as u32;
         }
 
         self.write_message_checksum(writer, mesg, self.options.endianness as u8)?;
@@ -318,25 +308,23 @@ impl Encoder {
         self.data_size += 1;
 
         for field in &mesg.fields {
-            self.buf.clear();
-            write_value_to_vec(&mut self.buf, &field.value, arch);
+            let n = write_value(&mut self.buf, &field.value, arch);
 
-            writer.write_all(&self.buf)?;
-            self.crc16.write(&self.buf);
+            writer.write_all(&self.buf[..n])?;
+            self.crc16.write(&self.buf[..n]);
 
-            self.n += self.buf.len() as i64;
-            self.data_size += self.buf.len() as u32;
+            self.n += n as i64;
+            self.data_size += n as u32;
         }
 
         for dev_field in &mesg.developer_fields {
-            self.buf.clear();
-            write_value_to_vec(&mut self.buf, &dev_field.value, arch);
+            let n = write_value(&mut self.buf, &dev_field.value, arch);
 
-            writer.write_all(&self.buf)?;
-            self.crc16.write(&self.buf);
+            writer.write_all(&self.buf[..n])?;
+            self.crc16.write(&self.buf[..n]);
 
-            self.n += self.buf.len() as i64;
-            self.data_size += self.buf.len() as u32;
+            self.n += n as i64;
+            self.data_size += n as u32;
         }
 
         Ok(())
@@ -359,9 +347,6 @@ impl Encoder {
         self.data_size = 0;
         self.message_validator.reset();
 
-        self.buf.clear();
-        self.buf.reserve_exact(1537); // Never realloc. [5+1+(3*255)+1+(3*255) = 1537]
-
         self.lru.reset(
             match self.options.header_option {
                 HeaderOption::Normal(interleave) => interleave.min(15) as usize,
@@ -377,137 +362,232 @@ impl Default for Encoder {
     }
 }
 
-fn write_file_header_to_vec(buf: &mut Vec<u8>, file_header: &FileHeader) {
-    buf.push(file_header.size);
-    buf.push(file_header.protocol_version.0);
-    buf.extend_from_slice(&file_header.profile_version.to_le_bytes());
-    buf.extend_from_slice(&file_header.data_size.to_le_bytes());
-    buf.extend_from_slice(FileHeader::DATA_TYPE.as_bytes());
-    if file_header.size == 14 {
-        buf.extend_from_slice(&file_header.crc.to_le_bytes());
+fn write_file_header<'a>(buf: &'a mut [u8], h: &FileHeader) -> usize {
+    let mut n = 0usize;
+    buf[0] = h.size;
+    buf[1] = h.protocol_version.0;
+    buf[2..4].copy_from_slice(&h.profile_version.to_le_bytes());
+    buf[4..8].copy_from_slice(&h.data_size.to_le_bytes());
+    buf[8..12].copy_from_slice(FileHeader::DATA_TYPE.as_bytes());
+    if h.size == 14 {
+        buf[12..14].copy_from_slice(&h.crc.to_le_bytes());
+        n += 2;
     }
+    n + 12
 }
 
-fn write_message_definition_to_vec(buf: &mut Vec<u8>, mesg: &Message, arch: u8) {
-    buf.extend_from_slice(&[
-        Message::DEFINITION_MASK, // header
-        0,                        // reserved
-        arch,                     // architecture
-    ]);
-
-    buf.extend_from_slice(&match arch {
+fn write_message_definition(buf: &mut [u8], mesg: &Message, arch: u8) -> usize {
+    let mut n = 0usize;
+    buf[0] = Message::DEFINITION_MASK;
+    buf[1] = 0; // reserved
+    buf[2] = arch;
+    buf[3..5].copy_from_slice(&match arch {
         0 => mesg.num.0.to_le_bytes(),
         _ => mesg.num.0.to_be_bytes(),
     });
-
-    buf.push(mesg.fields.len() as u8);
+    buf[5] = mesg.fields.len() as u8;
+    n += 6;
     for field in &mesg.fields {
-        buf.push(field.num);
-        buf.push(field.value.size() as u8);
-        buf.push(field.profile_type.base_type().0);
+        buf[n] = field.num;
+        buf[n + 1] = field.value.size() as u8;
+        buf[n + 2] = field.profile_type.base_type().0;
+        n += 3;
     }
 
     if mesg.developer_fields.is_empty() {
-        return;
+        return n;
     }
 
     buf[0] |= Message::DEV_DATA_MASK;
-    buf.push(mesg.developer_fields.len() as u8);
+    buf[n] = mesg.developer_fields.len() as u8 as u8;
+    n += 1;
     for developer_field in &mesg.developer_fields {
-        buf.push(developer_field.num);
-        buf.push(developer_field.value.size() as u8);
-        buf.push(developer_field.developer_data_index);
+        buf[n] = developer_field.num;
+        buf[n + 1] = developer_field.value.size() as u8;
+        buf[n + 2] = developer_field.developer_data_index;
+        n += 3;
     }
+
+    n
 }
 
-fn write_value_to_vec(w: &mut Vec<u8>, value: &Value, arch: u8) {
+fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
+    let mut n = 0usize;
     match value {
-        Value::Int8(v) => w.push(*v as u8),
-        Value::Uint8(v) => w.push(*v),
-        Value::Int16(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
-        }),
-        Value::Uint16(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
-        }),
-        Value::Int32(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
-        }),
-        Value::Uint32(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
-        }),
+        Value::Int8(v) => {
+            buf[0] = *v as u8;
+            n = 1;
+        }
+        Value::Uint8(v) => {
+            buf[0] = *v;
+            n = 1;
+        }
+        Value::Int16(v) => {
+            buf[0..2].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 2;
+        }
+        Value::Uint16(v) => {
+            buf[0..2].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 2;
+        }
+        Value::Int32(v) => {
+            buf[0..4].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 4;
+        }
+        Value::Uint32(v) => {
+            buf[0..4].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 4;
+        }
         Value::String(v) => {
             let b = v.as_bytes();
-            w.extend_from_slice(b);
+            n = b.len();
+            buf[0..n].copy_from_slice(b);
             if b.is_empty() || b[b.len() - 1] != 0 {
-                w.push(0);
+                buf[n] = 0;
+                n += 1;
             }
         }
-        Value::Float32(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
+        Value::Float32(v) => {
+            buf[0..4].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 4;
+        }
+        Value::Float64(v) => {
+            buf[0..8].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 8;
+        }
+        Value::Int64(v) => {
+            buf[0..8].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 8;
+        }
+        Value::Uint64(v) => {
+            buf[0..8].copy_from_slice(&match arch {
+                0 => v.to_le_bytes(),
+                _ => v.to_be_bytes(),
+            });
+            n = 8;
+        }
+        Value::VecInt8(v) => v.iter().for_each(|x| {
+            buf[n] = *x as u8;
+            n += 1;
         }),
-        Value::Float64(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
+        Value::VecUint8(v) => v.iter().for_each(|x| {
+            buf[n] = *x;
+            n += 1;
         }),
-        Value::Int64(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
-        }),
-        Value::Uint64(v) => w.extend_from_slice(&match arch {
-            0 => v.to_le_bytes(),
-            _ => v.to_be_bytes(),
-        }),
-        Value::VecInt8(v) => w.extend(v.iter().map(|&x| x as u8)),
-        Value::VecUint8(v) => w.extend(v.iter()),
         Value::VecInt16(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 2].copy_from_slice(&x.to_le_bytes());
+                n += 2;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 2].copy_from_slice(&x.to_be_bytes());
+                n += 2;
+            }),
         },
         Value::VecUint16(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 2].copy_from_slice(&x.to_le_bytes());
+                n += 2;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 2].copy_from_slice(&x.to_be_bytes());
+                n += 2;
+            }),
         },
         Value::VecInt32(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 4].copy_from_slice(&x.to_le_bytes());
+                n += 4;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 4].copy_from_slice(&x.to_be_bytes());
+                n += 4;
+            }),
         },
         Value::VecUint32(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 4].copy_from_slice(&x.to_le_bytes());
+                n += 4;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 4].copy_from_slice(&x.to_be_bytes());
+                n += 4;
+            }),
         },
-        Value::VecString(v) => {
-            for x in v {
-                let b = x.as_bytes();
-                w.extend_from_slice(b);
-                if b.is_empty() || b[b.len() - 1] != 0 {
-                    w.push(0);
-                }
+        Value::VecString(v) => v.iter().for_each(|x| {
+            let b = x.as_bytes();
+            buf[n..n + b.len()].copy_from_slice(b);
+            n += b.len();
+            if b.is_empty() || b[b.len() - 1] != 0 {
+                buf[n] = 0;
+                n += 1;
             }
-        }
+        }),
         Value::VecFloat32(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 4].copy_from_slice(&x.to_le_bytes());
+                n += 4;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 4].copy_from_slice(&x.to_be_bytes());
+                n += 4;
+            }),
         },
         Value::VecFloat64(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 8].copy_from_slice(&x.to_le_bytes());
+                n += 8;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 8].copy_from_slice(&x.to_be_bytes());
+                n += 8;
+            }),
         },
         Value::VecInt64(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 8].copy_from_slice(&x.to_le_bytes());
+                n += 8;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 8].copy_from_slice(&x.to_be_bytes());
+                n += 8;
+            }),
         },
         Value::VecUint64(v) => match arch {
-            0 => w.extend(v.iter().flat_map(|x| x.to_le_bytes())),
-            _ => w.extend(v.iter().flat_map(|x| x.to_be_bytes())),
+            0 => v.iter().for_each(|x| {
+                buf[n..n + 8].copy_from_slice(&x.to_le_bytes());
+                n += 8;
+            }),
+            _ => v.iter().for_each(|x| {
+                buf[n..n + 8].copy_from_slice(&x.to_be_bytes());
+                n += 8;
+            }),
         },
         _ => {} // SAFETY: Value validity has been checked by MessageValidator
     };
+
+    n
 }
 
 /// Build Encoder with some options.
@@ -555,7 +635,7 @@ impl Builder {
             data_size: 0,
             crc16: Crc16::new(),
             lru: Lru::new(),
-            buf: Vec::new(),
+            buf: [0u8; 1537],
             timestamp_reference: 0,
             options: self.options,
             message_validator: MessageValidator::new(),
@@ -627,16 +707,14 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
             crc: 0, // calculated
         };
 
-        self.encoder.buf.clear();
-        write_file_header_to_vec(&mut self.encoder.buf, &file_header);
-
+        let n = write_file_header(&mut self.encoder.buf, &file_header);
         self.encoder.crc16.write(&self.encoder.buf[..12]);
         let crc = self.encoder.crc16.sum16();
         self.encoder.buf[12..14].copy_from_slice(&crc.to_le_bytes());
         self.encoder.crc16.reset();
 
         self.writer.seek(SeekFrom::Current(-self.encoder.n))?;
-        self.writer.write_all(&self.encoder.buf)?;
+        self.writer.write_all(&self.encoder.buf[..n])?;
         self.writer.seek(SeekFrom::Current(self.encoder.n - 14))?;
 
         self.counter = 0;
@@ -652,7 +730,7 @@ mod tests {
 
     use crate::{
         Encoder,
-        encoder::write_value_to_vec,
+        encoder::write_value,
         profile::{mesgdef, typedef},
         proto::{FIT, FileHeader, Message, ProtocolVersion, Value},
     };
@@ -728,7 +806,7 @@ mod tests {
     }
 
     #[test]
-    fn test_write_value_to_vec() {
+    fn test_write_value() {
         struct Case {
             value: Value,
             expected: Vec<u8>,
@@ -1068,11 +1146,10 @@ mod tests {
             },
         ];
 
-        let mut buf: Vec<u8> = Vec::new();
+        let mut buf = [0u8; 255];
         for tc in tt {
-            buf.clear();
-            write_value_to_vec(&mut buf, &tc.value, tc.arch);
-            assert_eq!(tc.expected, buf, "input: {:?}", tc.value)
+            let n = write_value(&mut buf, &tc.value, tc.arch);
+            assert_eq!(tc.expected, buf[..n], "input: {:?}", tc.value)
         }
     }
 
@@ -1097,7 +1174,9 @@ mod tests {
         fn seek(&mut self, pos: embedded_io::SeekFrom) -> Result<u64, Self::Error> {
             match pos {
                 embedded_io::SeekFrom::Current(v) => {
-                    unsafe { self.buf.set_len((self.buf.len() as i64 + v) as usize) };
+                    let new_len = (self.buf.len() as i64 + v) as usize;
+                    assert!(new_len <= self.buf.capacity());
+                    unsafe { self.buf.set_len(new_len) };
                     return Ok(v.wrapping_abs() as u64);
                 }
                 _ => panic!("only support SeekFrom::Current"),
