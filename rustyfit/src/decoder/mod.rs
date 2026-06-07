@@ -86,7 +86,7 @@ struct Options {
 
 /// Decoder for decoding FIT file.
 pub struct Decoder {
-    buf: [u8; 765],
+    buf: [u8; 256],
     cur: u32,
     crc16: Crc16,
     mesg_definitions: [MessageDefinition; 16],
@@ -284,38 +284,46 @@ impl Decoder {
         mesg_def.field_definitions.clear();
         mesg_def.developer_field_definitions.clear();
 
-        let n = self.buf[4] as usize * 3;
-        self.read_exact_inc(reader, n)?;
-
         mesg_def.field_definitions.reserve_exact(255);
 
-        mesg_def
-            .field_definitions
-            .extend(self.buf[..n].chunks_exact(3).map(|b| FieldDefinition {
-                num: b[0],
-                size: b[1],
-                base_type: FitBaseType(b[2]),
-            }));
+        let mut n = self.buf[4] as usize * 3;
+        while n > 0 {
+            let chunk = n.min(255);
+            self.read_exact_inc(reader, chunk)?;
+            n -= chunk;
+
+            mesg_def
+                .field_definitions
+                .extend(self.buf[..chunk].chunks_exact(3).map(|b| FieldDefinition {
+                    num: b[0],
+                    size: b[1],
+                    base_type: FitBaseType(b[2]),
+                }));
+        }
 
         if mesg_def.header & Message::DEV_DATA_MASK == Message::DEV_DATA_MASK {
             self.read_exact_inc(reader, 1)?;
 
-            let n = self.buf[0] as usize * 3;
-            self.read_exact_inc(reader, n)?;
-
             mesg_def.developer_field_definitions.reserve_exact(255);
 
-            mesg_def
-                .developer_field_definitions
-                .extend(
-                    self.buf[..n]
-                        .chunks_exact(3)
-                        .map(|b| DeveloperFieldDefinition {
-                            num: b[0],
-                            size: b[1],
-                            developer_data_index: b[2],
-                        }),
-                );
+            let mut n = self.buf[0] as usize * 3;
+            while n > 0 {
+                let chunk = n.min(255);
+                self.read_exact_inc(reader, chunk)?;
+                n -= chunk;
+
+                mesg_def
+                    .developer_field_definitions
+                    .extend(
+                        self.buf[..chunk]
+                            .chunks_exact(3)
+                            .map(|b| DeveloperFieldDefinition {
+                                num: b[0],
+                                size: b[1],
+                                developer_data_index: b[2],
+                            }),
+                    );
+            }
         }
 
         Ok(())
@@ -630,7 +638,7 @@ fn local_mesg_num_from_mesg_header(header: u8) -> usize {
 }
 
 fn slice_buffer_to_match_type_size(
-    arr: &mut [u8; 765],
+    arr: &mut [u8],
     arch: u8,
     current_len: usize,
     target_len: usize,
@@ -741,7 +749,7 @@ impl Builder {
     /// Build Decoder based on given options (if any).
     pub const fn build(&self) -> Decoder {
         Decoder {
-            buf: [0u8; 765],
+            buf: [0u8; 256],
             cur: 0,
             crc16: Crc16::new(),
             mesg_definitions: [const {
