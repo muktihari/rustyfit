@@ -362,7 +362,7 @@ impl Default for Encoder {
     }
 }
 
-fn write_file_header<'a>(buf: &'a mut [u8], h: &FileHeader) -> usize {
+fn write_file_header(buf: &mut [u8], h: &FileHeader) -> usize {
     let mut n = 0usize;
     buf[0] = h.size;
     buf[1] = h.protocol_version.0;
@@ -399,7 +399,7 @@ fn write_message_definition(buf: &mut [u8], mesg: &Message, arch: u8) -> usize {
     }
 
     buf[0] |= Message::DEV_DATA_MASK;
-    buf[n] = mesg.developer_fields.len() as u8 as u8;
+    buf[n] = mesg.developer_fields.len() as u8;
     n += 1;
     for developer_field in &mesg.developer_fields {
         buf[n] = developer_field.num;
