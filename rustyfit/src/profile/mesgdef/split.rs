@@ -131,9 +131,21 @@ impl Split {
         semconv::to_degrees(self.start_position_lat)
     }
 
+    /// Set `start_position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_start_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.start_position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn start_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_long)
+    }
+
+    /// Set `start_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_start_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.start_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
@@ -141,9 +153,21 @@ impl Split {
         semconv::to_degrees(self.end_position_lat)
     }
 
+    /// Set `end_position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_end_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.end_position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn end_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_long)
+    }
+
+    /// Set `end_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_end_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.end_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.

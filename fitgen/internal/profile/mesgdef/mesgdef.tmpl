@@ -86,6 +86,12 @@ impl {{ .Name }} {
         pub fn {{ .Name }}_degrees(&self) -> Option<f64> {
             semconv::to_degrees(self.{{ .Name }})
         }
+
+        /// Set `{{ .Name }}` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+        pub fn set_{{ .Name }}_degrees(&mut self, v: f64) -> &mut Self {
+            self.{{ .Name }} = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+            self
+        }
     {{ end }}
     {{ end }}
 

@@ -80,9 +80,21 @@ impl GpsMetadata {
         semconv::to_degrees(self.position_lat)
     }
 
+    /// Set `position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
+    }
+
+    /// Set `position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
