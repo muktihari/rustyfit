@@ -12,7 +12,7 @@ This library is a rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) 
 
 ## Current State
 
-At the moment, I can't make this library heapless without complicating the code. I have no elegant solution for pure baremetal without dynamic memory allocation. That being said, this library is efficient enough to work on resource-constrained environments. I've tested it on [a `#![no_std]` program](./examples/no_std_decode) to decode a FIT file (statically embedded) and print some of its Session's fields to `stdout` with a custom global allocator having less than 50 KB heap size and it works like a charm.
+At the moment, I can't make this library heapless without complicating the code. I have no elegant solution for pure baremetal without dynamic memory allocation. That being said, this library is efficient enough to work on resource-constrained environments. I've tested it on [a `#![no_std]` program](https://github.com/muktihari/rustyfit/tree/master/examples/no_std_decode) to decode a FIT file (statically embedded) and print some of its Session's fields to `stdout` with a custom global allocator having less than 50 KB heap size and it works like a charm.
 
 ## Usage
 
@@ -20,7 +20,12 @@ For [#![no_std]](https://docs.rust-embedded.org/book/intro/no-std.html), you nee
 
 For [std](https://doc.rust-lang.org/std), you need to wrap `std::io`'s [Read](https://doc.rust-lang.org/std/io/trait.Read.html) or [Write](https://doc.rust-lang.org/std/io/trait.Write.html) with [embedded_io_adapters::std:FromStd](https://docs.rs/embedded-io-adapters/0.7.0/embedded_io_adapters/std/struct.FromStd.html).
 
-Usage examples can be viewed on [**docs.rs**](https://docs.rs/rustyfit/latest/rustyfit).
+```sh
+cargo add rustyfit 
+cargo add embedded-io-adapters --features std # only for std
+```
+
+Usage examples can be viewed on **https://docs.rs/rustyfit**
 
 ## License
 
