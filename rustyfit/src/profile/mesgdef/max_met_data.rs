@@ -66,7 +66,7 @@ impl MaxMetData {
         }
     }
 
-    /// Returns `vo2_max` in its scaled value. It returns `None` when value is valid.
+    /// Returns `vo2_max` in its scaled value. It returns `None` when value is invalid.
     pub fn vo2_max_scaled(&self) -> Option<f64> {
         if self.vo2_max == u16::MAX {
             return None;

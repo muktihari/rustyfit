@@ -88,7 +88,7 @@ impl Jump {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
@@ -99,7 +99,7 @@ impl Jump {
         self
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
@@ -110,7 +110,7 @@ impl Jump {
         self
     }
 
-    /// Returns `speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `speed` in its scaled value. It returns `None` when value is invalid.
     pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == u16::MAX {
             return None;
@@ -129,7 +129,7 @@ impl Jump {
         self
     }
 
-    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
             return None;

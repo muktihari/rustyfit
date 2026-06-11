@@ -160,7 +160,7 @@ impl UserProfile {
         }
     }
 
-    /// Returns `height` in its scaled value. It returns `None` when value is valid.
+    /// Returns `height` in its scaled value. It returns `None` when value is invalid.
     pub fn height_scaled(&self) -> Option<f64> {
         if self.height == u8::MAX {
             return None;
@@ -179,7 +179,7 @@ impl UserProfile {
         self
     }
 
-    /// Returns `weight` in its scaled value. It returns `None` when value is valid.
+    /// Returns `weight` in its scaled value. It returns `None` when value is invalid.
     pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == u16::MAX {
             return None;
@@ -198,7 +198,7 @@ impl UserProfile {
         self
     }
 
-    /// Returns `user_running_step_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `user_running_step_length` in its scaled value. It returns `None` when value is invalid.
     pub fn user_running_step_length_scaled(&self) -> Option<f64> {
         if self.user_running_step_length == u16::MAX {
             return None;
@@ -217,7 +217,7 @@ impl UserProfile {
         self
     }
 
-    /// Returns `user_walking_step_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `user_walking_step_length` in its scaled value. It returns `None` when value is invalid.
     pub fn user_walking_step_length_scaled(&self) -> Option<f64> {
         if self.user_walking_step_length == u16::MAX {
             return None;

@@ -49,7 +49,7 @@ impl TrainingSettings {
         }
     }
 
-    /// Returns `target_distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `target_distance` in its scaled value. It returns `None` when value is invalid.
     pub fn target_distance_scaled(&self) -> Option<f64> {
         if self.target_distance == u32::MAX {
             return None;
@@ -68,7 +68,7 @@ impl TrainingSettings {
         self
     }
 
-    /// Returns `target_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `target_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn target_speed_scaled(&self) -> Option<f64> {
         if self.target_speed == u16::MAX {
             return None;
@@ -87,7 +87,7 @@ impl TrainingSettings {
         self
     }
 
-    /// Returns `precise_target_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `precise_target_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn precise_target_speed_scaled(&self) -> Option<f64> {
         if self.precise_target_speed == u32::MAX {
             return None;

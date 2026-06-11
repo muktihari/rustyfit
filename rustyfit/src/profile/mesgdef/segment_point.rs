@@ -73,7 +73,7 @@ impl SegmentPoint {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
@@ -84,7 +84,7 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
@@ -95,7 +95,7 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;
@@ -114,7 +114,7 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn altitude_scaled(&self) -> Option<f64> {
         if self.altitude == u16::MAX {
             return None;
@@ -133,7 +133,7 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `leader_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `leader_time` in its scaled value. It returns `None` when value is invalid.
     pub fn leader_time_scaled(&self) -> Option<Vec<f64>> {
         if self.leader_time.is_empty() {
             return None;
@@ -162,7 +162,7 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
             return None;

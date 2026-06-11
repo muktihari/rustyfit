@@ -109,7 +109,7 @@ impl WeatherConditions {
         }
     }
 
-    /// Returns `observed_location_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `observed_location_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn observed_location_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.observed_location_lat)
     }
@@ -120,7 +120,7 @@ impl WeatherConditions {
         self
     }
 
-    /// Returns `observed_location_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `observed_location_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn observed_location_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.observed_location_long)
     }
@@ -131,7 +131,7 @@ impl WeatherConditions {
         self
     }
 
-    /// Returns `wind_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `wind_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn wind_speed_scaled(&self) -> Option<f64> {
         if self.wind_speed == u16::MAX {
             return None;

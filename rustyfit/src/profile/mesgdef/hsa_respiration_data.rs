@@ -44,7 +44,7 @@ impl HsaRespirationData {
         }
     }
 
-    /// Returns `respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn respiration_rate_scaled(&self) -> Option<Vec<f64>> {
         if self.respiration_rate.is_empty() {
             return None;

@@ -97,7 +97,7 @@ impl WeightScale {
         }
     }
 
-    /// Returns `weight` in its scaled value. It returns `None` when value is valid.
+    /// Returns `weight` in its scaled value. It returns `None` when value is invalid.
     pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == typedef::Weight(u16::MAX) {
             return None;
@@ -116,7 +116,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `percent_fat` in its scaled value. It returns `None` when value is valid.
+    /// Returns `percent_fat` in its scaled value. It returns `None` when value is invalid.
     pub fn percent_fat_scaled(&self) -> Option<f64> {
         if self.percent_fat == u16::MAX {
             return None;
@@ -135,7 +135,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `percent_hydration` in its scaled value. It returns `None` when value is valid.
+    /// Returns `percent_hydration` in its scaled value. It returns `None` when value is invalid.
     pub fn percent_hydration_scaled(&self) -> Option<f64> {
         if self.percent_hydration == u16::MAX {
             return None;
@@ -154,7 +154,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `visceral_fat_mass` in its scaled value. It returns `None` when value is valid.
+    /// Returns `visceral_fat_mass` in its scaled value. It returns `None` when value is invalid.
     pub fn visceral_fat_mass_scaled(&self) -> Option<f64> {
         if self.visceral_fat_mass == u16::MAX {
             return None;
@@ -173,7 +173,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `bone_mass` in its scaled value. It returns `None` when value is valid.
+    /// Returns `bone_mass` in its scaled value. It returns `None` when value is invalid.
     pub fn bone_mass_scaled(&self) -> Option<f64> {
         if self.bone_mass == u16::MAX {
             return None;
@@ -192,7 +192,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `muscle_mass` in its scaled value. It returns `None` when value is valid.
+    /// Returns `muscle_mass` in its scaled value. It returns `None` when value is invalid.
     pub fn muscle_mass_scaled(&self) -> Option<f64> {
         if self.muscle_mass == u16::MAX {
             return None;
@@ -211,7 +211,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `basal_met` in its scaled value. It returns `None` when value is valid.
+    /// Returns `basal_met` in its scaled value. It returns `None` when value is invalid.
     pub fn basal_met_scaled(&self) -> Option<f64> {
         if self.basal_met == u16::MAX {
             return None;
@@ -230,7 +230,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `active_met` in its scaled value. It returns `None` when value is valid.
+    /// Returns `active_met` in its scaled value. It returns `None` when value is invalid.
     pub fn active_met_scaled(&self) -> Option<f64> {
         if self.active_met == u16::MAX {
             return None;
@@ -249,7 +249,7 @@ impl WeightScale {
         self
     }
 
-    /// Returns `bmi` in its scaled value. It returns `None` when value is valid.
+    /// Returns `bmi` in its scaled value. It returns `None` when value is invalid.
     pub fn bmi_scaled(&self) -> Option<f64> {
         if self.bmi == u16::MAX {
             return None;

@@ -44,7 +44,7 @@ impl Software {
         }
     }
 
-    /// Returns `version` in its scaled value. It returns `None` when value is valid.
+    /// Returns `version` in its scaled value. It returns `None` when value is invalid.
     pub fn version_scaled(&self) -> Option<f64> {
         if self.version == u16::MAX {
             return None;

@@ -101,7 +101,7 @@ impl SplitSummary {
         }
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -120,7 +120,7 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `total_distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_distance` in its scaled value. It returns `None` when value is invalid.
     pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
             return None;
@@ -139,7 +139,7 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
             return None;
@@ -158,7 +158,7 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `max_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
             return None;
@@ -177,7 +177,7 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `avg_vert_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_vert_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_vert_speed_scaled(&self) -> Option<f64> {
         if self.avg_vert_speed == i32::MAX {
             return None;
@@ -196,7 +196,7 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `active_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -215,7 +215,7 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
             return None;

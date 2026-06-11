@@ -64,7 +64,7 @@ impl HsaAccelerometerData {
         }
     }
 
-    /// Returns `accel_x` in its scaled value. It returns `None` when value is valid.
+    /// Returns `accel_x` in its scaled value. It returns `None` when value is invalid.
     pub fn accel_x_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_x.is_empty() {
             return None;
@@ -93,7 +93,7 @@ impl HsaAccelerometerData {
         self
     }
 
-    /// Returns `accel_y` in its scaled value. It returns `None` when value is valid.
+    /// Returns `accel_y` in its scaled value. It returns `None` when value is invalid.
     pub fn accel_y_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_y.is_empty() {
             return None;
@@ -122,7 +122,7 @@ impl HsaAccelerometerData {
         self
     }
 
-    /// Returns `accel_z` in its scaled value. It returns `None` when value is valid.
+    /// Returns `accel_z` in its scaled value. It returns `None` when value is invalid.
     pub fn accel_z_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_z.is_empty() {
             return None;

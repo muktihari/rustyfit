@@ -67,7 +67,7 @@ impl SdmProfile {
         }
     }
 
-    /// Returns `sdm_cal_factor` in its scaled value. It returns `None` when value is valid.
+    /// Returns `sdm_cal_factor` in its scaled value. It returns `None` when value is invalid.
     pub fn sdm_cal_factor_scaled(&self) -> Option<f64> {
         if self.sdm_cal_factor == u16::MAX {
             return None;
@@ -86,7 +86,7 @@ impl SdmProfile {
         self
     }
 
-    /// Returns `odometer` in its scaled value. It returns `None` when value is valid.
+    /// Returns `odometer` in its scaled value. It returns `None` when value is invalid.
     pub fn odometer_scaled(&self) -> Option<f64> {
         if self.odometer == u32::MAX {
             return None;

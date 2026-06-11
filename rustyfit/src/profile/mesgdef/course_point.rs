@@ -67,7 +67,7 @@ impl CoursePoint {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
@@ -78,7 +78,7 @@ impl CoursePoint {
         self
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
@@ -89,7 +89,7 @@ impl CoursePoint {
         self
     }
 
-    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;

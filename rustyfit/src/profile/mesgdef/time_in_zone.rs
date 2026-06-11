@@ -106,7 +106,7 @@ impl TimeInZone {
         }
     }
 
-    /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_hr_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_hr_zone.is_empty() {
             return None;
@@ -135,7 +135,7 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_speed_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_speed_zone.is_empty() {
             return None;
@@ -164,7 +164,7 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_cadence_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_cadence_zone.is_empty() {
             return None;
@@ -193,7 +193,7 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_power_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_power_zone.is_empty() {
             return None;
@@ -222,7 +222,7 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `speed_zone_high_boundary` in its scaled value. It returns `None` when value is valid.
+    /// Returns `speed_zone_high_boundary` in its scaled value. It returns `None` when value is invalid.
     pub fn speed_zone_high_boundary_scaled(&self) -> Option<Vec<f64>> {
         if self.speed_zone_high_boundary.is_empty() {
             return None;

@@ -94,7 +94,7 @@ impl DiveApneaAlarm {
         }
     }
 
-    /// Returns `depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `depth` in its scaled value. It returns `None` when value is invalid.
     pub fn depth_scaled(&self) -> Option<f64> {
         if self.depth == u32::MAX {
             return None;
@@ -113,7 +113,7 @@ impl DiveApneaAlarm {
         self
     }
 
-    /// Returns `speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `speed` in its scaled value. It returns `None` when value is invalid.
     pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == i32::MAX {
             return None;

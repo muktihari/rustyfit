@@ -44,7 +44,7 @@ impl TankUpdate {
         }
     }
 
-    /// Returns `pressure` in its scaled value. It returns `None` when value is valid.
+    /// Returns `pressure` in its scaled value. It returns `None` when value is invalid.
     pub fn pressure_scaled(&self) -> Option<f64> {
         if self.pressure == u16::MAX {
             return None;

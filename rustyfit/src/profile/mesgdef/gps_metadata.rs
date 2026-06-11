@@ -75,7 +75,7 @@ impl GpsMetadata {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
@@ -86,7 +86,7 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
@@ -97,7 +97,7 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
             return None;
@@ -116,7 +116,7 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
             return None;
@@ -135,7 +135,7 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `heading` in its scaled value. It returns `None` when value is valid.
+    /// Returns `heading` in its scaled value. It returns `None` when value is invalid.
     pub fn heading_scaled(&self) -> Option<f64> {
         if self.heading == u16::MAX {
             return None;
@@ -154,7 +154,7 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `velocity` in its scaled value. It returns `None` when value is valid.
+    /// Returns `velocity` in its scaled value. It returns `None` when value is invalid.
     pub fn velocity_scaled(&self) -> Option<[f64; 3]> {
         if self.velocity == [i16::MAX; 3] {
             return None;

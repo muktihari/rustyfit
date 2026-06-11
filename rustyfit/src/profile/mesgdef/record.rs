@@ -454,7 +454,7 @@ impl Record {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
@@ -465,7 +465,7 @@ impl Record {
         self
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
@@ -476,7 +476,7 @@ impl Record {
         self
     }
 
-    /// Returns `altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn altitude_scaled(&self) -> Option<f64> {
         if self.altitude == u16::MAX {
             return None;
@@ -495,7 +495,7 @@ impl Record {
         self
     }
 
-    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;
@@ -514,7 +514,7 @@ impl Record {
         self
     }
 
-    /// Returns `speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `speed` in its scaled value. It returns `None` when value is invalid.
     pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == u16::MAX {
             return None;
@@ -533,7 +533,7 @@ impl Record {
         self
     }
 
-    /// Returns `grade` in its scaled value. It returns `None` when value is valid.
+    /// Returns `grade` in its scaled value. It returns `None` when value is invalid.
     pub fn grade_scaled(&self) -> Option<f64> {
         if self.grade == i16::MAX {
             return None;
@@ -552,7 +552,7 @@ impl Record {
         self
     }
 
-    /// Returns `time_from_course` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_from_course` in its scaled value. It returns `None` when value is invalid.
     pub fn time_from_course_scaled(&self) -> Option<f64> {
         if self.time_from_course == i32::MAX {
             return None;
@@ -571,7 +571,7 @@ impl Record {
         self
     }
 
-    /// Returns `cycle_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `cycle_length` in its scaled value. It returns `None` when value is invalid.
     pub fn cycle_length_scaled(&self) -> Option<f64> {
         if self.cycle_length == u8::MAX {
             return None;
@@ -590,7 +590,7 @@ impl Record {
         self
     }
 
-    /// Returns `speed_1s` in its scaled value. It returns `None` when value is valid.
+    /// Returns `speed_1s` in its scaled value. It returns `None` when value is invalid.
     pub fn speed_1s_scaled(&self) -> Option<Vec<f64>> {
         if self.speed_1s.is_empty() {
             return None;
@@ -619,7 +619,7 @@ impl Record {
         self
     }
 
-    /// Returns `vertical_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `vertical_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn vertical_speed_scaled(&self) -> Option<f64> {
         if self.vertical_speed == i16::MAX {
             return None;
@@ -638,7 +638,7 @@ impl Record {
         self
     }
 
-    /// Returns `vertical_oscillation` in its scaled value. It returns `None` when value is valid.
+    /// Returns `vertical_oscillation` in its scaled value. It returns `None` when value is invalid.
     pub fn vertical_oscillation_scaled(&self) -> Option<f64> {
         if self.vertical_oscillation == u16::MAX {
             return None;
@@ -657,7 +657,7 @@ impl Record {
         self
     }
 
-    /// Returns `stance_time_percent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `stance_time_percent` in its scaled value. It returns `None` when value is invalid.
     pub fn stance_time_percent_scaled(&self) -> Option<f64> {
         if self.stance_time_percent == u16::MAX {
             return None;
@@ -676,7 +676,7 @@ impl Record {
         self
     }
 
-    /// Returns `stance_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `stance_time` in its scaled value. It returns `None` when value is invalid.
     pub fn stance_time_scaled(&self) -> Option<f64> {
         if self.stance_time == u16::MAX {
             return None;
@@ -695,7 +695,7 @@ impl Record {
         self
     }
 
-    /// Returns `left_torque_effectiveness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
     pub fn left_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.left_torque_effectiveness == u8::MAX {
             return None;
@@ -714,7 +714,7 @@ impl Record {
         self
     }
 
-    /// Returns `right_torque_effectiveness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `right_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
     pub fn right_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.right_torque_effectiveness == u8::MAX {
             return None;
@@ -733,7 +733,7 @@ impl Record {
         self
     }
 
-    /// Returns `left_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `left_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
     pub fn left_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.left_pedal_smoothness == u8::MAX {
             return None;
@@ -752,7 +752,7 @@ impl Record {
         self
     }
 
-    /// Returns `right_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `right_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
     pub fn right_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.right_pedal_smoothness == u8::MAX {
             return None;
@@ -771,7 +771,7 @@ impl Record {
         self
     }
 
-    /// Returns `combined_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `combined_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
     pub fn combined_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.combined_pedal_smoothness == u8::MAX {
             return None;
@@ -790,7 +790,7 @@ impl Record {
         self
     }
 
-    /// Returns `time128` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time128` in its scaled value. It returns `None` when value is invalid.
     pub fn time128_scaled(&self) -> Option<f64> {
         if self.time128 == u8::MAX {
             return None;
@@ -809,7 +809,7 @@ impl Record {
         self
     }
 
-    /// Returns `ball_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ball_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn ball_speed_scaled(&self) -> Option<f64> {
         if self.ball_speed == u16::MAX {
             return None;
@@ -828,7 +828,7 @@ impl Record {
         self
     }
 
-    /// Returns `cadence256` in its scaled value. It returns `None` when value is valid.
+    /// Returns `cadence256` in its scaled value. It returns `None` when value is invalid.
     pub fn cadence256_scaled(&self) -> Option<f64> {
         if self.cadence256 == u16::MAX {
             return None;
@@ -847,7 +847,7 @@ impl Record {
         self
     }
 
-    /// Returns `fractional_cadence` in its scaled value. It returns `None` when value is valid.
+    /// Returns `fractional_cadence` in its scaled value. It returns `None` when value is invalid.
     pub fn fractional_cadence_scaled(&self) -> Option<f64> {
         if self.fractional_cadence == u8::MAX {
             return None;
@@ -866,7 +866,7 @@ impl Record {
         self
     }
 
-    /// Returns `total_hemoglobin_conc` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
     pub fn total_hemoglobin_conc_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc == u16::MAX {
             return None;
@@ -885,7 +885,7 @@ impl Record {
         self
     }
 
-    /// Returns `total_hemoglobin_conc_min` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_hemoglobin_conc_min` in its scaled value. It returns `None` when value is invalid.
     pub fn total_hemoglobin_conc_min_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc_min == u16::MAX {
             return None;
@@ -904,7 +904,7 @@ impl Record {
         self
     }
 
-    /// Returns `total_hemoglobin_conc_max` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_hemoglobin_conc_max` in its scaled value. It returns `None` when value is invalid.
     pub fn total_hemoglobin_conc_max_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc_max == u16::MAX {
             return None;
@@ -923,7 +923,7 @@ impl Record {
         self
     }
 
-    /// Returns `saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
     pub fn saturated_hemoglobin_percent_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent == u16::MAX {
             return None;
@@ -942,7 +942,7 @@ impl Record {
         self
     }
 
-    /// Returns `saturated_hemoglobin_percent_min` in its scaled value. It returns `None` when value is valid.
+    /// Returns `saturated_hemoglobin_percent_min` in its scaled value. It returns `None` when value is invalid.
     pub fn saturated_hemoglobin_percent_min_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent_min == u16::MAX {
             return None;
@@ -961,7 +961,7 @@ impl Record {
         self
     }
 
-    /// Returns `saturated_hemoglobin_percent_max` in its scaled value. It returns `None` when value is valid.
+    /// Returns `saturated_hemoglobin_percent_max` in its scaled value. It returns `None` when value is invalid.
     pub fn saturated_hemoglobin_percent_max_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent_max == u16::MAX {
             return None;
@@ -980,7 +980,7 @@ impl Record {
         self
     }
 
-    /// Returns `left_power_phase` in its scaled value. It returns `None` when value is valid.
+    /// Returns `left_power_phase` in its scaled value. It returns `None` when value is invalid.
     pub fn left_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.left_power_phase.is_empty() {
             return None;
@@ -1009,7 +1009,7 @@ impl Record {
         self
     }
 
-    /// Returns `left_power_phase_peak` in its scaled value. It returns `None` when value is valid.
+    /// Returns `left_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
     pub fn left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.left_power_phase_peak.is_empty() {
             return None;
@@ -1038,7 +1038,7 @@ impl Record {
         self
     }
 
-    /// Returns `right_power_phase` in its scaled value. It returns `None` when value is valid.
+    /// Returns `right_power_phase` in its scaled value. It returns `None` when value is invalid.
     pub fn right_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.right_power_phase.is_empty() {
             return None;
@@ -1067,7 +1067,7 @@ impl Record {
         self
     }
 
-    /// Returns `right_power_phase_peak` in its scaled value. It returns `None` when value is valid.
+    /// Returns `right_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
     pub fn right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.right_power_phase_peak.is_empty() {
             return None;
@@ -1096,7 +1096,7 @@ impl Record {
         self
     }
 
-    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
             return None;
@@ -1115,7 +1115,7 @@ impl Record {
         self
     }
 
-    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
             return None;
@@ -1134,7 +1134,7 @@ impl Record {
         self
     }
 
-    /// Returns `battery_soc` in its scaled value. It returns `None` when value is valid.
+    /// Returns `battery_soc` in its scaled value. It returns `None` when value is invalid.
     pub fn battery_soc_scaled(&self) -> Option<f64> {
         if self.battery_soc == u8::MAX {
             return None;
@@ -1153,7 +1153,7 @@ impl Record {
         self
     }
 
-    /// Returns `vertical_ratio` in its scaled value. It returns `None` when value is valid.
+    /// Returns `vertical_ratio` in its scaled value. It returns `None` when value is invalid.
     pub fn vertical_ratio_scaled(&self) -> Option<f64> {
         if self.vertical_ratio == u16::MAX {
             return None;
@@ -1172,7 +1172,7 @@ impl Record {
         self
     }
 
-    /// Returns `stance_time_balance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `stance_time_balance` in its scaled value. It returns `None` when value is invalid.
     pub fn stance_time_balance_scaled(&self) -> Option<f64> {
         if self.stance_time_balance == u16::MAX {
             return None;
@@ -1191,7 +1191,7 @@ impl Record {
         self
     }
 
-    /// Returns `step_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `step_length` in its scaled value. It returns `None` when value is invalid.
     pub fn step_length_scaled(&self) -> Option<f64> {
         if self.step_length == u16::MAX {
             return None;
@@ -1210,7 +1210,7 @@ impl Record {
         self
     }
 
-    /// Returns `cycle_length16` in its scaled value. It returns `None` when value is valid.
+    /// Returns `cycle_length16` in its scaled value. It returns `None` when value is invalid.
     pub fn cycle_length16_scaled(&self) -> Option<f64> {
         if self.cycle_length16 == u16::MAX {
             return None;
@@ -1229,7 +1229,7 @@ impl Record {
         self
     }
 
-    /// Returns `depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `depth` in its scaled value. It returns `None` when value is invalid.
     pub fn depth_scaled(&self) -> Option<f64> {
         if self.depth == u32::MAX {
             return None;
@@ -1248,7 +1248,7 @@ impl Record {
         self
     }
 
-    /// Returns `next_stop_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `next_stop_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn next_stop_depth_scaled(&self) -> Option<f64> {
         if self.next_stop_depth == u32::MAX {
             return None;
@@ -1267,7 +1267,7 @@ impl Record {
         self
     }
 
-    /// Returns `enhanced_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_respiration_rate == u16::MAX {
             return None;
@@ -1286,7 +1286,7 @@ impl Record {
         self
     }
 
-    /// Returns `current_stress` in its scaled value. It returns `None` when value is valid.
+    /// Returns `current_stress` in its scaled value. It returns `None` when value is invalid.
     pub fn current_stress_scaled(&self) -> Option<f64> {
         if self.current_stress == u16::MAX {
             return None;
@@ -1305,7 +1305,7 @@ impl Record {
         self
     }
 
-    /// Returns `pressure_sac` in its scaled value. It returns `None` when value is valid.
+    /// Returns `pressure_sac` in its scaled value. It returns `None` when value is invalid.
     pub fn pressure_sac_scaled(&self) -> Option<f64> {
         if self.pressure_sac == u16::MAX {
             return None;
@@ -1324,7 +1324,7 @@ impl Record {
         self
     }
 
-    /// Returns `volume_sac` in its scaled value. It returns `None` when value is valid.
+    /// Returns `volume_sac` in its scaled value. It returns `None` when value is invalid.
     pub fn volume_sac_scaled(&self) -> Option<f64> {
         if self.volume_sac == u16::MAX {
             return None;
@@ -1343,7 +1343,7 @@ impl Record {
         self
     }
 
-    /// Returns `rmv` in its scaled value. It returns `None` when value is valid.
+    /// Returns `rmv` in its scaled value. It returns `None` when value is invalid.
     pub fn rmv_scaled(&self) -> Option<f64> {
         if self.rmv == u16::MAX {
             return None;
@@ -1362,7 +1362,7 @@ impl Record {
         self
     }
 
-    /// Returns `ascent_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ascent_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn ascent_rate_scaled(&self) -> Option<f64> {
         if self.ascent_rate == i32::MAX {
             return None;
@@ -1381,7 +1381,7 @@ impl Record {
         self
     }
 
-    /// Returns `po2` in its scaled value. It returns `None` when value is valid.
+    /// Returns `po2` in its scaled value. It returns `None` when value is invalid.
     pub fn po2_scaled(&self) -> Option<f64> {
         if self.po2 == u8::MAX {
             return None;
@@ -1400,7 +1400,7 @@ impl Record {
         self
     }
 
-    /// Returns `core_temperature` in its scaled value. It returns `None` when value is valid.
+    /// Returns `core_temperature` in its scaled value. It returns `None` when value is invalid.
     pub fn core_temperature_scaled(&self) -> Option<f64> {
         if self.core_temperature == u16::MAX {
             return None;

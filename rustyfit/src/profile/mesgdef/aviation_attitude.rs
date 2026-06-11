@@ -87,7 +87,7 @@ impl AviationAttitude {
         }
     }
 
-    /// Returns `pitch` in its scaled value. It returns `None` when value is valid.
+    /// Returns `pitch` in its scaled value. It returns `None` when value is invalid.
     pub fn pitch_scaled(&self) -> Option<Vec<f64>> {
         if self.pitch.is_empty() {
             return None;
@@ -116,7 +116,7 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `roll` in its scaled value. It returns `None` when value is valid.
+    /// Returns `roll` in its scaled value. It returns `None` when value is invalid.
     pub fn roll_scaled(&self) -> Option<Vec<f64>> {
         if self.roll.is_empty() {
             return None;
@@ -145,7 +145,7 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `accel_lateral` in its scaled value. It returns `None` when value is valid.
+    /// Returns `accel_lateral` in its scaled value. It returns `None` when value is invalid.
     pub fn accel_lateral_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_lateral.is_empty() {
             return None;
@@ -174,7 +174,7 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `accel_normal` in its scaled value. It returns `None` when value is valid.
+    /// Returns `accel_normal` in its scaled value. It returns `None` when value is invalid.
     pub fn accel_normal_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_normal.is_empty() {
             return None;
@@ -203,7 +203,7 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `turn_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `turn_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn turn_rate_scaled(&self) -> Option<Vec<f64>> {
         if self.turn_rate.is_empty() {
             return None;
@@ -232,7 +232,7 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `track` in its scaled value. It returns `None` when value is valid.
+    /// Returns `track` in its scaled value. It returns `None` when value is invalid.
     pub fn track_scaled(&self) -> Option<Vec<f64>> {
         if self.track.is_empty() {
             return None;

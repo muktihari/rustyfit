@@ -141,7 +141,7 @@ impl DiveSummary {
         }
     }
 
-    /// Returns `avg_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_depth_scaled(&self) -> Option<f64> {
         if self.avg_depth == u32::MAX {
             return None;
@@ -160,7 +160,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `max_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn max_depth_scaled(&self) -> Option<f64> {
         if self.max_depth == u32::MAX {
             return None;
@@ -179,7 +179,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `bottom_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `bottom_time` in its scaled value. It returns `None` when value is invalid.
     pub fn bottom_time_scaled(&self) -> Option<f64> {
         if self.bottom_time == u32::MAX {
             return None;
@@ -198,7 +198,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_pressure_sac` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_pressure_sac` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_pressure_sac_scaled(&self) -> Option<f64> {
         if self.avg_pressure_sac == u16::MAX {
             return None;
@@ -217,7 +217,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_volume_sac` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_volume_sac` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_volume_sac_scaled(&self) -> Option<f64> {
         if self.avg_volume_sac == u16::MAX {
             return None;
@@ -236,7 +236,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_rmv` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_rmv` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_rmv_scaled(&self) -> Option<f64> {
         if self.avg_rmv == u16::MAX {
             return None;
@@ -255,7 +255,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `descent_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `descent_time` in its scaled value. It returns `None` when value is invalid.
     pub fn descent_time_scaled(&self) -> Option<f64> {
         if self.descent_time == u32::MAX {
             return None;
@@ -274,7 +274,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `ascent_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ascent_time` in its scaled value. It returns `None` when value is invalid.
     pub fn ascent_time_scaled(&self) -> Option<f64> {
         if self.ascent_time == u32::MAX {
             return None;
@@ -293,7 +293,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_ascent_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_ascent_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_ascent_rate_scaled(&self) -> Option<f64> {
         if self.avg_ascent_rate == i32::MAX {
             return None;
@@ -312,7 +312,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_descent_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_descent_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_descent_rate_scaled(&self) -> Option<f64> {
         if self.avg_descent_rate == u32::MAX {
             return None;
@@ -331,7 +331,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `max_ascent_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_ascent_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn max_ascent_rate_scaled(&self) -> Option<f64> {
         if self.max_ascent_rate == u32::MAX {
             return None;
@@ -350,7 +350,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `max_descent_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_descent_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn max_descent_rate_scaled(&self) -> Option<f64> {
         if self.max_descent_rate == u32::MAX {
             return None;
@@ -369,7 +369,7 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `hang_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `hang_time` in its scaled value. It returns `None` when value is invalid.
     pub fn hang_time_scaled(&self) -> Option<f64> {
         if self.hang_time == u32::MAX {
             return None;

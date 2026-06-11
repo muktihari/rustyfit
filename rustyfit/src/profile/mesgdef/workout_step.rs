@@ -108,7 +108,7 @@ impl WorkoutStep {
         }
     }
 
-    /// Returns `exercise_weight` in its scaled value. It returns `None` when value is valid.
+    /// Returns `exercise_weight` in its scaled value. It returns `None` when value is invalid.
     pub fn exercise_weight_scaled(&self) -> Option<f64> {
         if self.exercise_weight == u16::MAX {
             return None;

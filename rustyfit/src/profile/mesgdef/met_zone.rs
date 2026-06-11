@@ -47,7 +47,7 @@ impl MetZone {
         }
     }
 
-    /// Returns `calories` in its scaled value. It returns `None` when value is valid.
+    /// Returns `calories` in its scaled value. It returns `None` when value is invalid.
     pub fn calories_scaled(&self) -> Option<f64> {
         if self.calories == u16::MAX {
             return None;
@@ -66,7 +66,7 @@ impl MetZone {
         self
     }
 
-    /// Returns `fat_calories` in its scaled value. It returns `None` when value is valid.
+    /// Returns `fat_calories` in its scaled value. It returns `None` when value is invalid.
     pub fn fat_calories_scaled(&self) -> Option<f64> {
         if self.fat_calories == u8::MAX {
             return None;

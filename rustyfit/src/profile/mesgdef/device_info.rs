@@ -118,7 +118,7 @@ impl DeviceInfo {
         }
     }
 
-    /// Returns `software_version` in its scaled value. It returns `None` when value is valid.
+    /// Returns `software_version` in its scaled value. It returns `None` when value is invalid.
     pub fn software_version_scaled(&self) -> Option<f64> {
         if self.software_version == u16::MAX {
             return None;
@@ -137,7 +137,7 @@ impl DeviceInfo {
         self
     }
 
-    /// Returns `battery_voltage` in its scaled value. It returns `None` when value is valid.
+    /// Returns `battery_voltage` in its scaled value. It returns `None` when value is invalid.
     pub fn battery_voltage_scaled(&self) -> Option<f64> {
         if self.battery_voltage == u16::MAX {
             return None;
