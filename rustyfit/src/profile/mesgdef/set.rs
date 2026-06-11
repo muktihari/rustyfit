@@ -88,7 +88,7 @@ impl Set {
     }
 
     /// Set `duration` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_duration_scaled(&mut self, v: f64) -> &mut Set {
+    pub fn set_duration_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.duration = u32::MAX;
@@ -107,7 +107,7 @@ impl Set {
     }
 
     /// Set `weight` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_weight_scaled(&mut self, v: f64) -> &mut Set {
+    pub fn set_weight_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 16.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.weight = u16::MAX;

@@ -189,7 +189,7 @@ impl Monitoring {
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_distance_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.distance = u32::MAX;
@@ -208,7 +208,7 @@ impl Monitoring {
     }
 
     /// Set `cycles` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycles_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_cycles_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.cycles = u32::MAX;
@@ -227,7 +227,7 @@ impl Monitoring {
     }
 
     /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.active_time = u32::MAX;
@@ -246,7 +246,7 @@ impl Monitoring {
     }
 
     /// Set `temperature` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_temperature_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_temperature_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.temperature = i16::MAX;
@@ -265,7 +265,7 @@ impl Monitoring {
     }
 
     /// Set `temperature_min` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_temperature_min_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_temperature_min_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.temperature_min = i16::MAX;
@@ -284,7 +284,7 @@ impl Monitoring {
     }
 
     /// Set `temperature_max` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_temperature_max_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_temperature_max_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.temperature_max = i16::MAX;
@@ -303,7 +303,7 @@ impl Monitoring {
     }
 
     /// Set `intensity` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_intensity_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_intensity_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.intensity = u8::MAX;
@@ -322,7 +322,7 @@ impl Monitoring {
     }
 
     /// Set `ascent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ascent_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_ascent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.ascent = u32::MAX;
@@ -341,7 +341,7 @@ impl Monitoring {
     }
 
     /// Set `descent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_descent_scaled(&mut self, v: f64) -> &mut Monitoring {
+    pub fn set_descent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.descent = u32::MAX;

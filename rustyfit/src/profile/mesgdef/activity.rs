@@ -72,7 +72,7 @@ impl Activity {
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Activity {
+    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_timer_time = u32::MAX;

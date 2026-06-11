@@ -138,7 +138,7 @@ impl Event {
     }
 
     /// Set `radar_threat_avg_approach_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_radar_threat_avg_approach_speed_scaled(&mut self, v: f64) -> &mut Event {
+    pub fn set_radar_threat_avg_approach_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.radar_threat_avg_approach_speed = u8::MAX;
@@ -157,7 +157,7 @@ impl Event {
     }
 
     /// Set `radar_threat_max_approach_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_radar_threat_max_approach_speed_scaled(&mut self, v: f64) -> &mut Event {
+    pub fn set_radar_threat_max_approach_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.radar_threat_max_approach_speed = u8::MAX;

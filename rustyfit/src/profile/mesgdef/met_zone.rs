@@ -56,7 +56,7 @@ impl MetZone {
     }
 
     /// Set `calories` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_calories_scaled(&mut self, v: f64) -> &mut MetZone {
+    pub fn set_calories_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.calories = u16::MAX;
@@ -75,7 +75,7 @@ impl MetZone {
     }
 
     /// Set `fat_calories` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_fat_calories_scaled(&mut self, v: f64) -> &mut MetZone {
+    pub fn set_fat_calories_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.fat_calories = u8::MAX;

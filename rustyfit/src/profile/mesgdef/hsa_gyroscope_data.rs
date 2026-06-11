@@ -77,7 +77,7 @@ impl HsaGyroscopeData {
     }
 
     /// Set `gyro_x` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_gyro_x_scaled(&mut self, v: &[f64]) -> &mut HsaGyroscopeData {
+    pub fn set_gyro_x_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.gyro_x = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -106,7 +106,7 @@ impl HsaGyroscopeData {
     }
 
     /// Set `gyro_y` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_gyro_y_scaled(&mut self, v: &[f64]) -> &mut HsaGyroscopeData {
+    pub fn set_gyro_y_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.gyro_y = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -135,7 +135,7 @@ impl HsaGyroscopeData {
     }
 
     /// Set `gyro_z` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_gyro_z_scaled(&mut self, v: &[f64]) -> &mut HsaGyroscopeData {
+    pub fn set_gyro_z_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.gyro_z = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

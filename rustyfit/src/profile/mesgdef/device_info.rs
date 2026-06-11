@@ -127,7 +127,7 @@ impl DeviceInfo {
     }
 
     /// Set `software_version` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_software_version_scaled(&mut self, v: f64) -> &mut DeviceInfo {
+    pub fn set_software_version_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.software_version = u16::MAX;
@@ -146,7 +146,7 @@ impl DeviceInfo {
     }
 
     /// Set `battery_voltage` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_battery_voltage_scaled(&mut self, v: f64) -> &mut DeviceInfo {
+    pub fn set_battery_voltage_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 256.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.battery_voltage = u16::MAX;

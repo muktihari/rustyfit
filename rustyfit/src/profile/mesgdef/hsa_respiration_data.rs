@@ -57,7 +57,7 @@ impl HsaRespirationData {
     }
 
     /// Set `respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_respiration_rate_scaled(&mut self, v: &[f64]) -> &mut HsaRespirationData {
+    pub fn set_respiration_rate_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.respiration_rate = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

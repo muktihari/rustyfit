@@ -117,7 +117,7 @@ impl WorkoutStep {
     }
 
     /// Set `exercise_weight` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_exercise_weight_scaled(&mut self, v: f64) -> &mut WorkoutStep {
+    pub fn set_exercise_weight_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.exercise_weight = u16::MAX;

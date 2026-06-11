@@ -53,7 +53,7 @@ impl TankUpdate {
     }
 
     /// Set `pressure` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_pressure_scaled(&mut self, v: f64) -> &mut TankUpdate {
+    pub fn set_pressure_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.pressure = u16::MAX;

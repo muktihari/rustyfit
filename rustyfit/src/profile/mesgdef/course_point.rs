@@ -72,9 +72,21 @@ impl CoursePoint {
         semconv::to_degrees(self.position_lat)
     }
 
+    /// Set `position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
+    }
+
+    /// Set `position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `distance` in its scaled value. It returns `None` when value is valid.
@@ -86,7 +98,7 @@ impl CoursePoint {
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_distance_scaled(&mut self, v: f64) -> &mut CoursePoint {
+    pub fn set_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.distance = u32::MAX;

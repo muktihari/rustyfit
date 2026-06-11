@@ -75,7 +75,7 @@ impl ChronoShotSession {
     }
 
     /// Set `min_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_min_speed_scaled(&mut self, v: f64) -> &mut ChronoShotSession {
+    pub fn set_min_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.min_speed = u32::MAX;
@@ -94,7 +94,7 @@ impl ChronoShotSession {
     }
 
     /// Set `max_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_speed_scaled(&mut self, v: f64) -> &mut ChronoShotSession {
+    pub fn set_max_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.max_speed = u32::MAX;
@@ -113,7 +113,7 @@ impl ChronoShotSession {
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut ChronoShotSession {
+    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_speed = u32::MAX;
@@ -132,7 +132,7 @@ impl ChronoShotSession {
     }
 
     /// Set `grain_weight` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_grain_weight_scaled(&mut self, v: f64) -> &mut ChronoShotSession {
+    pub fn set_grain_weight_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.grain_weight = u32::MAX;
@@ -151,7 +151,7 @@ impl ChronoShotSession {
     }
 
     /// Set `standard_deviation` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_standard_deviation_scaled(&mut self, v: f64) -> &mut ChronoShotSession {
+    pub fn set_standard_deviation_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.standard_deviation = u32::MAX;

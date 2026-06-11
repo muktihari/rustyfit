@@ -76,7 +76,7 @@ impl HrvStatusSummary {
     }
 
     /// Set `weekly_average` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_weekly_average_scaled(&mut self, v: f64) -> &mut HrvStatusSummary {
+    pub fn set_weekly_average_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.weekly_average = u16::MAX;
@@ -95,7 +95,7 @@ impl HrvStatusSummary {
     }
 
     /// Set `last_night_average` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_last_night_average_scaled(&mut self, v: f64) -> &mut HrvStatusSummary {
+    pub fn set_last_night_average_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.last_night_average = u16::MAX;
@@ -114,7 +114,7 @@ impl HrvStatusSummary {
     }
 
     /// Set `last_night_5_min_high` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_last_night_5_min_high_scaled(&mut self, v: f64) -> &mut HrvStatusSummary {
+    pub fn set_last_night_5_min_high_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.last_night_5_min_high = u16::MAX;
@@ -133,7 +133,7 @@ impl HrvStatusSummary {
     }
 
     /// Set `baseline_low_upper` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_baseline_low_upper_scaled(&mut self, v: f64) -> &mut HrvStatusSummary {
+    pub fn set_baseline_low_upper_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.baseline_low_upper = u16::MAX;
@@ -152,7 +152,7 @@ impl HrvStatusSummary {
     }
 
     /// Set `baseline_balanced_lower` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_baseline_balanced_lower_scaled(&mut self, v: f64) -> &mut HrvStatusSummary {
+    pub fn set_baseline_balanced_lower_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.baseline_balanced_lower = u16::MAX;
@@ -171,7 +171,7 @@ impl HrvStatusSummary {
     }
 
     /// Set `baseline_balanced_upper` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_baseline_balanced_upper_scaled(&mut self, v: f64) -> &mut HrvStatusSummary {
+    pub fn set_baseline_balanced_upper_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.baseline_balanced_upper = u16::MAX;

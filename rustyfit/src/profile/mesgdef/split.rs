@@ -131,9 +131,21 @@ impl Split {
         semconv::to_degrees(self.start_position_lat)
     }
 
+    /// Set `start_position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_start_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.start_position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn start_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_long)
+    }
+
+    /// Set `start_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_start_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.start_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
@@ -141,9 +153,21 @@ impl Split {
         semconv::to_degrees(self.end_position_lat)
     }
 
+    /// Set `end_position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_end_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.end_position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn end_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_long)
+    }
+
+    /// Set `end_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_end_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.end_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.
@@ -155,7 +179,7 @@ impl Split {
     }
 
     /// Set `total_elapsed_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_elapsed_time_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_total_elapsed_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_elapsed_time = u32::MAX;
@@ -174,7 +198,7 @@ impl Split {
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_timer_time = u32::MAX;
@@ -193,7 +217,7 @@ impl Split {
     }
 
     /// Set `total_distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_distance_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_total_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_distance = u32::MAX;
@@ -212,7 +236,7 @@ impl Split {
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_speed = u32::MAX;
@@ -231,7 +255,7 @@ impl Split {
     }
 
     /// Set `max_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_speed_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_max_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.max_speed = u32::MAX;
@@ -250,7 +274,7 @@ impl Split {
     }
 
     /// Set `avg_vert_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_vert_speed_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_avg_vert_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
             self.avg_vert_speed = i32::MAX;
@@ -269,7 +293,7 @@ impl Split {
     }
 
     /// Set `start_elevation` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_start_elevation_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_start_elevation_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.start_elevation = u32::MAX;
@@ -288,7 +312,7 @@ impl Split {
     }
 
     /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.active_time = u32::MAX;
@@ -307,7 +331,7 @@ impl Split {
     }
 
     /// Set `total_moving_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_moving_time_scaled(&mut self, v: f64) -> &mut Split {
+    pub fn set_total_moving_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_moving_time = u32::MAX;

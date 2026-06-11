@@ -200,7 +200,7 @@ impl DiveSettings {
     }
 
     /// Set `po2_warn` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_po2_warn_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_po2_warn_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.po2_warn = u8::MAX;
@@ -219,7 +219,7 @@ impl DiveSettings {
     }
 
     /// Set `po2_critical` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_po2_critical_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_po2_critical_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.po2_critical = u8::MAX;
@@ -238,7 +238,7 @@ impl DiveSettings {
     }
 
     /// Set `po2_deco` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_po2_deco_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_po2_deco_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.po2_deco = u8::MAX;
@@ -257,7 +257,7 @@ impl DiveSettings {
     }
 
     /// Set `ccr_low_setpoint` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ccr_low_setpoint_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_ccr_low_setpoint_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.ccr_low_setpoint = u8::MAX;
@@ -276,7 +276,7 @@ impl DiveSettings {
     }
 
     /// Set `ccr_low_setpoint_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ccr_low_setpoint_depth_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_ccr_low_setpoint_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.ccr_low_setpoint_depth = u32::MAX;
@@ -295,7 +295,7 @@ impl DiveSettings {
     }
 
     /// Set `ccr_high_setpoint` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ccr_high_setpoint_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_ccr_high_setpoint_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.ccr_high_setpoint = u8::MAX;
@@ -314,7 +314,7 @@ impl DiveSettings {
     }
 
     /// Set `ccr_high_setpoint_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ccr_high_setpoint_depth_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_ccr_high_setpoint_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.ccr_high_setpoint_depth = u32::MAX;
@@ -333,7 +333,7 @@ impl DiveSettings {
     }
 
     /// Set `last_stop_multiple` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_last_stop_multiple_scaled(&mut self, v: f64) -> &mut DiveSettings {
+    pub fn set_last_stop_multiple_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.last_stop_multiple = u8::MAX;

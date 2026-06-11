@@ -63,7 +63,7 @@ impl TankSummary {
     }
 
     /// Set `start_pressure` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_start_pressure_scaled(&mut self, v: f64) -> &mut TankSummary {
+    pub fn set_start_pressure_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.start_pressure = u16::MAX;
@@ -82,7 +82,7 @@ impl TankSummary {
     }
 
     /// Set `end_pressure` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_end_pressure_scaled(&mut self, v: f64) -> &mut TankSummary {
+    pub fn set_end_pressure_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.end_pressure = u16::MAX;
@@ -101,7 +101,7 @@ impl TankSummary {
     }
 
     /// Set `volume_used` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_volume_used_scaled(&mut self, v: f64) -> &mut TankSummary {
+    pub fn set_volume_used_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.volume_used = u32::MAX;

@@ -119,7 +119,7 @@ impl TimeInZone {
     }
 
     /// Set `time_in_hr_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+    pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_hr_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -148,7 +148,7 @@ impl TimeInZone {
     }
 
     /// Set `time_in_speed_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+    pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_speed_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -177,7 +177,7 @@ impl TimeInZone {
     }
 
     /// Set `time_in_cadence_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+    pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_cadence_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -206,7 +206,7 @@ impl TimeInZone {
     }
 
     /// Set `time_in_power_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+    pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_power_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -235,7 +235,7 @@ impl TimeInZone {
     }
 
     /// Set `speed_zone_high_boundary` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_zone_high_boundary_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+    pub fn set_speed_zone_high_boundary_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.speed_zone_high_boundary = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

@@ -159,7 +159,7 @@ impl DeviceSettings {
     }
 
     /// Set `time_zone_offset` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_zone_offset_scaled(&mut self, v: &[f64]) -> &mut DeviceSettings {
+    pub fn set_time_zone_offset_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_zone_offset = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

@@ -150,7 +150,7 @@ impl DiveSummary {
     }
 
     /// Set `avg_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_depth_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_avg_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_depth = u32::MAX;
@@ -169,7 +169,7 @@ impl DiveSummary {
     }
 
     /// Set `max_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_depth_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_max_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.max_depth = u32::MAX;
@@ -188,7 +188,7 @@ impl DiveSummary {
     }
 
     /// Set `bottom_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_bottom_time_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_bottom_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.bottom_time = u32::MAX;
@@ -207,7 +207,7 @@ impl DiveSummary {
     }
 
     /// Set `avg_pressure_sac` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_pressure_sac_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_avg_pressure_sac_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_pressure_sac = u16::MAX;
@@ -226,7 +226,7 @@ impl DiveSummary {
     }
 
     /// Set `avg_volume_sac` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_volume_sac_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_avg_volume_sac_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_volume_sac = u16::MAX;
@@ -245,7 +245,7 @@ impl DiveSummary {
     }
 
     /// Set `avg_rmv` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_rmv_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_avg_rmv_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_rmv = u16::MAX;
@@ -264,7 +264,7 @@ impl DiveSummary {
     }
 
     /// Set `descent_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_descent_time_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_descent_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.descent_time = u32::MAX;
@@ -283,7 +283,7 @@ impl DiveSummary {
     }
 
     /// Set `ascent_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ascent_time_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_ascent_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.ascent_time = u32::MAX;
@@ -302,7 +302,7 @@ impl DiveSummary {
     }
 
     /// Set `avg_ascent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_ascent_rate_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_avg_ascent_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
             self.avg_ascent_rate = i32::MAX;
@@ -321,7 +321,7 @@ impl DiveSummary {
     }
 
     /// Set `avg_descent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_descent_rate_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_avg_descent_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_descent_rate = u32::MAX;
@@ -340,7 +340,7 @@ impl DiveSummary {
     }
 
     /// Set `max_ascent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_ascent_rate_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_max_ascent_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.max_ascent_rate = u32::MAX;
@@ -359,7 +359,7 @@ impl DiveSummary {
     }
 
     /// Set `max_descent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_descent_rate_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_max_descent_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.max_descent_rate = u32::MAX;
@@ -378,7 +378,7 @@ impl DiveSummary {
     }
 
     /// Set `hang_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_hang_time_scaled(&mut self, v: f64) -> &mut DiveSummary {
+    pub fn set_hang_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.hang_time = u32::MAX;

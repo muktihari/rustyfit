@@ -93,9 +93,21 @@ impl Jump {
         semconv::to_degrees(self.position_lat)
     }
 
+    /// Set `position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
+    }
+
+    /// Set `position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `speed` in its scaled value. It returns `None` when value is valid.
@@ -107,7 +119,7 @@ impl Jump {
     }
 
     /// Set `speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_scaled(&mut self, v: f64) -> &mut Jump {
+    pub fn set_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.speed = u16::MAX;
@@ -126,7 +138,7 @@ impl Jump {
     }
 
     /// Set `enhanced_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_speed_scaled(&mut self, v: f64) -> &mut Jump {
+    pub fn set_enhanced_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_speed = u32::MAX;

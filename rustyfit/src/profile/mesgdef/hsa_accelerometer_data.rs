@@ -77,7 +77,7 @@ impl HsaAccelerometerData {
     }
 
     /// Set `accel_x` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_x_scaled(&mut self, v: &[f64]) -> &mut HsaAccelerometerData {
+    pub fn set_accel_x_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.accel_x = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -106,7 +106,7 @@ impl HsaAccelerometerData {
     }
 
     /// Set `accel_y` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_y_scaled(&mut self, v: &[f64]) -> &mut HsaAccelerometerData {
+    pub fn set_accel_y_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.accel_y = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -135,7 +135,7 @@ impl HsaAccelerometerData {
     }
 
     /// Set `accel_z` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_z_scaled(&mut self, v: &[f64]) -> &mut HsaAccelerometerData {
+    pub fn set_accel_z_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.accel_z = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

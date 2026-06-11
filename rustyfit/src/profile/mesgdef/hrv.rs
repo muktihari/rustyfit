@@ -47,7 +47,7 @@ impl Hrv {
     }
 
     /// Set `time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_scaled(&mut self, v: &[f64]) -> &mut Hrv {
+    pub fn set_time_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

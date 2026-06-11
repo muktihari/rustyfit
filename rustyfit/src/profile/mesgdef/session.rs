@@ -819,9 +819,21 @@ impl Session {
         semconv::to_degrees(self.start_position_lat)
     }
 
+    /// Set `start_position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_start_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.start_position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn start_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_long)
+    }
+
+    /// Set `start_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_start_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.start_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `nec_lat` in degrees instead of semicircles. It returns `None` when value is valid.
@@ -829,9 +841,21 @@ impl Session {
         semconv::to_degrees(self.nec_lat)
     }
 
+    /// Set `nec_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_nec_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.nec_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `nec_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn nec_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.nec_long)
+    }
+
+    /// Set `nec_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_nec_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.nec_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `swc_lat` in degrees instead of semicircles. It returns `None` when value is valid.
@@ -839,9 +863,21 @@ impl Session {
         semconv::to_degrees(self.swc_lat)
     }
 
+    /// Set `swc_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_swc_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.swc_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `swc_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn swc_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.swc_long)
+    }
+
+    /// Set `swc_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_swc_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.swc_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
@@ -849,9 +885,21 @@ impl Session {
         semconv::to_degrees(self.end_position_lat)
     }
 
+    /// Set `end_position_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_end_position_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.end_position_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
     /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
     pub fn end_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_long)
+    }
+
+    /// Set `end_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_end_position_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.end_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.
@@ -863,7 +911,7 @@ impl Session {
     }
 
     /// Set `total_elapsed_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_elapsed_time_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_elapsed_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_elapsed_time = u32::MAX;
@@ -882,7 +930,7 @@ impl Session {
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_timer_time = u32::MAX;
@@ -901,7 +949,7 @@ impl Session {
     }
 
     /// Set `total_distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_distance_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_distance = u32::MAX;
@@ -920,7 +968,7 @@ impl Session {
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_speed = u16::MAX;
@@ -939,7 +987,7 @@ impl Session {
     }
 
     /// Set `max_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.max_speed = u16::MAX;
@@ -958,7 +1006,7 @@ impl Session {
     }
 
     /// Set `total_training_effect` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_training_effect_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_training_effect_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.total_training_effect = u8::MAX;
@@ -977,7 +1025,7 @@ impl Session {
     }
 
     /// Set `training_stress_score` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_training_stress_score_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_training_stress_score_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.training_stress_score = u16::MAX;
@@ -996,7 +1044,7 @@ impl Session {
     }
 
     /// Set `intensity_factor` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_intensity_factor_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_intensity_factor_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.intensity_factor = u16::MAX;
@@ -1015,7 +1063,7 @@ impl Session {
     }
 
     /// Set `avg_stroke_count` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_stroke_count_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_stroke_count_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_stroke_count = u32::MAX;
@@ -1034,7 +1082,7 @@ impl Session {
     }
 
     /// Set `avg_stroke_distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_stroke_distance_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_stroke_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_stroke_distance = u16::MAX;
@@ -1053,7 +1101,7 @@ impl Session {
     }
 
     /// Set `pool_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_pool_length_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_pool_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.pool_length = u16::MAX;
@@ -1072,7 +1120,7 @@ impl Session {
     }
 
     /// Set `avg_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_altitude_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_altitude = u16::MAX;
@@ -1091,7 +1139,7 @@ impl Session {
     }
 
     /// Set `max_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_altitude_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.max_altitude = u16::MAX;
@@ -1110,7 +1158,7 @@ impl Session {
     }
 
     /// Set `avg_grade` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_grade_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_grade_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.avg_grade = i16::MAX;
@@ -1129,7 +1177,7 @@ impl Session {
     }
 
     /// Set `avg_pos_grade` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_pos_grade_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_pos_grade_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.avg_pos_grade = i16::MAX;
@@ -1148,7 +1196,7 @@ impl Session {
     }
 
     /// Set `avg_neg_grade` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_neg_grade_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_neg_grade_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.avg_neg_grade = i16::MAX;
@@ -1167,7 +1215,7 @@ impl Session {
     }
 
     /// Set `max_pos_grade` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_pos_grade_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_pos_grade_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.max_pos_grade = i16::MAX;
@@ -1186,7 +1234,7 @@ impl Session {
     }
 
     /// Set `max_neg_grade` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_neg_grade_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_neg_grade_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.max_neg_grade = i16::MAX;
@@ -1205,7 +1253,7 @@ impl Session {
     }
 
     /// Set `total_moving_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_moving_time_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_moving_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_moving_time = u32::MAX;
@@ -1224,7 +1272,7 @@ impl Session {
     }
 
     /// Set `avg_pos_vertical_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_pos_vertical_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_pos_vertical_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.avg_pos_vertical_speed = i16::MAX;
@@ -1243,7 +1291,7 @@ impl Session {
     }
 
     /// Set `avg_neg_vertical_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_neg_vertical_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_neg_vertical_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.avg_neg_vertical_speed = i16::MAX;
@@ -1262,7 +1310,7 @@ impl Session {
     }
 
     /// Set `max_pos_vertical_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_pos_vertical_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_pos_vertical_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.max_pos_vertical_speed = i16::MAX;
@@ -1281,7 +1329,7 @@ impl Session {
     }
 
     /// Set `max_neg_vertical_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_neg_vertical_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_neg_vertical_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.max_neg_vertical_speed = i16::MAX;
@@ -1304,7 +1352,7 @@ impl Session {
     }
 
     /// Set `time_in_hr_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_hr_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1333,7 +1381,7 @@ impl Session {
     }
 
     /// Set `time_in_speed_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_speed_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1362,7 +1410,7 @@ impl Session {
     }
 
     /// Set `time_in_cadence_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_cadence_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1391,7 +1439,7 @@ impl Session {
     }
 
     /// Set `time_in_power_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.time_in_power_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1416,7 +1464,7 @@ impl Session {
     }
 
     /// Set `avg_lap_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_lap_time_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_lap_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_lap_time = u32::MAX;
@@ -1435,7 +1483,7 @@ impl Session {
     }
 
     /// Set `min_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_min_altitude_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_min_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.min_altitude = u16::MAX;
@@ -1454,7 +1502,7 @@ impl Session {
     }
 
     /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_active_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.active_time = u32::MAX;
@@ -1473,7 +1521,7 @@ impl Session {
     }
 
     /// Set `max_ball_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_ball_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_ball_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.max_ball_speed = u16::MAX;
@@ -1492,7 +1540,7 @@ impl Session {
     }
 
     /// Set `avg_ball_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_ball_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_ball_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_ball_speed = u16::MAX;
@@ -1511,7 +1559,7 @@ impl Session {
     }
 
     /// Set `avg_vertical_oscillation` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_vertical_oscillation_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_vertical_oscillation_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_vertical_oscillation = u16::MAX;
@@ -1530,7 +1578,7 @@ impl Session {
     }
 
     /// Set `avg_stance_time_percent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_stance_time_percent_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_stance_time_percent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_stance_time_percent = u16::MAX;
@@ -1549,7 +1597,7 @@ impl Session {
     }
 
     /// Set `avg_stance_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_stance_time_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_stance_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_stance_time = u16::MAX;
@@ -1568,7 +1616,7 @@ impl Session {
     }
 
     /// Set `avg_fractional_cadence` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_fractional_cadence_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_fractional_cadence_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.avg_fractional_cadence = u8::MAX;
@@ -1587,7 +1635,7 @@ impl Session {
     }
 
     /// Set `max_fractional_cadence` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_fractional_cadence_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_fractional_cadence_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.max_fractional_cadence = u8::MAX;
@@ -1606,7 +1654,7 @@ impl Session {
     }
 
     /// Set `total_fractional_cycles` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_fractional_cycles_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_fractional_cycles_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.total_fractional_cycles = u8::MAX;
@@ -1629,7 +1677,7 @@ impl Session {
     }
 
     /// Set `avg_total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_avg_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.avg_total_hemoglobin_conc = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1658,7 +1706,7 @@ impl Session {
     }
 
     /// Set `min_total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_min_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_min_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.min_total_hemoglobin_conc = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1687,7 +1735,7 @@ impl Session {
     }
 
     /// Set `max_total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_max_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.max_total_hemoglobin_conc = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1716,7 +1764,7 @@ impl Session {
     }
 
     /// Set `avg_saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_avg_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.avg_saturated_hemoglobin_percent = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1745,7 +1793,7 @@ impl Session {
     }
 
     /// Set `min_saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_min_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_min_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.min_saturated_hemoglobin_percent = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1774,7 +1822,7 @@ impl Session {
     }
 
     /// Set `max_saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_max_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.max_saturated_hemoglobin_percent = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1799,7 +1847,7 @@ impl Session {
     }
 
     /// Set `avg_left_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_left_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_left_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.avg_left_torque_effectiveness = u8::MAX;
@@ -1818,7 +1866,7 @@ impl Session {
     }
 
     /// Set `avg_right_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_right_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_right_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.avg_right_torque_effectiveness = u8::MAX;
@@ -1837,7 +1885,7 @@ impl Session {
     }
 
     /// Set `avg_left_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_left_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_left_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.avg_left_pedal_smoothness = u8::MAX;
@@ -1856,7 +1904,7 @@ impl Session {
     }
 
     /// Set `avg_right_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_right_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_right_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.avg_right_pedal_smoothness = u8::MAX;
@@ -1875,7 +1923,7 @@ impl Session {
     }
 
     /// Set `avg_combined_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_combined_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_combined_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.avg_combined_pedal_smoothness = u8::MAX;
@@ -1894,7 +1942,7 @@ impl Session {
     }
 
     /// Set `time_standing` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_standing_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_time_standing_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.time_standing = u32::MAX;
@@ -1917,7 +1965,7 @@ impl Session {
     }
 
     /// Set `avg_left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_avg_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.avg_left_power_phase = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1946,7 +1994,7 @@ impl Session {
     }
 
     /// Set `avg_left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_avg_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.avg_left_power_phase_peak = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1975,7 +2023,7 @@ impl Session {
     }
 
     /// Set `avg_right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_avg_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.avg_right_power_phase = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -2004,7 +2052,7 @@ impl Session {
     }
 
     /// Set `avg_right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Session {
+    pub fn set_avg_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.avg_right_power_phase_peak = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -2029,7 +2077,7 @@ impl Session {
     }
 
     /// Set `enhanced_avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_avg_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_avg_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_avg_speed = u32::MAX;
@@ -2048,7 +2096,7 @@ impl Session {
     }
 
     /// Set `enhanced_max_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_max_speed_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_max_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_max_speed = u32::MAX;
@@ -2067,7 +2115,7 @@ impl Session {
     }
 
     /// Set `enhanced_avg_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_avg_altitude_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_avg_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_avg_altitude = u32::MAX;
@@ -2086,7 +2134,7 @@ impl Session {
     }
 
     /// Set `enhanced_min_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_min_altitude_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_min_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_min_altitude = u32::MAX;
@@ -2105,7 +2153,7 @@ impl Session {
     }
 
     /// Set `enhanced_max_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_max_altitude_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_max_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_max_altitude = u32::MAX;
@@ -2124,7 +2172,7 @@ impl Session {
     }
 
     /// Set `lev_battery_consumption` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_lev_battery_consumption_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_lev_battery_consumption_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.lev_battery_consumption = u8::MAX;
@@ -2143,7 +2191,7 @@ impl Session {
     }
 
     /// Set `avg_vertical_ratio` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_vertical_ratio_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_vertical_ratio_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_vertical_ratio = u16::MAX;
@@ -2162,7 +2210,7 @@ impl Session {
     }
 
     /// Set `avg_stance_time_balance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_stance_time_balance_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_stance_time_balance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_stance_time_balance = u16::MAX;
@@ -2181,7 +2229,7 @@ impl Session {
     }
 
     /// Set `avg_step_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_step_length_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_step_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_step_length = u16::MAX;
@@ -2200,7 +2248,7 @@ impl Session {
     }
 
     /// Set `total_anaerobic_training_effect` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_anaerobic_training_effect_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_anaerobic_training_effect_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.total_anaerobic_training_effect = u8::MAX;
@@ -2219,7 +2267,7 @@ impl Session {
     }
 
     /// Set `avg_vam` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_vam_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_vam_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_vam = u16::MAX;
@@ -2238,7 +2286,7 @@ impl Session {
     }
 
     /// Set `avg_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_depth_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.avg_depth = u32::MAX;
@@ -2257,7 +2305,7 @@ impl Session {
     }
 
     /// Set `max_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_depth_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.max_depth = u32::MAX;
@@ -2276,7 +2324,7 @@ impl Session {
     }
 
     /// Set `training_load_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_training_load_peak_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_training_load_peak_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 65536.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
             self.training_load_peak = i32::MAX;
@@ -2295,7 +2343,7 @@ impl Session {
     }
 
     /// Set `enhanced_avg_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_avg_respiration_rate_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_avg_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.enhanced_avg_respiration_rate = u16::MAX;
@@ -2314,7 +2362,7 @@ impl Session {
     }
 
     /// Set `enhanced_max_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_max_respiration_rate_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_max_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.enhanced_max_respiration_rate = u16::MAX;
@@ -2333,7 +2381,7 @@ impl Session {
     }
 
     /// Set `enhanced_min_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_min_respiration_rate_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_enhanced_min_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.enhanced_min_respiration_rate = u16::MAX;
@@ -2352,7 +2400,7 @@ impl Session {
     }
 
     /// Set `total_fractional_ascent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_fractional_ascent_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_fractional_ascent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.total_fractional_ascent = u8::MAX;
@@ -2371,7 +2419,7 @@ impl Session {
     }
 
     /// Set `total_fractional_descent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_fractional_descent_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_total_fractional_descent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.total_fractional_descent = u8::MAX;
@@ -2390,7 +2438,7 @@ impl Session {
     }
 
     /// Set `avg_core_temperature` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_core_temperature_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_avg_core_temperature_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_core_temperature = u16::MAX;
@@ -2409,7 +2457,7 @@ impl Session {
     }
 
     /// Set `min_core_temperature` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_min_core_temperature_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_min_core_temperature_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.min_core_temperature = u16::MAX;
@@ -2428,7 +2476,7 @@ impl Session {
     }
 
     /// Set `max_core_temperature` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_max_core_temperature_scaled(&mut self, v: f64) -> &mut Session {
+    pub fn set_max_core_temperature_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.max_core_temperature = u16::MAX;

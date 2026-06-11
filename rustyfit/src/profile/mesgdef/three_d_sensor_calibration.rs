@@ -80,7 +80,7 @@ impl ThreeDSensorCalibration {
     }
 
     /// Set `orientation_matrix` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_orientation_matrix_scaled(&mut self, v: [f64; 9]) -> &mut ThreeDSensorCalibration {
+    pub fn set_orientation_matrix_scaled(&mut self, v: [f64; 9]) -> &mut Self {
         self.orientation_matrix = [i32::MAX; 9];
         for (i, &x) in v.iter().enumerate() {
             let unscaled = (x + 0.0) * 65535.0;

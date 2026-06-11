@@ -169,7 +169,7 @@ impl UserProfile {
     }
 
     /// Set `height` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_height_scaled(&mut self, v: f64) -> &mut UserProfile {
+    pub fn set_height_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.height = u8::MAX;
@@ -188,7 +188,7 @@ impl UserProfile {
     }
 
     /// Set `weight` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_weight_scaled(&mut self, v: f64) -> &mut UserProfile {
+    pub fn set_weight_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.weight = u16::MAX;
@@ -207,7 +207,7 @@ impl UserProfile {
     }
 
     /// Set `user_running_step_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_user_running_step_length_scaled(&mut self, v: f64) -> &mut UserProfile {
+    pub fn set_user_running_step_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.user_running_step_length = u16::MAX;
@@ -226,7 +226,7 @@ impl UserProfile {
     }
 
     /// Set `user_walking_step_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_user_walking_step_length_scaled(&mut self, v: f64) -> &mut UserProfile {
+    pub fn set_user_walking_step_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.user_walking_step_length = u16::MAX;
