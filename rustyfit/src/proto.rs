@@ -30,8 +30,10 @@ pub struct FileHeader {
     pub profile_version: u16,
     /// The size of the messages in bytes (this field will be automatically updated by the encoder)
     pub data_size: u32,
-    /// String marker `.FIT`. Any user-provided value is automatically overwritten with `FileHeader::DATA_TYPE` during encoding.
-    pub data_type: &'static str,
+    // ----
+    // This section contains omitted `data_type` field since the value is always constant ".FIT".
+    // During encoding, the value will be automatically filled with `FileHeader::DATA_TYPE`.
+    // ----
     /// Cyclic Redundancy Check 16-bit value to ensure the integrity of the file header.
     /// (this field will be automatically updated by the encoder)
     pub crc: u16,

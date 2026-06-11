@@ -135,8 +135,7 @@ impl Decoder {
             reader,
             decoder: self,
             state: State::FileHeader,
-            file_header: FileHeader::default(),
-            crc: 0,
+            data_size: 0,
         }
     }
 
@@ -247,7 +246,6 @@ impl Decoder {
             protocol_version: ProtocolVersion(self.buf[1]),
             profile_version: u16::from_le_bytes([self.buf[2], self.buf[3]]),
             data_size: u32::from_le_bytes(self.buf[4..8].try_into().unwrap()),
-            data_type: FileHeader::DATA_TYPE,
             crc,
         }))
     }
@@ -786,13 +784,13 @@ impl Default for Builder {
 #[derive(Debug)]
 pub enum Event<'a> {
     /// Returned when the `StreamDecoder` encounter a `FileHeader`.
-    FileHeader(&'a FileHeader),
+    FileHeader(FileHeader),
     /// Returned when the `StreamDecoder` encounter a `MessageDefinition`.
     MessageDefinition(&'a MessageDefinition),
     /// Returned when the `StreamDecoder` encounter a `Message`.
     Message(&'a Message),
     /// Returned when the `StreamDecoder` encounter a `File`'s CRC.
-    Crc(&'a u16),
+    Crc(u16),
 }
 
 enum State {
@@ -806,8 +804,7 @@ pub struct Stream<'a, R> {
     reader: R,
     decoder: &'a mut Decoder,
     state: State,
-    file_header: FileHeader,
-    crc: u16,
+    data_size: u32,
 }
 
 impl<'a, R: Read> Stream<'a, R> {
@@ -821,17 +818,17 @@ impl<'a, R: Read> Stream<'a, R> {
 
                     let result = self.decoder.decode_file_header(&mut self.reader);
                     self.decoder.options.checksum = checksum; // restore checksum
-                    self.file_header = match result? {
-                        Some(file_header) => file_header,
+                    self.data_size = match result? {
+                        Some(file_header) => file_header.data_size,
                         None => break,
                     };
 
                     self.state = State::Message;
                 }
                 State::Message => {
-                    while self.decoder.cur < self.file_header.data_size {
+                    while self.decoder.cur < self.data_size {
                         let buf = &mut self.decoder.buf[..256];
-                        let remaining = self.file_header.data_size - self.decoder.cur;
+                        let remaining = self.data_size - self.decoder.cur;
                         let n = (remaining as usize).min(buf.len());
                         self.reader.read_exact(&mut buf[..n])?;
                         self.decoder.cur += n as u32;
@@ -875,12 +872,13 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
     fn next(&mut self) -> Option<Result<Event<'_>, Error<R::Error>>> {
         match self.state {
             State::FileHeader => {
-                self.file_header = match self.decoder.decode_file_header(&mut self.reader) {
+                let file_header = match self.decoder.decode_file_header(&mut self.reader) {
                     Ok(file_header) => file_header,
                     Err(err) => return Some(Err(err)),
                 }?;
+                self.data_size = file_header.data_size;
                 self.state = State::Message;
-                Some(Ok(Event::FileHeader(&self.file_header)))
+                Some(Ok(Event::FileHeader(file_header)))
             }
             State::Message => {
                 if let Err(err) = self.decoder.read_exact_inc(&mut self.reader, 1) {
@@ -934,20 +932,20 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
                     return Some(Err(err));
                 }
 
-                if self.decoder.cur >= self.file_header.data_size {
+                if self.decoder.cur >= self.data_size {
                     self.state = State::Crc;
                 }
 
                 Some(Ok(Event::Message(&self.decoder.mesg)))
             }
             State::Crc => {
-                self.crc = match self.decoder.decode_crc(&mut self.reader) {
+                let crc = match self.decoder.decode_crc(&mut self.reader) {
                     Ok(crc) => crc,
                     Err(err) => return Some(Err(err)),
                 };
                 self.decoder.reset();
                 self.state = State::FileHeader;
-                Some(Ok(Event::Crc(&self.crc)))
+                Some(Ok(Event::Crc(crc)))
             }
         }
     }
@@ -985,7 +983,6 @@ mod tests {
             protocol_version: ProtocolVersion::V2,
             profile_version: 2132,
             data_size: 642262,
-            data_type: FileHeader::DATA_TYPE,
             crc: 12856,
         };
 

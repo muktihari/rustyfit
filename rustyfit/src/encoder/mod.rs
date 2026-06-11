@@ -196,8 +196,6 @@ impl Encoder {
             file_header.profile_version = PROFILE_VERSION;
         }
 
-        file_header.data_type = FileHeader::DATA_TYPE;
-
         let n = write_file_header(&mut self.buf, file_header);
 
         writer.write_all(&self.buf[..n])?;
@@ -703,7 +701,6 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
             protocol_version,
             profile_version: PROFILE_VERSION,
             data_size: self.encoder.data_size,
-            data_type: FileHeader::DATA_TYPE,
             crc: 0, // calculated
         };
 
@@ -1200,8 +1197,8 @@ mod tests {
             protocol_version: ProtocolVersion::V1, // [16]
             profile_version: 21205,                // [212, 82]
             data_size: 0,                          // [1, 0, 0, 0] updated
-            data_type: FileHeader::DATA_TYPE,      // [46, 70, 73, 84]
-            crc: 0,                                // [83, 147] updated
+            // data_type: ".FIT" / [46, 70, 73, 84]
+            crc: 0, // [83, 147] updated
         };
 
         enc.update_file_header(&mut ws, &mut file_header).unwrap();
