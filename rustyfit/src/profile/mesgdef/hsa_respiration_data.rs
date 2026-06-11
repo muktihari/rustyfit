@@ -44,25 +44,24 @@ impl HsaRespirationData {
         }
     }
 
-    /// Returns `respiration_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn respiration_rate_scaled(&self) -> Vec<f64> {
+    /// Returns `respiration_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn respiration_rate_scaled(&self) -> Option<Vec<f64>> {
         if self.respiration_rate.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.respiration_rate.len());
         for &x in &self.respiration_rate {
             v.push(x as f64 / 100.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_respiration_rate_scaled(&mut self, v: &Vec<f64>) -> &mut HsaRespirationData {
+    pub fn set_respiration_rate_scaled(&mut self, v: &[f64]) -> &mut HsaRespirationData {
+        self.respiration_rate = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.respiration_rate = Vec::new();
             return self;
         }
-        self.respiration_rate = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {

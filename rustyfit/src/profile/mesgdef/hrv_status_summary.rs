@@ -67,12 +67,12 @@ impl HrvStatusSummary {
         }
     }
 
-    /// Returns `weekly_average` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn weekly_average_scaled(&self) -> f64 {
+    /// Returns `weekly_average` in its scaled value. It returns `None` when value is valid.
+    pub fn weekly_average_scaled(&self) -> Option<f64> {
         if self.weekly_average == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.weekly_average as f64 / 128.0 - 0.0
+        Some(self.weekly_average as f64 / 128.0 - 0.0)
     }
 
     /// Set `weekly_average` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -86,12 +86,12 @@ impl HrvStatusSummary {
         self
     }
 
-    /// Returns `last_night_average` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn last_night_average_scaled(&self) -> f64 {
+    /// Returns `last_night_average` in its scaled value. It returns `None` when value is valid.
+    pub fn last_night_average_scaled(&self) -> Option<f64> {
         if self.last_night_average == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.last_night_average as f64 / 128.0 - 0.0
+        Some(self.last_night_average as f64 / 128.0 - 0.0)
     }
 
     /// Set `last_night_average` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -105,12 +105,12 @@ impl HrvStatusSummary {
         self
     }
 
-    /// Returns `last_night_5_min_high` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn last_night_5_min_high_scaled(&self) -> f64 {
+    /// Returns `last_night_5_min_high` in its scaled value. It returns `None` when value is valid.
+    pub fn last_night_5_min_high_scaled(&self) -> Option<f64> {
         if self.last_night_5_min_high == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.last_night_5_min_high as f64 / 128.0 - 0.0
+        Some(self.last_night_5_min_high as f64 / 128.0 - 0.0)
     }
 
     /// Set `last_night_5_min_high` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -124,12 +124,12 @@ impl HrvStatusSummary {
         self
     }
 
-    /// Returns `baseline_low_upper` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn baseline_low_upper_scaled(&self) -> f64 {
+    /// Returns `baseline_low_upper` in its scaled value. It returns `None` when value is valid.
+    pub fn baseline_low_upper_scaled(&self) -> Option<f64> {
         if self.baseline_low_upper == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.baseline_low_upper as f64 / 128.0 - 0.0
+        Some(self.baseline_low_upper as f64 / 128.0 - 0.0)
     }
 
     /// Set `baseline_low_upper` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -143,12 +143,12 @@ impl HrvStatusSummary {
         self
     }
 
-    /// Returns `baseline_balanced_lower` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn baseline_balanced_lower_scaled(&self) -> f64 {
+    /// Returns `baseline_balanced_lower` in its scaled value. It returns `None` when value is valid.
+    pub fn baseline_balanced_lower_scaled(&self) -> Option<f64> {
         if self.baseline_balanced_lower == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.baseline_balanced_lower as f64 / 128.0 - 0.0
+        Some(self.baseline_balanced_lower as f64 / 128.0 - 0.0)
     }
 
     /// Set `baseline_balanced_lower` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -162,12 +162,12 @@ impl HrvStatusSummary {
         self
     }
 
-    /// Returns `baseline_balanced_upper` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn baseline_balanced_upper_scaled(&self) -> f64 {
+    /// Returns `baseline_balanced_upper` in its scaled value. It returns `None` when value is valid.
+    pub fn baseline_balanced_upper_scaled(&self) -> Option<f64> {
         if self.baseline_balanced_upper == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.baseline_balanced_upper as f64 / 128.0 - 0.0
+        Some(self.baseline_balanced_upper as f64 / 128.0 - 0.0)
     }
 
     /// Set `baseline_balanced_upper` with scaled value, it will automatically be converted to its corresponding integer value.

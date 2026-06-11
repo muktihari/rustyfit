@@ -58,12 +58,12 @@ impl AadAccelFeatures {
         }
     }
 
-    /// Returns `time_above_threshold` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_above_threshold_scaled(&self) -> f64 {
+    /// Returns `time_above_threshold` in its scaled value. It returns `None` when value is valid.
+    pub fn time_above_threshold_scaled(&self) -> Option<f64> {
         if self.time_above_threshold == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.time_above_threshold as f64 / 25.0 - 0.0
+        Some(self.time_above_threshold as f64 / 25.0 - 0.0)
     }
 
     /// Set `time_above_threshold` with scaled value, it will automatically be converted to its corresponding integer value.

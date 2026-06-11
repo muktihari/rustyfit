@@ -97,12 +97,12 @@ impl WeightScale {
         }
     }
 
-    /// Returns `weight` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn weight_scaled(&self) -> f64 {
+    /// Returns `weight` in its scaled value. It returns `None` when value is valid.
+    pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == typedef::Weight(u16::MAX) {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.weight.0 as f64 / 100.0 - 0.0
+        Some(self.weight.0 as f64 / 100.0 - 0.0)
     }
 
     /// Set `weight` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -116,12 +116,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `percent_fat` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn percent_fat_scaled(&self) -> f64 {
+    /// Returns `percent_fat` in its scaled value. It returns `None` when value is valid.
+    pub fn percent_fat_scaled(&self) -> Option<f64> {
         if self.percent_fat == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.percent_fat as f64 / 100.0 - 0.0
+        Some(self.percent_fat as f64 / 100.0 - 0.0)
     }
 
     /// Set `percent_fat` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -135,12 +135,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `percent_hydration` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn percent_hydration_scaled(&self) -> f64 {
+    /// Returns `percent_hydration` in its scaled value. It returns `None` when value is valid.
+    pub fn percent_hydration_scaled(&self) -> Option<f64> {
         if self.percent_hydration == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.percent_hydration as f64 / 100.0 - 0.0
+        Some(self.percent_hydration as f64 / 100.0 - 0.0)
     }
 
     /// Set `percent_hydration` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -154,12 +154,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `visceral_fat_mass` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn visceral_fat_mass_scaled(&self) -> f64 {
+    /// Returns `visceral_fat_mass` in its scaled value. It returns `None` when value is valid.
+    pub fn visceral_fat_mass_scaled(&self) -> Option<f64> {
         if self.visceral_fat_mass == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.visceral_fat_mass as f64 / 100.0 - 0.0
+        Some(self.visceral_fat_mass as f64 / 100.0 - 0.0)
     }
 
     /// Set `visceral_fat_mass` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -173,12 +173,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `bone_mass` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn bone_mass_scaled(&self) -> f64 {
+    /// Returns `bone_mass` in its scaled value. It returns `None` when value is valid.
+    pub fn bone_mass_scaled(&self) -> Option<f64> {
         if self.bone_mass == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.bone_mass as f64 / 100.0 - 0.0
+        Some(self.bone_mass as f64 / 100.0 - 0.0)
     }
 
     /// Set `bone_mass` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -192,12 +192,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `muscle_mass` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn muscle_mass_scaled(&self) -> f64 {
+    /// Returns `muscle_mass` in its scaled value. It returns `None` when value is valid.
+    pub fn muscle_mass_scaled(&self) -> Option<f64> {
         if self.muscle_mass == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.muscle_mass as f64 / 100.0 - 0.0
+        Some(self.muscle_mass as f64 / 100.0 - 0.0)
     }
 
     /// Set `muscle_mass` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -211,12 +211,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `basal_met` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn basal_met_scaled(&self) -> f64 {
+    /// Returns `basal_met` in its scaled value. It returns `None` when value is valid.
+    pub fn basal_met_scaled(&self) -> Option<f64> {
         if self.basal_met == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.basal_met as f64 / 4.0 - 0.0
+        Some(self.basal_met as f64 / 4.0 - 0.0)
     }
 
     /// Set `basal_met` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -230,12 +230,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `active_met` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn active_met_scaled(&self) -> f64 {
+    /// Returns `active_met` in its scaled value. It returns `None` when value is valid.
+    pub fn active_met_scaled(&self) -> Option<f64> {
         if self.active_met == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.active_met as f64 / 4.0 - 0.0
+        Some(self.active_met as f64 / 4.0 - 0.0)
     }
 
     /// Set `active_met` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -249,12 +249,12 @@ impl WeightScale {
         self
     }
 
-    /// Returns `bmi` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn bmi_scaled(&self) -> f64 {
+    /// Returns `bmi` in its scaled value. It returns `None` when value is valid.
+    pub fn bmi_scaled(&self) -> Option<f64> {
         if self.bmi == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.bmi as f64 / 10.0 - 0.0
+        Some(self.bmi as f64 / 10.0 - 0.0)
     }
 
     /// Set `bmi` with scaled value, it will automatically be converted to its corresponding integer value.

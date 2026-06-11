@@ -58,25 +58,24 @@ impl MonitoringInfo {
         }
     }
 
-    /// Returns `cycles_to_distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn cycles_to_distance_scaled(&self) -> Vec<f64> {
+    /// Returns `cycles_to_distance` in its scaled value. It returns `None` when value is valid.
+    pub fn cycles_to_distance_scaled(&self) -> Option<Vec<f64>> {
         if self.cycles_to_distance.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.cycles_to_distance.len());
         for &x in &self.cycles_to_distance {
             v.push(x as f64 / 5000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `cycles_to_distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycles_to_distance_scaled(&mut self, v: &Vec<f64>) -> &mut MonitoringInfo {
+    pub fn set_cycles_to_distance_scaled(&mut self, v: &[f64]) -> &mut MonitoringInfo {
+        self.cycles_to_distance = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.cycles_to_distance = Vec::new();
             return self;
         }
-        self.cycles_to_distance = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 5000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
@@ -88,25 +87,24 @@ impl MonitoringInfo {
         self
     }
 
-    /// Returns `cycles_to_calories` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn cycles_to_calories_scaled(&self) -> Vec<f64> {
+    /// Returns `cycles_to_calories` in its scaled value. It returns `None` when value is valid.
+    pub fn cycles_to_calories_scaled(&self) -> Option<Vec<f64>> {
         if self.cycles_to_calories.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.cycles_to_calories.len());
         for &x in &self.cycles_to_calories {
             v.push(x as f64 / 5000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `cycles_to_calories` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycles_to_calories_scaled(&mut self, v: &Vec<f64>) -> &mut MonitoringInfo {
+    pub fn set_cycles_to_calories_scaled(&mut self, v: &[f64]) -> &mut MonitoringInfo {
+        self.cycles_to_calories = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.cycles_to_calories = Vec::new();
             return self;
         }
-        self.cycles_to_calories = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 5000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {

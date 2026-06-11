@@ -64,12 +64,12 @@ impl AntTx {
         }
     }
 
-    /// Returns `fractional_timestamp` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn fractional_timestamp_scaled(&self) -> f64 {
+    /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is valid.
+    pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.fractional_timestamp as f64 / 32768.0 - 0.0
+        Some(self.fractional_timestamp as f64 / 32768.0 - 0.0)
     }
 
     /// Set `fractional_timestamp` with scaled value, it will automatically be converted to its corresponding integer value.

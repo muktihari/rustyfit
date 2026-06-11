@@ -63,12 +63,12 @@ impl Activity {
         }
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_timer_time_scaled(&self) -> f64 {
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_timer_time as f64 / 1000.0 - 0.0
+        Some(self.total_timer_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.

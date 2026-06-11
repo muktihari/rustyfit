@@ -44,12 +44,12 @@ impl TankUpdate {
         }
     }
 
-    /// Returns `pressure` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn pressure_scaled(&self) -> f64 {
+    /// Returns `pressure` in its scaled value. It returns `None` when value is valid.
+    pub fn pressure_scaled(&self) -> Option<f64> {
         if self.pressure == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.pressure as f64 / 100.0 - 0.0
+        Some(self.pressure as f64 / 100.0 - 0.0)
     }
 
     /// Set `pressure` with scaled value, it will automatically be converted to its corresponding integer value.

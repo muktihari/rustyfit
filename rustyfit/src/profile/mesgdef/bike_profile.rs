@@ -178,12 +178,12 @@ impl BikeProfile {
         }
     }
 
-    /// Returns `odometer` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn odometer_scaled(&self) -> f64 {
+    /// Returns `odometer` in its scaled value. It returns `None` when value is valid.
+    pub fn odometer_scaled(&self) -> Option<f64> {
         if self.odometer == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.odometer as f64 / 100.0 - 0.0
+        Some(self.odometer as f64 / 100.0 - 0.0)
     }
 
     /// Set `odometer` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -197,12 +197,12 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `custom_wheelsize` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn custom_wheelsize_scaled(&self) -> f64 {
+    /// Returns `custom_wheelsize` in its scaled value. It returns `None` when value is valid.
+    pub fn custom_wheelsize_scaled(&self) -> Option<f64> {
         if self.custom_wheelsize == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.custom_wheelsize as f64 / 1000.0 - 0.0
+        Some(self.custom_wheelsize as f64 / 1000.0 - 0.0)
     }
 
     /// Set `custom_wheelsize` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -216,12 +216,12 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `auto_wheelsize` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn auto_wheelsize_scaled(&self) -> f64 {
+    /// Returns `auto_wheelsize` in its scaled value. It returns `None` when value is valid.
+    pub fn auto_wheelsize_scaled(&self) -> Option<f64> {
         if self.auto_wheelsize == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.auto_wheelsize as f64 / 1000.0 - 0.0
+        Some(self.auto_wheelsize as f64 / 1000.0 - 0.0)
     }
 
     /// Set `auto_wheelsize` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -235,12 +235,12 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `bike_weight` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn bike_weight_scaled(&self) -> f64 {
+    /// Returns `bike_weight` in its scaled value. It returns `None` when value is valid.
+    pub fn bike_weight_scaled(&self) -> Option<f64> {
         if self.bike_weight == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.bike_weight as f64 / 10.0 - 0.0
+        Some(self.bike_weight as f64 / 10.0 - 0.0)
     }
 
     /// Set `bike_weight` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -254,12 +254,12 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `power_cal_factor` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn power_cal_factor_scaled(&self) -> f64 {
+    /// Returns `power_cal_factor` in its scaled value. It returns `None` when value is valid.
+    pub fn power_cal_factor_scaled(&self) -> Option<f64> {
         if self.power_cal_factor == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.power_cal_factor as f64 / 10.0 - 0.0
+        Some(self.power_cal_factor as f64 / 10.0 - 0.0)
     }
 
     /// Set `power_cal_factor` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -273,12 +273,12 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `crank_length` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn crank_length_scaled(&self) -> f64 {
+    /// Returns `crank_length` in its scaled value. It returns `None` when value is valid.
+    pub fn crank_length_scaled(&self) -> Option<f64> {
         if self.crank_length == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.crank_length as f64 / 2.0 - -110.0
+        Some(self.crank_length as f64 / 2.0 - -110.0)
     }
 
     /// Set `crank_length` with scaled value, it will automatically be converted to its corresponding integer value.

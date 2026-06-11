@@ -88,22 +88,22 @@ impl Jump {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_lat_degrees(&self) -> f64 {
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_long_degrees(&self) -> f64 {
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
 
-    /// Returns `speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn speed_scaled(&self) -> f64 {
+    /// Returns `speed` in its scaled value. It returns `None` when value is valid.
+    pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.speed as f64 / 1000.0 - 0.0
+        Some(self.speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -117,12 +117,12 @@ impl Jump {
         self
     }
 
-    /// Returns `enhanced_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_speed_scaled(&self) -> f64 {
+    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_speed as f64 / 1000.0 - 0.0
+        Some(self.enhanced_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `enhanced_speed` with scaled value, it will automatically be converted to its corresponding integer value.

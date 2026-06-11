@@ -106,25 +106,24 @@ impl TimeInZone {
         }
     }
 
-    /// Returns `time_in_hr_zone` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_in_hr_zone_scaled(&self) -> Vec<f64> {
+    /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is valid.
+    pub fn time_in_hr_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_hr_zone.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.time_in_hr_zone.len());
         for &x in &self.time_in_hr_zone {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `time_in_hr_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_hr_zone_scaled(&mut self, v: &Vec<f64>) -> &mut TimeInZone {
+    pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+        self.time_in_hr_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.time_in_hr_zone = Vec::new();
             return self;
         }
-        self.time_in_hr_zone = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -136,25 +135,24 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `time_in_speed_zone` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_in_speed_zone_scaled(&self) -> Vec<f64> {
+    /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is valid.
+    pub fn time_in_speed_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_speed_zone.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.time_in_speed_zone.len());
         for &x in &self.time_in_speed_zone {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `time_in_speed_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_speed_zone_scaled(&mut self, v: &Vec<f64>) -> &mut TimeInZone {
+    pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+        self.time_in_speed_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.time_in_speed_zone = Vec::new();
             return self;
         }
-        self.time_in_speed_zone = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -166,25 +164,24 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `time_in_cadence_zone` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_in_cadence_zone_scaled(&self) -> Vec<f64> {
+    /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is valid.
+    pub fn time_in_cadence_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_cadence_zone.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.time_in_cadence_zone.len());
         for &x in &self.time_in_cadence_zone {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `time_in_cadence_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_cadence_zone_scaled(&mut self, v: &Vec<f64>) -> &mut TimeInZone {
+    pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+        self.time_in_cadence_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.time_in_cadence_zone = Vec::new();
             return self;
         }
-        self.time_in_cadence_zone = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -196,25 +193,24 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `time_in_power_zone` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_in_power_zone_scaled(&self) -> Vec<f64> {
+    /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is valid.
+    pub fn time_in_power_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_power_zone.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.time_in_power_zone.len());
         for &x in &self.time_in_power_zone {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `time_in_power_zone` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_in_power_zone_scaled(&mut self, v: &Vec<f64>) -> &mut TimeInZone {
+    pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+        self.time_in_power_zone = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.time_in_power_zone = Vec::new();
             return self;
         }
-        self.time_in_power_zone = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -226,25 +222,24 @@ impl TimeInZone {
         self
     }
 
-    /// Returns `speed_zone_high_boundary` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn speed_zone_high_boundary_scaled(&self) -> Vec<f64> {
+    /// Returns `speed_zone_high_boundary` in its scaled value. It returns `None` when value is valid.
+    pub fn speed_zone_high_boundary_scaled(&self) -> Option<Vec<f64>> {
         if self.speed_zone_high_boundary.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.speed_zone_high_boundary.len());
         for &x in &self.speed_zone_high_boundary {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `speed_zone_high_boundary` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_zone_high_boundary_scaled(&mut self, v: &Vec<f64>) -> &mut TimeInZone {
+    pub fn set_speed_zone_high_boundary_scaled(&mut self, v: &[f64]) -> &mut TimeInZone {
+        self.speed_zone_high_boundary = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.speed_zone_high_boundary = Vec::new();
             return self;
         }
-        self.speed_zone_high_boundary = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {

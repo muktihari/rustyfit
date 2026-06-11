@@ -54,12 +54,12 @@ impl TankSummary {
         }
     }
 
-    /// Returns `start_pressure` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn start_pressure_scaled(&self) -> f64 {
+    /// Returns `start_pressure` in its scaled value. It returns `None` when value is valid.
+    pub fn start_pressure_scaled(&self) -> Option<f64> {
         if self.start_pressure == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.start_pressure as f64 / 100.0 - 0.0
+        Some(self.start_pressure as f64 / 100.0 - 0.0)
     }
 
     /// Set `start_pressure` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -73,12 +73,12 @@ impl TankSummary {
         self
     }
 
-    /// Returns `end_pressure` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn end_pressure_scaled(&self) -> f64 {
+    /// Returns `end_pressure` in its scaled value. It returns `None` when value is valid.
+    pub fn end_pressure_scaled(&self) -> Option<f64> {
         if self.end_pressure == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.end_pressure as f64 / 100.0 - 0.0
+        Some(self.end_pressure as f64 / 100.0 - 0.0)
     }
 
     /// Set `end_pressure` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -92,12 +92,12 @@ impl TankSummary {
         self
     }
 
-    /// Returns `volume_used` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn volume_used_scaled(&self) -> f64 {
+    /// Returns `volume_used` in its scaled value. It returns `None` when value is valid.
+    pub fn volume_used_scaled(&self) -> Option<f64> {
         if self.volume_used == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.volume_used as f64 / 100.0 - 0.0
+        Some(self.volume_used as f64 / 100.0 - 0.0)
     }
 
     /// Set `volume_used` with scaled value, it will automatically be converted to its corresponding integer value.

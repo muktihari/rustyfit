@@ -38,12 +38,12 @@ impl RespirationRate {
         }
     }
 
-    /// Returns `respiration_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn respiration_rate_scaled(&self) -> f64 {
+    /// Returns `respiration_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn respiration_rate_scaled(&self) -> Option<f64> {
         if self.respiration_rate == i16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.respiration_rate as f64 / 100.0 - 0.0
+        Some(self.respiration_rate as f64 / 100.0 - 0.0)
     }
 
     /// Set `respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.

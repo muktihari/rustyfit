@@ -47,12 +47,12 @@ impl MetZone {
         }
     }
 
-    /// Returns `calories` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn calories_scaled(&self) -> f64 {
+    /// Returns `calories` in its scaled value. It returns `None` when value is valid.
+    pub fn calories_scaled(&self) -> Option<f64> {
         if self.calories == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.calories as f64 / 10.0 - 0.0
+        Some(self.calories as f64 / 10.0 - 0.0)
     }
 
     /// Set `calories` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -66,12 +66,12 @@ impl MetZone {
         self
     }
 
-    /// Returns `fat_calories` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn fat_calories_scaled(&self) -> f64 {
+    /// Returns `fat_calories` in its scaled value. It returns `None` when value is valid.
+    pub fn fat_calories_scaled(&self) -> Option<f64> {
         if self.fat_calories == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.fat_calories as f64 / 10.0 - 0.0
+        Some(self.fat_calories as f64 / 10.0 - 0.0)
     }
 
     /// Set `fat_calories` with scaled value, it will automatically be converted to its corresponding integer value.

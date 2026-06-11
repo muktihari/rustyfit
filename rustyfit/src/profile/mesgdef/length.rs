@@ -137,12 +137,12 @@ impl Length {
         }
     }
 
-    /// Returns `total_elapsed_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_elapsed_time_scaled(&self) -> f64 {
+    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.
+    pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_elapsed_time as f64 / 1000.0 - 0.0
+        Some(self.total_elapsed_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `total_elapsed_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -156,12 +156,12 @@ impl Length {
         self
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_timer_time_scaled(&self) -> f64 {
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_timer_time as f64 / 1000.0 - 0.0
+        Some(self.total_timer_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -175,12 +175,12 @@ impl Length {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_speed_scaled(&self) -> f64 {
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_speed as f64 / 1000.0 - 0.0
+        Some(self.avg_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -194,12 +194,12 @@ impl Length {
         self
     }
 
-    /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_avg_respiration_rate_scaled(&self) -> f64 {
+    /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_avg_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_respiration_rate == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_avg_respiration_rate as f64 / 100.0 - 0.0
+        Some(self.enhanced_avg_respiration_rate as f64 / 100.0 - 0.0)
     }
 
     /// Set `enhanced_avg_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -213,12 +213,12 @@ impl Length {
         self
     }
 
-    /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_max_respiration_rate_scaled(&self) -> f64 {
+    /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_max_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_max_respiration_rate == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_max_respiration_rate as f64 / 100.0 - 0.0
+        Some(self.enhanced_max_respiration_rate as f64 / 100.0 - 0.0)
     }
 
     /// Set `enhanced_max_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.

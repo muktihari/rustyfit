@@ -146,25 +146,24 @@ impl DeviceSettings {
         }
     }
 
-    /// Returns `time_zone_offset` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_zone_offset_scaled(&self) -> Vec<f64> {
+    /// Returns `time_zone_offset` in its scaled value. It returns `None` when value is valid.
+    pub fn time_zone_offset_scaled(&self) -> Option<Vec<f64>> {
         if self.time_zone_offset.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.time_zone_offset.len());
         for &x in &self.time_zone_offset {
             v.push(x as f64 / 4.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `time_zone_offset` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_zone_offset_scaled(&mut self, v: &Vec<f64>) -> &mut DeviceSettings {
+    pub fn set_time_zone_offset_scaled(&mut self, v: &[f64]) -> &mut DeviceSettings {
+        self.time_zone_offset = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.time_zone_offset = Vec::new();
             return self;
         }
-        self.time_zone_offset = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 4.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i8::MAX as f64 {

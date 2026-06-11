@@ -67,12 +67,12 @@ impl SdmProfile {
         }
     }
 
-    /// Returns `sdm_cal_factor` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn sdm_cal_factor_scaled(&self) -> f64 {
+    /// Returns `sdm_cal_factor` in its scaled value. It returns `None` when value is valid.
+    pub fn sdm_cal_factor_scaled(&self) -> Option<f64> {
         if self.sdm_cal_factor == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.sdm_cal_factor as f64 / 10.0 - 0.0
+        Some(self.sdm_cal_factor as f64 / 10.0 - 0.0)
     }
 
     /// Set `sdm_cal_factor` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -86,12 +86,12 @@ impl SdmProfile {
         self
     }
 
-    /// Returns `odometer` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn odometer_scaled(&self) -> f64 {
+    /// Returns `odometer` in its scaled value. It returns `None` when value is valid.
+    pub fn odometer_scaled(&self) -> Option<f64> {
         if self.odometer == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.odometer as f64 / 100.0 - 0.0
+        Some(self.odometer as f64 / 100.0 - 0.0)
     }
 
     /// Set `odometer` with scaled value, it will automatically be converted to its corresponding integer value.

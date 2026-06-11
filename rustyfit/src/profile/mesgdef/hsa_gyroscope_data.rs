@@ -64,25 +64,24 @@ impl HsaGyroscopeData {
         }
     }
 
-    /// Returns `gyro_x` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn gyro_x_scaled(&self) -> Vec<f64> {
+    /// Returns `gyro_x` in its scaled value. It returns `None` when value is valid.
+    pub fn gyro_x_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_x.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.gyro_x.len());
         for &x in &self.gyro_x {
             v.push(x as f64 / 28.57143 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `gyro_x` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_gyro_x_scaled(&mut self, v: &Vec<f64>) -> &mut HsaGyroscopeData {
+    pub fn set_gyro_x_scaled(&mut self, v: &[f64]) -> &mut HsaGyroscopeData {
+        self.gyro_x = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.gyro_x = Vec::new();
             return self;
         }
-        self.gyro_x = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 28.57143;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -94,25 +93,24 @@ impl HsaGyroscopeData {
         self
     }
 
-    /// Returns `gyro_y` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn gyro_y_scaled(&self) -> Vec<f64> {
+    /// Returns `gyro_y` in its scaled value. It returns `None` when value is valid.
+    pub fn gyro_y_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_y.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.gyro_y.len());
         for &x in &self.gyro_y {
             v.push(x as f64 / 28.57143 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `gyro_y` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_gyro_y_scaled(&mut self, v: &Vec<f64>) -> &mut HsaGyroscopeData {
+    pub fn set_gyro_y_scaled(&mut self, v: &[f64]) -> &mut HsaGyroscopeData {
+        self.gyro_y = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.gyro_y = Vec::new();
             return self;
         }
-        self.gyro_y = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 28.57143;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -124,25 +122,24 @@ impl HsaGyroscopeData {
         self
     }
 
-    /// Returns `gyro_z` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn gyro_z_scaled(&self) -> Vec<f64> {
+    /// Returns `gyro_z` in its scaled value. It returns `None` when value is valid.
+    pub fn gyro_z_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_z.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.gyro_z.len());
         for &x in &self.gyro_z {
             v.push(x as f64 / 28.57143 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `gyro_z` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_gyro_z_scaled(&mut self, v: &Vec<f64>) -> &mut HsaGyroscopeData {
+    pub fn set_gyro_z_scaled(&mut self, v: &[f64]) -> &mut HsaGyroscopeData {
+        self.gyro_z = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.gyro_z = Vec::new();
             return self;
         }
-        self.gyro_z = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 28.57143;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {

@@ -454,22 +454,22 @@ impl Record {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_lat_degrees(&self) -> f64 {
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_long_degrees(&self) -> f64 {
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
 
-    /// Returns `altitude` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn altitude_scaled(&self) -> f64 {
+    /// Returns `altitude` in its scaled value. It returns `None` when value is valid.
+    pub fn altitude_scaled(&self) -> Option<f64> {
         if self.altitude == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.altitude as f64 / 5.0 - 500.0
+        Some(self.altitude as f64 / 5.0 - 500.0)
     }
 
     /// Set `altitude` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -483,12 +483,12 @@ impl Record {
         self
     }
 
-    /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn distance_scaled(&self) -> f64 {
+    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.distance as f64 / 100.0 - 0.0
+        Some(self.distance as f64 / 100.0 - 0.0)
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -502,12 +502,12 @@ impl Record {
         self
     }
 
-    /// Returns `speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn speed_scaled(&self) -> f64 {
+    /// Returns `speed` in its scaled value. It returns `None` when value is valid.
+    pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.speed as f64 / 1000.0 - 0.0
+        Some(self.speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -521,12 +521,12 @@ impl Record {
         self
     }
 
-    /// Returns `grade` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn grade_scaled(&self) -> f64 {
+    /// Returns `grade` in its scaled value. It returns `None` when value is valid.
+    pub fn grade_scaled(&self) -> Option<f64> {
         if self.grade == i16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.grade as f64 / 100.0 - 0.0
+        Some(self.grade as f64 / 100.0 - 0.0)
     }
 
     /// Set `grade` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -540,12 +540,12 @@ impl Record {
         self
     }
 
-    /// Returns `time_from_course` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time_from_course_scaled(&self) -> f64 {
+    /// Returns `time_from_course` in its scaled value. It returns `None` when value is valid.
+    pub fn time_from_course_scaled(&self) -> Option<f64> {
         if self.time_from_course == i32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.time_from_course as f64 / 1000.0 - 0.0
+        Some(self.time_from_course as f64 / 1000.0 - 0.0)
     }
 
     /// Set `time_from_course` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -559,12 +559,12 @@ impl Record {
         self
     }
 
-    /// Returns `cycle_length` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn cycle_length_scaled(&self) -> f64 {
+    /// Returns `cycle_length` in its scaled value. It returns `None` when value is valid.
+    pub fn cycle_length_scaled(&self) -> Option<f64> {
         if self.cycle_length == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.cycle_length as f64 / 100.0 - 0.0
+        Some(self.cycle_length as f64 / 100.0 - 0.0)
     }
 
     /// Set `cycle_length` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -578,25 +578,24 @@ impl Record {
         self
     }
 
-    /// Returns `speed_1s` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn speed_1s_scaled(&self) -> Vec<f64> {
+    /// Returns `speed_1s` in its scaled value. It returns `None` when value is valid.
+    pub fn speed_1s_scaled(&self) -> Option<Vec<f64>> {
         if self.speed_1s.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.speed_1s.len());
         for &x in &self.speed_1s {
             v.push(x as f64 / 16.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `speed_1s` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_1s_scaled(&mut self, v: &Vec<f64>) -> &mut Record {
+    pub fn set_speed_1s_scaled(&mut self, v: &[f64]) -> &mut Record {
+        self.speed_1s = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.speed_1s = Vec::new();
             return self;
         }
-        self.speed_1s = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 16.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -608,12 +607,12 @@ impl Record {
         self
     }
 
-    /// Returns `vertical_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn vertical_speed_scaled(&self) -> f64 {
+    /// Returns `vertical_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn vertical_speed_scaled(&self) -> Option<f64> {
         if self.vertical_speed == i16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.vertical_speed as f64 / 1000.0 - 0.0
+        Some(self.vertical_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `vertical_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -627,12 +626,12 @@ impl Record {
         self
     }
 
-    /// Returns `vertical_oscillation` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn vertical_oscillation_scaled(&self) -> f64 {
+    /// Returns `vertical_oscillation` in its scaled value. It returns `None` when value is valid.
+    pub fn vertical_oscillation_scaled(&self) -> Option<f64> {
         if self.vertical_oscillation == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.vertical_oscillation as f64 / 10.0 - 0.0
+        Some(self.vertical_oscillation as f64 / 10.0 - 0.0)
     }
 
     /// Set `vertical_oscillation` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -646,12 +645,12 @@ impl Record {
         self
     }
 
-    /// Returns `stance_time_percent` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn stance_time_percent_scaled(&self) -> f64 {
+    /// Returns `stance_time_percent` in its scaled value. It returns `None` when value is valid.
+    pub fn stance_time_percent_scaled(&self) -> Option<f64> {
         if self.stance_time_percent == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.stance_time_percent as f64 / 100.0 - 0.0
+        Some(self.stance_time_percent as f64 / 100.0 - 0.0)
     }
 
     /// Set `stance_time_percent` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -665,12 +664,12 @@ impl Record {
         self
     }
 
-    /// Returns `stance_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn stance_time_scaled(&self) -> f64 {
+    /// Returns `stance_time` in its scaled value. It returns `None` when value is valid.
+    pub fn stance_time_scaled(&self) -> Option<f64> {
         if self.stance_time == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.stance_time as f64 / 10.0 - 0.0
+        Some(self.stance_time as f64 / 10.0 - 0.0)
     }
 
     /// Set `stance_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -684,12 +683,12 @@ impl Record {
         self
     }
 
-    /// Returns `left_torque_effectiveness` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn left_torque_effectiveness_scaled(&self) -> f64 {
+    /// Returns `left_torque_effectiveness` in its scaled value. It returns `None` when value is valid.
+    pub fn left_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.left_torque_effectiveness == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.left_torque_effectiveness as f64 / 2.0 - 0.0
+        Some(self.left_torque_effectiveness as f64 / 2.0 - 0.0)
     }
 
     /// Set `left_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -703,12 +702,12 @@ impl Record {
         self
     }
 
-    /// Returns `right_torque_effectiveness` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn right_torque_effectiveness_scaled(&self) -> f64 {
+    /// Returns `right_torque_effectiveness` in its scaled value. It returns `None` when value is valid.
+    pub fn right_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.right_torque_effectiveness == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.right_torque_effectiveness as f64 / 2.0 - 0.0
+        Some(self.right_torque_effectiveness as f64 / 2.0 - 0.0)
     }
 
     /// Set `right_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -722,12 +721,12 @@ impl Record {
         self
     }
 
-    /// Returns `left_pedal_smoothness` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn left_pedal_smoothness_scaled(&self) -> f64 {
+    /// Returns `left_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    pub fn left_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.left_pedal_smoothness == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.left_pedal_smoothness as f64 / 2.0 - 0.0
+        Some(self.left_pedal_smoothness as f64 / 2.0 - 0.0)
     }
 
     /// Set `left_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -741,12 +740,12 @@ impl Record {
         self
     }
 
-    /// Returns `right_pedal_smoothness` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn right_pedal_smoothness_scaled(&self) -> f64 {
+    /// Returns `right_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    pub fn right_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.right_pedal_smoothness == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.right_pedal_smoothness as f64 / 2.0 - 0.0
+        Some(self.right_pedal_smoothness as f64 / 2.0 - 0.0)
     }
 
     /// Set `right_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -760,12 +759,12 @@ impl Record {
         self
     }
 
-    /// Returns `combined_pedal_smoothness` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn combined_pedal_smoothness_scaled(&self) -> f64 {
+    /// Returns `combined_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    pub fn combined_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.combined_pedal_smoothness == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.combined_pedal_smoothness as f64 / 2.0 - 0.0
+        Some(self.combined_pedal_smoothness as f64 / 2.0 - 0.0)
     }
 
     /// Set `combined_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -779,12 +778,12 @@ impl Record {
         self
     }
 
-    /// Returns `time128` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time128_scaled(&self) -> f64 {
+    /// Returns `time128` in its scaled value. It returns `None` when value is valid.
+    pub fn time128_scaled(&self) -> Option<f64> {
         if self.time128 == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.time128 as f64 / 128.0 - 0.0
+        Some(self.time128 as f64 / 128.0 - 0.0)
     }
 
     /// Set `time128` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -798,12 +797,12 @@ impl Record {
         self
     }
 
-    /// Returns `ball_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ball_speed_scaled(&self) -> f64 {
+    /// Returns `ball_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn ball_speed_scaled(&self) -> Option<f64> {
         if self.ball_speed == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ball_speed as f64 / 100.0 - 0.0
+        Some(self.ball_speed as f64 / 100.0 - 0.0)
     }
 
     /// Set `ball_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -817,12 +816,12 @@ impl Record {
         self
     }
 
-    /// Returns `cadence256` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn cadence256_scaled(&self) -> f64 {
+    /// Returns `cadence256` in its scaled value. It returns `None` when value is valid.
+    pub fn cadence256_scaled(&self) -> Option<f64> {
         if self.cadence256 == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.cadence256 as f64 / 256.0 - 0.0
+        Some(self.cadence256 as f64 / 256.0 - 0.0)
     }
 
     /// Set `cadence256` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -836,12 +835,12 @@ impl Record {
         self
     }
 
-    /// Returns `fractional_cadence` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn fractional_cadence_scaled(&self) -> f64 {
+    /// Returns `fractional_cadence` in its scaled value. It returns `None` when value is valid.
+    pub fn fractional_cadence_scaled(&self) -> Option<f64> {
         if self.fractional_cadence == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.fractional_cadence as f64 / 128.0 - 0.0
+        Some(self.fractional_cadence as f64 / 128.0 - 0.0)
     }
 
     /// Set `fractional_cadence` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -855,12 +854,12 @@ impl Record {
         self
     }
 
-    /// Returns `total_hemoglobin_conc` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_hemoglobin_conc_scaled(&self) -> f64 {
+    /// Returns `total_hemoglobin_conc` in its scaled value. It returns `None` when value is valid.
+    pub fn total_hemoglobin_conc_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_hemoglobin_conc as f64 / 100.0 - 0.0
+        Some(self.total_hemoglobin_conc as f64 / 100.0 - 0.0)
     }
 
     /// Set `total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -874,12 +873,12 @@ impl Record {
         self
     }
 
-    /// Returns `total_hemoglobin_conc_min` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_hemoglobin_conc_min_scaled(&self) -> f64 {
+    /// Returns `total_hemoglobin_conc_min` in its scaled value. It returns `None` when value is valid.
+    pub fn total_hemoglobin_conc_min_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc_min == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_hemoglobin_conc_min as f64 / 100.0 - 0.0
+        Some(self.total_hemoglobin_conc_min as f64 / 100.0 - 0.0)
     }
 
     /// Set `total_hemoglobin_conc_min` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -893,12 +892,12 @@ impl Record {
         self
     }
 
-    /// Returns `total_hemoglobin_conc_max` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_hemoglobin_conc_max_scaled(&self) -> f64 {
+    /// Returns `total_hemoglobin_conc_max` in its scaled value. It returns `None` when value is valid.
+    pub fn total_hemoglobin_conc_max_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc_max == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_hemoglobin_conc_max as f64 / 100.0 - 0.0
+        Some(self.total_hemoglobin_conc_max as f64 / 100.0 - 0.0)
     }
 
     /// Set `total_hemoglobin_conc_max` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -912,12 +911,12 @@ impl Record {
         self
     }
 
-    /// Returns `saturated_hemoglobin_percent` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn saturated_hemoglobin_percent_scaled(&self) -> f64 {
+    /// Returns `saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is valid.
+    pub fn saturated_hemoglobin_percent_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.saturated_hemoglobin_percent as f64 / 10.0 - 0.0
+        Some(self.saturated_hemoglobin_percent as f64 / 10.0 - 0.0)
     }
 
     /// Set `saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -931,12 +930,12 @@ impl Record {
         self
     }
 
-    /// Returns `saturated_hemoglobin_percent_min` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn saturated_hemoglobin_percent_min_scaled(&self) -> f64 {
+    /// Returns `saturated_hemoglobin_percent_min` in its scaled value. It returns `None` when value is valid.
+    pub fn saturated_hemoglobin_percent_min_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent_min == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.saturated_hemoglobin_percent_min as f64 / 10.0 - 0.0
+        Some(self.saturated_hemoglobin_percent_min as f64 / 10.0 - 0.0)
     }
 
     /// Set `saturated_hemoglobin_percent_min` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -950,12 +949,12 @@ impl Record {
         self
     }
 
-    /// Returns `saturated_hemoglobin_percent_max` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn saturated_hemoglobin_percent_max_scaled(&self) -> f64 {
+    /// Returns `saturated_hemoglobin_percent_max` in its scaled value. It returns `None` when value is valid.
+    pub fn saturated_hemoglobin_percent_max_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent_max == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.saturated_hemoglobin_percent_max as f64 / 10.0 - 0.0
+        Some(self.saturated_hemoglobin_percent_max as f64 / 10.0 - 0.0)
     }
 
     /// Set `saturated_hemoglobin_percent_max` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -969,25 +968,24 @@ impl Record {
         self
     }
 
-    /// Returns `left_power_phase` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn left_power_phase_scaled(&self) -> Vec<f64> {
+    /// Returns `left_power_phase` in its scaled value. It returns `None` when value is valid.
+    pub fn left_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.left_power_phase.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.left_power_phase.len());
         for &x in &self.left_power_phase {
             v.push(x as f64 / 0.7111111 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_left_power_phase_scaled(&mut self, v: &Vec<f64>) -> &mut Record {
+    pub fn set_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Record {
+        self.left_power_phase = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.left_power_phase = Vec::new();
             return self;
         }
-        self.left_power_phase = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -999,25 +997,24 @@ impl Record {
         self
     }
 
-    /// Returns `left_power_phase_peak` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn left_power_phase_peak_scaled(&self) -> Vec<f64> {
+    /// Returns `left_power_phase_peak` in its scaled value. It returns `None` when value is valid.
+    pub fn left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.left_power_phase_peak.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.left_power_phase_peak.len());
         for &x in &self.left_power_phase_peak {
             v.push(x as f64 / 0.7111111 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_left_power_phase_peak_scaled(&mut self, v: &Vec<f64>) -> &mut Record {
+    pub fn set_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Record {
+        self.left_power_phase_peak = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.left_power_phase_peak = Vec::new();
             return self;
         }
-        self.left_power_phase_peak = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -1029,25 +1026,24 @@ impl Record {
         self
     }
 
-    /// Returns `right_power_phase` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn right_power_phase_scaled(&self) -> Vec<f64> {
+    /// Returns `right_power_phase` in its scaled value. It returns `None` when value is valid.
+    pub fn right_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.right_power_phase.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.right_power_phase.len());
         for &x in &self.right_power_phase {
             v.push(x as f64 / 0.7111111 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_right_power_phase_scaled(&mut self, v: &Vec<f64>) -> &mut Record {
+    pub fn set_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Record {
+        self.right_power_phase = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.right_power_phase = Vec::new();
             return self;
         }
-        self.right_power_phase = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -1059,25 +1055,24 @@ impl Record {
         self
     }
 
-    /// Returns `right_power_phase_peak` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn right_power_phase_peak_scaled(&self) -> Vec<f64> {
+    /// Returns `right_power_phase_peak` in its scaled value. It returns `None` when value is valid.
+    pub fn right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.right_power_phase_peak.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.right_power_phase_peak.len());
         for &x in &self.right_power_phase_peak {
             v.push(x as f64 / 0.7111111 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_right_power_phase_peak_scaled(&mut self, v: &Vec<f64>) -> &mut Record {
+    pub fn set_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Record {
+        self.right_power_phase_peak = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.right_power_phase_peak = Vec::new();
             return self;
         }
-        self.right_power_phase_peak = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -1089,12 +1084,12 @@ impl Record {
         self
     }
 
-    /// Returns `enhanced_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_speed_scaled(&self) -> f64 {
+    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_speed as f64 / 1000.0 - 0.0
+        Some(self.enhanced_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `enhanced_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1108,12 +1103,12 @@ impl Record {
         self
     }
 
-    /// Returns `enhanced_altitude` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_altitude_scaled(&self) -> f64 {
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_altitude as f64 / 5.0 - 500.0
+        Some(self.enhanced_altitude as f64 / 5.0 - 500.0)
     }
 
     /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1127,12 +1122,12 @@ impl Record {
         self
     }
 
-    /// Returns `battery_soc` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn battery_soc_scaled(&self) -> f64 {
+    /// Returns `battery_soc` in its scaled value. It returns `None` when value is valid.
+    pub fn battery_soc_scaled(&self) -> Option<f64> {
         if self.battery_soc == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.battery_soc as f64 / 2.0 - 0.0
+        Some(self.battery_soc as f64 / 2.0 - 0.0)
     }
 
     /// Set `battery_soc` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1146,12 +1141,12 @@ impl Record {
         self
     }
 
-    /// Returns `vertical_ratio` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn vertical_ratio_scaled(&self) -> f64 {
+    /// Returns `vertical_ratio` in its scaled value. It returns `None` when value is valid.
+    pub fn vertical_ratio_scaled(&self) -> Option<f64> {
         if self.vertical_ratio == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.vertical_ratio as f64 / 100.0 - 0.0
+        Some(self.vertical_ratio as f64 / 100.0 - 0.0)
     }
 
     /// Set `vertical_ratio` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1165,12 +1160,12 @@ impl Record {
         self
     }
 
-    /// Returns `stance_time_balance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn stance_time_balance_scaled(&self) -> f64 {
+    /// Returns `stance_time_balance` in its scaled value. It returns `None` when value is valid.
+    pub fn stance_time_balance_scaled(&self) -> Option<f64> {
         if self.stance_time_balance == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.stance_time_balance as f64 / 100.0 - 0.0
+        Some(self.stance_time_balance as f64 / 100.0 - 0.0)
     }
 
     /// Set `stance_time_balance` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1184,12 +1179,12 @@ impl Record {
         self
     }
 
-    /// Returns `step_length` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn step_length_scaled(&self) -> f64 {
+    /// Returns `step_length` in its scaled value. It returns `None` when value is valid.
+    pub fn step_length_scaled(&self) -> Option<f64> {
         if self.step_length == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.step_length as f64 / 10.0 - 0.0
+        Some(self.step_length as f64 / 10.0 - 0.0)
     }
 
     /// Set `step_length` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1203,12 +1198,12 @@ impl Record {
         self
     }
 
-    /// Returns `cycle_length16` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn cycle_length16_scaled(&self) -> f64 {
+    /// Returns `cycle_length16` in its scaled value. It returns `None` when value is valid.
+    pub fn cycle_length16_scaled(&self) -> Option<f64> {
         if self.cycle_length16 == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.cycle_length16 as f64 / 100.0 - 0.0
+        Some(self.cycle_length16 as f64 / 100.0 - 0.0)
     }
 
     /// Set `cycle_length16` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1222,12 +1217,12 @@ impl Record {
         self
     }
 
-    /// Returns `depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn depth_scaled(&self) -> f64 {
+    /// Returns `depth` in its scaled value. It returns `None` when value is valid.
+    pub fn depth_scaled(&self) -> Option<f64> {
         if self.depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.depth as f64 / 1000.0 - 0.0
+        Some(self.depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1241,12 +1236,12 @@ impl Record {
         self
     }
 
-    /// Returns `next_stop_depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn next_stop_depth_scaled(&self) -> f64 {
+    /// Returns `next_stop_depth` in its scaled value. It returns `None` when value is valid.
+    pub fn next_stop_depth_scaled(&self) -> Option<f64> {
         if self.next_stop_depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.next_stop_depth as f64 / 1000.0 - 0.0
+        Some(self.next_stop_depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `next_stop_depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1260,12 +1255,12 @@ impl Record {
         self
     }
 
-    /// Returns `enhanced_respiration_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_respiration_rate_scaled(&self) -> f64 {
+    /// Returns `enhanced_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_respiration_rate == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_respiration_rate as f64 / 100.0 - 0.0
+        Some(self.enhanced_respiration_rate as f64 / 100.0 - 0.0)
     }
 
     /// Set `enhanced_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1279,12 +1274,12 @@ impl Record {
         self
     }
 
-    /// Returns `current_stress` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn current_stress_scaled(&self) -> f64 {
+    /// Returns `current_stress` in its scaled value. It returns `None` when value is valid.
+    pub fn current_stress_scaled(&self) -> Option<f64> {
         if self.current_stress == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.current_stress as f64 / 100.0 - 0.0
+        Some(self.current_stress as f64 / 100.0 - 0.0)
     }
 
     /// Set `current_stress` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1298,12 +1293,12 @@ impl Record {
         self
     }
 
-    /// Returns `pressure_sac` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn pressure_sac_scaled(&self) -> f64 {
+    /// Returns `pressure_sac` in its scaled value. It returns `None` when value is valid.
+    pub fn pressure_sac_scaled(&self) -> Option<f64> {
         if self.pressure_sac == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.pressure_sac as f64 / 100.0 - 0.0
+        Some(self.pressure_sac as f64 / 100.0 - 0.0)
     }
 
     /// Set `pressure_sac` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1317,12 +1312,12 @@ impl Record {
         self
     }
 
-    /// Returns `volume_sac` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn volume_sac_scaled(&self) -> f64 {
+    /// Returns `volume_sac` in its scaled value. It returns `None` when value is valid.
+    pub fn volume_sac_scaled(&self) -> Option<f64> {
         if self.volume_sac == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.volume_sac as f64 / 100.0 - 0.0
+        Some(self.volume_sac as f64 / 100.0 - 0.0)
     }
 
     /// Set `volume_sac` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1336,12 +1331,12 @@ impl Record {
         self
     }
 
-    /// Returns `rmv` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn rmv_scaled(&self) -> f64 {
+    /// Returns `rmv` in its scaled value. It returns `None` when value is valid.
+    pub fn rmv_scaled(&self) -> Option<f64> {
         if self.rmv == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.rmv as f64 / 100.0 - 0.0
+        Some(self.rmv as f64 / 100.0 - 0.0)
     }
 
     /// Set `rmv` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1355,12 +1350,12 @@ impl Record {
         self
     }
 
-    /// Returns `ascent_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ascent_rate_scaled(&self) -> f64 {
+    /// Returns `ascent_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn ascent_rate_scaled(&self) -> Option<f64> {
         if self.ascent_rate == i32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ascent_rate as f64 / 1000.0 - 0.0
+        Some(self.ascent_rate as f64 / 1000.0 - 0.0)
     }
 
     /// Set `ascent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1374,12 +1369,12 @@ impl Record {
         self
     }
 
-    /// Returns `po2` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn po2_scaled(&self) -> f64 {
+    /// Returns `po2` in its scaled value. It returns `None` when value is valid.
+    pub fn po2_scaled(&self) -> Option<f64> {
         if self.po2 == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.po2 as f64 / 100.0 - 0.0
+        Some(self.po2 as f64 / 100.0 - 0.0)
     }
 
     /// Set `po2` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -1393,12 +1388,12 @@ impl Record {
         self
     }
 
-    /// Returns `core_temperature` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn core_temperature_scaled(&self) -> f64 {
+    /// Returns `core_temperature` in its scaled value. It returns `None` when value is valid.
+    pub fn core_temperature_scaled(&self) -> Option<f64> {
         if self.core_temperature == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.core_temperature as f64 / 100.0 - 0.0
+        Some(self.core_temperature as f64 / 100.0 - 0.0)
     }
 
     /// Set `core_temperature` with scaled value, it will automatically be converted to its corresponding integer value.
