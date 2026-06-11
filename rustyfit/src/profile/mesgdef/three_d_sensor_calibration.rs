@@ -64,7 +64,7 @@ impl ThreeDSensorCalibration {
         }
     }
 
-    /// Returns `orientation_matrix` in its scaled value. It returns `None` when value is valid.
+    /// Returns `orientation_matrix` in its scaled value. It returns `None` when value is invalid.
     pub fn orientation_matrix_scaled(&self) -> Option<[f64; 9]> {
         if self.orientation_matrix == [i32::MAX; 9] {
             return None;

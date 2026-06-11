@@ -640,7 +640,7 @@ impl Lap {
         }
     }
 
-    /// Returns `start_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `start_position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn start_position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_lat)
     }
@@ -651,7 +651,7 @@ impl Lap {
         self
     }
 
-    /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn start_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_long)
     }
@@ -662,7 +662,7 @@ impl Lap {
         self
     }
 
-    /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn end_position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_lat)
     }
@@ -673,7 +673,7 @@ impl Lap {
         self
     }
 
-    /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn end_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_long)
     }
@@ -684,7 +684,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -703,7 +703,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -722,7 +722,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_distance` in its scaled value. It returns `None` when value is invalid.
     pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
             return None;
@@ -741,7 +741,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u16::MAX {
             return None;
@@ -760,7 +760,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u16::MAX {
             return None;
@@ -779,7 +779,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_stroke_distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_stroke_distance` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_stroke_distance_scaled(&self) -> Option<f64> {
         if self.avg_stroke_distance == u16::MAX {
             return None;
@@ -798,7 +798,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_altitude_scaled(&self) -> Option<f64> {
         if self.avg_altitude == u16::MAX {
             return None;
@@ -817,7 +817,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn max_altitude_scaled(&self) -> Option<f64> {
         if self.max_altitude == u16::MAX {
             return None;
@@ -836,7 +836,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_grade` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_grade` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_grade_scaled(&self) -> Option<f64> {
         if self.avg_grade == i16::MAX {
             return None;
@@ -855,7 +855,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_pos_grade` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_pos_grade` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_pos_grade_scaled(&self) -> Option<f64> {
         if self.avg_pos_grade == i16::MAX {
             return None;
@@ -874,7 +874,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_neg_grade` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_neg_grade` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_neg_grade_scaled(&self) -> Option<f64> {
         if self.avg_neg_grade == i16::MAX {
             return None;
@@ -893,7 +893,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_pos_grade` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_pos_grade` in its scaled value. It returns `None` when value is invalid.
     pub fn max_pos_grade_scaled(&self) -> Option<f64> {
         if self.max_pos_grade == i16::MAX {
             return None;
@@ -912,7 +912,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_neg_grade` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_neg_grade` in its scaled value. It returns `None` when value is invalid.
     pub fn max_neg_grade_scaled(&self) -> Option<f64> {
         if self.max_neg_grade == i16::MAX {
             return None;
@@ -931,7 +931,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
             return None;
@@ -950,7 +950,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_pos_vertical_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_pos_vertical_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_pos_vertical_speed_scaled(&self) -> Option<f64> {
         if self.avg_pos_vertical_speed == i16::MAX {
             return None;
@@ -969,7 +969,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_neg_vertical_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_neg_vertical_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_neg_vertical_speed_scaled(&self) -> Option<f64> {
         if self.avg_neg_vertical_speed == i16::MAX {
             return None;
@@ -988,7 +988,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_pos_vertical_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_pos_vertical_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn max_pos_vertical_speed_scaled(&self) -> Option<f64> {
         if self.max_pos_vertical_speed == i16::MAX {
             return None;
@@ -1007,7 +1007,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_neg_vertical_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_neg_vertical_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn max_neg_vertical_speed_scaled(&self) -> Option<f64> {
         if self.max_neg_vertical_speed == i16::MAX {
             return None;
@@ -1026,7 +1026,7 @@ impl Lap {
         self
     }
 
-    /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_hr_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_hr_zone.is_empty() {
             return None;
@@ -1055,7 +1055,7 @@ impl Lap {
         self
     }
 
-    /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_speed_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_speed_zone.is_empty() {
             return None;
@@ -1084,7 +1084,7 @@ impl Lap {
         self
     }
 
-    /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_cadence_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_cadence_zone.is_empty() {
             return None;
@@ -1113,7 +1113,7 @@ impl Lap {
         self
     }
 
-    /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is invalid.
     pub fn time_in_power_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_power_zone.is_empty() {
             return None;
@@ -1142,7 +1142,7 @@ impl Lap {
         self
     }
 
-    /// Returns `min_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `min_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn min_altitude_scaled(&self) -> Option<f64> {
         if self.min_altitude == u16::MAX {
             return None;
@@ -1161,7 +1161,7 @@ impl Lap {
         self
     }
 
-    /// Returns `active_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -1180,7 +1180,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_vertical_oscillation` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_vertical_oscillation` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_vertical_oscillation_scaled(&self) -> Option<f64> {
         if self.avg_vertical_oscillation == u16::MAX {
             return None;
@@ -1199,7 +1199,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_stance_time_percent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_stance_time_percent` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_stance_time_percent_scaled(&self) -> Option<f64> {
         if self.avg_stance_time_percent == u16::MAX {
             return None;
@@ -1218,7 +1218,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_stance_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_stance_time` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_stance_time_scaled(&self) -> Option<f64> {
         if self.avg_stance_time == u16::MAX {
             return None;
@@ -1237,7 +1237,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_fractional_cadence` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_fractional_cadence` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_fractional_cadence_scaled(&self) -> Option<f64> {
         if self.avg_fractional_cadence == u8::MAX {
             return None;
@@ -1256,7 +1256,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_fractional_cadence` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_fractional_cadence` in its scaled value. It returns `None` when value is invalid.
     pub fn max_fractional_cadence_scaled(&self) -> Option<f64> {
         if self.max_fractional_cadence == u8::MAX {
             return None;
@@ -1275,7 +1275,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_fractional_cycles` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_fractional_cycles` in its scaled value. It returns `None` when value is invalid.
     pub fn total_fractional_cycles_scaled(&self) -> Option<f64> {
         if self.total_fractional_cycles == u8::MAX {
             return None;
@@ -1294,7 +1294,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_total_hemoglobin_conc` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_total_hemoglobin_conc_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_total_hemoglobin_conc.is_empty() {
             return None;
@@ -1323,7 +1323,7 @@ impl Lap {
         self
     }
 
-    /// Returns `min_total_hemoglobin_conc` in its scaled value. It returns `None` when value is valid.
+    /// Returns `min_total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
     pub fn min_total_hemoglobin_conc_scaled(&self) -> Option<Vec<f64>> {
         if self.min_total_hemoglobin_conc.is_empty() {
             return None;
@@ -1352,7 +1352,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_total_hemoglobin_conc` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
     pub fn max_total_hemoglobin_conc_scaled(&self) -> Option<Vec<f64>> {
         if self.max_total_hemoglobin_conc.is_empty() {
             return None;
@@ -1381,7 +1381,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_saturated_hemoglobin_percent_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_saturated_hemoglobin_percent.is_empty() {
             return None;
@@ -1410,7 +1410,7 @@ impl Lap {
         self
     }
 
-    /// Returns `min_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `min_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
     pub fn min_saturated_hemoglobin_percent_scaled(&self) -> Option<Vec<f64>> {
         if self.min_saturated_hemoglobin_percent.is_empty() {
             return None;
@@ -1439,7 +1439,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
     pub fn max_saturated_hemoglobin_percent_scaled(&self) -> Option<Vec<f64>> {
         if self.max_saturated_hemoglobin_percent.is_empty() {
             return None;
@@ -1468,7 +1468,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_left_torque_effectiveness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_left_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.avg_left_torque_effectiveness == u8::MAX {
             return None;
@@ -1487,7 +1487,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_right_torque_effectiveness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_right_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_right_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.avg_right_torque_effectiveness == u8::MAX {
             return None;
@@ -1506,7 +1506,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_left_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_left_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_left_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_left_pedal_smoothness == u8::MAX {
             return None;
@@ -1525,7 +1525,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_right_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_right_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_right_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_right_pedal_smoothness == u8::MAX {
             return None;
@@ -1544,7 +1544,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_combined_pedal_smoothness` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_combined_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_combined_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_combined_pedal_smoothness == u8::MAX {
             return None;
@@ -1563,7 +1563,7 @@ impl Lap {
         self
     }
 
-    /// Returns `time_standing` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_standing` in its scaled value. It returns `None` when value is invalid.
     pub fn time_standing_scaled(&self) -> Option<f64> {
         if self.time_standing == u32::MAX {
             return None;
@@ -1582,7 +1582,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_left_power_phase` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_left_power_phase` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_left_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_left_power_phase.is_empty() {
             return None;
@@ -1611,7 +1611,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_left_power_phase_peak` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_left_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_left_power_phase_peak.is_empty() {
             return None;
@@ -1640,7 +1640,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_right_power_phase` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_right_power_phase` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_right_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_right_power_phase.is_empty() {
             return None;
@@ -1669,7 +1669,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_right_power_phase_peak` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_right_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_right_power_phase_peak.is_empty() {
             return None;
@@ -1698,7 +1698,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_avg_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_avg_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_avg_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_speed == u32::MAX {
             return None;
@@ -1717,7 +1717,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_max_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_max_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_max_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_max_speed == u32::MAX {
             return None;
@@ -1736,7 +1736,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_avg_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_avg_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_avg_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_altitude == u32::MAX {
             return None;
@@ -1755,7 +1755,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_min_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_min_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_min_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_min_altitude == u32::MAX {
             return None;
@@ -1774,7 +1774,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_max_altitude` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_max_altitude` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_max_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_max_altitude == u32::MAX {
             return None;
@@ -1793,7 +1793,7 @@ impl Lap {
         self
     }
 
-    /// Returns `lev_battery_consumption` in its scaled value. It returns `None` when value is valid.
+    /// Returns `lev_battery_consumption` in its scaled value. It returns `None` when value is invalid.
     pub fn lev_battery_consumption_scaled(&self) -> Option<f64> {
         if self.lev_battery_consumption == u8::MAX {
             return None;
@@ -1812,7 +1812,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_vertical_ratio` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_vertical_ratio` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_vertical_ratio_scaled(&self) -> Option<f64> {
         if self.avg_vertical_ratio == u16::MAX {
             return None;
@@ -1831,7 +1831,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_stance_time_balance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_stance_time_balance` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_stance_time_balance_scaled(&self) -> Option<f64> {
         if self.avg_stance_time_balance == u16::MAX {
             return None;
@@ -1850,7 +1850,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_step_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_step_length` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_step_length_scaled(&self) -> Option<f64> {
         if self.avg_step_length == u16::MAX {
             return None;
@@ -1869,7 +1869,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_vam` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_vam` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_vam_scaled(&self) -> Option<f64> {
         if self.avg_vam == u16::MAX {
             return None;
@@ -1888,7 +1888,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_depth_scaled(&self) -> Option<f64> {
         if self.avg_depth == u32::MAX {
             return None;
@@ -1907,7 +1907,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn max_depth_scaled(&self) -> Option<f64> {
         if self.max_depth == u32::MAX {
             return None;
@@ -1926,7 +1926,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_avg_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_respiration_rate == u16::MAX {
             return None;
@@ -1945,7 +1945,7 @@ impl Lap {
         self
     }
 
-    /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_max_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_max_respiration_rate == u16::MAX {
             return None;
@@ -1964,7 +1964,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_fractional_ascent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_fractional_ascent` in its scaled value. It returns `None` when value is invalid.
     pub fn total_fractional_ascent_scaled(&self) -> Option<f64> {
         if self.total_fractional_ascent == u8::MAX {
             return None;
@@ -1983,7 +1983,7 @@ impl Lap {
         self
     }
 
-    /// Returns `total_fractional_descent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_fractional_descent` in its scaled value. It returns `None` when value is invalid.
     pub fn total_fractional_descent_scaled(&self) -> Option<f64> {
         if self.total_fractional_descent == u8::MAX {
             return None;
@@ -2002,7 +2002,7 @@ impl Lap {
         self
     }
 
-    /// Returns `avg_core_temperature` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_core_temperature` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_core_temperature_scaled(&self) -> Option<f64> {
         if self.avg_core_temperature == u16::MAX {
             return None;
@@ -2021,7 +2021,7 @@ impl Lap {
         self
     }
 
-    /// Returns `min_core_temperature` in its scaled value. It returns `None` when value is valid.
+    /// Returns `min_core_temperature` in its scaled value. It returns `None` when value is invalid.
     pub fn min_core_temperature_scaled(&self) -> Option<f64> {
         if self.min_core_temperature == u16::MAX {
             return None;
@@ -2040,7 +2040,7 @@ impl Lap {
         self
     }
 
-    /// Returns `max_core_temperature` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_core_temperature` in its scaled value. It returns `None` when value is invalid.
     pub fn max_core_temperature_scaled(&self) -> Option<f64> {
         if self.max_core_temperature == u16::MAX {
             return None;

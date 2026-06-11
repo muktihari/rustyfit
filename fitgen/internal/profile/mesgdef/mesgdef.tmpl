@@ -82,7 +82,7 @@ impl {{ .Name }} {
 
     {{ range .Fields -}}
     {{ if eq .Units "semicircles" }}
-        /// Returns `{{ .Name }}` in degrees instead of semicircles. It returns `None` when value is valid.
+        /// Returns `{{ .Name }}` in degrees instead of semicircles. It returns `None` when value is invalid.
         pub fn {{ .Name }}_degrees(&self) -> Option<f64> {
             semconv::to_degrees(self.{{ .Name }})
         }
@@ -97,7 +97,7 @@ impl {{ .Name }} {
 
     {{ range .Fields -}}
     {{ if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
-        /// Returns `{{ .Name }}` in its scaled value. It returns `None` when value is valid.
+        /// Returns `{{ .Name }}` in its scaled value. It returns `None` when value is invalid.
         {{ if not .Array -}}
         pub fn {{ .Name }}_scaled(&self) -> Option<f64> {
             if self.{{ .Name }} == {{ .InvalidValue }} {

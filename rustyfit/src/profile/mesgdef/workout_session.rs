@@ -58,7 +58,7 @@ impl WorkoutSession {
         }
     }
 
-    /// Returns `pool_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `pool_length` in its scaled value. It returns `None` when value is invalid.
     pub fn pool_length_scaled(&self) -> Option<f64> {
         if self.pool_length == u16::MAX {
             return None;

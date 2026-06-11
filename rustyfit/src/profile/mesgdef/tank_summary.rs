@@ -54,7 +54,7 @@ impl TankSummary {
         }
     }
 
-    /// Returns `start_pressure` in its scaled value. It returns `None` when value is valid.
+    /// Returns `start_pressure` in its scaled value. It returns `None` when value is invalid.
     pub fn start_pressure_scaled(&self) -> Option<f64> {
         if self.start_pressure == u16::MAX {
             return None;
@@ -73,7 +73,7 @@ impl TankSummary {
         self
     }
 
-    /// Returns `end_pressure` in its scaled value. It returns `None` when value is valid.
+    /// Returns `end_pressure` in its scaled value. It returns `None` when value is invalid.
     pub fn end_pressure_scaled(&self) -> Option<f64> {
         if self.end_pressure == u16::MAX {
             return None;
@@ -92,7 +92,7 @@ impl TankSummary {
         self
     }
 
-    /// Returns `volume_used` in its scaled value. It returns `None` when value is valid.
+    /// Returns `volume_used` in its scaled value. It returns `None` when value is invalid.
     pub fn volume_used_scaled(&self) -> Option<f64> {
         if self.volume_used == u32::MAX {
             return None;

@@ -64,7 +64,7 @@ impl HsaGyroscopeData {
         }
     }
 
-    /// Returns `gyro_x` in its scaled value. It returns `None` when value is valid.
+    /// Returns `gyro_x` in its scaled value. It returns `None` when value is invalid.
     pub fn gyro_x_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_x.is_empty() {
             return None;
@@ -93,7 +93,7 @@ impl HsaGyroscopeData {
         self
     }
 
-    /// Returns `gyro_y` in its scaled value. It returns `None` when value is valid.
+    /// Returns `gyro_y` in its scaled value. It returns `None` when value is invalid.
     pub fn gyro_y_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_y.is_empty() {
             return None;
@@ -122,7 +122,7 @@ impl HsaGyroscopeData {
         self
     }
 
-    /// Returns `gyro_z` in its scaled value. It returns `None` when value is valid.
+    /// Returns `gyro_z` in its scaled value. It returns `None` when value is invalid.
     pub fn gyro_z_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_z.is_empty() {
             return None;

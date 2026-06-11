@@ -178,7 +178,7 @@ impl BikeProfile {
         }
     }
 
-    /// Returns `odometer` in its scaled value. It returns `None` when value is valid.
+    /// Returns `odometer` in its scaled value. It returns `None` when value is invalid.
     pub fn odometer_scaled(&self) -> Option<f64> {
         if self.odometer == u32::MAX {
             return None;
@@ -197,7 +197,7 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `custom_wheelsize` in its scaled value. It returns `None` when value is valid.
+    /// Returns `custom_wheelsize` in its scaled value. It returns `None` when value is invalid.
     pub fn custom_wheelsize_scaled(&self) -> Option<f64> {
         if self.custom_wheelsize == u16::MAX {
             return None;
@@ -216,7 +216,7 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `auto_wheelsize` in its scaled value. It returns `None` when value is valid.
+    /// Returns `auto_wheelsize` in its scaled value. It returns `None` when value is invalid.
     pub fn auto_wheelsize_scaled(&self) -> Option<f64> {
         if self.auto_wheelsize == u16::MAX {
             return None;
@@ -235,7 +235,7 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `bike_weight` in its scaled value. It returns `None` when value is valid.
+    /// Returns `bike_weight` in its scaled value. It returns `None` when value is invalid.
     pub fn bike_weight_scaled(&self) -> Option<f64> {
         if self.bike_weight == u16::MAX {
             return None;
@@ -254,7 +254,7 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `power_cal_factor` in its scaled value. It returns `None` when value is valid.
+    /// Returns `power_cal_factor` in its scaled value. It returns `None` when value is invalid.
     pub fn power_cal_factor_scaled(&self) -> Option<f64> {
         if self.power_cal_factor == u16::MAX {
             return None;
@@ -273,7 +273,7 @@ impl BikeProfile {
         self
     }
 
-    /// Returns `crank_length` in its scaled value. It returns `None` when value is valid.
+    /// Returns `crank_length` in its scaled value. It returns `None` when value is invalid.
     pub fn crank_length_scaled(&self) -> Option<f64> {
         if self.crank_length == u8::MAX {
             return None;

@@ -65,7 +65,7 @@ impl SegmentLeaderboardEntry {
         }
     }
 
-    /// Returns `segment_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `segment_time` in its scaled value. It returns `None` when value is invalid.
     pub fn segment_time_scaled(&self) -> Option<f64> {
         if self.segment_time == u32::MAX {
             return None;

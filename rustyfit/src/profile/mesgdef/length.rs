@@ -137,7 +137,7 @@ impl Length {
         }
     }
 
-    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -156,7 +156,7 @@ impl Length {
         self
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -175,7 +175,7 @@ impl Length {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u16::MAX {
             return None;
@@ -194,7 +194,7 @@ impl Length {
         self
     }
 
-    /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_avg_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_respiration_rate == u16::MAX {
             return None;
@@ -213,7 +213,7 @@ impl Length {
         self
     }
 
-    /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn enhanced_max_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_max_respiration_rate == u16::MAX {
             return None;

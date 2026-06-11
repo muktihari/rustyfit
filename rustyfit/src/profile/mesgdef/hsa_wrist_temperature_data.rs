@@ -44,7 +44,7 @@ impl HsaWristTemperatureData {
         }
     }
 
-    /// Returns `value` in its scaled value. It returns `None` when value is valid.
+    /// Returns `value` in its scaled value. It returns `None` when value is invalid.
     pub fn value_scaled(&self) -> Option<Vec<f64>> {
         if self.value.is_empty() {
             return None;

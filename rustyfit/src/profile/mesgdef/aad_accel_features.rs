@@ -58,7 +58,7 @@ impl AadAccelFeatures {
         }
     }
 
-    /// Returns `time_above_threshold` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_above_threshold` in its scaled value. It returns `None` when value is invalid.
     pub fn time_above_threshold_scaled(&self) -> Option<f64> {
         if self.time_above_threshold == u16::MAX {
             return None;

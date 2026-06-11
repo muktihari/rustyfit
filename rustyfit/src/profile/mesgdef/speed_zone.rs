@@ -44,7 +44,7 @@ impl SpeedZone {
         }
     }
 
-    /// Returns `high_value` in its scaled value. It returns `None` when value is valid.
+    /// Returns `high_value` in its scaled value. It returns `None` when value is invalid.
     pub fn high_value_scaled(&self) -> Option<f64> {
         if self.high_value == u16::MAX {
             return None;

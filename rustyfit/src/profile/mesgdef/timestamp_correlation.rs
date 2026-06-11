@@ -64,7 +64,7 @@ impl TimestampCorrelation {
         }
     }
 
-    /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is valid.
+    /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is invalid.
     pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
             return None;
@@ -83,7 +83,7 @@ impl TimestampCorrelation {
         self
     }
 
-    /// Returns `fractional_system_timestamp` in its scaled value. It returns `None` when value is valid.
+    /// Returns `fractional_system_timestamp` in its scaled value. It returns `None` when value is invalid.
     pub fn fractional_system_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_system_timestamp == u16::MAX {
             return None;

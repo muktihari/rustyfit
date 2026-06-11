@@ -62,7 +62,7 @@ impl ClimbPro {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
@@ -73,7 +73,7 @@ impl ClimbPro {
         self
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }

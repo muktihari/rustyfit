@@ -99,7 +99,7 @@ impl SleepAssessment {
         }
     }
 
-    /// Returns `average_stress_during_sleep` in its scaled value. It returns `None` when value is valid.
+    /// Returns `average_stress_during_sleep` in its scaled value. It returns `None` when value is invalid.
     pub fn average_stress_during_sleep_scaled(&self) -> Option<f64> {
         if self.average_stress_during_sleep == u16::MAX {
             return None;

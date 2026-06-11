@@ -129,7 +129,7 @@ impl Event {
         }
     }
 
-    /// Returns `radar_threat_avg_approach_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `radar_threat_avg_approach_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn radar_threat_avg_approach_speed_scaled(&self) -> Option<f64> {
         if self.radar_threat_avg_approach_speed == u8::MAX {
             return None;
@@ -148,7 +148,7 @@ impl Event {
         self
     }
 
-    /// Returns `radar_threat_max_approach_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `radar_threat_max_approach_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn radar_threat_max_approach_speed_scaled(&self) -> Option<f64> {
         if self.radar_threat_max_approach_speed == u8::MAX {
             return None;

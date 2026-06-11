@@ -79,7 +79,7 @@ impl Set {
         }
     }
 
-    /// Returns `duration` in its scaled value. It returns `None` when value is valid.
+    /// Returns `duration` in its scaled value. It returns `None` when value is invalid.
     pub fn duration_scaled(&self) -> Option<f64> {
         if self.duration == u32::MAX {
             return None;
@@ -98,7 +98,7 @@ impl Set {
         self
     }
 
-    /// Returns `weight` in its scaled value. It returns `None` when value is valid.
+    /// Returns `weight` in its scaled value. It returns `None` when value is invalid.
     pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == u16::MAX {
             return None;

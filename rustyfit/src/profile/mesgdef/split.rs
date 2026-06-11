@@ -126,7 +126,7 @@ impl Split {
         }
     }
 
-    /// Returns `start_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `start_position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn start_position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_lat)
     }
@@ -137,7 +137,7 @@ impl Split {
         self
     }
 
-    /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `start_position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn start_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.start_position_long)
     }
@@ -148,7 +148,7 @@ impl Split {
         self
     }
 
-    /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `end_position_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn end_position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_lat)
     }
@@ -159,7 +159,7 @@ impl Split {
         self
     }
 
-    /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    /// Returns `end_position_long` in degrees instead of semicircles. It returns `None` when value is invalid.
     pub fn end_position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.end_position_long)
     }
@@ -170,7 +170,7 @@ impl Split {
         self
     }
 
-    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -189,7 +189,7 @@ impl Split {
         self
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -208,7 +208,7 @@ impl Split {
         self
     }
 
-    /// Returns `total_distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_distance` in its scaled value. It returns `None` when value is invalid.
     pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
             return None;
@@ -227,7 +227,7 @@ impl Split {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
             return None;
@@ -246,7 +246,7 @@ impl Split {
         self
     }
 
-    /// Returns `max_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
             return None;
@@ -265,7 +265,7 @@ impl Split {
         self
     }
 
-    /// Returns `avg_vert_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_vert_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_vert_speed_scaled(&self) -> Option<f64> {
         if self.avg_vert_speed == i32::MAX {
             return None;
@@ -284,7 +284,7 @@ impl Split {
         self
     }
 
-    /// Returns `start_elevation` in its scaled value. It returns `None` when value is valid.
+    /// Returns `start_elevation` in its scaled value. It returns `None` when value is invalid.
     pub fn start_elevation_scaled(&self) -> Option<f64> {
         if self.start_elevation == u32::MAX {
             return None;
@@ -303,7 +303,7 @@ impl Split {
         self
     }
 
-    /// Returns `active_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -322,7 +322,7 @@ impl Split {
         self
     }
 
-    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is invalid.
     pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
             return None;

@@ -67,7 +67,7 @@ impl Hr {
         }
     }
 
-    /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is valid.
+    /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is invalid.
     pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
             return None;
@@ -86,7 +86,7 @@ impl Hr {
         self
     }
 
-    /// Returns `time256` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time256` in its scaled value. It returns `None` when value is invalid.
     pub fn time256_scaled(&self) -> Option<f64> {
         if self.time256 == u8::MAX {
             return None;
@@ -105,7 +105,7 @@ impl Hr {
         self
     }
 
-    /// Returns `event_timestamp` in its scaled value. It returns `None` when value is valid.
+    /// Returns `event_timestamp` in its scaled value. It returns `None` when value is invalid.
     pub fn event_timestamp_scaled(&self) -> Option<Vec<f64>> {
         if self.event_timestamp.is_empty() {
             return None;

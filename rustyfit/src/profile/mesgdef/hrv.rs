@@ -34,7 +34,7 @@ impl Hrv {
         }
     }
 
-    /// Returns `time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time` in its scaled value. It returns `None` when value is invalid.
     pub fn time_scaled(&self) -> Option<Vec<f64>> {
         if self.time.is_empty() {
             return None;

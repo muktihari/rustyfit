@@ -58,7 +58,7 @@ impl MonitoringInfo {
         }
     }
 
-    /// Returns `cycles_to_distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `cycles_to_distance` in its scaled value. It returns `None` when value is invalid.
     pub fn cycles_to_distance_scaled(&self) -> Option<Vec<f64>> {
         if self.cycles_to_distance.is_empty() {
             return None;
@@ -87,7 +87,7 @@ impl MonitoringInfo {
         self
     }
 
-    /// Returns `cycles_to_calories` in its scaled value. It returns `None` when value is valid.
+    /// Returns `cycles_to_calories` in its scaled value. It returns `None` when value is invalid.
     pub fn cycles_to_calories_scaled(&self) -> Option<Vec<f64>> {
         if self.cycles_to_calories.is_empty() {
             return None;

@@ -66,7 +66,7 @@ impl ChronoShotSession {
         }
     }
 
-    /// Returns `min_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `min_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn min_speed_scaled(&self) -> Option<f64> {
         if self.min_speed == u32::MAX {
             return None;
@@ -85,7 +85,7 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `max_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
             return None;
@@ -104,7 +104,7 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
             return None;
@@ -123,7 +123,7 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `grain_weight` in its scaled value. It returns `None` when value is valid.
+    /// Returns `grain_weight` in its scaled value. It returns `None` when value is invalid.
     pub fn grain_weight_scaled(&self) -> Option<f64> {
         if self.grain_weight == u32::MAX {
             return None;
@@ -142,7 +142,7 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `standard_deviation` in its scaled value. It returns `None` when value is valid.
+    /// Returns `standard_deviation` in its scaled value. It returns `None` when value is invalid.
     pub fn standard_deviation_scaled(&self) -> Option<f64> {
         if self.standard_deviation == u32::MAX {
             return None;

@@ -191,7 +191,7 @@ impl DiveSettings {
         }
     }
 
-    /// Returns `po2_warn` in its scaled value. It returns `None` when value is valid.
+    /// Returns `po2_warn` in its scaled value. It returns `None` when value is invalid.
     pub fn po2_warn_scaled(&self) -> Option<f64> {
         if self.po2_warn == u8::MAX {
             return None;
@@ -210,7 +210,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `po2_critical` in its scaled value. It returns `None` when value is valid.
+    /// Returns `po2_critical` in its scaled value. It returns `None` when value is invalid.
     pub fn po2_critical_scaled(&self) -> Option<f64> {
         if self.po2_critical == u8::MAX {
             return None;
@@ -229,7 +229,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `po2_deco` in its scaled value. It returns `None` when value is valid.
+    /// Returns `po2_deco` in its scaled value. It returns `None` when value is invalid.
     pub fn po2_deco_scaled(&self) -> Option<f64> {
         if self.po2_deco == u8::MAX {
             return None;
@@ -248,7 +248,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_low_setpoint` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ccr_low_setpoint` in its scaled value. It returns `None` when value is invalid.
     pub fn ccr_low_setpoint_scaled(&self) -> Option<f64> {
         if self.ccr_low_setpoint == u8::MAX {
             return None;
@@ -267,7 +267,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_low_setpoint_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ccr_low_setpoint_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn ccr_low_setpoint_depth_scaled(&self) -> Option<f64> {
         if self.ccr_low_setpoint_depth == u32::MAX {
             return None;
@@ -286,7 +286,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_high_setpoint` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ccr_high_setpoint` in its scaled value. It returns `None` when value is invalid.
     pub fn ccr_high_setpoint_scaled(&self) -> Option<f64> {
         if self.ccr_high_setpoint == u8::MAX {
             return None;
@@ -305,7 +305,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_high_setpoint_depth` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ccr_high_setpoint_depth` in its scaled value. It returns `None` when value is invalid.
     pub fn ccr_high_setpoint_depth_scaled(&self) -> Option<f64> {
         if self.ccr_high_setpoint_depth == u32::MAX {
             return None;
@@ -324,7 +324,7 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `last_stop_multiple` in its scaled value. It returns `None` when value is valid.
+    /// Returns `last_stop_multiple` in its scaled value. It returns `None` when value is invalid.
     pub fn last_stop_multiple_scaled(&self) -> Option<f64> {
         if self.last_stop_multiple == u8::MAX {
             return None;

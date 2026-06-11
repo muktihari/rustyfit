@@ -146,7 +146,7 @@ impl DeviceSettings {
         }
     }
 
-    /// Returns `time_zone_offset` in its scaled value. It returns `None` when value is valid.
+    /// Returns `time_zone_offset` in its scaled value. It returns `None` when value is invalid.
     pub fn time_zone_offset_scaled(&self) -> Option<Vec<f64>> {
         if self.time_zone_offset.is_empty() {
             return None;

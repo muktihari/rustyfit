@@ -38,7 +38,7 @@ impl RespirationRate {
         }
     }
 
-    /// Returns `respiration_rate` in its scaled value. It returns `None` when value is valid.
+    /// Returns `respiration_rate` in its scaled value. It returns `None` when value is invalid.
     pub fn respiration_rate_scaled(&self) -> Option<f64> {
         if self.respiration_rate == i16::MAX {
             return None;

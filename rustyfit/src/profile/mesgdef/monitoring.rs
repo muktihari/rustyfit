@@ -180,7 +180,7 @@ impl Monitoring {
         }
     }
 
-    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;
@@ -199,7 +199,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `cycles` in its scaled value. It returns `None` when value is valid.
+    /// Returns `cycles` in its scaled value. It returns `None` when value is invalid.
     pub fn cycles_scaled(&self) -> Option<f64> {
         if self.cycles == u32::MAX {
             return None;
@@ -218,7 +218,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `active_time` in its scaled value. It returns `None` when value is valid.
+    /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -237,7 +237,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `temperature` in its scaled value. It returns `None` when value is valid.
+    /// Returns `temperature` in its scaled value. It returns `None` when value is invalid.
     pub fn temperature_scaled(&self) -> Option<f64> {
         if self.temperature == i16::MAX {
             return None;
@@ -256,7 +256,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `temperature_min` in its scaled value. It returns `None` when value is valid.
+    /// Returns `temperature_min` in its scaled value. It returns `None` when value is invalid.
     pub fn temperature_min_scaled(&self) -> Option<f64> {
         if self.temperature_min == i16::MAX {
             return None;
@@ -275,7 +275,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `temperature_max` in its scaled value. It returns `None` when value is valid.
+    /// Returns `temperature_max` in its scaled value. It returns `None` when value is invalid.
     pub fn temperature_max_scaled(&self) -> Option<f64> {
         if self.temperature_max == i16::MAX {
             return None;
@@ -294,7 +294,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `intensity` in its scaled value. It returns `None` when value is valid.
+    /// Returns `intensity` in its scaled value. It returns `None` when value is invalid.
     pub fn intensity_scaled(&self) -> Option<f64> {
         if self.intensity == u8::MAX {
             return None;
@@ -313,7 +313,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `ascent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `ascent` in its scaled value. It returns `None` when value is invalid.
     pub fn ascent_scaled(&self) -> Option<f64> {
         if self.ascent == u32::MAX {
             return None;
@@ -332,7 +332,7 @@ impl Monitoring {
         self
     }
 
-    /// Returns `descent` in its scaled value. It returns `None` when value is valid.
+    /// Returns `descent` in its scaled value. It returns `None` when value is invalid.
     pub fn descent_scaled(&self) -> Option<f64> {
         if self.descent == u32::MAX {
             return None;

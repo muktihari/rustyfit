@@ -42,7 +42,7 @@ impl ChronoShotData {
         }
     }
 
-    /// Returns `shot_speed` in its scaled value. It returns `None` when value is valid.
+    /// Returns `shot_speed` in its scaled value. It returns `None` when value is invalid.
     pub fn shot_speed_scaled(&self) -> Option<f64> {
         if self.shot_speed == u32::MAX {
             return None;
