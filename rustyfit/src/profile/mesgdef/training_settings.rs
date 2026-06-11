@@ -58,7 +58,7 @@ impl TrainingSettings {
     }
 
     /// Set `target_distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_target_distance_scaled(&mut self, v: f64) -> &mut TrainingSettings {
+    pub fn set_target_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.target_distance = u32::MAX;
@@ -77,7 +77,7 @@ impl TrainingSettings {
     }
 
     /// Set `target_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_target_speed_scaled(&mut self, v: f64) -> &mut TrainingSettings {
+    pub fn set_target_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.target_speed = u16::MAX;
@@ -96,7 +96,7 @@ impl TrainingSettings {
     }
 
     /// Set `precise_target_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_precise_target_speed_scaled(&mut self, v: f64) -> &mut TrainingSettings {
+    pub fn set_precise_target_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.precise_target_speed = u32::MAX;

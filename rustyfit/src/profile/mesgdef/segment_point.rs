@@ -104,7 +104,7 @@ impl SegmentPoint {
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_distance_scaled(&mut self, v: f64) -> &mut SegmentPoint {
+    pub fn set_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.distance = u32::MAX;
@@ -123,7 +123,7 @@ impl SegmentPoint {
     }
 
     /// Set `altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_altitude_scaled(&mut self, v: f64) -> &mut SegmentPoint {
+    pub fn set_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.altitude = u16::MAX;
@@ -146,7 +146,7 @@ impl SegmentPoint {
     }
 
     /// Set `leader_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_leader_time_scaled(&mut self, v: &[f64]) -> &mut SegmentPoint {
+    pub fn set_leader_time_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.leader_time = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -171,7 +171,7 @@ impl SegmentPoint {
     }
 
     /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_altitude_scaled(&mut self, v: f64) -> &mut SegmentPoint {
+    pub fn set_enhanced_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_altitude = u32::MAX;

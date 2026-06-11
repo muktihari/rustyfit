@@ -103,7 +103,7 @@ impl DiveAlarm {
     }
 
     /// Set `depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_depth_scaled(&mut self, v: f64) -> &mut DiveAlarm {
+    pub fn set_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.depth = u32::MAX;
@@ -122,7 +122,7 @@ impl DiveAlarm {
     }
 
     /// Set `speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_scaled(&mut self, v: f64) -> &mut DiveAlarm {
+    pub fn set_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
             self.speed = i32::MAX;

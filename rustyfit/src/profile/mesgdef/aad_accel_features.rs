@@ -67,7 +67,7 @@ impl AadAccelFeatures {
     }
 
     /// Set `time_above_threshold` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_above_threshold_scaled(&mut self, v: f64) -> &mut AadAccelFeatures {
+    pub fn set_time_above_threshold_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 25.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.time_above_threshold = u16::MAX;

@@ -485,7 +485,7 @@ impl Record {
     }
 
     /// Set `altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_altitude_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.altitude = u16::MAX;
@@ -504,7 +504,7 @@ impl Record {
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_distance_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_distance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.distance = u32::MAX;
@@ -523,7 +523,7 @@ impl Record {
     }
 
     /// Set `speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.speed = u16::MAX;
@@ -542,7 +542,7 @@ impl Record {
     }
 
     /// Set `grade` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_grade_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_grade_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.grade = i16::MAX;
@@ -561,7 +561,7 @@ impl Record {
     }
 
     /// Set `time_from_course` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time_from_course_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_time_from_course_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
             self.time_from_course = i32::MAX;
@@ -580,7 +580,7 @@ impl Record {
     }
 
     /// Set `cycle_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycle_length_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_cycle_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.cycle_length = u8::MAX;
@@ -603,7 +603,7 @@ impl Record {
     }
 
     /// Set `speed_1s` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_speed_1s_scaled(&mut self, v: &[f64]) -> &mut Record {
+    pub fn set_speed_1s_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.speed_1s = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -628,7 +628,7 @@ impl Record {
     }
 
     /// Set `vertical_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_vertical_speed_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_vertical_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.vertical_speed = i16::MAX;
@@ -647,7 +647,7 @@ impl Record {
     }
 
     /// Set `vertical_oscillation` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_vertical_oscillation_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_vertical_oscillation_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.vertical_oscillation = u16::MAX;
@@ -666,7 +666,7 @@ impl Record {
     }
 
     /// Set `stance_time_percent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_stance_time_percent_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_stance_time_percent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.stance_time_percent = u16::MAX;
@@ -685,7 +685,7 @@ impl Record {
     }
 
     /// Set `stance_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_stance_time_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_stance_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.stance_time = u16::MAX;
@@ -704,7 +704,7 @@ impl Record {
     }
 
     /// Set `left_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_left_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_left_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.left_torque_effectiveness = u8::MAX;
@@ -723,7 +723,7 @@ impl Record {
     }
 
     /// Set `right_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_right_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_right_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.right_torque_effectiveness = u8::MAX;
@@ -742,7 +742,7 @@ impl Record {
     }
 
     /// Set `left_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_left_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_left_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.left_pedal_smoothness = u8::MAX;
@@ -761,7 +761,7 @@ impl Record {
     }
 
     /// Set `right_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_right_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_right_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.right_pedal_smoothness = u8::MAX;
@@ -780,7 +780,7 @@ impl Record {
     }
 
     /// Set `combined_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_combined_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_combined_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.combined_pedal_smoothness = u8::MAX;
@@ -799,7 +799,7 @@ impl Record {
     }
 
     /// Set `time128` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_time128_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_time128_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.time128 = u8::MAX;
@@ -818,7 +818,7 @@ impl Record {
     }
 
     /// Set `ball_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ball_speed_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_ball_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.ball_speed = u16::MAX;
@@ -837,7 +837,7 @@ impl Record {
     }
 
     /// Set `cadence256` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cadence256_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_cadence256_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 256.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.cadence256 = u16::MAX;
@@ -856,7 +856,7 @@ impl Record {
     }
 
     /// Set `fractional_cadence` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_fractional_cadence_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_fractional_cadence_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 128.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.fractional_cadence = u8::MAX;
@@ -875,7 +875,7 @@ impl Record {
     }
 
     /// Set `total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_hemoglobin_conc_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_total_hemoglobin_conc_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.total_hemoglobin_conc = u16::MAX;
@@ -894,7 +894,7 @@ impl Record {
     }
 
     /// Set `total_hemoglobin_conc_min` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_hemoglobin_conc_min_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_total_hemoglobin_conc_min_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.total_hemoglobin_conc_min = u16::MAX;
@@ -913,7 +913,7 @@ impl Record {
     }
 
     /// Set `total_hemoglobin_conc_max` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_hemoglobin_conc_max_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_total_hemoglobin_conc_max_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.total_hemoglobin_conc_max = u16::MAX;
@@ -932,7 +932,7 @@ impl Record {
     }
 
     /// Set `saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_saturated_hemoglobin_percent_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_saturated_hemoglobin_percent_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.saturated_hemoglobin_percent = u16::MAX;
@@ -951,7 +951,7 @@ impl Record {
     }
 
     /// Set `saturated_hemoglobin_percent_min` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_saturated_hemoglobin_percent_min_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_saturated_hemoglobin_percent_min_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.saturated_hemoglobin_percent_min = u16::MAX;
@@ -970,7 +970,7 @@ impl Record {
     }
 
     /// Set `saturated_hemoglobin_percent_max` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_saturated_hemoglobin_percent_max_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_saturated_hemoglobin_percent_max_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.saturated_hemoglobin_percent_max = u16::MAX;
@@ -993,7 +993,7 @@ impl Record {
     }
 
     /// Set `left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Record {
+    pub fn set_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.left_power_phase = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1022,7 +1022,7 @@ impl Record {
     }
 
     /// Set `left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Record {
+    pub fn set_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.left_power_phase_peak = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1051,7 +1051,7 @@ impl Record {
     }
 
     /// Set `right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Record {
+    pub fn set_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.right_power_phase = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1080,7 +1080,7 @@ impl Record {
     }
 
     /// Set `right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Record {
+    pub fn set_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.right_power_phase_peak = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -1105,7 +1105,7 @@ impl Record {
     }
 
     /// Set `enhanced_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_speed_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_enhanced_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_speed = u32::MAX;
@@ -1124,7 +1124,7 @@ impl Record {
     }
 
     /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_altitude_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_enhanced_altitude_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 500.0) * 5.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.enhanced_altitude = u32::MAX;
@@ -1143,7 +1143,7 @@ impl Record {
     }
 
     /// Set `battery_soc` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_battery_soc_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_battery_soc_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.battery_soc = u8::MAX;
@@ -1162,7 +1162,7 @@ impl Record {
     }
 
     /// Set `vertical_ratio` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_vertical_ratio_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_vertical_ratio_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.vertical_ratio = u16::MAX;
@@ -1181,7 +1181,7 @@ impl Record {
     }
 
     /// Set `stance_time_balance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_stance_time_balance_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_stance_time_balance_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.stance_time_balance = u16::MAX;
@@ -1200,7 +1200,7 @@ impl Record {
     }
 
     /// Set `step_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_step_length_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_step_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.step_length = u16::MAX;
@@ -1219,7 +1219,7 @@ impl Record {
     }
 
     /// Set `cycle_length16` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycle_length16_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_cycle_length16_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.cycle_length16 = u16::MAX;
@@ -1238,7 +1238,7 @@ impl Record {
     }
 
     /// Set `depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_depth_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.depth = u32::MAX;
@@ -1257,7 +1257,7 @@ impl Record {
     }
 
     /// Set `next_stop_depth` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_next_stop_depth_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_next_stop_depth_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.next_stop_depth = u32::MAX;
@@ -1276,7 +1276,7 @@ impl Record {
     }
 
     /// Set `enhanced_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_respiration_rate_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_enhanced_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.enhanced_respiration_rate = u16::MAX;
@@ -1295,7 +1295,7 @@ impl Record {
     }
 
     /// Set `current_stress` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_current_stress_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_current_stress_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.current_stress = u16::MAX;
@@ -1314,7 +1314,7 @@ impl Record {
     }
 
     /// Set `pressure_sac` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_pressure_sac_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_pressure_sac_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.pressure_sac = u16::MAX;
@@ -1333,7 +1333,7 @@ impl Record {
     }
 
     /// Set `volume_sac` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_volume_sac_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_volume_sac_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.volume_sac = u16::MAX;
@@ -1352,7 +1352,7 @@ impl Record {
     }
 
     /// Set `rmv` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_rmv_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_rmv_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.rmv = u16::MAX;
@@ -1371,7 +1371,7 @@ impl Record {
     }
 
     /// Set `ascent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_ascent_rate_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_ascent_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
             self.ascent_rate = i32::MAX;
@@ -1390,7 +1390,7 @@ impl Record {
     }
 
     /// Set `po2` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_po2_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_po2_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.po2 = u8::MAX;
@@ -1409,7 +1409,7 @@ impl Record {
     }
 
     /// Set `core_temperature` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_core_temperature_scaled(&mut self, v: f64) -> &mut Record {
+    pub fn set_core_temperature_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.core_temperature = u16::MAX;

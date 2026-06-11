@@ -57,7 +57,7 @@ impl HsaWristTemperatureData {
     }
 
     /// Set `value` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_value_scaled(&mut self, v: &[f64]) -> &mut HsaWristTemperatureData {
+    pub fn set_value_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.value = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

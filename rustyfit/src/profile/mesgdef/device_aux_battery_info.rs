@@ -59,7 +59,7 @@ impl DeviceAuxBatteryInfo {
     }
 
     /// Set `battery_voltage` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_battery_voltage_scaled(&mut self, v: f64) -> &mut DeviceAuxBatteryInfo {
+    pub fn set_battery_voltage_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 256.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.battery_voltage = u16::MAX;

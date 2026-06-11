@@ -47,7 +47,7 @@ impl RespirationRate {
     }
 
     /// Set `respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_respiration_rate_scaled(&mut self, v: f64) -> &mut RespirationRate {
+    pub fn set_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
             self.respiration_rate = i16::MAX;

@@ -73,7 +73,7 @@ impl TimestampCorrelation {
     }
 
     /// Set `fractional_timestamp` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_fractional_timestamp_scaled(&mut self, v: f64) -> &mut TimestampCorrelation {
+    pub fn set_fractional_timestamp_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 32768.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.fractional_timestamp = u16::MAX;
@@ -92,7 +92,7 @@ impl TimestampCorrelation {
     }
 
     /// Set `fractional_system_timestamp` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_fractional_system_timestamp_scaled(&mut self, v: f64) -> &mut TimestampCorrelation {
+    pub fn set_fractional_system_timestamp_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 32768.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.fractional_system_timestamp = u16::MAX;

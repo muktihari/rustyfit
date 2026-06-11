@@ -146,7 +146,7 @@ impl Length {
     }
 
     /// Set `total_elapsed_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_elapsed_time_scaled(&mut self, v: f64) -> &mut Length {
+    pub fn set_total_elapsed_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_elapsed_time = u32::MAX;
@@ -165,7 +165,7 @@ impl Length {
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Length {
+    pub fn set_total_timer_time_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.total_timer_time = u32::MAX;
@@ -184,7 +184,7 @@ impl Length {
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Length {
+    pub fn set_avg_speed_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.avg_speed = u16::MAX;
@@ -203,7 +203,7 @@ impl Length {
     }
 
     /// Set `enhanced_avg_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_avg_respiration_rate_scaled(&mut self, v: f64) -> &mut Length {
+    pub fn set_enhanced_avg_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.enhanced_avg_respiration_rate = u16::MAX;
@@ -222,7 +222,7 @@ impl Length {
     }
 
     /// Set `enhanced_max_respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_enhanced_max_respiration_rate_scaled(&mut self, v: f64) -> &mut Length {
+    pub fn set_enhanced_max_respiration_rate_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.enhanced_max_respiration_rate = u16::MAX;

@@ -187,7 +187,7 @@ impl BikeProfile {
     }
 
     /// Set `odometer` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_odometer_scaled(&mut self, v: f64) -> &mut BikeProfile {
+    pub fn set_odometer_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.odometer = u32::MAX;
@@ -206,7 +206,7 @@ impl BikeProfile {
     }
 
     /// Set `custom_wheelsize` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_custom_wheelsize_scaled(&mut self, v: f64) -> &mut BikeProfile {
+    pub fn set_custom_wheelsize_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.custom_wheelsize = u16::MAX;
@@ -225,7 +225,7 @@ impl BikeProfile {
     }
 
     /// Set `auto_wheelsize` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_auto_wheelsize_scaled(&mut self, v: f64) -> &mut BikeProfile {
+    pub fn set_auto_wheelsize_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 1000.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.auto_wheelsize = u16::MAX;
@@ -244,7 +244,7 @@ impl BikeProfile {
     }
 
     /// Set `bike_weight` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_bike_weight_scaled(&mut self, v: f64) -> &mut BikeProfile {
+    pub fn set_bike_weight_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.bike_weight = u16::MAX;
@@ -263,7 +263,7 @@ impl BikeProfile {
     }
 
     /// Set `power_cal_factor` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_power_cal_factor_scaled(&mut self, v: f64) -> &mut BikeProfile {
+    pub fn set_power_cal_factor_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.power_cal_factor = u16::MAX;
@@ -282,7 +282,7 @@ impl BikeProfile {
     }
 
     /// Set `crank_length` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_crank_length_scaled(&mut self, v: f64) -> &mut BikeProfile {
+    pub fn set_crank_length_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + -110.0) * 2.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
             self.crank_length = u8::MAX;

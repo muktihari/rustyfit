@@ -76,7 +76,7 @@ impl SdmProfile {
     }
 
     /// Set `sdm_cal_factor` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_sdm_cal_factor_scaled(&mut self, v: f64) -> &mut SdmProfile {
+    pub fn set_sdm_cal_factor_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.sdm_cal_factor = u16::MAX;
@@ -95,7 +95,7 @@ impl SdmProfile {
     }
 
     /// Set `odometer` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_odometer_scaled(&mut self, v: f64) -> &mut SdmProfile {
+    pub fn set_odometer_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
             self.odometer = u32::MAX;

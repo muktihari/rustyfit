@@ -71,7 +71,7 @@ impl MonitoringInfo {
     }
 
     /// Set `cycles_to_distance` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycles_to_distance_scaled(&mut self, v: &[f64]) -> &mut MonitoringInfo {
+    pub fn set_cycles_to_distance_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.cycles_to_distance = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -100,7 +100,7 @@ impl MonitoringInfo {
     }
 
     /// Set `cycles_to_calories` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_cycles_to_calories_scaled(&mut self, v: &[f64]) -> &mut MonitoringInfo {
+    pub fn set_cycles_to_calories_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.cycles_to_calories = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

@@ -100,7 +100,7 @@ impl AviationAttitude {
     }
 
     /// Set `pitch` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_pitch_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+    pub fn set_pitch_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.pitch = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -129,7 +129,7 @@ impl AviationAttitude {
     }
 
     /// Set `roll` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_roll_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+    pub fn set_roll_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.roll = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -158,7 +158,7 @@ impl AviationAttitude {
     }
 
     /// Set `accel_lateral` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_lateral_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+    pub fn set_accel_lateral_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.accel_lateral = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -187,7 +187,7 @@ impl AviationAttitude {
     }
 
     /// Set `accel_normal` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_normal_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+    pub fn set_accel_normal_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.accel_normal = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -216,7 +216,7 @@ impl AviationAttitude {
     }
 
     /// Set `turn_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_turn_rate_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+    pub fn set_turn_rate_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.turn_rate = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;
@@ -245,7 +245,7 @@ impl AviationAttitude {
     }
 
     /// Set `track` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_track_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+    pub fn set_track_scaled(&mut self, v: &[f64]) -> &mut Self {
         self.track = Vec::with_capacity(v.len());
         if v.is_empty() {
             return self;

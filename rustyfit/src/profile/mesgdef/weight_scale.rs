@@ -106,7 +106,7 @@ impl WeightScale {
     }
 
     /// Set `weight` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_weight_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_weight_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.weight = typedef::Weight(u16::MAX);
@@ -125,7 +125,7 @@ impl WeightScale {
     }
 
     /// Set `percent_fat` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_percent_fat_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_percent_fat_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.percent_fat = u16::MAX;
@@ -144,7 +144,7 @@ impl WeightScale {
     }
 
     /// Set `percent_hydration` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_percent_hydration_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_percent_hydration_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.percent_hydration = u16::MAX;
@@ -163,7 +163,7 @@ impl WeightScale {
     }
 
     /// Set `visceral_fat_mass` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_visceral_fat_mass_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_visceral_fat_mass_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.visceral_fat_mass = u16::MAX;
@@ -182,7 +182,7 @@ impl WeightScale {
     }
 
     /// Set `bone_mass` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_bone_mass_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_bone_mass_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.bone_mass = u16::MAX;
@@ -201,7 +201,7 @@ impl WeightScale {
     }
 
     /// Set `muscle_mass` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_muscle_mass_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_muscle_mass_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 100.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.muscle_mass = u16::MAX;
@@ -220,7 +220,7 @@ impl WeightScale {
     }
 
     /// Set `basal_met` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_basal_met_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_basal_met_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 4.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.basal_met = u16::MAX;
@@ -239,7 +239,7 @@ impl WeightScale {
     }
 
     /// Set `active_met` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_active_met_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_active_met_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 4.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.active_met = u16::MAX;
@@ -258,7 +258,7 @@ impl WeightScale {
     }
 
     /// Set `bmi` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_bmi_scaled(&mut self, v: f64) -> &mut WeightScale {
+    pub fn set_bmi_scaled(&mut self, v: f64) -> &mut Self {
         let unscaled = (v + 0.0) * 10.0;
         if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
             self.bmi = u16::MAX;
