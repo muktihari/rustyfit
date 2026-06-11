@@ -94,12 +94,12 @@ impl DiveApneaAlarm {
         }
     }
 
-    /// Returns `depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn depth_scaled(&self) -> f64 {
+    /// Returns `depth` in its scaled value. It returns `None` when value is valid.
+    pub fn depth_scaled(&self) -> Option<f64> {
         if self.depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.depth as f64 / 1000.0 - 0.0
+        Some(self.depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -113,12 +113,12 @@ impl DiveApneaAlarm {
         self
     }
 
-    /// Returns `speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn speed_scaled(&self) -> f64 {
+    /// Returns `speed` in its scaled value. It returns `None` when value is valid.
+    pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == i32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.speed as f64 / 1000.0 - 0.0
+        Some(self.speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `speed` with scaled value, it will automatically be converted to its corresponding integer value.

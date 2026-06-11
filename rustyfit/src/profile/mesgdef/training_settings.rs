@@ -49,12 +49,12 @@ impl TrainingSettings {
         }
     }
 
-    /// Returns `target_distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn target_distance_scaled(&self) -> f64 {
+    /// Returns `target_distance` in its scaled value. It returns `None` when value is valid.
+    pub fn target_distance_scaled(&self) -> Option<f64> {
         if self.target_distance == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.target_distance as f64 / 100.0 - 0.0
+        Some(self.target_distance as f64 / 100.0 - 0.0)
     }
 
     /// Set `target_distance` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -68,12 +68,12 @@ impl TrainingSettings {
         self
     }
 
-    /// Returns `target_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn target_speed_scaled(&self) -> f64 {
+    /// Returns `target_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn target_speed_scaled(&self) -> Option<f64> {
         if self.target_speed == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.target_speed as f64 / 1000.0 - 0.0
+        Some(self.target_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `target_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -87,12 +87,12 @@ impl TrainingSettings {
         self
     }
 
-    /// Returns `precise_target_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn precise_target_speed_scaled(&self) -> f64 {
+    /// Returns `precise_target_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn precise_target_speed_scaled(&self) -> Option<f64> {
         if self.precise_target_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.precise_target_speed as f64 / 1000000.0 - 0.0
+        Some(self.precise_target_speed as f64 / 1000000.0 - 0.0)
     }
 
     /// Set `precise_target_speed` with scaled value, it will automatically be converted to its corresponding integer value.

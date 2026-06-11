@@ -66,12 +66,12 @@ impl ChronoShotSession {
         }
     }
 
-    /// Returns `min_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn min_speed_scaled(&self) -> f64 {
+    /// Returns `min_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn min_speed_scaled(&self) -> Option<f64> {
         if self.min_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.min_speed as f64 / 1000.0 - 0.0
+        Some(self.min_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `min_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -85,12 +85,12 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `max_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn max_speed_scaled(&self) -> f64 {
+    /// Returns `max_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.max_speed as f64 / 1000.0 - 0.0
+        Some(self.max_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `max_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -104,12 +104,12 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_speed_scaled(&self) -> f64 {
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_speed as f64 / 1000.0 - 0.0
+        Some(self.avg_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -123,12 +123,12 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `grain_weight` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn grain_weight_scaled(&self) -> f64 {
+    /// Returns `grain_weight` in its scaled value. It returns `None` when value is valid.
+    pub fn grain_weight_scaled(&self) -> Option<f64> {
         if self.grain_weight == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.grain_weight as f64 / 10.0 - 0.0
+        Some(self.grain_weight as f64 / 10.0 - 0.0)
     }
 
     /// Set `grain_weight` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -142,12 +142,12 @@ impl ChronoShotSession {
         self
     }
 
-    /// Returns `standard_deviation` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn standard_deviation_scaled(&self) -> f64 {
+    /// Returns `standard_deviation` in its scaled value. It returns `None` when value is valid.
+    pub fn standard_deviation_scaled(&self) -> Option<f64> {
         if self.standard_deviation == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.standard_deviation as f64 / 1000.0 - 0.0
+        Some(self.standard_deviation as f64 / 1000.0 - 0.0)
     }
 
     /// Set `standard_deviation` with scaled value, it will automatically be converted to its corresponding integer value.

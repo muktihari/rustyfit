@@ -44,25 +44,24 @@ impl HsaWristTemperatureData {
         }
     }
 
-    /// Returns `value` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn value_scaled(&self) -> Vec<f64> {
+    /// Returns `value` in its scaled value. It returns `None` when value is valid.
+    pub fn value_scaled(&self) -> Option<Vec<f64>> {
         if self.value.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.value.len());
         for &x in &self.value {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `value` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_value_scaled(&mut self, v: &Vec<f64>) -> &mut HsaWristTemperatureData {
+    pub fn set_value_scaled(&mut self, v: &[f64]) -> &mut HsaWristTemperatureData {
+        self.value = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.value = Vec::new();
             return self;
         }
-        self.value = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {

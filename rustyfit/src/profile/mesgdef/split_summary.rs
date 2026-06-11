@@ -101,12 +101,12 @@ impl SplitSummary {
         }
     }
 
-    /// Returns `total_timer_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_timer_time_scaled(&self) -> f64 {
+    /// Returns `total_timer_time` in its scaled value. It returns `None` when value is valid.
+    pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_timer_time as f64 / 1000.0 - 0.0
+        Some(self.total_timer_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -120,12 +120,12 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `total_distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_distance_scaled(&self) -> f64 {
+    /// Returns `total_distance` in its scaled value. It returns `None` when value is valid.
+    pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_distance as f64 / 100.0 - 0.0
+        Some(self.total_distance as f64 / 100.0 - 0.0)
     }
 
     /// Set `total_distance` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -139,12 +139,12 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `avg_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_speed_scaled(&self) -> f64 {
+    /// Returns `avg_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_speed as f64 / 1000.0 - 0.0
+        Some(self.avg_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -158,12 +158,12 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `max_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn max_speed_scaled(&self) -> f64 {
+    /// Returns `max_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.max_speed as f64 / 1000.0 - 0.0
+        Some(self.max_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `max_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -177,12 +177,12 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `avg_vert_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_vert_speed_scaled(&self) -> f64 {
+    /// Returns `avg_vert_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_vert_speed_scaled(&self) -> Option<f64> {
         if self.avg_vert_speed == i32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_vert_speed as f64 / 1000.0 - 0.0
+        Some(self.avg_vert_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_vert_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -196,12 +196,12 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `active_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn active_time_scaled(&self) -> f64 {
+    /// Returns `active_time` in its scaled value. It returns `None` when value is valid.
+    pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.active_time as f64 / 1000.0 - 0.0
+        Some(self.active_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -215,12 +215,12 @@ impl SplitSummary {
         self
     }
 
-    /// Returns `total_moving_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn total_moving_time_scaled(&self) -> f64 {
+    /// Returns `total_moving_time` in its scaled value. It returns `None` when value is valid.
+    pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.total_moving_time as f64 / 1000.0 - 0.0
+        Some(self.total_moving_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `total_moving_time` with scaled value, it will automatically be converted to its corresponding integer value.

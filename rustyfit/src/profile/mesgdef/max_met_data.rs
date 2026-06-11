@@ -66,12 +66,12 @@ impl MaxMetData {
         }
     }
 
-    /// Returns `vo2_max` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn vo2_max_scaled(&self) -> f64 {
+    /// Returns `vo2_max` in its scaled value. It returns `None` when value is valid.
+    pub fn vo2_max_scaled(&self) -> Option<f64> {
         if self.vo2_max == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.vo2_max as f64 / 10.0 - 0.0
+        Some(self.vo2_max as f64 / 10.0 - 0.0)
     }
 
     /// Set `vo2_max` with scaled value, it will automatically be converted to its corresponding integer value.

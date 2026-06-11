@@ -160,12 +160,12 @@ impl UserProfile {
         }
     }
 
-    /// Returns `height` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn height_scaled(&self) -> f64 {
+    /// Returns `height` in its scaled value. It returns `None` when value is valid.
+    pub fn height_scaled(&self) -> Option<f64> {
         if self.height == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.height as f64 / 100.0 - 0.0
+        Some(self.height as f64 / 100.0 - 0.0)
     }
 
     /// Set `height` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -179,12 +179,12 @@ impl UserProfile {
         self
     }
 
-    /// Returns `weight` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn weight_scaled(&self) -> f64 {
+    /// Returns `weight` in its scaled value. It returns `None` when value is valid.
+    pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.weight as f64 / 10.0 - 0.0
+        Some(self.weight as f64 / 10.0 - 0.0)
     }
 
     /// Set `weight` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -198,12 +198,12 @@ impl UserProfile {
         self
     }
 
-    /// Returns `user_running_step_length` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn user_running_step_length_scaled(&self) -> f64 {
+    /// Returns `user_running_step_length` in its scaled value. It returns `None` when value is valid.
+    pub fn user_running_step_length_scaled(&self) -> Option<f64> {
         if self.user_running_step_length == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.user_running_step_length as f64 / 1000.0 - 0.0
+        Some(self.user_running_step_length as f64 / 1000.0 - 0.0)
     }
 
     /// Set `user_running_step_length` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -217,12 +217,12 @@ impl UserProfile {
         self
     }
 
-    /// Returns `user_walking_step_length` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn user_walking_step_length_scaled(&self) -> f64 {
+    /// Returns `user_walking_step_length` in its scaled value. It returns `None` when value is valid.
+    pub fn user_walking_step_length_scaled(&self) -> Option<f64> {
         if self.user_walking_step_length == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.user_walking_step_length as f64 / 1000.0 - 0.0
+        Some(self.user_walking_step_length as f64 / 1000.0 - 0.0)
     }
 
     /// Set `user_walking_step_length` with scaled value, it will automatically be converted to its corresponding integer value.

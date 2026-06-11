@@ -118,12 +118,12 @@ impl DeviceInfo {
         }
     }
 
-    /// Returns `software_version` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn software_version_scaled(&self) -> f64 {
+    /// Returns `software_version` in its scaled value. It returns `None` when value is valid.
+    pub fn software_version_scaled(&self) -> Option<f64> {
         if self.software_version == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.software_version as f64 / 100.0 - 0.0
+        Some(self.software_version as f64 / 100.0 - 0.0)
     }
 
     /// Set `software_version` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -137,12 +137,12 @@ impl DeviceInfo {
         self
     }
 
-    /// Returns `battery_voltage` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn battery_voltage_scaled(&self) -> f64 {
+    /// Returns `battery_voltage` in its scaled value. It returns `None` when value is valid.
+    pub fn battery_voltage_scaled(&self) -> Option<f64> {
         if self.battery_voltage == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.battery_voltage as f64 / 256.0 - 0.0
+        Some(self.battery_voltage as f64 / 256.0 - 0.0)
     }
 
     /// Set `battery_voltage` with scaled value, it will automatically be converted to its corresponding integer value.

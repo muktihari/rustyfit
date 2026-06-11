@@ -75,22 +75,22 @@ impl GpsMetadata {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_lat_degrees(&self) -> f64 {
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_long_degrees(&self) -> f64 {
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
 
-    /// Returns `enhanced_altitude` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_altitude_scaled(&self) -> f64 {
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_altitude as f64 / 5.0 - 500.0
+        Some(self.enhanced_altitude as f64 / 5.0 - 500.0)
     }
 
     /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -104,12 +104,12 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `enhanced_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_speed_scaled(&self) -> f64 {
+    /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_speed as f64 / 1000.0 - 0.0
+        Some(self.enhanced_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `enhanced_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -123,12 +123,12 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `heading` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn heading_scaled(&self) -> f64 {
+    /// Returns `heading` in its scaled value. It returns `None` when value is valid.
+    pub fn heading_scaled(&self) -> Option<f64> {
         if self.heading == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.heading as f64 / 100.0 - 0.0
+        Some(self.heading as f64 / 100.0 - 0.0)
     }
 
     /// Set `heading` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -142,8 +142,11 @@ impl GpsMetadata {
         self
     }
 
-    /// Returns `velocity` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn velocity_scaled(&self) -> [f64; 3] {
+    /// Returns `velocity` in its scaled value. It returns `None` when value is valid.
+    pub fn velocity_scaled(&self) -> Option<[f64; 3]> {
+        if self.velocity == [i16::MAX; 3] {
+            return None;
+        }
         let mut v = [f64::from_bits(u64::MAX); 3];
         for (i, &x) in self.velocity.iter().enumerate() {
             if x == i16::MAX {
@@ -151,7 +154,7 @@ impl GpsMetadata {
             }
             v[i] = x as f64 / 100.0 - 0.0;
         }
-        v
+        Some(v)
     }
 
     /// Set `velocity` with scaled value, it will automatically be converted to its corresponding integer value.

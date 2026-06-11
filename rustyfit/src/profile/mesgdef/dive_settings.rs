@@ -191,12 +191,12 @@ impl DiveSettings {
         }
     }
 
-    /// Returns `po2_warn` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn po2_warn_scaled(&self) -> f64 {
+    /// Returns `po2_warn` in its scaled value. It returns `None` when value is valid.
+    pub fn po2_warn_scaled(&self) -> Option<f64> {
         if self.po2_warn == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.po2_warn as f64 / 100.0 - 0.0
+        Some(self.po2_warn as f64 / 100.0 - 0.0)
     }
 
     /// Set `po2_warn` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -210,12 +210,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `po2_critical` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn po2_critical_scaled(&self) -> f64 {
+    /// Returns `po2_critical` in its scaled value. It returns `None` when value is valid.
+    pub fn po2_critical_scaled(&self) -> Option<f64> {
         if self.po2_critical == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.po2_critical as f64 / 100.0 - 0.0
+        Some(self.po2_critical as f64 / 100.0 - 0.0)
     }
 
     /// Set `po2_critical` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -229,12 +229,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `po2_deco` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn po2_deco_scaled(&self) -> f64 {
+    /// Returns `po2_deco` in its scaled value. It returns `None` when value is valid.
+    pub fn po2_deco_scaled(&self) -> Option<f64> {
         if self.po2_deco == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.po2_deco as f64 / 100.0 - 0.0
+        Some(self.po2_deco as f64 / 100.0 - 0.0)
     }
 
     /// Set `po2_deco` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -248,12 +248,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_low_setpoint` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ccr_low_setpoint_scaled(&self) -> f64 {
+    /// Returns `ccr_low_setpoint` in its scaled value. It returns `None` when value is valid.
+    pub fn ccr_low_setpoint_scaled(&self) -> Option<f64> {
         if self.ccr_low_setpoint == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ccr_low_setpoint as f64 / 100.0 - 0.0
+        Some(self.ccr_low_setpoint as f64 / 100.0 - 0.0)
     }
 
     /// Set `ccr_low_setpoint` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -267,12 +267,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_low_setpoint_depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ccr_low_setpoint_depth_scaled(&self) -> f64 {
+    /// Returns `ccr_low_setpoint_depth` in its scaled value. It returns `None` when value is valid.
+    pub fn ccr_low_setpoint_depth_scaled(&self) -> Option<f64> {
         if self.ccr_low_setpoint_depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ccr_low_setpoint_depth as f64 / 1000.0 - 0.0
+        Some(self.ccr_low_setpoint_depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `ccr_low_setpoint_depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -286,12 +286,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_high_setpoint` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ccr_high_setpoint_scaled(&self) -> f64 {
+    /// Returns `ccr_high_setpoint` in its scaled value. It returns `None` when value is valid.
+    pub fn ccr_high_setpoint_scaled(&self) -> Option<f64> {
         if self.ccr_high_setpoint == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ccr_high_setpoint as f64 / 100.0 - 0.0
+        Some(self.ccr_high_setpoint as f64 / 100.0 - 0.0)
     }
 
     /// Set `ccr_high_setpoint` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -305,12 +305,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `ccr_high_setpoint_depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ccr_high_setpoint_depth_scaled(&self) -> f64 {
+    /// Returns `ccr_high_setpoint_depth` in its scaled value. It returns `None` when value is valid.
+    pub fn ccr_high_setpoint_depth_scaled(&self) -> Option<f64> {
         if self.ccr_high_setpoint_depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ccr_high_setpoint_depth as f64 / 1000.0 - 0.0
+        Some(self.ccr_high_setpoint_depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `ccr_high_setpoint_depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -324,12 +324,12 @@ impl DiveSettings {
         self
     }
 
-    /// Returns `last_stop_multiple` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn last_stop_multiple_scaled(&self) -> f64 {
+    /// Returns `last_stop_multiple` in its scaled value. It returns `None` when value is valid.
+    pub fn last_stop_multiple_scaled(&self) -> Option<f64> {
         if self.last_stop_multiple == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.last_stop_multiple as f64 / 10.0 - 0.0
+        Some(self.last_stop_multiple as f64 / 10.0 - 0.0)
     }
 
     /// Set `last_stop_multiple` with scaled value, it will automatically be converted to its corresponding integer value.

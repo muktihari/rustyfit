@@ -38,12 +38,12 @@ impl HrvValue {
         }
     }
 
-    /// Returns `value` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn value_scaled(&self) -> f64 {
+    /// Returns `value` in its scaled value. It returns `None` when value is valid.
+    pub fn value_scaled(&self) -> Option<f64> {
         if self.value == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.value as f64 / 128.0 - 0.0
+        Some(self.value as f64 / 128.0 - 0.0)
     }
 
     /// Set `value` with scaled value, it will automatically be converted to its corresponding integer value.

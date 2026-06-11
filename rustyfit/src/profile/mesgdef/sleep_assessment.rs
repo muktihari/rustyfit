@@ -99,12 +99,12 @@ impl SleepAssessment {
         }
     }
 
-    /// Returns `average_stress_during_sleep` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn average_stress_during_sleep_scaled(&self) -> f64 {
+    /// Returns `average_stress_during_sleep` in its scaled value. It returns `None` when value is valid.
+    pub fn average_stress_during_sleep_scaled(&self) -> Option<f64> {
         if self.average_stress_during_sleep == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.average_stress_during_sleep as f64 / 100.0 - 0.0
+        Some(self.average_stress_during_sleep as f64 / 100.0 - 0.0)
     }
 
     /// Set `average_stress_during_sleep` with scaled value, it will automatically be converted to its corresponding integer value.

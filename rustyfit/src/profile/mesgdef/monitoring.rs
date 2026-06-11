@@ -180,12 +180,12 @@ impl Monitoring {
         }
     }
 
-    /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn distance_scaled(&self) -> f64 {
+    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.distance as f64 / 100.0 - 0.0
+        Some(self.distance as f64 / 100.0 - 0.0)
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -199,12 +199,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `cycles` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn cycles_scaled(&self) -> f64 {
+    /// Returns `cycles` in its scaled value. It returns `None` when value is valid.
+    pub fn cycles_scaled(&self) -> Option<f64> {
         if self.cycles == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.cycles as f64 / 2.0 - 0.0
+        Some(self.cycles as f64 / 2.0 - 0.0)
     }
 
     /// Set `cycles` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -218,12 +218,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `active_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn active_time_scaled(&self) -> f64 {
+    /// Returns `active_time` in its scaled value. It returns `None` when value is valid.
+    pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.active_time as f64 / 1000.0 - 0.0
+        Some(self.active_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `active_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -237,12 +237,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `temperature` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn temperature_scaled(&self) -> f64 {
+    /// Returns `temperature` in its scaled value. It returns `None` when value is valid.
+    pub fn temperature_scaled(&self) -> Option<f64> {
         if self.temperature == i16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.temperature as f64 / 100.0 - 0.0
+        Some(self.temperature as f64 / 100.0 - 0.0)
     }
 
     /// Set `temperature` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -256,12 +256,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `temperature_min` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn temperature_min_scaled(&self) -> f64 {
+    /// Returns `temperature_min` in its scaled value. It returns `None` when value is valid.
+    pub fn temperature_min_scaled(&self) -> Option<f64> {
         if self.temperature_min == i16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.temperature_min as f64 / 100.0 - 0.0
+        Some(self.temperature_min as f64 / 100.0 - 0.0)
     }
 
     /// Set `temperature_min` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -275,12 +275,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `temperature_max` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn temperature_max_scaled(&self) -> f64 {
+    /// Returns `temperature_max` in its scaled value. It returns `None` when value is valid.
+    pub fn temperature_max_scaled(&self) -> Option<f64> {
         if self.temperature_max == i16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.temperature_max as f64 / 100.0 - 0.0
+        Some(self.temperature_max as f64 / 100.0 - 0.0)
     }
 
     /// Set `temperature_max` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -294,12 +294,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `intensity` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn intensity_scaled(&self) -> f64 {
+    /// Returns `intensity` in its scaled value. It returns `None` when value is valid.
+    pub fn intensity_scaled(&self) -> Option<f64> {
         if self.intensity == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.intensity as f64 / 10.0 - 0.0
+        Some(self.intensity as f64 / 10.0 - 0.0)
     }
 
     /// Set `intensity` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -313,12 +313,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `ascent` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ascent_scaled(&self) -> f64 {
+    /// Returns `ascent` in its scaled value. It returns `None` when value is valid.
+    pub fn ascent_scaled(&self) -> Option<f64> {
         if self.ascent == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ascent as f64 / 1000.0 - 0.0
+        Some(self.ascent as f64 / 1000.0 - 0.0)
     }
 
     /// Set `ascent` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -332,12 +332,12 @@ impl Monitoring {
         self
     }
 
-    /// Returns `descent` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn descent_scaled(&self) -> f64 {
+    /// Returns `descent` in its scaled value. It returns `None` when value is valid.
+    pub fn descent_scaled(&self) -> Option<f64> {
         if self.descent == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.descent as f64 / 1000.0 - 0.0
+        Some(self.descent as f64 / 1000.0 - 0.0)
     }
 
     /// Set `descent` with scaled value, it will automatically be converted to its corresponding integer value.

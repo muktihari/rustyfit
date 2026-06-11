@@ -108,12 +108,12 @@ impl WorkoutStep {
         }
     }
 
-    /// Returns `exercise_weight` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn exercise_weight_scaled(&self) -> f64 {
+    /// Returns `exercise_weight` in its scaled value. It returns `None` when value is valid.
+    pub fn exercise_weight_scaled(&self) -> Option<f64> {
         if self.exercise_weight == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.exercise_weight as f64 / 100.0 - 0.0
+        Some(self.exercise_weight as f64 / 100.0 - 0.0)
     }
 
     /// Set `exercise_weight` with scaled value, it will automatically be converted to its corresponding integer value.

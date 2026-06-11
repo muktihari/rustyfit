@@ -44,12 +44,12 @@ impl Software {
         }
     }
 
-    /// Returns `version` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn version_scaled(&self) -> f64 {
+    /// Returns `version` in its scaled value. It returns `None` when value is valid.
+    pub fn version_scaled(&self) -> Option<f64> {
         if self.version == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.version as f64 / 100.0 - 0.0
+        Some(self.version as f64 / 100.0 - 0.0)
     }
 
     /// Set `version` with scaled value, it will automatically be converted to its corresponding integer value.

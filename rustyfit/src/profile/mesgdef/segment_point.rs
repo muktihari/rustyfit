@@ -73,22 +73,22 @@ impl SegmentPoint {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_lat_degrees(&self) -> f64 {
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_long_degrees(&self) -> f64 {
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
 
-    /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn distance_scaled(&self) -> f64 {
+    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.distance as f64 / 100.0 - 0.0
+        Some(self.distance as f64 / 100.0 - 0.0)
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -102,12 +102,12 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `altitude` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn altitude_scaled(&self) -> f64 {
+    /// Returns `altitude` in its scaled value. It returns `None` when value is valid.
+    pub fn altitude_scaled(&self) -> Option<f64> {
         if self.altitude == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.altitude as f64 / 5.0 - 500.0
+        Some(self.altitude as f64 / 5.0 - 500.0)
     }
 
     /// Set `altitude` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -121,25 +121,24 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `leader_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn leader_time_scaled(&self) -> Vec<f64> {
+    /// Returns `leader_time` in its scaled value. It returns `None` when value is valid.
+    pub fn leader_time_scaled(&self) -> Option<Vec<f64>> {
         if self.leader_time.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.leader_time.len());
         for &x in &self.leader_time {
             v.push(x as f64 / 1000.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `leader_time` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_leader_time_scaled(&mut self, v: &Vec<f64>) -> &mut SegmentPoint {
+    pub fn set_leader_time_scaled(&mut self, v: &[f64]) -> &mut SegmentPoint {
+        self.leader_time = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.leader_time = Vec::new();
             return self;
         }
-        self.leader_time = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -151,12 +150,12 @@ impl SegmentPoint {
         self
     }
 
-    /// Returns `enhanced_altitude` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn enhanced_altitude_scaled(&self) -> f64 {
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is valid.
+    pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.enhanced_altitude as f64 / 5.0 - 500.0
+        Some(self.enhanced_altitude as f64 / 5.0 - 500.0)
     }
 
     /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.

@@ -58,12 +58,12 @@ impl WorkoutSession {
         }
     }
 
-    /// Returns `pool_length` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn pool_length_scaled(&self) -> f64 {
+    /// Returns `pool_length` in its scaled value. It returns `None` when value is valid.
+    pub fn pool_length_scaled(&self) -> Option<f64> {
         if self.pool_length == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.pool_length as f64 / 100.0 - 0.0
+        Some(self.pool_length as f64 / 100.0 - 0.0)
     }
 
     /// Set `pool_length` with scaled value, it will automatically be converted to its corresponding integer value.

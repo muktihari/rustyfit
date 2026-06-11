@@ -141,12 +141,12 @@ impl DiveSummary {
         }
     }
 
-    /// Returns `avg_depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_depth_scaled(&self) -> f64 {
+    /// Returns `avg_depth` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_depth_scaled(&self) -> Option<f64> {
         if self.avg_depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_depth as f64 / 1000.0 - 0.0
+        Some(self.avg_depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -160,12 +160,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `max_depth` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn max_depth_scaled(&self) -> f64 {
+    /// Returns `max_depth` in its scaled value. It returns `None` when value is valid.
+    pub fn max_depth_scaled(&self) -> Option<f64> {
         if self.max_depth == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.max_depth as f64 / 1000.0 - 0.0
+        Some(self.max_depth as f64 / 1000.0 - 0.0)
     }
 
     /// Set `max_depth` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -179,12 +179,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `bottom_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn bottom_time_scaled(&self) -> f64 {
+    /// Returns `bottom_time` in its scaled value. It returns `None` when value is valid.
+    pub fn bottom_time_scaled(&self) -> Option<f64> {
         if self.bottom_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.bottom_time as f64 / 1000.0 - 0.0
+        Some(self.bottom_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `bottom_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -198,12 +198,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_pressure_sac` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_pressure_sac_scaled(&self) -> f64 {
+    /// Returns `avg_pressure_sac` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_pressure_sac_scaled(&self) -> Option<f64> {
         if self.avg_pressure_sac == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_pressure_sac as f64 / 100.0 - 0.0
+        Some(self.avg_pressure_sac as f64 / 100.0 - 0.0)
     }
 
     /// Set `avg_pressure_sac` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -217,12 +217,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_volume_sac` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_volume_sac_scaled(&self) -> f64 {
+    /// Returns `avg_volume_sac` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_volume_sac_scaled(&self) -> Option<f64> {
         if self.avg_volume_sac == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_volume_sac as f64 / 100.0 - 0.0
+        Some(self.avg_volume_sac as f64 / 100.0 - 0.0)
     }
 
     /// Set `avg_volume_sac` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -236,12 +236,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_rmv` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_rmv_scaled(&self) -> f64 {
+    /// Returns `avg_rmv` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_rmv_scaled(&self) -> Option<f64> {
         if self.avg_rmv == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_rmv as f64 / 100.0 - 0.0
+        Some(self.avg_rmv as f64 / 100.0 - 0.0)
     }
 
     /// Set `avg_rmv` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -255,12 +255,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `descent_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn descent_time_scaled(&self) -> f64 {
+    /// Returns `descent_time` in its scaled value. It returns `None` when value is valid.
+    pub fn descent_time_scaled(&self) -> Option<f64> {
         if self.descent_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.descent_time as f64 / 1000.0 - 0.0
+        Some(self.descent_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `descent_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -274,12 +274,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `ascent_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn ascent_time_scaled(&self) -> f64 {
+    /// Returns `ascent_time` in its scaled value. It returns `None` when value is valid.
+    pub fn ascent_time_scaled(&self) -> Option<f64> {
         if self.ascent_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.ascent_time as f64 / 1000.0 - 0.0
+        Some(self.ascent_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `ascent_time` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -293,12 +293,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_ascent_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_ascent_rate_scaled(&self) -> f64 {
+    /// Returns `avg_ascent_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_ascent_rate_scaled(&self) -> Option<f64> {
         if self.avg_ascent_rate == i32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_ascent_rate as f64 / 1000.0 - 0.0
+        Some(self.avg_ascent_rate as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_ascent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -312,12 +312,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `avg_descent_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn avg_descent_rate_scaled(&self) -> f64 {
+    /// Returns `avg_descent_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn avg_descent_rate_scaled(&self) -> Option<f64> {
         if self.avg_descent_rate == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.avg_descent_rate as f64 / 1000.0 - 0.0
+        Some(self.avg_descent_rate as f64 / 1000.0 - 0.0)
     }
 
     /// Set `avg_descent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -331,12 +331,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `max_ascent_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn max_ascent_rate_scaled(&self) -> f64 {
+    /// Returns `max_ascent_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn max_ascent_rate_scaled(&self) -> Option<f64> {
         if self.max_ascent_rate == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.max_ascent_rate as f64 / 1000.0 - 0.0
+        Some(self.max_ascent_rate as f64 / 1000.0 - 0.0)
     }
 
     /// Set `max_ascent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -350,12 +350,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `max_descent_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn max_descent_rate_scaled(&self) -> f64 {
+    /// Returns `max_descent_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn max_descent_rate_scaled(&self) -> Option<f64> {
         if self.max_descent_rate == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.max_descent_rate as f64 / 1000.0 - 0.0
+        Some(self.max_descent_rate as f64 / 1000.0 - 0.0)
     }
 
     /// Set `max_descent_rate` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -369,12 +369,12 @@ impl DiveSummary {
         self
     }
 
-    /// Returns `hang_time` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn hang_time_scaled(&self) -> f64 {
+    /// Returns `hang_time` in its scaled value. It returns `None` when value is valid.
+    pub fn hang_time_scaled(&self) -> Option<f64> {
         if self.hang_time == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.hang_time as f64 / 1000.0 - 0.0
+        Some(self.hang_time as f64 / 1000.0 - 0.0)
     }
 
     /// Set `hang_time` with scaled value, it will automatically be converted to its corresponding integer value.

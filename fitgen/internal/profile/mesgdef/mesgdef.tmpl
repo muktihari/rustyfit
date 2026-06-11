@@ -82,8 +82,8 @@ impl {{ .Name }} {
 
     {{ range .Fields -}}
     {{ if eq .Units "semicircles" }}
-        /// Returns `{{ .Name }}` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-        pub fn {{ .Name }}_degrees(&self) -> f64 {
+        /// Returns `{{ .Name }}` in degrees instead of semicircles. It returns `None` when value is valid.
+        pub fn {{ .Name }}_degrees(&self) -> Option<f64> {
             semconv::to_degrees(self.{{ .Name }})
         }
     {{ end }}
@@ -91,27 +91,30 @@ impl {{ .Name }} {
 
     {{ range .Fields -}}
     {{ if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
-        /// Returns `{{ .Name }}` in its scaled value. It returns invalid f64 when value is valid.
+        /// Returns `{{ .Name }}` in its scaled value. It returns `None` when value is valid.
         {{ if not .Array -}}
-        pub fn {{ .Name }}_scaled(&self) -> f64 {
+        pub fn {{ .Name }}_scaled(&self) -> Option<f64> {
             if self.{{ .Name }} == {{ .InvalidValue }} {
-                return f64::from_bits(u64::MAX);
+                return None;
             }
-            self.{{ .Name0 }} as f64/{{ formatFloat .Scale }} - {{ formatFloat .Offset }}
+            Some(self.{{ .Name0 }} as f64/{{ formatFloat .Scale }} - {{ formatFloat .Offset }})
         }
         {{ else if eq .FixedArraySize 0 -}}
-        pub fn {{ .Name }}_scaled(&self) -> Vec<f64> {
+        pub fn {{ .Name }}_scaled(&self) -> Option<Vec<f64>> {
             if {{ .IfSelfEqualInvalid }} {
-                return Vec::new();
+                return None;
             }
             let mut v = Vec::with_capacity(self.{{ .Name }}.len());
             for &x in &self.{{ .Name }} {
                 v.push(x as f64/{{ formatFloat .Scale }} - {{ formatFloat .Offset }})
             }
-            v
+            Some(v)
         }
         {{ else -}}
-        pub fn {{ .Name }}_scaled(&self) -> [f64; {{ .FixedArraySize }}] {
+        pub fn {{ .Name }}_scaled(&self) -> Option<[f64; {{ .FixedArraySize }}]> {
+            if {{ .IfSelfEqualInvalid }} {
+                return None;
+            }
             let mut v = [f64::from_bits(u64::MAX); {{ .FixedArraySize }}];
             for (i, &x) in self.{{ .Name }}.iter().enumerate() {
                 if x == {{ .BaseType0Invalid }} {
@@ -119,7 +122,7 @@ impl {{ .Name }} {
                 }
                 v[i] = x as f64/{{ formatFloat .Scale }} - {{ formatFloat .Offset }};
             }
-            v
+            Some(v)
         }
         {{ end }}
 
@@ -135,12 +138,11 @@ impl {{ .Name }} {
             self
         }
         {{ else if eq .FixedArraySize 0 -}}
-        pub fn set_{{ .Name }}_scaled(&mut self, v: &Vec<f64>) -> &mut {{ $.Name }} {
+        pub fn set_{{ .Name }}_scaled(&mut self, v: &[f64]) -> &mut {{ $.Name }} {
+            self.{{ .Name }} = Vec::with_capacity(v.len());
             if v.is_empty() {
-                self.{{ .Name }} = Vec::new();
                 return self;
             }
-            self.{{ .Name }} = Vec::with_capacity(v.len());
             for &x in v{
                 let unscaled = (x + {{ formatFloat .Offset }}) * {{ formatFloat .Scale }};
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > {{ .MaxValue }} as f64 {

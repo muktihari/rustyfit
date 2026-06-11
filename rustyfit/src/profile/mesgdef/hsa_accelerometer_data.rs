@@ -64,25 +64,24 @@ impl HsaAccelerometerData {
         }
     }
 
-    /// Returns `accel_x` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn accel_x_scaled(&self) -> Vec<f64> {
+    /// Returns `accel_x` in its scaled value. It returns `None` when value is valid.
+    pub fn accel_x_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_x.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.accel_x.len());
         for &x in &self.accel_x {
             v.push(x as f64 / 1.024 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `accel_x` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_x_scaled(&mut self, v: &Vec<f64>) -> &mut HsaAccelerometerData {
+    pub fn set_accel_x_scaled(&mut self, v: &[f64]) -> &mut HsaAccelerometerData {
+        self.accel_x = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.accel_x = Vec::new();
             return self;
         }
-        self.accel_x = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1.024;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -94,25 +93,24 @@ impl HsaAccelerometerData {
         self
     }
 
-    /// Returns `accel_y` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn accel_y_scaled(&self) -> Vec<f64> {
+    /// Returns `accel_y` in its scaled value. It returns `None` when value is valid.
+    pub fn accel_y_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_y.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.accel_y.len());
         for &x in &self.accel_y {
             v.push(x as f64 / 1.024 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `accel_y` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_y_scaled(&mut self, v: &Vec<f64>) -> &mut HsaAccelerometerData {
+    pub fn set_accel_y_scaled(&mut self, v: &[f64]) -> &mut HsaAccelerometerData {
+        self.accel_y = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.accel_y = Vec::new();
             return self;
         }
-        self.accel_y = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1.024;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -124,25 +122,24 @@ impl HsaAccelerometerData {
         self
     }
 
-    /// Returns `accel_z` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn accel_z_scaled(&self) -> Vec<f64> {
+    /// Returns `accel_z` in its scaled value. It returns `None` when value is valid.
+    pub fn accel_z_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_z.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.accel_z.len());
         for &x in &self.accel_z {
             v.push(x as f64 / 1.024 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `accel_z` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_z_scaled(&mut self, v: &Vec<f64>) -> &mut HsaAccelerometerData {
+    pub fn set_accel_z_scaled(&mut self, v: &[f64]) -> &mut HsaAccelerometerData {
+        self.accel_z = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.accel_z = Vec::new();
             return self;
         }
-        self.accel_z = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1.024;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {

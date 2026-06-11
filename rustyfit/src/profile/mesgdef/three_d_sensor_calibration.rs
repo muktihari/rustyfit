@@ -64,8 +64,11 @@ impl ThreeDSensorCalibration {
         }
     }
 
-    /// Returns `orientation_matrix` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn orientation_matrix_scaled(&self) -> [f64; 9] {
+    /// Returns `orientation_matrix` in its scaled value. It returns `None` when value is valid.
+    pub fn orientation_matrix_scaled(&self) -> Option<[f64; 9]> {
+        if self.orientation_matrix == [i32::MAX; 9] {
+            return None;
+        }
         let mut v = [f64::from_bits(u64::MAX); 9];
         for (i, &x) in self.orientation_matrix.iter().enumerate() {
             if x == i32::MAX {
@@ -73,7 +76,7 @@ impl ThreeDSensorCalibration {
             }
             v[i] = x as f64 / 65535.0 - 0.0;
         }
-        v
+        Some(v)
     }
 
     /// Set `orientation_matrix` with scaled value, it will automatically be converted to its corresponding integer value.

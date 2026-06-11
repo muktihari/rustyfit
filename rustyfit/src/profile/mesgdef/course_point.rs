@@ -67,22 +67,22 @@ impl CoursePoint {
         }
     }
 
-    /// Returns `position_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_lat_degrees(&self) -> f64 {
+    /// Returns `position_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_lat)
     }
 
-    /// Returns `position_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn position_long_degrees(&self) -> f64 {
+    /// Returns `position_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn position_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.position_long)
     }
 
-    /// Returns `distance` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn distance_scaled(&self) -> f64 {
+    /// Returns `distance` in its scaled value. It returns `None` when value is valid.
+    pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.distance as f64 / 100.0 - 0.0
+        Some(self.distance as f64 / 100.0 - 0.0)
     }
 
     /// Set `distance` with scaled value, it will automatically be converted to its corresponding integer value.

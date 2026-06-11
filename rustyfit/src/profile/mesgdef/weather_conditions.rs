@@ -109,22 +109,22 @@ impl WeatherConditions {
         }
     }
 
-    /// Returns `observed_location_lat` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn observed_location_lat_degrees(&self) -> f64 {
+    /// Returns `observed_location_lat` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn observed_location_lat_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.observed_location_lat)
     }
 
-    /// Returns `observed_location_long` in degrees instead of semicircles. It returns invalid f64 when value is valid.
-    pub fn observed_location_long_degrees(&self) -> f64 {
+    /// Returns `observed_location_long` in degrees instead of semicircles. It returns `None` when value is valid.
+    pub fn observed_location_long_degrees(&self) -> Option<f64> {
         semconv::to_degrees(self.observed_location_long)
     }
 
-    /// Returns `wind_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn wind_speed_scaled(&self) -> f64 {
+    /// Returns `wind_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn wind_speed_scaled(&self) -> Option<f64> {
         if self.wind_speed == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.wind_speed as f64 / 1000.0 - 0.0
+        Some(self.wind_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `wind_speed` with scaled value, it will automatically be converted to its corresponding integer value.

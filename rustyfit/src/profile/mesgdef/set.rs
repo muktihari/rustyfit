@@ -79,12 +79,12 @@ impl Set {
         }
     }
 
-    /// Returns `duration` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn duration_scaled(&self) -> f64 {
+    /// Returns `duration` in its scaled value. It returns `None` when value is valid.
+    pub fn duration_scaled(&self) -> Option<f64> {
         if self.duration == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.duration as f64 / 1000.0 - 0.0
+        Some(self.duration as f64 / 1000.0 - 0.0)
     }
 
     /// Set `duration` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -98,12 +98,12 @@ impl Set {
         self
     }
 
-    /// Returns `weight` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn weight_scaled(&self) -> f64 {
+    /// Returns `weight` in its scaled value. It returns `None` when value is valid.
+    pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.weight as f64 / 16.0 - 0.0
+        Some(self.weight as f64 / 16.0 - 0.0)
     }
 
     /// Set `weight` with scaled value, it will automatically be converted to its corresponding integer value.

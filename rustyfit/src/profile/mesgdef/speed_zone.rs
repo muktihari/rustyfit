@@ -44,12 +44,12 @@ impl SpeedZone {
         }
     }
 
-    /// Returns `high_value` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn high_value_scaled(&self) -> f64 {
+    /// Returns `high_value` in its scaled value. It returns `None` when value is valid.
+    pub fn high_value_scaled(&self) -> Option<f64> {
         if self.high_value == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.high_value as f64 / 1000.0 - 0.0
+        Some(self.high_value as f64 / 1000.0 - 0.0)
     }
 
     /// Set `high_value` with scaled value, it will automatically be converted to its corresponding integer value.

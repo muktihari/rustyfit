@@ -129,12 +129,12 @@ impl Event {
         }
     }
 
-    /// Returns `radar_threat_avg_approach_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn radar_threat_avg_approach_speed_scaled(&self) -> f64 {
+    /// Returns `radar_threat_avg_approach_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn radar_threat_avg_approach_speed_scaled(&self) -> Option<f64> {
         if self.radar_threat_avg_approach_speed == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.radar_threat_avg_approach_speed as f64 / 10.0 - 0.0
+        Some(self.radar_threat_avg_approach_speed as f64 / 10.0 - 0.0)
     }
 
     /// Set `radar_threat_avg_approach_speed` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -148,12 +148,12 @@ impl Event {
         self
     }
 
-    /// Returns `radar_threat_max_approach_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn radar_threat_max_approach_speed_scaled(&self) -> f64 {
+    /// Returns `radar_threat_max_approach_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn radar_threat_max_approach_speed_scaled(&self) -> Option<f64> {
         if self.radar_threat_max_approach_speed == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.radar_threat_max_approach_speed as f64 / 10.0 - 0.0
+        Some(self.radar_threat_max_approach_speed as f64 / 10.0 - 0.0)
     }
 
     /// Set `radar_threat_max_approach_speed` with scaled value, it will automatically be converted to its corresponding integer value.

@@ -87,25 +87,24 @@ impl AviationAttitude {
         }
     }
 
-    /// Returns `pitch` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn pitch_scaled(&self) -> Vec<f64> {
+    /// Returns `pitch` in its scaled value. It returns `None` when value is valid.
+    pub fn pitch_scaled(&self) -> Option<Vec<f64>> {
         if self.pitch.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.pitch.len());
         for &x in &self.pitch {
             v.push(x as f64 / 10430.38 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `pitch` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_pitch_scaled(&mut self, v: &Vec<f64>) -> &mut AviationAttitude {
+    pub fn set_pitch_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+        self.pitch = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.pitch = Vec::new();
             return self;
         }
-        self.pitch = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10430.38;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -117,25 +116,24 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `roll` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn roll_scaled(&self) -> Vec<f64> {
+    /// Returns `roll` in its scaled value. It returns `None` when value is valid.
+    pub fn roll_scaled(&self) -> Option<Vec<f64>> {
         if self.roll.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.roll.len());
         for &x in &self.roll {
             v.push(x as f64 / 10430.38 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `roll` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_roll_scaled(&mut self, v: &Vec<f64>) -> &mut AviationAttitude {
+    pub fn set_roll_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+        self.roll = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.roll = Vec::new();
             return self;
         }
-        self.roll = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10430.38;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -147,25 +145,24 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `accel_lateral` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn accel_lateral_scaled(&self) -> Vec<f64> {
+    /// Returns `accel_lateral` in its scaled value. It returns `None` when value is valid.
+    pub fn accel_lateral_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_lateral.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.accel_lateral.len());
         for &x in &self.accel_lateral {
             v.push(x as f64 / 100.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `accel_lateral` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_lateral_scaled(&mut self, v: &Vec<f64>) -> &mut AviationAttitude {
+    pub fn set_accel_lateral_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+        self.accel_lateral = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.accel_lateral = Vec::new();
             return self;
         }
-        self.accel_lateral = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -177,25 +174,24 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `accel_normal` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn accel_normal_scaled(&self) -> Vec<f64> {
+    /// Returns `accel_normal` in its scaled value. It returns `None` when value is valid.
+    pub fn accel_normal_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_normal.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.accel_normal.len());
         for &x in &self.accel_normal {
             v.push(x as f64 / 100.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `accel_normal` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_accel_normal_scaled(&mut self, v: &Vec<f64>) -> &mut AviationAttitude {
+    pub fn set_accel_normal_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+        self.accel_normal = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.accel_normal = Vec::new();
             return self;
         }
-        self.accel_normal = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -207,25 +203,24 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `turn_rate` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn turn_rate_scaled(&self) -> Vec<f64> {
+    /// Returns `turn_rate` in its scaled value. It returns `None` when value is valid.
+    pub fn turn_rate_scaled(&self) -> Option<Vec<f64>> {
         if self.turn_rate.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.turn_rate.len());
         for &x in &self.turn_rate {
             v.push(x as f64 / 1024.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `turn_rate` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_turn_rate_scaled(&mut self, v: &Vec<f64>) -> &mut AviationAttitude {
+    pub fn set_turn_rate_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+        self.turn_rate = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.turn_rate = Vec::new();
             return self;
         }
-        self.turn_rate = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1024.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
@@ -237,25 +232,24 @@ impl AviationAttitude {
         self
     }
 
-    /// Returns `track` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn track_scaled(&self) -> Vec<f64> {
+    /// Returns `track` in its scaled value. It returns `None` when value is valid.
+    pub fn track_scaled(&self) -> Option<Vec<f64>> {
         if self.track.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.track.len());
         for &x in &self.track {
             v.push(x as f64 / 10430.38 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `track` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_track_scaled(&mut self, v: &Vec<f64>) -> &mut AviationAttitude {
+    pub fn set_track_scaled(&mut self, v: &[f64]) -> &mut AviationAttitude {
+        self.track = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.track = Vec::new();
             return self;
         }
-        self.track = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10430.38;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {

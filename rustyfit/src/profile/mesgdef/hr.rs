@@ -67,12 +67,12 @@ impl Hr {
         }
     }
 
-    /// Returns `fractional_timestamp` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn fractional_timestamp_scaled(&self) -> f64 {
+    /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is valid.
+    pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.fractional_timestamp as f64 / 32768.0 - 0.0
+        Some(self.fractional_timestamp as f64 / 32768.0 - 0.0)
     }
 
     /// Set `fractional_timestamp` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -86,12 +86,12 @@ impl Hr {
         self
     }
 
-    /// Returns `time256` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn time256_scaled(&self) -> f64 {
+    /// Returns `time256` in its scaled value. It returns `None` when value is valid.
+    pub fn time256_scaled(&self) -> Option<f64> {
         if self.time256 == u8::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.time256 as f64 / 256.0 - 0.0
+        Some(self.time256 as f64 / 256.0 - 0.0)
     }
 
     /// Set `time256` with scaled value, it will automatically be converted to its corresponding integer value.
@@ -105,25 +105,24 @@ impl Hr {
         self
     }
 
-    /// Returns `event_timestamp` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn event_timestamp_scaled(&self) -> Vec<f64> {
+    /// Returns `event_timestamp` in its scaled value. It returns `None` when value is valid.
+    pub fn event_timestamp_scaled(&self) -> Option<Vec<f64>> {
         if self.event_timestamp.is_empty() {
-            return Vec::new();
+            return None;
         }
         let mut v = Vec::with_capacity(self.event_timestamp.len());
         for &x in &self.event_timestamp {
             v.push(x as f64 / 1024.0 - 0.0)
         }
-        v
+        Some(v)
     }
 
     /// Set `event_timestamp` with scaled value, it will automatically be converted to its corresponding integer value.
-    pub fn set_event_timestamp_scaled(&mut self, v: &Vec<f64>) -> &mut Hr {
+    pub fn set_event_timestamp_scaled(&mut self, v: &[f64]) -> &mut Hr {
+        self.event_timestamp = Vec::with_capacity(v.len());
         if v.is_empty() {
-            self.event_timestamp = Vec::new();
             return self;
         }
-        self.event_timestamp = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1024.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {

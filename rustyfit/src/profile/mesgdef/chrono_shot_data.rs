@@ -42,12 +42,12 @@ impl ChronoShotData {
         }
     }
 
-    /// Returns `shot_speed` in its scaled value. It returns invalid f64 when value is valid.
-    pub fn shot_speed_scaled(&self) -> f64 {
+    /// Returns `shot_speed` in its scaled value. It returns `None` when value is valid.
+    pub fn shot_speed_scaled(&self) -> Option<f64> {
         if self.shot_speed == u32::MAX {
-            return f64::from_bits(u64::MAX);
+            return None;
         }
-        self.shot_speed as f64 / 1000.0 - 0.0
+        Some(self.shot_speed as f64 / 1000.0 - 0.0)
     }
 
     /// Set `shot_speed` with scaled value, it will automatically be converted to its corresponding integer value.
