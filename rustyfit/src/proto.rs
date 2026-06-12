@@ -626,7 +626,7 @@ impl Value {
         if let Value::Float32(v) = self {
             return *v;
         }
-        f32::MAX
+        f32::from_bits(u32::MAX)
     }
 
     /// Returns `f64` or its invalid value when it's not a `f64` value.
@@ -635,7 +635,7 @@ impl Value {
         if let Value::Float64(v) = self {
             return *v;
         }
-        f64::MAX
+        f64::from_bits(u64::MAX)
     }
 
     /// Returns `i64` or its invalid value when it's not an `i64` value.
