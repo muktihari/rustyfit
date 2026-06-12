@@ -13,7 +13,8 @@ use talc::{DefaultBinning, source::Claim, sync::TalcLock};
 
 #[global_allocator]
 static A: TalcLock<spinning_top::RawSpinlock, Claim, DefaultBinning> = TalcLock::new(unsafe {
-    const SIZE: usize = 40 * 1024; // 40 KB
+    const KB: usize = 1024;
+    const SIZE: usize = 38 * KB;
     static mut HEAP: [u8; SIZE] = [0; SIZE];
     Claim::array(&raw mut HEAP)
 });
@@ -44,7 +45,7 @@ fn _start() -> ! {
             if v.num == typedef::MesgNum::SESSION {
                 let ses = mesgdef::Session::from(v);
                 let sport = ses.sport;
-                let total_distance = ses.total_distance_scaled() / 1000.0;
+                let total_distance = ses.total_distance_scaled().unwrap() / 1000.0;
                 printf!("> sport: {sport:}, total_distance: {total_distance:.2} km\n");
             }
         }
