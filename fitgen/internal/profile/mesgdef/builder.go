@@ -146,6 +146,11 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name, field.InvalidValue)
 			field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s != %s", field.Name, field.InvalidValue)
 			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name, field.InvalidValue)
+			if field.BaseType0 == "f32" || field.BaseType0 == "f64" {
+				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.to_bits() == u%s::MAX", field.Name, field.BaseType0[1:])
+				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name, field.BaseType0[1:])
+				field.IfNotEqualInvalid = fmt.Sprintf("m.%s.to_bits() != u%s::MAX", field.Name, field.BaseType0[1:])
+			}
 			if parserField.Array == "[N]" || (field.BaseType == "STRING" && parserField.Array == "") {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
 				field.IfSelfNotEqualInvalid = fmt.Sprintf("!self.%s.is_empty()", field.Name)
@@ -158,10 +163,6 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			} else {
 				field.Scale = scaleOrDefault(parserField.Scales, 0)
 				field.Offset = offsetOrDefault(parserField.Offsets, 0)
-			}
-
-			if field.FixedArraySize > 0 && (field.Scale != 1 || field.Offset != 0) {
-				field.InvalidArrayValueScaled = b.invalidArrayValueScaled(field.FixedArraySize)
 			}
 
 			field.Comment = createComment(&field, parserField.Array)
@@ -467,9 +468,14 @@ func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) s
 	rustType := baseTypeToRustTypeReplacer.Replace(baseType)
 
 	var invalid string
-	if baseType == "string" {
+	switch baseType {
+	case "string":
 		invalid = "String::new()"
-	} else {
+	case "float32":
+		invalid = "f32::from_bits(u32::MAX)"
+	case "float64":
+		invalid = "f64::from_bits(u64::MAX)"
+	default:
 		if strings.HasSuffix(baseType, "z") {
 			invalid = fmt.Sprintf("%s::MIN", rustType)
 		} else {
@@ -492,18 +498,6 @@ func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) s
 	}
 
 	return fmt.Sprintf("typedef::%s(%s)", strutil.ToTitle(fieldType), invalid)
-}
-
-func (b *Builder) invalidArrayValueScaled(fixedArraySize byte) string {
-	return fmt.Sprintf(`[%d]float64{
-		%s
-	}`,
-		fixedArraySize,
-		strings.Repeat(
-			"math.Float64frombits(basetype.Float64Invalid),\n",
-			int(fixedArraySize),
-		),
-	)
 }
 
 // Profile.xlsx says unless otherwise specified, scale of 1 is assumed.

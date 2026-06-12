@@ -791,11 +791,11 @@ impl Session {
             enhanced_avg_respiration_rate: u16::MAX,
             enhanced_max_respiration_rate: u16::MAX,
             enhanced_min_respiration_rate: u16::MAX,
-            total_grit: f32::MAX,
-            total_flow: f32::MAX,
+            total_grit: f32::from_bits(u32::MAX),
+            total_flow: f32::from_bits(u32::MAX),
             jump_count: u16::MAX,
-            avg_grit: f32::MAX,
-            avg_flow: f32::MAX,
+            avg_grit: f32::from_bits(u32::MAX),
+            avg_flow: f32::from_bits(u32::MAX),
             workout_feel: u8::MAX,
             workout_rpe: u8::MAX,
             avg_spo2: u8::MAX,
@@ -2648,11 +2648,11 @@ impl Session {
             + (self.enhanced_avg_respiration_rate != u16::MAX) as usize
             + (self.enhanced_max_respiration_rate != u16::MAX) as usize
             + (self.enhanced_min_respiration_rate != u16::MAX) as usize
-            + (self.total_grit != f32::MAX) as usize
-            + (self.total_flow != f32::MAX) as usize
+            + (self.total_grit.to_bits() != u32::MAX) as usize
+            + (self.total_flow.to_bits() != u32::MAX) as usize
             + (self.jump_count != u16::MAX) as usize
-            + (self.avg_grit != f32::MAX) as usize
-            + (self.avg_flow != f32::MAX) as usize
+            + (self.avg_grit.to_bits() != u32::MAX) as usize
+            + (self.avg_flow.to_bits() != u32::MAX) as usize
             + (self.workout_feel != u8::MAX) as usize
             + (self.workout_rpe != u8::MAX) as usize
             + (self.avg_spo2 != u8::MAX) as usize
@@ -3999,7 +3999,7 @@ impl From<Session> for Message {
                 is_expanded: is_expanded(&m.state, 180),
             });
         };
-        if m.total_grit != f32::MAX {
+        if m.total_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 181,
                 profile_type: ProfileType::FLOAT32,
@@ -4007,7 +4007,7 @@ impl From<Session> for Message {
                 is_expanded: false,
             });
         };
-        if m.total_flow != f32::MAX {
+        if m.total_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 182,
                 profile_type: ProfileType::FLOAT32,
@@ -4023,7 +4023,7 @@ impl From<Session> for Message {
                 is_expanded: false,
             });
         };
-        if m.avg_grit != f32::MAX {
+        if m.avg_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 186,
                 profile_type: ProfileType::FLOAT32,
@@ -4031,7 +4031,7 @@ impl From<Session> for Message {
                 is_expanded: false,
             });
         };
-        if m.avg_flow != f32::MAX {
+        if m.avg_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 187,
                 profile_type: ProfileType::FLOAT32,

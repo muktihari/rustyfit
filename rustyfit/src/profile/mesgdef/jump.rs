@@ -73,11 +73,11 @@ impl Jump {
     pub const fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
-            distance: f32::MAX,
-            height: f32::MAX,
+            distance: f32::from_bits(u32::MAX),
+            height: f32::from_bits(u32::MAX),
             rotations: u8::MAX,
-            hang_time: f32::MAX,
-            score: f32::MAX,
+            hang_time: f32::from_bits(u32::MAX),
+            score: f32::from_bits(u32::MAX),
             position_lat: i32::MAX,
             position_long: i32::MAX,
             speed: u16::MAX,
@@ -170,11 +170,11 @@ impl Jump {
 
     fn count_valid_fields(&self) -> usize {
         (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.distance != f32::MAX) as usize
-            + (self.height != f32::MAX) as usize
+            + (self.distance.to_bits() != u32::MAX) as usize
+            + (self.height.to_bits() != u32::MAX) as usize
             + (self.rotations != u8::MAX) as usize
-            + (self.hang_time != f32::MAX) as usize
-            + (self.score != f32::MAX) as usize
+            + (self.hang_time.to_bits() != u32::MAX) as usize
+            + (self.score.to_bits() != u32::MAX) as usize
             + (self.position_lat != i32::MAX) as usize
             + (self.position_long != i32::MAX) as usize
             + (self.speed != u16::MAX) as usize
@@ -240,7 +240,7 @@ impl From<Jump> for Message {
                 is_expanded: false,
             });
         };
-        if m.distance != f32::MAX {
+        if m.distance.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::FLOAT32,
@@ -248,7 +248,7 @@ impl From<Jump> for Message {
                 is_expanded: false,
             });
         };
-        if m.height != f32::MAX {
+        if m.height.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::FLOAT32,
@@ -264,7 +264,7 @@ impl From<Jump> for Message {
                 is_expanded: false,
             });
         };
-        if m.hang_time != f32::MAX {
+        if m.hang_time.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::FLOAT32,
@@ -272,7 +272,7 @@ impl From<Jump> for Message {
                 is_expanded: false,
             });
         };
-        if m.score != f32::MAX {
+        if m.score.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::FLOAT32,

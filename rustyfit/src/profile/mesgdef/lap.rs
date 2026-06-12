@@ -624,11 +624,11 @@ impl Lap {
             enhanced_max_respiration_rate: u16::MAX,
             avg_respiration_rate: u8::MAX,
             max_respiration_rate: u8::MAX,
-            total_grit: f32::MAX,
-            total_flow: f32::MAX,
+            total_grit: f32::from_bits(u32::MAX),
+            total_flow: f32::from_bits(u32::MAX),
             jump_count: u16::MAX,
-            avg_grit: f32::MAX,
-            avg_flow: f32::MAX,
+            avg_grit: f32::from_bits(u32::MAX),
+            avg_flow: f32::from_bits(u32::MAX),
             total_fractional_ascent: u8::MAX,
             total_fractional_descent: u8::MAX,
             avg_core_temperature: u16::MAX,
@@ -2194,11 +2194,11 @@ impl Lap {
             + (self.enhanced_max_respiration_rate != u16::MAX) as usize
             + (self.avg_respiration_rate != u8::MAX) as usize
             + (self.max_respiration_rate != u8::MAX) as usize
-            + (self.total_grit != f32::MAX) as usize
-            + (self.total_flow != f32::MAX) as usize
+            + (self.total_grit.to_bits() != u32::MAX) as usize
+            + (self.total_flow.to_bits() != u32::MAX) as usize
             + (self.jump_count != u16::MAX) as usize
-            + (self.avg_grit != f32::MAX) as usize
-            + (self.avg_flow != f32::MAX) as usize
+            + (self.avg_grit.to_bits() != u32::MAX) as usize
+            + (self.avg_flow.to_bits() != u32::MAX) as usize
             + (self.total_fractional_ascent != u8::MAX) as usize
             + (self.total_fractional_descent != u8::MAX) as usize
             + (self.avg_core_temperature != u16::MAX) as usize
@@ -3288,7 +3288,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.total_grit != f32::MAX {
+        if m.total_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 149,
                 profile_type: ProfileType::FLOAT32,
@@ -3296,7 +3296,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.total_flow != f32::MAX {
+        if m.total_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 150,
                 profile_type: ProfileType::FLOAT32,
@@ -3312,7 +3312,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.avg_grit != f32::MAX {
+        if m.avg_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 153,
                 profile_type: ProfileType::FLOAT32,
@@ -3320,7 +3320,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.avg_flow != f32::MAX {
+        if m.avg_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 154,
                 profile_type: ProfileType::FLOAT32,

@@ -158,12 +158,12 @@ impl DiveSettings {
             gf_low: u8::MAX,
             gf_high: u8::MAX,
             water_type: typedef::WaterType(u8::MAX),
-            water_density: f32::MAX,
+            water_density: f32::from_bits(u32::MAX),
             po2_warn: u8::MAX,
             po2_critical: u8::MAX,
             po2_deco: u8::MAX,
             safety_stop_enabled: typedef::Bool(u8::MAX),
-            bottom_depth: f32::MAX,
+            bottom_depth: f32::from_bits(u32::MAX),
             bottom_time: u32::MAX,
             apnea_countdown_enabled: typedef::Bool(u8::MAX),
             apnea_countdown_time: u32::MAX,
@@ -351,12 +351,12 @@ impl DiveSettings {
             + (self.gf_low != u8::MAX) as usize
             + (self.gf_high != u8::MAX) as usize
             + (self.water_type != typedef::WaterType(u8::MAX)) as usize
-            + (self.water_density != f32::MAX) as usize
+            + (self.water_density.to_bits() != u32::MAX) as usize
             + (self.po2_warn != u8::MAX) as usize
             + (self.po2_critical != u8::MAX) as usize
             + (self.po2_deco != u8::MAX) as usize
             + (self.safety_stop_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.bottom_depth != f32::MAX) as usize
+            + (self.bottom_depth.to_bits() != u32::MAX) as usize
             + (self.bottom_time != u32::MAX) as usize
             + (self.apnea_countdown_enabled != typedef::Bool(u8::MAX)) as usize
             + (self.apnea_countdown_time != u32::MAX) as usize
@@ -517,7 +517,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.water_density != f32::MAX {
+        if m.water_density.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::FLOAT32,
@@ -557,7 +557,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.bottom_depth != f32::MAX {
+        if m.bottom_depth.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::FLOAT32,
