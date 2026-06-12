@@ -434,8 +434,8 @@ impl Record {
             n2_load: u16::MAX,
             respiration_rate: u8::MAX,
             enhanced_respiration_rate: u16::MAX,
-            grit: f32::MAX,
-            flow: f32::MAX,
+            grit: f32::from_bits(u32::MAX),
+            flow: f32::from_bits(u32::MAX),
             current_stress: u16::MAX,
             ebike_travel_range: u16::MAX,
             ebike_battery_level: u8::MAX,
@@ -1510,8 +1510,8 @@ impl Record {
             + (self.n2_load != u16::MAX) as usize
             + (self.respiration_rate != u8::MAX) as usize
             + (self.enhanced_respiration_rate != u16::MAX) as usize
-            + (self.grit != f32::MAX) as usize
-            + (self.flow != f32::MAX) as usize
+            + (self.grit.to_bits() != u32::MAX) as usize
+            + (self.flow.to_bits() != u32::MAX) as usize
             + (self.current_stress != u16::MAX) as usize
             + (self.ebike_travel_range != u16::MAX) as usize
             + (self.ebike_battery_level != u8::MAX) as usize
@@ -2227,7 +2227,7 @@ impl From<Record> for Message {
                 is_expanded: is_expanded(&m.state, 108),
             });
         };
-        if m.grit != f32::MAX {
+        if m.grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 114,
                 profile_type: ProfileType::FLOAT32,
@@ -2235,7 +2235,7 @@ impl From<Record> for Message {
                 is_expanded: false,
             });
         };
-        if m.flow != f32::MAX {
+        if m.flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 115,
                 profile_type: ProfileType::FLOAT32,

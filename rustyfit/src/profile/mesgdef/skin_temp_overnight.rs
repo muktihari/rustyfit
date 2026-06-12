@@ -44,9 +44,9 @@ impl SkinTempOvernight {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             local_timestamp: typedef::LocalDateTime(u32::MAX),
-            average_deviation: f32::MAX,
-            average_7_day_deviation: f32::MAX,
-            nightly_value: f32::MAX,
+            average_deviation: f32::from_bits(u32::MAX),
+            average_7_day_deviation: f32::from_bits(u32::MAX),
+            nightly_value: f32::from_bits(u32::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -55,9 +55,9 @@ impl SkinTempOvernight {
     fn count_valid_fields(&self) -> usize {
         (self.timestamp != typedef::DateTime(u32::MAX)) as usize
             + (self.local_timestamp != typedef::LocalDateTime(u32::MAX)) as usize
-            + (self.average_deviation != f32::MAX) as usize
-            + (self.average_7_day_deviation != f32::MAX) as usize
-            + (self.nightly_value != f32::MAX) as usize
+            + (self.average_deviation.to_bits() != u32::MAX) as usize
+            + (self.average_7_day_deviation.to_bits() != u32::MAX) as usize
+            + (self.nightly_value.to_bits() != u32::MAX) as usize
     }
 }
 
@@ -116,7 +116,7 @@ impl From<SkinTempOvernight> for Message {
                 is_expanded: false,
             });
         };
-        if m.average_deviation != f32::MAX {
+        if m.average_deviation.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::FLOAT32,
@@ -124,7 +124,7 @@ impl From<SkinTempOvernight> for Message {
                 is_expanded: false,
             });
         };
-        if m.average_7_day_deviation != f32::MAX {
+        if m.average_7_day_deviation.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::FLOAT32,
@@ -132,7 +132,7 @@ impl From<SkinTempOvernight> for Message {
                 is_expanded: false,
             });
         };
-        if m.nightly_value != f32::MAX {
+        if m.nightly_value.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::FLOAT32,

@@ -485,10 +485,10 @@ impl SegmentLap {
             avg_cadence_position: Vec::new(),
             max_cadence_position: Vec::new(),
             manufacturer: typedef::Manufacturer(u16::MAX),
-            total_grit: f32::MAX,
-            total_flow: f32::MAX,
-            avg_grit: f32::MAX,
-            avg_flow: f32::MAX,
+            total_grit: f32::from_bits(u32::MAX),
+            total_flow: f32::from_bits(u32::MAX),
+            avg_grit: f32::from_bits(u32::MAX),
+            avg_flow: f32::from_bits(u32::MAX),
             total_fractional_ascent: u8::MAX,
             total_fractional_descent: u8::MAX,
             enhanced_avg_altitude: u32::MAX,
@@ -1554,10 +1554,10 @@ impl SegmentLap {
             + (!self.avg_cadence_position.is_empty()) as usize
             + (!self.max_cadence_position.is_empty()) as usize
             + (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
-            + (self.total_grit != f32::MAX) as usize
-            + (self.total_flow != f32::MAX) as usize
-            + (self.avg_grit != f32::MAX) as usize
-            + (self.avg_flow != f32::MAX) as usize
+            + (self.total_grit.to_bits() != u32::MAX) as usize
+            + (self.total_flow.to_bits() != u32::MAX) as usize
+            + (self.avg_grit.to_bits() != u32::MAX) as usize
+            + (self.avg_flow.to_bits() != u32::MAX) as usize
             + (self.total_fractional_ascent != u8::MAX) as usize
             + (self.total_fractional_descent != u8::MAX) as usize
             + (self.enhanced_avg_altitude != u32::MAX) as usize
@@ -2389,7 +2389,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.total_grit != f32::MAX {
+        if m.total_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 84,
                 profile_type: ProfileType::FLOAT32,
@@ -2397,7 +2397,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.total_flow != f32::MAX {
+        if m.total_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 85,
                 profile_type: ProfileType::FLOAT32,
@@ -2405,7 +2405,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.avg_grit != f32::MAX {
+        if m.avg_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 86,
                 profile_type: ProfileType::FLOAT32,
@@ -2413,7 +2413,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.avg_flow != f32::MAX {
+        if m.avg_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 87,
                 profile_type: ProfileType::FLOAT32,

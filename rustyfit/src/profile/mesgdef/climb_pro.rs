@@ -56,7 +56,7 @@ impl ClimbPro {
             climb_pro_event: typedef::ClimbProEvent(u8::MAX),
             climb_number: u16::MAX,
             climb_category: u8::MAX,
-            current_dist: f32::MAX,
+            current_dist: f32::from_bits(u32::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -91,7 +91,7 @@ impl ClimbPro {
             + (self.climb_pro_event != typedef::ClimbProEvent(u8::MAX)) as usize
             + (self.climb_number != u16::MAX) as usize
             + (self.climb_category != u8::MAX) as usize
-            + (self.current_dist != f32::MAX) as usize
+            + (self.current_dist.to_bits() != u32::MAX) as usize
     }
 }
 
@@ -184,7 +184,7 @@ impl From<ClimbPro> for Message {
                 is_expanded: false,
             });
         };
-        if m.current_dist != f32::MAX {
+        if m.current_dist.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::FLOAT32,
