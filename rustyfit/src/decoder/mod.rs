@@ -146,9 +146,8 @@ impl Decoder {
     {
         self.reset();
 
-        let file_header = match self.decode_file_header(&mut reader)? {
-            Some(file_header) => file_header,
-            None => return Ok(None),
+        let Some(file_header) = self.decode_file_header(&mut reader)? else {
+            return Ok(None);
         };
 
         let mut messages = Vec::new();
@@ -375,9 +374,8 @@ impl Decoder {
             if !field.value.is_valid(field.profile_type.base_type()) {
                 continue;
             }
-            let field_ref = match lookup::field_reference(mesg.num, field.num) {
-                Some(field_ref) => field_ref,
-                None => continue,
+            let Some(field_ref) = lookup::field_reference(mesg.num, field.num) else {
+                continue;
             };
             let components = match mesg.sub_field_substitution(&field_ref) {
                 Some(sub_field) => sub_field.components,
@@ -469,9 +467,8 @@ impl Decoder {
 
     fn expand_components(&mut self, mesg: &mut Message, bits: &mut Bits, components: &[Component]) {
         for component in components {
-            let mut val = match bits.pull(component.bits) {
-                Some(v) => v,
-                None => break,
+            let Some(mut val) = bits.pull(component.bits) else {
+                break;
             };
 
             let field_num = component.field_num;
@@ -481,9 +478,8 @@ impl Decoder {
                     .accumulate(mesg.num, field_num, val, component.bits);
             }
 
-            let field_ref = match lookup::field_reference(mesg.num, field_num) {
-                Some(v) => v,
-                None => continue,
+            let Some(field_ref) = lookup::field_reference(mesg.num, field_num) else {
+                continue;
             };
 
             let scaled_val = val as f64 / component.scale - component.offset;
@@ -547,12 +543,11 @@ impl Decoder {
             self.read_exact_inc(reader, dev_field_def.size as usize)?;
             let mut buf = &self.buf[..dev_field_def.size as usize];
 
-            let field_desc = match self.field_descriptions.iter().find(|v| {
+            let Some(field_desc) = self.field_descriptions.iter().find(|v| {
                 v.developer_data_index == dev_field_def.developer_data_index
                     && v.field_definition_number == dev_field_def.num
-            }) {
-                Some(field_desc) => field_desc,
-                None => continue, // Currently we ignore missing field_description
+            }) else {
+                continue; // Currently we ignore missing field_description
             };
 
             let base_type = field_desc.fit_base_type_id;
