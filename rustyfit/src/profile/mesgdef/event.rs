@@ -19,8 +19,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Event message.
 #[derive(Debug, Clone)]
-/// Event is a Event message.
 pub struct Event {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -62,43 +62,43 @@ pub struct Event {
 }
 
 impl Event {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const DATA16: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const DATA: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const EVENT_GROUP: u8 = 4;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const SCORE: u8 = 7;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const OPPONENT_SCORE: u8 = 8;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const FRONT_GEAR_NUM: u8 = 9;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const FRONT_GEAR: u8 = 10;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const REAR_GEAR_NUM: u8 = 11;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const REAR_GEAR: u8 = 12;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
     pub const DEVICE_INDEX: u8 = 13;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_TYPE`
     pub const ACTIVITY_TYPE: u8 = 14;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIMESTAMP: u8 = 15;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::RADAR_THREAT_LEVEL_TYPE`
     pub const RADAR_THREAT_LEVEL_MAX: u8 = 21;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const RADAR_THREAT_COUNT: u8 = 22;
-    /// Value's type: `u8`; Scale: `10`; Units: `m/s`
+    /// Value's type: `u8`; Scale: `10`; Units: `m/s`; ProfileType: `ProfileType::UINT8`
     pub const RADAR_THREAT_AVG_APPROACH_SPEED: u8 = 23;
-    /// Value's type: `u8`; Scale: `10`; Units: `m/s`
+    /// Value's type: `u8`; Scale: `10`; Units: `m/s`; ProfileType: `ProfileType::UINT8`
     pub const RADAR_THREAT_MAX_APPROACH_SPEED: u8 = 24;
 
     /// Create new Event with all fields being set to its corresponding invalid value.
@@ -130,6 +130,8 @@ impl Event {
     }
 
     /// Returns `radar_threat_avg_approach_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn radar_threat_avg_approach_speed_scaled(&self) -> Option<f64> {
         if self.radar_threat_avg_approach_speed == u8::MAX {
             return None;
@@ -149,6 +151,8 @@ impl Event {
     }
 
     /// Returns `radar_threat_max_approach_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn radar_threat_max_approach_speed_scaled(&self) -> Option<f64> {
         if self.radar_threat_max_approach_speed == u8::MAX {
             return None;

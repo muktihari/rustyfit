@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hrv Status Summary message.
 #[derive(Debug, Clone)]
-/// HrvStatusSummary is a HrvStatusSummary message.
 pub struct HrvStatusSummary {
     pub timestamp: typedef::DateTime,
     /// Scale: 128; Units: ms; 7 day RMSSD average over sleep
@@ -34,21 +34,21 @@ pub struct HrvStatusSummary {
 }
 
 impl HrvStatusSummary {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const WEEKLY_AVERAGE: u8 = 0;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const LAST_NIGHT_AVERAGE: u8 = 1;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const LAST_NIGHT_5_MIN_HIGH: u8 = 2;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const BASELINE_LOW_UPPER: u8 = 3;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const BASELINE_BALANCED_LOWER: u8 = 4;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const BASELINE_BALANCED_UPPER: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::HRV_STATUS`
     pub const STATUS: u8 = 6;
 
     /// Create new HrvStatusSummary with all fields being set to its corresponding invalid value.
@@ -68,6 +68,8 @@ impl HrvStatusSummary {
     }
 
     /// Returns `weekly_average` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn weekly_average_scaled(&self) -> Option<f64> {
         if self.weekly_average == u16::MAX {
             return None;
@@ -87,6 +89,8 @@ impl HrvStatusSummary {
     }
 
     /// Returns `last_night_average` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn last_night_average_scaled(&self) -> Option<f64> {
         if self.last_night_average == u16::MAX {
             return None;
@@ -106,6 +110,8 @@ impl HrvStatusSummary {
     }
 
     /// Returns `last_night_5_min_high` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn last_night_5_min_high_scaled(&self) -> Option<f64> {
         if self.last_night_5_min_high == u16::MAX {
             return None;
@@ -125,6 +131,8 @@ impl HrvStatusSummary {
     }
 
     /// Returns `baseline_low_upper` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn baseline_low_upper_scaled(&self) -> Option<f64> {
         if self.baseline_low_upper == u16::MAX {
             return None;
@@ -144,6 +152,8 @@ impl HrvStatusSummary {
     }
 
     /// Returns `baseline_balanced_lower` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn baseline_balanced_lower_scaled(&self) -> Option<f64> {
         if self.baseline_balanced_lower == u16::MAX {
             return None;
@@ -163,6 +173,8 @@ impl HrvStatusSummary {
     }
 
     /// Returns `baseline_balanced_upper` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn baseline_balanced_upper_scaled(&self) -> Option<f64> {
         if self.baseline_balanced_upper == u16::MAX {
             return None;

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Fit Base Unit type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct FitBaseUnit(pub u16);

@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Three D Sensor Calibration message.
 #[derive(Debug, Clone)]
-/// ThreeDSensorCalibration is a ThreeDSensorCalibration message.
 pub struct ThreeDSensorCalibration {
     /// Units: s; Whole second part of the timestamp
     pub timestamp: typedef::DateTime,
@@ -23,9 +23,9 @@ pub struct ThreeDSensorCalibration {
     pub calibration_divisor: u32,
     /// Level shift value used to shift the ADC value back into range
     pub level_shift: u32,
-    /// Array: [3]; Internal calibration factors, one for each: xy, yx, zx
+    /// Array: \[3\]; Internal calibration factors, one for each: xy, yx, zx
     pub offset_cal: [i32; 3],
-    /// Array: [9]; Scale: 65535; 3 x 3 rotation matrix (row major)
+    /// Array: \[9\]; Scale: 65535; 3 x 3 rotation matrix (row major)
     pub orientation_matrix: [i32; 9],
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -34,19 +34,19 @@ pub struct ThreeDSensorCalibration {
 }
 
 impl ThreeDSensorCalibration {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SENSOR_TYPE`
     pub const SENSOR_TYPE: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const CALIBRATION_FACTOR: u8 = 1;
-    /// Value's type: `u32`; Units: `counts`
+    /// Value's type: `u32`; Units: `counts`; ProfileType: `ProfileType::UINT32`
     pub const CALIBRATION_DIVISOR: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const LEVEL_SHIFT: u8 = 3;
-    /// Value's type: `[i32; 3]`
+    /// Value's type: `[i32; 3]`; ProfileType: `ProfileType::SINT32`
     pub const OFFSET_CAL: u8 = 4;
-    /// Value's type: `[i32; 9]`; Scale: `65535`
+    /// Value's type: `[i32; 9]`; Scale: `65535`; ProfileType: `ProfileType::SINT32`
     pub const ORIENTATION_MATRIX: u8 = 5;
 
     /// Create new ThreeDSensorCalibration with all fields being set to its corresponding invalid value.

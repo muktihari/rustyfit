@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Time Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TimeMode(pub u8);

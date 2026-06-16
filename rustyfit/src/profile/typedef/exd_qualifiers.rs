@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Exd Qualifiers type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ExdQualifiers(pub u8);

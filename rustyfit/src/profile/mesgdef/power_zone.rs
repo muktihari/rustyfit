@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Power Zone message.
 #[derive(Debug, Clone)]
-/// PowerZone is a PowerZone message.
 pub struct PowerZone {
     pub message_index: typedef::MessageIndex,
     /// Units: watts
@@ -26,11 +26,11 @@ pub struct PowerZone {
 }
 
 impl PowerZone {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const HIGH_VALUE: u8 = 1;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 2;
 
     /// Create new PowerZone with all fields being set to its corresponding invalid value.

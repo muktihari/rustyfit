@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Activity message.
 #[derive(Debug, Clone)]
-/// Activity is a Activity message.
 pub struct Activity {
     pub timestamp: typedef::DateTime,
     /// Scale: 1000; Units: s; Exclude pauses
@@ -30,21 +30,21 @@ pub struct Activity {
 }
 
 impl Activity {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_TIMER_TIME: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const NUM_SESSIONS: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY`
     pub const TYPE: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
     pub const EVENT: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
     pub const EVENT_TYPE: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
     pub const LOCAL_TIMESTAMP: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const EVENT_GROUP: u8 = 6;
 
     /// Create new Activity with all fields being set to its corresponding invalid value.
@@ -64,6 +64,8 @@ impl Activity {
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;

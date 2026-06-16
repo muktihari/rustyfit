@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Developer Data Id message.
 #[derive(Debug, Clone)]
-/// DeveloperDataId is a DeveloperDataId message.
 pub struct DeveloperDataId {
     pub developer_id: Vec<u8>,
     pub application_id: Vec<u8>,
@@ -23,15 +23,15 @@ pub struct DeveloperDataId {
 }
 
 impl DeveloperDataId {
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const DEVELOPER_ID: u8 = 0;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const APPLICATION_ID: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER_ID: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DEVELOPER_DATA_INDEX: u8 = 3;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const APPLICATION_VERSION: u8 = 4;
 
     /// Create new DeveloperDataId with all fields being set to its corresponding invalid value.

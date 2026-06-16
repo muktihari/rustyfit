@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Display Position type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DisplayPosition(pub u8);

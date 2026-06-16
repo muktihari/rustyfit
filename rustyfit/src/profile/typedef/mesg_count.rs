@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Mesg Count type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct MesgCount(pub u8);

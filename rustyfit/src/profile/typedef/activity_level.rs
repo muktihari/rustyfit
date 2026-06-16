@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Activity Level type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ActivityLevel(pub u8);

@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Dive Summary message.
 #[derive(Debug, Clone)]
-/// DiveSummary is a DiveSummary message.
 pub struct DiveSummary {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -63,51 +63,51 @@ pub struct DiveSummary {
 }
 
 impl DiveSummary {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
     pub const REFERENCE_MESG: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const AVG_DEPTH: u8 = 2;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const MAX_DEPTH: u8 = 3;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const SURFACE_INTERVAL: u8 = 4;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const START_CNS: u8 = 5;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const END_CNS: u8 = 6;
-    /// Value's type: `u16`; Units: `percent`
+    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const START_N2: u8 = 7;
-    /// Value's type: `u16`; Units: `percent`
+    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const END_N2: u8 = 8;
-    /// Value's type: `u16`; Units: `OTUs`
+    /// Value's type: `u16`; Units: `OTUs`; ProfileType: `ProfileType::UINT16`
     pub const O2_TOXICITY: u8 = 9;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const DIVE_NUMBER: u8 = 10;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const BOTTOM_TIME: u8 = 11;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`; ProfileType: `ProfileType::UINT16`
     pub const AVG_PRESSURE_SAC: u8 = 12;
-    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`; ProfileType: `ProfileType::UINT16`
     pub const AVG_VOLUME_SAC: u8 = 13;
-    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`; ProfileType: `ProfileType::UINT16`
     pub const AVG_RMV: u8 = 14;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const DESCENT_TIME: u8 = 15;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ASCENT_TIME: u8 = 16;
-    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT32`
     pub const AVG_ASCENT_RATE: u8 = 17;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const AVG_DESCENT_RATE: u8 = 22;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const MAX_ASCENT_RATE: u8 = 23;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const MAX_DESCENT_RATE: u8 = 24;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const HANG_TIME: u8 = 25;
 
     /// Create new DiveSummary with all fields being set to its corresponding invalid value.
@@ -142,6 +142,8 @@ impl DiveSummary {
     }
 
     /// Returns `avg_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn avg_depth_scaled(&self) -> Option<f64> {
         if self.avg_depth == u32::MAX {
             return None;
@@ -161,6 +163,8 @@ impl DiveSummary {
     }
 
     /// Returns `max_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn max_depth_scaled(&self) -> Option<f64> {
         if self.max_depth == u32::MAX {
             return None;
@@ -180,6 +184,8 @@ impl DiveSummary {
     }
 
     /// Returns `bottom_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn bottom_time_scaled(&self) -> Option<f64> {
         if self.bottom_time == u32::MAX {
             return None;
@@ -199,6 +205,8 @@ impl DiveSummary {
     }
 
     /// Returns `avg_pressure_sac` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: bar/min
     pub fn avg_pressure_sac_scaled(&self) -> Option<f64> {
         if self.avg_pressure_sac == u16::MAX {
             return None;
@@ -218,6 +226,8 @@ impl DiveSummary {
     }
 
     /// Returns `avg_volume_sac` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: L/min
     pub fn avg_volume_sac_scaled(&self) -> Option<f64> {
         if self.avg_volume_sac == u16::MAX {
             return None;
@@ -237,6 +247,8 @@ impl DiveSummary {
     }
 
     /// Returns `avg_rmv` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: L/min
     pub fn avg_rmv_scaled(&self) -> Option<f64> {
         if self.avg_rmv == u16::MAX {
             return None;
@@ -256,6 +268,8 @@ impl DiveSummary {
     }
 
     /// Returns `descent_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn descent_time_scaled(&self) -> Option<f64> {
         if self.descent_time == u32::MAX {
             return None;
@@ -275,6 +289,8 @@ impl DiveSummary {
     }
 
     /// Returns `ascent_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn ascent_time_scaled(&self) -> Option<f64> {
         if self.ascent_time == u32::MAX {
             return None;
@@ -294,6 +310,8 @@ impl DiveSummary {
     }
 
     /// Returns `avg_ascent_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_ascent_rate_scaled(&self) -> Option<f64> {
         if self.avg_ascent_rate == i32::MAX {
             return None;
@@ -313,6 +331,8 @@ impl DiveSummary {
     }
 
     /// Returns `avg_descent_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_descent_rate_scaled(&self) -> Option<f64> {
         if self.avg_descent_rate == u32::MAX {
             return None;
@@ -332,6 +352,8 @@ impl DiveSummary {
     }
 
     /// Returns `max_ascent_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_ascent_rate_scaled(&self) -> Option<f64> {
         if self.max_ascent_rate == u32::MAX {
             return None;
@@ -351,6 +373,8 @@ impl DiveSummary {
     }
 
     /// Returns `max_descent_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_descent_rate_scaled(&self) -> Option<f64> {
         if self.max_descent_rate == u32::MAX {
             return None;
@@ -370,6 +394,8 @@ impl DiveSummary {
     }
 
     /// Returns `hang_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn hang_time_scaled(&self) -> Option<f64> {
         if self.hang_time == u32::MAX {
             return None;

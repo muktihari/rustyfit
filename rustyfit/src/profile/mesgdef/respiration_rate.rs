@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Respiration Rate message.
 #[derive(Debug, Clone)]
-/// RespirationRate is a RespirationRate message.
 pub struct RespirationRate {
     pub timestamp: typedef::DateTime,
     /// Scale: 100; Units: breaths/min; Breaths * 100 /min, -300 indicates invalid, -200 indicates large motion, -100 indicates off wrist
@@ -23,9 +23,9 @@ pub struct RespirationRate {
 }
 
 impl RespirationRate {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `i16`; Scale: `100`; Units: `breaths/min`
+    /// Value's type: `i16`; Scale: `100`; Units: `breaths/min`; ProfileType: `ProfileType::SINT16`
     pub const RESPIRATION_RATE: u8 = 0;
 
     /// Create new RespirationRate with all fields being set to its corresponding invalid value.
@@ -39,6 +39,8 @@ impl RespirationRate {
     }
 
     /// Returns `respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: breaths/min
     pub fn respiration_rate_scaled(&self) -> Option<f64> {
         if self.respiration_rate == i16::MAX {
             return None;

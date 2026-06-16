@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// User Profile message.
 #[derive(Debug, Clone)]
-/// UserProfile is a UserProfile message.
 pub struct UserProfile {
     pub message_index: typedef::MessageIndex,
     /// Used for Morning Report greeting
@@ -44,7 +44,7 @@ pub struct UserProfile {
     pub position_setting: typedef::DisplayPosition,
     pub temperature_setting: typedef::DisplayMeasure,
     pub local_id: typedef::UserLocalId,
-    /// Array: [6]
+    /// Array: \[6\]
     pub global_id: [u8; 6],
     /// Typical wake time
     pub wake_time: typedef::LocaltimeIntoDay,
@@ -64,63 +64,63 @@ pub struct UserProfile {
 }
 
 impl UserProfile {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const FRIENDLY_NAME: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::GENDER`
     pub const GENDER: u8 = 1;
-    /// Value's type: `u8`; Units: `years`
+    /// Value's type: `u8`; Units: `years`; ProfileType: `ProfileType::UINT8`
     pub const AGE: u8 = 2;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const HEIGHT: u8 = 3;
-    /// Value's type: `u16`; Scale: `10`; Units: `kg`
+    /// Value's type: `u16`; Scale: `10`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const WEIGHT: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::LANGUAGE`
     pub const LANGUAGE: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const ELEV_SETTING: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const WEIGHT_SETTING: u8 = 7;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const RESTING_HEART_RATE: u8 = 8;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const DEFAULT_MAX_RUNNING_HEART_RATE: u8 = 9;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const DEFAULT_MAX_BIKING_HEART_RATE: u8 = 10;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const DEFAULT_MAX_HEART_RATE: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_HEART`
     pub const HR_SETTING: u8 = 12;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const SPEED_SETTING: u8 = 13;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const DIST_SETTING: u8 = 14;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_POWER`
     pub const POWER_SETTING: u8 = 16;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_CLASS`
     pub const ACTIVITY_CLASS: u8 = 17;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_POSITION`
     pub const POSITION_SETTING: u8 = 18;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const TEMPERATURE_SETTING: u8 = 21;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::USER_LOCAL_ID`
     pub const LOCAL_ID: u8 = 22;
-    /// Value's type: `[u8; 6]`
+    /// Value's type: `[u8; 6]`; ProfileType: `ProfileType::BYTE`
     pub const GLOBAL_ID: u8 = 23;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::LOCALTIME_INTO_DAY`
     pub const WAKE_TIME: u8 = 28;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::LOCALTIME_INTO_DAY`
     pub const SLEEP_TIME: u8 = 29;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const HEIGHT_SETTING: u8 = 30;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const USER_RUNNING_STEP_LENGTH: u8 = 31;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const USER_WALKING_STEP_LENGTH: u8 = 32;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const DEPTH_SETTING: u8 = 47;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const DIVE_COUNT: u8 = 49;
 
     /// Create new UserProfile with all fields being set to its corresponding invalid value.
@@ -161,6 +161,8 @@ impl UserProfile {
     }
 
     /// Returns `height` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn height_scaled(&self) -> Option<f64> {
         if self.height == u8::MAX {
             return None;
@@ -180,6 +182,8 @@ impl UserProfile {
     }
 
     /// Returns `weight` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == u16::MAX {
             return None;
@@ -199,6 +203,8 @@ impl UserProfile {
     }
 
     /// Returns `user_running_step_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn user_running_step_length_scaled(&self) -> Option<f64> {
         if self.user_running_step_length == u16::MAX {
             return None;
@@ -218,6 +224,8 @@ impl UserProfile {
     }
 
     /// Returns `user_walking_step_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn user_walking_step_length_scaled(&self) -> Option<f64> {
         if self.user_walking_step_length == u16::MAX {
             return None;

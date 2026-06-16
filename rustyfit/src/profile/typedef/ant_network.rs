@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Ant Network type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AntNetwork(pub u8);

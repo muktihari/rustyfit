@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Exd Layout type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ExdLayout(pub u8);

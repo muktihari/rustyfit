@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Exercise Title message.
 #[derive(Debug, Clone)]
-/// ExerciseTitle is a ExerciseTitle message.
 pub struct ExerciseTitle {
     pub message_index: typedef::MessageIndex,
     pub exercise_category: typedef::ExerciseCategory,
@@ -26,13 +26,13 @@ pub struct ExerciseTitle {
 }
 
 impl ExerciseTitle {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::EXERCISE_CATEGORY`
     pub const EXERCISE_CATEGORY: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const EXERCISE_NAME: u8 = 1;
-    /// Value's type: `Vec<String>`
+    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
     pub const WKT_STEP_NAME: u8 = 2;
 
     /// Create new ExerciseTitle with all fields being set to its corresponding invalid value.

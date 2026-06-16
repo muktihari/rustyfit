@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Leg Curl Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LegCurlExerciseName(pub u16);

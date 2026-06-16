@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Speed Zone message.
 #[derive(Debug, Clone)]
-/// SpeedZone is a SpeedZone message.
 pub struct SpeedZone {
     pub message_index: typedef::MessageIndex,
     /// Scale: 1000; Units: m/s
@@ -26,11 +26,11 @@ pub struct SpeedZone {
 }
 
 impl SpeedZone {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const HIGH_VALUE: u8 = 0;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 1;
 
     /// Create new SpeedZone with all fields being set to its corresponding invalid value.
@@ -45,6 +45,8 @@ impl SpeedZone {
     }
 
     /// Returns `high_value` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn high_value_scaled(&self) -> Option<f64> {
         if self.high_value == u16::MAX {
             return None;

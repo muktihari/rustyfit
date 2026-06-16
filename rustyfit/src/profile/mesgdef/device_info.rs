@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Device Info message.
 #[derive(Debug, Clone)]
-/// DeviceInfo is a DeviceInfo message.
 pub struct DeviceInfo {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -52,43 +52,43 @@ pub struct DeviceInfo {
 }
 
 impl DeviceInfo {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DEVICE_TYPE: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER: u8 = 2;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
     pub const SERIAL_NUMBER: u8 = 3;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PRODUCT: u8 = 4;
-    /// Value's type: `u16`; Scale: `100`
+    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
     pub const SOFTWARE_VERSION: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const HARDWARE_VERSION: u8 = 6;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const CUM_OPERATING_TIME: u8 = 7;
-    /// Value's type: `u16`; Scale: `256`; Units: `V`
+    /// Value's type: `u16`; Scale: `256`; Units: `V`; ProfileType: `ProfileType::UINT16`
     pub const BATTERY_VOLTAGE: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BATTERY_STATUS`
     pub const BATTERY_STATUS: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BODY_LOCATION`
     pub const SENSOR_POSITION: u8 = 18;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const DESCRIPTOR: u8 = 19;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const ANT_TRANSMISSION_TYPE: u8 = 20;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const ANT_DEVICE_NUMBER: u8 = 21;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ANT_NETWORK`
     pub const ANT_NETWORK: u8 = 22;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SOURCE_TYPE`
     pub const SOURCE_TYPE: u8 = 25;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const PRODUCT_NAME: u8 = 27;
-    /// Value's type: `u8`; Units: `%`
+    /// Value's type: `u8`; Units: `%`; ProfileType: `ProfileType::UINT8`
     pub const BATTERY_LEVEL: u8 = 32;
 
     /// Create new DeviceInfo with all fields being set to its corresponding invalid value.
@@ -138,6 +138,8 @@ impl DeviceInfo {
     }
 
     /// Returns `battery_voltage` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: V
     pub fn battery_voltage_scaled(&self) -> Option<f64> {
         if self.battery_voltage == u16::MAX {
             return None;

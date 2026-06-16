@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Manufacturer type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Manufacturer(pub u16);

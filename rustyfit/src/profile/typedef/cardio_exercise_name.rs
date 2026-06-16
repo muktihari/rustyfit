@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Cardio Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CardioExerciseName(pub u16);

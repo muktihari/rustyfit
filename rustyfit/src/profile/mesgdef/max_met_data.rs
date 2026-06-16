@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Max Met Data message.
 #[derive(Debug, Clone)]
-/// MaxMetData is a MaxMetData message.
 pub struct MaxMetData {
     /// Time maxMET and vo2 were calculated
     pub update_time: typedef::DateTime,
@@ -33,21 +33,21 @@ pub struct MaxMetData {
 }
 
 impl MaxMetData {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const UPDATE_TIME: u8 = 0;
-    /// Value's type: `u16`; Scale: `10`; Units: `mL/kg/min`
+    /// Value's type: `u16`; Scale: `10`; Units: `mL/kg/min`; ProfileType: `ProfileType::UINT16`
     pub const VO2_MAX: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::MAX_MET_CATEGORY`
     pub const MAX_MET_CATEGORY: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const CALIBRATED_DATA: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::MAX_MET_HEART_RATE_SOURCE`
     pub const HR_SOURCE: u8 = 12;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::MAX_MET_SPEED_SOURCE`
     pub const SPEED_SOURCE: u8 = 13;
 
     /// Create new MaxMetData with all fields being set to its corresponding invalid value.
@@ -67,6 +67,8 @@ impl MaxMetData {
     }
 
     /// Returns `vo2_max` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mL/kg/min
     pub fn vo2_max_scaled(&self) -> Option<f64> {
         if self.vo2_max == u16::MAX {
             return None;

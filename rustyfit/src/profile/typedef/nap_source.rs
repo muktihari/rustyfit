@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Nap Source type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct NapSource(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Pwr Zone Calc type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct PwrZoneCalc(pub u8);

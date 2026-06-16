@@ -10,14 +10,14 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Respiration Data message.
 #[derive(Debug, Clone)]
-/// HsaRespirationData is a HsaRespirationData message.
 pub struct HsaRespirationData {
     /// Units: s
     pub timestamp: typedef::DateTime,
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
-    /// Scale: 100; Units: breaths/min; Breaths / min: [1,100] Invalid: 255 Excess motion: 254 Off wrist: 253 Not available: 252 Blank: 2.4
+    /// Scale: 100; Units: breaths/min; Breaths / min: \[1,100\] Invalid: 255 Excess motion: 254 Off wrist: 253 Not available: 252 Blank: 2.4
     pub respiration_rate: Vec<i16>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -26,11 +26,11 @@ pub struct HsaRespirationData {
 }
 
 impl HsaRespirationData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `breaths/min`
+    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `breaths/min`; ProfileType: `ProfileType::SINT16`
     pub const RESPIRATION_RATE: u8 = 1;
 
     /// Create new HsaRespirationData with all fields being set to its corresponding invalid value.
@@ -45,6 +45,8 @@ impl HsaRespirationData {
     }
 
     /// Returns `respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: breaths/min
     pub fn respiration_rate_scaled(&self) -> Option<Vec<f64>> {
         if self.respiration_rate.is_empty() {
             return None;

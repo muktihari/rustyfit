@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Schedule message.
 #[derive(Debug, Clone)]
-/// Schedule is a Schedule message.
 pub struct Schedule {
     /// Corresponds to file_id of scheduled workout / course.
     pub manufacturer: typedef::Manufacturer,
@@ -32,19 +32,19 @@ pub struct Schedule {
 }
 
 impl Schedule {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PRODUCT: u8 = 1;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
     pub const SERIAL_NUMBER: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIME_CREATED: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const COMPLETED: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SCHEDULE`
     pub const TYPE: u8 = 5;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
     pub const SCHEDULED_TIME: u8 = 6;
 
     /// Create new Schedule with all fields being set to its corresponding invalid value.

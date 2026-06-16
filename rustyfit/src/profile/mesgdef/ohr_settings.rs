@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Ohr Settings message.
 #[derive(Debug, Clone)]
-/// OhrSettings is a OhrSettings message.
 pub struct OhrSettings {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -23,9 +23,9 @@ pub struct OhrSettings {
 }
 
 impl OhrSettings {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SWITCH`
     pub const ENABLED: u8 = 0;
 
     /// Create new OhrSettings with all fields being set to its corresponding invalid value.

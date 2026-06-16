@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Session Trigger type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SessionTrigger(pub u8);

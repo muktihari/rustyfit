@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Lap Trigger type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LapTrigger(pub u8);

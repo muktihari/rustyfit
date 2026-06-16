@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Tap Sensitivity type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TapSensitivity(pub u8);

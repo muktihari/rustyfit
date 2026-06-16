@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Hr Zone Calc type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct HrZoneCalc(pub u8);

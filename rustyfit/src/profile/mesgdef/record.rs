@@ -18,8 +18,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Record message.
 #[derive(Debug, Clone)]
-/// Record is a Record message.
 pub struct Record {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -39,7 +39,7 @@ pub struct Record {
     pub speed: u16,
     /// Units: watts
     pub power: u16,
-    /// Array: [3]; Units: m/s,m
+    /// Array: \[3\]; Units: m/s,m
     pub compressed_speed_distance: [u8; 3],
     /// Scale: 100; Units: %
     pub grade: i16,
@@ -192,173 +192,173 @@ pub struct Record {
 }
 
 impl Record {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LAT: u8 = 0;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LONG: u8 = 1;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const ALTITUDE: u8 = 2;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const HEART_RATE: u8 = 3;
-    /// Value's type: `u8`; Units: `rpm`
+    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const CADENCE: u8 = 4;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DISTANCE: u8 = 5;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const SPEED: u8 = 6;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const POWER: u8 = 7;
-    /// Value's type: `[u8; 3]`; Units: `m/s,m`
+    /// Value's type: `[u8; 3]`; Units: `m/s,m`; ProfileType: `ProfileType::BYTE`
     pub const COMPRESSED_SPEED_DISTANCE: u8 = 8;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const GRADE: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const RESISTANCE: u8 = 10;
-    /// Value's type: `i32`; Scale: `1000`; Units: `s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::SINT32`
     pub const TIME_FROM_COURSE: u8 = 11;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const CYCLE_LENGTH: u8 = 12;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const TEMPERATURE: u8 = 13;
-    /// Value's type: `Vec<u8>`; Scale: `16`; Units: `m/s`
+    /// Value's type: `Vec<u8>`; Scale: `16`; Units: `m/s`; ProfileType: `ProfileType::UINT8`
     pub const SPEED_1S: u8 = 17;
-    /// Value's type: `u8`; Units: `cycles`
+    /// Value's type: `u8`; Units: `cycles`; ProfileType: `ProfileType::UINT8`
     pub const CYCLES: u8 = 18;
-    /// Value's type: `u32`; Units: `cycles`
+    /// Value's type: `u32`; Units: `cycles`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_CYCLES: u8 = 19;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const COMPRESSED_ACCUMULATED_POWER: u8 = 28;
-    /// Value's type: `u32`; Units: `watts`
+    /// Value's type: `u32`; Units: `watts`; ProfileType: `ProfileType::UINT32`
     pub const ACCUMULATED_POWER: u8 = 29;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::LEFT_RIGHT_BALANCE`
     pub const LEFT_RIGHT_BALANCE: u8 = 30;
-    /// Value's type: `u8`; Units: `m`
+    /// Value's type: `u8`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const GPS_ACCURACY: u8 = 31;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const VERTICAL_SPEED: u8 = 32;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const CALORIES: u8 = 33;
-    /// Value's type: `u16`; Scale: `10`; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`; ProfileType: `ProfileType::UINT16`
     pub const VERTICAL_OSCILLATION: u8 = 39;
-    /// Value's type: `u16`; Scale: `100`; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const STANCE_TIME_PERCENT: u8 = 40;
-    /// Value's type: `u16`; Scale: `10`; Units: `ms`
+    /// Value's type: `u16`; Scale: `10`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const STANCE_TIME: u8 = 41;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_TYPE`
     pub const ACTIVITY_TYPE: u8 = 42;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const LEFT_TORQUE_EFFECTIVENESS: u8 = 43;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const RIGHT_TORQUE_EFFECTIVENESS: u8 = 44;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const LEFT_PEDAL_SMOOTHNESS: u8 = 45;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const RIGHT_PEDAL_SMOOTHNESS: u8 = 46;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const COMBINED_PEDAL_SMOOTHNESS: u8 = 47;
-    /// Value's type: `u8`; Scale: `128`; Units: `s`
+    /// Value's type: `u8`; Scale: `128`; Units: `s`; ProfileType: `ProfileType::UINT8`
     pub const TIME128: u8 = 48;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::STROKE_TYPE`
     pub const STROKE_TYPE: u8 = 49;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ZONE: u8 = 50;
-    /// Value's type: `u16`; Scale: `100`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `100`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const BALL_SPEED: u8 = 51;
-    /// Value's type: `u16`; Scale: `256`; Units: `rpm`
+    /// Value's type: `u16`; Scale: `256`; Units: `rpm`; ProfileType: `ProfileType::UINT16`
     pub const CADENCE256: u8 = 52;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const FRACTIONAL_CADENCE: u8 = 53;
-    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`
+    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_HEMOGLOBIN_CONC: u8 = 54;
-    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`
+    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_HEMOGLOBIN_CONC_MIN: u8 = 55;
-    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`
+    /// Value's type: `u16`; Scale: `100`; Units: `g/dL`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_HEMOGLOBIN_CONC_MAX: u8 = 56;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const SATURATED_HEMOGLOBIN_PERCENT: u8 = 57;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const SATURATED_HEMOGLOBIN_PERCENT_MIN: u8 = 58;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const SATURATED_HEMOGLOBIN_PERCENT_MAX: u8 = 59;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
     pub const DEVICE_INDEX: u8 = 62;
-    /// Value's type: `i8`; Units: `mm`
+    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
     pub const LEFT_PCO: u8 = 67;
-    /// Value's type: `i8`; Units: `mm`
+    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
     pub const RIGHT_PCO: u8 = 68;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const LEFT_POWER_PHASE: u8 = 69;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const LEFT_POWER_PHASE_PEAK: u8 = 70;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const RIGHT_POWER_PHASE: u8 = 71;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const RIGHT_POWER_PHASE_PEAK: u8 = 72;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_SPEED: u8 = 73;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_ALTITUDE: u8 = 78;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const BATTERY_SOC: u8 = 81;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const MOTOR_POWER: u8 = 82;
-    /// Value's type: `u16`; Scale: `100`; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const VERTICAL_RATIO: u8 = 83;
-    /// Value's type: `u16`; Scale: `100`; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const STANCE_TIME_BALANCE: u8 = 84;
-    /// Value's type: `u16`; Scale: `10`; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`; ProfileType: `ProfileType::UINT16`
     pub const STEP_LENGTH: u8 = 85;
-    /// Value's type: `u16`; Scale: `100`; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const CYCLE_LENGTH16: u8 = 87;
-    /// Value's type: `u32`; Units: `Pa`
+    /// Value's type: `u32`; Units: `Pa`; ProfileType: `ProfileType::UINT32`
     pub const ABSOLUTE_PRESSURE: u8 = 91;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DEPTH: u8 = 92;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const NEXT_STOP_DEPTH: u8 = 93;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const NEXT_STOP_TIME: u8 = 94;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_TO_SURFACE: u8 = 95;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const NDL_TIME: u8 = 96;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const CNS_LOAD: u8 = 97;
-    /// Value's type: `u16`; Units: `percent`
+    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const N2_LOAD: u8 = 98;
-    /// Value's type: `u8`; Units: `s`
+    /// Value's type: `u8`; Units: `s`; ProfileType: `ProfileType::UINT8`
     pub const RESPIRATION_RATE: u8 = 99;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
     pub const ENHANCED_RESPIRATION_RATE: u8 = 108;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const GRIT: u8 = 114;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const FLOW: u8 = 115;
-    /// Value's type: `u16`; Scale: `100`
+    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
     pub const CURRENT_STRESS: u8 = 116;
-    /// Value's type: `u16`; Units: `km`
+    /// Value's type: `u16`; Units: `km`; ProfileType: `ProfileType::UINT16`
     pub const EBIKE_TRAVEL_RANGE: u8 = 117;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const EBIKE_BATTERY_LEVEL: u8 = 118;
-    /// Value's type: `u8`; Units: `depends on sensor`
+    /// Value's type: `u8`; Units: `depends on sensor`; ProfileType: `ProfileType::UINT8`
     pub const EBIKE_ASSIST_MODE: u8 = 119;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const EBIKE_ASSIST_LEVEL_PERCENT: u8 = 120;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const AIR_TIME_REMAINING: u8 = 123;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`; ProfileType: `ProfileType::UINT16`
     pub const PRESSURE_SAC: u8 = 124;
-    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`; ProfileType: `ProfileType::UINT16`
     pub const VOLUME_SAC: u8 = 125;
-    /// Value's type: `u16`; Scale: `100`; Units: `L/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `L/min`; ProfileType: `ProfileType::UINT16`
     pub const RMV: u8 = 126;
-    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT32`
     pub const ASCENT_RATE: u8 = 127;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const PO2: u8 = 129;
-    /// Value's type: `u16`; Scale: `100`; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::UINT16`
     pub const CORE_TEMPERATURE: u8 = 139;
 
     /// Create new Record with all fields being set to its corresponding invalid value.
@@ -477,6 +477,8 @@ impl Record {
     }
 
     /// Returns `altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn altitude_scaled(&self) -> Option<f64> {
         if self.altitude == u16::MAX {
             return None;
@@ -496,6 +498,8 @@ impl Record {
     }
 
     /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;
@@ -515,6 +519,8 @@ impl Record {
     }
 
     /// Returns `speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == u16::MAX {
             return None;
@@ -534,6 +540,8 @@ impl Record {
     }
 
     /// Returns `grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn grade_scaled(&self) -> Option<f64> {
         if self.grade == i16::MAX {
             return None;
@@ -553,6 +561,8 @@ impl Record {
     }
 
     /// Returns `time_from_course` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_from_course_scaled(&self) -> Option<f64> {
         if self.time_from_course == i32::MAX {
             return None;
@@ -572,6 +582,8 @@ impl Record {
     }
 
     /// Returns `cycle_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn cycle_length_scaled(&self) -> Option<f64> {
         if self.cycle_length == u8::MAX {
             return None;
@@ -591,6 +603,8 @@ impl Record {
     }
 
     /// Returns `speed_1s` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn speed_1s_scaled(&self) -> Option<Vec<f64>> {
         if self.speed_1s.is_empty() {
             return None;
@@ -620,6 +634,8 @@ impl Record {
     }
 
     /// Returns `vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn vertical_speed_scaled(&self) -> Option<f64> {
         if self.vertical_speed == i16::MAX {
             return None;
@@ -639,6 +655,8 @@ impl Record {
     }
 
     /// Returns `vertical_oscillation` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
     pub fn vertical_oscillation_scaled(&self) -> Option<f64> {
         if self.vertical_oscillation == u16::MAX {
             return None;
@@ -658,6 +676,8 @@ impl Record {
     }
 
     /// Returns `stance_time_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn stance_time_percent_scaled(&self) -> Option<f64> {
         if self.stance_time_percent == u16::MAX {
             return None;
@@ -677,6 +697,8 @@ impl Record {
     }
 
     /// Returns `stance_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn stance_time_scaled(&self) -> Option<f64> {
         if self.stance_time == u16::MAX {
             return None;
@@ -696,6 +718,8 @@ impl Record {
     }
 
     /// Returns `left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn left_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.left_torque_effectiveness == u8::MAX {
             return None;
@@ -715,6 +739,8 @@ impl Record {
     }
 
     /// Returns `right_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn right_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.right_torque_effectiveness == u8::MAX {
             return None;
@@ -734,6 +760,8 @@ impl Record {
     }
 
     /// Returns `left_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn left_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.left_pedal_smoothness == u8::MAX {
             return None;
@@ -753,6 +781,8 @@ impl Record {
     }
 
     /// Returns `right_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn right_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.right_pedal_smoothness == u8::MAX {
             return None;
@@ -772,6 +802,8 @@ impl Record {
     }
 
     /// Returns `combined_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn combined_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.combined_pedal_smoothness == u8::MAX {
             return None;
@@ -791,6 +823,8 @@ impl Record {
     }
 
     /// Returns `time128` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time128_scaled(&self) -> Option<f64> {
         if self.time128 == u8::MAX {
             return None;
@@ -810,6 +844,8 @@ impl Record {
     }
 
     /// Returns `ball_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn ball_speed_scaled(&self) -> Option<f64> {
         if self.ball_speed == u16::MAX {
             return None;
@@ -829,6 +865,8 @@ impl Record {
     }
 
     /// Returns `cadence256` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
     pub fn cadence256_scaled(&self) -> Option<f64> {
         if self.cadence256 == u16::MAX {
             return None;
@@ -848,6 +886,8 @@ impl Record {
     }
 
     /// Returns `fractional_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
     pub fn fractional_cadence_scaled(&self) -> Option<f64> {
         if self.fractional_cadence == u8::MAX {
             return None;
@@ -867,6 +907,8 @@ impl Record {
     }
 
     /// Returns `total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: g/dL
     pub fn total_hemoglobin_conc_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc == u16::MAX {
             return None;
@@ -886,6 +928,8 @@ impl Record {
     }
 
     /// Returns `total_hemoglobin_conc_min` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: g/dL
     pub fn total_hemoglobin_conc_min_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc_min == u16::MAX {
             return None;
@@ -905,6 +949,8 @@ impl Record {
     }
 
     /// Returns `total_hemoglobin_conc_max` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: g/dL
     pub fn total_hemoglobin_conc_max_scaled(&self) -> Option<f64> {
         if self.total_hemoglobin_conc_max == u16::MAX {
             return None;
@@ -924,6 +970,8 @@ impl Record {
     }
 
     /// Returns `saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn saturated_hemoglobin_percent_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent == u16::MAX {
             return None;
@@ -943,6 +991,8 @@ impl Record {
     }
 
     /// Returns `saturated_hemoglobin_percent_min` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn saturated_hemoglobin_percent_min_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent_min == u16::MAX {
             return None;
@@ -962,6 +1012,8 @@ impl Record {
     }
 
     /// Returns `saturated_hemoglobin_percent_max` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn saturated_hemoglobin_percent_max_scaled(&self) -> Option<f64> {
         if self.saturated_hemoglobin_percent_max == u16::MAX {
             return None;
@@ -981,6 +1033,8 @@ impl Record {
     }
 
     /// Returns `left_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn left_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.left_power_phase.is_empty() {
             return None;
@@ -1010,6 +1064,8 @@ impl Record {
     }
 
     /// Returns `left_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.left_power_phase_peak.is_empty() {
             return None;
@@ -1039,6 +1095,8 @@ impl Record {
     }
 
     /// Returns `right_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn right_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.right_power_phase.is_empty() {
             return None;
@@ -1068,6 +1126,8 @@ impl Record {
     }
 
     /// Returns `right_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.right_power_phase_peak.is_empty() {
             return None;
@@ -1097,6 +1157,8 @@ impl Record {
     }
 
     /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
             return None;
@@ -1116,6 +1178,8 @@ impl Record {
     }
 
     /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
             return None;
@@ -1135,6 +1199,8 @@ impl Record {
     }
 
     /// Returns `battery_soc` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn battery_soc_scaled(&self) -> Option<f64> {
         if self.battery_soc == u8::MAX {
             return None;
@@ -1154,6 +1220,8 @@ impl Record {
     }
 
     /// Returns `vertical_ratio` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn vertical_ratio_scaled(&self) -> Option<f64> {
         if self.vertical_ratio == u16::MAX {
             return None;
@@ -1173,6 +1241,8 @@ impl Record {
     }
 
     /// Returns `stance_time_balance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn stance_time_balance_scaled(&self) -> Option<f64> {
         if self.stance_time_balance == u16::MAX {
             return None;
@@ -1192,6 +1262,8 @@ impl Record {
     }
 
     /// Returns `step_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
     pub fn step_length_scaled(&self) -> Option<f64> {
         if self.step_length == u16::MAX {
             return None;
@@ -1211,6 +1283,8 @@ impl Record {
     }
 
     /// Returns `cycle_length16` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn cycle_length16_scaled(&self) -> Option<f64> {
         if self.cycle_length16 == u16::MAX {
             return None;
@@ -1230,6 +1304,8 @@ impl Record {
     }
 
     /// Returns `depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn depth_scaled(&self) -> Option<f64> {
         if self.depth == u32::MAX {
             return None;
@@ -1249,6 +1325,8 @@ impl Record {
     }
 
     /// Returns `next_stop_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn next_stop_depth_scaled(&self) -> Option<f64> {
         if self.next_stop_depth == u32::MAX {
             return None;
@@ -1268,6 +1346,8 @@ impl Record {
     }
 
     /// Returns `enhanced_respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: Breaths/min
     pub fn enhanced_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_respiration_rate == u16::MAX {
             return None;
@@ -1306,6 +1386,8 @@ impl Record {
     }
 
     /// Returns `pressure_sac` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: bar/min
     pub fn pressure_sac_scaled(&self) -> Option<f64> {
         if self.pressure_sac == u16::MAX {
             return None;
@@ -1325,6 +1407,8 @@ impl Record {
     }
 
     /// Returns `volume_sac` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: L/min
     pub fn volume_sac_scaled(&self) -> Option<f64> {
         if self.volume_sac == u16::MAX {
             return None;
@@ -1344,6 +1428,8 @@ impl Record {
     }
 
     /// Returns `rmv` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: L/min
     pub fn rmv_scaled(&self) -> Option<f64> {
         if self.rmv == u16::MAX {
             return None;
@@ -1363,6 +1449,8 @@ impl Record {
     }
 
     /// Returns `ascent_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn ascent_rate_scaled(&self) -> Option<f64> {
         if self.ascent_rate == i32::MAX {
             return None;
@@ -1382,6 +1470,8 @@ impl Record {
     }
 
     /// Returns `po2` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn po2_scaled(&self) -> Option<f64> {
         if self.po2 == u8::MAX {
             return None;
@@ -1401,6 +1491,8 @@ impl Record {
     }
 
     /// Returns `core_temperature` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn core_temperature_scaled(&self) -> Option<f64> {
         if self.core_temperature == u16::MAX {
             return None;

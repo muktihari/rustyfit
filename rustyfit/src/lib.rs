@@ -28,8 +28,9 @@
 //!
 //! ## Decoding
 //!
-//! `Decoder`'s `decode` method allows us to interact with FIT files directly through their original protocol messages' structure.
-//! This method can be invoked multiple times to decode chained FIT file until it return Ok(None) or Err(err).
+//! `Decoder`'s `decode()` method allows us to interact with FIT files directly through their original protocol messages' structure.
+//!
+//! This method returns a single FIT sequence, If it's a chained FIT file, call this method multiple times until it return Ok(None) or Err(err).
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -76,9 +77,13 @@
 //!
 //! ## Streaming Decoding
 //!
-//! `StreamDecoder` allows us to retrieve an enum, `DecoderEvent`, as soon as it is being decoded. The enum can hold a reference
-//! to either a `FileHeader`, `MessageDefinition`, `Message` or `CRC`. This way, users can have fine-grained control on how to interact
-//! with the data. And since this is lazily evaluated, users can decide when to stop without being required to read the entire reader.
+//! `StreamDecoder` allows us to retrieve `DecoderEvent` enum for every `next()` method call. The enum can hold a value of either
+//! `FileHeader`, `&MessageDefinition`, `&Message` or `CRC`, without unnecessary allocation. This way, users can have fine-grained
+//! control to interact with the data efficiently. This is lazily evaluated, so users can decide when to stop without being
+//! required to read the entire reader.
+//!
+//! The `next()` method may advance through chained FIT sequences. If exactly one sequence is desired, break manually when reaching
+//! `DecoderEvent::Crc`.
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -165,14 +170,39 @@
 //!         .build();
 //! ```
 //!
-//! These associated functions and method are `const fn`, so we can use it to declare a static variable
+//! These associated functions and methods are `const fn`, so we can use it to declare a static variable
 //! as long as we wrap it with a lock, e.g. `Mutex`. This is useful on microcrontrollers where RAM is only hundred KBs.
 //!
 //! ####
 //!
 //! ## Encoding
 //!
-//! Here is the example of manually encode FIT protocol using this library to give the idea how it works.
+//! To make the encoding process easier to understand, we have generated code containing detailed information to guide
+//! users through the encoding process, so users don't have to look back-and-forth into `Profile.xlsx` for specifications.
+//!
+//! ```
+//! // rustyfit::profile::mesgdef
+//!
+//! # use rustyfit::profile::typedef;
+//! pub struct FileId {
+//!     pub r#type: typedef::File,
+//!     pub manufacturer: typedef::Manufacturer,
+//!     pub product: u16,
+//!     /* ... */
+//! }
+//!
+//! impl FileId {
+//!     /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
+//!     pub const TYPE: u8 = 0;
+//!     /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+//!     pub const MANUFACTURER: u8 = 1;
+//!     /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+//!     pub const PRODUCT: u8 = 2;
+//!     /* ... */
+//! }
+//! ```
+//!
+//! Now, let's encode FIT protocol data using low-level structures to illustrate the underlying mechanics of this library.
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -186,6 +216,12 @@
 //!                 num: typedef::MesgNum::FILE_ID,
 //!                 fields: vec![
 //!                     Field {
+//!                         num: mesgdef::FileId::TYPE,
+//!                         profile_type: ProfileType::FILE, // or ProfileType::UINT8 is also valid
+//!                         value: Value::Uint8(typedef::File::ACTIVITY.0),
+//!                         is_expanded: false,
+//!                     },
+//!                     Field {
 //!                         num: mesgdef::FileId::MANUFACTURER,
 //!                         profile_type: ProfileType::MANUFACTURER, // or ProfileType::UINT16 is also valid
 //!                         value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
@@ -195,12 +231,6 @@
 //!                         num: mesgdef::FileId::PRODUCT,
 //!                         profile_type: ProfileType::UINT16,
 //!                         value: Value::Uint16(typedef::GarminProduct::FENIX8_SOLAR.0),
-//!                         is_expanded: false,
-//!                     },
-//!                     Field {
-//!                         num: mesgdef::FileId::TYPE,
-//!                         profile_type: ProfileType::UINT8,
-//!                         value: Value::Uint8(typedef::File::ACTIVITY.0),
 //!                         is_expanded: false,
 //!                     },
 //!                 ],
@@ -250,7 +280,8 @@
 //!
 //! ## Encode with mesgdef
 //!
-//! Alternatively, users can create messages using the mesgdef module for convenience.
+//! For the most convenient approach, users can encode messages using the [mesgdef](crate::profile::mesgdef) module which
+//! can be converted into low-level structures, `Message`.
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -262,9 +293,9 @@
 //!         messages: vec![
 //!             {
 //!                 let mut file_id = mesgdef::FileId::new();
+//!                 file_id.r#type = typedef::File::ACTIVITY;
 //!                 file_id.manufacturer = typedef::Manufacturer::GARMIN;
 //!                 file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
-//!                 file_id.r#type = typedef::File::ACTIVITY;
 //!                 Message::from(file_id)
 //!             },
 //!             {
@@ -297,6 +328,8 @@
 //! `StreamEncoder` allows us to encode in streaming fashion. Write each message directly without retain them first in the memory.
 //! This is useful when the device is the one who produce the data such as smartwatch, cycling computer or other health devices.
 //!
+//! The `finish()` method must be called to finalize the sequence. To make a chained FIT file, repeat the process using the same
+//! `stream` instance.
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -314,9 +347,9 @@
 //!
 //!     stream.write_message(&mut {
 //!         let mut file_id = mesgdef::FileId::new();
+//!         file_id.r#type = typedef::File::ACTIVITY;
 //!         file_id.manufacturer = typedef::Manufacturer::GARMIN;
 //!         file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
-//!         file_id.r#type = typedef::File::ACTIVITY;
 //!         Message::from(file_id)
 //!     })?;
 //!
@@ -351,7 +384,7 @@
 //!         .build();
 //! ```
 //!
-//! These associated functions and method are `const fn`, so we can use it to declare a static variable
+//! These associated functions and methods are `const fn`, so we can use it to declare a static variable
 //! as long as we wrap it with a lock, e.g. `Mutex`. This is useful on microcrontrollers where RAM is only hundred KBs.
 
 #![cfg_attr(not(test), no_std)]

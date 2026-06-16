@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Segment Leaderboard Entry message.
 #[derive(Debug, Clone)]
-/// SegmentLeaderboardEntry is a SegmentLeaderboardEntry message.
 pub struct SegmentLeaderboardEntry {
     pub message_index: typedef::MessageIndex,
     /// Friendly name assigned to leader
@@ -35,19 +35,19 @@ pub struct SegmentLeaderboardEntry {
 }
 
 impl SegmentLeaderboardEntry {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_LEADERBOARD_TYPE`
     pub const TYPE: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const GROUP_PRIMARY_KEY: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const ACTIVITY_ID: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const SEGMENT_TIME: u8 = 4;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const ACTIVITY_ID_STRING: u8 = 5;
 
     /// Create new SegmentLeaderboardEntry with all fields being set to its corresponding invalid value.
@@ -66,6 +66,8 @@ impl SegmentLeaderboardEntry {
     }
 
     /// Returns `segment_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn segment_time_scaled(&self) -> Option<f64> {
         if self.segment_time == u32::MAX {
             return None;

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Display Orientation type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DisplayOrientation(pub u8);

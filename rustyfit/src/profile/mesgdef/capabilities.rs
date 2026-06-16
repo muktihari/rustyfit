@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Capabilities message.
 #[derive(Debug, Clone)]
-/// Capabilities is a Capabilities message.
 pub struct Capabilities {
     /// Base: UINT8Z; Use language_bits_x types where x is index of array.
     pub languages: Vec<u8>,
@@ -28,13 +28,13 @@ pub struct Capabilities {
 }
 
 impl Capabilities {
-    /// Value's type: `Vec<u8>`; Base: UINT8Z
+    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const LANGUAGES: u8 = 0;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z
+    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::SPORT_BITS_0`
     pub const SPORTS: u8 = 1;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::WORKOUT_CAPABILITIES`
     pub const WORKOUTS_SUPPORTED: u8 = 21;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::CONNECTIVITY_CAPABILITIES`
     pub const CONNECTIVITY_SUPPORTED: u8 = 23;
 
     /// Create new Capabilities with all fields being set to its corresponding invalid value.

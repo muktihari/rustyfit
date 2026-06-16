@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Shoulder Press Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ShoulderPressExerciseName(pub u16);

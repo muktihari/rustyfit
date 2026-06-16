@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Heart Rate Data message.
 #[derive(Debug, Clone)]
-/// HsaHeartRateData is a HsaHeartRateData message.
 pub struct HsaHeartRateData {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -28,13 +28,13 @@ pub struct HsaHeartRateData {
 }
 
 impl HsaHeartRateData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const STATUS: u8 = 1;
-    /// Value's type: `Vec<u8>`; Units: `bpm`
+    /// Value's type: `Vec<u8>`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const HEART_RATE: u8 = 2;
 
     /// Create new HsaHeartRateData with all fields being set to its corresponding invalid value.

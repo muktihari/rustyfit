@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sport Bits 0 type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SportBits0(pub u8);

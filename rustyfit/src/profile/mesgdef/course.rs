@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Course message.
 #[derive(Debug, Clone)]
-/// Course is a Course message.
 pub struct Course {
     pub sport: typedef::Sport,
     pub name: String,
@@ -27,13 +27,13 @@ pub struct Course {
 }
 
 impl Course {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 4;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 5;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::COURSE_CAPABILITIES`
     pub const CAPABILITIES: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 7;
 
     /// Create new Course with all fields being set to its corresponding invalid value.

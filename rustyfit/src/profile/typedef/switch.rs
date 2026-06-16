@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Switch type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Switch(pub u8);

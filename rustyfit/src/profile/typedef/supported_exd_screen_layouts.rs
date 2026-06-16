@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Supported Exd Screen Layouts type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SupportedExdScreenLayouts(pub u32);

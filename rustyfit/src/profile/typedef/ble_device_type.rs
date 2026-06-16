@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Ble Device Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BleDeviceType(pub u8);

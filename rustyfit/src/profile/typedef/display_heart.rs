@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Display Heart type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DisplayHeart(pub u8);

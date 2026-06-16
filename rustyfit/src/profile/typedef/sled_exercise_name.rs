@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sled Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SledExerciseName(pub u16);

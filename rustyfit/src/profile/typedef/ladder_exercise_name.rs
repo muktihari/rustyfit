@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Ladder Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LadderExerciseName(pub u16);

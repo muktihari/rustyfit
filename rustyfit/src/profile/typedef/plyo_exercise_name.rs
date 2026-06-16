@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Plyo Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct PlyoExerciseName(pub u16);

@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Device Settings message.
 #[derive(Debug, Clone)]
-/// DeviceSettings is a DeviceSettings message.
 pub struct DeviceSettings {
     /// Index into time zone arrays.
     pub active_time_zone: u8,
@@ -65,53 +65,53 @@ pub struct DeviceSettings {
 }
 
 impl DeviceSettings {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ACTIVE_TIME_ZONE: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const UTC_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u32>`; Units: `s`
+    /// Value's type: `Vec<u32>`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_OFFSET: u8 = 2;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::TIME_MODE`
     pub const TIME_MODE: u8 = 4;
-    /// Value's type: `Vec<i8>`; Scale: `4`; Units: `hr`
+    /// Value's type: `Vec<i8>`; Scale: `4`; Units: `hr`; ProfileType: `ProfileType::SINT8`
     pub const TIME_ZONE_OFFSET: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BACKLIGHT_MODE`
     pub const BACKLIGHT_MODE: u8 = 12;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ACTIVITY_TRACKER_ENABLED: u8 = 36;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const CLOCK_TIME: u8 = 39;
-    /// Value's type: `Vec<u16>`
+    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
     pub const PAGES_ENABLED: u8 = 40;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const MOVE_ALERT_ENABLED: u8 = 46;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DATE_MODE`
     pub const DATE_MODE: u8 = 47;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_ORIENTATION`
     pub const DISPLAY_ORIENTATION: u8 = 55;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SIDE`
     pub const MOUNTING_SIDE: u8 = 56;
-    /// Value's type: `Vec<u16>`
+    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
     pub const DEFAULT_PAGE: u8 = 57;
-    /// Value's type: `u16`; Units: `steps`
+    /// Value's type: `u16`; Units: `steps`; ProfileType: `ProfileType::UINT16`
     pub const AUTOSYNC_MIN_STEPS: u8 = 58;
-    /// Value's type: `u16`; Units: `minutes`
+    /// Value's type: `u16`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
     pub const AUTOSYNC_MIN_TIME: u8 = 59;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const LACTATE_THRESHOLD_AUTODETECT_ENABLED: u8 = 80;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const BLE_AUTO_UPLOAD_ENABLED: u8 = 86;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::AUTO_SYNC_FREQUENCY`
     pub const AUTO_SYNC_FREQUENCY: u8 = 89;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::AUTO_ACTIVITY_DETECT`
     pub const AUTO_ACTIVITY_DETECT: u8 = 90;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const NUMBER_OF_SCREENS: u8 = 94;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_ORIENTATION`
     pub const SMART_NOTIFICATION_DISPLAY_ORIENTATION: u8 = 95;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SWITCH`
     pub const TAP_INTERFACE: u8 = 134;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::TAP_SENSITIVITY`
     pub const TAP_SENSITIVITY: u8 = 174;
 
     /// Create new DeviceSettings with all fields being set to its corresponding invalid value.
@@ -147,6 +147,8 @@ impl DeviceSettings {
     }
 
     /// Returns `time_zone_offset` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: hr
     pub fn time_zone_offset_scaled(&self) -> Option<Vec<f64>> {
         if self.time_zone_offset.is_empty() {
             return None;

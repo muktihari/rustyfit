@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Memo Glob message.
 #[derive(Debug, Clone)]
-/// MemoGlob is a MemoGlob message.
 pub struct MemoGlob {
     /// Sequence number of memo blocks
     pub part_index: u32,
@@ -32,17 +32,17 @@ pub struct MemoGlob {
 }
 
 impl MemoGlob {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const PART_INDEX: u8 = 250;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const MEMO: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
     pub const MESG_NUM: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const PARENT_INDEX: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const FIELD_NUM: u8 = 3;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z
+    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const DATA: u8 = 4;
 
     /// Create new MemoGlob with all fields being set to its corresponding invalid value.

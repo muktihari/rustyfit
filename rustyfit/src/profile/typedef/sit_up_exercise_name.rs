@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sit Up Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SitUpExerciseName(pub u16);

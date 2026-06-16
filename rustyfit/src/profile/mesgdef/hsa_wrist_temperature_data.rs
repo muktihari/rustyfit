@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Wrist Temperature Data message.
 #[derive(Debug, Clone)]
-/// HsaWristTemperatureData is a HsaWristTemperatureData message.
 pub struct HsaWristTemperatureData {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -26,11 +26,11 @@ pub struct HsaWristTemperatureData {
 }
 
 impl HsaWristTemperatureData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `C`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `C`; ProfileType: `ProfileType::UINT16`
     pub const VALUE: u8 = 1;
 
     /// Create new HsaWristTemperatureData with all fields being set to its corresponding invalid value.
@@ -45,6 +45,8 @@ impl HsaWristTemperatureData {
     }
 
     /// Returns `value` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn value_scaled(&self) -> Option<Vec<f64>> {
         if self.value.is_empty() {
             return None;

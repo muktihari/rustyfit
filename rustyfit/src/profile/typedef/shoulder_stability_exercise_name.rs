@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Shoulder Stability Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ShoulderStabilityExerciseName(pub u16);

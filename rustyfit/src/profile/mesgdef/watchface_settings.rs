@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Watchface Settings message.
 #[derive(Debug, Clone)]
-/// WatchfaceSettings is a WatchfaceSettings message.
 pub struct WatchfaceSettings {
     pub message_index: typedef::MessageIndex,
     pub mode: typedef::WatchfaceMode,
@@ -23,11 +23,11 @@ pub struct WatchfaceSettings {
 }
 
 impl WatchfaceSettings {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WATCHFACE_MODE`
     pub const MODE: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
     pub const LAYOUT: u8 = 1;
 
     /// Create new WatchfaceSettings with all fields being set to its corresponding invalid value.

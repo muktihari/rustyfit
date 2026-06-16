@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// File Flags type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct FileFlags(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Intensity type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Intensity(pub u8);

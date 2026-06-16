@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Met Zone message.
 #[derive(Debug, Clone)]
-/// MetZone is a MetZone message.
 pub struct MetZone {
     pub message_index: typedef::MessageIndex,
     pub high_bpm: u8,
@@ -26,13 +26,13 @@ pub struct MetZone {
 }
 
 impl MetZone {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const HIGH_BPM: u8 = 1;
-    /// Value's type: `u16`; Scale: `10`; Units: `kcal / min`
+    /// Value's type: `u16`; Scale: `10`; Units: `kcal / min`; ProfileType: `ProfileType::UINT16`
     pub const CALORIES: u8 = 2;
-    /// Value's type: `u8`; Scale: `10`; Units: `kcal / min`
+    /// Value's type: `u8`; Scale: `10`; Units: `kcal / min`; ProfileType: `ProfileType::UINT8`
     pub const FAT_CALORIES: u8 = 3;
 
     /// Create new MetZone with all fields being set to its corresponding invalid value.
@@ -48,6 +48,8 @@ impl MetZone {
     }
 
     /// Returns `calories` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kcal / min
     pub fn calories_scaled(&self) -> Option<f64> {
         if self.calories == u16::MAX {
             return None;
@@ -67,6 +69,8 @@ impl MetZone {
     }
 
     /// Returns `fat_calories` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kcal / min
     pub fn fat_calories_scaled(&self) -> Option<f64> {
         if self.fat_calories == u8::MAX {
             return None;

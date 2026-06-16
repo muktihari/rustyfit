@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sport Event type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SportEvent(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Dive Gas Status type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DiveGasStatus(pub u8);

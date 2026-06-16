@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Time Into Day type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TimeIntoDay(pub u32);

@@ -10,16 +10,16 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Spo2 Data message.
 #[derive(Debug, Clone)]
-/// HsaSpo2Data is a HsaSpo2Data message.
 pub struct HsaSpo2Data {
     /// Units: s
     pub timestamp: typedef::DateTime,
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
-    /// Units: percent; SpO2 Reading: [70,100] Blank: 240
+    /// Units: percent; SpO2 Reading: \[70,100\] Blank: 240
     pub reading_spo2: Vec<u8>,
-    /// SpO2 Confidence: [0,254]
+    /// SpO2 Confidence: \[0,254\]
     pub confidence: Vec<u8>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -28,13 +28,13 @@ pub struct HsaSpo2Data {
 }
 
 impl HsaSpo2Data {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u8>`; Units: `percent`
+    /// Value's type: `Vec<u8>`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const READING_SPO2: u8 = 1;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::UINT8`
     pub const CONFIDENCE: u8 = 2;
 
     /// Create new HsaSpo2Data with all fields being set to its corresponding invalid value.

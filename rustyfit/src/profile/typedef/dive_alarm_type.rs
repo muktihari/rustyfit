@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Dive Alarm Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DiveAlarmType(pub u8);

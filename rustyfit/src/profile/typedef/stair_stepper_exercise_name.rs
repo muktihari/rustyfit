@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Stair Stepper Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct StairStepperExerciseName(pub u16);

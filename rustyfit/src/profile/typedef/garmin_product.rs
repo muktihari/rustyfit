@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Garmin Product type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct GarminProduct(pub u16);

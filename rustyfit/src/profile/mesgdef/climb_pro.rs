@@ -11,8 +11,8 @@ use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
 
+/// Climb Pro message.
 #[derive(Debug, Clone)]
-/// ClimbPro is a ClimbPro message.
 pub struct ClimbPro {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -32,19 +32,19 @@ pub struct ClimbPro {
 }
 
 impl ClimbPro {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LAT: u8 = 0;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LONG: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::CLIMB_PRO_EVENT`
     pub const CLIMB_PRO_EVENT: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const CLIMB_NUMBER: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const CLIMB_CATEGORY: u8 = 4;
-    /// Value's type: `f32`; Units: `m`
+    /// Value's type: `f32`; Units: `m`; ProfileType: `ProfileType::FLOAT32`
     pub const CURRENT_DIST: u8 = 5;
 
     /// Create new ClimbPro with all fields being set to its corresponding invalid value.

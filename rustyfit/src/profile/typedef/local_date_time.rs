@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Local Date Time type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LocalDateTime(pub u32);

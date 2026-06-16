@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Run Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct RunExerciseName(pub u16);

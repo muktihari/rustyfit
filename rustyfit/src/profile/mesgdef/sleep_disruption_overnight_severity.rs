@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Sleep Disruption Overnight Severity message.
 #[derive(Debug, Clone)]
-/// SleepDisruptionOvernightSeverity is a SleepDisruptionOvernightSeverity message.
 pub struct SleepDisruptionOvernightSeverity {
     pub timestamp: typedef::DateTime,
     pub severity: typedef::SleepDisruptionSeverity,
@@ -22,9 +22,9 @@ pub struct SleepDisruptionOvernightSeverity {
 }
 
 impl SleepDisruptionOvernightSeverity {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SLEEP_DISRUPTION_SEVERITY`
     pub const SEVERITY: u8 = 0;
 
     /// Create new SleepDisruptionOvernightSeverity with all fields being set to its corresponding invalid value.

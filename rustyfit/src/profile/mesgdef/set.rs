@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Set message.
 #[derive(Debug, Clone)]
-/// Set is a Set message.
 pub struct Set {
     /// Timestamp of the set
     pub timestamp: typedef::DateTime,
@@ -25,7 +25,7 @@ pub struct Set {
     /// Start time of the set
     pub start_time: typedef::DateTime,
     pub category: Vec<typedef::ExerciseCategory>,
-    /// Based on the associated category, see [category]_exercise_names
+    /// Based on the associated category, see \[category\]_exercise_names
     pub category_subtype: Vec<u16>,
     pub weight_display_unit: typedef::FitBaseUnit,
     pub message_index: typedef::MessageIndex,
@@ -37,27 +37,27 @@ pub struct Set {
 }
 
 impl Set {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 254;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const DURATION: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const REPETITIONS: u8 = 3;
-    /// Value's type: `u16`; Scale: `16`; Units: `kg`
+    /// Value's type: `u16`; Scale: `16`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const WEIGHT: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SET_TYPE`
     pub const SET_TYPE: u8 = 5;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIME: u8 = 6;
-    /// Value's type: `Vec<u16>`
+    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::EXERCISE_CATEGORY`
     pub const CATEGORY: u8 = 7;
-    /// Value's type: `Vec<u16>`
+    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
     pub const CATEGORY_SUBTYPE: u8 = 8;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::FIT_BASE_UNIT`
     pub const WEIGHT_DISPLAY_UNIT: u8 = 9;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 10;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const WKT_STEP_INDEX: u8 = 11;
 
     /// Create new Set with all fields being set to its corresponding invalid value.
@@ -80,6 +80,8 @@ impl Set {
     }
 
     /// Returns `duration` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn duration_scaled(&self) -> Option<f64> {
         if self.duration == u32::MAX {
             return None;
@@ -99,6 +101,8 @@ impl Set {
     }
 
     /// Returns `weight` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == u16::MAX {
             return None;

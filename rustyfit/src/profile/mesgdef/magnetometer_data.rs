@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Magnetometer Data message.
 #[derive(Debug, Clone)]
-/// MagnetometerData is a MagnetometerData message.
 pub struct MagnetometerData {
     /// Units: s; Whole second part of the timestamp
     pub timestamp: typedef::DateTime,
@@ -38,23 +38,23 @@ pub struct MagnetometerData {
 }
 
 impl MagnetometerData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`
+    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const MAG_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const MAG_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const MAG_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; Units: `G`
+    /// Value's type: `Vec<f32>`; Units: `G`; ProfileType: `ProfileType::FLOAT32`
     pub const CALIBRATED_MAG_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; Units: `G`
+    /// Value's type: `Vec<f32>`; Units: `G`; ProfileType: `ProfileType::FLOAT32`
     pub const CALIBRATED_MAG_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; Units: `G`
+    /// Value's type: `Vec<f32>`; Units: `G`; ProfileType: `ProfileType::FLOAT32`
     pub const CALIBRATED_MAG_Z: u8 = 7;
 
     /// Create new MagnetometerData with all fields being set to its corresponding invalid value.

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Activity type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Activity(pub u8);

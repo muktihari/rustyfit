@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Monitoring Hr Data message.
 #[derive(Debug, Clone)]
-/// MonitoringHrData is a MonitoringHrData message.
 pub struct MonitoringHrData {
     /// Units: s; Must align to logging interval, for example, time must be 00:00:00 for daily log.
     pub timestamp: typedef::DateTime,
@@ -26,11 +26,11 @@ pub struct MonitoringHrData {
 }
 
 impl MonitoringHrData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const RESTING_HEART_RATE: u8 = 0;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const CURRENT_DAY_RESTING_HEART_RATE: u8 = 1;
 
     /// Create new MonitoringHrData with all fields being set to its corresponding invalid value.

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Hip Raise Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct HipRaiseExerciseName(pub u16);

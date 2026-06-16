@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Set Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SetType(pub u8);

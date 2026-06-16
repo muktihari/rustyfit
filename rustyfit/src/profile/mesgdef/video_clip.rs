@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Video Clip message.
 #[derive(Debug, Clone)]
-/// VideoClip is a VideoClip message.
 pub struct VideoClip {
     pub clip_number: u16,
     pub start_timestamp: typedef::DateTime,
@@ -29,19 +29,19 @@ pub struct VideoClip {
 }
 
 impl VideoClip {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const CLIP_NUMBER: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIMESTAMP: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const START_TIMESTAMP_MS: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const END_TIMESTAMP: u8 = 3;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const END_TIMESTAMP_MS: u8 = 4;
-    /// Value's type: `u32`; Units: `ms`
+    /// Value's type: `u32`; Units: `ms`; ProfileType: `ProfileType::UINT32`
     pub const CLIP_START: u8 = 6;
-    /// Value's type: `u32`; Units: `ms`
+    /// Value's type: `u32`; Units: `ms`; ProfileType: `ProfileType::UINT32`
     pub const CLIP_END: u8 = 7;
 
     /// Create new VideoClip with all fields being set to its corresponding invalid value.

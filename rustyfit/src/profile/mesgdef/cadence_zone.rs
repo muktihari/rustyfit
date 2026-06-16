@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Cadence Zone message.
 #[derive(Debug, Clone)]
-/// CadenceZone is a CadenceZone message.
 pub struct CadenceZone {
     pub message_index: typedef::MessageIndex,
     /// Units: rpm
@@ -26,11 +26,11 @@ pub struct CadenceZone {
 }
 
 impl CadenceZone {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; Units: `rpm`
+    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const HIGH_VALUE: u8 = 0;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 1;
 
     /// Create new CadenceZone with all fields being set to its corresponding invalid value.

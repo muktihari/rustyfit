@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Beat Intervals message.
 #[derive(Debug, Clone)]
-/// BeatIntervals is a BeatIntervals message.
 pub struct BeatIntervals {
     pub timestamp: typedef::DateTime,
     /// Units: ms; Milliseconds past date_time
@@ -25,11 +25,11 @@ pub struct BeatIntervals {
 }
 
 impl BeatIntervals {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`
+    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIME: u8 = 1;
 
     /// Create new BeatIntervals with all fields being set to its corresponding invalid value.

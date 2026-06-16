@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Skin Temp Overnight message.
 #[derive(Debug, Clone)]
-/// SkinTempOvernight is a SkinTempOvernight message.
 pub struct SkinTempOvernight {
     pub timestamp: typedef::DateTime,
     pub local_timestamp: typedef::LocalDateTime,
@@ -28,15 +28,15 @@ pub struct SkinTempOvernight {
 }
 
 impl SkinTempOvernight {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
     pub const LOCAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const AVERAGE_DEVIATION: u8 = 1;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const AVERAGE_7_DAY_DEVIATION: u8 = 2;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const NIGHTLY_VALUE: u8 = 4;
 
     /// Create new SkinTempOvernight with all fields being set to its corresponding invalid value.

@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Hr Zone message.
 #[derive(Debug, Clone)]
-/// HrZone is a HrZone message.
 pub struct HrZone {
     pub message_index: typedef::MessageIndex,
     /// Units: bpm
@@ -26,11 +26,11 @@ pub struct HrZone {
 }
 
 impl HrZone {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const HIGH_BPM: u8 = 1;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 2;
 
     /// Create new HrZone with all fields being set to its corresponding invalid value.

@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Video Frame message.
 #[derive(Debug, Clone)]
-/// VideoFrame is a VideoFrame message.
 pub struct VideoFrame {
     /// Units: s; Whole second part of the timestamp
     pub timestamp: typedef::DateTime,
@@ -26,11 +26,11 @@ pub struct VideoFrame {
 }
 
 impl VideoFrame {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const FRAME_NUMBER: u8 = 1;
 
     /// Create new VideoFrame with all fields being set to its corresponding invalid value.

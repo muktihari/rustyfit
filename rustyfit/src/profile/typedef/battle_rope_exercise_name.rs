@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Battle Rope Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BattleRopeExerciseName(pub u16);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Turn Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TurnType(pub u8);

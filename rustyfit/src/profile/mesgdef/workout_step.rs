@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Workout Step message.
 #[derive(Debug, Clone)]
-/// WorkoutStep is a WorkoutStep message.
 pub struct WorkoutStep {
     pub message_index: typedef::MessageIndex,
     pub wkt_step_name: String,
@@ -42,43 +42,43 @@ pub struct WorkoutStep {
 }
 
 impl WorkoutStep {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const WKT_STEP_NAME: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WKT_STEP_DURATION`
     pub const DURATION_TYPE: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const DURATION_VALUE: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WKT_STEP_TARGET`
     pub const TARGET_TYPE: u8 = 3;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const TARGET_VALUE: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const CUSTOM_TARGET_VALUE_LOW: u8 = 5;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const CUSTOM_TARGET_VALUE_HIGH: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::INTENSITY`
     pub const INTENSITY: u8 = 7;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NOTES: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WORKOUT_EQUIPMENT`
     pub const EQUIPMENT: u8 = 9;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::EXERCISE_CATEGORY`
     pub const EXERCISE_CATEGORY: u8 = 10;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const EXERCISE_NAME: u8 = 11;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const EXERCISE_WEIGHT: u8 = 12;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::FIT_BASE_UNIT`
     pub const WEIGHT_DISPLAY_UNIT: u8 = 13;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WKT_STEP_TARGET`
     pub const SECONDARY_TARGET_TYPE: u8 = 19;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const SECONDARY_TARGET_VALUE: u8 = 20;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const SECONDARY_CUSTOM_TARGET_VALUE_LOW: u8 = 21;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const SECONDARY_CUSTOM_TARGET_VALUE_HIGH: u8 = 22;
 
     /// Create new WorkoutStep with all fields being set to its corresponding invalid value.
@@ -109,6 +109,8 @@ impl WorkoutStep {
     }
 
     /// Returns `exercise_weight` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn exercise_weight_scaled(&self) -> Option<f64> {
         if self.exercise_weight == u16::MAX {
             return None;

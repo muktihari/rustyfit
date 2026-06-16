@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Weather Status type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WeatherStatus(pub u8);

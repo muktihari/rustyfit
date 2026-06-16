@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Zones Target message.
 #[derive(Debug, Clone)]
-/// ZonesTarget is a ZonesTarget message.
 pub struct ZonesTarget {
     pub max_heart_rate: u8,
     pub threshold_heart_rate: u8,
@@ -25,15 +25,15 @@ pub struct ZonesTarget {
 }
 
 impl ZonesTarget {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const MAX_HEART_RATE: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const THRESHOLD_HEART_RATE: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const FUNCTIONAL_THRESHOLD_POWER: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::HR_ZONE_CALC`
     pub const HR_CALC_TYPE: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::PWR_ZONE_CALC`
     pub const PWR_CALC_TYPE: u8 = 7;
 
     /// Create new ZonesTarget with all fields being set to its corresponding invalid value.

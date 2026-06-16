@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Watchface Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WatchfaceMode(pub u8);

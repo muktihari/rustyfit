@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Training File message.
 #[derive(Debug, Clone)]
-/// TrainingFile is a TrainingFile message.
 pub struct TrainingFile {
     pub timestamp: typedef::DateTime,
     pub r#type: typedef::File,
@@ -27,17 +27,17 @@ pub struct TrainingFile {
 }
 
 impl TrainingFile {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
     pub const TYPE: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PRODUCT: u8 = 2;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
     pub const SERIAL_NUMBER: u8 = 3;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIME_CREATED: u8 = 4;
 
     /// Create new TrainingFile with all fields being set to its corresponding invalid value.

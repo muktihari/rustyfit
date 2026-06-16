@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Ant Channel Id type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AntChannelId(pub u32);

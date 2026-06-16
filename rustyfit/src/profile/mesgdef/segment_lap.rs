@@ -20,8 +20,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Segment Lap message.
 #[derive(Debug, Clone)]
-/// SegmentLap is a SegmentLap message.
 pub struct SegmentLap {
     pub message_index: typedef::MessageIndex,
     /// Units: s
@@ -205,195 +205,195 @@ pub struct SegmentLap {
 }
 
 impl SegmentLap {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIME: u8 = 2;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const START_POSITION_LAT: u8 = 3;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const START_POSITION_LONG: u8 = 4;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const END_POSITION_LAT: u8 = 5;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const END_POSITION_LONG: u8 = 6;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_ELAPSED_TIME: u8 = 7;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_TIMER_TIME: u8 = 8;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_DISTANCE: u8 = 9;
-    /// Value's type: `u32`; Units: `cycles`
+    /// Value's type: `u32`; Units: `cycles`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_CYCLES: u8 = 10;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_CALORIES: u8 = 11;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_FAT_CALORIES: u8 = 12;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const AVG_SPEED: u8 = 13;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const MAX_SPEED: u8 = 14;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_HEART_RATE: u8 = 15;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_HEART_RATE: u8 = 16;
-    /// Value's type: `u8`; Units: `rpm`
+    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_CADENCE: u8 = 17;
-    /// Value's type: `u8`; Units: `rpm`
+    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_CADENCE: u8 = 18;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const AVG_POWER: u8 = 19;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const MAX_POWER: u8 = 20;
-    /// Value's type: `u16`; Units: `m`
+    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_ASCENT: u8 = 21;
-    /// Value's type: `u16`; Units: `m`
+    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_DESCENT: u8 = 22;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 23;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const EVENT_GROUP: u8 = 24;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const NEC_LAT: u8 = 25;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const NEC_LONG: u8 = 26;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const SWC_LAT: u8 = 27;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const SWC_LONG: u8 = 28;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 29;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const NORMALIZED_POWER: u8 = 30;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::LEFT_RIGHT_BALANCE_100`
     pub const LEFT_RIGHT_BALANCE: u8 = 31;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 32;
-    /// Value's type: `u32`; Units: `J`
+    /// Value's type: `u32`; Units: `J`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_WORK: u8 = 33;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const AVG_ALTITUDE: u8 = 34;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const MAX_ALTITUDE: u8 = 35;
-    /// Value's type: `u8`; Units: `m`
+    /// Value's type: `u8`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const GPS_ACCURACY: u8 = 36;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const AVG_GRADE: u8 = 37;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const AVG_POS_GRADE: u8 = 38;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const AVG_NEG_GRADE: u8 = 39;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const MAX_POS_GRADE: u8 = 40;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const MAX_NEG_GRADE: u8 = 41;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const AVG_TEMPERATURE: u8 = 42;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const MAX_TEMPERATURE: u8 = 43;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_MOVING_TIME: u8 = 44;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const AVG_POS_VERTICAL_SPEED: u8 = 45;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const AVG_NEG_VERTICAL_SPEED: u8 = 46;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const MAX_POS_VERTICAL_SPEED: u8 = 47;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const MAX_NEG_VERTICAL_SPEED: u8 = 48;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_HR_ZONE: u8 = 49;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_SPEED_ZONE: u8 = 50;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_CADENCE_ZONE: u8 = 51;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_POWER_ZONE: u8 = 52;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const REPETITION_NUM: u8 = 53;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const MIN_ALTITUDE: u8 = 54;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const MIN_HEART_RATE: u8 = 55;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ACTIVE_TIME: u8 = 56;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const WKT_STEP_INDEX: u8 = 57;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT_EVENT`
     pub const SPORT_EVENT: u8 = 58;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 59;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_TORQUE_EFFECTIVENESS: u8 = 60;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_PEDAL_SMOOTHNESS: u8 = 61;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 62;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 63;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_LAP_STATUS`
     pub const STATUS: u8 = 64;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const UUID: u8 = 65;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_FRACTIONAL_CADENCE: u8 = 66;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_FRACTIONAL_CADENCE: u8 = 67;
-    /// Value's type: `u8`; Scale: `128`; Units: `cycles`
+    /// Value's type: `u8`; Scale: `128`; Units: `cycles`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_FRACTIONAL_CYCLES: u8 = 68;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const FRONT_GEAR_SHIFT_COUNT: u8 = 69;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const REAR_GEAR_SHIFT_COUNT: u8 = 70;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_STANDING: u8 = 71;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const STAND_COUNT: u8 = 72;
-    /// Value's type: `i8`; Units: `mm`
+    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
     pub const AVG_LEFT_PCO: u8 = 73;
-    /// Value's type: `i8`; Units: `mm`
+    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
     pub const AVG_RIGHT_PCO: u8 = 74;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_POWER_PHASE: u8 = 75;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 76;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 77;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 78;
-    /// Value's type: `Vec<u16>`; Units: `watts`
+    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const AVG_POWER_POSITION: u8 = 79;
-    /// Value's type: `Vec<u16>`; Units: `watts`
+    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const MAX_POWER_POSITION: u8 = 80;
-    /// Value's type: `Vec<u8>`; Units: `rpm`
+    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_CADENCE_POSITION: u8 = 81;
-    /// Value's type: `Vec<u8>`; Units: `rpm`
+    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_CADENCE_POSITION: u8 = 82;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER: u8 = 83;
-    /// Value's type: `f32`; Units: `kGrit`
+    /// Value's type: `f32`; Units: `kGrit`; ProfileType: `ProfileType::FLOAT32`
     pub const TOTAL_GRIT: u8 = 84;
-    /// Value's type: `f32`; Units: `Flow`
+    /// Value's type: `f32`; Units: `Flow`; ProfileType: `ProfileType::FLOAT32`
     pub const TOTAL_FLOW: u8 = 85;
-    /// Value's type: `f32`; Units: `kGrit`
+    /// Value's type: `f32`; Units: `kGrit`; ProfileType: `ProfileType::FLOAT32`
     pub const AVG_GRIT: u8 = 86;
-    /// Value's type: `f32`; Units: `Flow`
+    /// Value's type: `f32`; Units: `Flow`; ProfileType: `ProfileType::FLOAT32`
     pub const AVG_FLOW: u8 = 87;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_FRACTIONAL_ASCENT: u8 = 89;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_FRACTIONAL_DESCENT: u8 = 90;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_AVG_ALTITUDE: u8 = 91;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_MAX_ALTITUDE: u8 = 92;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_MIN_ALTITUDE: u8 = 93;
 
     /// Create new SegmentLap with all fields being set to its corresponding invalid value.
@@ -589,6 +589,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -608,6 +610,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -627,6 +631,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
             return None;
@@ -646,6 +652,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u16::MAX {
             return None;
@@ -665,6 +673,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u16::MAX {
             return None;
@@ -684,6 +694,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn avg_altitude_scaled(&self) -> Option<f64> {
         if self.avg_altitude == u16::MAX {
             return None;
@@ -703,6 +715,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn max_altitude_scaled(&self) -> Option<f64> {
         if self.max_altitude == u16::MAX {
             return None;
@@ -722,6 +736,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_grade_scaled(&self) -> Option<f64> {
         if self.avg_grade == i16::MAX {
             return None;
@@ -741,6 +757,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_pos_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_pos_grade_scaled(&self) -> Option<f64> {
         if self.avg_pos_grade == i16::MAX {
             return None;
@@ -760,6 +778,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_neg_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_neg_grade_scaled(&self) -> Option<f64> {
         if self.avg_neg_grade == i16::MAX {
             return None;
@@ -779,6 +799,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_pos_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn max_pos_grade_scaled(&self) -> Option<f64> {
         if self.max_pos_grade == i16::MAX {
             return None;
@@ -798,6 +820,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_neg_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn max_neg_grade_scaled(&self) -> Option<f64> {
         if self.max_neg_grade == i16::MAX {
             return None;
@@ -817,6 +841,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_moving_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
             return None;
@@ -836,6 +862,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_pos_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_pos_vertical_speed_scaled(&self) -> Option<f64> {
         if self.avg_pos_vertical_speed == i16::MAX {
             return None;
@@ -855,6 +883,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_neg_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_neg_vertical_speed_scaled(&self) -> Option<f64> {
         if self.avg_neg_vertical_speed == i16::MAX {
             return None;
@@ -874,6 +904,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_pos_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_pos_vertical_speed_scaled(&self) -> Option<f64> {
         if self.max_pos_vertical_speed == i16::MAX {
             return None;
@@ -893,6 +925,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_neg_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_neg_vertical_speed_scaled(&self) -> Option<f64> {
         if self.max_neg_vertical_speed == i16::MAX {
             return None;
@@ -912,6 +946,8 @@ impl SegmentLap {
     }
 
     /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_hr_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_hr_zone.is_empty() {
             return None;
@@ -941,6 +977,8 @@ impl SegmentLap {
     }
 
     /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_speed_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_speed_zone.is_empty() {
             return None;
@@ -970,6 +1008,8 @@ impl SegmentLap {
     }
 
     /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_cadence_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_cadence_zone.is_empty() {
             return None;
@@ -999,6 +1039,8 @@ impl SegmentLap {
     }
 
     /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_power_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_power_zone.is_empty() {
             return None;
@@ -1028,6 +1070,8 @@ impl SegmentLap {
     }
 
     /// Returns `min_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn min_altitude_scaled(&self) -> Option<f64> {
         if self.min_altitude == u16::MAX {
             return None;
@@ -1047,6 +1091,8 @@ impl SegmentLap {
     }
 
     /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -1066,6 +1112,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_left_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.avg_left_torque_effectiveness == u8::MAX {
             return None;
@@ -1085,6 +1133,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_right_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_right_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.avg_right_torque_effectiveness == u8::MAX {
             return None;
@@ -1104,6 +1154,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_left_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_left_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_left_pedal_smoothness == u8::MAX {
             return None;
@@ -1123,6 +1175,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_right_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_right_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_right_pedal_smoothness == u8::MAX {
             return None;
@@ -1142,6 +1196,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_combined_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_combined_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_combined_pedal_smoothness == u8::MAX {
             return None;
@@ -1161,6 +1217,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_fractional_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
     pub fn avg_fractional_cadence_scaled(&self) -> Option<f64> {
         if self.avg_fractional_cadence == u8::MAX {
             return None;
@@ -1180,6 +1238,8 @@ impl SegmentLap {
     }
 
     /// Returns `max_fractional_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
     pub fn max_fractional_cadence_scaled(&self) -> Option<f64> {
         if self.max_fractional_cadence == u8::MAX {
             return None;
@@ -1199,6 +1259,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_fractional_cycles` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: cycles
     pub fn total_fractional_cycles_scaled(&self) -> Option<f64> {
         if self.total_fractional_cycles == u8::MAX {
             return None;
@@ -1218,6 +1280,8 @@ impl SegmentLap {
     }
 
     /// Returns `time_standing` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_standing_scaled(&self) -> Option<f64> {
         if self.time_standing == u32::MAX {
             return None;
@@ -1237,6 +1301,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_left_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_left_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_left_power_phase.is_empty() {
             return None;
@@ -1266,6 +1332,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_left_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_left_power_phase_peak.is_empty() {
             return None;
@@ -1295,6 +1363,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_right_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_right_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_right_power_phase.is_empty() {
             return None;
@@ -1324,6 +1394,8 @@ impl SegmentLap {
     }
 
     /// Returns `avg_right_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_right_power_phase_peak.is_empty() {
             return None;
@@ -1353,6 +1425,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_fractional_ascent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_fractional_ascent_scaled(&self) -> Option<f64> {
         if self.total_fractional_ascent == u8::MAX {
             return None;
@@ -1372,6 +1446,8 @@ impl SegmentLap {
     }
 
     /// Returns `total_fractional_descent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_fractional_descent_scaled(&self) -> Option<f64> {
         if self.total_fractional_descent == u8::MAX {
             return None;
@@ -1391,6 +1467,8 @@ impl SegmentLap {
     }
 
     /// Returns `enhanced_avg_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_avg_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_altitude == u32::MAX {
             return None;
@@ -1410,6 +1488,8 @@ impl SegmentLap {
     }
 
     /// Returns `enhanced_max_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_max_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_max_altitude == u32::MAX {
             return None;
@@ -1429,6 +1509,8 @@ impl SegmentLap {
     }
 
     /// Returns `enhanced_min_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_min_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_min_altitude == u32::MAX {
             return None;

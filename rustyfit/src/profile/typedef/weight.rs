@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Weight type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Weight(pub u16);

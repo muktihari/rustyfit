@@ -17,8 +17,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Ant Rx message.
 #[derive(Debug, Clone)]
-/// AntRx is a AntRx message.
 pub struct AntRx {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -36,17 +36,17 @@ pub struct AntRx {
 }
 
 impl AntRx {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768`; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
     pub const MESG_ID: u8 = 1;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const MESG_DATA: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const CHANNEL_NUMBER: u8 = 3;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const DATA: u8 = 4;
 
     /// Create new AntRx with all fields being set to its corresponding invalid value.
@@ -65,6 +65,8 @@ impl AntRx {
     }
 
     /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
             return None;

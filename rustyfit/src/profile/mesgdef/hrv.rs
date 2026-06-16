@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hrv message.
 #[derive(Debug, Clone)]
-/// Hrv is a Hrv message.
 pub struct Hrv {
     /// Scale: 1000; Units: s; Time between beats
     pub time: Vec<u16>,
@@ -22,7 +22,7 @@ pub struct Hrv {
 }
 
 impl Hrv {
-    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const TIME: u8 = 0;
 
     /// Create new Hrv with all fields being set to its corresponding invalid value.
@@ -35,6 +35,8 @@ impl Hrv {
     }
 
     /// Returns `time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_scaled(&self) -> Option<Vec<f64>> {
         if self.time.is_empty() {
             return None;

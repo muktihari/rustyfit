@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Step Data message.
 #[derive(Debug, Clone)]
-/// HsaStepData is a HsaStepData message.
 pub struct HsaStepData {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -26,11 +26,11 @@ pub struct HsaStepData {
 }
 
 impl HsaStepData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u32>`; Units: `steps`
+    /// Value's type: `Vec<u32>`; Units: `steps`; ProfileType: `ProfileType::UINT32`
     pub const STEPS: u8 = 1;
 
     /// Create new HsaStepData with all fields being set to its corresponding invalid value.

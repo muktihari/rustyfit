@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Shrug Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ShrugExerciseName(pub u16);

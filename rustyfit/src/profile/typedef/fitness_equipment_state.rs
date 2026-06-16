@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Fitness Equipment State type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct FitnessEquipmentState(pub u8);

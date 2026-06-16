@@ -17,8 +17,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Raw Bbi message.
 #[derive(Debug, Clone)]
-/// RawBbi is a RawBbi message.
 pub struct RawBbi {
     pub timestamp: typedef::DateTime,
     /// Units: ms; Millisecond resolution of the timestamp
@@ -39,17 +39,17 @@ pub struct RawBbi {
 }
 
 impl RawBbi {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`
+    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
     pub const DATA: u8 = 1;
-    /// Value's type: `Vec<u16>`; Units: `ms`
+    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIME: u8 = 2;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::UINT8`
     pub const QUALITY: u8 = 3;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::UINT8`
     pub const GAP: u8 = 4;
 
     /// Create new RawBbi with all fields being set to its corresponding invalid value.

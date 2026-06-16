@@ -13,8 +13,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Course Point message.
 #[derive(Debug, Clone)]
-/// CoursePoint is a CoursePoint message.
 pub struct CoursePoint {
     pub message_index: typedef::MessageIndex,
     pub timestamp: typedef::DateTime,
@@ -34,21 +34,21 @@ pub struct CoursePoint {
 }
 
 impl CoursePoint {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 1;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LAT: u8 = 2;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LONG: u8 = 3;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DISTANCE: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::COURSE_POINT`
     pub const TYPE: u8 = 5;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const FAVORITE: u8 = 8;
 
     /// Create new CoursePoint with all fields being set to its corresponding invalid value.
@@ -90,6 +90,8 @@ impl CoursePoint {
     }
 
     /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;

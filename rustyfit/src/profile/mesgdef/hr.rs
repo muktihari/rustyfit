@@ -17,8 +17,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Hr message.
 #[derive(Debug, Clone)]
-/// Hr is a Hr message.
 pub struct Hr {
     pub timestamp: typedef::DateTime,
     /// Scale: 32768; Units: s
@@ -39,17 +39,17 @@ pub struct Hr {
 }
 
 impl Hr {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768`; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `u8`; Scale: `256`; Units: `s`
+    /// Value's type: `u8`; Scale: `256`; Units: `s`; ProfileType: `ProfileType::UINT8`
     pub const TIME256: u8 = 1;
-    /// Value's type: `Vec<u8>`; Units: `bpm`
+    /// Value's type: `Vec<u8>`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const FILTERED_BPM: u8 = 6;
-    /// Value's type: `Vec<u32>`; Scale: `1024`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1024`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const EVENT_TIMESTAMP: u8 = 9;
-    /// Value's type: `Vec<u8>`; Units: `s`
+    /// Value's type: `Vec<u8>`; Units: `s`; ProfileType: `ProfileType::BYTE`
     pub const EVENT_TIMESTAMP_12: u8 = 10;
 
     /// Create new Hr with all fields being set to its corresponding invalid value.
@@ -68,6 +68,8 @@ impl Hr {
     }
 
     /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
             return None;
@@ -87,6 +89,8 @@ impl Hr {
     }
 
     /// Returns `time256` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time256_scaled(&self) -> Option<f64> {
         if self.time256 == u8::MAX {
             return None;
@@ -106,6 +110,8 @@ impl Hr {
     }
 
     /// Returns `event_timestamp` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn event_timestamp_scaled(&self) -> Option<Vec<f64>> {
         if self.event_timestamp.is_empty() {
             return None;

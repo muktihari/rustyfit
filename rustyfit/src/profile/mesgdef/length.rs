@@ -17,8 +17,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Length message.
 #[derive(Debug, Clone)]
-/// Length is a Length message.
 pub struct Length {
     pub message_index: typedef::MessageIndex,
     pub timestamp: typedef::DateTime,
@@ -61,49 +61,49 @@ pub struct Length {
 }
 
 impl Length {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIME: u8 = 2;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_ELAPSED_TIME: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_TIMER_TIME: u8 = 4;
-    /// Value's type: `u16`; Units: `strokes`
+    /// Value's type: `u16`; Units: `strokes`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_STROKES: u8 = 5;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const AVG_SPEED: u8 = 6;
-    /// Value's type: `u8`; Units: `swim_stroke`
+    /// Value's type: `u8`; Units: `swim_stroke`; ProfileType: `ProfileType::SWIM_STROKE`
     pub const SWIM_STROKE: u8 = 7;
-    /// Value's type: `u8`; Units: `strokes/min`
+    /// Value's type: `u8`; Units: `strokes/min`; ProfileType: `ProfileType::UINT8`
     pub const AVG_SWIMMING_CADENCE: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const EVENT_GROUP: u8 = 10;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_CALORIES: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::LENGTH_TYPE`
     pub const LENGTH_TYPE: u8 = 12;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PLAYER_SCORE: u8 = 18;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const OPPONENT_SCORE: u8 = 19;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const STROKE_COUNT: u8 = 20;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const ZONE_COUNT: u8 = 21;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
     pub const ENHANCED_AVG_RESPIRATION_RATE: u8 = 22;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
     pub const ENHANCED_MAX_RESPIRATION_RATE: u8 = 23;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RESPIRATION_RATE: u8 = 24;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const MAX_RESPIRATION_RATE: u8 = 25;
 
     /// Create new Length with all fields being set to its corresponding invalid value.
@@ -138,6 +138,8 @@ impl Length {
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -157,6 +159,8 @@ impl Length {
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -176,6 +180,8 @@ impl Length {
     }
 
     /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u16::MAX {
             return None;
@@ -195,6 +201,8 @@ impl Length {
     }
 
     /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: Breaths/min
     pub fn enhanced_avg_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_respiration_rate == u16::MAX {
             return None;
@@ -214,6 +222,8 @@ impl Length {
     }
 
     /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: Breaths/min
     pub fn enhanced_max_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_max_respiration_rate == u16::MAX {
             return None;

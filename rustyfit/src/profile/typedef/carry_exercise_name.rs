@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Carry Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CarryExerciseName(pub u16);

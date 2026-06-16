@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Projectile Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ProjectileType(pub u8);

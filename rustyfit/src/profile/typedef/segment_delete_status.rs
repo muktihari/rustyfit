@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Segment Delete Status type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SegmentDeleteStatus(pub u8);

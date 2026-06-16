@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Tissue Model Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TissueModelType(pub u8);

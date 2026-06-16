@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Rider Position Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct RiderPositionType(pub u8);

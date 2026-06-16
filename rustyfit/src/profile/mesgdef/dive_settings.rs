@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Dive Settings message.
 #[derive(Debug, Clone)]
-/// DiveSettings is a DiveSettings message.
 pub struct DiveSettings {
     pub timestamp: typedef::DateTime,
     pub message_index: typedef::MessageIndex,
@@ -77,75 +77,75 @@ pub struct DiveSettings {
 }
 
 impl DiveSettings {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::TISSUE_MODEL_TYPE`
     pub const MODEL: u8 = 1;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const GF_LOW: u8 = 2;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const GF_HIGH: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WATER_TYPE`
     pub const WATER_TYPE: u8 = 4;
-    /// Value's type: `f32`; Units: `kg/m^3`
+    /// Value's type: `f32`; Units: `kg/m^3`; ProfileType: `ProfileType::FLOAT32`
     pub const WATER_DENSITY: u8 = 5;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const PO2_WARN: u8 = 6;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const PO2_CRITICAL: u8 = 7;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const PO2_DECO: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const SAFETY_STOP_ENABLED: u8 = 9;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const BOTTOM_DEPTH: u8 = 10;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const BOTTOM_TIME: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const APNEA_COUNTDOWN_ENABLED: u8 = 12;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const APNEA_COUNTDOWN_TIME: u8 = 13;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_BACKLIGHT_MODE`
     pub const BACKLIGHT_MODE: u8 = 14;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const BACKLIGHT_BRIGHTNESS: u8 = 15;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BACKLIGHT_TIMEOUT`
     pub const BACKLIGHT_TIMEOUT: u8 = 16;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const REPEAT_DIVE_INTERVAL: u8 = 17;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const SAFETY_STOP_TIME: u8 = 18;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SOURCE_TYPE`
     pub const HEART_RATE_SOURCE_TYPE: u8 = 19;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const HEART_RATE_SOURCE: u8 = 20;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const TRAVEL_GAS: u8 = 21;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::CCR_SETPOINT_SWITCH_MODE`
     pub const CCR_LOW_SETPOINT_SWITCH_MODE: u8 = 22;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const CCR_LOW_SETPOINT: u8 = 23;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const CCR_LOW_SETPOINT_DEPTH: u8 = 24;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::CCR_SETPOINT_SWITCH_MODE`
     pub const CCR_HIGH_SETPOINT_SWITCH_MODE: u8 = 25;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`
+    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const CCR_HIGH_SETPOINT: u8 = 26;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const CCR_HIGH_SETPOINT_DEPTH: u8 = 27;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::GAS_CONSUMPTION_RATE_TYPE`
     pub const GAS_CONSUMPTION_DISPLAY: u8 = 29;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const UP_KEY_ENABLED: u8 = 30;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::TONE`
     pub const DIVE_SOUNDS: u8 = 35;
-    /// Value's type: `u8`; Scale: `10`
+    /// Value's type: `u8`; Scale: `10`; ProfileType: `ProfileType::UINT8`
     pub const LAST_STOP_MULTIPLE: u8 = 36;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::NO_FLY_TIME_MODE`
     pub const NO_FLY_TIME_MODE: u8 = 37;
 
     /// Create new DiveSettings with all fields being set to its corresponding invalid value.
@@ -192,6 +192,8 @@ impl DiveSettings {
     }
 
     /// Returns `po2_warn` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn po2_warn_scaled(&self) -> Option<f64> {
         if self.po2_warn == u8::MAX {
             return None;
@@ -211,6 +213,8 @@ impl DiveSettings {
     }
 
     /// Returns `po2_critical` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn po2_critical_scaled(&self) -> Option<f64> {
         if self.po2_critical == u8::MAX {
             return None;
@@ -230,6 +234,8 @@ impl DiveSettings {
     }
 
     /// Returns `po2_deco` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn po2_deco_scaled(&self) -> Option<f64> {
         if self.po2_deco == u8::MAX {
             return None;
@@ -249,6 +255,8 @@ impl DiveSettings {
     }
 
     /// Returns `ccr_low_setpoint` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn ccr_low_setpoint_scaled(&self) -> Option<f64> {
         if self.ccr_low_setpoint == u8::MAX {
             return None;
@@ -268,6 +276,8 @@ impl DiveSettings {
     }
 
     /// Returns `ccr_low_setpoint_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn ccr_low_setpoint_depth_scaled(&self) -> Option<f64> {
         if self.ccr_low_setpoint_depth == u32::MAX {
             return None;
@@ -287,6 +297,8 @@ impl DiveSettings {
     }
 
     /// Returns `ccr_high_setpoint` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn ccr_high_setpoint_scaled(&self) -> Option<f64> {
         if self.ccr_high_setpoint == u8::MAX {
             return None;
@@ -306,6 +318,8 @@ impl DiveSettings {
     }
 
     /// Returns `ccr_high_setpoint_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn ccr_high_setpoint_depth_scaled(&self) -> Option<f64> {
         if self.ccr_high_setpoint_depth == u32::MAX {
             return None;

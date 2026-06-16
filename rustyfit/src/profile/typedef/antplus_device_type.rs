@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Antplus Device Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AntplusDeviceType(pub u8);

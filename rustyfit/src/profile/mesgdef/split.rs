@@ -11,8 +11,8 @@ use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
 
+/// Split message.
 #[derive(Debug, Clone)]
-/// Split is a Split message.
 pub struct Split {
     pub message_index: typedef::MessageIndex,
     pub split_type: typedef::SplitType,
@@ -57,45 +57,45 @@ pub struct Split {
 }
 
 impl Split {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPLIT_TYPE`
     pub const SPLIT_TYPE: u8 = 0;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_ELAPSED_TIME: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_TIMER_TIME: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_DISTANCE: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const AVG_SPEED: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIME: u8 = 9;
-    /// Value's type: `u16`; Units: `m`
+    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_ASCENT: u8 = 13;
-    /// Value's type: `u16`; Units: `m`
+    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_DESCENT: u8 = 14;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const START_POSITION_LAT: u8 = 21;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const START_POSITION_LONG: u8 = 22;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const END_POSITION_LAT: u8 = 23;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const END_POSITION_LONG: u8 = 24;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const MAX_SPEED: u8 = 25;
-    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT32`
     pub const AVG_VERT_SPEED: u8 = 26;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const END_TIME: u8 = 27;
-    /// Value's type: `u32`; Units: `kcal`
+    /// Value's type: `u32`; Units: `kcal`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_CALORIES: u8 = 28;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const START_ELEVATION: u8 = 74;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ACTIVE_TIME: u8 = 78;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_MOVING_TIME: u8 = 110;
 
     /// Create new Split with all fields being set to its corresponding invalid value.
@@ -171,6 +171,8 @@ impl Split {
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -190,6 +192,8 @@ impl Split {
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -209,6 +213,8 @@ impl Split {
     }
 
     /// Returns `total_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
             return None;
@@ -228,6 +234,8 @@ impl Split {
     }
 
     /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
             return None;
@@ -247,6 +255,8 @@ impl Split {
     }
 
     /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
             return None;
@@ -266,6 +276,8 @@ impl Split {
     }
 
     /// Returns `avg_vert_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_vert_speed_scaled(&self) -> Option<f64> {
         if self.avg_vert_speed == i32::MAX {
             return None;
@@ -285,6 +297,8 @@ impl Split {
     }
 
     /// Returns `start_elevation` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn start_elevation_scaled(&self) -> Option<f64> {
         if self.start_elevation == u32::MAX {
             return None;
@@ -304,6 +318,8 @@ impl Split {
     }
 
     /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -323,6 +339,8 @@ impl Split {
     }
 
     /// Returns `total_moving_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
             return None;

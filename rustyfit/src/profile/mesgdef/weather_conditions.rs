@@ -13,8 +13,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Weather Conditions message.
 #[derive(Debug, Clone)]
-/// WeatherConditions is a WeatherConditions message.
 pub struct WeatherConditions {
     /// time of update for current conditions, else forecast time
     pub timestamp: typedef::DateTime,
@@ -52,37 +52,37 @@ pub struct WeatherConditions {
 }
 
 impl WeatherConditions {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_REPORT`
     pub const WEATHER_REPORT: u8 = 0;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const TEMPERATURE: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_STATUS`
     pub const CONDITION: u8 = 2;
-    /// Value's type: `u16`; Units: `degrees`
+    /// Value's type: `u16`; Units: `degrees`; ProfileType: `ProfileType::UINT16`
     pub const WIND_DIRECTION: u8 = 3;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const WIND_SPEED: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const PRECIPITATION_PROBABILITY: u8 = 5;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const TEMPERATURE_FEELS_LIKE: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const RELATIVE_HUMIDITY: u8 = 7;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const LOCATION: u8 = 8;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const OBSERVED_AT_TIME: u8 = 9;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const OBSERVED_LOCATION_LAT: u8 = 10;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const OBSERVED_LOCATION_LONG: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DAY_OF_WEEK`
     pub const DAY_OF_WEEK: u8 = 12;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const HIGH_TEMPERATURE: u8 = 13;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const LOW_TEMPERATURE: u8 = 14;
 
     /// Create new WeatherConditions with all fields being set to its corresponding invalid value.
@@ -132,6 +132,8 @@ impl WeatherConditions {
     }
 
     /// Returns `wind_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn wind_speed_scaled(&self) -> Option<f64> {
         if self.wind_speed == u16::MAX {
             return None;

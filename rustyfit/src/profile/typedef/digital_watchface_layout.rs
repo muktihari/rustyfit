@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Digital Watchface Layout type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DigitalWatchfaceLayout(pub u8);

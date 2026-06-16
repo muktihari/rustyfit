@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Wkt Step Duration type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WktStepDuration(pub u8);

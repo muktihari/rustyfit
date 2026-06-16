@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Run Indoor Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct RunIndoorExerciseName(pub u16);

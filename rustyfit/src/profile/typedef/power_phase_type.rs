@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Power Phase Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct PowerPhaseType(pub u8);

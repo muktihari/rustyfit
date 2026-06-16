@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Elliptical Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct EllipticalExerciseName(pub u16);

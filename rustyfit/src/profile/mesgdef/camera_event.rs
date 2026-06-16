@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Camera Event message.
 #[derive(Debug, Clone)]
-/// CameraEvent is a CameraEvent message.
 pub struct CameraEvent {
     /// Units: s; Whole second part of the timestamp.
     pub timestamp: typedef::DateTime,
@@ -29,15 +29,15 @@ pub struct CameraEvent {
 }
 
 impl CameraEvent {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::CAMERA_EVENT_TYPE`
     pub const CAMERA_EVENT_TYPE: u8 = 1;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const CAMERA_FILE_UUID: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::CAMERA_ORIENTATION_TYPE`
     pub const CAMERA_ORIENTATION: u8 = 3;
 
     /// Create new CameraEvent with all fields being set to its corresponding invalid value.

@@ -10,20 +10,20 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Obdii Data message.
 #[derive(Debug, Clone)]
-/// ObdiiData is a ObdiiData message.
 pub struct ObdiiData {
     /// Units: s; Timestamp message was output
     pub timestamp: typedef::DateTime,
     /// Units: ms; Fractional part of timestamp, added to timestamp
     pub timestamp_ms: u16,
-    /// Units: ms; Offset of PID reading [i] from start_timestamp+start_timestamp_ms. Readings may span across seconds.
+    /// Units: ms; Offset of PID reading \[i\] from start_timestamp+start_timestamp_ms. Readings may span across seconds.
     pub time_offset: Vec<u16>,
     /// Parameter ID
     pub pid: u8,
     /// Raw parameter data
     pub raw_data: Vec<u8>,
-    /// Optional, data size of PID[i]. If not specified refer to SAE J1979.
+    /// Optional, data size of PID\[i\]. If not specified refer to SAE J1979.
     pub pid_data_size: Vec<u8>,
     /// System time associated with sample expressed in ms, can be used instead of time_offset. There will be a system_time value for each raw_data element. For multibyte pids the system_time is repeated.
     pub system_time: Vec<u32>,
@@ -38,23 +38,23 @@ pub struct ObdiiData {
 }
 
 impl ObdiiData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`
+    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIME_OFFSET: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
     pub const PID: u8 = 2;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const RAW_DATA: u8 = 3;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::UINT8`
     pub const PID_DATA_SIZE: u8 = 4;
-    /// Value's type: `Vec<u32>`
+    /// Value's type: `Vec<u32>`; ProfileType: `ProfileType::UINT32`
     pub const SYSTEM_TIME: u8 = 5;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIMESTAMP: u8 = 6;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const START_TIMESTAMP_MS: u8 = 7;
 
     /// Create new ObdiiData with all fields being set to its corresponding invalid value.

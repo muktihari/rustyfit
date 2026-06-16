@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Field Description message.
 #[derive(Debug, Clone)]
-/// FieldDescription is a FieldDescription message.
 pub struct FieldDescription {
     pub developer_data_index: u8,
     pub field_definition_number: u8,
@@ -34,33 +34,33 @@ pub struct FieldDescription {
 }
 
 impl FieldDescription {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DEVELOPER_DATA_INDEX: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const FIELD_DEFINITION_NUMBER: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::FIT_BASE_TYPE`
     pub const FIT_BASE_TYPE_ID: u8 = 2;
-    /// Value's type: `Vec<String>`
+    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
     pub const FIELD_NAME: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ARRAY: u8 = 4;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const COMPONENTS: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SCALE: u8 = 6;
-    /// Value's type: `i8`
+    /// Value's type: `i8`; ProfileType: `ProfileType::SINT8`
     pub const OFFSET: u8 = 7;
-    /// Value's type: `Vec<String>`
+    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
     pub const UNITS: u8 = 8;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const BITS: u8 = 9;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const ACCUMULATE: u8 = 10;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::FIT_BASE_UNIT`
     pub const FIT_BASE_UNIT_ID: u8 = 13;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
     pub const NATIVE_MESG_NUM: u8 = 14;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const NATIVE_FIELD_NUM: u8 = 15;
 
     /// Create new FieldDescription with all fields being set to its corresponding invalid value.

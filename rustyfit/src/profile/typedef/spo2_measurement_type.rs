@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Spo2 Measurement Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Spo2MeasurementType(pub u8);

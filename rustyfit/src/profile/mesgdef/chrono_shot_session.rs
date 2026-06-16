@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Chrono Shot Session message.
 #[derive(Debug, Clone)]
-/// ChronoShotSession is a ChronoShotSession message.
 pub struct ChronoShotSession {
     pub timestamp: typedef::DateTime,
     /// Scale: 1000; Units: m/s
@@ -33,21 +33,21 @@ pub struct ChronoShotSession {
 }
 
 impl ChronoShotSession {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const MIN_SPEED: u8 = 0;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const MAX_SPEED: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const AVG_SPEED: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const SHOT_COUNT: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::PROJECTILE_TYPE`
     pub const PROJECTILE_TYPE: u8 = 4;
-    /// Value's type: `u32`; Scale: `10`; Units: `gr`
+    /// Value's type: `u32`; Scale: `10`; Units: `gr`; ProfileType: `ProfileType::UINT32`
     pub const GRAIN_WEIGHT: u8 = 5;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const STANDARD_DEVIATION: u8 = 6;
 
     /// Create new ChronoShotSession with all fields being set to its corresponding invalid value.
@@ -67,6 +67,8 @@ impl ChronoShotSession {
     }
 
     /// Returns `min_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn min_speed_scaled(&self) -> Option<f64> {
         if self.min_speed == u32::MAX {
             return None;
@@ -86,6 +88,8 @@ impl ChronoShotSession {
     }
 
     /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u32::MAX {
             return None;
@@ -105,6 +109,8 @@ impl ChronoShotSession {
     }
 
     /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u32::MAX {
             return None;
@@ -124,6 +130,8 @@ impl ChronoShotSession {
     }
 
     /// Returns `grain_weight` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: gr
     pub fn grain_weight_scaled(&self) -> Option<f64> {
         if self.grain_weight == u32::MAX {
             return None;
@@ -143,6 +151,8 @@ impl ChronoShotSession {
     }
 
     /// Returns `standard_deviation` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn standard_deviation_scaled(&self) -> Option<f64> {
         if self.standard_deviation == u32::MAX {
             return None;

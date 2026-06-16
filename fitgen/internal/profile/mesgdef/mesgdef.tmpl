@@ -31,8 +31,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 {{ end }}
 
+/// {{ .Doc }}
 #[derive(Debug, Clone)]
-/// {{ .Name }} is a {{ .Name }} message.
 pub struct {{ .Name }} {
 	{{ range .Fields -}} 
     {{ if .Comment -}}
@@ -60,7 +60,8 @@ impl {{ .Name }} {
     {{- if ne .Scale 1.0 }}; Scale: `{{ .Scale }}` {{- end }} 
     {{- if ne .Offset 0.0 }}; Offset: `{{ .Offset }}` {{- end }}
     {{- if ne .Units "" }}; Units: `{{ .Units }}` {{- end }}
-    {{- if hasSuffix .BaseType "Z" }}; Base: {{ .BaseType }} {{- end }}
+    {{- if hasSuffix .BaseType "Z" }}; Base: {{ .BaseType }} {{- end -}}
+    ; ProfileType: `{{ .ProfileType }}`
     pub const {{ .NameUpperCase }}: u8 = {{ .Num }};
     {{ end }}
     /// Create new {{ .Name }} with all fields being set to its corresponding invalid value.
@@ -98,6 +99,10 @@ impl {{ .Name }} {
     {{ range .Fields -}}
     {{ if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
         /// Returns `{{ .Name }}` in its scaled value. It returns `None` when value is invalid.
+        {{- if .Units }}
+        /// 
+        /// Units: {{ .Units -}}
+        {{ end }}
         {{ if not .Array -}}
         pub fn {{ .Name }}_scaled(&self) -> Option<f64> {
             if self.{{ .Name }} == {{ .InvalidValue }} {

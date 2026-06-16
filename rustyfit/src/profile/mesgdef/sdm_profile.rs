@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Sdm Profile message.
 #[derive(Debug, Clone)]
-/// SdmProfile is a SdmProfile message.
 pub struct SdmProfile {
     pub message_index: typedef::MessageIndex,
     pub enabled: typedef::Bool,
@@ -34,21 +34,21 @@ pub struct SdmProfile {
 }
 
 impl SdmProfile {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 0;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const SDM_ANT_ID: u8 = 1;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const SDM_CAL_FACTOR: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ODOMETER: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const SPEED_SOURCE: u8 = 4;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const SDM_ANT_ID_TRANS_TYPE: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ODOMETER_ROLLOVER: u8 = 7;
 
     /// Create new SdmProfile with all fields being set to its corresponding invalid value.
@@ -68,6 +68,8 @@ impl SdmProfile {
     }
 
     /// Returns `sdm_cal_factor` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn sdm_cal_factor_scaled(&self) -> Option<f64> {
         if self.sdm_cal_factor == u16::MAX {
             return None;
@@ -87,6 +89,8 @@ impl SdmProfile {
     }
 
     /// Returns `odometer` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn odometer_scaled(&self) -> Option<f64> {
         if self.odometer == u32::MAX {
             return None;

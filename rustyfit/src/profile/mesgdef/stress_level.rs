@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Stress Level message.
 #[derive(Debug, Clone)]
-/// StressLevel is a StressLevel message.
 pub struct StressLevel {
     pub stress_level_value: i16,
     /// Units: s; Time stress score was calculated
@@ -23,9 +23,9 @@ pub struct StressLevel {
 }
 
 impl StressLevel {
-    /// Value's type: `i16`
+    /// Value's type: `i16`; ProfileType: `ProfileType::SINT16`
     pub const STRESS_LEVEL_VALUE: u8 = 0;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const STRESS_LEVEL_TIME: u8 = 1;
 
     /// Create new StressLevel with all fields being set to its corresponding invalid value.

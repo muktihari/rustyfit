@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Weight Scale message.
 #[derive(Debug, Clone)]
-/// WeightScale is a WeightScale message.
 pub struct WeightScale {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -46,33 +46,33 @@ pub struct WeightScale {
 }
 
 impl WeightScale {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::WEIGHT`
     pub const WEIGHT: u8 = 0;
-    /// Value's type: `u16`; Scale: `100`; Units: `%`
+    /// Value's type: `u16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const PERCENT_FAT: u8 = 1;
-    /// Value's type: `u16`; Scale: `100`; Units: `%`
+    /// Value's type: `u16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const PERCENT_HYDRATION: u8 = 2;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const VISCERAL_FAT_MASS: u8 = 3;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const BONE_MASS: u8 = 4;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`
+    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const MUSCLE_MASS: u8 = 5;
-    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`
+    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`; ProfileType: `ProfileType::UINT16`
     pub const BASAL_MET: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const PHYSIQUE_RATING: u8 = 8;
-    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`
+    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`; ProfileType: `ProfileType::UINT16`
     pub const ACTIVE_MET: u8 = 9;
-    /// Value's type: `u8`; Units: `years`
+    /// Value's type: `u8`; Units: `years`; ProfileType: `ProfileType::UINT8`
     pub const METABOLIC_AGE: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const VISCERAL_FAT_RATING: u8 = 11;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const USER_PROFILE_INDEX: u8 = 12;
-    /// Value's type: `u16`; Scale: `10`; Units: `kg/m^2`
+    /// Value's type: `u16`; Scale: `10`; Units: `kg/m^2`; ProfileType: `ProfileType::UINT16`
     pub const BMI: u8 = 13;
 
     /// Create new WeightScale with all fields being set to its corresponding invalid value.
@@ -98,6 +98,8 @@ impl WeightScale {
     }
 
     /// Returns `weight` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn weight_scaled(&self) -> Option<f64> {
         if self.weight == typedef::Weight(u16::MAX) {
             return None;
@@ -117,6 +119,8 @@ impl WeightScale {
     }
 
     /// Returns `percent_fat` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn percent_fat_scaled(&self) -> Option<f64> {
         if self.percent_fat == u16::MAX {
             return None;
@@ -136,6 +140,8 @@ impl WeightScale {
     }
 
     /// Returns `percent_hydration` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn percent_hydration_scaled(&self) -> Option<f64> {
         if self.percent_hydration == u16::MAX {
             return None;
@@ -155,6 +161,8 @@ impl WeightScale {
     }
 
     /// Returns `visceral_fat_mass` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn visceral_fat_mass_scaled(&self) -> Option<f64> {
         if self.visceral_fat_mass == u16::MAX {
             return None;
@@ -174,6 +182,8 @@ impl WeightScale {
     }
 
     /// Returns `bone_mass` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn bone_mass_scaled(&self) -> Option<f64> {
         if self.bone_mass == u16::MAX {
             return None;
@@ -193,6 +203,8 @@ impl WeightScale {
     }
 
     /// Returns `muscle_mass` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn muscle_mass_scaled(&self) -> Option<f64> {
         if self.muscle_mass == u16::MAX {
             return None;
@@ -212,6 +224,8 @@ impl WeightScale {
     }
 
     /// Returns `basal_met` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kcal/day
     pub fn basal_met_scaled(&self) -> Option<f64> {
         if self.basal_met == u16::MAX {
             return None;
@@ -231,6 +245,8 @@ impl WeightScale {
     }
 
     /// Returns `active_met` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kcal/day
     pub fn active_met_scaled(&self) -> Option<f64> {
         if self.active_met == u16::MAX {
             return None;
@@ -250,6 +266,8 @@ impl WeightScale {
     }
 
     /// Returns `bmi` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg/m^2
     pub fn bmi_scaled(&self) -> Option<f64> {
         if self.bmi == u16::MAX {
             return None;

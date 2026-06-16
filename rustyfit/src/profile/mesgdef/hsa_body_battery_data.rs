@@ -10,14 +10,14 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Body Battery Data message.
 #[derive(Debug, Clone)]
-/// HsaBodyBatteryData is a HsaBodyBatteryData message.
 pub struct HsaBodyBatteryData {
     /// Units: s
     pub timestamp: typedef::DateTime,
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
-    /// Units: percent; Body battery level: [0,100] Blank: -16
+    /// Units: percent; Body battery level: \[0,100\] Blank: -16
     pub level: Vec<i8>,
     /// Body battery charged value
     pub charged: Vec<i16>,
@@ -30,15 +30,15 @@ pub struct HsaBodyBatteryData {
 }
 
 impl HsaBodyBatteryData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i8>`; Units: `percent`
+    /// Value's type: `Vec<i8>`; Units: `percent`; ProfileType: `ProfileType::SINT8`
     pub const LEVEL: u8 = 1;
-    /// Value's type: `Vec<i16>`
+    /// Value's type: `Vec<i16>`; ProfileType: `ProfileType::SINT16`
     pub const CHARGED: u8 = 2;
-    /// Value's type: `Vec<i16>`
+    /// Value's type: `Vec<i16>`; ProfileType: `ProfileType::SINT16`
     pub const UNCHARGED: u8 = 3;
 
     /// Create new HsaBodyBatteryData with all fields being set to its corresponding invalid value.

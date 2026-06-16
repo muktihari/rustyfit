@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Bike Light Network Config Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BikeLightNetworkConfigType(pub u8);

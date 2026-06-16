@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Accelerometer Data message.
 #[derive(Debug, Clone)]
-/// AccelerometerData is a AccelerometerData message.
 pub struct AccelerometerData {
     /// Units: s; Whole second part of the timestamp
     pub timestamp: typedef::DateTime,
@@ -44,29 +44,29 @@ pub struct AccelerometerData {
 }
 
 impl AccelerometerData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`
+    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const ACCEL_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; Units: `g`
+    /// Value's type: `Vec<f32>`; Units: `g`; ProfileType: `ProfileType::FLOAT32`
     pub const CALIBRATED_ACCEL_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; Units: `g`
+    /// Value's type: `Vec<f32>`; Units: `g`; ProfileType: `ProfileType::FLOAT32`
     pub const CALIBRATED_ACCEL_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; Units: `g`
+    /// Value's type: `Vec<f32>`; Units: `g`; ProfileType: `ProfileType::FLOAT32`
     pub const CALIBRATED_ACCEL_Z: u8 = 7;
-    /// Value's type: `Vec<i16>`; Units: `mG`
+    /// Value's type: `Vec<i16>`; Units: `mG`; ProfileType: `ProfileType::SINT16`
     pub const COMPRESSED_CALIBRATED_ACCEL_X: u8 = 8;
-    /// Value's type: `Vec<i16>`; Units: `mG`
+    /// Value's type: `Vec<i16>`; Units: `mG`; ProfileType: `ProfileType::SINT16`
     pub const COMPRESSED_CALIBRATED_ACCEL_Y: u8 = 9;
-    /// Value's type: `Vec<i16>`; Units: `mG`
+    /// Value's type: `Vec<i16>`; Units: `mG`; ProfileType: `ProfileType::SINT16`
     pub const COMPRESSED_CALIBRATED_ACCEL_Z: u8 = 10;
 
     /// Create new AccelerometerData with all fields being set to its corresponding invalid value.

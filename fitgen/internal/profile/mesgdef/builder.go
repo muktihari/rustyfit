@@ -177,9 +177,16 @@ func (b *Builder) Build() ([]generator.Data, error) {
 		}
 
 		messages = append(messages, Message{
+			Doc: func() string {
+				parts := strings.Split(mesg.Name, "_")
+				for i := range parts {
+					parts[i] = strutil.ToTitle(parts[i])
+				}
+				return strings.Join(parts, " ") + " message."
+			}(),
 			Num:               strings.ToUpper(mesg.Name),
-			NameSnakeCase:     mesg.Name,
 			Name:              strutil.ToTitle(mesg.Name),
+			NameSnakeCase:     mesg.Name,
 			Fields:            fields,
 			DynamicFields:     dynamicFields,
 			KnownNums:         knownNums,
@@ -242,6 +249,11 @@ func (b *Builder) componentExpansionAbility(mesg *parser.Message) (canExpand map
 	return
 }
 
+var escapeSquareBracket = strings.NewReplacer(
+	"[", "\\[",
+	"]", "\\]",
+)
+
 func createComment(field *Field, array string) string {
 	buf := new(strings.Builder)
 
@@ -277,7 +289,9 @@ func createComment(field *Field, array string) string {
 
 	buf.WriteString(field.Comment)
 
-	return strings.TrimSuffix(buf.String(), "; ")
+	s := escapeSquareBracket.Replace(buf.String())
+
+	return strings.TrimSuffix(s, "; ")
 }
 
 func (b *Builder) createDynamicField(mesgName string, field *Field, parserField *parser.Field) DynamicField {

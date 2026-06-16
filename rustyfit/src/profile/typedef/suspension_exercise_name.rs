@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Suspension Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SuspensionExerciseName(pub u16);

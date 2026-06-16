@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Stroke Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct StrokeType(pub u8);

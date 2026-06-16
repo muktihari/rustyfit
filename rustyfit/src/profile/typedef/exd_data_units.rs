@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Exd Data Units type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ExdDataUnits(pub u8);

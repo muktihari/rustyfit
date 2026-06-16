@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// No Fly Time Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct NoFlyTimeMode(pub u8);

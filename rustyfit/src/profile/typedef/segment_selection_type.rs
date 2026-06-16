@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Segment Selection Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SegmentSelectionType(pub u8);

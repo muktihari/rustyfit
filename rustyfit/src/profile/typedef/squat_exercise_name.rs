@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Squat Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SquatExerciseName(pub u16);

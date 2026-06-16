@@ -22,8 +22,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Session message.
 #[derive(Debug, Clone)]
-/// Session is a Session message.
 pub struct Session {
     /// Selected bit is set for the current session.
     pub message_index: typedef::MessageIndex,
@@ -330,321 +330,321 @@ pub struct Session {
 }
 
 impl Session {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIME: u8 = 2;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const START_POSITION_LAT: u8 = 3;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const START_POSITION_LONG: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 6;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_ELAPSED_TIME: u8 = 7;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_TIMER_TIME: u8 = 8;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_DISTANCE: u8 = 9;
-    /// Value's type: `u32`; Units: `cycles`
+    /// Value's type: `u32`; Units: `cycles`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_CYCLES: u8 = 10;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_CALORIES: u8 = 11;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_FAT_CALORIES: u8 = 13;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const AVG_SPEED: u8 = 14;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const MAX_SPEED: u8 = 15;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_HEART_RATE: u8 = 16;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_HEART_RATE: u8 = 17;
-    /// Value's type: `u8`; Units: `rpm`
+    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_CADENCE: u8 = 18;
-    /// Value's type: `u8`; Units: `rpm`
+    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_CADENCE: u8 = 19;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const AVG_POWER: u8 = 20;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const MAX_POWER: u8 = 21;
-    /// Value's type: `u16`; Units: `m`
+    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_ASCENT: u8 = 22;
-    /// Value's type: `u16`; Units: `m`
+    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const TOTAL_DESCENT: u8 = 23;
-    /// Value's type: `u8`; Scale: `10`
+    /// Value's type: `u8`; Scale: `10`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_TRAINING_EFFECT: u8 = 24;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const FIRST_LAP_INDEX: u8 = 25;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const NUM_LAPS: u8 = 26;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const EVENT_GROUP: u8 = 27;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SESSION_TRIGGER`
     pub const TRIGGER: u8 = 28;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const NEC_LAT: u8 = 29;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const NEC_LONG: u8 = 30;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const SWC_LAT: u8 = 31;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const SWC_LONG: u8 = 32;
-    /// Value's type: `u16`; Units: `lengths`
+    /// Value's type: `u16`; Units: `lengths`; ProfileType: `ProfileType::UINT16`
     pub const NUM_LENGTHS: u8 = 33;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const NORMALIZED_POWER: u8 = 34;
-    /// Value's type: `u16`; Scale: `10`; Units: `tss`
+    /// Value's type: `u16`; Scale: `10`; Units: `tss`; ProfileType: `ProfileType::UINT16`
     pub const TRAINING_STRESS_SCORE: u8 = 35;
-    /// Value's type: `u16`; Scale: `1000`; Units: `if`
+    /// Value's type: `u16`; Scale: `1000`; Units: `if`; ProfileType: `ProfileType::UINT16`
     pub const INTENSITY_FACTOR: u8 = 36;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::LEFT_RIGHT_BALANCE_100`
     pub const LEFT_RIGHT_BALANCE: u8 = 37;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const END_POSITION_LAT: u8 = 38;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const END_POSITION_LONG: u8 = 39;
-    /// Value's type: `u32`; Scale: `10`; Units: `strokes/lap`
+    /// Value's type: `u32`; Scale: `10`; Units: `strokes/lap`; ProfileType: `ProfileType::UINT32`
     pub const AVG_STROKE_COUNT: u8 = 41;
-    /// Value's type: `u16`; Scale: `100`; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const AVG_STROKE_DISTANCE: u8 = 42;
-    /// Value's type: `u8`; Units: `swim_stroke`
+    /// Value's type: `u8`; Units: `swim_stroke`; ProfileType: `ProfileType::SWIM_STROKE`
     pub const SWIM_STROKE: u8 = 43;
-    /// Value's type: `u16`; Scale: `100`; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const POOL_LENGTH: u8 = 44;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const THRESHOLD_POWER: u8 = 45;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const POOL_LENGTH_UNIT: u8 = 46;
-    /// Value's type: `u16`; Units: `lengths`
+    /// Value's type: `u16`; Units: `lengths`; ProfileType: `ProfileType::UINT16`
     pub const NUM_ACTIVE_LENGTHS: u8 = 47;
-    /// Value's type: `u32`; Units: `J`
+    /// Value's type: `u32`; Units: `J`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_WORK: u8 = 48;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const AVG_ALTITUDE: u8 = 49;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const MAX_ALTITUDE: u8 = 50;
-    /// Value's type: `u8`; Units: `m`
+    /// Value's type: `u8`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const GPS_ACCURACY: u8 = 51;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const AVG_GRADE: u8 = 52;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const AVG_POS_GRADE: u8 = 53;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const AVG_NEG_GRADE: u8 = 54;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const MAX_POS_GRADE: u8 = 55;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`
+    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
     pub const MAX_NEG_GRADE: u8 = 56;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const AVG_TEMPERATURE: u8 = 57;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const MAX_TEMPERATURE: u8 = 58;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TOTAL_MOVING_TIME: u8 = 59;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const AVG_POS_VERTICAL_SPEED: u8 = 60;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const AVG_NEG_VERTICAL_SPEED: u8 = 61;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const MAX_POS_VERTICAL_SPEED: u8 = 62;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const MAX_NEG_VERTICAL_SPEED: u8 = 63;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const MIN_HEART_RATE: u8 = 64;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_HR_ZONE: u8 = 65;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_SPEED_ZONE: u8 = 66;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_CADENCE_ZONE: u8 = 67;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_POWER_ZONE: u8 = 68;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const AVG_LAP_TIME: u8 = 69;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const BEST_LAP_INDEX: u8 = 70;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const MIN_ALTITUDE: u8 = 71;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ACTIVE_TIME: u8 = 78;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PLAYER_SCORE: u8 = 82;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const OPPONENT_SCORE: u8 = 83;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const OPPONENT_NAME: u8 = 84;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const STROKE_COUNT: u8 = 85;
-    /// Value's type: `Vec<u16>`; Units: `counts`
+    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
     pub const ZONE_COUNT: u8 = 86;
-    /// Value's type: `u16`; Scale: `100`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `100`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const MAX_BALL_SPEED: u8 = 87;
-    /// Value's type: `u16`; Scale: `100`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `100`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const AVG_BALL_SPEED: u8 = 88;
-    /// Value's type: `u16`; Scale: `10`; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`; ProfileType: `ProfileType::UINT16`
     pub const AVG_VERTICAL_OSCILLATION: u8 = 89;
-    /// Value's type: `u16`; Scale: `100`; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const AVG_STANCE_TIME_PERCENT: u8 = 90;
-    /// Value's type: `u16`; Scale: `10`; Units: `ms`
+    /// Value's type: `u16`; Scale: `10`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const AVG_STANCE_TIME: u8 = 91;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_FRACTIONAL_CADENCE: u8 = 92;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`
+    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_FRACTIONAL_CADENCE: u8 = 93;
-    /// Value's type: `u8`; Scale: `128`; Units: `cycles`
+    /// Value's type: `u8`; Scale: `128`; Units: `cycles`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_FRACTIONAL_CYCLES: u8 = 94;
-    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`
+    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`; ProfileType: `ProfileType::UINT16`
     pub const AVG_TOTAL_HEMOGLOBIN_CONC: u8 = 95;
-    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`
+    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`; ProfileType: `ProfileType::UINT16`
     pub const MIN_TOTAL_HEMOGLOBIN_CONC: u8 = 96;
-    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`
+    /// Value's type: `Vec<u16>`; Scale: `100`; Units: `g/dL`; ProfileType: `ProfileType::UINT16`
     pub const MAX_TOTAL_HEMOGLOBIN_CONC: u8 = 97;
-    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`
+    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const AVG_SATURATED_HEMOGLOBIN_PERCENT: u8 = 98;
-    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`
+    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const MIN_SATURATED_HEMOGLOBIN_PERCENT: u8 = 99;
-    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`
+    /// Value's type: `Vec<u16>`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const MAX_SATURATED_HEMOGLOBIN_PERCENT: u8 = 100;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 101;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_TORQUE_EFFECTIVENESS: u8 = 102;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_PEDAL_SMOOTHNESS: u8 = 103;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 104;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 105;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const SPORT_PROFILE_NAME: u8 = 110;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SPORT_INDEX: u8 = 111;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_STANDING: u8 = 112;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const STAND_COUNT: u8 = 113;
-    /// Value's type: `i8`; Units: `mm`
+    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
     pub const AVG_LEFT_PCO: u8 = 114;
-    /// Value's type: `i8`; Units: `mm`
+    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
     pub const AVG_RIGHT_PCO: u8 = 115;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_POWER_PHASE: u8 = 116;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 117;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 118;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 119;
-    /// Value's type: `Vec<u16>`; Units: `watts`
+    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const AVG_POWER_POSITION: u8 = 120;
-    /// Value's type: `Vec<u16>`; Units: `watts`
+    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const MAX_POWER_POSITION: u8 = 121;
-    /// Value's type: `Vec<u8>`; Units: `rpm`
+    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const AVG_CADENCE_POSITION: u8 = 122;
-    /// Value's type: `Vec<u8>`; Units: `rpm`
+    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const MAX_CADENCE_POSITION: u8 = 123;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_AVG_SPEED: u8 = 124;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_MAX_SPEED: u8 = 125;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_AVG_ALTITUDE: u8 = 126;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_MIN_ALTITUDE: u8 = 127;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_MAX_ALTITUDE: u8 = 128;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const AVG_LEV_MOTOR_POWER: u8 = 129;
-    /// Value's type: `u16`; Units: `watts`
+    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const MAX_LEV_MOTOR_POWER: u8 = 130;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`
+    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const LEV_BATTERY_CONSUMPTION: u8 = 131;
-    /// Value's type: `u16`; Scale: `100`; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const AVG_VERTICAL_RATIO: u8 = 132;
-    /// Value's type: `u16`; Scale: `100`; Units: `percent`
+    /// Value's type: `u16`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const AVG_STANCE_TIME_BALANCE: u8 = 133;
-    /// Value's type: `u16`; Scale: `10`; Units: `mm`
+    /// Value's type: `u16`; Scale: `10`; Units: `mm`; ProfileType: `ProfileType::UINT16`
     pub const AVG_STEP_LENGTH: u8 = 134;
-    /// Value's type: `u8`; Scale: `10`
+    /// Value's type: `u8`; Scale: `10`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_ANAEROBIC_TRAINING_EFFECT: u8 = 137;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const AVG_VAM: u8 = 139;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const AVG_DEPTH: u8 = 140;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const MAX_DEPTH: u8 = 141;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const SURFACE_INTERVAL: u8 = 142;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const START_CNS: u8 = 143;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const END_CNS: u8 = 144;
-    /// Value's type: `u16`; Units: `percent`
+    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const START_N2: u8 = 145;
-    /// Value's type: `u16`; Units: `percent`
+    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
     pub const END_N2: u8 = 146;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const AVG_RESPIRATION_RATE: u8 = 147;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const MAX_RESPIRATION_RATE: u8 = 148;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const MIN_RESPIRATION_RATE: u8 = 149;
-    /// Value's type: `i8`; Units: `C`
+    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
     pub const MIN_TEMPERATURE: u8 = 150;
-    /// Value's type: `u16`; Units: `OTUs`
+    /// Value's type: `u16`; Units: `OTUs`; ProfileType: `ProfileType::UINT16`
     pub const O2_TOXICITY: u8 = 155;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const DIVE_NUMBER: u8 = 156;
-    /// Value's type: `i32`; Scale: `65536`
+    /// Value's type: `i32`; Scale: `65536`; ProfileType: `ProfileType::SINT32`
     pub const TRAINING_LOAD_PEAK: u8 = 168;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
     pub const ENHANCED_AVG_RESPIRATION_RATE: u8 = 169;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`
+    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
     pub const ENHANCED_MAX_RESPIRATION_RATE: u8 = 170;
-    /// Value's type: `u16`; Scale: `100`
+    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
     pub const ENHANCED_MIN_RESPIRATION_RATE: u8 = 180;
-    /// Value's type: `f32`; Units: `kGrit`
+    /// Value's type: `f32`; Units: `kGrit`; ProfileType: `ProfileType::FLOAT32`
     pub const TOTAL_GRIT: u8 = 181;
-    /// Value's type: `f32`; Units: `Flow`
+    /// Value's type: `f32`; Units: `Flow`; ProfileType: `ProfileType::FLOAT32`
     pub const TOTAL_FLOW: u8 = 182;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const JUMP_COUNT: u8 = 183;
-    /// Value's type: `f32`; Units: `kGrit`
+    /// Value's type: `f32`; Units: `kGrit`; ProfileType: `ProfileType::FLOAT32`
     pub const AVG_GRIT: u8 = 186;
-    /// Value's type: `f32`; Units: `Flow`
+    /// Value's type: `f32`; Units: `Flow`; ProfileType: `ProfileType::FLOAT32`
     pub const AVG_FLOW: u8 = 187;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const WORKOUT_FEEL: u8 = 192;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const WORKOUT_RPE: u8 = 193;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_SPO2: u8 = 194;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const AVG_STRESS: u8 = 195;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const METABOLIC_CALORIES: u8 = 196;
-    /// Value's type: `u8`; Units: `mS`
+    /// Value's type: `u8`; Units: `mS`; ProfileType: `ProfileType::UINT8`
     pub const SDRR_HRV: u8 = 197;
-    /// Value's type: `u8`; Units: `mS`
+    /// Value's type: `u8`; Units: `mS`; ProfileType: `ProfileType::UINT8`
     pub const RMSSD_HRV: u8 = 198;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_FRACTIONAL_ASCENT: u8 = 199;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`
+    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
     pub const TOTAL_FRACTIONAL_DESCENT: u8 = 200;
-    /// Value's type: `u16`; Scale: `100`; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::UINT16`
     pub const AVG_CORE_TEMPERATURE: u8 = 208;
-    /// Value's type: `u16`; Scale: `100`; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::UINT16`
     pub const MIN_CORE_TEMPERATURE: u8 = 209;
-    /// Value's type: `u16`; Scale: `100`; Units: `C`
+    /// Value's type: `u16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::UINT16`
     pub const MAX_CORE_TEMPERATURE: u8 = 210;
 
     /// Create new Session with all fields being set to its corresponding invalid value.
@@ -903,6 +903,8 @@ impl Session {
     }
 
     /// Returns `total_elapsed_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_elapsed_time_scaled(&self) -> Option<f64> {
         if self.total_elapsed_time == u32::MAX {
             return None;
@@ -922,6 +924,8 @@ impl Session {
     }
 
     /// Returns `total_timer_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_timer_time_scaled(&self) -> Option<f64> {
         if self.total_timer_time == u32::MAX {
             return None;
@@ -941,6 +945,8 @@ impl Session {
     }
 
     /// Returns `total_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_distance_scaled(&self) -> Option<f64> {
         if self.total_distance == u32::MAX {
             return None;
@@ -960,6 +966,8 @@ impl Session {
     }
 
     /// Returns `avg_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_speed_scaled(&self) -> Option<f64> {
         if self.avg_speed == u16::MAX {
             return None;
@@ -979,6 +987,8 @@ impl Session {
     }
 
     /// Returns `max_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_speed_scaled(&self) -> Option<f64> {
         if self.max_speed == u16::MAX {
             return None;
@@ -1017,6 +1027,8 @@ impl Session {
     }
 
     /// Returns `training_stress_score` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: tss
     pub fn training_stress_score_scaled(&self) -> Option<f64> {
         if self.training_stress_score == u16::MAX {
             return None;
@@ -1036,6 +1048,8 @@ impl Session {
     }
 
     /// Returns `intensity_factor` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: if
     pub fn intensity_factor_scaled(&self) -> Option<f64> {
         if self.intensity_factor == u16::MAX {
             return None;
@@ -1055,6 +1069,8 @@ impl Session {
     }
 
     /// Returns `avg_stroke_count` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: strokes/lap
     pub fn avg_stroke_count_scaled(&self) -> Option<f64> {
         if self.avg_stroke_count == u32::MAX {
             return None;
@@ -1074,6 +1090,8 @@ impl Session {
     }
 
     /// Returns `avg_stroke_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn avg_stroke_distance_scaled(&self) -> Option<f64> {
         if self.avg_stroke_distance == u16::MAX {
             return None;
@@ -1093,6 +1111,8 @@ impl Session {
     }
 
     /// Returns `pool_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn pool_length_scaled(&self) -> Option<f64> {
         if self.pool_length == u16::MAX {
             return None;
@@ -1112,6 +1132,8 @@ impl Session {
     }
 
     /// Returns `avg_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn avg_altitude_scaled(&self) -> Option<f64> {
         if self.avg_altitude == u16::MAX {
             return None;
@@ -1131,6 +1153,8 @@ impl Session {
     }
 
     /// Returns `max_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn max_altitude_scaled(&self) -> Option<f64> {
         if self.max_altitude == u16::MAX {
             return None;
@@ -1150,6 +1174,8 @@ impl Session {
     }
 
     /// Returns `avg_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_grade_scaled(&self) -> Option<f64> {
         if self.avg_grade == i16::MAX {
             return None;
@@ -1169,6 +1195,8 @@ impl Session {
     }
 
     /// Returns `avg_pos_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_pos_grade_scaled(&self) -> Option<f64> {
         if self.avg_pos_grade == i16::MAX {
             return None;
@@ -1188,6 +1216,8 @@ impl Session {
     }
 
     /// Returns `avg_neg_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_neg_grade_scaled(&self) -> Option<f64> {
         if self.avg_neg_grade == i16::MAX {
             return None;
@@ -1207,6 +1237,8 @@ impl Session {
     }
 
     /// Returns `max_pos_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn max_pos_grade_scaled(&self) -> Option<f64> {
         if self.max_pos_grade == i16::MAX {
             return None;
@@ -1226,6 +1258,8 @@ impl Session {
     }
 
     /// Returns `max_neg_grade` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn max_neg_grade_scaled(&self) -> Option<f64> {
         if self.max_neg_grade == i16::MAX {
             return None;
@@ -1245,6 +1279,8 @@ impl Session {
     }
 
     /// Returns `total_moving_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn total_moving_time_scaled(&self) -> Option<f64> {
         if self.total_moving_time == u32::MAX {
             return None;
@@ -1264,6 +1300,8 @@ impl Session {
     }
 
     /// Returns `avg_pos_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_pos_vertical_speed_scaled(&self) -> Option<f64> {
         if self.avg_pos_vertical_speed == i16::MAX {
             return None;
@@ -1283,6 +1321,8 @@ impl Session {
     }
 
     /// Returns `avg_neg_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_neg_vertical_speed_scaled(&self) -> Option<f64> {
         if self.avg_neg_vertical_speed == i16::MAX {
             return None;
@@ -1302,6 +1342,8 @@ impl Session {
     }
 
     /// Returns `max_pos_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_pos_vertical_speed_scaled(&self) -> Option<f64> {
         if self.max_pos_vertical_speed == i16::MAX {
             return None;
@@ -1321,6 +1363,8 @@ impl Session {
     }
 
     /// Returns `max_neg_vertical_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_neg_vertical_speed_scaled(&self) -> Option<f64> {
         if self.max_neg_vertical_speed == i16::MAX {
             return None;
@@ -1340,6 +1384,8 @@ impl Session {
     }
 
     /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_hr_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_hr_zone.is_empty() {
             return None;
@@ -1369,6 +1415,8 @@ impl Session {
     }
 
     /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_speed_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_speed_zone.is_empty() {
             return None;
@@ -1398,6 +1446,8 @@ impl Session {
     }
 
     /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_cadence_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_cadence_zone.is_empty() {
             return None;
@@ -1427,6 +1477,8 @@ impl Session {
     }
 
     /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_power_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_power_zone.is_empty() {
             return None;
@@ -1456,6 +1508,8 @@ impl Session {
     }
 
     /// Returns `avg_lap_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn avg_lap_time_scaled(&self) -> Option<f64> {
         if self.avg_lap_time == u32::MAX {
             return None;
@@ -1475,6 +1529,8 @@ impl Session {
     }
 
     /// Returns `min_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn min_altitude_scaled(&self) -> Option<f64> {
         if self.min_altitude == u16::MAX {
             return None;
@@ -1494,6 +1550,8 @@ impl Session {
     }
 
     /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -1513,6 +1571,8 @@ impl Session {
     }
 
     /// Returns `max_ball_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn max_ball_speed_scaled(&self) -> Option<f64> {
         if self.max_ball_speed == u16::MAX {
             return None;
@@ -1532,6 +1592,8 @@ impl Session {
     }
 
     /// Returns `avg_ball_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_ball_speed_scaled(&self) -> Option<f64> {
         if self.avg_ball_speed == u16::MAX {
             return None;
@@ -1551,6 +1613,8 @@ impl Session {
     }
 
     /// Returns `avg_vertical_oscillation` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
     pub fn avg_vertical_oscillation_scaled(&self) -> Option<f64> {
         if self.avg_vertical_oscillation == u16::MAX {
             return None;
@@ -1570,6 +1634,8 @@ impl Session {
     }
 
     /// Returns `avg_stance_time_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_stance_time_percent_scaled(&self) -> Option<f64> {
         if self.avg_stance_time_percent == u16::MAX {
             return None;
@@ -1589,6 +1655,8 @@ impl Session {
     }
 
     /// Returns `avg_stance_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn avg_stance_time_scaled(&self) -> Option<f64> {
         if self.avg_stance_time == u16::MAX {
             return None;
@@ -1608,6 +1676,8 @@ impl Session {
     }
 
     /// Returns `avg_fractional_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
     pub fn avg_fractional_cadence_scaled(&self) -> Option<f64> {
         if self.avg_fractional_cadence == u8::MAX {
             return None;
@@ -1627,6 +1697,8 @@ impl Session {
     }
 
     /// Returns `max_fractional_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
     pub fn max_fractional_cadence_scaled(&self) -> Option<f64> {
         if self.max_fractional_cadence == u8::MAX {
             return None;
@@ -1646,6 +1718,8 @@ impl Session {
     }
 
     /// Returns `total_fractional_cycles` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: cycles
     pub fn total_fractional_cycles_scaled(&self) -> Option<f64> {
         if self.total_fractional_cycles == u8::MAX {
             return None;
@@ -1665,6 +1739,8 @@ impl Session {
     }
 
     /// Returns `avg_total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: g/dL
     pub fn avg_total_hemoglobin_conc_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_total_hemoglobin_conc.is_empty() {
             return None;
@@ -1694,6 +1770,8 @@ impl Session {
     }
 
     /// Returns `min_total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: g/dL
     pub fn min_total_hemoglobin_conc_scaled(&self) -> Option<Vec<f64>> {
         if self.min_total_hemoglobin_conc.is_empty() {
             return None;
@@ -1723,6 +1801,8 @@ impl Session {
     }
 
     /// Returns `max_total_hemoglobin_conc` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: g/dL
     pub fn max_total_hemoglobin_conc_scaled(&self) -> Option<Vec<f64>> {
         if self.max_total_hemoglobin_conc.is_empty() {
             return None;
@@ -1752,6 +1832,8 @@ impl Session {
     }
 
     /// Returns `avg_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn avg_saturated_hemoglobin_percent_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_saturated_hemoglobin_percent.is_empty() {
             return None;
@@ -1781,6 +1863,8 @@ impl Session {
     }
 
     /// Returns `min_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn min_saturated_hemoglobin_percent_scaled(&self) -> Option<Vec<f64>> {
         if self.min_saturated_hemoglobin_percent.is_empty() {
             return None;
@@ -1810,6 +1894,8 @@ impl Session {
     }
 
     /// Returns `max_saturated_hemoglobin_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn max_saturated_hemoglobin_percent_scaled(&self) -> Option<Vec<f64>> {
         if self.max_saturated_hemoglobin_percent.is_empty() {
             return None;
@@ -1839,6 +1925,8 @@ impl Session {
     }
 
     /// Returns `avg_left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_left_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.avg_left_torque_effectiveness == u8::MAX {
             return None;
@@ -1858,6 +1946,8 @@ impl Session {
     }
 
     /// Returns `avg_right_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_right_torque_effectiveness_scaled(&self) -> Option<f64> {
         if self.avg_right_torque_effectiveness == u8::MAX {
             return None;
@@ -1877,6 +1967,8 @@ impl Session {
     }
 
     /// Returns `avg_left_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_left_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_left_pedal_smoothness == u8::MAX {
             return None;
@@ -1896,6 +1988,8 @@ impl Session {
     }
 
     /// Returns `avg_right_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_right_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_right_pedal_smoothness == u8::MAX {
             return None;
@@ -1915,6 +2009,8 @@ impl Session {
     }
 
     /// Returns `avg_combined_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_combined_pedal_smoothness_scaled(&self) -> Option<f64> {
         if self.avg_combined_pedal_smoothness == u8::MAX {
             return None;
@@ -1934,6 +2030,8 @@ impl Session {
     }
 
     /// Returns `time_standing` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_standing_scaled(&self) -> Option<f64> {
         if self.time_standing == u32::MAX {
             return None;
@@ -1953,6 +2051,8 @@ impl Session {
     }
 
     /// Returns `avg_left_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_left_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_left_power_phase.is_empty() {
             return None;
@@ -1982,6 +2082,8 @@ impl Session {
     }
 
     /// Returns `avg_left_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_left_power_phase_peak.is_empty() {
             return None;
@@ -2011,6 +2113,8 @@ impl Session {
     }
 
     /// Returns `avg_right_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_right_power_phase_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_right_power_phase.is_empty() {
             return None;
@@ -2040,6 +2144,8 @@ impl Session {
     }
 
     /// Returns `avg_right_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn avg_right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
         if self.avg_right_power_phase_peak.is_empty() {
             return None;
@@ -2069,6 +2175,8 @@ impl Session {
     }
 
     /// Returns `enhanced_avg_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn enhanced_avg_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_speed == u32::MAX {
             return None;
@@ -2088,6 +2196,8 @@ impl Session {
     }
 
     /// Returns `enhanced_max_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn enhanced_max_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_max_speed == u32::MAX {
             return None;
@@ -2107,6 +2217,8 @@ impl Session {
     }
 
     /// Returns `enhanced_avg_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_avg_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_altitude == u32::MAX {
             return None;
@@ -2126,6 +2238,8 @@ impl Session {
     }
 
     /// Returns `enhanced_min_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_min_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_min_altitude == u32::MAX {
             return None;
@@ -2145,6 +2259,8 @@ impl Session {
     }
 
     /// Returns `enhanced_max_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_max_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_max_altitude == u32::MAX {
             return None;
@@ -2164,6 +2280,8 @@ impl Session {
     }
 
     /// Returns `lev_battery_consumption` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn lev_battery_consumption_scaled(&self) -> Option<f64> {
         if self.lev_battery_consumption == u8::MAX {
             return None;
@@ -2183,6 +2301,8 @@ impl Session {
     }
 
     /// Returns `avg_vertical_ratio` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_vertical_ratio_scaled(&self) -> Option<f64> {
         if self.avg_vertical_ratio == u16::MAX {
             return None;
@@ -2202,6 +2322,8 @@ impl Session {
     }
 
     /// Returns `avg_stance_time_balance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
     pub fn avg_stance_time_balance_scaled(&self) -> Option<f64> {
         if self.avg_stance_time_balance == u16::MAX {
             return None;
@@ -2221,6 +2343,8 @@ impl Session {
     }
 
     /// Returns `avg_step_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
     pub fn avg_step_length_scaled(&self) -> Option<f64> {
         if self.avg_step_length == u16::MAX {
             return None;
@@ -2259,6 +2383,8 @@ impl Session {
     }
 
     /// Returns `avg_vam` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn avg_vam_scaled(&self) -> Option<f64> {
         if self.avg_vam == u16::MAX {
             return None;
@@ -2278,6 +2404,8 @@ impl Session {
     }
 
     /// Returns `avg_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn avg_depth_scaled(&self) -> Option<f64> {
         if self.avg_depth == u32::MAX {
             return None;
@@ -2297,6 +2425,8 @@ impl Session {
     }
 
     /// Returns `max_depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn max_depth_scaled(&self) -> Option<f64> {
         if self.max_depth == u32::MAX {
             return None;
@@ -2335,6 +2465,8 @@ impl Session {
     }
 
     /// Returns `enhanced_avg_respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: Breaths/min
     pub fn enhanced_avg_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_avg_respiration_rate == u16::MAX {
             return None;
@@ -2354,6 +2486,8 @@ impl Session {
     }
 
     /// Returns `enhanced_max_respiration_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: Breaths/min
     pub fn enhanced_max_respiration_rate_scaled(&self) -> Option<f64> {
         if self.enhanced_max_respiration_rate == u16::MAX {
             return None;
@@ -2392,6 +2526,8 @@ impl Session {
     }
 
     /// Returns `total_fractional_ascent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_fractional_ascent_scaled(&self) -> Option<f64> {
         if self.total_fractional_ascent == u8::MAX {
             return None;
@@ -2411,6 +2547,8 @@ impl Session {
     }
 
     /// Returns `total_fractional_descent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn total_fractional_descent_scaled(&self) -> Option<f64> {
         if self.total_fractional_descent == u8::MAX {
             return None;
@@ -2430,6 +2568,8 @@ impl Session {
     }
 
     /// Returns `avg_core_temperature` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn avg_core_temperature_scaled(&self) -> Option<f64> {
         if self.avg_core_temperature == u16::MAX {
             return None;
@@ -2449,6 +2589,8 @@ impl Session {
     }
 
     /// Returns `min_core_temperature` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn min_core_temperature_scaled(&self) -> Option<f64> {
         if self.min_core_temperature == u16::MAX {
             return None;
@@ -2468,6 +2610,8 @@ impl Session {
     }
 
     /// Returns `max_core_temperature` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn max_core_temperature_scaled(&self) -> Option<f64> {
         if self.max_core_temperature == u16::MAX {
             return None;

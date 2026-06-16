@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Local Device Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LocalDeviceType(pub u8);

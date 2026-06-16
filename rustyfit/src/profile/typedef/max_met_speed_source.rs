@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Max Met Speed Source type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct MaxMetSpeedSource(pub u8);

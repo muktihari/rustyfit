@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Segment Leaderboard Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SegmentLeaderboardType(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Camera Orientation Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CameraOrientationType(pub u8);

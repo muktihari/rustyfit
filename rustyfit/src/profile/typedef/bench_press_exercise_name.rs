@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Bench Press Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BenchPressExerciseName(pub u16);

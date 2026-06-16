@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Exercise Category type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ExerciseCategory(pub u16);
