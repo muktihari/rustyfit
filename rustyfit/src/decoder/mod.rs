@@ -44,7 +44,7 @@ pub enum Error<E> {
 
 impl<E> core::fmt::Display for Error<E>
 where
-    E: core::fmt::Display,
+    E: embedded_io::Error,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
@@ -67,7 +67,10 @@ where
     }
 }
 
-impl<E> From<ReadExactError<E>> for Error<E> {
+impl<E> From<ReadExactError<E>> for Error<E>
+where
+    E: embedded_io::Error,
+{
     fn from(err: ReadExactError<E>) -> Self {
         match err {
             ReadExactError::UnexpectedEof => Error::UnexpectedEof,
@@ -76,7 +79,7 @@ impl<E> From<ReadExactError<E>> for Error<E> {
     }
 }
 
-impl<E> core::error::Error for Error<E> where E: core::fmt::Debug + core::fmt::Display {}
+impl<E> core::error::Error for Error<E> where E: embedded_io::Error {}
 
 #[derive(Clone, Copy)]
 struct Options {

@@ -33,7 +33,7 @@ pub enum Error<E> {
 
 impl<E> core::fmt::Display for Error<E>
 where
-    E: core::fmt::Display,
+    E: embedded_io::Error,
 {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         match &self {
@@ -46,13 +46,38 @@ where
     }
 }
 
-impl<E> From<E> for Error<E> {
+impl<E> core::error::Error for Error<E> where E: embedded_io::Error {}
+
+impl<E> From<E> for Error<E>
+where
+    E: embedded_io::Error,
+{
     fn from(err: E) -> Self {
         Self::Io { err }
     }
 }
 
-impl<E> core::error::Error for Error<E> where E: core::fmt::Debug + core::fmt::Display {}
+enum ValidationError {
+    EmptyMessages,
+    MessageValidation {
+        mesg_index: usize,
+        err: MessageValidationError,
+    },
+}
+
+impl<E> From<ValidationError> for Error<E>
+where
+    E: embedded_io::Error,
+{
+    fn from(value: ValidationError) -> Self {
+        match value {
+            ValidationError::EmptyMessages => Self::EmptyMessages,
+            ValidationError::MessageValidation { mesg_index, err } => {
+                Self::MessageValidation { mesg_index, err }
+            }
+        }
+    }
+}
 
 /// HeaderOption to pick when encoding FIT file, this will optimize
 /// the size of the resulting FIT file.
@@ -135,7 +160,7 @@ impl Encoder {
         self.reset();
 
         self.select_protocol_version(&mut fit.file_header);
-        self.validate::<W>(fit)?;
+        self.validate(fit)?;
 
         self.encode_file_header(&mut writer, &mut fit.file_header)?;
 
@@ -159,12 +184,9 @@ impl Encoder {
         }
     }
 
-    fn validate<W>(&mut self, fit: &mut FIT) -> Result<(), Error<W::Error>>
-    where
-        W: Write + Seek,
-    {
+    fn validate(&mut self, fit: &mut FIT) -> Result<(), ValidationError> {
         if fit.messages.is_empty() {
-            return Err(Error::EmptyMessages);
+            return Err(ValidationError::EmptyMessages);
         }
 
         let protocol_version = fit.file_header.protocol_version;
@@ -173,7 +195,7 @@ impl Encoder {
                 .message_validator
                 .validate_message(mesg, protocol_version)
             {
-                return Err(Error::MessageValidation { mesg_index: i, err });
+                return Err(ValidationError::MessageValidation { mesg_index: i, err });
             }
         }
 
@@ -184,7 +206,7 @@ impl Encoder {
         &mut self,
         writer: &mut W,
         file_header: &mut FileHeader,
-    ) -> Result<(), Error<W::Error>>
+    ) -> Result<(), W::Error>
     where
         W: Write + Seek,
     {
@@ -208,7 +230,7 @@ impl Encoder {
         &mut self,
         writer: &mut W,
         file_header: &mut FileHeader,
-    ) -> Result<(), Error<W::Error>>
+    ) -> Result<(), W::Error>
     where
         W: Write + Seek,
     {
@@ -230,11 +252,7 @@ impl Encoder {
         Ok(())
     }
 
-    fn encode_message<W>(
-        &mut self,
-        writer: &mut W,
-        mesg: &mut Message,
-    ) -> Result<(), Error<W::Error>>
+    fn encode_message<W>(&mut self, writer: &mut W, mesg: &mut Message) -> Result<(), W::Error>
     where
         W: Write + Seek,
     {
@@ -295,7 +313,7 @@ impl Encoder {
         writer: &mut W,
         mesg: &Message,
         arch: u8,
-    ) -> Result<(), Error<W::Error>>
+    ) -> Result<(), W::Error>
     where
         W: Write + Seek,
     {
@@ -328,7 +346,7 @@ impl Encoder {
         Ok(())
     }
 
-    fn encode_crc<W>(&mut self, writer: &mut W) -> Result<(), Error<W::Error>>
+    fn encode_crc<W>(&mut self, writer: &mut W) -> Result<(), W::Error>
     where
         W: Write + Seek,
     {
