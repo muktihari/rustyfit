@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Time Zone type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TimeZone(pub u8);

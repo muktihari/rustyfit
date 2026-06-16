@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Segment Lap Status type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SegmentLapStatus(pub u8);

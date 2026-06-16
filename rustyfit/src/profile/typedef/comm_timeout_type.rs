@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Comm Timeout Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CommTimeoutType(pub u16);

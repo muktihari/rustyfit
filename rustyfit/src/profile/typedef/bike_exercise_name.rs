@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Bike Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BikeExerciseName(pub u16);

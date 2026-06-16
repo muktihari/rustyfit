@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sandbag Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SandbagExerciseName(pub u16);

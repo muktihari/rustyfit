@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Curl Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CurlExerciseName(pub u16);

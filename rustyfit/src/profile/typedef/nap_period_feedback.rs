@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Nap Period Feedback type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct NapPeriodFeedback(pub u8);

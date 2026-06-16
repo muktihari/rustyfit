@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Flye Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct FlyeExerciseName(pub u16);

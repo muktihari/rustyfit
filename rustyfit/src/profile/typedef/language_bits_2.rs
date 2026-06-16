@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Language Bits 2 type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LanguageBits2(pub u8);

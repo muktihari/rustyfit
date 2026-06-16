@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Timer Trigger type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TimerTrigger(pub u8);

@@ -55,6 +55,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 		Path:         b.path,
 		Filename:     "bool.rs",
 		Data: Type{
+			Doc:      "Bool type.",
 			TypeName: "Bool",
 			Base:     "u8",
 			Invalid:  "u8::MAX",
@@ -104,8 +105,8 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				}
 				comment := strings.ToLower(constants[i].Comment)
 				if strings.Contains(comment, "deprecated") {
-					constants[i].Decorator = "// " + constants[i].Decorator
-					constants[i].Comment = "[DUPLICATE!] " + constants[i].Comment
+					constants[i].Decorator = "// " + constants[i].Comment + ":" + constants[i].Decorator
+					constants[i].Comment = ""
 					constants[i].IsDuplicate = true
 				}
 			}
@@ -123,6 +124,13 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Path:         b.path,
 			Filename:     t.Name + ".rs",
 			Data: Type{
+				Doc: func() string {
+					parts := strings.Split(t.Name, "_")
+					for i := range parts {
+						parts[i] = strutil.ToTitle(parts[i])
+					}
+					return strings.Join(parts, " ") + " type."
+				}(),
 				TypeName: typeName,
 				Base:     intoRustType(basetype.FromString(t.BaseType)),
 				Invalid: func() string {

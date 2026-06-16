@@ -8,14 +8,14 @@
 
 use core::fmt;
 
+/// Weather Report type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WeatherReport(pub u8);
 
 impl WeatherReport {
     pub const CURRENT: WeatherReport = WeatherReport(0);
-    /// [DUPLICATE!] Deprecated use hourly_forecast instead
-    //  pub const FORECAST: WeatherReport = WeatherReport(1);
+    // Deprecated use hourly_forecast instead: pub const FORECAST: WeatherReport = WeatherReport(1);
     pub const HOURLY_FORECAST: WeatherReport = WeatherReport(1);
     pub const DAILY_FORECAST: WeatherReport = WeatherReport(2);
 }
@@ -30,7 +30,7 @@ impl fmt::Display for WeatherReport {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "current"),
-            //  1 => write!(f, "forecast"),
+            // Deprecated use hourly_forecast instead: 1 => write!(f, "forecast"),
             1 => write!(f, "hourly_forecast"),
             2 => write!(f, "daily_forecast"),
             _ => write!(f, "WeatherReport({})", self.0),
@@ -42,7 +42,7 @@ impl fmt::Debug for WeatherReport {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "WeatherReport::CURRENT(0)"),
-            //  1 => write!(f, "WeatherReport::FORECAST(1)"),
+            // Deprecated use hourly_forecast instead: 1 => write!(f, "WeatherReport::FORECAST(1)"),
             1 => write!(f, "WeatherReport::HOURLY_FORECAST(1)"),
             2 => write!(f, "WeatherReport::DAILY_FORECAST(2)"),
             _ => write!(f, "WeatherReport({})", self.0),

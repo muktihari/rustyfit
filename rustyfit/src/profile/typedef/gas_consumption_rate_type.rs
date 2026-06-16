@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Gas Consumption Rate Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct GasConsumptionRateType(pub u8);

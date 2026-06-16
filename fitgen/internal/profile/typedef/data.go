@@ -14,6 +14,7 @@ type SubMod struct {
 }
 
 type Type struct {
+	Doc       string
 	TypeName  string
 	Base      string
 	Invalid   string

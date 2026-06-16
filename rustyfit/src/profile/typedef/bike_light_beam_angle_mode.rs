@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Bike Light Beam Angle Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BikeLightBeamAngleMode(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Plank Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct PlankExerciseName(pub u16);

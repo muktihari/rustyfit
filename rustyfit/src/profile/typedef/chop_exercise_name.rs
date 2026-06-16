@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Chop Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ChopExerciseName(pub u16);

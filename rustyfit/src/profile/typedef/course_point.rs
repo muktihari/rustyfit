@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Course Point type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CoursePoint(pub u8);

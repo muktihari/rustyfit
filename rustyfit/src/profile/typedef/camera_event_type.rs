@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Camera Event Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CameraEventType(pub u8);

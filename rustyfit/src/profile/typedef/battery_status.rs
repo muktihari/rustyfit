@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Battery Status type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BatteryStatus(pub u8);

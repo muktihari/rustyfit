@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Calf Raise Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CalfRaiseExerciseName(pub u16);

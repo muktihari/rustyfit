@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sensor Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SensorType(pub u8);

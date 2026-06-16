@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Bp Status type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BpStatus(pub u8);

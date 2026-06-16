@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Tire Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TireExerciseName(pub u16);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Connectivity Capabilities type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ConnectivityCapabilities(pub u32);

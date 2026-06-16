@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sub Sport type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SubSport(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Length Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LengthType(pub u8);

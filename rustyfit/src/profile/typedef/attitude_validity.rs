@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Attitude Validity type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AttitudeValidity(pub u16);

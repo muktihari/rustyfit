@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Weather Severity type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WeatherSeverity(pub u8);

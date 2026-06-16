@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Language type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Language(pub u8);

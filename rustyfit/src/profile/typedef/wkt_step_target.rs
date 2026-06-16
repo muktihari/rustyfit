@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Wkt Step Target type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WktStepTarget(pub u8);

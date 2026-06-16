@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Exd Display Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ExdDisplayType(pub u8);

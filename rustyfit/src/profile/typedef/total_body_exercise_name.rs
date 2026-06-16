@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Total Body Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TotalBodyExerciseName(pub u16);

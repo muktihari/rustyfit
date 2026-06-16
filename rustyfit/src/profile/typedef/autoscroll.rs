@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Autoscroll type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Autoscroll(pub u8);

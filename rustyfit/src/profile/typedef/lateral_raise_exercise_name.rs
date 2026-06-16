@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Lateral Raise Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LateralRaiseExerciseName(pub u16);

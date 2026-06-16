@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Auto Activity Detect type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AutoActivityDetect(pub u32);

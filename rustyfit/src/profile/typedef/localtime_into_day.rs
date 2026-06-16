@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Localtime Into Day type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LocaltimeIntoDay(pub u32);

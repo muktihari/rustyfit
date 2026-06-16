@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Water Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WaterType(pub u8);

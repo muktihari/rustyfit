@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Max Met Category type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct MaxMetCategory(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Body Location type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BodyLocation(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Message Index type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct MessageIndex(pub u16);

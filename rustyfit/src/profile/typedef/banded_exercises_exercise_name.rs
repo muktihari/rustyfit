@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Banded Exercises Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BandedExercisesExerciseName(pub u16);

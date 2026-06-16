@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Date Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DateMode(pub u8);

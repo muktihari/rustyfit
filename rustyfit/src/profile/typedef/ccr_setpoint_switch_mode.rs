@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Ccr Setpoint Switch Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CcrSetpointSwitchMode(pub u8);

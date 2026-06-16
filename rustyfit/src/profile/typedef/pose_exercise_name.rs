@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Pose Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct PoseExerciseName(pub u16);

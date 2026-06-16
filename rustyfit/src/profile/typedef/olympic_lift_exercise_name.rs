@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Olympic Lift Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct OlympicLiftExerciseName(pub u16);

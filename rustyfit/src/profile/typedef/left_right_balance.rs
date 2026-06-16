@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Left Right Balance type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct LeftRightBalance(pub u8);

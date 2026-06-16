@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Tone type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Tone(pub u8);

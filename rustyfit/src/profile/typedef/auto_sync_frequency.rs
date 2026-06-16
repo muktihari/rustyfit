@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Auto Sync Frequency type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AutoSyncFrequency(pub u8);

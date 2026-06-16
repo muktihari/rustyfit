@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Analog Watchface Layout type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct AnalogWatchfaceLayout(pub u8);

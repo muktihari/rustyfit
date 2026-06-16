@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Event type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Event(pub u8);

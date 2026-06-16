@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Deadlift Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DeadliftExerciseName(pub u16);

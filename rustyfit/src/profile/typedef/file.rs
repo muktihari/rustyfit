@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// File type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct File(pub u8);

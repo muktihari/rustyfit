@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Sledge Hammer Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SledgeHammerExerciseName(pub u16);

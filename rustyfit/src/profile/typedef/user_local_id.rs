@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// User Local Id type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct UserLocalId(pub u16);

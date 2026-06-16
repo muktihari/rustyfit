@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Display Power type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DisplayPower(pub u8);

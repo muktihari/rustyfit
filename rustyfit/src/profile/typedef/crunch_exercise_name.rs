@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Crunch Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CrunchExerciseName(pub u16);

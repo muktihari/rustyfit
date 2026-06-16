@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Checksum type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct Checksum(pub u8);

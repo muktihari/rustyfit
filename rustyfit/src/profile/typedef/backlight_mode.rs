@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Backlight Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct BacklightMode(pub u8);

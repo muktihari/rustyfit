@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Triceps Extension Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct TricepsExtensionExerciseName(pub u16);

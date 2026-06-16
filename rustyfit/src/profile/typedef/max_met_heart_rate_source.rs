@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Max Met Heart Rate Source type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct MaxMetHeartRateSource(pub u8);

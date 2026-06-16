@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Floor Climb Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct FloorClimbExerciseName(pub u16);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Date Time type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DateTime(pub u32);

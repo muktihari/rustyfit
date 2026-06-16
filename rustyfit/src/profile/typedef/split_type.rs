@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Split Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct SplitType(pub u8);

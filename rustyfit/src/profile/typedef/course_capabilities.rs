@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Course Capabilities type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct CourseCapabilities(pub u32);

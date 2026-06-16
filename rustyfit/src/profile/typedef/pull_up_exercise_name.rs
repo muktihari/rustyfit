@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Pull Up Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct PullUpExerciseName(pub u16);

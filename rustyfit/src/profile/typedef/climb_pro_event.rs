@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Climb Pro Event type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ClimbProEvent(pub u8);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Exd Descriptors type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct ExdDescriptors(pub u8);

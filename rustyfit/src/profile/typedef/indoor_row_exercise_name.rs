@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Indoor Row Exercise Name type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct IndoorRowExerciseName(pub u16);

@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Workout Power type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct WorkoutPower(pub u32);

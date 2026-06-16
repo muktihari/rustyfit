@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Radar Threat Level Type type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct RadarThreatLevelType(pub u8);

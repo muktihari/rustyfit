@@ -8,6 +8,7 @@
 
 use core::fmt;
 
+/// Dive Backlight Mode type.
 #[repr(transparent)]
 #[derive(Clone, Copy, PartialEq)]
 pub struct DiveBacklightMode(pub u8);
