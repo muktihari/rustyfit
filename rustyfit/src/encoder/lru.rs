@@ -60,10 +60,9 @@ impl Lru {
     }
 
     fn bucket_index(&self, item: &[u8]) -> Option<usize> {
-        for i in (0..self.bucket.len()).rev() {
-            let cur = self.bucket[i] as usize;
-            if self.items[cur] == item {
-                return Some(i);
+        for (bucket_index, &item_index) in self.bucket.iter().enumerate().rev() {
+            if self.items[item_index as usize] == item {
+                return Some(bucket_index);
             }
         }
         None
@@ -74,18 +73,17 @@ impl Lru {
 /// frequency of reallocation by reserving capacity in fixed-size tiers.
 ///
 /// NOTE: Clear vector before passing.
-fn reserve_with_capacity_tiers(v: &mut Vec<u8>, mut n: usize) {
+fn reserve_with_capacity_tiers(v: &mut Vec<u8>, n: usize) {
     if n <= v.capacity() {
         return;
     }
 
     const RESERVED: usize = 7; // header, mesg_num, etc.
-    const FULL: usize = 1537 - RESERVED;
-    const THREE_QUARTER: usize = FULL * 3 / 4;
-    const HALF: usize = FULL / 2;
-    const QUARTER: usize = FULL / 4;
-
-    n = n.saturating_sub(RESERVED);
+    const N: usize = 255 * 2; // n fields + n developer_fields
+    const FULL: usize = RESERVED + N * 3;
+    const THREE_QUARTER: usize = RESERVED + (N * 3 / 4) * 3;
+    const HALF: usize = RESERVED + (N / 2) * 3;
+    const QUARTER: usize = RESERVED + (N / 4) * 3;
 
     // Start at QUARTER because in practice, encountering more than 127 entries,
     // combination of fields and developer fields, is already rare. (127 * 3 = 381 bytes).
@@ -102,7 +100,7 @@ fn reserve_with_capacity_tiers(v: &mut Vec<u8>, mut n: usize) {
     };
 
     // Note that allocator may still give more space than requested.
-    v.reserve_exact(RESERVED + target);
+    v.reserve_exact(target);
 }
 
 #[cfg(test)]
@@ -157,16 +155,16 @@ mod tests {
         let mut v = Vec::<u8>::new();
 
         reserve_with_capacity_tiers(&mut v, 10);
-        assert_eq!(v.capacity(), 389);
+        assert_eq!(v.capacity(), 388);
 
         reserve_with_capacity_tiers(&mut v, 256);
-        assert_eq!(v.capacity(), 389);
+        assert_eq!(v.capacity(), 388);
 
         reserve_with_capacity_tiers(&mut v, 510);
         assert_eq!(v.capacity(), 772);
 
         reserve_with_capacity_tiers(&mut v, 1000);
-        assert_eq!(v.capacity(), 1154);
+        assert_eq!(v.capacity(), 1153);
 
         reserve_with_capacity_tiers(&mut v, 1200);
         assert_eq!(v.capacity(), 1537);
