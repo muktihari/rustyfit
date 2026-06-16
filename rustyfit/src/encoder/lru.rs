@@ -24,7 +24,11 @@ impl Lru {
     }
 
     pub(super) fn put(&mut self, item: &[u8]) -> (u8, bool) {
-        if let Some(bucket_index) = self.bucket_index(item) {
+        if let Some(bucket_index) = self
+            .bucket
+            .iter()
+            .rposition(|&i| self.items[i as usize] == item)
+        {
             return (self.mark_as_recently_used(bucket_index), false);
         }
         if self.bucket.len() != self.items.len() {
@@ -57,15 +61,6 @@ impl Lru {
         reserve_with_capacity_tiers(&mut self.items[item_index], item.len());
         self.items[item_index].extend_from_slice(item);
         item_index as u8
-    }
-
-    fn bucket_index(&self, item: &[u8]) -> Option<usize> {
-        for (bucket_index, &item_index) in self.bucket.iter().enumerate().rev() {
-            if self.items[item_index as usize] == item {
-                return Some(bucket_index);
-            }
-        }
-        None
     }
 }
 
@@ -138,12 +133,19 @@ mod tests {
 
         // check index exist
         assert_eq!(
-            lru.bucket_index(&lru.items[lru.bucket[1] as usize]),
+            lru.bucket
+                .iter()
+                .rposition(|&i| lru.items[i as usize] == lru.items[lru.bucket[1] as usize]),
             Some(1)
         );
 
         // check index not exist
-        assert!(lru.bucket_index(&[255, 255]).is_none());
+        assert!(
+            lru.bucket
+                .iter()
+                .rposition(|&i| lru.items[i as usize] == &[255, 255])
+                .is_none()
+        );
 
         lru.reset(SIZE);
         assert_eq!(lru.bucket.len(), 0);
