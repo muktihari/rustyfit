@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Tank Update message.
 #[derive(Debug, Clone)]
-/// TankUpdate is a TankUpdate message.
 pub struct TankUpdate {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -26,11 +26,11 @@ pub struct TankUpdate {
 }
 
 impl TankUpdate {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::ANT_CHANNEL_ID`
     pub const SENSOR: u8 = 0;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar`; ProfileType: `ProfileType::UINT16`
     pub const PRESSURE: u8 = 1;
 
     /// Create new TankUpdate with all fields being set to its corresponding invalid value.
@@ -45,6 +45,8 @@ impl TankUpdate {
     }
 
     /// Returns `pressure` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: bar
     pub fn pressure_scaled(&self) -> Option<f64> {
         if self.pressure == u16::MAX {
             return None;

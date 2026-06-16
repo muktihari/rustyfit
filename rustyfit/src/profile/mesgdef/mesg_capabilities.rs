@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Mesg Capabilities message.
 #[derive(Debug, Clone)]
-/// MesgCapabilities is a MesgCapabilities message.
 pub struct MesgCapabilities {
     pub message_index: typedef::MessageIndex,
     pub file: typedef::File,
@@ -25,15 +25,15 @@ pub struct MesgCapabilities {
 }
 
 impl MesgCapabilities {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
     pub const FILE: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
     pub const MESG_NUM: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::MESG_COUNT`
     pub const COUNT_TYPE: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const COUNT: u8 = 3;
 
     /// Create new MesgCapabilities with all fields being set to its corresponding invalid value.

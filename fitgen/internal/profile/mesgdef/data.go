@@ -14,6 +14,7 @@ type SubMod struct {
 }
 
 type Message struct {
+	Doc               string
 	Num               string
 	Name              string
 	NameSnakeCase     string

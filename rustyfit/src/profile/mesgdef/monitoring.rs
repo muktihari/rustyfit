@@ -17,8 +17,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Monitoring message.
 #[derive(Debug, Clone)]
-/// Monitoring is a Monitoring message.
 pub struct Monitoring {
     /// Units: s; Must align to logging interval, for example, time must be 00:00:00 for daily log.
     pub timestamp: typedef::DateTime,
@@ -49,7 +49,7 @@ pub struct Monitoring {
     pub temperature_min: i16,
     /// Scale: 100; Units: C; Max temperature during the logging interval ended at timestamp
     pub temperature_max: i16,
-    /// Array: [8]; Units: minutes; Indexed using minute_activity_level enum
+    /// Array: \[8\]; Units: minutes; Indexed using minute_activity_level enum
     pub activity_time: [u16; 8],
     /// Units: kcal
     pub active_calories: u16,
@@ -83,63 +83,63 @@ pub struct Monitoring {
 }
 
 impl Monitoring {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const CALORIES: u8 = 1;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DISTANCE: u8 = 2;
-    /// Value's type: `u32`; Scale: `2`; Units: `cycles`
+    /// Value's type: `u32`; Scale: `2`; Units: `cycles`; ProfileType: `ProfileType::UINT32`
     pub const CYCLES: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ACTIVE_TIME: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_TYPE`
     pub const ACTIVITY_TYPE: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_SUBTYPE`
     pub const ACTIVITY_SUBTYPE: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_LEVEL`
     pub const ACTIVITY_LEVEL: u8 = 7;
-    /// Value's type: `u16`; Units: `100 * m`
+    /// Value's type: `u16`; Units: `100 * m`; ProfileType: `ProfileType::UINT16`
     pub const DISTANCE_16: u8 = 8;
-    /// Value's type: `u16`; Units: `2 * cycles (steps)`
+    /// Value's type: `u16`; Units: `2 * cycles (steps)`; ProfileType: `ProfileType::UINT16`
     pub const CYCLES_16: u8 = 9;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const ACTIVE_TIME_16: u8 = 10;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
     pub const LOCAL_TIMESTAMP: u8 = 11;
-    /// Value's type: `i16`; Scale: `100`; Units: `C`
+    /// Value's type: `i16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::SINT16`
     pub const TEMPERATURE: u8 = 12;
-    /// Value's type: `i16`; Scale: `100`; Units: `C`
+    /// Value's type: `i16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::SINT16`
     pub const TEMPERATURE_MIN: u8 = 14;
-    /// Value's type: `i16`; Scale: `100`; Units: `C`
+    /// Value's type: `i16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::SINT16`
     pub const TEMPERATURE_MAX: u8 = 15;
-    /// Value's type: `[u16; 8]`; Units: `minutes`
+    /// Value's type: `[u16; 8]`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
     pub const ACTIVITY_TIME: u8 = 16;
-    /// Value's type: `u16`; Units: `kcal`
+    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
     pub const ACTIVE_CALORIES: u8 = 19;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
     pub const CURRENT_ACTIVITY_TYPE_INTENSITY: u8 = 24;
-    /// Value's type: `u8`; Units: `min`
+    /// Value's type: `u8`; Units: `min`; ProfileType: `ProfileType::UINT8`
     pub const TIMESTAMP_MIN_8: u8 = 25;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_16: u8 = 26;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const HEART_RATE: u8 = 27;
-    /// Value's type: `u8`; Scale: `10`
+    /// Value's type: `u8`; Scale: `10`; ProfileType: `ProfileType::UINT8`
     pub const INTENSITY: u8 = 28;
-    /// Value's type: `u16`; Units: `min`
+    /// Value's type: `u16`; Units: `min`; ProfileType: `ProfileType::UINT16`
     pub const DURATION_MIN: u8 = 29;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const DURATION: u8 = 30;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ASCENT: u8 = 31;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DESCENT: u8 = 32;
-    /// Value's type: `u16`; Units: `minutes`
+    /// Value's type: `u16`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
     pub const MODERATE_ACTIVITY_MINUTES: u8 = 33;
-    /// Value's type: `u16`; Units: `minutes`
+    /// Value's type: `u16`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
     pub const VIGOROUS_ACTIVITY_MINUTES: u8 = 34;
 
     /// Create new Monitoring with all fields being set to its corresponding invalid value.
@@ -181,6 +181,8 @@ impl Monitoring {
     }
 
     /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;
@@ -200,6 +202,8 @@ impl Monitoring {
     }
 
     /// Returns `cycles` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: cycles
     pub fn cycles_scaled(&self) -> Option<f64> {
         if self.cycles == u32::MAX {
             return None;
@@ -219,6 +223,8 @@ impl Monitoring {
     }
 
     /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn active_time_scaled(&self) -> Option<f64> {
         if self.active_time == u32::MAX {
             return None;
@@ -238,6 +244,8 @@ impl Monitoring {
     }
 
     /// Returns `temperature` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn temperature_scaled(&self) -> Option<f64> {
         if self.temperature == i16::MAX {
             return None;
@@ -257,6 +265,8 @@ impl Monitoring {
     }
 
     /// Returns `temperature_min` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn temperature_min_scaled(&self) -> Option<f64> {
         if self.temperature_min == i16::MAX {
             return None;
@@ -276,6 +286,8 @@ impl Monitoring {
     }
 
     /// Returns `temperature_max` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: C
     pub fn temperature_max_scaled(&self) -> Option<f64> {
         if self.temperature_max == i16::MAX {
             return None;
@@ -314,6 +326,8 @@ impl Monitoring {
     }
 
     /// Returns `ascent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn ascent_scaled(&self) -> Option<f64> {
         if self.ascent == u32::MAX {
             return None;
@@ -333,6 +347,8 @@ impl Monitoring {
     }
 
     /// Returns `descent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn descent_scaled(&self) -> Option<f64> {
         if self.descent == u32::MAX {
             return None;

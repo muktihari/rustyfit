@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Exd Screen Configuration message.
 #[derive(Debug, Clone)]
-/// ExdScreenConfiguration is a ExdScreenConfiguration message.
 pub struct ExdScreenConfiguration {
     pub screen_index: u8,
     /// number of fields in screen
@@ -25,13 +25,13 @@ pub struct ExdScreenConfiguration {
 }
 
 impl ExdScreenConfiguration {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SCREEN_INDEX: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const FIELD_COUNT: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_LAYOUT`
     pub const LAYOUT: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const SCREEN_ENABLED: u8 = 3;
 
     /// Create new ExdScreenConfiguration with all fields being set to its corresponding invalid value.

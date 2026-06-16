@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// File Creator message.
 #[derive(Debug, Clone)]
-/// FileCreator is a FileCreator message.
 pub struct FileCreator {
     pub software_version: u16,
     pub hardware_version: u8,
@@ -22,9 +22,9 @@ pub struct FileCreator {
 }
 
 impl FileCreator {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const SOFTWARE_VERSION: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const HARDWARE_VERSION: u8 = 1;
 
     /// Create new FileCreator with all fields being set to its corresponding invalid value.

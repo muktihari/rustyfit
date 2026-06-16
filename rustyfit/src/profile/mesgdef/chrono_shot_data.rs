@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Chrono Shot Data message.
 #[derive(Debug, Clone)]
-/// ChronoShotData is a ChronoShotData message.
 pub struct ChronoShotData {
     pub timestamp: typedef::DateTime,
     /// Scale: 1000; Units: m/s
@@ -24,11 +24,11 @@ pub struct ChronoShotData {
 }
 
 impl ChronoShotData {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const SHOT_SPEED: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const SHOT_NUM: u8 = 1;
 
     /// Create new ChronoShotData with all fields being set to its corresponding invalid value.
@@ -43,6 +43,8 @@ impl ChronoShotData {
     }
 
     /// Returns `shot_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn shot_speed_scaled(&self) -> Option<f64> {
         if self.shot_speed == u32::MAX {
             return None;

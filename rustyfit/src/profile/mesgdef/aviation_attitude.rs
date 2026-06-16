@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Aviation Attitude message.
 #[derive(Debug, Clone)]
-/// AviationAttitude is a AviationAttitude message.
 pub struct AviationAttitude {
     /// Units: s; Timestamp message was output
     pub timestamp: typedef::DateTime,
@@ -42,29 +42,29 @@ pub struct AviationAttitude {
 }
 
 impl AviationAttitude {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u32>`; Units: `ms`
+    /// Value's type: `Vec<u32>`; Units: `ms`; ProfileType: `ProfileType::UINT32`
     pub const SYSTEM_TIME: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`
+    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`; ProfileType: `ProfileType::SINT16`
     pub const PITCH: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`
+    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`; ProfileType: `ProfileType::SINT16`
     pub const ROLL: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`
+    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`; ProfileType: `ProfileType::SINT16`
     pub const ACCEL_LATERAL: u8 = 4;
-    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`
+    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`; ProfileType: `ProfileType::SINT16`
     pub const ACCEL_NORMAL: u8 = 5;
-    /// Value's type: `Vec<i16>`; Scale: `1024`; Units: `radians/second`
+    /// Value's type: `Vec<i16>`; Scale: `1024`; Units: `radians/second`; ProfileType: `ProfileType::SINT16`
     pub const TURN_RATE: u8 = 6;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::ATTITUDE_STAGE`
     pub const STAGE: u8 = 7;
-    /// Value's type: `Vec<u8>`; Units: `%`
+    /// Value's type: `Vec<u8>`; Units: `%`; ProfileType: `ProfileType::UINT8`
     pub const ATTITUDE_STAGE_COMPLETE: u8 = 8;
-    /// Value's type: `Vec<u16>`; Scale: `10430.38`; Units: `radians`
+    /// Value's type: `Vec<u16>`; Scale: `10430.38`; Units: `radians`; ProfileType: `ProfileType::UINT16`
     pub const TRACK: u8 = 9;
-    /// Value's type: `Vec<u16>`
+    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::ATTITUDE_VALIDITY`
     pub const VALIDITY: u8 = 10;
 
     /// Create new AviationAttitude with all fields being set to its corresponding invalid value.
@@ -88,6 +88,8 @@ impl AviationAttitude {
     }
 
     /// Returns `pitch` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: radians
     pub fn pitch_scaled(&self) -> Option<Vec<f64>> {
         if self.pitch.is_empty() {
             return None;
@@ -117,6 +119,8 @@ impl AviationAttitude {
     }
 
     /// Returns `roll` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: radians
     pub fn roll_scaled(&self) -> Option<Vec<f64>> {
         if self.roll.is_empty() {
             return None;
@@ -146,6 +150,8 @@ impl AviationAttitude {
     }
 
     /// Returns `accel_lateral` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s^2
     pub fn accel_lateral_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_lateral.is_empty() {
             return None;
@@ -175,6 +181,8 @@ impl AviationAttitude {
     }
 
     /// Returns `accel_normal` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s^2
     pub fn accel_normal_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_normal.is_empty() {
             return None;
@@ -204,6 +212,8 @@ impl AviationAttitude {
     }
 
     /// Returns `turn_rate` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: radians/second
     pub fn turn_rate_scaled(&self) -> Option<Vec<f64>> {
         if self.turn_rate.is_empty() {
             return None;
@@ -233,6 +243,8 @@ impl AviationAttitude {
     }
 
     /// Returns `track` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: radians
     pub fn track_scaled(&self) -> Option<Vec<f64>> {
         if self.track.is_empty() {
             return None;

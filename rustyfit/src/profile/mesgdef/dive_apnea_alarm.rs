@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Dive Apnea Alarm message.
 #[derive(Debug, Clone)]
-/// DiveApneaAlarm is a DiveApneaAlarm message.
 pub struct DiveApneaAlarm {
     /// Index of the alarm
     pub message_index: typedef::MessageIndex,
@@ -46,31 +46,31 @@ pub struct DiveApneaAlarm {
 }
 
 impl DiveApneaAlarm {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DEPTH: u8 = 0;
-    /// Value's type: `i32`; Units: `s`
+    /// Value's type: `i32`; Units: `s`; ProfileType: `ProfileType::SINT32`
     pub const TIME: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_ALARM_TYPE`
     pub const ALARM_TYPE: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::TONE`
     pub const SOUND: u8 = 4;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::SUB_SPORT`
     pub const DIVE_TYPES: u8 = 5;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const ID: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const POPUP_ENABLED: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const TRIGGER_ON_DESCENT: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const TRIGGER_ON_ASCENT: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const REPEATING: u8 = 10;
-    /// Value's type: `i32`; Scale: `1000`; Units: `mps`
+    /// Value's type: `i32`; Scale: `1000`; Units: `mps`; ProfileType: `ProfileType::SINT32`
     pub const SPEED: u8 = 11;
 
     /// Create new DiveApneaAlarm with all fields being set to its corresponding invalid value.
@@ -95,6 +95,8 @@ impl DiveApneaAlarm {
     }
 
     /// Returns `depth` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn depth_scaled(&self) -> Option<f64> {
         if self.depth == u32::MAX {
             return None;
@@ -114,6 +116,8 @@ impl DiveApneaAlarm {
     }
 
     /// Returns `speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mps
     pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == i32::MAX {
             return None;

@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Slave Device message.
 #[derive(Debug, Clone)]
-/// SlaveDevice is a SlaveDevice message.
 pub struct SlaveDevice {
     pub manufacturer: typedef::Manufacturer,
     pub product: u16,
@@ -22,9 +22,9 @@ pub struct SlaveDevice {
 }
 
 impl SlaveDevice {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PRODUCT: u8 = 1;
 
     /// Create new SlaveDevice with all fields being set to its corresponding invalid value.

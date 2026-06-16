@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Field Capabilities message.
 #[derive(Debug, Clone)]
-/// FieldCapabilities is a FieldCapabilities message.
 pub struct FieldCapabilities {
     pub message_index: typedef::MessageIndex,
     pub file: typedef::File,
@@ -25,15 +25,15 @@ pub struct FieldCapabilities {
 }
 
 impl FieldCapabilities {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
     pub const FILE: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
     pub const MESG_NUM: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const FIELD_NUM: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const COUNT: u8 = 3;
 
     /// Create new FieldCapabilities with all fields being set to its corresponding invalid value.

@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Aad Accel Features message.
 #[derive(Debug, Clone)]
-/// AadAccelFeatures is a AadAccelFeatures message.
 pub struct AadAccelFeatures {
     pub timestamp: typedef::DateTime,
     /// Units: s; Time interval length in seconds
@@ -31,17 +31,17 @@ pub struct AadAccelFeatures {
 }
 
 impl AadAccelFeatures {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const TIME: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const ENERGY_TOTAL: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const ZERO_CROSS_CNT: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const INSTANCE: u8 = 3;
-    /// Value's type: `u16`; Scale: `25`; Units: `s`
+    /// Value's type: `u16`; Scale: `25`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const TIME_ABOVE_THRESHOLD: u8 = 4;
 
     /// Create new AadAccelFeatures with all fields being set to its corresponding invalid value.
@@ -59,6 +59,8 @@ impl AadAccelFeatures {
     }
 
     /// Returns `time_above_threshold` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_above_threshold_scaled(&self) -> Option<f64> {
         if self.time_above_threshold == u16::MAX {
             return None;

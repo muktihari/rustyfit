@@ -11,8 +11,8 @@ use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
 
+/// Gps Metadata message.
 #[derive(Debug, Clone)]
-/// GpsMetadata is a GpsMetadata message.
 pub struct GpsMetadata {
     /// Units: s; Whole second part of the timestamp.
     pub timestamp: typedef::DateTime,
@@ -30,7 +30,7 @@ pub struct GpsMetadata {
     pub heading: u16,
     /// Units: s; Used to correlate UTC to system time if the timestamp of the message is in system time. This UTC time is derived from the GPS data.
     pub utc_timestamp: typedef::DateTime,
-    /// Array: [3]; Scale: 100; Units: m/s; velocity[0] is lon velocity. Velocity[1] is lat velocity. Velocity[2] is altitude velocity.
+    /// Array: \[3\]; Scale: 100; Units: m/s; velocity\[0\] is lon velocity. Velocity\[1\] is lat velocity. Velocity\[2\] is altitude velocity.
     pub velocity: [i16; 3],
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -39,23 +39,23 @@ pub struct GpsMetadata {
 }
 
 impl GpsMetadata {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LAT: u8 = 1;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LONG: u8 = 2;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_ALTITUDE: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_SPEED: u8 = 4;
-    /// Value's type: `u16`; Scale: `100`; Units: `degrees`
+    /// Value's type: `u16`; Scale: `100`; Units: `degrees`; ProfileType: `ProfileType::UINT16`
     pub const HEADING: u8 = 5;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const UTC_TIMESTAMP: u8 = 6;
-    /// Value's type: `[i16; 3]`; Scale: `100`; Units: `m/s`
+    /// Value's type: `[i16; 3]`; Scale: `100`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
     pub const VELOCITY: u8 = 7;
 
     /// Create new GpsMetadata with all fields being set to its corresponding invalid value.
@@ -98,6 +98,8 @@ impl GpsMetadata {
     }
 
     /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
             return None;
@@ -117,6 +119,8 @@ impl GpsMetadata {
     }
 
     /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
             return None;
@@ -136,6 +140,8 @@ impl GpsMetadata {
     }
 
     /// Returns `heading` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
     pub fn heading_scaled(&self) -> Option<f64> {
         if self.heading == u16::MAX {
             return None;
@@ -155,6 +161,8 @@ impl GpsMetadata {
     }
 
     /// Returns `velocity` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn velocity_scaled(&self) -> Option<[f64; 3]> {
         if self.velocity == [i16::MAX; 3] {
             return None;

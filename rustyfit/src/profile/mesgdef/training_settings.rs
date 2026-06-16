@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Training Settings message.
 #[derive(Debug, Clone)]
-/// TrainingSettings is a TrainingSettings message.
 pub struct TrainingSettings {
     /// Scale: 100; Units: m
     pub target_distance: u32,
@@ -28,13 +28,13 @@ pub struct TrainingSettings {
 }
 
 impl TrainingSettings {
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const TARGET_DISTANCE: u8 = 31;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const TARGET_SPEED: u8 = 32;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TARGET_TIME: u8 = 33;
-    /// Value's type: `u32`; Scale: `1e+06`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1e+06`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const PRECISE_TARGET_SPEED: u8 = 153;
 
     /// Create new TrainingSettings with all fields being set to its corresponding invalid value.
@@ -50,6 +50,8 @@ impl TrainingSettings {
     }
 
     /// Returns `target_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn target_distance_scaled(&self) -> Option<f64> {
         if self.target_distance == u32::MAX {
             return None;
@@ -69,6 +71,8 @@ impl TrainingSettings {
     }
 
     /// Returns `target_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn target_speed_scaled(&self) -> Option<f64> {
         if self.target_speed == u16::MAX {
             return None;
@@ -88,6 +92,8 @@ impl TrainingSettings {
     }
 
     /// Returns `precise_target_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn precise_target_speed_scaled(&self) -> Option<f64> {
         if self.precise_target_speed == u32::MAX {
             return None;

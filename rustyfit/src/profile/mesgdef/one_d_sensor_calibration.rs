@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// One D Sensor Calibration message.
 #[derive(Debug, Clone)]
-/// OneDSensorCalibration is a OneDSensorCalibration message.
 pub struct OneDSensorCalibration {
     /// Units: s; Whole second part of the timestamp
     pub timestamp: typedef::DateTime,
@@ -32,17 +32,17 @@ pub struct OneDSensorCalibration {
 }
 
 impl OneDSensorCalibration {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SENSOR_TYPE`
     pub const SENSOR_TYPE: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const CALIBRATION_FACTOR: u8 = 1;
-    /// Value's type: `u32`; Units: `counts`
+    /// Value's type: `u32`; Units: `counts`; ProfileType: `ProfileType::UINT32`
     pub const CALIBRATION_DIVISOR: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const LEVEL_SHIFT: u8 = 3;
-    /// Value's type: `i32`
+    /// Value's type: `i32`; ProfileType: `ProfileType::SINT32`
     pub const OFFSET_CAL: u8 = 4;
 
     /// Create new OneDSensorCalibration with all fields being set to its corresponding invalid value.

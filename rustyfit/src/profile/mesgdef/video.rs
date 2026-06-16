@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Video message.
 #[derive(Debug, Clone)]
-/// Video is a Video message.
 pub struct Video {
     pub url: String,
     pub hosting_provider: String,
@@ -26,11 +26,11 @@ pub struct Video {
 }
 
 impl Video {
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const URL: u8 = 0;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const HOSTING_PROVIDER: u8 = 1;
-    /// Value's type: `u32`; Units: `ms`
+    /// Value's type: `u32`; Units: `ms`; ProfileType: `ProfileType::UINT32`
     pub const DURATION: u8 = 2;
 
     /// Create new Video with all fields being set to its corresponding invalid value.

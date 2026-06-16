@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Sleep Level message.
 #[derive(Debug, Clone)]
-/// SleepLevel is a SleepLevel message.
 pub struct SleepLevel {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -23,9 +23,9 @@ pub struct SleepLevel {
 }
 
 impl SleepLevel {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SLEEP_LEVEL`
     pub const SLEEP_LEVEL: u8 = 0;
 
     /// Create new SleepLevel with all fields being set to its corresponding invalid value.

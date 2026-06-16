@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hrv Value message.
 #[derive(Debug, Clone)]
-/// HrvValue is a HrvValue message.
 pub struct HrvValue {
     pub timestamp: typedef::DateTime,
     /// Scale: 128; Units: ms; 5 minute RMSSD
@@ -23,9 +23,9 @@ pub struct HrvValue {
 }
 
 impl HrvValue {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`
+    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const VALUE: u8 = 0;
 
     /// Create new HrvValue with all fields being set to its corresponding invalid value.
@@ -39,6 +39,8 @@ impl HrvValue {
     }
 
     /// Returns `value` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
     pub fn value_scaled(&self) -> Option<f64> {
         if self.value == u16::MAX {
             return None;

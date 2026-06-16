@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Weather Alert message.
 #[derive(Debug, Clone)]
-/// WeatherAlert is a WeatherAlert message.
 pub struct WeatherAlert {
     pub timestamp: typedef::DateTime,
     /// Unique identifier from GCS report ID string, length is 12
@@ -33,17 +33,17 @@ pub struct WeatherAlert {
 }
 
 impl WeatherAlert {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const REPORT_ID: u8 = 0;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const ISSUE_TIME: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const EXPIRE_TIME: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_SEVERITY`
     pub const SEVERITY: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_SEVERE_TYPE`
     pub const TYPE: u8 = 4;
 
     /// Create new WeatherAlert with all fields being set to its corresponding invalid value.

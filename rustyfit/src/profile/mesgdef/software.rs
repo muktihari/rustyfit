@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Software message.
 #[derive(Debug, Clone)]
-/// Software is a Software message.
 pub struct Software {
     pub message_index: typedef::MessageIndex,
     /// Scale: 100
@@ -26,11 +26,11 @@ pub struct Software {
 }
 
 impl Software {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u16`; Scale: `100`
+    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
     pub const VERSION: u8 = 3;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const PART_NUMBER: u8 = 5;
 
     /// Create new Software with all fields being set to its corresponding invalid value.

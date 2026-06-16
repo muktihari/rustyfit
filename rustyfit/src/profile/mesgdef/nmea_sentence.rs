@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Nmea Sentence message.
 #[derive(Debug, Clone)]
-/// NmeaSentence is a NmeaSentence message.
 pub struct NmeaSentence {
     /// Units: s; Timestamp message was output
     pub timestamp: typedef::DateTime,
@@ -28,11 +28,11 @@ pub struct NmeaSentence {
 }
 
 impl NmeaSentence {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const SENTENCE: u8 = 1;
 
     /// Create new NmeaSentence with all fields being set to its corresponding invalid value.

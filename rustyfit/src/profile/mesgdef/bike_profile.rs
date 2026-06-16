@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Bike Profile message.
 #[derive(Debug, Clone)]
-/// BikeProfile is a BikeProfile message.
 pub struct BikeProfile {
     pub message_index: typedef::MessageIndex,
     pub name: String,
@@ -73,69 +73,69 @@ pub struct BikeProfile {
 }
 
 impl BikeProfile {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ODOMETER: u8 = 3;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const BIKE_SPD_ANT_ID: u8 = 4;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const BIKE_CAD_ANT_ID: u8 = 5;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const BIKE_SPDCAD_ANT_ID: u8 = 6;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const BIKE_POWER_ANT_ID: u8 = 7;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const CUSTOM_WHEELSIZE: u8 = 8;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const AUTO_WHEELSIZE: u8 = 9;
-    /// Value's type: `u16`; Scale: `10`; Units: `kg`
+    /// Value's type: `u16`; Scale: `10`; Units: `kg`; ProfileType: `ProfileType::UINT16`
     pub const BIKE_WEIGHT: u8 = 10;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`
+    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
     pub const POWER_CAL_FACTOR: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const AUTO_WHEEL_CAL: u8 = 12;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const AUTO_POWER_ZERO: u8 = 13;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ID: u8 = 14;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const SPD_ENABLED: u8 = 15;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const CAD_ENABLED: u8 = 16;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const SPDCAD_ENABLED: u8 = 17;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const POWER_ENABLED: u8 = 18;
-    /// Value's type: `u8`; Scale: `2`; Offset: `-110`; Units: `mm`
+    /// Value's type: `u8`; Scale: `2`; Offset: `-110`; Units: `mm`; ProfileType: `ProfileType::UINT8`
     pub const CRANK_LENGTH: u8 = 19;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 20;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const BIKE_SPD_ANT_ID_TRANS_TYPE: u8 = 21;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const BIKE_CAD_ANT_ID_TRANS_TYPE: u8 = 22;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const BIKE_SPDCAD_ANT_ID_TRANS_TYPE: u8 = 23;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const BIKE_POWER_ANT_ID_TRANS_TYPE: u8 = 24;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ODOMETER_ROLLOVER: u8 = 37;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const FRONT_GEAR_NUM: u8 = 38;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z
+    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const FRONT_GEAR: u8 = 39;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const REAR_GEAR_NUM: u8 = 40;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z
+    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const REAR_GEAR: u8 = 41;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const SHIMANO_DI2_ENABLED: u8 = 44;
 
     /// Create new BikeProfile with all fields being set to its corresponding invalid value.
@@ -179,6 +179,8 @@ impl BikeProfile {
     }
 
     /// Returns `odometer` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn odometer_scaled(&self) -> Option<f64> {
         if self.odometer == u32::MAX {
             return None;
@@ -198,6 +200,8 @@ impl BikeProfile {
     }
 
     /// Returns `custom_wheelsize` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn custom_wheelsize_scaled(&self) -> Option<f64> {
         if self.custom_wheelsize == u16::MAX {
             return None;
@@ -217,6 +221,8 @@ impl BikeProfile {
     }
 
     /// Returns `auto_wheelsize` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn auto_wheelsize_scaled(&self) -> Option<f64> {
         if self.auto_wheelsize == u16::MAX {
             return None;
@@ -236,6 +242,8 @@ impl BikeProfile {
     }
 
     /// Returns `bike_weight` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kg
     pub fn bike_weight_scaled(&self) -> Option<f64> {
         if self.bike_weight == u16::MAX {
             return None;
@@ -255,6 +263,8 @@ impl BikeProfile {
     }
 
     /// Returns `power_cal_factor` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: %
     pub fn power_cal_factor_scaled(&self) -> Option<f64> {
         if self.power_cal_factor == u16::MAX {
             return None;
@@ -274,6 +284,8 @@ impl BikeProfile {
     }
 
     /// Returns `crank_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
     pub fn crank_length_scaled(&self) -> Option<f64> {
         if self.crank_length == u8::MAX {
             return None;

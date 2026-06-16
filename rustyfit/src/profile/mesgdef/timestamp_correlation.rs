@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Timestamp Correlation message.
 #[derive(Debug, Clone)]
-/// TimestampCorrelation is a TimestampCorrelation message.
 pub struct TimestampCorrelation {
     /// Units: s; Whole second part of UTC timestamp at the time the system timestamp was recorded.
     pub timestamp: typedef::DateTime,
@@ -34,19 +34,19 @@ pub struct TimestampCorrelation {
 }
 
 impl TimestampCorrelation {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768`; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const SYSTEM_TIMESTAMP: u8 = 1;
-    /// Value's type: `u16`; Scale: `32768`; Units: `s`
+    /// Value's type: `u16`; Scale: `32768`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const FRACTIONAL_SYSTEM_TIMESTAMP: u8 = 2;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
     pub const LOCAL_TIMESTAMP: u8 = 3;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 4;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const SYSTEM_TIMESTAMP_MS: u8 = 5;
 
     /// Create new TimestampCorrelation with all fields being set to its corresponding invalid value.
@@ -65,6 +65,8 @@ impl TimestampCorrelation {
     }
 
     /// Returns `fractional_timestamp` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn fractional_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_timestamp == u16::MAX {
             return None;
@@ -84,6 +86,8 @@ impl TimestampCorrelation {
     }
 
     /// Returns `fractional_system_timestamp` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn fractional_system_timestamp_scaled(&self) -> Option<f64> {
         if self.fractional_system_timestamp == u16::MAX {
             return None;

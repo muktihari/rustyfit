@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Spo2 Data message.
 #[derive(Debug, Clone)]
-/// Spo2Data is a Spo2Data message.
 pub struct Spo2Data {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -27,13 +27,13 @@ pub struct Spo2Data {
 }
 
 impl Spo2Data {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const READING_SPO2: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const READING_CONFIDENCE: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPO2_MEASUREMENT_TYPE`
     pub const MODE: u8 = 2;
 
     /// Create new Spo2Data with all fields being set to its corresponding invalid value.

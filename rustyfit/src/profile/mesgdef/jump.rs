@@ -18,8 +18,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Jump message.
 #[derive(Debug, Clone)]
-/// Jump is a Jump message.
 pub struct Jump {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -48,25 +48,25 @@ pub struct Jump {
 }
 
 impl Jump {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `f32`; Units: `m`
+    /// Value's type: `f32`; Units: `m`; ProfileType: `ProfileType::FLOAT32`
     pub const DISTANCE: u8 = 0;
-    /// Value's type: `f32`; Units: `m`
+    /// Value's type: `f32`; Units: `m`; ProfileType: `ProfileType::FLOAT32`
     pub const HEIGHT: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const ROTATIONS: u8 = 2;
-    /// Value's type: `f32`; Units: `s`
+    /// Value's type: `f32`; Units: `s`; ProfileType: `ProfileType::FLOAT32`
     pub const HANG_TIME: u8 = 3;
-    /// Value's type: `f32`
+    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
     pub const SCORE: u8 = 4;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LAT: u8 = 5;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LONG: u8 = 6;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const SPEED: u8 = 7;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_SPEED: u8 = 8;
 
     /// Create new Jump with all fields being set to its corresponding invalid value.
@@ -111,6 +111,8 @@ impl Jump {
     }
 
     /// Returns `speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn speed_scaled(&self) -> Option<f64> {
         if self.speed == u16::MAX {
             return None;
@@ -130,6 +132,8 @@ impl Jump {
     }
 
     /// Returns `enhanced_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn enhanced_speed_scaled(&self) -> Option<f64> {
         if self.enhanced_speed == u32::MAX {
             return None;

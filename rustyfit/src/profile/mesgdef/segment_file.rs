@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Segment File message.
 #[derive(Debug, Clone)]
-/// SegmentFile is a SegmentFile message.
 pub struct SegmentFile {
     pub message_index: typedef::MessageIndex,
     /// UUID of the segment file
@@ -39,23 +39,23 @@ pub struct SegmentFile {
 }
 
 impl SegmentFile {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const FILE_UUID: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 3;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const USER_PROFILE_PRIMARY_KEY: u8 = 4;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::SEGMENT_LEADERBOARD_TYPE`
     pub const LEADER_TYPE: u8 = 7;
-    /// Value's type: `Vec<u32>`
+    /// Value's type: `Vec<u32>`; ProfileType: `ProfileType::UINT32`
     pub const LEADER_GROUP_PRIMARY_KEY: u8 = 8;
-    /// Value's type: `Vec<u32>`
+    /// Value's type: `Vec<u32>`; ProfileType: `ProfileType::UINT32`
     pub const LEADER_ACTIVITY_ID: u8 = 9;
-    /// Value's type: `Vec<String>`
+    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
     pub const LEADER_ACTIVITY_ID_STRING: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DEFAULT_RACE_LEADER: u8 = 11;
 
     /// Create new SegmentFile with all fields being set to its corresponding invalid value.

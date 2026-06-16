@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Device Aux Battery Info message.
 #[derive(Debug, Clone)]
-/// DeviceAuxBatteryInfo is a DeviceAuxBatteryInfo message.
 pub struct DeviceAuxBatteryInfo {
     pub timestamp: typedef::DateTime,
     pub device_index: typedef::DeviceIndex,
@@ -26,15 +26,15 @@ pub struct DeviceAuxBatteryInfo {
 }
 
 impl DeviceAuxBatteryInfo {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u16`; Scale: `256`; Units: `V`
+    /// Value's type: `u16`; Scale: `256`; Units: `V`; ProfileType: `ProfileType::UINT16`
     pub const BATTERY_VOLTAGE: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BATTERY_STATUS`
     pub const BATTERY_STATUS: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const BATTERY_IDENTIFIER: u8 = 3;
 
     /// Create new DeviceAuxBatteryInfo with all fields being set to its corresponding invalid value.
@@ -51,6 +51,8 @@ impl DeviceAuxBatteryInfo {
     }
 
     /// Returns `battery_voltage` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: V
     pub fn battery_voltage_scaled(&self) -> Option<f64> {
         if self.battery_voltage == u16::MAX {
             return None;

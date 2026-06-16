@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Ant Channel Id message.
 #[derive(Debug, Clone)]
-/// AntChannelId is a AntChannelId message.
 pub struct AntChannelId {
     pub channel_number: u8,
     /// Base: UINT8Z
@@ -28,15 +28,15 @@ pub struct AntChannelId {
 }
 
 impl AntChannelId {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const CHANNEL_NUMBER: u8 = 0;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const DEVICE_TYPE: u8 = 1;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const DEVICE_NUMBER: u8 = 2;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const TRANSMISSION_TYPE: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
     pub const DEVICE_INDEX: u8 = 4;
 
     /// Create new AntChannelId with all fields being set to its corresponding invalid value.

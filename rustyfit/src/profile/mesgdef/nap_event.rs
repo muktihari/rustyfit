@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Nap Event message.
 #[derive(Debug, Clone)]
-/// NapEvent is a NapEvent message.
 pub struct NapEvent {
     pub message_index: typedef::MessageIndex,
     pub timestamp: typedef::DateTime,
@@ -35,25 +35,25 @@ pub struct NapEvent {
 }
 
 impl NapEvent {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Units: `seconds`
+    /// Value's type: `u32`; Units: `seconds`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_TIME: u8 = 0;
-    /// Value's type: `i16`; Units: `minutes`
+    /// Value's type: `i16`; Units: `minutes`; ProfileType: `ProfileType::SINT16`
     pub const START_TIMEZONE_OFFSET: u8 = 1;
-    /// Value's type: `u32`; Units: `seconds`
+    /// Value's type: `u32`; Units: `seconds`; ProfileType: `ProfileType::DATE_TIME`
     pub const END_TIME: u8 = 2;
-    /// Value's type: `i16`; Units: `minutes`
+    /// Value's type: `i16`; Units: `minutes`; ProfileType: `ProfileType::SINT16`
     pub const END_TIMEZONE_OFFSET: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::NAP_PERIOD_FEEDBACK`
     pub const FEEDBACK: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const IS_DELETED: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::NAP_SOURCE`
     pub const SOURCE: u8 = 6;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const UPDATE_TIMESTAMP: u8 = 7;
 
     /// Create new NapEvent with all fields being set to its corresponding invalid value.

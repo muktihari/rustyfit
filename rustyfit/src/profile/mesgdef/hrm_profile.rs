@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hrm Profile message.
 #[derive(Debug, Clone)]
-/// HrmProfile is a HrmProfile message.
 pub struct HrmProfile {
     pub message_index: typedef::MessageIndex,
     pub enabled: typedef::Bool,
@@ -27,15 +27,15 @@ pub struct HrmProfile {
 }
 
 impl HrmProfile {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 0;
-    /// Value's type: `u16`; Base: UINT16Z
+    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
     pub const HRM_ANT_ID: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const LOG_HRV: u8 = 2;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
     pub const HRM_ANT_ID_TRANS_TYPE: u8 = 3;
 
     /// Create new HrmProfile with all fields being set to its corresponding invalid value.

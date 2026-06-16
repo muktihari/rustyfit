@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Accelerometer Data message.
 #[derive(Debug, Clone)]
-/// HsaAccelerometerData is a HsaAccelerometerData message.
 pub struct HsaAccelerometerData {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -34,19 +34,19 @@ pub struct HsaAccelerometerData {
 }
 
 impl HsaAccelerometerData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const SAMPLING_INTERVAL: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`
+    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`; ProfileType: `ProfileType::SINT16`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`
+    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`; ProfileType: `ProfileType::SINT16`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`
+    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`; ProfileType: `ProfileType::SINT16`
     pub const ACCEL_Z: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaAccelerometerData with all fields being set to its corresponding invalid value.
@@ -65,6 +65,8 @@ impl HsaAccelerometerData {
     }
 
     /// Returns `accel_x` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mG
     pub fn accel_x_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_x.is_empty() {
             return None;
@@ -94,6 +96,8 @@ impl HsaAccelerometerData {
     }
 
     /// Returns `accel_y` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mG
     pub fn accel_y_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_y.is_empty() {
             return None;
@@ -123,6 +127,8 @@ impl HsaAccelerometerData {
     }
 
     /// Returns `accel_z` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mG
     pub fn accel_z_scaled(&self) -> Option<Vec<f64>> {
         if self.accel_z.is_empty() {
             return None;

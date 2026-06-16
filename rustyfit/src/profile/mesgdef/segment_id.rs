@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Segment Id message.
 #[derive(Debug, Clone)]
-/// SegmentId is a SegmentId message.
 pub struct SegmentId {
     /// Friendly name assigned to segment
     pub name: String,
@@ -40,23 +40,23 @@ pub struct SegmentId {
 }
 
 impl SegmentId {
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 0;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const UUID: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 3;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const USER_PROFILE_PRIMARY_KEY: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const DEVICE_ID: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DEFAULT_RACE_LEADER: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_DELETE_STATUS`
     pub const DELETE_STATUS: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_SELECTION_TYPE`
     pub const SELECTION_TYPE: u8 = 8;
 
     /// Create new SegmentId with all fields being set to its corresponding invalid value.

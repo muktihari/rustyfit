@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Event message.
 #[derive(Debug, Clone)]
-/// HsaEvent is a HsaEvent message.
 pub struct HsaEvent {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -24,9 +24,9 @@ pub struct HsaEvent {
 }
 
 impl HsaEvent {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const EVENT_ID: u8 = 0;
 
     /// Create new HsaEvent with all fields being set to its corresponding invalid value.

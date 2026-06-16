@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// File Id message.
 #[derive(Debug, Clone)]
-/// FileId is a FileId message.
 pub struct FileId {
     pub r#type: typedef::File,
     pub manufacturer: typedef::Manufacturer,
@@ -31,19 +31,19 @@ pub struct FileId {
 }
 
 impl FileId {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
     pub const TYPE: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
     pub const MANUFACTURER: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const PRODUCT: u8 = 2;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
     pub const SERIAL_NUMBER: u8 = 3;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIME_CREATED: u8 = 4;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const NUMBER: u8 = 5;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const PRODUCT_NAME: u8 = 8;
 
     /// Create new FileId with all fields being set to its corresponding invalid value.

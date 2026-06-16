@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Workout Session message.
 #[derive(Debug, Clone)]
-/// WorkoutSession is a WorkoutSession message.
 pub struct WorkoutSession {
     pub message_index: typedef::MessageIndex,
     pub sport: typedef::Sport,
@@ -28,19 +28,19 @@ pub struct WorkoutSession {
 }
 
 impl WorkoutSession {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const NUM_VALID_STEPS: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const FIRST_STEP_INDEX: u8 = 3;
-    /// Value's type: `u16`; Scale: `100`; Units: `m`
+    /// Value's type: `u16`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const POOL_LENGTH: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
     pub const POOL_LENGTH_UNIT: u8 = 5;
 
     /// Create new WorkoutSession with all fields being set to its corresponding invalid value.
@@ -59,6 +59,8 @@ impl WorkoutSession {
     }
 
     /// Returns `pool_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn pool_length_scaled(&self) -> Option<f64> {
         if self.pool_length == u16::MAX {
             return None;

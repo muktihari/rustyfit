@@ -19,15 +19,15 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Exd Data Field Configuration message.
 #[derive(Debug, Clone)]
-/// ExdDataFieldConfiguration is a ExdDataFieldConfiguration message.
 pub struct ExdDataFieldConfiguration {
     pub screen_index: u8,
     pub concept_field: u8,
     pub field_id: u8,
     pub concept_count: u8,
     pub display_type: typedef::ExdDisplayType,
-    /// Array: [32]
+    /// Array: \[32\]
     pub title: [String; 32],
     state: [u8; 1], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -37,17 +37,17 @@ pub struct ExdDataFieldConfiguration {
 }
 
 impl ExdDataFieldConfiguration {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SCREEN_INDEX: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
     pub const CONCEPT_FIELD: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const FIELD_ID: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const CONCEPT_COUNT: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_DISPLAY_TYPE`
     pub const DISPLAY_TYPE: u8 = 4;
-    /// Value's type: `[String; 32]`
+    /// Value's type: `[String; 32]`; ProfileType: `ProfileType::STRING`
     pub const TITLE: u8 = 5;
 
     /// Create new ExdDataFieldConfiguration with all fields being set to its corresponding invalid value.

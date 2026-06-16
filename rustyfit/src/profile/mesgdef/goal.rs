@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Goal message.
 #[derive(Debug, Clone)]
-/// Goal is a Goal message.
 pub struct Goal {
     pub message_index: typedef::MessageIndex,
     pub sport: typedef::Sport,
@@ -33,31 +33,31 @@ pub struct Goal {
 }
 
 impl Goal {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const START_DATE: u8 = 2;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const END_DATE: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::GOAL`
     pub const TYPE: u8 = 4;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const VALUE: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const REPEAT: u8 = 6;
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
     pub const TARGET_VALUE: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::GOAL_RECURRENCE`
     pub const RECURRENCE: u8 = 8;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const RECURRENCE_VALUE: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ENABLED: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::GOAL_SOURCE`
     pub const SOURCE: u8 = 11;
 
     /// Create new Goal with all fields being set to its corresponding invalid value.

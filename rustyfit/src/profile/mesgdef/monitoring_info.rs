@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Monitoring Info message.
 #[derive(Debug, Clone)]
-/// MonitoringInfo is a MonitoringInfo message.
 pub struct MonitoringInfo {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -31,17 +31,17 @@ pub struct MonitoringInfo {
 }
 
 impl MonitoringInfo {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
     pub const LOCAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::ACTIVITY_TYPE`
     pub const ACTIVITY_TYPE: u8 = 1;
-    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `m/cycle`
+    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `m/cycle`; ProfileType: `ProfileType::UINT16`
     pub const CYCLES_TO_DISTANCE: u8 = 3;
-    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `kcal/cycle`
+    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `kcal/cycle`; ProfileType: `ProfileType::UINT16`
     pub const CYCLES_TO_CALORIES: u8 = 4;
-    /// Value's type: `u16`; Units: `kcal / day`
+    /// Value's type: `u16`; Units: `kcal / day`; ProfileType: `ProfileType::UINT16`
     pub const RESTING_METABOLIC_RATE: u8 = 5;
 
     /// Create new MonitoringInfo with all fields being set to its corresponding invalid value.
@@ -59,6 +59,8 @@ impl MonitoringInfo {
     }
 
     /// Returns `cycles_to_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/cycle
     pub fn cycles_to_distance_scaled(&self) -> Option<Vec<f64>> {
         if self.cycles_to_distance.is_empty() {
             return None;
@@ -88,6 +90,8 @@ impl MonitoringInfo {
     }
 
     /// Returns `cycles_to_calories` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: kcal/cycle
     pub fn cycles_to_calories_scaled(&self) -> Option<Vec<f64>> {
         if self.cycles_to_calories.is_empty() {
             return None;

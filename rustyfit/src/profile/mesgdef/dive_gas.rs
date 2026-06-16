@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Dive Gas message.
 #[derive(Debug, Clone)]
-/// DiveGas is a DiveGas message.
 pub struct DiveGas {
     pub message_index: typedef::MessageIndex,
     /// Units: percent
@@ -27,15 +27,15 @@ pub struct DiveGas {
 }
 
 impl DiveGas {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const HELIUM_CONTENT: u8 = 0;
-    /// Value's type: `u8`; Units: `percent`
+    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
     pub const OXYGEN_CONTENT: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_GAS_STATUS`
     pub const STATUS: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_GAS_MODE`
     pub const MODE: u8 = 3;
 
     /// Create new DiveGas with all fields being set to its corresponding invalid value.

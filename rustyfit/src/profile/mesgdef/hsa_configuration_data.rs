@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Configuration Data message.
 #[derive(Debug, Clone)]
-/// HsaConfigurationData is a HsaConfigurationData message.
 pub struct HsaConfigurationData {
     /// Units: s; Encoded configuration data
     pub timestamp: typedef::DateTime,
@@ -26,11 +26,11 @@ pub struct HsaConfigurationData {
 }
 
 impl HsaConfigurationData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `Vec<u8>`
+    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
     pub const DATA: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DATA_SIZE: u8 = 1;
 
     /// Create new HsaConfigurationData with all fields being set to its corresponding invalid value.

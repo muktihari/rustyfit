@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// File Capabilities message.
 #[derive(Debug, Clone)]
-/// FileCapabilities is a FileCapabilities message.
 pub struct FileCapabilities {
     pub message_index: typedef::MessageIndex,
     pub r#type: typedef::File,
@@ -30,17 +30,17 @@ pub struct FileCapabilities {
 }
 
 impl FileCapabilities {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
     pub const TYPE: u8 = 0;
-    /// Value's type: `u8`; Base: UINT8Z
+    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::FILE_FLAGS`
     pub const FLAGS: u8 = 1;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const DIRECTORY: u8 = 2;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const MAX_COUNT: u8 = 3;
-    /// Value's type: `u32`; Units: `bytes`
+    /// Value's type: `u32`; Units: `bytes`; ProfileType: `ProfileType::UINT32`
     pub const MAX_SIZE: u8 = 4;
 
     /// Create new FileCapabilities with all fields being set to its corresponding invalid value.

@@ -10,13 +10,13 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Stress Data message.
 #[derive(Debug, Clone)]
-/// HsaStressData is a HsaStressData message.
 pub struct HsaStressData {
     pub timestamp: typedef::DateTime,
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
-    /// Units: s; Stress Level: [0,100] Off wrist: -1 Excess motion: -2 Not enough data: -3 Recovering from exercise: -4 Unidentified: -5 Blank: -16
+    /// Units: s; Stress Level: \[0,100\] Off wrist: -1 Excess motion: -2 Not enough data: -3 Recovering from exercise: -4 Unidentified: -5 Blank: -16
     pub stress_level: Vec<i8>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -25,11 +25,11 @@ pub struct HsaStressData {
 }
 
 impl HsaStressData {
-    /// Value's type: `u32`
+    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`
+    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i8>`; Units: `s`
+    /// Value's type: `Vec<i8>`; Units: `s`; ProfileType: `ProfileType::SINT8`
     pub const STRESS_LEVEL: u8 = 1;
 
     /// Create new HsaStressData with all fields being set to its corresponding invalid value.

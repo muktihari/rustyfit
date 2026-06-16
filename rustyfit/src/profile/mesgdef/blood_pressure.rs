@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Blood Pressure message.
 #[derive(Debug, Clone)]
-/// BloodPressure is a BloodPressure message.
 pub struct BloodPressure {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -40,27 +40,27 @@ pub struct BloodPressure {
 }
 
 impl BloodPressure {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `mmHg`
+    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
     pub const SYSTOLIC_PRESSURE: u8 = 0;
-    /// Value's type: `u16`; Units: `mmHg`
+    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
     pub const DIASTOLIC_PRESSURE: u8 = 1;
-    /// Value's type: `u16`; Units: `mmHg`
+    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
     pub const MEAN_ARTERIAL_PRESSURE: u8 = 2;
-    /// Value's type: `u16`; Units: `mmHg`
+    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
     pub const MAP_3_SAMPLE_MEAN: u8 = 3;
-    /// Value's type: `u16`; Units: `mmHg`
+    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
     pub const MAP_MORNING_VALUES: u8 = 4;
-    /// Value's type: `u16`; Units: `mmHg`
+    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
     pub const MAP_EVENING_VALUES: u8 = 5;
-    /// Value's type: `u8`; Units: `bpm`
+    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const HEART_RATE: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::HR_TYPE`
     pub const HEART_RATE_TYPE: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BP_STATUS`
     pub const STATUS: u8 = 8;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const USER_PROFILE_INDEX: u8 = 9;
 
     /// Create new BloodPressure with all fields being set to its corresponding invalid value.

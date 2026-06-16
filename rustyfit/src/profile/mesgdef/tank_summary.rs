@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Tank Summary message.
 #[derive(Debug, Clone)]
-/// TankSummary is a TankSummary message.
 pub struct TankSummary {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -30,15 +30,15 @@ pub struct TankSummary {
 }
 
 impl TankSummary {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Base: UINT32Z
+    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::ANT_CHANNEL_ID`
     pub const SENSOR: u8 = 0;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar`; ProfileType: `ProfileType::UINT16`
     pub const START_PRESSURE: u8 = 1;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar`
+    /// Value's type: `u16`; Scale: `100`; Units: `bar`; ProfileType: `ProfileType::UINT16`
     pub const END_PRESSURE: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `L`
+    /// Value's type: `u32`; Scale: `100`; Units: `L`; ProfileType: `ProfileType::UINT32`
     pub const VOLUME_USED: u8 = 3;
 
     /// Create new TankSummary with all fields being set to its corresponding invalid value.
@@ -55,6 +55,8 @@ impl TankSummary {
     }
 
     /// Returns `start_pressure` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: bar
     pub fn start_pressure_scaled(&self) -> Option<f64> {
         if self.start_pressure == u16::MAX {
             return None;
@@ -74,6 +76,8 @@ impl TankSummary {
     }
 
     /// Returns `end_pressure` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: bar
     pub fn end_pressure_scaled(&self) -> Option<f64> {
         if self.end_pressure == u16::MAX {
             return None;
@@ -93,6 +97,8 @@ impl TankSummary {
     }
 
     /// Returns `volume_used` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: L
     pub fn volume_used_scaled(&self) -> Option<f64> {
         if self.volume_used == u32::MAX {
             return None;

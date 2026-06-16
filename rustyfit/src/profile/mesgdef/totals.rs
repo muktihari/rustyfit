@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Totals message.
 #[derive(Debug, Clone)]
-/// Totals is a Totals message.
 pub struct Totals {
     pub message_index: typedef::MessageIndex,
     /// Units: s
@@ -36,25 +36,25 @@ pub struct Totals {
 }
 
 impl Totals {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIMER_TIME: u8 = 0;
-    /// Value's type: `u32`; Units: `m`
+    /// Value's type: `u32`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DISTANCE: u8 = 1;
-    /// Value's type: `u32`; Units: `kcal`
+    /// Value's type: `u32`; Units: `kcal`; ProfileType: `ProfileType::UINT32`
     pub const CALORIES: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 3;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ELAPSED_TIME: u8 = 4;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const SESSIONS: u8 = 5;
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const ACTIVE_TIME: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SPORT_INDEX: u8 = 9;
 
     /// Create new Totals with all fields being set to its corresponding invalid value.

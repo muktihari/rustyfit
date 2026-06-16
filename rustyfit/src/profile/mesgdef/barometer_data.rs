@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Barometer Data message.
 #[derive(Debug, Clone)]
-/// BarometerData is a BarometerData message.
 pub struct BarometerData {
     /// Units: s; Whole second part of the timestamp
     pub timestamp: typedef::DateTime,
@@ -28,13 +28,13 @@ pub struct BarometerData {
 }
 
 impl BarometerData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`
+    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u32>`; Units: `Pa`
+    /// Value's type: `Vec<u32>`; Units: `Pa`; ProfileType: `ProfileType::UINT32`
     pub const BARO_PRES: u8 = 2;
 
     /// Create new BarometerData with all fields being set to its corresponding invalid value.

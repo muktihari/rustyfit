@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Time In Zone message.
 #[derive(Debug, Clone)]
-/// TimeInZone is a TimeInZone message.
 pub struct TimeInZone {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -46,39 +46,39 @@ pub struct TimeInZone {
 }
 
 impl TimeInZone {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
     pub const REFERENCE_MESG: u8 = 0;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_HR_ZONE: u8 = 2;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_SPEED_ZONE: u8 = 3;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_CADENCE_ZONE: u8 = 4;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const TIME_IN_POWER_ZONE: u8 = 5;
-    /// Value's type: `Vec<u8>`; Units: `bpm`
+    /// Value's type: `Vec<u8>`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
     pub const HR_ZONE_HIGH_BOUNDARY: u8 = 6;
-    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `m/s`
+    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
     pub const SPEED_ZONE_HIGH_BOUNDARY: u8 = 7;
-    /// Value's type: `Vec<u8>`; Units: `rpm`
+    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
     pub const CADENCE_ZONE_HIGH_BOUNDARY: u8 = 8;
-    /// Value's type: `Vec<u16>`; Units: `watts`
+    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
     pub const POWER_ZONE_HIGH_BOUNDARY: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::HR_ZONE_CALC`
     pub const HR_CALC_TYPE: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const MAX_HEART_RATE: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const RESTING_HEART_RATE: u8 = 12;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const THRESHOLD_HEART_RATE: u8 = 13;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::PWR_ZONE_CALC`
     pub const PWR_CALC_TYPE: u8 = 14;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const FUNCTIONAL_THRESHOLD_POWER: u8 = 15;
 
     /// Create new TimeInZone with all fields being set to its corresponding invalid value.
@@ -107,6 +107,8 @@ impl TimeInZone {
     }
 
     /// Returns `time_in_hr_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_hr_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_hr_zone.is_empty() {
             return None;
@@ -136,6 +138,8 @@ impl TimeInZone {
     }
 
     /// Returns `time_in_speed_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_speed_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_speed_zone.is_empty() {
             return None;
@@ -165,6 +169,8 @@ impl TimeInZone {
     }
 
     /// Returns `time_in_cadence_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_cadence_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_cadence_zone.is_empty() {
             return None;
@@ -194,6 +200,8 @@ impl TimeInZone {
     }
 
     /// Returns `time_in_power_zone` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn time_in_power_zone_scaled(&self) -> Option<Vec<f64>> {
         if self.time_in_power_zone.is_empty() {
             return None;
@@ -223,6 +231,8 @@ impl TimeInZone {
     }
 
     /// Returns `speed_zone_high_boundary` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
     pub fn speed_zone_high_boundary_scaled(&self) -> Option<Vec<f64>> {
         if self.speed_zone_high_boundary.is_empty() {
             return None;

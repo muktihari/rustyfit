@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Video Title message.
 #[derive(Debug, Clone)]
-/// VideoTitle is a VideoTitle message.
 pub struct VideoTitle {
     /// Long titles will be split into multiple parts
     pub message_index: typedef::MessageIndex,
@@ -27,11 +27,11 @@ pub struct VideoTitle {
 }
 
 impl VideoTitle {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
     pub const MESSAGE_COUNT: u8 = 0;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const TEXT: u8 = 1;
 
     /// Create new VideoTitle with all fields being set to its corresponding invalid value.

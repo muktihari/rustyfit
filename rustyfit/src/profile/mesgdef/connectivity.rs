@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Connectivity message.
 #[derive(Debug, Clone)]
-/// Connectivity is a Connectivity message.
 pub struct Connectivity {
     /// Use Bluetooth for connectivity features
     pub bluetooth_enabled: typedef::Bool,
@@ -38,31 +38,31 @@ pub struct Connectivity {
 }
 
 impl Connectivity {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const BLUETOOTH_ENABLED: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const BLUETOOTH_LE_ENABLED: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const ANT_ENABLED: u8 = 2;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const LIVE_TRACKING_ENABLED: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const WEATHER_CONDITIONS_ENABLED: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const WEATHER_ALERTS_ENABLED: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const AUTO_ACTIVITY_UPLOAD_ENABLED: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const COURSE_DOWNLOAD_ENABLED: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const WORKOUT_DOWNLOAD_ENABLED: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const GPS_EPHEMERIS_DOWNLOAD_ENABLED: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const INCIDENT_DETECTION_ENABLED: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const GROUPTRACK_ENABLED: u8 = 12;
 
     /// Create new Connectivity with all fields being set to its corresponding invalid value.

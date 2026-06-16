@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Sleep Assessment message.
 #[derive(Debug, Clone)]
-/// SleepAssessment is a SleepAssessment message.
 pub struct SleepAssessment {
     /// Average of awake_time_score and awakenings_count_score. If valid: 0 (worst) to 100 (best). If unknown: FIT_UINT8_INVALID.
     pub combined_awake_score: u8,
@@ -48,33 +48,33 @@ pub struct SleepAssessment {
 }
 
 impl SleepAssessment {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const COMBINED_AWAKE_SCORE: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const AWAKE_TIME_SCORE: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const AWAKENINGS_COUNT_SCORE: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DEEP_SLEEP_SCORE: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SLEEP_DURATION_SCORE: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const LIGHT_SLEEP_SCORE: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const OVERALL_SLEEP_SCORE: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SLEEP_QUALITY_SCORE: u8 = 7;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SLEEP_RECOVERY_SCORE: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const REM_SLEEP_SCORE: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SLEEP_RESTLESSNESS_SCORE: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const AWAKENINGS_COUNT: u8 = 11;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const INTERRUPTIONS_SCORE: u8 = 14;
-    /// Value's type: `u16`; Scale: `100`
+    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
     pub const AVERAGE_STRESS_DURING_SLEEP: u8 = 15;
 
     /// Create new SleepAssessment with all fields being set to its corresponding invalid value.

@@ -17,8 +17,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Exd Data Concept Configuration message.
 #[derive(Debug, Clone)]
-/// ExdDataConceptConfiguration is a ExdDataConceptConfiguration message.
 pub struct ExdDataConceptConfiguration {
     pub screen_index: u8,
     pub concept_field: u8,
@@ -39,27 +39,27 @@ pub struct ExdDataConceptConfiguration {
 }
 
 impl ExdDataConceptConfiguration {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SCREEN_INDEX: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
     pub const CONCEPT_FIELD: u8 = 1;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const FIELD_ID: u8 = 2;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const CONCEPT_INDEX: u8 = 3;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const DATA_PAGE: u8 = 4;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const CONCEPT_KEY: u8 = 5;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
     pub const SCALING: u8 = 6;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_DATA_UNITS`
     pub const DATA_UNITS: u8 = 8;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_QUALIFIERS`
     pub const QUALIFIER: u8 = 9;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_DESCRIPTORS`
     pub const DESCRIPTOR: u8 = 10;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
     pub const IS_SIGNED: u8 = 11;
 
     /// Create new ExdDataConceptConfiguration with all fields being set to its corresponding invalid value.

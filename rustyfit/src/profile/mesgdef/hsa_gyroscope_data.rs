@@ -10,8 +10,8 @@ use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
 
+/// Hsa Gyroscope Data message.
 #[derive(Debug, Clone)]
-/// HsaGyroscopeData is a HsaGyroscopeData message.
 pub struct HsaGyroscopeData {
     /// Units: s
     pub timestamp: typedef::DateTime,
@@ -34,19 +34,19 @@ pub struct HsaGyroscopeData {
 }
 
 impl HsaGyroscopeData {
-    /// Value's type: `u32`; Units: `s`
+    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`
+    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `u16`; Units: `1/32768 s`
+    /// Value's type: `u16`; Units: `1/32768 s`; ProfileType: `ProfileType::UINT16`
     pub const SAMPLING_INTERVAL: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `28.57143`; Units: `deg/s`
+    /// Value's type: `Vec<i16>`; Scale: `28.57143`; Units: `deg/s`; ProfileType: `ProfileType::SINT16`
     pub const GYRO_X: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `28.57143`; Units: `deg/s`
+    /// Value's type: `Vec<i16>`; Scale: `28.57143`; Units: `deg/s`; ProfileType: `ProfileType::SINT16`
     pub const GYRO_Y: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `28.57143`; Units: `deg/s`
+    /// Value's type: `Vec<i16>`; Scale: `28.57143`; Units: `deg/s`; ProfileType: `ProfileType::SINT16`
     pub const GYRO_Z: u8 = 4;
-    /// Value's type: `u32`; Units: `1/32768 s`
+    /// Value's type: `u32`; Units: `1/32768 s`; ProfileType: `ProfileType::UINT32`
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaGyroscopeData with all fields being set to its corresponding invalid value.
@@ -65,6 +65,8 @@ impl HsaGyroscopeData {
     }
 
     /// Returns `gyro_x` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: deg/s
     pub fn gyro_x_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_x.is_empty() {
             return None;
@@ -94,6 +96,8 @@ impl HsaGyroscopeData {
     }
 
     /// Returns `gyro_y` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: deg/s
     pub fn gyro_y_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_y.is_empty() {
             return None;
@@ -123,6 +127,8 @@ impl HsaGyroscopeData {
     }
 
     /// Returns `gyro_z` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: deg/s
     pub fn gyro_z_scaled(&self) -> Option<Vec<f64>> {
         if self.gyro_z.is_empty() {
             return None;

@@ -12,8 +12,8 @@ use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
 
+/// Sport message.
 #[derive(Debug, Clone)]
-/// Sport is a Sport message.
 pub struct Sport {
     pub sport: typedef::Sport,
     pub sub_sport: typedef::SubSport,
@@ -25,11 +25,11 @@ pub struct Sport {
 }
 
 impl Sport {
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
     pub const SPORT: u8 = 0;
-    /// Value's type: `u8`
+    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `String`
+    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
     pub const NAME: u8 = 3;
 
     /// Create new Sport with all fields being set to its corresponding invalid value.

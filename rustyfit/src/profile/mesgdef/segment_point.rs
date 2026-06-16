@@ -18,8 +18,8 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
     }
 }
 
+/// Segment Point message.
 #[derive(Debug, Clone)]
-/// SegmentPoint is a SegmentPoint message.
 pub struct SegmentPoint {
     pub message_index: typedef::MessageIndex,
     /// Units: semicircles
@@ -42,19 +42,19 @@ pub struct SegmentPoint {
 }
 
 impl SegmentPoint {
-    /// Value's type: `u16`
+    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LAT: u8 = 1;
-    /// Value's type: `i32`; Units: `semicircles`
+    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
     pub const POSITION_LONG: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`
+    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const DISTANCE: u8 = 3;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
     pub const ALTITUDE: u8 = 4;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`
+    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
     pub const LEADER_TIME: u8 = 5;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
     pub const ENHANCED_ALTITUDE: u8 = 6;
 
     /// Create new SegmentPoint with all fields being set to its corresponding invalid value.
@@ -96,6 +96,8 @@ impl SegmentPoint {
     }
 
     /// Returns `distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn distance_scaled(&self) -> Option<f64> {
         if self.distance == u32::MAX {
             return None;
@@ -115,6 +117,8 @@ impl SegmentPoint {
     }
 
     /// Returns `altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn altitude_scaled(&self) -> Option<f64> {
         if self.altitude == u16::MAX {
             return None;
@@ -134,6 +138,8 @@ impl SegmentPoint {
     }
 
     /// Returns `leader_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
     pub fn leader_time_scaled(&self) -> Option<Vec<f64>> {
         if self.leader_time.is_empty() {
             return None;
@@ -163,6 +169,8 @@ impl SegmentPoint {
     }
 
     /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
     pub fn enhanced_altitude_scaled(&self) -> Option<f64> {
         if self.enhanced_altitude == u32::MAX {
             return None;
