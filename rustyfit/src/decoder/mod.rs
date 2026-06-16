@@ -139,7 +139,8 @@ impl Decoder {
         }
     }
 
-    /// Decode return a single FIT sequence. If it's a chained FIT file, call this method multiple times.
+    /// Decode returns a single FIT sequence. If it's a chained FIT file,
+    /// call this method multiple times until it return Ok(None) or Err(err).
     pub fn decode<R>(&mut self, mut reader: R) -> Result<Option<FIT>, Error<R::Error>>
     where
         R: Read,
@@ -863,7 +864,10 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
         Self: 'b;
 
     /// Decode next `DecoderEvent` until it returns `None` indicating no more data is available from the `reader`.
-    /// Since this is lazily evaluated, users can decide when to stop without required to read the whole reader.
+    /// Since this is lazily evaluated, users can decide when to stop without being required to read the whole reader.
+    ///
+    /// This method may advance through chained FIT sequences. If exactly one sequence is desired, break manually
+    /// when reaching `DecoderEvent::Crc`.
     fn next(&mut self) -> Option<Result<Event<'_>, Error<R::Error>>> {
         match self.state {
             State::FileHeader => {
