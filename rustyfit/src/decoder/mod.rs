@@ -1001,7 +1001,7 @@ mod tests {
         dec.timestamp = timestamp;
         let mesg_def = MessageDefinition::default();
 
-        let time_offset = (timestamp + 1 & Message::COMPRESSED_TIME_MASK as u32) as u8;
+        let time_offset = ((timestamp + 1) & Message::COMPRESSED_TIME_MASK as u32) as u8;
         let mut mesg = Message {
             header: Message::COMPRESSED_HEADER_MASK | time_offset,
             ..Default::default()
@@ -1012,7 +1012,7 @@ mod tests {
             .unwrap();
         assert_eq!(dec.timestamp, timestamp + 1, "time_offset {}", time_offset);
 
-        let time_offset = (timestamp + 10 & Message::COMPRESSED_TIME_MASK as u32) as u8;
+        let time_offset = ((timestamp + 10) & Message::COMPRESSED_TIME_MASK as u32) as u8;
         let mut mesg = Message {
             header: Message::COMPRESSED_HEADER_MASK | time_offset,
             ..Default::default()

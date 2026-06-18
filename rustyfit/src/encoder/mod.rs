@@ -1192,7 +1192,7 @@ mod tests {
                     let new_len = (self.buf.len() as i64 + v) as usize;
                     assert!(new_len <= self.buf.capacity());
                     unsafe { self.buf.set_len(new_len) };
-                    return Ok(v.wrapping_abs() as u64);
+                    Ok(v.wrapping_abs() as u64)
                 }
                 _ => panic!("only support SeekFrom::Current"),
             }
@@ -1265,8 +1265,8 @@ mod tests {
         let mut enc2 = Encoder::new();
         let mut stream = enc2.stream(&mut stream_writer);
 
-        for mut mesg in fit.messages.iter_mut() {
-            stream.write_message(&mut mesg).unwrap();
+        for mesg in fit.messages.iter_mut() {
+            stream.write_message(mesg).unwrap();
         }
         stream.finish().unwrap();
 

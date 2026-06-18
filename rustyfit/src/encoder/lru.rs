@@ -143,7 +143,7 @@ mod tests {
         assert!(
             lru.bucket
                 .iter()
-                .rposition(|&i| lru.items[i as usize] == &[255, 255])
+                .rposition(|&i| lru.items[i as usize] == [255, 255])
                 .is_none()
         );
 
