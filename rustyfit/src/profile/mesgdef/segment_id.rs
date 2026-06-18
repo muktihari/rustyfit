@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -79,13 +77,13 @@ impl SegmentId {
     fn count_valid_fields(&self) -> usize {
         (!self.name.is_empty()) as usize
             + (!self.uuid.is_empty()) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.enabled.0 != u8::MAX) as usize
             + (self.user_profile_primary_key != u32::MAX) as usize
             + (self.device_id != u32::MAX) as usize
             + (self.default_race_leader != u8::MAX) as usize
-            + (self.delete_status != typedef::SegmentDeleteStatus(u8::MAX)) as usize
-            + (self.selection_type != typedef::SegmentSelectionType(u8::MAX)) as usize
+            + (self.delete_status.0 != u8::MAX) as usize
+            + (self.selection_type.0 != u8::MAX) as usize
     }
 }
 
@@ -148,7 +146,7 @@ impl From<SegmentId> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SPORT,
@@ -156,7 +154,7 @@ impl From<SegmentId> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BOOL,
@@ -188,7 +186,7 @@ impl From<SegmentId> for Message {
                 is_expanded: false,
             });
         };
-        if m.delete_status != typedef::SegmentDeleteStatus(u8::MAX) {
+        if m.delete_status.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SEGMENT_DELETE_STATUS,
@@ -196,7 +194,7 @@ impl From<SegmentId> for Message {
                 is_expanded: false,
             });
         };
-        if m.selection_type != typedef::SegmentSelectionType(u8::MAX) {
+        if m.selection_type.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::SEGMENT_SELECTION_TYPE,

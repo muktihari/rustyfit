@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -80,13 +78,13 @@ impl WorkoutSession {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
             + (self.num_valid_steps != u16::MAX) as usize
             + (self.first_step_index != u16::MAX) as usize
             + (self.pool_length != u16::MAX) as usize
-            + (self.pool_length_unit != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.pool_length_unit.0 != u8::MAX) as usize
     }
 }
 
@@ -131,7 +129,7 @@ impl From<WorkoutSession> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -139,7 +137,7 @@ impl From<WorkoutSession> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SPORT,
@@ -147,7 +145,7 @@ impl From<WorkoutSession> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SUB_SPORT,
@@ -179,7 +177,7 @@ impl From<WorkoutSession> for Message {
                 is_expanded: false,
             });
         };
-        if m.pool_length_unit != typedef::DisplayMeasure(u8::MAX) {
+        if m.pool_length_unit.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::DISPLAY_MEASURE,

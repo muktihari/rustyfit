@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -64,7 +62,7 @@ impl Software {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (self.version != u16::MAX) as usize
             + (!self.part_number.is_empty()) as usize
     }
@@ -107,7 +105,7 @@ impl From<Software> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -49,8 +47,8 @@ impl ExdScreenConfiguration {
     fn count_valid_fields(&self) -> usize {
         (self.screen_index != u8::MAX) as usize
             + (self.field_count != u8::MAX) as usize
-            + (self.layout != typedef::ExdLayout(u8::MAX)) as usize
-            + (self.screen_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.layout.0 != u8::MAX) as usize
+            + (self.screen_enabled.0 != u8::MAX) as usize
     }
 }
 
@@ -108,7 +106,7 @@ impl From<ExdScreenConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.layout != typedef::ExdLayout(u8::MAX) {
+        if m.layout.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::EXD_LAYOUT,
@@ -116,7 +114,7 @@ impl From<ExdScreenConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.screen_enabled != typedef::Bool(u8::MAX) {
+        if m.screen_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BOOL,

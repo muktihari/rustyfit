@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -172,12 +170,12 @@ impl ChronoShotSession {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.min_speed != u32::MAX) as usize
             + (self.max_speed != u32::MAX) as usize
             + (self.avg_speed != u32::MAX) as usize
             + (self.shot_count != u16::MAX) as usize
-            + (self.projectile_type != typedef::ProjectileType(u8::MAX)) as usize
+            + (self.projectile_type.0 != u8::MAX) as usize
             + (self.grain_weight != u32::MAX) as usize
             + (self.standard_deviation != u32::MAX) as usize
     }
@@ -225,7 +223,7 @@ impl From<ChronoShotSession> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -265,7 +263,7 @@ impl From<ChronoShotSession> for Message {
                 is_expanded: false,
             });
         };
-        if m.projectile_type != typedef::ProjectileType(u8::MAX) {
+        if m.projectile_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::PROJECTILE_TYPE,

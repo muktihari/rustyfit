@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
@@ -360,13 +358,13 @@ impl Split {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.split_type != typedef::SplitType(u8::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.split_type.0 != u8::MAX) as usize
             + (self.total_elapsed_time != u32::MAX) as usize
             + (self.total_timer_time != u32::MAX) as usize
             + (self.total_distance != u32::MAX) as usize
             + (self.avg_speed != u32::MAX) as usize
-            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.start_time.0 != u32::MAX) as usize
             + (self.total_ascent != u16::MAX) as usize
             + (self.total_descent != u16::MAX) as usize
             + (self.start_position_lat != i32::MAX) as usize
@@ -375,7 +373,7 @@ impl Split {
             + (self.end_position_long != i32::MAX) as usize
             + (self.max_speed != u32::MAX) as usize
             + (self.avg_vert_speed != i32::MAX) as usize
-            + (self.end_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.end_time.0 != u32::MAX) as usize
             + (self.total_calories != u32::MAX) as usize
             + (self.start_elevation != u32::MAX) as usize
             + (self.active_time != u32::MAX) as usize
@@ -437,7 +435,7 @@ impl From<Split> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -445,7 +443,7 @@ impl From<Split> for Message {
                 is_expanded: false,
             });
         };
-        if m.split_type != typedef::SplitType(u8::MAX) {
+        if m.split_type.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SPLIT_TYPE,
@@ -485,7 +483,7 @@ impl From<Split> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_time != typedef::DateTime(u32::MAX) {
+        if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::DATE_TIME,
@@ -557,7 +555,7 @@ impl From<Split> for Message {
                 is_expanded: false,
             });
         };
-        if m.end_time != typedef::DateTime(u32::MAX) {
+        if m.end_time.0 != u32::MAX {
             fields.push(Field {
                 num: 27,
                 profile_type: ProfileType::DATE_TIME,

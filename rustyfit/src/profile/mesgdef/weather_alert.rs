@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -61,12 +59,12 @@ impl WeatherAlert {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (!self.report_id.is_empty()) as usize
-            + (self.issue_time != typedef::DateTime(u32::MAX)) as usize
-            + (self.expire_time != typedef::DateTime(u32::MAX)) as usize
-            + (self.severity != typedef::WeatherSeverity(u8::MAX)) as usize
-            + (self.r#type != typedef::WeatherSevereType(u8::MAX)) as usize
+            + (self.issue_time.0 != u32::MAX) as usize
+            + (self.expire_time.0 != u32::MAX) as usize
+            + (self.severity.0 != u8::MAX) as usize
+            + (self.r#type.0 != u8::MAX) as usize
     }
 }
 
@@ -110,7 +108,7 @@ impl From<WeatherAlert> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -126,7 +124,7 @@ impl From<WeatherAlert> for Message {
                 is_expanded: false,
             });
         };
-        if m.issue_time != typedef::DateTime(u32::MAX) {
+        if m.issue_time.0 != u32::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::DATE_TIME,
@@ -134,7 +132,7 @@ impl From<WeatherAlert> for Message {
                 is_expanded: false,
             });
         };
-        if m.expire_time != typedef::DateTime(u32::MAX) {
+        if m.expire_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
@@ -142,7 +140,7 @@ impl From<WeatherAlert> for Message {
                 is_expanded: false,
             });
         };
-        if m.severity != typedef::WeatherSeverity(u8::MAX) {
+        if m.severity.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::WEATHER_SEVERITY,
@@ -150,7 +148,7 @@ impl From<WeatherAlert> for Message {
                 is_expanded: false,
             });
         };
-        if m.r#type != typedef::WeatherSevereType(u8::MAX) {
+        if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::WEATHER_SEVERE_TYPE,

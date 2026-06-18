@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -245,34 +243,34 @@ impl UserProfile {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (!self.friendly_name.is_empty()) as usize
-            + (self.gender != typedef::Gender(u8::MAX)) as usize
+            + (self.gender.0 != u8::MAX) as usize
             + (self.age != u8::MAX) as usize
             + (self.height != u8::MAX) as usize
             + (self.weight != u16::MAX) as usize
-            + (self.language != typedef::Language(u8::MAX)) as usize
-            + (self.elev_setting != typedef::DisplayMeasure(u8::MAX)) as usize
-            + (self.weight_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.language.0 != u8::MAX) as usize
+            + (self.elev_setting.0 != u8::MAX) as usize
+            + (self.weight_setting.0 != u8::MAX) as usize
             + (self.resting_heart_rate != u8::MAX) as usize
             + (self.default_max_running_heart_rate != u8::MAX) as usize
             + (self.default_max_biking_heart_rate != u8::MAX) as usize
             + (self.default_max_heart_rate != u8::MAX) as usize
-            + (self.hr_setting != typedef::DisplayHeart(u8::MAX)) as usize
-            + (self.speed_setting != typedef::DisplayMeasure(u8::MAX)) as usize
-            + (self.dist_setting != typedef::DisplayMeasure(u8::MAX)) as usize
-            + (self.power_setting != typedef::DisplayPower(u8::MAX)) as usize
-            + (self.activity_class != typedef::ActivityClass(u8::MAX)) as usize
-            + (self.position_setting != typedef::DisplayPosition(u8::MAX)) as usize
-            + (self.temperature_setting != typedef::DisplayMeasure(u8::MAX)) as usize
-            + (self.local_id != typedef::UserLocalId(u16::MAX)) as usize
+            + (self.hr_setting.0 != u8::MAX) as usize
+            + (self.speed_setting.0 != u8::MAX) as usize
+            + (self.dist_setting.0 != u8::MAX) as usize
+            + (self.power_setting.0 != u8::MAX) as usize
+            + (self.activity_class.0 != u8::MAX) as usize
+            + (self.position_setting.0 != u8::MAX) as usize
+            + (self.temperature_setting.0 != u8::MAX) as usize
+            + (self.local_id.0 != u16::MAX) as usize
             + (self.global_id != [u8::MAX; 6]) as usize
-            + (self.wake_time != typedef::LocaltimeIntoDay(u32::MAX)) as usize
-            + (self.sleep_time != typedef::LocaltimeIntoDay(u32::MAX)) as usize
-            + (self.height_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.wake_time.0 != u32::MAX) as usize
+            + (self.sleep_time.0 != u32::MAX) as usize
+            + (self.height_setting.0 != u8::MAX) as usize
             + (self.user_running_step_length != u16::MAX) as usize
             + (self.user_walking_step_length != u16::MAX) as usize
-            + (self.depth_setting != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.depth_setting.0 != u8::MAX) as usize
             + (self.dive_count != u32::MAX) as usize
     }
 }
@@ -351,7 +349,7 @@ impl From<UserProfile> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -367,7 +365,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.gender != typedef::Gender(u8::MAX) {
+        if m.gender.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::GENDER,
@@ -399,7 +397,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.language != typedef::Language(u8::MAX) {
+        if m.language.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::LANGUAGE,
@@ -407,7 +405,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.elev_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.elev_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::DISPLAY_MEASURE,
@@ -415,7 +413,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.weight_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.weight_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::DISPLAY_MEASURE,
@@ -455,7 +453,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.hr_setting != typedef::DisplayHeart(u8::MAX) {
+        if m.hr_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::DISPLAY_HEART,
@@ -463,7 +461,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.speed_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.speed_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::DISPLAY_MEASURE,
@@ -471,7 +469,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.dist_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.dist_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::DISPLAY_MEASURE,
@@ -479,7 +477,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.power_setting != typedef::DisplayPower(u8::MAX) {
+        if m.power_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::DISPLAY_POWER,
@@ -487,7 +485,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.activity_class != typedef::ActivityClass(u8::MAX) {
+        if m.activity_class.0 != u8::MAX {
             fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::ACTIVITY_CLASS,
@@ -495,7 +493,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.position_setting != typedef::DisplayPosition(u8::MAX) {
+        if m.position_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::DISPLAY_POSITION,
@@ -503,7 +501,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.temperature_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.temperature_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::DISPLAY_MEASURE,
@@ -511,7 +509,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.local_id != typedef::UserLocalId(u16::MAX) {
+        if m.local_id.0 != u16::MAX {
             fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::USER_LOCAL_ID,
@@ -527,7 +525,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.wake_time != typedef::LocaltimeIntoDay(u32::MAX) {
+        if m.wake_time.0 != u32::MAX {
             fields.push(Field {
                 num: 28,
                 profile_type: ProfileType::LOCALTIME_INTO_DAY,
@@ -535,7 +533,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.sleep_time != typedef::LocaltimeIntoDay(u32::MAX) {
+        if m.sleep_time.0 != u32::MAX {
             fields.push(Field {
                 num: 29,
                 profile_type: ProfileType::LOCALTIME_INTO_DAY,
@@ -543,7 +541,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.height_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.height_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::DISPLAY_MEASURE,
@@ -567,7 +565,7 @@ impl From<UserProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.depth_setting != typedef::DisplayMeasure(u8::MAX) {
+        if m.depth_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 47,
                 profile_type: ProfileType::DISPLAY_MEASURE,

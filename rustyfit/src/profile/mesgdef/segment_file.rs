@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -76,9 +74,9 @@ impl SegmentFile {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (!self.file_uuid.is_empty()) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.enabled.0 != u8::MAX) as usize
             + (self.user_profile_primary_key != u32::MAX) as usize
             + (!self.leader_type.is_empty()) as usize
             + (!self.leader_group_primary_key.is_empty()) as usize
@@ -140,7 +138,7 @@ impl From<SegmentFile> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -156,7 +154,7 @@ impl From<SegmentFile> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::BOOL,

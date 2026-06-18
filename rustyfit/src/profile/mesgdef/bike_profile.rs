@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -305,10 +303,10 @@ impl BikeProfile {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (!self.name.is_empty()) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
             + (self.odometer != u32::MAX) as usize
             + (self.bike_spd_ant_id != u16::MIN) as usize
             + (self.bike_cad_ant_id != u16::MIN) as usize
@@ -318,15 +316,15 @@ impl BikeProfile {
             + (self.auto_wheelsize != u16::MAX) as usize
             + (self.bike_weight != u16::MAX) as usize
             + (self.power_cal_factor != u16::MAX) as usize
-            + (self.auto_wheel_cal != typedef::Bool(u8::MAX)) as usize
-            + (self.auto_power_zero != typedef::Bool(u8::MAX)) as usize
+            + (self.auto_wheel_cal.0 != u8::MAX) as usize
+            + (self.auto_power_zero.0 != u8::MAX) as usize
             + (self.id != u8::MAX) as usize
-            + (self.spd_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.cad_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.spdcad_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.power_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.spd_enabled.0 != u8::MAX) as usize
+            + (self.cad_enabled.0 != u8::MAX) as usize
+            + (self.spdcad_enabled.0 != u8::MAX) as usize
+            + (self.power_enabled.0 != u8::MAX) as usize
             + (self.crank_length != u8::MAX) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.enabled.0 != u8::MAX) as usize
             + (self.bike_spd_ant_id_trans_type != u8::MIN) as usize
             + (self.bike_cad_ant_id_trans_type != u8::MIN) as usize
             + (self.bike_spdcad_ant_id_trans_type != u8::MIN) as usize
@@ -336,7 +334,7 @@ impl BikeProfile {
             + (!self.front_gear.is_empty()) as usize
             + (self.rear_gear_num != u8::MIN) as usize
             + (!self.rear_gear.is_empty()) as usize
-            + (self.shimano_di2_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.shimano_di2_enabled.0 != u8::MAX) as usize
     }
 }
 
@@ -406,7 +404,7 @@ impl From<BikeProfile> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -422,7 +420,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SPORT,
@@ -430,7 +428,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SUB_SPORT,
@@ -510,7 +508,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.auto_wheel_cal != typedef::Bool(u8::MAX) {
+        if m.auto_wheel_cal.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BOOL,
@@ -518,7 +516,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.auto_power_zero != typedef::Bool(u8::MAX) {
+        if m.auto_power_zero.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::BOOL,
@@ -534,7 +532,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.spd_enabled != typedef::Bool(u8::MAX) {
+        if m.spd_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::BOOL,
@@ -542,7 +540,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.cad_enabled != typedef::Bool(u8::MAX) {
+        if m.cad_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::BOOL,
@@ -550,7 +548,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.spdcad_enabled != typedef::Bool(u8::MAX) {
+        if m.spdcad_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 17,
                 profile_type: ProfileType::BOOL,
@@ -558,7 +556,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.power_enabled != typedef::Bool(u8::MAX) {
+        if m.power_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::BOOL,
@@ -574,7 +572,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 20,
                 profile_type: ProfileType::BOOL,
@@ -654,7 +652,7 @@ impl From<BikeProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.shimano_di2_enabled != typedef::Bool(u8::MAX) {
+        if m.shimano_di2_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 44,
                 profile_type: ProfileType::BOOL,

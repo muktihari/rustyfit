@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
@@ -185,20 +183,20 @@ impl GpsMetadata {
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
                 continue;
             }
-            self.velocity[i] = (unscaled as i16);
+            self.velocity[i] = unscaled as i16;
         }
         self
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.timestamp_ms != u16::MAX) as usize
             + (self.position_lat != i32::MAX) as usize
             + (self.position_long != i32::MAX) as usize
             + (self.enhanced_altitude != u32::MAX) as usize
             + (self.enhanced_speed != u32::MAX) as usize
             + (self.heading != u16::MAX) as usize
-            + (self.utc_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.utc_timestamp.0 != u32::MAX) as usize
             + (self.velocity != [i16::MAX; 3]) as usize
     }
 }
@@ -257,7 +255,7 @@ impl From<GpsMetadata> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -313,7 +311,7 @@ impl From<GpsMetadata> for Message {
                 is_expanded: false,
             });
         };
-        if m.utc_timestamp != typedef::DateTime(u32::MAX) {
+        if m.utc_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::DATE_TIME,

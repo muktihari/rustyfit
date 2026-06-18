@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -110,10 +110,10 @@ impl ExdDataConceptConfiguration {
             + (self.data_page != u8::MAX) as usize
             + (self.concept_key != u8::MAX) as usize
             + (self.scaling != u8::MAX) as usize
-            + (self.data_units != typedef::ExdDataUnits(u8::MAX)) as usize
-            + (self.qualifier != typedef::ExdQualifiers(u8::MAX)) as usize
-            + (self.descriptor != typedef::ExdDescriptors(u8::MAX)) as usize
-            + (self.is_signed != typedef::Bool(u8::MAX)) as usize
+            + (self.data_units.0 != u8::MAX) as usize
+            + (self.qualifier.0 != u8::MAX) as usize
+            + (self.descriptor.0 != u8::MAX) as usize
+            + (self.is_signed.0 != u8::MAX) as usize
     }
 }
 
@@ -224,7 +224,7 @@ impl From<ExdDataConceptConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.data_units != typedef::ExdDataUnits(u8::MAX) {
+        if m.data_units.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::EXD_DATA_UNITS,
@@ -232,7 +232,7 @@ impl From<ExdDataConceptConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.qualifier != typedef::ExdQualifiers(u8::MAX) {
+        if m.qualifier.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::EXD_QUALIFIERS,
@@ -240,7 +240,7 @@ impl From<ExdDataConceptConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.descriptor != typedef::ExdDescriptors(u8::MAX) {
+        if m.descriptor.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::EXD_DESCRIPTORS,
@@ -248,7 +248,7 @@ impl From<ExdDataConceptConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.is_signed != typedef::Bool(u8::MAX) {
+        if m.is_signed.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::BOOL,

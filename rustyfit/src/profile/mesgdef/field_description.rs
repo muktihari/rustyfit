@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -87,7 +85,7 @@ impl FieldDescription {
     fn count_valid_fields(&self) -> usize {
         (self.developer_data_index != u8::MAX) as usize
             + (self.field_definition_number != u8::MAX) as usize
-            + (self.fit_base_type_id != typedef::FitBaseType(u8::MAX)) as usize
+            + (self.fit_base_type_id.0 != u8::MAX) as usize
             + (!self.field_name.is_empty()) as usize
             + (self.array != u8::MAX) as usize
             + (!self.components.is_empty()) as usize
@@ -96,8 +94,8 @@ impl FieldDescription {
             + (!self.units.is_empty()) as usize
             + (!self.bits.is_empty()) as usize
             + (!self.accumulate.is_empty()) as usize
-            + (self.fit_base_unit_id != typedef::FitBaseUnit(u16::MAX)) as usize
-            + (self.native_mesg_num != typedef::MesgNum(u16::MAX)) as usize
+            + (self.fit_base_unit_id.0 != u16::MAX) as usize
+            + (self.native_mesg_num.0 != u16::MAX) as usize
             + (self.native_field_num != u8::MAX) as usize
     }
 }
@@ -165,7 +163,7 @@ impl From<FieldDescription> for Message {
                 is_expanded: false,
             });
         };
-        if m.fit_base_type_id != typedef::FitBaseType(u8::MAX) {
+        if m.fit_base_type_id.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::FIT_BASE_TYPE,
@@ -237,7 +235,7 @@ impl From<FieldDescription> for Message {
                 is_expanded: false,
             });
         };
-        if m.fit_base_unit_id != typedef::FitBaseUnit(u16::MAX) {
+        if m.fit_base_unit_id.0 != u16::MAX {
             fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::FIT_BASE_UNIT,
@@ -245,7 +243,7 @@ impl From<FieldDescription> for Message {
                 is_expanded: false,
             });
         };
-        if m.native_mesg_num != typedef::MesgNum(u16::MAX) {
+        if m.native_mesg_num.0 != u16::MAX {
             fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::MESG_NUM,

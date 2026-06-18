@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -52,11 +50,11 @@ impl DiveGas {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (self.helium_content != u8::MAX) as usize
             + (self.oxygen_content != u8::MAX) as usize
-            + (self.status != typedef::DiveGasStatus(u8::MAX)) as usize
-            + (self.mode != typedef::DiveGasMode(u8::MAX)) as usize
+            + (self.status.0 != u8::MAX) as usize
+            + (self.mode.0 != u8::MAX) as usize
     }
 }
 
@@ -99,7 +97,7 @@ impl From<DiveGas> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -123,7 +121,7 @@ impl From<DiveGas> for Message {
                 is_expanded: false,
             });
         };
-        if m.status != typedef::DiveGasStatus(u8::MAX) {
+        if m.status.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DIVE_GAS_STATUS,
@@ -131,7 +129,7 @@ impl From<DiveGas> for Message {
                 is_expanded: false,
             });
         };
-        if m.mode != typedef::DiveGasMode(u8::MAX) {
+        if m.mode.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DIVE_GAS_MODE,

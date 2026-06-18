@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -2210,11 +2210,11 @@ impl Lap {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.event != typedef::Event(u8::MAX)) as usize
-            + (self.event_type != typedef::EventType(u8::MAX)) as usize
-            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.timestamp.0 != u32::MAX) as usize
+            + (self.event.0 != u8::MAX) as usize
+            + (self.event_type.0 != u8::MAX) as usize
+            + (self.start_time.0 != u32::MAX) as usize
             + (self.start_position_lat != i32::MAX) as usize
             + (self.start_position_long != i32::MAX) as usize
             + (self.end_position_lat != i32::MAX) as usize
@@ -2235,17 +2235,17 @@ impl Lap {
             + (self.max_power != u16::MAX) as usize
             + (self.total_ascent != u16::MAX) as usize
             + (self.total_descent != u16::MAX) as usize
-            + (self.intensity != typedef::Intensity(u8::MAX)) as usize
-            + (self.lap_trigger != typedef::LapTrigger(u8::MAX)) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.intensity.0 != u8::MAX) as usize
+            + (self.lap_trigger.0 != u8::MAX) as usize
+            + (self.sport.0 != u8::MAX) as usize
             + (self.event_group != u8::MAX) as usize
             + (self.num_lengths != u16::MAX) as usize
             + (self.normalized_power != u16::MAX) as usize
-            + (self.left_right_balance != typedef::LeftRightBalance100(u16::MAX)) as usize
+            + (self.left_right_balance.0 != u16::MAX) as usize
             + (self.first_length_index != u16::MAX) as usize
             + (self.avg_stroke_distance != u16::MAX) as usize
-            + (self.swim_stroke != typedef::SwimStroke(u8::MAX)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.swim_stroke.0 != u8::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
             + (self.num_active_lengths != u16::MAX) as usize
             + (self.total_work != u32::MAX) as usize
             + (self.avg_altitude != u16::MAX) as usize
@@ -2271,7 +2271,7 @@ impl Lap {
             + (self.min_altitude != u16::MAX) as usize
             + (self.min_heart_rate != u8::MAX) as usize
             + (self.active_time != u32::MAX) as usize
-            + (self.wkt_step_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.wkt_step_index.0 != u16::MAX) as usize
             + (self.opponent_score != u16::MAX) as usize
             + (!self.stroke_count.is_empty()) as usize
             + (!self.zone_count.is_empty()) as usize
@@ -2506,7 +2506,7 @@ impl From<Lap> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -2514,7 +2514,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -2522,7 +2522,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.event != typedef::Event(u8::MAX) {
+        if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EVENT,
@@ -2530,7 +2530,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.event_type != typedef::EventType(u8::MAX) {
+        if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::EVENT_TYPE,
@@ -2538,7 +2538,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_time != typedef::DateTime(u32::MAX) {
+        if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
@@ -2706,7 +2706,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.intensity != typedef::Intensity(u8::MAX) {
+        if m.intensity.0 != u8::MAX {
             fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::INTENSITY,
@@ -2714,7 +2714,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.lap_trigger != typedef::LapTrigger(u8::MAX) {
+        if m.lap_trigger.0 != u8::MAX {
             fields.push(Field {
                 num: 24,
                 profile_type: ProfileType::LAP_TRIGGER,
@@ -2722,7 +2722,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::SPORT,
@@ -2754,7 +2754,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.left_right_balance != typedef::LeftRightBalance100(u16::MAX) {
+        if m.left_right_balance.0 != u16::MAX {
             fields.push(Field {
                 num: 34,
                 profile_type: ProfileType::LEFT_RIGHT_BALANCE_100,
@@ -2778,7 +2778,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.swim_stroke != typedef::SwimStroke(u8::MAX) {
+        if m.swim_stroke.0 != u8::MAX {
             fields.push(Field {
                 num: 38,
                 profile_type: ProfileType::SWIM_STROKE,
@@ -2786,7 +2786,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 39,
                 profile_type: ProfileType::SUB_SPORT,
@@ -2994,7 +2994,7 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
-        if m.wkt_step_index != typedef::MessageIndex(u16::MAX) {
+        if m.wkt_step_index.0 != u16::MAX {
             fields.push(Field {
                 num: 71,
                 profile_type: ProfileType::MESSAGE_INDEX,

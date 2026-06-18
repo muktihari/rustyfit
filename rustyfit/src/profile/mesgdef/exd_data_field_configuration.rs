@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -90,7 +90,7 @@ impl ExdDataFieldConfiguration {
             + (self.concept_field != u8::MAX) as usize
             + (self.field_id != u8::MAX) as usize
             + (self.concept_count != u8::MAX) as usize
-            + (self.display_type != typedef::ExdDisplayType(u8::MAX)) as usize
+            + (self.display_type.0 != u8::MAX) as usize
             + (self.title != [const { String::new() }; 32]) as usize
     }
 }
@@ -184,7 +184,7 @@ impl From<ExdDataFieldConfiguration> for Message {
                 is_expanded: is_expanded(&m.state, 3),
             });
         };
-        if m.display_type != typedef::ExdDisplayType(u8::MAX) {
+        if m.display_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::EXD_DISPLAY_TYPE,

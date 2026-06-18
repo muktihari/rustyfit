@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -358,43 +356,41 @@ impl DiveSettings {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.message_index.0 != u16::MAX) as usize
             + (!self.name.is_empty()) as usize
-            + (self.model != typedef::TissueModelType(u8::MAX)) as usize
+            + (self.model.0 != u8::MAX) as usize
             + (self.gf_low != u8::MAX) as usize
             + (self.gf_high != u8::MAX) as usize
-            + (self.water_type != typedef::WaterType(u8::MAX)) as usize
+            + (self.water_type.0 != u8::MAX) as usize
             + (self.water_density.to_bits() != u32::MAX) as usize
             + (self.po2_warn != u8::MAX) as usize
             + (self.po2_critical != u8::MAX) as usize
             + (self.po2_deco != u8::MAX) as usize
-            + (self.safety_stop_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.safety_stop_enabled.0 != u8::MAX) as usize
             + (self.bottom_depth.to_bits() != u32::MAX) as usize
             + (self.bottom_time != u32::MAX) as usize
-            + (self.apnea_countdown_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.apnea_countdown_enabled.0 != u8::MAX) as usize
             + (self.apnea_countdown_time != u32::MAX) as usize
-            + (self.backlight_mode != typedef::DiveBacklightMode(u8::MAX)) as usize
+            + (self.backlight_mode.0 != u8::MAX) as usize
             + (self.backlight_brightness != u8::MAX) as usize
-            + (self.backlight_timeout != typedef::BacklightTimeout(u8::MAX)) as usize
+            + (self.backlight_timeout.0 != u8::MAX) as usize
             + (self.repeat_dive_interval != u16::MAX) as usize
             + (self.safety_stop_time != u16::MAX) as usize
-            + (self.heart_rate_source_type != typedef::SourceType(u8::MAX)) as usize
+            + (self.heart_rate_source_type.0 != u8::MAX) as usize
             + (self.heart_rate_source != u8::MAX) as usize
-            + (self.travel_gas != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.ccr_low_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX))
-                as usize
+            + (self.travel_gas.0 != u16::MAX) as usize
+            + (self.ccr_low_setpoint_switch_mode.0 != u8::MAX) as usize
             + (self.ccr_low_setpoint != u8::MAX) as usize
             + (self.ccr_low_setpoint_depth != u32::MAX) as usize
-            + (self.ccr_high_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX))
-                as usize
+            + (self.ccr_high_setpoint_switch_mode.0 != u8::MAX) as usize
             + (self.ccr_high_setpoint != u8::MAX) as usize
             + (self.ccr_high_setpoint_depth != u32::MAX) as usize
-            + (self.gas_consumption_display != typedef::GasConsumptionRateType(u8::MAX)) as usize
-            + (self.up_key_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.dive_sounds != typedef::Tone(u8::MAX)) as usize
+            + (self.gas_consumption_display.0 != u8::MAX) as usize
+            + (self.up_key_enabled.0 != u8::MAX) as usize
+            + (self.dive_sounds.0 != u8::MAX) as usize
             + (self.last_stop_multiple != u8::MAX) as usize
-            + (self.no_fly_time_mode != typedef::NoFlyTimeMode(u8::MAX)) as usize
+            + (self.no_fly_time_mode.0 != u8::MAX) as usize
     }
 }
 
@@ -475,7 +471,7 @@ impl From<DiveSettings> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -483,7 +479,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -499,7 +495,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.model != typedef::TissueModelType(u8::MAX) {
+        if m.model.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::TISSUE_MODEL_TYPE,
@@ -523,7 +519,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.water_type != typedef::WaterType(u8::MAX) {
+        if m.water_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::WATER_TYPE,
@@ -563,7 +559,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.safety_stop_enabled != typedef::Bool(u8::MAX) {
+        if m.safety_stop_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
@@ -587,7 +583,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.apnea_countdown_enabled != typedef::Bool(u8::MAX) {
+        if m.apnea_countdown_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BOOL,
@@ -603,7 +599,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.backlight_mode != typedef::DiveBacklightMode(u8::MAX) {
+        if m.backlight_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::DIVE_BACKLIGHT_MODE,
@@ -619,7 +615,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.backlight_timeout != typedef::BacklightTimeout(u8::MAX) {
+        if m.backlight_timeout.0 != u8::MAX {
             fields.push(Field {
                 num: 16,
                 profile_type: ProfileType::BACKLIGHT_TIMEOUT,
@@ -643,7 +639,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.heart_rate_source_type != typedef::SourceType(u8::MAX) {
+        if m.heart_rate_source_type.0 != u8::MAX {
             fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::SOURCE_TYPE,
@@ -659,7 +655,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.travel_gas != typedef::MessageIndex(u16::MAX) {
+        if m.travel_gas.0 != u16::MAX {
             fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -667,7 +663,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.ccr_low_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX) {
+        if m.ccr_low_setpoint_switch_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
@@ -691,7 +687,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.ccr_high_setpoint_switch_mode != typedef::CcrSetpointSwitchMode(u8::MAX) {
+        if m.ccr_high_setpoint_switch_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
@@ -715,7 +711,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.gas_consumption_display != typedef::GasConsumptionRateType(u8::MAX) {
+        if m.gas_consumption_display.0 != u8::MAX {
             fields.push(Field {
                 num: 29,
                 profile_type: ProfileType::GAS_CONSUMPTION_RATE_TYPE,
@@ -723,7 +719,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.up_key_enabled != typedef::Bool(u8::MAX) {
+        if m.up_key_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::BOOL,
@@ -731,7 +727,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.dive_sounds != typedef::Tone(u8::MAX) {
+        if m.dive_sounds.0 != u8::MAX {
             fields.push(Field {
                 num: 35,
                 profile_type: ProfileType::TONE,
@@ -747,7 +743,7 @@ impl From<DiveSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.no_fly_time_mode != typedef::NoFlyTimeMode(u8::MAX) {
+        if m.no_fly_time_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 37,
                 profile_type: ProfileType::NO_FLY_TIME_MODE,

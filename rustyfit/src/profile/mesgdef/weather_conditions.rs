@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
@@ -153,20 +151,20 @@ impl WeatherConditions {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.weather_report != typedef::WeatherReport(u8::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.weather_report.0 != u8::MAX) as usize
             + (self.temperature != i8::MAX) as usize
-            + (self.condition != typedef::WeatherStatus(u8::MAX)) as usize
+            + (self.condition.0 != u8::MAX) as usize
             + (self.wind_direction != u16::MAX) as usize
             + (self.wind_speed != u16::MAX) as usize
             + (self.precipitation_probability != u8::MAX) as usize
             + (self.temperature_feels_like != i8::MAX) as usize
             + (self.relative_humidity != u8::MAX) as usize
             + (!self.location.is_empty()) as usize
-            + (self.observed_at_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.observed_at_time.0 != u32::MAX) as usize
             + (self.observed_location_lat != i32::MAX) as usize
             + (self.observed_location_long != i32::MAX) as usize
-            + (self.day_of_week != typedef::DayOfWeek(u8::MAX)) as usize
+            + (self.day_of_week.0 != u8::MAX) as usize
             + (self.high_temperature != i8::MAX) as usize
             + (self.low_temperature != i8::MAX) as usize
     }
@@ -222,7 +220,7 @@ impl From<WeatherConditions> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -230,7 +228,7 @@ impl From<WeatherConditions> for Message {
                 is_expanded: false,
             });
         };
-        if m.weather_report != typedef::WeatherReport(u8::MAX) {
+        if m.weather_report.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::WEATHER_REPORT,
@@ -246,7 +244,7 @@ impl From<WeatherConditions> for Message {
                 is_expanded: false,
             });
         };
-        if m.condition != typedef::WeatherStatus(u8::MAX) {
+        if m.condition.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::WEATHER_STATUS,
@@ -302,7 +300,7 @@ impl From<WeatherConditions> for Message {
                 is_expanded: false,
             });
         };
-        if m.observed_at_time != typedef::DateTime(u32::MAX) {
+        if m.observed_at_time.0 != u32::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::DATE_TIME,
@@ -326,7 +324,7 @@ impl From<WeatherConditions> for Message {
                 is_expanded: false,
             });
         };
-        if m.day_of_week != typedef::DayOfWeek(u8::MAX) {
+        if m.day_of_week.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::DAY_OF_WEEK,

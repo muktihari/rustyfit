@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -62,8 +60,8 @@ impl MemoGlob {
     fn count_valid_fields(&self) -> usize {
         (self.part_index != u32::MAX) as usize
             + (!self.memo.is_empty()) as usize
-            + (self.mesg_num != typedef::MesgNum(u16::MAX)) as usize
-            + (self.parent_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.mesg_num.0 != u16::MAX) as usize
+            + (self.parent_index.0 != u16::MAX) as usize
             + (self.field_num != u8::MAX) as usize
             + (!self.data.is_empty()) as usize
     }
@@ -125,7 +123,7 @@ impl From<MemoGlob> for Message {
                 is_expanded: false,
             });
         };
-        if m.mesg_num != typedef::MesgNum(u16::MAX) {
+        if m.mesg_num.0 != u16::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESG_NUM,
@@ -133,7 +131,7 @@ impl From<MemoGlob> for Message {
                 is_expanded: false,
             });
         };
-        if m.parent_index != typedef::MessageIndex(u16::MAX) {
+        if m.parent_index.0 != u16::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::MESSAGE_INDEX,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -287,8 +285,8 @@ impl WeightScale {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.weight != typedef::Weight(u16::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.weight.0 != u16::MAX) as usize
             + (self.percent_fat != u16::MAX) as usize
             + (self.percent_hydration != u16::MAX) as usize
             + (self.visceral_fat_mass != u16::MAX) as usize
@@ -299,7 +297,7 @@ impl WeightScale {
             + (self.active_met != u16::MAX) as usize
             + (self.metabolic_age != u8::MAX) as usize
             + (self.visceral_fat_rating != u8::MAX) as usize
-            + (self.user_profile_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.user_profile_index.0 != u16::MAX) as usize
             + (self.bmi != u16::MAX) as usize
     }
 }
@@ -352,7 +350,7 @@ impl From<WeightScale> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -360,7 +358,7 @@ impl From<WeightScale> for Message {
                 is_expanded: false,
             });
         };
-        if m.weight != typedef::Weight(u16::MAX) {
+        if m.weight.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::WEIGHT,
@@ -448,7 +446,7 @@ impl From<WeightScale> for Message {
                 is_expanded: false,
             });
         };
-        if m.user_profile_index != typedef::MessageIndex(u16::MAX) {
+        if m.user_profile_index.0 != u16::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::MESSAGE_INDEX,

@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -192,9 +192,9 @@ impl Event {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.event != typedef::Event(u8::MAX)) as usize
-            + (self.event_type != typedef::EventType(u8::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.event.0 != u8::MAX) as usize
+            + (self.event_type.0 != u8::MAX) as usize
             + (self.data16 != u16::MAX) as usize
             + (self.data != u32::MAX) as usize
             + (self.event_group != u8::MAX) as usize
@@ -204,10 +204,10 @@ impl Event {
             + (self.front_gear != u8::MIN) as usize
             + (self.rear_gear_num != u8::MIN) as usize
             + (self.rear_gear != u8::MIN) as usize
-            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
-            + (self.activity_type != typedef::ActivityType(u8::MAX)) as usize
-            + (self.start_timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.radar_threat_level_max != typedef::RadarThreatLevelType(u8::MAX)) as usize
+            + (self.device_index.0 != u8::MAX) as usize
+            + (self.activity_type.0 != u8::MAX) as usize
+            + (self.start_timestamp.0 != u32::MAX) as usize
+            + (self.radar_threat_level_max.0 != u8::MAX) as usize
             + (self.radar_threat_count != u8::MAX) as usize
             + (self.radar_threat_avg_approach_speed != u8::MAX) as usize
             + (self.radar_threat_max_approach_speed != u8::MAX) as usize
@@ -273,7 +273,7 @@ impl From<Event> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -281,7 +281,7 @@ impl From<Event> for Message {
                 is_expanded: false,
             });
         };
-        if m.event != typedef::Event(u8::MAX) {
+        if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EVENT,
@@ -289,7 +289,7 @@ impl From<Event> for Message {
                 is_expanded: false,
             });
         };
-        if m.event_type != typedef::EventType(u8::MAX) {
+        if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::EVENT_TYPE,
@@ -369,7 +369,7 @@ impl From<Event> for Message {
                 is_expanded: is_expanded(&m.state, 12),
             });
         };
-        if m.device_index != typedef::DeviceIndex(u8::MAX) {
+        if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::DEVICE_INDEX,
@@ -377,7 +377,7 @@ impl From<Event> for Message {
                 is_expanded: false,
             });
         };
-        if m.activity_type != typedef::ActivityType(u8::MAX) {
+        if m.activity_type.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::ACTIVITY_TYPE,
@@ -385,7 +385,7 @@ impl From<Event> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_timestamp != typedef::DateTime(u32::MAX) {
+        if m.start_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::DATE_TIME,
@@ -393,7 +393,7 @@ impl From<Event> for Message {
                 is_expanded: false,
             });
         };
-        if m.radar_threat_level_max != typedef::RadarThreatLevelType(u8::MAX) {
+        if m.radar_threat_level_max.0 != u8::MAX {
             fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::RADAR_THREAT_LEVEL_TYPE,

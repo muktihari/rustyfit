@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -1550,11 +1550,11 @@ impl SegmentLap {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.event != typedef::Event(u8::MAX)) as usize
-            + (self.event_type != typedef::EventType(u8::MAX)) as usize
-            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.timestamp.0 != u32::MAX) as usize
+            + (self.event.0 != u8::MAX) as usize
+            + (self.event_type.0 != u8::MAX) as usize
+            + (self.start_time.0 != u32::MAX) as usize
             + (self.start_position_lat != i32::MAX) as usize
             + (self.start_position_long != i32::MAX) as usize
             + (self.end_position_lat != i32::MAX) as usize
@@ -1575,7 +1575,7 @@ impl SegmentLap {
             + (self.max_power != u16::MAX) as usize
             + (self.total_ascent != u16::MAX) as usize
             + (self.total_descent != u16::MAX) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.sport.0 != u8::MAX) as usize
             + (self.event_group != u8::MAX) as usize
             + (self.nec_lat != i32::MAX) as usize
             + (self.nec_long != i32::MAX) as usize
@@ -1583,8 +1583,8 @@ impl SegmentLap {
             + (self.swc_long != i32::MAX) as usize
             + (!self.name.is_empty()) as usize
             + (self.normalized_power != u16::MAX) as usize
-            + (self.left_right_balance != typedef::LeftRightBalance100(u16::MAX)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.left_right_balance.0 != u16::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
             + (self.total_work != u32::MAX) as usize
             + (self.avg_altitude != u16::MAX) as usize
             + (self.max_altitude != u16::MAX) as usize
@@ -1609,14 +1609,14 @@ impl SegmentLap {
             + (self.min_altitude != u16::MAX) as usize
             + (self.min_heart_rate != u8::MAX) as usize
             + (self.active_time != u32::MAX) as usize
-            + (self.wkt_step_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.sport_event != typedef::SportEvent(u8::MAX)) as usize
+            + (self.wkt_step_index.0 != u16::MAX) as usize
+            + (self.sport_event.0 != u8::MAX) as usize
             + (self.avg_left_torque_effectiveness != u8::MAX) as usize
             + (self.avg_right_torque_effectiveness != u8::MAX) as usize
             + (self.avg_left_pedal_smoothness != u8::MAX) as usize
             + (self.avg_right_pedal_smoothness != u8::MAX) as usize
             + (self.avg_combined_pedal_smoothness != u8::MAX) as usize
-            + (self.status != typedef::SegmentLapStatus(u8::MAX)) as usize
+            + (self.status.0 != u8::MAX) as usize
             + (!self.uuid.is_empty()) as usize
             + (self.avg_fractional_cadence != u8::MAX) as usize
             + (self.max_fractional_cadence != u8::MAX) as usize
@@ -1635,7 +1635,7 @@ impl SegmentLap {
             + (!self.max_power_position.is_empty()) as usize
             + (!self.avg_cadence_position.is_empty()) as usize
             + (!self.max_cadence_position.is_empty()) as usize
-            + (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.manufacturer.0 != u16::MAX) as usize
             + (self.total_grit.to_bits() != u32::MAX) as usize
             + (self.total_flow.to_bits() != u32::MAX) as usize
             + (self.avg_grit.to_bits() != u32::MAX) as usize
@@ -1783,7 +1783,7 @@ impl From<SegmentLap> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -1791,7 +1791,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -1799,7 +1799,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.event != typedef::Event(u8::MAX) {
+        if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EVENT,
@@ -1807,7 +1807,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.event_type != typedef::EventType(u8::MAX) {
+        if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::EVENT_TYPE,
@@ -1815,7 +1815,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_time != typedef::DateTime(u32::MAX) {
+        if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
@@ -1983,7 +1983,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::SPORT,
@@ -2047,7 +2047,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.left_right_balance != typedef::LeftRightBalance100(u16::MAX) {
+        if m.left_right_balance.0 != u16::MAX {
             fields.push(Field {
                 num: 31,
                 profile_type: ProfileType::LEFT_RIGHT_BALANCE_100,
@@ -2055,7 +2055,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 32,
                 profile_type: ProfileType::SUB_SPORT,
@@ -2255,7 +2255,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.wkt_step_index != typedef::MessageIndex(u16::MAX) {
+        if m.wkt_step_index.0 != u16::MAX {
             fields.push(Field {
                 num: 57,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -2263,7 +2263,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport_event != typedef::SportEvent(u8::MAX) {
+        if m.sport_event.0 != u8::MAX {
             fields.push(Field {
                 num: 58,
                 profile_type: ProfileType::SPORT_EVENT,
@@ -2311,7 +2311,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.status != typedef::SegmentLapStatus(u8::MAX) {
+        if m.status.0 != u8::MAX {
             fields.push(Field {
                 num: 64,
                 profile_type: ProfileType::SEGMENT_LAP_STATUS,
@@ -2463,7 +2463,7 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
-        if m.manufacturer != typedef::Manufacturer(u16::MAX) {
+        if m.manufacturer.0 != u16::MAX {
             fields.push(Field {
                 num: 83,
                 profile_type: ProfileType::MANUFACTURER,

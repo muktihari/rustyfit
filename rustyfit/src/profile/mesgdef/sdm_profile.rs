@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -110,12 +108,12 @@ impl SdmProfile {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.enabled.0 != u8::MAX) as usize
             + (self.sdm_ant_id != u16::MIN) as usize
             + (self.sdm_cal_factor != u16::MAX) as usize
             + (self.odometer != u32::MAX) as usize
-            + (self.speed_source != typedef::Bool(u8::MAX)) as usize
+            + (self.speed_source.0 != u8::MAX) as usize
             + (self.sdm_ant_id_trans_type != u8::MIN) as usize
             + (self.odometer_rollover != u8::MAX) as usize
     }
@@ -163,7 +161,7 @@ impl From<SdmProfile> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -171,7 +169,7 @@ impl From<SdmProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::BOOL,
@@ -203,7 +201,7 @@ impl From<SdmProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.speed_source != typedef::Bool(u8::MAX) {
+        if m.speed_source.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::BOOL,

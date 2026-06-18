@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -61,9 +59,9 @@ impl VideoClip {
 
     fn count_valid_fields(&self) -> usize {
         (self.clip_number != u16::MAX) as usize
-            + (self.start_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.start_timestamp.0 != u32::MAX) as usize
             + (self.start_timestamp_ms != u16::MAX) as usize
-            + (self.end_timestamp != typedef::DateTime(u32::MAX)) as usize
+            + (self.end_timestamp.0 != u32::MAX) as usize
             + (self.end_timestamp_ms != u16::MAX) as usize
             + (self.clip_start != u32::MAX) as usize
             + (self.clip_end != u32::MAX) as usize
@@ -119,7 +117,7 @@ impl From<VideoClip> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_timestamp != typedef::DateTime(u32::MAX) {
+        if m.start_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::DATE_TIME,
@@ -135,7 +133,7 @@ impl From<VideoClip> for Message {
                 is_expanded: false,
             });
         };
-        if m.end_timestamp != typedef::DateTime(u32::MAX) {
+        if m.end_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DATE_TIME,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -122,17 +120,17 @@ impl Set {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.duration != u32::MAX) as usize
             + (self.repetitions != u16::MAX) as usize
             + (self.weight != u16::MAX) as usize
-            + (self.set_type != typedef::SetType(u8::MAX)) as usize
-            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.set_type.0 != u8::MAX) as usize
+            + (self.start_time.0 != u32::MAX) as usize
             + (!self.category.is_empty()) as usize
             + (!self.category_subtype.is_empty()) as usize
-            + (self.weight_display_unit != typedef::FitBaseUnit(u16::MAX)) as usize
-            + (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.wkt_step_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.weight_display_unit.0 != u16::MAX) as usize
+            + (self.message_index.0 != u16::MAX) as usize
+            + (self.wkt_step_index.0 != u16::MAX) as usize
     }
 }
 
@@ -190,7 +188,7 @@ impl From<Set> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::DATE_TIME,
@@ -222,7 +220,7 @@ impl From<Set> for Message {
                 is_expanded: false,
             });
         };
-        if m.set_type != typedef::SetType(u8::MAX) {
+        if m.set_type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SET_TYPE,
@@ -230,7 +228,7 @@ impl From<Set> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_time != typedef::DateTime(u32::MAX) {
+        if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::DATE_TIME,
@@ -257,7 +255,7 @@ impl From<Set> for Message {
                 is_expanded: false,
             });
         };
-        if m.weight_display_unit != typedef::FitBaseUnit(u16::MAX) {
+        if m.weight_display_unit.0 != u16::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::FIT_BASE_UNIT,
@@ -265,7 +263,7 @@ impl From<Set> for Message {
                 is_expanded: false,
             });
         };
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -273,7 +271,7 @@ impl From<Set> for Message {
                 is_expanded: false,
             });
         };
-        if m.wkt_step_index != typedef::MessageIndex(u16::MAX) {
+        if m.wkt_step_index.0 != u16::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::MESSAGE_INDEX,

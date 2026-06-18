@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -137,18 +135,18 @@ impl DiveAlarm {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (self.depth != u32::MAX) as usize
             + (self.time != i32::MAX) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.alarm_type != typedef::DiveAlarmType(u8::MAX)) as usize
-            + (self.sound != typedef::Tone(u8::MAX)) as usize
+            + (self.enabled.0 != u8::MAX) as usize
+            + (self.alarm_type.0 != u8::MAX) as usize
+            + (self.sound.0 != u8::MAX) as usize
             + (!self.dive_types.is_empty()) as usize
             + (self.id != u32::MAX) as usize
-            + (self.popup_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.trigger_on_descent != typedef::Bool(u8::MAX)) as usize
-            + (self.trigger_on_ascent != typedef::Bool(u8::MAX)) as usize
-            + (self.repeating != typedef::Bool(u8::MAX)) as usize
+            + (self.popup_enabled.0 != u8::MAX) as usize
+            + (self.trigger_on_descent.0 != u8::MAX) as usize
+            + (self.trigger_on_ascent.0 != u8::MAX) as usize
+            + (self.repeating.0 != u8::MAX) as usize
             + (self.speed != i32::MAX) as usize
     }
 }
@@ -209,7 +207,7 @@ impl From<DiveAlarm> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -233,7 +231,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BOOL,
@@ -241,7 +239,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.alarm_type != typedef::DiveAlarmType(u8::MAX) {
+        if m.alarm_type.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DIVE_ALARM_TYPE,
@@ -249,7 +247,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.sound != typedef::Tone(u8::MAX) {
+        if m.sound.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::TONE,
@@ -276,7 +274,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.popup_enabled != typedef::Bool(u8::MAX) {
+        if m.popup_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::BOOL,
@@ -284,7 +282,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.trigger_on_descent != typedef::Bool(u8::MAX) {
+        if m.trigger_on_descent.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BOOL,
@@ -292,7 +290,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.trigger_on_ascent != typedef::Bool(u8::MAX) {
+        if m.trigger_on_ascent.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
@@ -300,7 +298,7 @@ impl From<DiveAlarm> for Message {
                 is_expanded: false,
             });
         };
-        if m.repeating != typedef::Bool(u8::MAX) {
+        if m.repeating.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BOOL,

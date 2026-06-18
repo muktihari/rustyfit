@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -82,19 +80,19 @@ impl Goal {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
-            + (self.start_date != typedef::DateTime(u32::MAX)) as usize
-            + (self.end_date != typedef::DateTime(u32::MAX)) as usize
-            + (self.r#type != typedef::Goal(u8::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
+            + (self.start_date.0 != u32::MAX) as usize
+            + (self.end_date.0 != u32::MAX) as usize
+            + (self.r#type.0 != u8::MAX) as usize
             + (self.value != u32::MAX) as usize
-            + (self.repeat != typedef::Bool(u8::MAX)) as usize
+            + (self.repeat.0 != u8::MAX) as usize
             + (self.target_value != u32::MAX) as usize
-            + (self.recurrence != typedef::GoalRecurrence(u8::MAX)) as usize
+            + (self.recurrence.0 != u8::MAX) as usize
             + (self.recurrence_value != u16::MAX) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.source != typedef::GoalSource(u8::MAX)) as usize
+            + (self.enabled.0 != u8::MAX) as usize
+            + (self.source.0 != u8::MAX) as usize
     }
 }
 
@@ -145,7 +143,7 @@ impl From<Goal> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -153,7 +151,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SPORT,
@@ -161,7 +159,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SUB_SPORT,
@@ -169,7 +167,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_date != typedef::DateTime(u32::MAX) {
+        if m.start_date.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
@@ -177,7 +175,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.end_date != typedef::DateTime(u32::MAX) {
+        if m.end_date.0 != u32::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::DATE_TIME,
@@ -185,7 +183,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.r#type != typedef::Goal(u8::MAX) {
+        if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::GOAL,
@@ -201,7 +199,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.repeat != typedef::Bool(u8::MAX) {
+        if m.repeat.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::BOOL,
@@ -217,7 +215,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.recurrence != typedef::GoalRecurrence(u8::MAX) {
+        if m.recurrence.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::GOAL_RECURRENCE,
@@ -233,7 +231,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BOOL,
@@ -241,7 +239,7 @@ impl From<Goal> for Message {
                 is_expanded: false,
             });
         };
-        if m.source != typedef::GoalSource(u8::MAX) {
+        if m.source.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::GOAL_SOURCE,

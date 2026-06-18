@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -183,26 +181,25 @@ impl DeviceSettings {
             + (!self.time_offset.is_empty()) as usize
             + (!self.time_mode.is_empty()) as usize
             + (!self.time_zone_offset.is_empty()) as usize
-            + (self.backlight_mode != typedef::BacklightMode(u8::MAX)) as usize
-            + (self.activity_tracker_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.clock_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.backlight_mode.0 != u8::MAX) as usize
+            + (self.activity_tracker_enabled.0 != u8::MAX) as usize
+            + (self.clock_time.0 != u32::MAX) as usize
             + (!self.pages_enabled.is_empty()) as usize
-            + (self.move_alert_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.date_mode != typedef::DateMode(u8::MAX)) as usize
-            + (self.display_orientation != typedef::DisplayOrientation(u8::MAX)) as usize
-            + (self.mounting_side != typedef::Side(u8::MAX)) as usize
+            + (self.move_alert_enabled.0 != u8::MAX) as usize
+            + (self.date_mode.0 != u8::MAX) as usize
+            + (self.display_orientation.0 != u8::MAX) as usize
+            + (self.mounting_side.0 != u8::MAX) as usize
             + (!self.default_page.is_empty()) as usize
             + (self.autosync_min_steps != u16::MAX) as usize
             + (self.autosync_min_time != u16::MAX) as usize
-            + (self.lactate_threshold_autodetect_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.ble_auto_upload_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.auto_sync_frequency != typedef::AutoSyncFrequency(u8::MAX)) as usize
-            + (self.auto_activity_detect != typedef::AutoActivityDetect(u32::MAX)) as usize
+            + (self.lactate_threshold_autodetect_enabled.0 != u8::MAX) as usize
+            + (self.ble_auto_upload_enabled.0 != u8::MAX) as usize
+            + (self.auto_sync_frequency.0 != u8::MAX) as usize
+            + (self.auto_activity_detect.0 != u32::MAX) as usize
             + (self.number_of_screens != u8::MAX) as usize
-            + (self.smart_notification_display_orientation != typedef::DisplayOrientation(u8::MAX))
-                as usize
-            + (self.tap_interface != typedef::Switch(u8::MAX)) as usize
-            + (self.tap_sensitivity != typedef::TapSensitivity(u8::MAX)) as usize
+            + (self.smart_notification_display_orientation.0 != u8::MAX) as usize
+            + (self.tap_interface.0 != u8::MAX) as usize
+            + (self.tap_sensitivity.0 != u8::MAX) as usize
     }
 }
 
@@ -319,7 +316,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.backlight_mode != typedef::BacklightMode(u8::MAX) {
+        if m.backlight_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BACKLIGHT_MODE,
@@ -327,7 +324,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.activity_tracker_enabled != typedef::Bool(u8::MAX) {
+        if m.activity_tracker_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 36,
                 profile_type: ProfileType::BOOL,
@@ -335,7 +332,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.clock_time != typedef::DateTime(u32::MAX) {
+        if m.clock_time.0 != u32::MAX {
             fields.push(Field {
                 num: 39,
                 profile_type: ProfileType::DATE_TIME,
@@ -351,7 +348,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.move_alert_enabled != typedef::Bool(u8::MAX) {
+        if m.move_alert_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 46,
                 profile_type: ProfileType::BOOL,
@@ -359,7 +356,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.date_mode != typedef::DateMode(u8::MAX) {
+        if m.date_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 47,
                 profile_type: ProfileType::DATE_MODE,
@@ -367,7 +364,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.display_orientation != typedef::DisplayOrientation(u8::MAX) {
+        if m.display_orientation.0 != u8::MAX {
             fields.push(Field {
                 num: 55,
                 profile_type: ProfileType::DISPLAY_ORIENTATION,
@@ -375,7 +372,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.mounting_side != typedef::Side(u8::MAX) {
+        if m.mounting_side.0 != u8::MAX {
             fields.push(Field {
                 num: 56,
                 profile_type: ProfileType::SIDE,
@@ -407,7 +404,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.lactate_threshold_autodetect_enabled != typedef::Bool(u8::MAX) {
+        if m.lactate_threshold_autodetect_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 80,
                 profile_type: ProfileType::BOOL,
@@ -415,7 +412,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.ble_auto_upload_enabled != typedef::Bool(u8::MAX) {
+        if m.ble_auto_upload_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 86,
                 profile_type: ProfileType::BOOL,
@@ -423,7 +420,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.auto_sync_frequency != typedef::AutoSyncFrequency(u8::MAX) {
+        if m.auto_sync_frequency.0 != u8::MAX {
             fields.push(Field {
                 num: 89,
                 profile_type: ProfileType::AUTO_SYNC_FREQUENCY,
@@ -431,7 +428,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.auto_activity_detect != typedef::AutoActivityDetect(u32::MAX) {
+        if m.auto_activity_detect.0 != u32::MAX {
             fields.push(Field {
                 num: 90,
                 profile_type: ProfileType::AUTO_ACTIVITY_DETECT,
@@ -447,7 +444,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.smart_notification_display_orientation != typedef::DisplayOrientation(u8::MAX) {
+        if m.smart_notification_display_orientation.0 != u8::MAX {
             fields.push(Field {
                 num: 95,
                 profile_type: ProfileType::DISPLAY_ORIENTATION,
@@ -455,7 +452,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.tap_interface != typedef::Switch(u8::MAX) {
+        if m.tap_interface.0 != u8::MAX {
             fields.push(Field {
                 num: 134,
                 profile_type: ProfileType::SWITCH,
@@ -463,7 +460,7 @@ impl From<DeviceSettings> for Message {
                 is_expanded: false,
             });
         };
-        if m.tap_sensitivity != typedef::TapSensitivity(u8::MAX) {
+        if m.tap_sensitivity.0 != u8::MAX {
             fields.push(Field {
                 num: 174,
                 profile_type: ProfileType::TAP_SENSITIVITY,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -159,23 +157,23 @@ impl DeviceInfo {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.device_index.0 != u8::MAX) as usize
             + (self.device_type != u8::MAX) as usize
-            + (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.manufacturer.0 != u16::MAX) as usize
             + (self.serial_number != u32::MIN) as usize
             + (self.product != u16::MAX) as usize
             + (self.software_version != u16::MAX) as usize
             + (self.hardware_version != u8::MAX) as usize
             + (self.cum_operating_time != u32::MAX) as usize
             + (self.battery_voltage != u16::MAX) as usize
-            + (self.battery_status != typedef::BatteryStatus(u8::MAX)) as usize
-            + (self.sensor_position != typedef::BodyLocation(u8::MAX)) as usize
+            + (self.battery_status.0 != u8::MAX) as usize
+            + (self.sensor_position.0 != u8::MAX) as usize
             + (!self.descriptor.is_empty()) as usize
             + (self.ant_transmission_type != u8::MIN) as usize
             + (self.ant_device_number != u16::MIN) as usize
-            + (self.ant_network != typedef::AntNetwork(u8::MAX)) as usize
-            + (self.source_type != typedef::SourceType(u8::MAX)) as usize
+            + (self.ant_network.0 != u8::MAX) as usize
+            + (self.source_type.0 != u8::MAX) as usize
             + (!self.product_name.is_empty()) as usize
             + (self.battery_level != u8::MAX) as usize
     }
@@ -234,7 +232,7 @@ impl From<DeviceInfo> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -242,7 +240,7 @@ impl From<DeviceInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.device_index != typedef::DeviceIndex(u8::MAX) {
+        if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DEVICE_INDEX,
@@ -258,7 +256,7 @@ impl From<DeviceInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.manufacturer != typedef::Manufacturer(u16::MAX) {
+        if m.manufacturer.0 != u16::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::MANUFACTURER,
@@ -314,7 +312,7 @@ impl From<DeviceInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.battery_status != typedef::BatteryStatus(u8::MAX) {
+        if m.battery_status.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::BATTERY_STATUS,
@@ -322,7 +320,7 @@ impl From<DeviceInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.sensor_position != typedef::BodyLocation(u8::MAX) {
+        if m.sensor_position.0 != u8::MAX {
             fields.push(Field {
                 num: 18,
                 profile_type: ProfileType::BODY_LOCATION,
@@ -354,7 +352,7 @@ impl From<DeviceInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.ant_network != typedef::AntNetwork(u8::MAX) {
+        if m.ant_network.0 != u8::MAX {
             fields.push(Field {
                 num: 22,
                 profile_type: ProfileType::ANT_NETWORK,
@@ -362,7 +360,7 @@ impl From<DeviceInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.source_type != typedef::SourceType(u8::MAX) {
+        if m.source_type.0 != u8::MAX {
             fields.push(Field {
                 num: 25,
                 profile_type: ProfileType::SOURCE_TYPE,

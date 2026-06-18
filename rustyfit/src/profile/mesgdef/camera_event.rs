@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -54,11 +52,11 @@ impl CameraEvent {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.timestamp_ms != u16::MAX) as usize
-            + (self.camera_event_type != typedef::CameraEventType(u8::MAX)) as usize
+            + (self.camera_event_type.0 != u8::MAX) as usize
             + (!self.camera_file_uuid.is_empty()) as usize
-            + (self.camera_orientation != typedef::CameraOrientationType(u8::MAX)) as usize
+            + (self.camera_orientation.0 != u8::MAX) as usize
     }
 }
 
@@ -101,7 +99,7 @@ impl From<CameraEvent> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -117,7 +115,7 @@ impl From<CameraEvent> for Message {
                 is_expanded: false,
             });
         };
-        if m.camera_event_type != typedef::CameraEventType(u8::MAX) {
+        if m.camera_event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::CAMERA_EVENT_TYPE,
@@ -133,7 +131,7 @@ impl From<CameraEvent> for Message {
                 is_expanded: false,
             });
         };
-        if m.camera_orientation != typedef::CameraOrientationType(u8::MAX) {
+        if m.camera_orientation.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::CAMERA_ORIENTATION_TYPE,

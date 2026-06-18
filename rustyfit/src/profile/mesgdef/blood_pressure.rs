@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -83,7 +81,7 @@ impl BloodPressure {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.systolic_pressure != u16::MAX) as usize
             + (self.diastolic_pressure != u16::MAX) as usize
             + (self.mean_arterial_pressure != u16::MAX) as usize
@@ -91,9 +89,9 @@ impl BloodPressure {
             + (self.map_morning_values != u16::MAX) as usize
             + (self.map_evening_values != u16::MAX) as usize
             + (self.heart_rate != u8::MAX) as usize
-            + (self.heart_rate_type != typedef::HrType(u8::MAX)) as usize
-            + (self.status != typedef::BpStatus(u8::MAX)) as usize
-            + (self.user_profile_index != typedef::MessageIndex(u16::MAX)) as usize
+            + (self.heart_rate_type.0 != u8::MAX) as usize
+            + (self.status.0 != u8::MAX) as usize
+            + (self.user_profile_index.0 != u16::MAX) as usize
     }
 }
 
@@ -142,7 +140,7 @@ impl From<BloodPressure> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -206,7 +204,7 @@ impl From<BloodPressure> for Message {
                 is_expanded: false,
             });
         };
-        if m.heart_rate_type != typedef::HrType(u8::MAX) {
+        if m.heart_rate_type.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::HR_TYPE,
@@ -214,7 +212,7 @@ impl From<BloodPressure> for Message {
                 is_expanded: false,
             });
         };
-        if m.status != typedef::BpStatus(u8::MAX) {
+        if m.status.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BP_STATUS,
@@ -222,7 +220,7 @@ impl From<BloodPressure> for Message {
                 is_expanded: false,
             });
         };
-        if m.user_profile_index != typedef::MessageIndex(u16::MAX) {
+        if m.user_profile_index.0 != u16::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::MESSAGE_INDEX,

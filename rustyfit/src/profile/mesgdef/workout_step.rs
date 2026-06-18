@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -130,22 +128,22 @@ impl WorkoutStep {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (!self.wkt_step_name.is_empty()) as usize
-            + (self.duration_type != typedef::WktStepDuration(u8::MAX)) as usize
+            + (self.duration_type.0 != u8::MAX) as usize
             + (self.duration_value != u32::MAX) as usize
-            + (self.target_type != typedef::WktStepTarget(u8::MAX)) as usize
+            + (self.target_type.0 != u8::MAX) as usize
             + (self.target_value != u32::MAX) as usize
             + (self.custom_target_value_low != u32::MAX) as usize
             + (self.custom_target_value_high != u32::MAX) as usize
-            + (self.intensity != typedef::Intensity(u8::MAX)) as usize
+            + (self.intensity.0 != u8::MAX) as usize
             + (!self.notes.is_empty()) as usize
-            + (self.equipment != typedef::WorkoutEquipment(u8::MAX)) as usize
-            + (self.exercise_category != typedef::ExerciseCategory(u16::MAX)) as usize
+            + (self.equipment.0 != u8::MAX) as usize
+            + (self.exercise_category.0 != u16::MAX) as usize
             + (self.exercise_name != u16::MAX) as usize
             + (self.exercise_weight != u16::MAX) as usize
-            + (self.weight_display_unit != typedef::FitBaseUnit(u16::MAX)) as usize
-            + (self.secondary_target_type != typedef::WktStepTarget(u8::MAX)) as usize
+            + (self.weight_display_unit.0 != u16::MAX) as usize
+            + (self.secondary_target_type.0 != u8::MAX) as usize
             + (self.secondary_target_value != u32::MAX) as usize
             + (self.secondary_custom_target_value_low != u32::MAX) as usize
             + (self.secondary_custom_target_value_high != u32::MAX) as usize
@@ -205,7 +203,7 @@ impl From<WorkoutStep> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -221,7 +219,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.duration_type != typedef::WktStepDuration(u8::MAX) {
+        if m.duration_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::WKT_STEP_DURATION,
@@ -237,7 +235,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.target_type != typedef::WktStepTarget(u8::MAX) {
+        if m.target_type.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::WKT_STEP_TARGET,
@@ -269,7 +267,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.intensity != typedef::Intensity(u8::MAX) {
+        if m.intensity.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::INTENSITY,
@@ -285,7 +283,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.equipment != typedef::WorkoutEquipment(u8::MAX) {
+        if m.equipment.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::WORKOUT_EQUIPMENT,
@@ -293,7 +291,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.exercise_category != typedef::ExerciseCategory(u16::MAX) {
+        if m.exercise_category.0 != u16::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::EXERCISE_CATEGORY,
@@ -317,7 +315,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.weight_display_unit != typedef::FitBaseUnit(u16::MAX) {
+        if m.weight_display_unit.0 != u16::MAX {
             fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::FIT_BASE_UNIT,
@@ -325,7 +323,7 @@ impl From<WorkoutStep> for Message {
                 is_expanded: false,
             });
         };
-        if m.secondary_target_type != typedef::WktStepTarget(u8::MAX) {
+        if m.secondary_target_type.0 != u8::MAX {
             fields.push(Field {
                 num: 19,
                 profile_type: ProfileType::WKT_STEP_TARGET,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -262,9 +260,9 @@ impl TimeInZone {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.reference_mesg != typedef::MesgNum(u16::MAX)) as usize
-            + (self.reference_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.reference_mesg.0 != u16::MAX) as usize
+            + (self.reference_index.0 != u16::MAX) as usize
             + (!self.time_in_hr_zone.is_empty()) as usize
             + (!self.time_in_speed_zone.is_empty()) as usize
             + (!self.time_in_cadence_zone.is_empty()) as usize
@@ -273,11 +271,11 @@ impl TimeInZone {
             + (!self.speed_zone_high_boundary.is_empty()) as usize
             + (!self.cadence_zone_high_boundary.is_empty()) as usize
             + (!self.power_zone_high_boundary.is_empty()) as usize
-            + (self.hr_calc_type != typedef::HrZoneCalc(u8::MAX)) as usize
+            + (self.hr_calc_type.0 != u8::MAX) as usize
             + (self.max_heart_rate != u8::MAX) as usize
             + (self.resting_heart_rate != u8::MAX) as usize
             + (self.threshold_heart_rate != u8::MAX) as usize
-            + (self.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX)) as usize
+            + (self.pwr_calc_type.0 != u8::MAX) as usize
             + (self.functional_threshold_power != u16::MAX) as usize
     }
 }
@@ -333,7 +331,7 @@ impl From<TimeInZone> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -341,7 +339,7 @@ impl From<TimeInZone> for Message {
                 is_expanded: false,
             });
         };
-        if m.reference_mesg != typedef::MesgNum(u16::MAX) {
+        if m.reference_mesg.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::MESG_NUM,
@@ -349,7 +347,7 @@ impl From<TimeInZone> for Message {
                 is_expanded: false,
             });
         };
-        if m.reference_index != typedef::MessageIndex(u16::MAX) {
+        if m.reference_index.0 != u16::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -421,7 +419,7 @@ impl From<TimeInZone> for Message {
                 is_expanded: false,
             });
         };
-        if m.hr_calc_type != typedef::HrZoneCalc(u8::MAX) {
+        if m.hr_calc_type.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::HR_ZONE_CALC,
@@ -453,7 +451,7 @@ impl From<TimeInZone> for Message {
                 is_expanded: false,
             });
         };
-        if m.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX) {
+        if m.pwr_calc_type.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
                 profile_type: ProfileType::PWR_ZONE_CALC,

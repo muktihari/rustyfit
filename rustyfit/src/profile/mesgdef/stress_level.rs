@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -40,7 +38,7 @@ impl StressLevel {
 
     fn count_valid_fields(&self) -> usize {
         (self.stress_level_value != i16::MAX) as usize
-            + (self.stress_level_time != typedef::DateTime(u32::MAX)) as usize
+            + (self.stress_level_time.0 != u32::MAX) as usize
     }
 }
 
@@ -88,7 +86,7 @@ impl From<StressLevel> for Message {
                 is_expanded: false,
             });
         };
-        if m.stress_level_time != typedef::DateTime(u32::MAX) {
+        if m.stress_level_time.0 != u32::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::DATE_TIME,

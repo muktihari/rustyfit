@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -87,19 +85,19 @@ impl Connectivity {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.bluetooth_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.bluetooth_le_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.ant_enabled != typedef::Bool(u8::MAX)) as usize
+        (self.bluetooth_enabled.0 != u8::MAX) as usize
+            + (self.bluetooth_le_enabled.0 != u8::MAX) as usize
+            + (self.ant_enabled.0 != u8::MAX) as usize
             + (!self.name.is_empty()) as usize
-            + (self.live_tracking_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.weather_conditions_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.weather_alerts_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.auto_activity_upload_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.course_download_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.workout_download_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.gps_ephemeris_download_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.incident_detection_enabled != typedef::Bool(u8::MAX)) as usize
-            + (self.grouptrack_enabled != typedef::Bool(u8::MAX)) as usize
+            + (self.live_tracking_enabled.0 != u8::MAX) as usize
+            + (self.weather_conditions_enabled.0 != u8::MAX) as usize
+            + (self.weather_alerts_enabled.0 != u8::MAX) as usize
+            + (self.auto_activity_upload_enabled.0 != u8::MAX) as usize
+            + (self.course_download_enabled.0 != u8::MAX) as usize
+            + (self.workout_download_enabled.0 != u8::MAX) as usize
+            + (self.gps_ephemeris_download_enabled.0 != u8::MAX) as usize
+            + (self.incident_detection_enabled.0 != u8::MAX) as usize
+            + (self.grouptrack_enabled.0 != u8::MAX) as usize
     }
 }
 
@@ -150,7 +148,7 @@ impl From<Connectivity> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.bluetooth_enabled != typedef::Bool(u8::MAX) {
+        if m.bluetooth_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::BOOL,
@@ -158,7 +156,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.bluetooth_le_enabled != typedef::Bool(u8::MAX) {
+        if m.bluetooth_le_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::BOOL,
@@ -166,7 +164,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.ant_enabled != typedef::Bool(u8::MAX) {
+        if m.ant_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BOOL,
@@ -182,7 +180,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.live_tracking_enabled != typedef::Bool(u8::MAX) {
+        if m.live_tracking_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::BOOL,
@@ -190,7 +188,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.weather_conditions_enabled != typedef::Bool(u8::MAX) {
+        if m.weather_conditions_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::BOOL,
@@ -198,7 +196,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.weather_alerts_enabled != typedef::Bool(u8::MAX) {
+        if m.weather_alerts_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::BOOL,
@@ -206,7 +204,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.auto_activity_upload_enabled != typedef::Bool(u8::MAX) {
+        if m.auto_activity_upload_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::BOOL,
@@ -214,7 +212,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.course_download_enabled != typedef::Bool(u8::MAX) {
+        if m.course_download_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::BOOL,
@@ -222,7 +220,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.workout_download_enabled != typedef::Bool(u8::MAX) {
+        if m.workout_download_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
@@ -230,7 +228,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.gps_ephemeris_download_enabled != typedef::Bool(u8::MAX) {
+        if m.gps_ephemeris_download_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
                 profile_type: ProfileType::BOOL,
@@ -238,7 +236,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.incident_detection_enabled != typedef::Bool(u8::MAX) {
+        if m.incident_detection_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::BOOL,
@@ -246,7 +244,7 @@ impl From<Connectivity> for Message {
                 is_expanded: false,
             });
         };
-        if m.grouptrack_enabled != typedef::Bool(u8::MAX) {
+        if m.grouptrack_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::BOOL,
