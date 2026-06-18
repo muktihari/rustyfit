@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -52,8 +50,8 @@ impl Capabilities {
     fn count_valid_fields(&self) -> usize {
         (!self.languages.is_empty()) as usize
             + (!self.sports.is_empty()) as usize
-            + (self.workouts_supported != typedef::WorkoutCapabilities(u32::MIN)) as usize
-            + (self.connectivity_supported != typedef::ConnectivityCapabilities(u32::MIN)) as usize
+            + (self.workouts_supported.0 != u32::MIN) as usize
+            + (self.connectivity_supported.0 != u32::MIN) as usize
     }
 }
 
@@ -126,7 +124,7 @@ impl From<Capabilities> for Message {
                 is_expanded: false,
             });
         };
-        if m.workouts_supported != typedef::WorkoutCapabilities(u32::MIN) {
+        if m.workouts_supported.0 != u32::MIN {
             fields.push(Field {
                 num: 21,
                 profile_type: ProfileType::WORKOUT_CAPABILITIES,
@@ -134,7 +132,7 @@ impl From<Capabilities> for Message {
                 is_expanded: false,
             });
         };
-        if m.connectivity_supported != typedef::ConnectivityCapabilities(u32::MIN) {
+        if m.connectivity_supported.0 != u32::MIN {
             fields.push(Field {
                 num: 23,
                 profile_type: ProfileType::CONNECTIVITY_CAPABILITIES,

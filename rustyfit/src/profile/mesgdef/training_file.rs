@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -55,12 +53,12 @@ impl TrainingFile {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.r#type != typedef::File(u8::MAX)) as usize
-            + (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.r#type.0 != u8::MAX) as usize
+            + (self.manufacturer.0 != u16::MAX) as usize
             + (self.product != u16::MAX) as usize
             + (self.serial_number != u32::MIN) as usize
-            + (self.time_created != typedef::DateTime(u32::MAX)) as usize
+            + (self.time_created.0 != u32::MAX) as usize
     }
 }
 
@@ -104,7 +102,7 @@ impl From<TrainingFile> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -112,7 +110,7 @@ impl From<TrainingFile> for Message {
                 is_expanded: false,
             });
         };
-        if m.r#type != typedef::File(u8::MAX) {
+        if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::FILE,
@@ -120,7 +118,7 @@ impl From<TrainingFile> for Message {
                 is_expanded: false,
             });
         };
-        if m.manufacturer != typedef::Manufacturer(u16::MAX) {
+        if m.manufacturer.0 != u16::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MANUFACTURER,
@@ -144,7 +142,7 @@ impl From<TrainingFile> for Message {
                 is_expanded: false,
             });
         };
-        if m.time_created != typedef::DateTime(u32::MAX) {
+        if m.time_created.0 != u32::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::DATE_TIME,

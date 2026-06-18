@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -52,10 +50,10 @@ impl HrmProfile {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.enabled != typedef::Bool(u8::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.enabled.0 != u8::MAX) as usize
             + (self.hrm_ant_id != u16::MIN) as usize
-            + (self.log_hrv != typedef::Bool(u8::MAX)) as usize
+            + (self.log_hrv.0 != u8::MAX) as usize
             + (self.hrm_ant_id_trans_type != u8::MIN) as usize
     }
 }
@@ -99,7 +97,7 @@ impl From<HrmProfile> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -107,7 +105,7 @@ impl From<HrmProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.enabled != typedef::Bool(u8::MAX) {
+        if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::BOOL,
@@ -123,7 +121,7 @@ impl From<HrmProfile> for Message {
                 is_expanded: false,
             });
         };
-        if m.log_hrv != typedef::Bool(u8::MAX) {
+        if m.log_hrv.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BOOL,

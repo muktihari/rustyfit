@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -53,8 +51,8 @@ impl ZonesTarget {
         (self.max_heart_rate != u8::MAX) as usize
             + (self.threshold_heart_rate != u8::MAX) as usize
             + (self.functional_threshold_power != u16::MAX) as usize
-            + (self.hr_calc_type != typedef::HrZoneCalc(u8::MAX)) as usize
-            + (self.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX)) as usize
+            + (self.hr_calc_type.0 != u8::MAX) as usize
+            + (self.pwr_calc_type.0 != u8::MAX) as usize
     }
 }
 
@@ -121,7 +119,7 @@ impl From<ZonesTarget> for Message {
                 is_expanded: false,
             });
         };
-        if m.hr_calc_type != typedef::HrZoneCalc(u8::MAX) {
+        if m.hr_calc_type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::HR_ZONE_CALC,
@@ -129,7 +127,7 @@ impl From<ZonesTarget> for Message {
                 is_expanded: false,
             });
         };
-        if m.pwr_calc_type != typedef::PwrZoneCalc(u8::MAX) {
+        if m.pwr_calc_type.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::PWR_ZONE_CALC,

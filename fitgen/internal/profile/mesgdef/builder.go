@@ -98,10 +98,11 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				Num:  parserField.Num,
 				Name: strutil.ToNonRustIdent(parserField.Name),
 				Name0: func() string {
+					name := strutil.ToNonRustIdent(parserField.Name)
 					if parserField.Type == baseType.String() {
-						return parserField.Name
+						return name
 					}
-					return fmt.Sprintf("%s.0", parserField.Name)
+					return fmt.Sprintf("%s.0", name)
 				}(),
 				NameUpperCase: strings.ToUpper(parserField.Name),
 				String:        parserField.Name,
@@ -123,7 +124,8 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				Type:           b.transformType(parserField.Type, parserField.Array, fixedArraySize),
 				TypedValue:     b.transformTypedValue(parserField.Type, parserField.Array, fixedArraySize),
 				ProtoValue:     b.transformToProtoValue(strutil.ToNonRustIdent(parserField.Name), parserField.Type, parserField.Array, fixedArraySize),
-				InvalidValue:   b.invalidValueOf(parserField.Type, parserField.Array, fixedArraySize),
+				InvalidValue:   b.invalidValue(parserField.Type, parserField.Array, fixedArraySize, false),
+				InvalidValue0:  b.invalidValue(parserField.Type, parserField.Array, fixedArraySize, true),
 				Comment:        parserField.Comment,
 				Scale:          1,
 				Offset:         0,
@@ -131,8 +133,11 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				FixedArraySize: fixedArraySize,
 				Units:          parserField.Units,
 			}
+
 			if field.BaseType == "STRING" {
 				imports["alloc::string::String"] = struct{}{}
+			}
+			if strings.Contains(field.TypedValue, "to_owned") {
 				imports["alloc::borrow::ToOwned"] = struct{}{}
 			}
 			if field.Units == "semicircles" {
@@ -143,13 +148,13 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				field.CanExpand = true
 			}
 
-			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name, field.InvalidValue)
-			field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s != %s", field.Name, field.InvalidValue)
-			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name, field.InvalidValue)
+			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name0, field.InvalidValue0)
+			field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s != %s", field.Name0, field.InvalidValue0)
+			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name0, field.InvalidValue0)
 			if field.BaseType0 == "f32" || field.BaseType0 == "f64" {
-				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.to_bits() == u%s::MAX", field.Name, field.BaseType0[1:])
-				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name, field.BaseType0[1:])
-				field.IfNotEqualInvalid = fmt.Sprintf("m.%s.to_bits() != u%s::MAX", field.Name, field.BaseType0[1:])
+				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.to_bits() == u%s::MAX", field.Name0, field.BaseType0[1:])
+				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
+				field.IfNotEqualInvalid = fmt.Sprintf("m.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
 			}
 			if parserField.Array == "[N]" || (field.BaseType == "STRING" && parserField.Array == "") {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
@@ -477,7 +482,7 @@ func (b *Builder) transformTypedValue(fieldType, array string, fixedArraySize ui
 	}`, strings.TrimSuffix(valueEnumType, "z"), typdef)
 }
 
-func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) string {
+func (b *Builder) invalidValue(fieldType, array string, fixedArraySize byte, inner bool) string {
 	baseType := b.lookup.BaseType(fieldType).String()
 	rustType := baseTypeToRustTypeReplacer.Replace(baseType)
 
@@ -507,7 +512,7 @@ func (b *Builder) invalidValueOf(fieldType, array string, fixedArraySize byte) s
 		return fmt.Sprintf("[%s; %d]", invalid, int(fixedArraySize))
 	}
 
-	if baseType == fieldType {
+	if baseType == fieldType || inner {
 		return invalid
 	}
 

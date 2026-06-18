@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -85,13 +83,13 @@ impl Activity {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.total_timer_time != u32::MAX) as usize
             + (self.num_sessions != u16::MAX) as usize
-            + (self.r#type != typedef::Activity(u8::MAX)) as usize
-            + (self.event != typedef::Event(u8::MAX)) as usize
-            + (self.event_type != typedef::EventType(u8::MAX)) as usize
-            + (self.local_timestamp != typedef::LocalDateTime(u32::MAX)) as usize
+            + (self.r#type.0 != u8::MAX) as usize
+            + (self.event.0 != u8::MAX) as usize
+            + (self.event_type.0 != u8::MAX) as usize
+            + (self.local_timestamp.0 != u32::MAX) as usize
             + (self.event_group != u8::MAX) as usize
     }
 }
@@ -138,7 +136,7 @@ impl From<Activity> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -162,7 +160,7 @@ impl From<Activity> for Message {
                 is_expanded: false,
             });
         };
-        if m.r#type != typedef::Activity(u8::MAX) {
+        if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::ACTIVITY,
@@ -170,7 +168,7 @@ impl From<Activity> for Message {
                 is_expanded: false,
             });
         };
-        if m.event != typedef::Event(u8::MAX) {
+        if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::EVENT,
@@ -178,7 +176,7 @@ impl From<Activity> for Message {
                 is_expanded: false,
             });
         };
-        if m.event_type != typedef::EventType(u8::MAX) {
+        if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::EVENT_TYPE,
@@ -186,7 +184,7 @@ impl From<Activity> for Message {
                 is_expanded: false,
             });
         };
-        if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
+        if m.local_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::LOCAL_DATE_TIME,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -49,7 +47,7 @@ impl DeveloperDataId {
     fn count_valid_fields(&self) -> usize {
         (!self.developer_id.is_empty()) as usize
             + (!self.application_id.is_empty()) as usize
-            + (self.manufacturer_id != typedef::Manufacturer(u16::MAX)) as usize
+            + (self.manufacturer_id.0 != u16::MAX) as usize
             + (self.developer_data_index != u8::MAX) as usize
             + (self.application_version != u32::MAX) as usize
     }
@@ -109,7 +107,7 @@ impl From<DeveloperDataId> for Message {
                 is_expanded: false,
             });
         };
-        if m.manufacturer_id != typedef::Manufacturer(u16::MAX) {
+        if m.manufacturer_id.0 != u16::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::MANUFACTURER,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -76,12 +74,12 @@ impl Totals {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.timestamp.0 != u32::MAX) as usize
             + (self.timer_time != u32::MAX) as usize
             + (self.distance != u32::MAX) as usize
             + (self.calories != u32::MAX) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
+            + (self.sport.0 != u8::MAX) as usize
             + (self.elapsed_time != u32::MAX) as usize
             + (self.sessions != u16::MAX) as usize
             + (self.active_time != u32::MAX) as usize
@@ -133,7 +131,7 @@ impl From<Totals> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -141,7 +139,7 @@ impl From<Totals> for Message {
                 is_expanded: false,
             });
         };
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -173,7 +171,7 @@ impl From<Totals> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
                 profile_type: ProfileType::SPORT,

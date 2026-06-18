@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -38,8 +36,7 @@ impl SlaveDevice {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.manufacturer != typedef::Manufacturer(u16::MAX)) as usize
-            + (self.product != u16::MAX) as usize
+        (self.manufacturer.0 != u16::MAX) as usize + (self.product != u16::MAX) as usize
     }
 }
 
@@ -79,7 +76,7 @@ impl From<SlaveDevice> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.manufacturer != typedef::Manufacturer(u16::MAX) {
+        if m.manufacturer.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::MANUFACTURER,

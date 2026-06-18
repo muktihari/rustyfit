@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -57,7 +55,7 @@ impl AntChannelId {
             + (self.device_type != u8::MIN) as usize
             + (self.device_number != u16::MIN) as usize
             + (self.transmission_type != u8::MIN) as usize
-            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+            + (self.device_index.0 != u8::MAX) as usize
     }
 }
 
@@ -132,7 +130,7 @@ impl From<AntChannelId> for Message {
                 is_expanded: false,
             });
         };
-        if m.device_index != typedef::DeviceIndex(u8::MAX) {
+        if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::DEVICE_INDEX,

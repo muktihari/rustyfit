@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -93,14 +91,14 @@ impl Workout {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
-            + (self.capabilities != typedef::WorkoutCapabilities(u32::MIN)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.capabilities.0 != u32::MIN) as usize
             + (self.num_valid_steps != u16::MAX) as usize
             + (!self.wkt_name.is_empty()) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
             + (self.pool_length != u16::MAX) as usize
-            + (self.pool_length_unit != typedef::DisplayMeasure(u8::MAX)) as usize
+            + (self.pool_length_unit.0 != u8::MAX) as usize
             + (!self.wkt_description.is_empty()) as usize
     }
 }
@@ -148,7 +146,7 @@ impl From<Workout> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -156,7 +154,7 @@ impl From<Workout> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::SPORT,
@@ -164,7 +162,7 @@ impl From<Workout> for Message {
                 is_expanded: false,
             });
         };
-        if m.capabilities != typedef::WorkoutCapabilities(u32::MIN) {
+        if m.capabilities.0 != u32::MIN {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::WORKOUT_CAPABILITIES,
@@ -188,7 +186,7 @@ impl From<Workout> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::SUB_SPORT,
@@ -204,7 +202,7 @@ impl From<Workout> for Message {
                 is_expanded: false,
             });
         };
-        if m.pool_length_unit != typedef::DisplayMeasure(u8::MAX) {
+        if m.pool_length_unit.0 != u8::MAX {
             fields.push(Field {
                 num: 15,
                 profile_type: ProfileType::DISPLAY_MEASURE,

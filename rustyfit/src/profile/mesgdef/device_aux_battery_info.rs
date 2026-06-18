@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -72,10 +70,10 @@ impl DeviceAuxBatteryInfo {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.device_index.0 != u8::MAX) as usize
             + (self.battery_voltage != u16::MAX) as usize
-            + (self.battery_status != typedef::BatteryStatus(u8::MAX)) as usize
+            + (self.battery_status.0 != u8::MAX) as usize
             + (self.battery_identifier != u8::MAX) as usize
     }
 }
@@ -119,7 +117,7 @@ impl From<DeviceAuxBatteryInfo> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -127,7 +125,7 @@ impl From<DeviceAuxBatteryInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.device_index != typedef::DeviceIndex(u8::MAX) {
+        if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DEVICE_INDEX,
@@ -143,7 +141,7 @@ impl From<DeviceAuxBatteryInfo> for Message {
                 is_expanded: false,
             });
         };
-        if m.battery_status != typedef::BatteryStatus(u8::MAX) {
+        if m.battery_status.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::BATTERY_STATUS,

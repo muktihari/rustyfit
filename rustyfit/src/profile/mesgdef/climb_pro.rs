@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use crate::semconv;
@@ -85,10 +83,10 @@ impl ClimbPro {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.position_lat != i32::MAX) as usize
             + (self.position_long != i32::MAX) as usize
-            + (self.climb_pro_event != typedef::ClimbProEvent(u8::MAX)) as usize
+            + (self.climb_pro_event.0 != u8::MAX) as usize
             + (self.climb_number != u16::MAX) as usize
             + (self.climb_category != u8::MAX) as usize
             + (self.current_dist.to_bits() != u32::MAX) as usize
@@ -136,7 +134,7 @@ impl From<ClimbPro> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -160,7 +158,7 @@ impl From<ClimbPro> for Message {
                 is_expanded: false,
             });
         };
-        if m.climb_pro_event != typedef::ClimbProEvent(u8::MAX) {
+        if m.climb_pro_event.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::CLIMB_PRO_EVENT,

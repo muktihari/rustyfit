@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -263,20 +263,20 @@ impl Length {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.event != typedef::Event(u8::MAX)) as usize
-            + (self.event_type != typedef::EventType(u8::MAX)) as usize
-            + (self.start_time != typedef::DateTime(u32::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.timestamp.0 != u32::MAX) as usize
+            + (self.event.0 != u8::MAX) as usize
+            + (self.event_type.0 != u8::MAX) as usize
+            + (self.start_time.0 != u32::MAX) as usize
             + (self.total_elapsed_time != u32::MAX) as usize
             + (self.total_timer_time != u32::MAX) as usize
             + (self.total_strokes != u16::MAX) as usize
             + (self.avg_speed != u16::MAX) as usize
-            + (self.swim_stroke != typedef::SwimStroke(u8::MAX)) as usize
+            + (self.swim_stroke.0 != u8::MAX) as usize
             + (self.avg_swimming_cadence != u8::MAX) as usize
             + (self.event_group != u8::MAX) as usize
             + (self.total_calories != u16::MAX) as usize
-            + (self.length_type != typedef::LengthType(u8::MAX)) as usize
+            + (self.length_type.0 != u8::MAX) as usize
             + (self.player_score != u16::MAX) as usize
             + (self.opponent_score != u16::MAX) as usize
             + (!self.stroke_count.is_empty()) as usize
@@ -350,7 +350,7 @@ impl From<Length> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -358,7 +358,7 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -366,7 +366,7 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
-        if m.event != typedef::Event(u8::MAX) {
+        if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::EVENT,
@@ -374,7 +374,7 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
-        if m.event_type != typedef::EventType(u8::MAX) {
+        if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::EVENT_TYPE,
@@ -382,7 +382,7 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
-        if m.start_time != typedef::DateTime(u32::MAX) {
+        if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::DATE_TIME,
@@ -422,7 +422,7 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
-        if m.swim_stroke != typedef::SwimStroke(u8::MAX) {
+        if m.swim_stroke.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SWIM_STROKE,
@@ -454,7 +454,7 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
-        if m.length_type != typedef::LengthType(u8::MAX) {
+        if m.length_type.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::LENGTH_TYPE,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -50,9 +48,9 @@ impl FieldCapabilities {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.file != typedef::File(u8::MAX)) as usize
-            + (self.mesg_num != typedef::MesgNum(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.file.0 != u8::MAX) as usize
+            + (self.mesg_num.0 != u16::MAX) as usize
             + (self.field_num != u8::MAX) as usize
             + (self.count != u16::MAX) as usize
     }
@@ -97,7 +95,7 @@ impl From<FieldCapabilities> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -105,7 +103,7 @@ impl From<FieldCapabilities> for Message {
                 is_expanded: false,
             });
         };
-        if m.file != typedef::File(u8::MAX) {
+        if m.file.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::FILE,
@@ -113,7 +111,7 @@ impl From<FieldCapabilities> for Message {
                 is_expanded: false,
             });
         };
-        if m.mesg_num != typedef::MesgNum(u16::MAX) {
+        if m.mesg_num.0 != u16::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::MESG_NUM,

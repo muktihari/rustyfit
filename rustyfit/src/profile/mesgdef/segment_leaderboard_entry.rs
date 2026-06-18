@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -87,9 +85,9 @@ impl SegmentLeaderboardEntry {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
             + (!self.name.is_empty()) as usize
-            + (self.r#type != typedef::SegmentLeaderboardType(u8::MAX)) as usize
+            + (self.r#type.0 != u8::MAX) as usize
             + (self.group_primary_key != u32::MAX) as usize
             + (self.activity_id != u32::MAX) as usize
             + (self.segment_time != u32::MAX) as usize
@@ -138,7 +136,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -154,7 +152,7 @@ impl From<SegmentLeaderboardEntry> for Message {
                 is_expanded: false,
             });
         };
-        if m.r#type != typedef::SegmentLeaderboardType(u8::MAX) {
+        if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
                 profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,

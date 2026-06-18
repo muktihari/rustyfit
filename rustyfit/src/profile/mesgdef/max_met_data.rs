@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -88,14 +86,14 @@ impl MaxMetData {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.update_time != typedef::DateTime(u32::MAX)) as usize
+        (self.update_time.0 != u32::MAX) as usize
             + (self.vo2_max != u16::MAX) as usize
-            + (self.sport != typedef::Sport(u8::MAX)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
-            + (self.max_met_category != typedef::MaxMetCategory(u8::MAX)) as usize
-            + (self.calibrated_data != typedef::Bool(u8::MAX)) as usize
-            + (self.hr_source != typedef::MaxMetHeartRateSource(u8::MAX)) as usize
-            + (self.speed_source != typedef::MaxMetSpeedSource(u8::MAX)) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
+            + (self.max_met_category.0 != u8::MAX) as usize
+            + (self.calibrated_data.0 != u8::MAX) as usize
+            + (self.hr_source.0 != u8::MAX) as usize
+            + (self.speed_source.0 != u8::MAX) as usize
     }
 }
 
@@ -141,7 +139,7 @@ impl From<MaxMetData> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.update_time != typedef::DateTime(u32::MAX) {
+        if m.update_time.0 != u32::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DATE_TIME,
@@ -157,7 +155,7 @@ impl From<MaxMetData> for Message {
                 is_expanded: false,
             });
         };
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::SPORT,
@@ -165,7 +163,7 @@ impl From<MaxMetData> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::SUB_SPORT,
@@ -173,7 +171,7 @@ impl From<MaxMetData> for Message {
                 is_expanded: false,
             });
         };
-        if m.max_met_category != typedef::MaxMetCategory(u8::MAX) {
+        if m.max_met_category.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
                 profile_type: ProfileType::MAX_MET_CATEGORY,
@@ -181,7 +179,7 @@ impl From<MaxMetData> for Message {
                 is_expanded: false,
             });
         };
-        if m.calibrated_data != typedef::Bool(u8::MAX) {
+        if m.calibrated_data.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
                 profile_type: ProfileType::BOOL,
@@ -189,7 +187,7 @@ impl From<MaxMetData> for Message {
                 is_expanded: false,
             });
         };
-        if m.hr_source != typedef::MaxMetHeartRateSource(u8::MAX) {
+        if m.hr_source.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
                 profile_type: ProfileType::MAX_MET_HEART_RATE_SOURCE,
@@ -197,7 +195,7 @@ impl From<MaxMetData> for Message {
                 is_expanded: false,
             });
         };
-        if m.speed_source != typedef::MaxMetSpeedSource(u8::MAX) {
+        if m.speed_source.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
                 profile_type: ProfileType::MAX_MET_SPEED_SOURCE,

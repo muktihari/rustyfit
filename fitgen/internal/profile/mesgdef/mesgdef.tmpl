@@ -10,7 +10,9 @@
 {{ define "mesgdef" -}}
 {{ template "header" . -}}
 
-#![allow(unused, clippy::manual_range_patterns)]
+{{ if gt .MaxFieldExpandNum 1 -}}
+#![allow(clippy::manual_range_patterns)]
+{{ end }}
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -172,7 +174,7 @@ impl {{ .Name }} {
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > {{ .MaxValue }} as f64 {
                     continue
                 }
-                self.{{ .Name }}[i] = (unscaled as {{ .BaseType0 }});
+                self.{{ .Name }}[i] = unscaled as {{ .BaseType0 }};
             }
             self
         }

@@ -45,6 +45,7 @@ type Field struct {
 	IsValidValue          string
 	ComparableValue       string
 	InvalidValue          string
+	InvalidValue0         string // Invalid value but with inner value if it's typedef: typedef::File(u32::MAX) -> u32::MAX
 	Comment               string
 	Units                 string
 	Scale                 float64

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
@@ -49,10 +47,10 @@ impl Course {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.sport != typedef::Sport(u8::MAX)) as usize
+        (self.sport.0 != u8::MAX) as usize
             + (!self.name.is_empty()) as usize
-            + (self.capabilities != typedef::CourseCapabilities(u32::MIN)) as usize
-            + (self.sub_sport != typedef::SubSport(u8::MAX)) as usize
+            + (self.capabilities.0 != u32::MIN) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
     }
 }
 
@@ -94,7 +92,7 @@ impl From<Course> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.sport != typedef::Sport(u8::MAX) {
+        if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
                 profile_type: ProfileType::SPORT,
@@ -110,7 +108,7 @@ impl From<Course> for Message {
                 is_expanded: false,
             });
         };
-        if m.capabilities != typedef::CourseCapabilities(u32::MIN) {
+        if m.capabilities.0 != u32::MIN {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::COURSE_CAPABILITIES,
@@ -118,7 +116,7 @@ impl From<Course> for Message {
                 is_expanded: false,
             });
         };
-        if m.sub_sport != typedef::SubSport(u8::MAX) {
+        if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::SUB_SPORT,

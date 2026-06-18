@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -1532,7 +1532,7 @@ impl Record {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.position_lat != i32::MAX) as usize
             + (self.position_long != i32::MAX) as usize
             + (self.altitude != u16::MAX) as usize
@@ -1552,21 +1552,21 @@ impl Record {
             + (self.total_cycles != u32::MAX) as usize
             + (self.compressed_accumulated_power != u16::MAX) as usize
             + (self.accumulated_power != u32::MAX) as usize
-            + (self.left_right_balance != typedef::LeftRightBalance(u8::MAX)) as usize
+            + (self.left_right_balance.0 != u8::MAX) as usize
             + (self.gps_accuracy != u8::MAX) as usize
             + (self.vertical_speed != i16::MAX) as usize
             + (self.calories != u16::MAX) as usize
             + (self.vertical_oscillation != u16::MAX) as usize
             + (self.stance_time_percent != u16::MAX) as usize
             + (self.stance_time != u16::MAX) as usize
-            + (self.activity_type != typedef::ActivityType(u8::MAX)) as usize
+            + (self.activity_type.0 != u8::MAX) as usize
             + (self.left_torque_effectiveness != u8::MAX) as usize
             + (self.right_torque_effectiveness != u8::MAX) as usize
             + (self.left_pedal_smoothness != u8::MAX) as usize
             + (self.right_pedal_smoothness != u8::MAX) as usize
             + (self.combined_pedal_smoothness != u8::MAX) as usize
             + (self.time128 != u8::MAX) as usize
-            + (self.stroke_type != typedef::StrokeType(u8::MAX)) as usize
+            + (self.stroke_type.0 != u8::MAX) as usize
             + (self.zone != u8::MAX) as usize
             + (self.ball_speed != u16::MAX) as usize
             + (self.cadence256 != u16::MAX) as usize
@@ -1577,7 +1577,7 @@ impl Record {
             + (self.saturated_hemoglobin_percent != u16::MAX) as usize
             + (self.saturated_hemoglobin_percent_min != u16::MAX) as usize
             + (self.saturated_hemoglobin_percent_max != u16::MAX) as usize
-            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+            + (self.device_index.0 != u8::MAX) as usize
             + (self.left_pco != i8::MAX) as usize
             + (self.right_pco != i8::MAX) as usize
             + (!self.left_power_phase.is_empty()) as usize
@@ -1759,7 +1759,7 @@ impl From<Record> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -1919,7 +1919,7 @@ impl From<Record> for Message {
                 is_expanded: is_expanded(&m.state, 29),
             });
         };
-        if m.left_right_balance != typedef::LeftRightBalance(u8::MAX) {
+        if m.left_right_balance.0 != u8::MAX {
             fields.push(Field {
                 num: 30,
                 profile_type: ProfileType::LEFT_RIGHT_BALANCE,
@@ -1975,7 +1975,7 @@ impl From<Record> for Message {
                 is_expanded: false,
             });
         };
-        if m.activity_type != typedef::ActivityType(u8::MAX) {
+        if m.activity_type.0 != u8::MAX {
             fields.push(Field {
                 num: 42,
                 profile_type: ProfileType::ACTIVITY_TYPE,
@@ -2031,7 +2031,7 @@ impl From<Record> for Message {
                 is_expanded: false,
             });
         };
-        if m.stroke_type != typedef::StrokeType(u8::MAX) {
+        if m.stroke_type.0 != u8::MAX {
             fields.push(Field {
                 num: 49,
                 profile_type: ProfileType::STROKE_TYPE,
@@ -2119,7 +2119,7 @@ impl From<Record> for Message {
                 is_expanded: false,
             });
         };
-        if m.device_index != typedef::DeviceIndex(u8::MAX) {
+        if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 62,
                 profile_type: ProfileType::DEVICE_INDEX,

@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -49,10 +47,10 @@ impl Spo2Data {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
             + (self.reading_spo2 != u8::MAX) as usize
             + (self.reading_confidence != u8::MAX) as usize
-            + (self.mode != typedef::Spo2MeasurementType(u8::MAX)) as usize
+            + (self.mode.0 != u8::MAX) as usize
     }
 }
 
@@ -94,7 +92,7 @@ impl From<Spo2Data> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -118,7 +116,7 @@ impl From<Spo2Data> for Message {
                 is_expanded: false,
             });
         };
-        if m.mode != typedef::Spo2MeasurementType(u8::MAX) {
+        if m.mode.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
                 profile_type: ProfileType::SPO2_MEASUREMENT_TYPE,

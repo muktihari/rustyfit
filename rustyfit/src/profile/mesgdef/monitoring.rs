@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
+#![allow(clippy::manual_range_patterns)]
 
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
@@ -388,19 +388,19 @@ impl Monitoring {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.timestamp != typedef::DateTime(u32::MAX)) as usize
-            + (self.device_index != typedef::DeviceIndex(u8::MAX)) as usize
+        (self.timestamp.0 != u32::MAX) as usize
+            + (self.device_index.0 != u8::MAX) as usize
             + (self.calories != u16::MAX) as usize
             + (self.distance != u32::MAX) as usize
             + (self.cycles != u32::MAX) as usize
             + (self.active_time != u32::MAX) as usize
-            + (self.activity_type != typedef::ActivityType(u8::MAX)) as usize
-            + (self.activity_subtype != typedef::ActivitySubtype(u8::MAX)) as usize
-            + (self.activity_level != typedef::ActivityLevel(u8::MAX)) as usize
+            + (self.activity_type.0 != u8::MAX) as usize
+            + (self.activity_subtype.0 != u8::MAX) as usize
+            + (self.activity_level.0 != u8::MAX) as usize
             + (self.distance_16 != u16::MAX) as usize
             + (self.cycles_16 != u16::MAX) as usize
             + (self.active_time_16 != u16::MAX) as usize
-            + (self.local_timestamp != typedef::LocalDateTime(u32::MAX)) as usize
+            + (self.local_timestamp.0 != u32::MAX) as usize
             + (self.temperature != i16::MAX) as usize
             + (self.temperature_min != i16::MAX) as usize
             + (self.temperature_max != i16::MAX) as usize
@@ -500,7 +500,7 @@ impl From<Monitoring> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.timestamp != typedef::DateTime(u32::MAX) {
+        if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
                 profile_type: ProfileType::DATE_TIME,
@@ -508,7 +508,7 @@ impl From<Monitoring> for Message {
                 is_expanded: false,
             });
         };
-        if m.device_index != typedef::DeviceIndex(u8::MAX) {
+        if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::DEVICE_INDEX,
@@ -548,7 +548,7 @@ impl From<Monitoring> for Message {
                 is_expanded: false,
             });
         };
-        if m.activity_type != typedef::ActivityType(u8::MAX) {
+        if m.activity_type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
                 profile_type: ProfileType::ACTIVITY_TYPE,
@@ -556,7 +556,7 @@ impl From<Monitoring> for Message {
                 is_expanded: is_expanded(&m.state, 5),
             });
         };
-        if m.activity_subtype != typedef::ActivitySubtype(u8::MAX) {
+        if m.activity_subtype.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
                 profile_type: ProfileType::ACTIVITY_SUBTYPE,
@@ -564,7 +564,7 @@ impl From<Monitoring> for Message {
                 is_expanded: false,
             });
         };
-        if m.activity_level != typedef::ActivityLevel(u8::MAX) {
+        if m.activity_level.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
                 profile_type: ProfileType::ACTIVITY_LEVEL,
@@ -596,7 +596,7 @@ impl From<Monitoring> for Message {
                 is_expanded: false,
             });
         };
-        if m.local_timestamp != typedef::LocalDateTime(u32::MAX) {
+        if m.local_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 11,
                 profile_type: ProfileType::LOCAL_DATE_TIME,

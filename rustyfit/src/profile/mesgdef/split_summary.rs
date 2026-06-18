@@ -4,8 +4,6 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::manual_range_patterns)]
-
 use crate::profile::{ProfileType, typedef};
 use crate::proto::*;
 use alloc::vec::Vec;
@@ -249,8 +247,8 @@ impl SplitSummary {
     }
 
     fn count_valid_fields(&self) -> usize {
-        (self.message_index != typedef::MessageIndex(u16::MAX)) as usize
-            + (self.split_type != typedef::SplitType(u8::MAX)) as usize
+        (self.message_index.0 != u16::MAX) as usize
+            + (self.split_type.0 != u8::MAX) as usize
             + (self.num_splits != u16::MAX) as usize
             + (self.total_timer_time != u32::MAX) as usize
             + (self.total_distance != u32::MAX) as usize
@@ -316,7 +314,7 @@ impl From<SplitSummary> for Message {
         let mut fields =
             Vec::<Field>::with_capacity(m.count_valid_fields() + m.unknown_fields.len());
 
-        if m.message_index != typedef::MessageIndex(u16::MAX) {
+        if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
                 profile_type: ProfileType::MESSAGE_INDEX,
@@ -324,7 +322,7 @@ impl From<SplitSummary> for Message {
                 is_expanded: false,
             });
         };
-        if m.split_type != typedef::SplitType(u8::MAX) {
+        if m.split_type.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 profile_type: ProfileType::SPLIT_TYPE,
