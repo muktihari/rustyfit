@@ -63,10 +63,10 @@ where
             walk_path(&path, f)?;
             continue;
         }
-        if path.extension().is_some_and(|ext| ext == "fit") {
-            if let Err(err) = f(&path) {
-                return Err(format!("path: {:?}, err: {:?}", path, err).into());
-            };
+        if path.extension().is_some_and(|ext| ext == "fit")
+            && let Err(err) = f(&path)
+        {
+            return Err(format!("path: {:?}, err: {:?}", path, err).into());
         }
     }
     Ok(())
@@ -89,14 +89,13 @@ fn do_roudtrip_with_encoder_options(
         Ok(fit) => fit,
         Err(err) => {
             if let DecoderError::ChecksumMismatch { .. } = err {
-                if let Some(file_name) = path.file_name() {
-                    // NOTE: Doubts exist regarding the integrity of these files.
-                    if ["WeightScaleMultiUser.fit", "Settings.fit"]
+                // NOTE: Doubts exist regarding the integrity of these files.
+                if let Some(file_name) = path.file_name()
+                    && ["WeightScaleMultiUser.fit", "Settings.fit"]
                         .iter()
                         .any(|x| *x == file_name)
-                    {
-                        continue 'decode;
-                    }
+                {
+                    continue 'decode;
                 }
             }
             return Err(format!("decode: {:?}", err).into());
@@ -125,7 +124,7 @@ fn do_roudtrip_with_encoder_options(
 
         let result_messages = result_fit.unwrap().messages;
 
-        if result_messages.len() == 0 || result_messages.len() != expected_messages.len() {
+        if result_messages.is_empty() || result_messages.len() != expected_messages.len() {
             return Err(format!(
                 "unexpected messages len, expected: {}, got: {}",
                 expected_messages.len(),
@@ -163,13 +162,12 @@ fn do_roudtrip_with_encoder_options(
 }
 
 fn do_roudtrip_by_streaming(path: &PathBuf) -> Result<(), Box<dyn Error>> {
-    if let Some(file_name) = path.file_name() {
-        if ["WeightScaleMultiUser.fit", "Settings.fit"]
+    if let Some(file_name) = path.file_name()
+        && ["WeightScaleMultiUser.fit", "Settings.fit"]
             .iter()
             .any(|x| *x == file_name)
-        {
-            return Ok(());
-        }
+    {
+        return Ok(());
     }
 
     let file = File::open(path).unwrap();
@@ -213,7 +211,7 @@ fn do_roudtrip_by_streaming(path: &PathBuf) -> Result<(), Box<dyn Error>> {
         }
     }
 
-    if result_messages.len() == 0 || result_messages.len() != expected_messages.len() {
+    if result_messages.is_empty() || result_messages.len() != expected_messages.len() {
         return Err(format!(
             "unexpected messages len, expected: {}, got: {}",
             expected_messages.len(),
