@@ -1,7 +1,9 @@
 #![warn(missing_docs)]
 
+#[cfg(feature = "serde")]
+use crate::profile::ProfileType;
 use crate::profile::{
-    ProfileType, lookup,
+    lookup,
     typedef::{FitBaseType, MesgNum},
 };
 use alloc::{string::String, vec::Vec};

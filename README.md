@@ -8,24 +8,17 @@
 
 The `#![no_std]` Rust implementation of [The Flexible and Interoperable Data Transfer (FIT) Protocol](https://developer.garmin.com/fit) for decoding and encoding Garmin FIT files, supporting FIT Protocol V2.
 
-This library is a rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) and is designed to run on baremetal Rust.
+This library is a rewrite of the Go implementation, https://github.com/muktihari/fit, and is designed to run on bare-metal Rust, where performance and memory efficiency are carefully considered. By being `#![no_std]`, a wide range of environments is supported, including bare-metal systems, WebAssembly, desktop applications, and servers.
 
-## Current State
-
-At the moment, I can't make this library heapless without complicating the code. I have no elegant solution for pure baremetal without dynamic memory allocation. That being said, this library is efficient enough to work on resource-constrained environments. I've tested it on [a `#![no_std]` program](https://github.com/muktihari/rustyfit/tree/master/examples/no_std_decode) to decode a FIT file (statically embedded) and print some of its Session's fields to `stdout` with a custom global allocator having less than 50 KB heap size and it works like a charm.
+This library now supports [serde](https://crates.io/crates/serde), allowing users to serialize FIT data into other formats, such as JSON, and deserialize it back into FIT by enabling the `serde` feature.
 
 ## Usage
 
-For [#![no_std]](https://docs.rust-embedded.org/book/intro/no-std.html), you need to provide [#[global_allocator]](https://doc.rust-lang.org/std/alloc/index.html#the-global_allocator-attribute) since this library requires allocation.
+Please see **https://docs.rs/rustyfit**.
 
-For [std](https://doc.rust-lang.org/std), you need to wrap `std::io`'s [Read](https://doc.rust-lang.org/std/io/trait.Read.html) or [Write](https://doc.rust-lang.org/std/io/trait.Write.html) with [embedded_io_adapters::std:FromStd](https://docs.rs/embedded-io-adapters/0.7.0/embedded_io_adapters/std/struct.FromStd.html).
+## Benchmark
 
-```sh
-cargo add rustyfit 
-cargo add embedded-io-adapters --features std # only for std
-```
-
-Usage examples can be viewed on **https://docs.rs/rustyfit**
+For performance comparisons against implementations across multiple programming languages, including the official SDKs, see https://github.com/roznet/fit-benchmarks.
 
 ## License
 
