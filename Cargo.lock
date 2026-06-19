@@ -454,6 +454,8 @@ dependencies = [
  "criterion",
  "embedded-io",
  "embedded-io-adapters",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
