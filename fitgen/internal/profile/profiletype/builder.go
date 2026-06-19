@@ -55,11 +55,13 @@ func (b *Builder) buildProfile() generator.Data {
 			for _, v := range t.Values {
 				constantName := strutil.ToTitle(v.Name)
 				constants = append(constants, Constant{
-					Name: constantName,
+					Name:   constantName,
+					String: v.Name,
 				})
 			}
 			constants = append(constants, Constant{
-				Name: "Bool",
+				Name:   "Bool",
+				String: "bool",
 			},
 			)
 			break
@@ -68,7 +70,8 @@ func (b *Builder) buildProfile() generator.Data {
 
 	for _, t := range b.types {
 		constants = append(constants, Constant{
-			Name: strutil.ToTitle(t.Name),
+			Name:   strutil.ToTitle(t.Name),
+			String: t.Name,
 		})
 	}
 

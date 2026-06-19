@@ -19,7 +19,9 @@ use crate::proto::*;
 use alloc::vec::Vec;
 {{- range $key, $val := .Imports -}}
 use {{ $key -}};
-{{ end }}
+{{ end -}}
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 {{ if gt .MaxFieldExpandNum 1 -}}
 fn is_expanded(state: &[u8], num: u8) -> bool {
@@ -34,6 +36,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 {{ end }}
 
 /// {{ .Doc }}
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct {{ .Name }} {
 	{{ range .Fields -}} 
@@ -58,12 +61,11 @@ pub struct {{ .Name }} {
 
 impl {{ .Name }} {
     {{ range .Fields -}}
-    /// Value's type: {{ if gt .FixedArraySize 0 -}} `[{{ .BaseType0 }}; {{ .FixedArraySize }}]` {{- else if .Array -}} `Vec<{{ .BaseType0 }}>` {{- else -}} `{{ .BaseType0 }}` {{- end }}
+    /// Value's type: {{ if gt .FixedArraySize 0 -}} `[{{ .BaseType0 }}; {{ .FixedArraySize }}]` {{- else if .Array -}} `Vec<{{ .BaseType0 }}>` {{- else -}} `{{ .BaseType0 }}` {{- end -}}
+    ; FitBaseType::{{ .BaseType }}; {{ .ProfileType }}
     {{- if ne .Scale 1.0 }}; Scale: `{{ .Scale }}` {{- end }} 
     {{- if ne .Offset 0.0 }}; Offset: `{{ .Offset }}` {{- end }}
     {{- if ne .Units "" }}; Units: `{{ .Units }}` {{- end }}
-    {{- if hasSuffix .BaseType "Z" }}; Base: {{ .BaseType }} {{- end -}}
-    ; ProfileType: `{{ .ProfileType }}`
     pub const {{ .NameUpperCase }}: u8 = {{ .Num }};
     {{ end }}
     /// Create new {{ .Name }} with all fields being set to its corresponding invalid value.
@@ -283,6 +285,168 @@ impl From<{{ .Name }}> for Message {
             {{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription"))  }}
             developer_fields: m.developer_fields, {{ else }} developer_fields: Vec::new(),
             {{ end }}
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for {{ .Name }} {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("{{ .Name }}", n)?;
+        {{ range .Fields -}}
+            {{ if or (eq .Type "typedef::DateTime") (eq .Type "typedef::LocalDateTime") -}}
+            if let Some(v) = self.{{ .Name }}.unix_timestamp() {
+                state.serialize_field("{{ .NameRaw }}", &v)?;
+            }
+            {{ else if eq .Units "semicircles" -}}
+            if let Some(v) = self.{{ .Name }}_degrees() {
+                state.serialize_field("{{ .NameRaw }}", &v)?;
+            }
+            {{ else if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
+            if let Some(v) = self.{{ .Name }}_scaled() {
+                state.serialize_field("{{ .NameRaw }}", &v)?;
+            }
+            {{ else -}}
+            if {{ .IfSelfNotEqualInvalid }} {
+                state.serialize_field("{{ .NameRaw }}", &self.{{ .Name }})?;
+            }
+            {{ end -}}
+        {{ end -}}
+        if !self.unknown_fields.is_empty() {
+       	    state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+       	{{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription")) }}
+        if !self.developer_fields.is_empty() {
+       	    state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+       	{{- end }}
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+	{{ range .Fields -}}
+	    {{ if or (eq .Type "typedef::DateTime") (eq .Type "typedef::LocalDateTime") -}}
+			{{ .Name }}: Option<i64>,
+	    {{ else if eq .Units "semicircles" -}}
+            /// Degrees.
+			{{ .Name }}: f64,
+    	{{ else if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
+    	    {{ if not .Array -}}
+    	        {{ .Name }}: f64,
+            {{ else if eq .FixedArraySize 0 -}}
+                {{ .Name }}: Vec<f64>,
+            {{ else -}}
+                {{ .Name }}: [f64; {{ .FixedArraySize }}],
+            {{ end -}}
+        {{ else -}}
+            {{ .Name }}: {{ .Type }},
+        {{ end -}}
+	{{ end -}}
+	unknown_fields: Vec<Field>,
+	{{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription")) }}
+	developer_fields: Vec<DeveloperField>,
+	{{- end }}
+}
+
+
+#[cfg(feature = "serde")]
+impl From<De> for {{ .Name }} {
+    fn from(m: De) -> Self {
+        Self {
+            {{ range .Fields -}}
+                {{ if or (eq .Type "typedef::DateTime") (eq .Type "typedef::LocalDateTime") -}}
+                    {{ .Name }}: m.{{ .Name }}.map_or_else(|| {{ .InvalidValue }}, {{ .Type }}::from_unix_timestamp),
+                {{ else if eq .Units "semicircles" -}}
+                    {{ .Name }}: semconv::to_semicircles(m.{{ .Name }}).unwrap_or(i32::MAX),
+                {{ else if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
+               	    {{ if not .Array -}}
+               	        {{ .Name }}: {
+                            let unscaled = (m.{{ .Name }} + {{ formatFloat .Offset }}) * {{ formatFloat .Scale }};
+                            if unscaled.is_nan() || unscaled.is_infinite() || unscaled > {{ .MaxValue }} as f64 {
+                                {{ .InvalidValue }}
+                            } else {
+                                {{ if eq .Name .Name0 }} unscaled as {{ .BaseType0 }} {{ else }} {{ .Type }}(unscaled as {{ .BaseType0 }}) {{ end }}
+                            }
+                        },
+                    {{ else if eq .FixedArraySize 0 -}}
+                        {{ .Name }}: {
+                            if m.{{ .Name }}.is_empty() {
+                                Vec::new()
+                            } else {
+                                let mut vals = Vec::with_capacity(m.{{ .Name }}.len());
+                                for &x in m.{{ .Name }}.iter() {
+                                    let unscaled = (x + {{ formatFloat .Offset }}) * {{ formatFloat .Scale }};
+                                    if unscaled.is_nan() || unscaled.is_infinite() || unscaled > {{ .MaxValue }} as f64 {
+                                        vals.push({{ .BaseType0Invalid }});
+                                        continue
+                                    }
+                                    vals.push(unscaled as {{ .BaseType0 }});
+                                }
+                                vals
+                            }
+                        },
+                    {{ else -}}
+                        {{ .Name }}: {
+                            let mut vals = [{{ .BaseType0Invalid }}; {{ .FixedArraySize }}];
+                            for (i, &x) in m.{{ .Name }}.iter().enumerate() {
+                                let unscaled = (x + {{ formatFloat .Offset }}) * {{ formatFloat .Scale }};
+                                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > {{ .MaxValue }} as f64 {
+                                    continue
+                                }
+                                vals[i] = unscaled as {{ .BaseType0 }};
+                            }
+                            vals
+                        },
+                    {{ end -}}
+                {{ else -}}
+                    {{ .Name }}: m.{{ .Name }},
+                {{ end -}}
+            {{ end -}}
+
+            {{ if gt .MaxFieldExpandNum 1 -}}
+           	state: [0u8; {{ .StateSize }}],
+           	{{ end -}}
+           	unknown_fields: m.unknown_fields,
+           	{{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription")) }}
+           	developer_fields: m.developer_fields,
+           	{{- end }}
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+{{- if eq .Name "Hrv" }} #[allow(clippy::derivable_impls)] {{ end }}
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            {{ range .Fields -}}
+            {{ if or (eq .Type "typedef::DateTime") (eq .Type "typedef::LocalDateTime") -}}
+                {{ .Name }}: None,
+    	    {{ else if eq .Units "semicircles" -}}
+    			{{ .Name }}: f64::from_bits(u64::MAX),
+       	    {{ else if not (and (eq .Scale 1.0) (eq .Offset 0.0)) -}}
+           	    {{ if not .Array -}}
+           	        {{ .Name }}: f64::from_bits(u64::MAX),
+                    {{ else if eq .FixedArraySize 0 -}}
+                        {{ .Name }}: Vec::new(),
+                    {{ else -}}
+                        {{ .Name }}: [const { f64::from_bits(u64::MAX) }; {{ .FixedArraySize }}],
+                    {{ end -}}
+                {{ else -}}
+                    {{ .Name }}: {{ .InvalidValue }},
+                {{ end -}}
+           	{{ end -}}
+           	unknown_fields: Vec::new(),
+           	{{- if and (not (eq .Name "FileId")) (not (eq .Name "DeveloperDataId")) (not (eq .Name "FieldDescription")) }}
+           	developer_fields: Vec::new(),
+           	{{- end }}
         }
     }
 }
