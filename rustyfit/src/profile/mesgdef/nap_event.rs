@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Nap Event message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct NapEvent {
     pub message_index: typedef::MessageIndex,
@@ -33,25 +36,25 @@ pub struct NapEvent {
 }
 
 impl NapEvent {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Units: `seconds`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `seconds`
     pub const START_TIME: u8 = 0;
-    /// Value's type: `i16`; Units: `minutes`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Units: `minutes`
     pub const START_TIMEZONE_OFFSET: u8 = 1;
-    /// Value's type: `u32`; Units: `seconds`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `seconds`
     pub const END_TIME: u8 = 2;
-    /// Value's type: `i16`; Units: `minutes`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Units: `minutes`
     pub const END_TIMEZONE_OFFSET: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::NAP_PERIOD_FEEDBACK`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::NapPeriodFeedback
     pub const FEEDBACK: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const IS_DELETED: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::NAP_SOURCE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::NapSource
     pub const SOURCE: u8 = 6;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const UPDATE_TIMESTAMP: u8 = 7;
 
     /// Create new NapEvent with all fields being set to its corresponding invalid value.
@@ -218,6 +221,123 @@ impl From<NapEvent> for Message {
             num: typedef::MesgNum::NAP_EVENT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for NapEvent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("NapEvent", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.start_time.unix_timestamp() {
+            state.serialize_field("start_time", &v)?;
+        }
+        if self.start_timezone_offset != i16::MAX {
+            state.serialize_field("start_timezone_offset", &self.start_timezone_offset)?;
+        }
+        if let Some(v) = self.end_time.unix_timestamp() {
+            state.serialize_field("end_time", &v)?;
+        }
+        if self.end_timezone_offset != i16::MAX {
+            state.serialize_field("end_timezone_offset", &self.end_timezone_offset)?;
+        }
+        if self.feedback.0 != u8::MAX {
+            state.serialize_field("feedback", &self.feedback)?;
+        }
+        if self.is_deleted.0 != u8::MAX {
+            state.serialize_field("is_deleted", &self.is_deleted)?;
+        }
+        if self.source.0 != u8::MAX {
+            state.serialize_field("source", &self.source)?;
+        }
+        if let Some(v) = self.update_timestamp.unix_timestamp() {
+            state.serialize_field("update_timestamp", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    timestamp: Option<i64>,
+    start_time: Option<i64>,
+    start_timezone_offset: i16,
+    end_time: Option<i64>,
+    end_timezone_offset: i16,
+    feedback: typedef::NapPeriodFeedback,
+    is_deleted: typedef::Bool,
+    source: typedef::NapSource,
+    update_timestamp: Option<i64>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for NapEvent {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            start_time: m.start_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            start_timezone_offset: m.start_timezone_offset,
+            end_time: m.end_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            end_timezone_offset: m.end_timezone_offset,
+            feedback: m.feedback,
+            is_deleted: m.is_deleted,
+            source: m.source,
+            update_timestamp: m.update_timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: None,
+            start_time: None,
+            start_timezone_offset: i16::MAX,
+            end_time: None,
+            end_timezone_offset: i16::MAX,
+            feedback: typedef::NapPeriodFeedback(u8::MAX),
+            is_deleted: typedef::Bool(u8::MAX),
+            source: typedef::NapSource(u8::MAX),
+            update_timestamp: None,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

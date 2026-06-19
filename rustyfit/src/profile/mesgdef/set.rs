@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Set message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Set {
     /// Timestamp of the set
@@ -35,27 +38,27 @@ pub struct Set {
 }
 
 impl Set {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 254;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const DURATION: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const REPETITIONS: u8 = 3;
-    /// Value's type: `u16`; Scale: `16`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `16`; Units: `kg`
     pub const WEIGHT: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SET_TYPE`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::SetType
     pub const SET_TYPE: u8 = 5;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIME: u8 = 6;
-    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::EXERCISE_CATEGORY`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::ExerciseCategory
     pub const CATEGORY: u8 = 7;
-    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const CATEGORY_SUBTYPE: u8 = 8;
-    /// Value's type: `u16`; ProfileType: `ProfileType::FIT_BASE_UNIT`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::FitBaseUnit
     pub const WEIGHT_DISPLAY_UNIT: u8 = 9;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 10;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const WKT_STEP_INDEX: u8 = 11;
 
     /// Create new Set with all fields being set to its corresponding invalid value.
@@ -287,6 +290,137 @@ impl From<Set> for Message {
             num: typedef::MesgNum::SET,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Set {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Set", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.duration_scaled() {
+            state.serialize_field("duration", &v)?;
+        }
+        if self.repetitions != u16::MAX {
+            state.serialize_field("repetitions", &self.repetitions)?;
+        }
+        if let Some(v) = self.weight_scaled() {
+            state.serialize_field("weight", &v)?;
+        }
+        if self.set_type.0 != u8::MAX {
+            state.serialize_field("set_type", &self.set_type)?;
+        }
+        if let Some(v) = self.start_time.unix_timestamp() {
+            state.serialize_field("start_time", &v)?;
+        }
+        if !self.category.is_empty() {
+            state.serialize_field("category", &self.category)?;
+        }
+        if !self.category_subtype.is_empty() {
+            state.serialize_field("category_subtype", &self.category_subtype)?;
+        }
+        if self.weight_display_unit.0 != u16::MAX {
+            state.serialize_field("weight_display_unit", &self.weight_display_unit)?;
+        }
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.wkt_step_index.0 != u16::MAX {
+            state.serialize_field("wkt_step_index", &self.wkt_step_index)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    duration: f64,
+    repetitions: u16,
+    weight: f64,
+    set_type: typedef::SetType,
+    start_time: Option<i64>,
+    category: Vec<typedef::ExerciseCategory>,
+    category_subtype: Vec<u16>,
+    weight_display_unit: typedef::FitBaseUnit,
+    message_index: typedef::MessageIndex,
+    wkt_step_index: typedef::MessageIndex,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Set {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            duration: {
+                let unscaled = (m.duration + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            repetitions: m.repetitions,
+            weight: {
+                let unscaled = (m.weight + 0.0) * 16.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            set_type: m.set_type,
+            start_time: m.start_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            category: m.category,
+            category_subtype: m.category_subtype,
+            weight_display_unit: m.weight_display_unit,
+            message_index: m.message_index,
+            wkt_step_index: m.wkt_step_index,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            duration: f64::from_bits(u64::MAX),
+            repetitions: u16::MAX,
+            weight: f64::from_bits(u64::MAX),
+            set_type: typedef::SetType(u8::MAX),
+            start_time: None,
+            category: Vec::new(),
+            category_subtype: Vec::new(),
+            weight_display_unit: typedef::FitBaseUnit(u16::MAX),
+            message_index: typedef::MessageIndex(u16::MAX),
+            wkt_step_index: typedef::MessageIndex(u16::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

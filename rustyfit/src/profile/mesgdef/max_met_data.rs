@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Max Met Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct MaxMetData {
     /// Time maxMET and vo2 were calculated
@@ -31,21 +34,21 @@ pub struct MaxMetData {
 }
 
 impl MaxMetData {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const UPDATE_TIME: u8 = 0;
-    /// Value's type: `u16`; Scale: `10`; Units: `mL/kg/min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `mL/kg/min`
     pub const VO2_MAX: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::MAX_MET_CATEGORY`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::MaxMetCategory
     pub const MAX_MET_CATEGORY: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const CALIBRATED_DATA: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::MAX_MET_HEART_RATE_SOURCE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::MaxMetHeartRateSource
     pub const HR_SOURCE: u8 = 12;
-    /// Value's type: `u8`; ProfileType: `ProfileType::MAX_MET_SPEED_SOURCE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::MaxMetSpeedSource
     pub const SPEED_SOURCE: u8 = 13;
 
     /// Create new MaxMetData with all fields being set to its corresponding invalid value.
@@ -211,6 +214,109 @@ impl From<MaxMetData> for Message {
             num: typedef::MesgNum::MAX_MET_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MaxMetData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("MaxMetData", n)?;
+        if let Some(v) = self.update_time.unix_timestamp() {
+            state.serialize_field("update_time", &v)?;
+        }
+        if let Some(v) = self.vo2_max_scaled() {
+            state.serialize_field("vo2_max", &v)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if self.max_met_category.0 != u8::MAX {
+            state.serialize_field("max_met_category", &self.max_met_category)?;
+        }
+        if self.calibrated_data.0 != u8::MAX {
+            state.serialize_field("calibrated_data", &self.calibrated_data)?;
+        }
+        if self.hr_source.0 != u8::MAX {
+            state.serialize_field("hr_source", &self.hr_source)?;
+        }
+        if self.speed_source.0 != u8::MAX {
+            state.serialize_field("speed_source", &self.speed_source)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    update_time: Option<i64>,
+    vo2_max: f64,
+    sport: typedef::Sport,
+    sub_sport: typedef::SubSport,
+    max_met_category: typedef::MaxMetCategory,
+    calibrated_data: typedef::Bool,
+    hr_source: typedef::MaxMetHeartRateSource,
+    speed_source: typedef::MaxMetSpeedSource,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for MaxMetData {
+    fn from(m: De) -> Self {
+        Self {
+            update_time: m.update_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            vo2_max: {
+                let unscaled = (m.vo2_max + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            sport: m.sport,
+            sub_sport: m.sub_sport,
+            max_met_category: m.max_met_category,
+            calibrated_data: m.calibrated_data,
+            hr_source: m.hr_source,
+            speed_source: m.speed_source,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            update_time: None,
+            vo2_max: f64::from_bits(u64::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            max_met_category: typedef::MaxMetCategory(u8::MAX),
+            calibrated_data: typedef::Bool(u8::MAX),
+            hr_source: typedef::MaxMetHeartRateSource(u8::MAX),
+            speed_source: typedef::MaxMetSpeedSource(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Weather Severe Type type.
 #[repr(transparent)]
@@ -99,6 +99,97 @@ impl WeatherSevereType {
     pub const LOW_WATER: WeatherSevereType = WeatherSevereType(82);
     pub const HYDROLOGICAL: WeatherSevereType = WeatherSevereType(83);
     pub const SPECIAL_WEATHER: WeatherSevereType = WeatherSevereType(84);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("unspecified"),
+            1 => Some("tornado"),
+            2 => Some("tsunami"),
+            3 => Some("hurricane"),
+            4 => Some("extreme_wind"),
+            5 => Some("typhoon"),
+            6 => Some("inland_hurricane"),
+            7 => Some("hurricane_force_wind"),
+            8 => Some("waterspout"),
+            9 => Some("severe_thunderstorm"),
+            10 => Some("wreckhouse_winds"),
+            11 => Some("les_suetes_wind"),
+            12 => Some("avalanche"),
+            13 => Some("flash_flood"),
+            14 => Some("tropical_storm"),
+            15 => Some("inland_tropical_storm"),
+            16 => Some("blizzard"),
+            17 => Some("ice_storm"),
+            18 => Some("freezing_rain"),
+            19 => Some("debris_flow"),
+            20 => Some("flash_freeze"),
+            21 => Some("dust_storm"),
+            22 => Some("high_wind"),
+            23 => Some("winter_storm"),
+            24 => Some("heavy_freezing_spray"),
+            25 => Some("extreme_cold"),
+            26 => Some("wind_chill"),
+            27 => Some("cold_wave"),
+            28 => Some("heavy_snow_alert"),
+            29 => Some("lake_effect_blowing_snow"),
+            30 => Some("snow_squall"),
+            31 => Some("lake_effect_snow"),
+            32 => Some("winter_weather"),
+            33 => Some("sleet"),
+            34 => Some("snowfall"),
+            35 => Some("snow_and_blowing_snow"),
+            36 => Some("blowing_snow"),
+            37 => Some("snow_alert"),
+            38 => Some("arctic_outflow"),
+            39 => Some("freezing_drizzle"),
+            40 => Some("storm"),
+            41 => Some("storm_surge"),
+            42 => Some("rainfall"),
+            43 => Some("areal_flood"),
+            44 => Some("coastal_flood"),
+            45 => Some("lakeshore_flood"),
+            46 => Some("excessive_heat"),
+            47 => Some("heat"),
+            48 => Some("weather"),
+            49 => Some("high_heat_and_humidity"),
+            50 => Some("humidex_and_health"),
+            51 => Some("humidex"),
+            52 => Some("gale"),
+            53 => Some("freezing_spray"),
+            54 => Some("special_marine"),
+            55 => Some("squall"),
+            56 => Some("strong_wind"),
+            57 => Some("lake_wind"),
+            58 => Some("marine_weather"),
+            59 => Some("wind"),
+            60 => Some("small_craft_hazardous_seas"),
+            61 => Some("hazardous_seas"),
+            62 => Some("small_craft"),
+            63 => Some("small_craft_winds"),
+            64 => Some("small_craft_rough_bar"),
+            65 => Some("high_water_level"),
+            66 => Some("ashfall"),
+            67 => Some("freezing_fog"),
+            68 => Some("dense_fog"),
+            69 => Some("dense_smoke"),
+            70 => Some("blowing_dust"),
+            71 => Some("hard_freeze"),
+            72 => Some("freeze"),
+            73 => Some("frost"),
+            74 => Some("fire_weather"),
+            75 => Some("flood"),
+            76 => Some("rip_tide"),
+            77 => Some("high_surf"),
+            78 => Some("smog"),
+            79 => Some("air_quality"),
+            80 => Some("brisk_wind"),
+            81 => Some("air_stagnation"),
+            82 => Some("low_water"),
+            83 => Some("hydrological"),
+            84 => Some("special_weather"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for WeatherSevereType {
@@ -109,93 +200,50 @@ impl Default for WeatherSevereType {
 
 impl fmt::Display for WeatherSevereType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "unspecified"),
-            1 => write!(f, "tornado"),
-            2 => write!(f, "tsunami"),
-            3 => write!(f, "hurricane"),
-            4 => write!(f, "extreme_wind"),
-            5 => write!(f, "typhoon"),
-            6 => write!(f, "inland_hurricane"),
-            7 => write!(f, "hurricane_force_wind"),
-            8 => write!(f, "waterspout"),
-            9 => write!(f, "severe_thunderstorm"),
-            10 => write!(f, "wreckhouse_winds"),
-            11 => write!(f, "les_suetes_wind"),
-            12 => write!(f, "avalanche"),
-            13 => write!(f, "flash_flood"),
-            14 => write!(f, "tropical_storm"),
-            15 => write!(f, "inland_tropical_storm"),
-            16 => write!(f, "blizzard"),
-            17 => write!(f, "ice_storm"),
-            18 => write!(f, "freezing_rain"),
-            19 => write!(f, "debris_flow"),
-            20 => write!(f, "flash_freeze"),
-            21 => write!(f, "dust_storm"),
-            22 => write!(f, "high_wind"),
-            23 => write!(f, "winter_storm"),
-            24 => write!(f, "heavy_freezing_spray"),
-            25 => write!(f, "extreme_cold"),
-            26 => write!(f, "wind_chill"),
-            27 => write!(f, "cold_wave"),
-            28 => write!(f, "heavy_snow_alert"),
-            29 => write!(f, "lake_effect_blowing_snow"),
-            30 => write!(f, "snow_squall"),
-            31 => write!(f, "lake_effect_snow"),
-            32 => write!(f, "winter_weather"),
-            33 => write!(f, "sleet"),
-            34 => write!(f, "snowfall"),
-            35 => write!(f, "snow_and_blowing_snow"),
-            36 => write!(f, "blowing_snow"),
-            37 => write!(f, "snow_alert"),
-            38 => write!(f, "arctic_outflow"),
-            39 => write!(f, "freezing_drizzle"),
-            40 => write!(f, "storm"),
-            41 => write!(f, "storm_surge"),
-            42 => write!(f, "rainfall"),
-            43 => write!(f, "areal_flood"),
-            44 => write!(f, "coastal_flood"),
-            45 => write!(f, "lakeshore_flood"),
-            46 => write!(f, "excessive_heat"),
-            47 => write!(f, "heat"),
-            48 => write!(f, "weather"),
-            49 => write!(f, "high_heat_and_humidity"),
-            50 => write!(f, "humidex_and_health"),
-            51 => write!(f, "humidex"),
-            52 => write!(f, "gale"),
-            53 => write!(f, "freezing_spray"),
-            54 => write!(f, "special_marine"),
-            55 => write!(f, "squall"),
-            56 => write!(f, "strong_wind"),
-            57 => write!(f, "lake_wind"),
-            58 => write!(f, "marine_weather"),
-            59 => write!(f, "wind"),
-            60 => write!(f, "small_craft_hazardous_seas"),
-            61 => write!(f, "hazardous_seas"),
-            62 => write!(f, "small_craft"),
-            63 => write!(f, "small_craft_winds"),
-            64 => write!(f, "small_craft_rough_bar"),
-            65 => write!(f, "high_water_level"),
-            66 => write!(f, "ashfall"),
-            67 => write!(f, "freezing_fog"),
-            68 => write!(f, "dense_fog"),
-            69 => write!(f, "dense_smoke"),
-            70 => write!(f, "blowing_dust"),
-            71 => write!(f, "hard_freeze"),
-            72 => write!(f, "freeze"),
-            73 => write!(f, "frost"),
-            74 => write!(f, "fire_weather"),
-            75 => write!(f, "flood"),
-            76 => write!(f, "rip_tide"),
-            77 => write!(f, "high_surf"),
-            78 => write!(f, "smog"),
-            79 => write!(f, "air_quality"),
-            80 => write!(f, "brisk_wind"),
-            81 => write!(f, "air_stagnation"),
-            82 => write!(f, "low_water"),
-            83 => write!(f, "hydrological"),
-            84 => write!(f, "special_weather"),
-            _ => write!(f, "WeatherSevereType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "WeatherSevereType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WeatherSevereType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("WeatherSevereType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for WeatherSevereType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

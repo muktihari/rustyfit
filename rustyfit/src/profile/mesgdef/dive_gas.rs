@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Dive Gas message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DiveGas {
     pub message_index: typedef::MessageIndex,
@@ -25,15 +28,15 @@ pub struct DiveGas {
 }
 
 impl DiveGas {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const HELIUM_CONTENT: u8 = 0;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const OXYGEN_CONTENT: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_GAS_STATUS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DiveGasStatus
     pub const STATUS: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_GAS_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DiveGasMode
     pub const MODE: u8 = 3;
 
     /// Create new DiveGas with all fields being set to its corresponding invalid value.
@@ -145,6 +148,81 @@ impl From<DiveGas> for Message {
             num: typedef::MesgNum::DIVE_GAS,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DiveGas {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DiveGas", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.helium_content != u8::MAX {
+            state.serialize_field("helium_content", &self.helium_content)?;
+        }
+        if self.oxygen_content != u8::MAX {
+            state.serialize_field("oxygen_content", &self.oxygen_content)?;
+        }
+        if self.status.0 != u8::MAX {
+            state.serialize_field("status", &self.status)?;
+        }
+        if self.mode.0 != u8::MAX {
+            state.serialize_field("mode", &self.mode)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    helium_content: u8,
+    oxygen_content: u8,
+    status: typedef::DiveGasStatus,
+    mode: typedef::DiveGasMode,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DiveGas {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            helium_content: m.helium_content,
+            oxygen_content: m.oxygen_content,
+            status: m.status,
+            mode: m.mode,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            helium_content: u8::MAX,
+            oxygen_content: u8::MAX,
+            status: typedef::DiveGasStatus(u8::MAX),
+            mode: typedef::DiveGasMode(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

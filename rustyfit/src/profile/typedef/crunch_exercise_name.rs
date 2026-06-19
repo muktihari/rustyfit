@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Crunch Exercise Name type.
 #[repr(transparent)]
@@ -106,6 +106,98 @@ impl CrunchExerciseName {
     pub const CRUNCH: CrunchExerciseName = CrunchExerciseName(83);
     pub const STRAIGHT_LEG_CRUNCH_WITH_BALL: CrunchExerciseName = CrunchExerciseName(84);
     pub const LEG_CLIMB_CRUNCH: CrunchExerciseName = CrunchExerciseName(86);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bicycle_crunch"),
+            1 => Some("cable_crunch"),
+            2 => Some("circular_arm_crunch"),
+            3 => Some("crossed_arms_crunch"),
+            4 => Some("weighted_crossed_arms_crunch"),
+            5 => Some("cross_leg_reverse_crunch"),
+            6 => Some("weighted_cross_leg_reverse_crunch"),
+            7 => Some("crunch_chop"),
+            8 => Some("weighted_crunch_chop"),
+            9 => Some("double_crunch"),
+            10 => Some("weighted_double_crunch"),
+            11 => Some("elbow_to_knee_crunch"),
+            12 => Some("weighted_elbow_to_knee_crunch"),
+            13 => Some("flutter_kicks"),
+            14 => Some("weighted_flutter_kicks"),
+            15 => Some("foam_roller_reverse_crunch_on_bench"),
+            16 => Some("weighted_foam_roller_reverse_crunch_on_bench"),
+            17 => Some("foam_roller_reverse_crunch_with_dumbbell"),
+            18 => Some("foam_roller_reverse_crunch_with_medicine_ball"),
+            19 => Some("frog_press"),
+            20 => Some("hanging_knee_raise_oblique_crunch"),
+            21 => Some("weighted_hanging_knee_raise_oblique_crunch"),
+            22 => Some("hip_crossover"),
+            23 => Some("weighted_hip_crossover"),
+            24 => Some("hollow_rock"),
+            25 => Some("weighted_hollow_rock"),
+            26 => Some("incline_reverse_crunch"),
+            27 => Some("weighted_incline_reverse_crunch"),
+            28 => Some("kneeling_cable_crunch"),
+            29 => Some("kneeling_cross_crunch"),
+            30 => Some("weighted_kneeling_cross_crunch"),
+            31 => Some("kneeling_oblique_cable_crunch"),
+            32 => Some("knees_to_elbow"),
+            33 => Some("leg_extensions"),
+            34 => Some("weighted_leg_extensions"),
+            35 => Some("leg_levers"),
+            36 => Some("mcgill_curl_up"),
+            37 => Some("weighted_mcgill_curl_up"),
+            38 => Some("modified_pilates_roll_up_with_ball"),
+            39 => Some("weighted_modified_pilates_roll_up_with_ball"),
+            40 => Some("pilates_crunch"),
+            41 => Some("weighted_pilates_crunch"),
+            42 => Some("pilates_roll_up_with_ball"),
+            43 => Some("weighted_pilates_roll_up_with_ball"),
+            44 => Some("raised_legs_crunch"),
+            45 => Some("weighted_raised_legs_crunch"),
+            46 => Some("reverse_crunch"),
+            47 => Some("weighted_reverse_crunch"),
+            48 => Some("reverse_crunch_on_a_bench"),
+            49 => Some("weighted_reverse_crunch_on_a_bench"),
+            50 => Some("reverse_curl_and_lift"),
+            51 => Some("weighted_reverse_curl_and_lift"),
+            52 => Some("rotational_lift"),
+            53 => Some("weighted_rotational_lift"),
+            54 => Some("seated_alternating_reverse_crunch"),
+            55 => Some("weighted_seated_alternating_reverse_crunch"),
+            56 => Some("seated_leg_u"),
+            57 => Some("weighted_seated_leg_u"),
+            58 => Some("side_to_side_crunch_and_weave"),
+            59 => Some("weighted_side_to_side_crunch_and_weave"),
+            60 => Some("single_leg_reverse_crunch"),
+            61 => Some("weighted_single_leg_reverse_crunch"),
+            62 => Some("skater_crunch_cross"),
+            63 => Some("weighted_skater_crunch_cross"),
+            64 => Some("standing_cable_crunch"),
+            65 => Some("standing_side_crunch"),
+            66 => Some("step_climb"),
+            67 => Some("weighted_step_climb"),
+            68 => Some("swiss_ball_crunch"),
+            69 => Some("swiss_ball_reverse_crunch"),
+            70 => Some("weighted_swiss_ball_reverse_crunch"),
+            71 => Some("swiss_ball_russian_twist"),
+            72 => Some("weighted_swiss_ball_russian_twist"),
+            73 => Some("swiss_ball_side_crunch"),
+            74 => Some("weighted_swiss_ball_side_crunch"),
+            75 => Some("thoracic_crunches_on_foam_roller"),
+            76 => Some("weighted_thoracic_crunches_on_foam_roller"),
+            77 => Some("triceps_crunch"),
+            78 => Some("weighted_bicycle_crunch"),
+            79 => Some("weighted_crunch"),
+            80 => Some("weighted_swiss_ball_crunch"),
+            81 => Some("toes_to_bar"),
+            82 => Some("weighted_toes_to_bar"),
+            83 => Some("crunch"),
+            84 => Some("straight_leg_crunch_with_ball"),
+            86 => Some("leg_climb_crunch"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CrunchExerciseName {
@@ -116,94 +208,50 @@ impl Default for CrunchExerciseName {
 
 impl fmt::Display for CrunchExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bicycle_crunch"),
-            1 => write!(f, "cable_crunch"),
-            2 => write!(f, "circular_arm_crunch"),
-            3 => write!(f, "crossed_arms_crunch"),
-            4 => write!(f, "weighted_crossed_arms_crunch"),
-            5 => write!(f, "cross_leg_reverse_crunch"),
-            6 => write!(f, "weighted_cross_leg_reverse_crunch"),
-            7 => write!(f, "crunch_chop"),
-            8 => write!(f, "weighted_crunch_chop"),
-            9 => write!(f, "double_crunch"),
-            10 => write!(f, "weighted_double_crunch"),
-            11 => write!(f, "elbow_to_knee_crunch"),
-            12 => write!(f, "weighted_elbow_to_knee_crunch"),
-            13 => write!(f, "flutter_kicks"),
-            14 => write!(f, "weighted_flutter_kicks"),
-            15 => write!(f, "foam_roller_reverse_crunch_on_bench"),
-            16 => write!(f, "weighted_foam_roller_reverse_crunch_on_bench"),
-            17 => write!(f, "foam_roller_reverse_crunch_with_dumbbell"),
-            18 => write!(f, "foam_roller_reverse_crunch_with_medicine_ball"),
-            19 => write!(f, "frog_press"),
-            20 => write!(f, "hanging_knee_raise_oblique_crunch"),
-            21 => write!(f, "weighted_hanging_knee_raise_oblique_crunch"),
-            22 => write!(f, "hip_crossover"),
-            23 => write!(f, "weighted_hip_crossover"),
-            24 => write!(f, "hollow_rock"),
-            25 => write!(f, "weighted_hollow_rock"),
-            26 => write!(f, "incline_reverse_crunch"),
-            27 => write!(f, "weighted_incline_reverse_crunch"),
-            28 => write!(f, "kneeling_cable_crunch"),
-            29 => write!(f, "kneeling_cross_crunch"),
-            30 => write!(f, "weighted_kneeling_cross_crunch"),
-            31 => write!(f, "kneeling_oblique_cable_crunch"),
-            32 => write!(f, "knees_to_elbow"),
-            33 => write!(f, "leg_extensions"),
-            34 => write!(f, "weighted_leg_extensions"),
-            35 => write!(f, "leg_levers"),
-            36 => write!(f, "mcgill_curl_up"),
-            37 => write!(f, "weighted_mcgill_curl_up"),
-            38 => write!(f, "modified_pilates_roll_up_with_ball"),
-            39 => write!(f, "weighted_modified_pilates_roll_up_with_ball"),
-            40 => write!(f, "pilates_crunch"),
-            41 => write!(f, "weighted_pilates_crunch"),
-            42 => write!(f, "pilates_roll_up_with_ball"),
-            43 => write!(f, "weighted_pilates_roll_up_with_ball"),
-            44 => write!(f, "raised_legs_crunch"),
-            45 => write!(f, "weighted_raised_legs_crunch"),
-            46 => write!(f, "reverse_crunch"),
-            47 => write!(f, "weighted_reverse_crunch"),
-            48 => write!(f, "reverse_crunch_on_a_bench"),
-            49 => write!(f, "weighted_reverse_crunch_on_a_bench"),
-            50 => write!(f, "reverse_curl_and_lift"),
-            51 => write!(f, "weighted_reverse_curl_and_lift"),
-            52 => write!(f, "rotational_lift"),
-            53 => write!(f, "weighted_rotational_lift"),
-            54 => write!(f, "seated_alternating_reverse_crunch"),
-            55 => write!(f, "weighted_seated_alternating_reverse_crunch"),
-            56 => write!(f, "seated_leg_u"),
-            57 => write!(f, "weighted_seated_leg_u"),
-            58 => write!(f, "side_to_side_crunch_and_weave"),
-            59 => write!(f, "weighted_side_to_side_crunch_and_weave"),
-            60 => write!(f, "single_leg_reverse_crunch"),
-            61 => write!(f, "weighted_single_leg_reverse_crunch"),
-            62 => write!(f, "skater_crunch_cross"),
-            63 => write!(f, "weighted_skater_crunch_cross"),
-            64 => write!(f, "standing_cable_crunch"),
-            65 => write!(f, "standing_side_crunch"),
-            66 => write!(f, "step_climb"),
-            67 => write!(f, "weighted_step_climb"),
-            68 => write!(f, "swiss_ball_crunch"),
-            69 => write!(f, "swiss_ball_reverse_crunch"),
-            70 => write!(f, "weighted_swiss_ball_reverse_crunch"),
-            71 => write!(f, "swiss_ball_russian_twist"),
-            72 => write!(f, "weighted_swiss_ball_russian_twist"),
-            73 => write!(f, "swiss_ball_side_crunch"),
-            74 => write!(f, "weighted_swiss_ball_side_crunch"),
-            75 => write!(f, "thoracic_crunches_on_foam_roller"),
-            76 => write!(f, "weighted_thoracic_crunches_on_foam_roller"),
-            77 => write!(f, "triceps_crunch"),
-            78 => write!(f, "weighted_bicycle_crunch"),
-            79 => write!(f, "weighted_crunch"),
-            80 => write!(f, "weighted_swiss_ball_crunch"),
-            81 => write!(f, "toes_to_bar"),
-            82 => write!(f, "weighted_toes_to_bar"),
-            83 => write!(f, "crunch"),
-            84 => write!(f, "straight_leg_crunch_with_ball"),
-            86 => write!(f, "leg_climb_crunch"),
-            _ => write!(f, "CrunchExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CrunchExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CrunchExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CrunchExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CrunchExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

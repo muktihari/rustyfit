@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hsa Configuration Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HsaConfigurationData {
     /// Units: s; Encoded configuration data
@@ -24,11 +27,11 @@ pub struct HsaConfigurationData {
 }
 
 impl HsaConfigurationData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
     pub const DATA: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DATA_SIZE: u8 = 1;
 
     /// Create new HsaConfigurationData with all fields being set to its corresponding invalid value.
@@ -118,6 +121,72 @@ impl From<HsaConfigurationData> for Message {
             num: typedef::MesgNum::HSA_CONFIGURATION_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HsaConfigurationData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HsaConfigurationData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if !self.data.is_empty() {
+            state.serialize_field("data", &self.data)?;
+        }
+        if self.data_size != u8::MAX {
+            state.serialize_field("data_size", &self.data_size)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    data: Vec<u8>,
+    data_size: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HsaConfigurationData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            data: m.data,
+            data_size: m.data_size,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            data: Vec::new(),
+            data_size: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

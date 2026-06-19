@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Total Body Exercise Name type.
 #[repr(transparent)]
@@ -36,6 +36,32 @@ impl TotalBodyExerciseName {
     pub const TOTAL_BODY_BURPEE_OVER_BAR: TotalBodyExerciseName = TotalBodyExerciseName(18);
     pub const BURPEE_BOX_JUMP_OVER: TotalBodyExerciseName = TotalBodyExerciseName(19);
     pub const BURPEE_WHEELCHAIR: TotalBodyExerciseName = TotalBodyExerciseName(20);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("burpee"),
+            1 => Some("weighted_burpee"),
+            2 => Some("burpee_box_jump"),
+            3 => Some("weighted_burpee_box_jump"),
+            4 => Some("high_pull_burpee"),
+            5 => Some("man_makers"),
+            6 => Some("one_arm_burpee"),
+            7 => Some("squat_thrusts"),
+            8 => Some("weighted_squat_thrusts"),
+            9 => Some("squat_plank_push_up"),
+            10 => Some("weighted_squat_plank_push_up"),
+            11 => Some("standing_t_rotation_balance"),
+            12 => Some("weighted_standing_t_rotation_balance"),
+            13 => Some("barbell_burpee"),
+            15 => Some("burpee_box_jump_over_yes_literally_jumping_over_the_box"),
+            16 => Some("burpee_box_jump_step_up_over"),
+            17 => Some("lateral_barbell_burpee"),
+            18 => Some("total_body_burpee_over_bar"),
+            19 => Some("burpee_box_jump_over"),
+            20 => Some("burpee_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for TotalBodyExerciseName {
@@ -46,28 +72,50 @@ impl Default for TotalBodyExerciseName {
 
 impl fmt::Display for TotalBodyExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "burpee"),
-            1 => write!(f, "weighted_burpee"),
-            2 => write!(f, "burpee_box_jump"),
-            3 => write!(f, "weighted_burpee_box_jump"),
-            4 => write!(f, "high_pull_burpee"),
-            5 => write!(f, "man_makers"),
-            6 => write!(f, "one_arm_burpee"),
-            7 => write!(f, "squat_thrusts"),
-            8 => write!(f, "weighted_squat_thrusts"),
-            9 => write!(f, "squat_plank_push_up"),
-            10 => write!(f, "weighted_squat_plank_push_up"),
-            11 => write!(f, "standing_t_rotation_balance"),
-            12 => write!(f, "weighted_standing_t_rotation_balance"),
-            13 => write!(f, "barbell_burpee"),
-            15 => write!(f, "burpee_box_jump_over_yes_literally_jumping_over_the_box"),
-            16 => write!(f, "burpee_box_jump_step_up_over"),
-            17 => write!(f, "lateral_barbell_burpee"),
-            18 => write!(f, "total_body_burpee_over_bar"),
-            19 => write!(f, "burpee_box_jump_over"),
-            20 => write!(f, "burpee_wheelchair"),
-            _ => write!(f, "TotalBodyExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "TotalBodyExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TotalBodyExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("TotalBodyExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TotalBodyExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

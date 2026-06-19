@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Sport message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Sport {
     pub sport: typedef::Sport,
@@ -23,11 +26,11 @@ pub struct Sport {
 }
 
 impl Sport {
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 3;
 
     /// Create new Sport with all fields being set to its corresponding invalid value.
@@ -117,6 +120,69 @@ impl From<Sport> for Message {
             num: typedef::MesgNum::SPORT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Sport {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Sport", n)?;
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    sport: typedef::Sport,
+    sub_sport: typedef::SubSport,
+    name: String,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Sport {
+    fn from(m: De) -> Self {
+        Self {
+            sport: m.sport,
+            sub_sport: m.sub_sport,
+            name: m.name,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            name: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

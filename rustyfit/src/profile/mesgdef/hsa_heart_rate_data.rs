@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hsa Heart Rate Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HsaHeartRateData {
     /// Units: s
@@ -26,13 +29,13 @@ pub struct HsaHeartRateData {
 }
 
 impl HsaHeartRateData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const STATUS: u8 = 1;
-    /// Value's type: `Vec<u8>`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HEART_RATE: u8 = 2;
 
     /// Create new HsaHeartRateData with all fields being set to its corresponding invalid value.
@@ -133,6 +136,78 @@ impl From<HsaHeartRateData> for Message {
             num: typedef::MesgNum::HSA_HEART_RATE_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HsaHeartRateData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HsaHeartRateData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.processing_interval != u16::MAX {
+            state.serialize_field("processing_interval", &self.processing_interval)?;
+        }
+        if self.status != u8::MAX {
+            state.serialize_field("status", &self.status)?;
+        }
+        if !self.heart_rate.is_empty() {
+            state.serialize_field("heart_rate", &self.heart_rate)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    processing_interval: u16,
+    status: u8,
+    heart_rate: Vec<u8>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HsaHeartRateData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            processing_interval: m.processing_interval,
+            status: m.status,
+            heart_rate: m.heart_rate,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            processing_interval: u16::MAX,
+            status: u8::MAX,
+            heart_rate: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

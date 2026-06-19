@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Day Of Week type.
 #[repr(transparent)]
@@ -21,6 +21,19 @@ impl DayOfWeek {
     pub const THURSDAY: DayOfWeek = DayOfWeek(4);
     pub const FRIDAY: DayOfWeek = DayOfWeek(5);
     pub const SATURDAY: DayOfWeek = DayOfWeek(6);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("sunday"),
+            1 => Some("monday"),
+            2 => Some("tuesday"),
+            3 => Some("wednesday"),
+            4 => Some("thursday"),
+            5 => Some("friday"),
+            6 => Some("saturday"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DayOfWeek {
@@ -31,15 +44,50 @@ impl Default for DayOfWeek {
 
 impl fmt::Display for DayOfWeek {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "sunday"),
-            1 => write!(f, "monday"),
-            2 => write!(f, "tuesday"),
-            3 => write!(f, "wednesday"),
-            4 => write!(f, "thursday"),
-            5 => write!(f, "friday"),
-            6 => write!(f, "saturday"),
-            _ => write!(f, "DayOfWeek({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DayOfWeek({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DayOfWeek {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DayOfWeek", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DayOfWeek {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

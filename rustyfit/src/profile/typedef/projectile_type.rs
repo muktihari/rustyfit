@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Projectile Type type.
 #[repr(transparent)]
@@ -26,6 +26,18 @@ impl ProjectileType {
     pub const AIR_RIFLE_PELLET: ProjectileType = ProjectileType(4);
     /// Other projectile type
     pub const OTHER: ProjectileType = ProjectileType(5);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("arrow"),
+            1 => Some("rifle_cartridge"),
+            2 => Some("pistol_cartridge"),
+            3 => Some("shotshell"),
+            4 => Some("air_rifle_pellet"),
+            5 => Some("other"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ProjectileType {
@@ -36,14 +48,50 @@ impl Default for ProjectileType {
 
 impl fmt::Display for ProjectileType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "arrow"),
-            1 => write!(f, "rifle_cartridge"),
-            2 => write!(f, "pistol_cartridge"),
-            3 => write!(f, "shotshell"),
-            4 => write!(f, "air_rifle_pellet"),
-            5 => write!(f, "other"),
-            _ => write!(f, "ProjectileType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ProjectileType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ProjectileType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ProjectileType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ProjectileType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

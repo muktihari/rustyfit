@@ -8,8 +8,11 @@ use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Split message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Split {
     pub message_index: typedef::MessageIndex,
@@ -55,45 +58,45 @@ pub struct Split {
 }
 
 impl Split {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPLIT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SplitType
     pub const SPLIT_TYPE: u8 = 0;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_ELAPSED_TIME: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const TOTAL_DISTANCE: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 4;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIME: u8 = 9;
-    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
     pub const TOTAL_ASCENT: u8 = 13;
-    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
     pub const TOTAL_DESCENT: u8 = 14;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const START_POSITION_LAT: u8 = 21;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const START_POSITION_LONG: u8 = 22;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const END_POSITION_LAT: u8 = 23;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const END_POSITION_LONG: u8 = 24;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 25;
-    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Scale: `1000`; Units: `m/s`
     pub const AVG_VERT_SPEED: u8 = 26;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const END_TIME: u8 = 27;
-    /// Value's type: `u32`; Units: `kcal`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 28;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const START_ELEVATION: u8 = 74;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 78;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 110;
 
     /// Create new Split with all fields being set to its corresponding invalid value.
@@ -603,6 +606,244 @@ impl From<Split> for Message {
             num: typedef::MesgNum::SPLIT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Split {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Split", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.split_type.0 != u8::MAX {
+            state.serialize_field("split_type", &self.split_type)?;
+        }
+        if let Some(v) = self.total_elapsed_time_scaled() {
+            state.serialize_field("total_elapsed_time", &v)?;
+        }
+        if let Some(v) = self.total_timer_time_scaled() {
+            state.serialize_field("total_timer_time", &v)?;
+        }
+        if let Some(v) = self.total_distance_scaled() {
+            state.serialize_field("total_distance", &v)?;
+        }
+        if let Some(v) = self.avg_speed_scaled() {
+            state.serialize_field("avg_speed", &v)?;
+        }
+        if let Some(v) = self.start_time.unix_timestamp() {
+            state.serialize_field("start_time", &v)?;
+        }
+        if self.total_ascent != u16::MAX {
+            state.serialize_field("total_ascent", &self.total_ascent)?;
+        }
+        if self.total_descent != u16::MAX {
+            state.serialize_field("total_descent", &self.total_descent)?;
+        }
+        if let Some(v) = self.start_position_lat_degrees() {
+            state.serialize_field("start_position_lat", &v)?;
+        }
+        if let Some(v) = self.start_position_long_degrees() {
+            state.serialize_field("start_position_long", &v)?;
+        }
+        if let Some(v) = self.end_position_lat_degrees() {
+            state.serialize_field("end_position_lat", &v)?;
+        }
+        if let Some(v) = self.end_position_long_degrees() {
+            state.serialize_field("end_position_long", &v)?;
+        }
+        if let Some(v) = self.max_speed_scaled() {
+            state.serialize_field("max_speed", &v)?;
+        }
+        if let Some(v) = self.avg_vert_speed_scaled() {
+            state.serialize_field("avg_vert_speed", &v)?;
+        }
+        if let Some(v) = self.end_time.unix_timestamp() {
+            state.serialize_field("end_time", &v)?;
+        }
+        if self.total_calories != u32::MAX {
+            state.serialize_field("total_calories", &self.total_calories)?;
+        }
+        if let Some(v) = self.start_elevation_scaled() {
+            state.serialize_field("start_elevation", &v)?;
+        }
+        if let Some(v) = self.active_time_scaled() {
+            state.serialize_field("active_time", &v)?;
+        }
+        if let Some(v) = self.total_moving_time_scaled() {
+            state.serialize_field("total_moving_time", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    split_type: typedef::SplitType,
+    total_elapsed_time: f64,
+    total_timer_time: f64,
+    total_distance: f64,
+    avg_speed: f64,
+    start_time: Option<i64>,
+    total_ascent: u16,
+    total_descent: u16,
+    /// Degrees.
+    start_position_lat: f64,
+    /// Degrees.
+    start_position_long: f64,
+    /// Degrees.
+    end_position_lat: f64,
+    /// Degrees.
+    end_position_long: f64,
+    max_speed: f64,
+    avg_vert_speed: f64,
+    end_time: Option<i64>,
+    total_calories: u32,
+    start_elevation: f64,
+    active_time: f64,
+    total_moving_time: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Split {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            split_type: m.split_type,
+            total_elapsed_time: {
+                let unscaled = (m.total_elapsed_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_timer_time: {
+                let unscaled = (m.total_timer_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_distance: {
+                let unscaled = (m.total_distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_speed: {
+                let unscaled = (m.avg_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            start_time: m.start_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            total_ascent: m.total_ascent,
+            total_descent: m.total_descent,
+            start_position_lat: semconv::to_semicircles(m.start_position_lat).unwrap_or(i32::MAX),
+            start_position_long: semconv::to_semicircles(m.start_position_long).unwrap_or(i32::MAX),
+            end_position_lat: semconv::to_semicircles(m.end_position_lat).unwrap_or(i32::MAX),
+            end_position_long: semconv::to_semicircles(m.end_position_long).unwrap_or(i32::MAX),
+            max_speed: {
+                let unscaled = (m.max_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_vert_speed: {
+                let unscaled = (m.avg_vert_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
+                    i32::MAX
+                } else {
+                    unscaled as i32
+                }
+            },
+            end_time: m.end_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            total_calories: m.total_calories,
+            start_elevation: {
+                let unscaled = (m.start_elevation + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            active_time: {
+                let unscaled = (m.active_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_moving_time: {
+                let unscaled = (m.total_moving_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            split_type: typedef::SplitType(u8::MAX),
+            total_elapsed_time: f64::from_bits(u64::MAX),
+            total_timer_time: f64::from_bits(u64::MAX),
+            total_distance: f64::from_bits(u64::MAX),
+            avg_speed: f64::from_bits(u64::MAX),
+            start_time: None,
+            total_ascent: u16::MAX,
+            total_descent: u16::MAX,
+            start_position_lat: f64::from_bits(u64::MAX),
+            start_position_long: f64::from_bits(u64::MAX),
+            end_position_lat: f64::from_bits(u64::MAX),
+            end_position_long: f64::from_bits(u64::MAX),
+            max_speed: f64::from_bits(u64::MAX),
+            avg_vert_speed: f64::from_bits(u64::MAX),
+            end_time: None,
+            total_calories: u32::MAX,
+            start_elevation: f64::from_bits(u64::MAX),
+            active_time: f64::from_bits(u64::MAX),
+            total_moving_time: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

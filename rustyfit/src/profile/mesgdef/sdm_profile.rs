@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Sdm Profile message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SdmProfile {
     pub message_index: typedef::MessageIndex,
@@ -32,21 +35,21 @@ pub struct SdmProfile {
 }
 
 impl SdmProfile {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 0;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const SDM_ANT_ID: u8 = 1;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
     pub const SDM_CAL_FACTOR: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const ODOMETER: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SPEED_SOURCE: u8 = 4;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const SDM_ANT_ID_TRANS_TYPE: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const ODOMETER_ROLLOVER: u8 = 7;
 
     /// Create new SdmProfile with all fields being set to its corresponding invalid value.
@@ -233,6 +236,113 @@ impl From<SdmProfile> for Message {
             num: typedef::MesgNum::SDM_PROFILE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SdmProfile {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SdmProfile", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.sdm_ant_id != u16::MIN {
+            state.serialize_field("sdm_ant_id", &self.sdm_ant_id)?;
+        }
+        if let Some(v) = self.sdm_cal_factor_scaled() {
+            state.serialize_field("sdm_cal_factor", &v)?;
+        }
+        if let Some(v) = self.odometer_scaled() {
+            state.serialize_field("odometer", &v)?;
+        }
+        if self.speed_source.0 != u8::MAX {
+            state.serialize_field("speed_source", &self.speed_source)?;
+        }
+        if self.sdm_ant_id_trans_type != u8::MIN {
+            state.serialize_field("sdm_ant_id_trans_type", &self.sdm_ant_id_trans_type)?;
+        }
+        if self.odometer_rollover != u8::MAX {
+            state.serialize_field("odometer_rollover", &self.odometer_rollover)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    enabled: typedef::Bool,
+    sdm_ant_id: u16,
+    sdm_cal_factor: f64,
+    odometer: f64,
+    speed_source: typedef::Bool,
+    sdm_ant_id_trans_type: u8,
+    odometer_rollover: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SdmProfile {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            enabled: m.enabled,
+            sdm_ant_id: m.sdm_ant_id,
+            sdm_cal_factor: {
+                let unscaled = (m.sdm_cal_factor + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            odometer: {
+                let unscaled = (m.odometer + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            speed_source: m.speed_source,
+            sdm_ant_id_trans_type: m.sdm_ant_id_trans_type,
+            odometer_rollover: m.odometer_rollover,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            sdm_ant_id: u16::MIN,
+            sdm_cal_factor: f64::from_bits(u64::MAX),
+            odometer: f64::from_bits(u64::MAX),
+            speed_source: typedef::Bool(u8::MAX),
+            sdm_ant_id_trans_type: u8::MIN,
+            odometer_rollover: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

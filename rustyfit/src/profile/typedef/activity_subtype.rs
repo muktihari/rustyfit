@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Activity Subtype type.
 #[repr(transparent)]
@@ -52,6 +52,32 @@ impl ActivitySubtype {
     /// Swimming
     pub const OPEN_WATER: ActivitySubtype = ActivitySubtype(18);
     pub const ALL: ActivitySubtype = ActivitySubtype(254);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("generic"),
+            1 => Some("treadmill"),
+            2 => Some("street"),
+            3 => Some("trail"),
+            4 => Some("track"),
+            5 => Some("spin"),
+            6 => Some("indoor_cycling"),
+            7 => Some("road"),
+            8 => Some("mountain"),
+            9 => Some("downhill"),
+            10 => Some("recumbent"),
+            11 => Some("cyclocross"),
+            12 => Some("hand_cycling"),
+            13 => Some("track_cycling"),
+            14 => Some("indoor_rowing"),
+            15 => Some("elliptical"),
+            16 => Some("stair_climbing"),
+            17 => Some("lap_swimming"),
+            18 => Some("open_water"),
+            254 => Some("all"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ActivitySubtype {
@@ -62,28 +88,50 @@ impl Default for ActivitySubtype {
 
 impl fmt::Display for ActivitySubtype {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "generic"),
-            1 => write!(f, "treadmill"),
-            2 => write!(f, "street"),
-            3 => write!(f, "trail"),
-            4 => write!(f, "track"),
-            5 => write!(f, "spin"),
-            6 => write!(f, "indoor_cycling"),
-            7 => write!(f, "road"),
-            8 => write!(f, "mountain"),
-            9 => write!(f, "downhill"),
-            10 => write!(f, "recumbent"),
-            11 => write!(f, "cyclocross"),
-            12 => write!(f, "hand_cycling"),
-            13 => write!(f, "track_cycling"),
-            14 => write!(f, "indoor_rowing"),
-            15 => write!(f, "elliptical"),
-            16 => write!(f, "stair_climbing"),
-            17 => write!(f, "lap_swimming"),
-            18 => write!(f, "open_water"),
-            254 => write!(f, "all"),
-            _ => write!(f, "ActivitySubtype({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ActivitySubtype({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ActivitySubtype {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ActivitySubtype", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ActivitySubtype {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

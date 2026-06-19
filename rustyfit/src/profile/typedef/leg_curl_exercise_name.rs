@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Leg Curl Exercise Name type.
 #[repr(transparent)]
@@ -28,6 +28,26 @@ impl LegCurlExerciseName {
     pub const ZERCHER_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(11);
     pub const BAND_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(12);
     pub const BAR_GOOD_MORNING: LegCurlExerciseName = LegCurlExerciseName(13);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("leg_curl"),
+            1 => Some("weighted_leg_curl"),
+            2 => Some("good_morning"),
+            3 => Some("seated_barbell_good_morning"),
+            4 => Some("single_leg_barbell_good_morning"),
+            5 => Some("single_leg_sliding_leg_curl"),
+            6 => Some("sliding_leg_curl"),
+            7 => Some("split_barbell_good_morning"),
+            8 => Some("split_stance_extension"),
+            9 => Some("staggered_stance_good_morning"),
+            10 => Some("swiss_ball_hip_raise_and_leg_curl"),
+            11 => Some("zercher_good_morning"),
+            12 => Some("band_good_morning"),
+            13 => Some("bar_good_morning"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for LegCurlExerciseName {
@@ -38,22 +58,50 @@ impl Default for LegCurlExerciseName {
 
 impl fmt::Display for LegCurlExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "leg_curl"),
-            1 => write!(f, "weighted_leg_curl"),
-            2 => write!(f, "good_morning"),
-            3 => write!(f, "seated_barbell_good_morning"),
-            4 => write!(f, "single_leg_barbell_good_morning"),
-            5 => write!(f, "single_leg_sliding_leg_curl"),
-            6 => write!(f, "sliding_leg_curl"),
-            7 => write!(f, "split_barbell_good_morning"),
-            8 => write!(f, "split_stance_extension"),
-            9 => write!(f, "staggered_stance_good_morning"),
-            10 => write!(f, "swiss_ball_hip_raise_and_leg_curl"),
-            11 => write!(f, "zercher_good_morning"),
-            12 => write!(f, "band_good_morning"),
-            13 => write!(f, "bar_good_morning"),
-            _ => write!(f, "LegCurlExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "LegCurlExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for LegCurlExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("LegCurlExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for LegCurlExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

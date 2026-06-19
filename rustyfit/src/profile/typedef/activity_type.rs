@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Activity Type type.
 #[repr(transparent)]
@@ -25,6 +25,21 @@ impl ActivityType {
     pub const SEDENTARY: ActivityType = ActivityType(8);
     /// All is for goals only to include all sports.
     pub const ALL: ActivityType = ActivityType(254);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("generic"),
+            1 => Some("running"),
+            2 => Some("cycling"),
+            3 => Some("transition"),
+            4 => Some("fitness_equipment"),
+            5 => Some("swimming"),
+            6 => Some("walking"),
+            8 => Some("sedentary"),
+            254 => Some("all"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ActivityType {
@@ -35,17 +50,50 @@ impl Default for ActivityType {
 
 impl fmt::Display for ActivityType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "generic"),
-            1 => write!(f, "running"),
-            2 => write!(f, "cycling"),
-            3 => write!(f, "transition"),
-            4 => write!(f, "fitness_equipment"),
-            5 => write!(f, "swimming"),
-            6 => write!(f, "walking"),
-            8 => write!(f, "sedentary"),
-            254 => write!(f, "all"),
-            _ => write!(f, "ActivityType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ActivityType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ActivityType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ActivityType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ActivityType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

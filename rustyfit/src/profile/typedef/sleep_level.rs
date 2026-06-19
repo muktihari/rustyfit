@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Sleep Level type.
 #[repr(transparent)]
@@ -19,6 +19,17 @@ impl SleepLevel {
     pub const LIGHT: SleepLevel = SleepLevel(2);
     pub const DEEP: SleepLevel = SleepLevel(3);
     pub const REM: SleepLevel = SleepLevel(4);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("unmeasurable"),
+            1 => Some("awake"),
+            2 => Some("light"),
+            3 => Some("deep"),
+            4 => Some("rem"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SleepLevel {
@@ -29,13 +40,50 @@ impl Default for SleepLevel {
 
 impl fmt::Display for SleepLevel {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "unmeasurable"),
-            1 => write!(f, "awake"),
-            2 => write!(f, "light"),
-            3 => write!(f, "deep"),
-            4 => write!(f, "rem"),
-            _ => write!(f, "SleepLevel({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SleepLevel({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SleepLevel {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SleepLevel", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SleepLevel {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

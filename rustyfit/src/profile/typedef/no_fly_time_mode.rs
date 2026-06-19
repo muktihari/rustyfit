@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// No Fly Time Mode type.
 #[repr(transparent)]
@@ -18,6 +18,14 @@ impl NoFlyTimeMode {
     pub const STANDARD: NoFlyTimeMode = NoFlyTimeMode(0);
     /// Flat 24 hour no-fly guidance
     pub const FLAT_24_HOURS: NoFlyTimeMode = NoFlyTimeMode(1);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("standard"),
+            1 => Some("flat_24_hours"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for NoFlyTimeMode {
@@ -28,10 +36,50 @@ impl Default for NoFlyTimeMode {
 
 impl fmt::Display for NoFlyTimeMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "standard"),
-            1 => write!(f, "flat_24_hours"),
-            _ => write!(f, "NoFlyTimeMode({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "NoFlyTimeMode({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for NoFlyTimeMode {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("NoFlyTimeMode", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for NoFlyTimeMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

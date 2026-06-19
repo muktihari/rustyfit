@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Monitoring Info message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct MonitoringInfo {
     /// Units: s
@@ -29,17 +32,17 @@ pub struct MonitoringInfo {
 }
 
 impl MonitoringInfo {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocalDateTime; Units: `s`
     pub const LOCAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::ACTIVITY_TYPE`
+    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::ActivityType
     pub const ACTIVITY_TYPE: u8 = 1;
-    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `m/cycle`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5000`; Units: `m/cycle`
     pub const CYCLES_TO_DISTANCE: u8 = 3;
-    /// Value's type: `Vec<u16>`; Scale: `5000`; Units: `kcal/cycle`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5000`; Units: `kcal/cycle`
     pub const CYCLES_TO_CALORIES: u8 = 4;
-    /// Value's type: `u16`; Units: `kcal / day`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal / day`
     pub const RESTING_METABOLIC_RATE: u8 = 5;
 
     /// Create new MonitoringInfo with all fields being set to its corresponding invalid value.
@@ -236,6 +239,125 @@ impl From<MonitoringInfo> for Message {
             num: typedef::MesgNum::MONITORING_INFO,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MonitoringInfo {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("MonitoringInfo", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.local_timestamp.unix_timestamp() {
+            state.serialize_field("local_timestamp", &v)?;
+        }
+        if !self.activity_type.is_empty() {
+            state.serialize_field("activity_type", &self.activity_type)?;
+        }
+        if let Some(v) = self.cycles_to_distance_scaled() {
+            state.serialize_field("cycles_to_distance", &v)?;
+        }
+        if let Some(v) = self.cycles_to_calories_scaled() {
+            state.serialize_field("cycles_to_calories", &v)?;
+        }
+        if self.resting_metabolic_rate != u16::MAX {
+            state.serialize_field("resting_metabolic_rate", &self.resting_metabolic_rate)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    local_timestamp: Option<i64>,
+    activity_type: Vec<typedef::ActivityType>,
+    cycles_to_distance: Vec<f64>,
+    cycles_to_calories: Vec<f64>,
+    resting_metabolic_rate: u16,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for MonitoringInfo {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            local_timestamp: m.local_timestamp.map_or_else(
+                || typedef::LocalDateTime(u32::MAX),
+                typedef::LocalDateTime::from_unix_timestamp,
+            ),
+            activity_type: m.activity_type,
+            cycles_to_distance: {
+                if m.cycles_to_distance.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.cycles_to_distance.len());
+                    for &x in m.cycles_to_distance.iter() {
+                        let unscaled = (x + 0.0) * 5000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64
+                        {
+                            vals.push(u16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u16);
+                    }
+                    vals
+                }
+            },
+            cycles_to_calories: {
+                if m.cycles_to_calories.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.cycles_to_calories.len());
+                    for &x in m.cycles_to_calories.iter() {
+                        let unscaled = (x + 0.0) * 5000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64
+                        {
+                            vals.push(u16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u16);
+                    }
+                    vals
+                }
+            },
+            resting_metabolic_rate: m.resting_metabolic_rate,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            local_timestamp: None,
+            activity_type: Vec::new(),
+            cycles_to_distance: Vec::new(),
+            cycles_to_calories: Vec::new(),
+            resting_metabolic_rate: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

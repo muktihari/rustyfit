@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Antplus Device Type type.
 #[repr(transparent)]
@@ -39,6 +39,37 @@ impl AntplusDeviceType {
     pub const BIKE_CADENCE: AntplusDeviceType = AntplusDeviceType(122);
     pub const BIKE_SPEED: AntplusDeviceType = AntplusDeviceType(123);
     pub const STRIDE_SPEED_DISTANCE: AntplusDeviceType = AntplusDeviceType(124);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            1 => Some("antfs"),
+            11 => Some("bike_power"),
+            12 => Some("environment_sensor_legacy"),
+            15 => Some("multi_sport_speed_distance"),
+            16 => Some("control"),
+            17 => Some("fitness_equipment"),
+            18 => Some("blood_pressure"),
+            19 => Some("geocache_node"),
+            20 => Some("light_electric_vehicle"),
+            25 => Some("env_sensor"),
+            26 => Some("racquet"),
+            27 => Some("control_hub"),
+            31 => Some("muscle_oxygen"),
+            34 => Some("shifting"),
+            35 => Some("bike_light_main"),
+            36 => Some("bike_light_shared"),
+            38 => Some("exd"),
+            40 => Some("bike_radar"),
+            46 => Some("bike_aero"),
+            119 => Some("weight_scale"),
+            120 => Some("heart_rate"),
+            121 => Some("bike_speed_cadence"),
+            122 => Some("bike_cadence"),
+            123 => Some("bike_speed"),
+            124 => Some("stride_speed_distance"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for AntplusDeviceType {
@@ -49,33 +80,50 @@ impl Default for AntplusDeviceType {
 
 impl fmt::Display for AntplusDeviceType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "antfs"),
-            11 => write!(f, "bike_power"),
-            12 => write!(f, "environment_sensor_legacy"),
-            15 => write!(f, "multi_sport_speed_distance"),
-            16 => write!(f, "control"),
-            17 => write!(f, "fitness_equipment"),
-            18 => write!(f, "blood_pressure"),
-            19 => write!(f, "geocache_node"),
-            20 => write!(f, "light_electric_vehicle"),
-            25 => write!(f, "env_sensor"),
-            26 => write!(f, "racquet"),
-            27 => write!(f, "control_hub"),
-            31 => write!(f, "muscle_oxygen"),
-            34 => write!(f, "shifting"),
-            35 => write!(f, "bike_light_main"),
-            36 => write!(f, "bike_light_shared"),
-            38 => write!(f, "exd"),
-            40 => write!(f, "bike_radar"),
-            46 => write!(f, "bike_aero"),
-            119 => write!(f, "weight_scale"),
-            120 => write!(f, "heart_rate"),
-            121 => write!(f, "bike_speed_cadence"),
-            122 => write!(f, "bike_cadence"),
-            123 => write!(f, "bike_speed"),
-            124 => write!(f, "stride_speed_distance"),
-            _ => write!(f, "AntplusDeviceType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "AntplusDeviceType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AntplusDeviceType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("AntplusDeviceType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for AntplusDeviceType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

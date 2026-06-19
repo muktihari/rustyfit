@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Spo2 Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Spo2Data {
     /// Units: s
@@ -25,13 +28,13 @@ pub struct Spo2Data {
 }
 
 impl Spo2Data {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const READING_SPO2: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const READING_CONFIDENCE: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPO2_MEASUREMENT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Spo2MeasurementType
     pub const MODE: u8 = 2;
 
     /// Create new Spo2Data with all fields being set to its corresponding invalid value.
@@ -132,6 +135,78 @@ impl From<Spo2Data> for Message {
             num: typedef::MesgNum::SPO2_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Spo2Data {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Spo2Data", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.reading_spo2 != u8::MAX {
+            state.serialize_field("reading_spo2", &self.reading_spo2)?;
+        }
+        if self.reading_confidence != u8::MAX {
+            state.serialize_field("reading_confidence", &self.reading_confidence)?;
+        }
+        if self.mode.0 != u8::MAX {
+            state.serialize_field("mode", &self.mode)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    reading_spo2: u8,
+    reading_confidence: u8,
+    mode: typedef::Spo2MeasurementType,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Spo2Data {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            reading_spo2: m.reading_spo2,
+            reading_confidence: m.reading_confidence,
+            mode: m.mode,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            reading_spo2: u8::MAX,
+            reading_confidence: u8::MAX,
+            mode: typedef::Spo2MeasurementType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

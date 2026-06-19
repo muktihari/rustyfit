@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Respiration Rate message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct RespirationRate {
     pub timestamp: typedef::DateTime,
@@ -21,9 +24,9 @@ pub struct RespirationRate {
 }
 
 impl RespirationRate {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `i16`; Scale: `100`; Units: `breaths/min`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `breaths/min`
     pub const RESPIRATION_RATE: u8 = 0;
 
     /// Create new RespirationRate with all fields being set to its corresponding invalid value.
@@ -122,6 +125,73 @@ impl From<RespirationRate> for Message {
             num: typedef::MesgNum::RESPIRATION_RATE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for RespirationRate {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("RespirationRate", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.respiration_rate_scaled() {
+            state.serialize_field("respiration_rate", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    respiration_rate: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for RespirationRate {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            respiration_rate: {
+                let unscaled = (m.respiration_rate + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            respiration_rate: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

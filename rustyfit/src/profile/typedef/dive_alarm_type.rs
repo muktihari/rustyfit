@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Dive Alarm Type type.
 #[repr(transparent)]
@@ -20,6 +20,15 @@ impl DiveAlarmType {
     pub const TIME: DiveAlarmType = DiveAlarmType(1);
     /// Alarm when a certain ascent or descent rate is exceeded
     pub const SPEED: DiveAlarmType = DiveAlarmType(2);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("depth"),
+            1 => Some("time"),
+            2 => Some("speed"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DiveAlarmType {
@@ -30,11 +39,50 @@ impl Default for DiveAlarmType {
 
 impl fmt::Display for DiveAlarmType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "depth"),
-            1 => write!(f, "time"),
-            2 => write!(f, "speed"),
-            _ => write!(f, "DiveAlarmType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DiveAlarmType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DiveAlarmType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DiveAlarmType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DiveAlarmType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

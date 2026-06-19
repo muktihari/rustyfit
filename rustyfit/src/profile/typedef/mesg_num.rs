@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Mesg Num type.
 #[repr(transparent)]
@@ -143,6 +143,138 @@ impl MesgNum {
     pub const MFG_RANGE_MIN: MesgNum = MesgNum(0xFF00);
     /// 0xFF00 - 0xFFFE reserved for manufacturer specific messages
     pub const MFG_RANGE_MAX: MesgNum = MesgNum(0xFFFE);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("file_id"),
+            1 => Some("capabilities"),
+            2 => Some("device_settings"),
+            3 => Some("user_profile"),
+            4 => Some("hrm_profile"),
+            5 => Some("sdm_profile"),
+            6 => Some("bike_profile"),
+            7 => Some("zones_target"),
+            8 => Some("hr_zone"),
+            9 => Some("power_zone"),
+            10 => Some("met_zone"),
+            12 => Some("sport"),
+            13 => Some("training_settings"),
+            15 => Some("goal"),
+            18 => Some("session"),
+            19 => Some("lap"),
+            20 => Some("record"),
+            21 => Some("event"),
+            23 => Some("device_info"),
+            26 => Some("workout"),
+            27 => Some("workout_step"),
+            28 => Some("schedule"),
+            30 => Some("weight_scale"),
+            31 => Some("course"),
+            32 => Some("course_point"),
+            33 => Some("totals"),
+            34 => Some("activity"),
+            35 => Some("software"),
+            37 => Some("file_capabilities"),
+            38 => Some("mesg_capabilities"),
+            39 => Some("field_capabilities"),
+            49 => Some("file_creator"),
+            51 => Some("blood_pressure"),
+            53 => Some("speed_zone"),
+            55 => Some("monitoring"),
+            72 => Some("training_file"),
+            78 => Some("hrv"),
+            80 => Some("ant_rx"),
+            81 => Some("ant_tx"),
+            82 => Some("ant_channel_id"),
+            101 => Some("length"),
+            103 => Some("monitoring_info"),
+            105 => Some("pad"),
+            106 => Some("slave_device"),
+            127 => Some("connectivity"),
+            128 => Some("weather_conditions"),
+            129 => Some("weather_alert"),
+            131 => Some("cadence_zone"),
+            132 => Some("hr"),
+            142 => Some("segment_lap"),
+            145 => Some("memo_glob"),
+            148 => Some("segment_id"),
+            149 => Some("segment_leaderboard_entry"),
+            150 => Some("segment_point"),
+            151 => Some("segment_file"),
+            158 => Some("workout_session"),
+            159 => Some("watchface_settings"),
+            160 => Some("gps_metadata"),
+            161 => Some("camera_event"),
+            162 => Some("timestamp_correlation"),
+            164 => Some("gyroscope_data"),
+            165 => Some("accelerometer_data"),
+            167 => Some("three_d_sensor_calibration"),
+            169 => Some("video_frame"),
+            174 => Some("obdii_data"),
+            177 => Some("nmea_sentence"),
+            178 => Some("aviation_attitude"),
+            184 => Some("video"),
+            185 => Some("video_title"),
+            186 => Some("video_description"),
+            187 => Some("video_clip"),
+            188 => Some("ohr_settings"),
+            200 => Some("exd_screen_configuration"),
+            201 => Some("exd_data_field_configuration"),
+            202 => Some("exd_data_concept_configuration"),
+            206 => Some("field_description"),
+            207 => Some("developer_data_id"),
+            208 => Some("magnetometer_data"),
+            209 => Some("barometer_data"),
+            210 => Some("one_d_sensor_calibration"),
+            211 => Some("monitoring_hr_data"),
+            216 => Some("time_in_zone"),
+            225 => Some("set"),
+            227 => Some("stress_level"),
+            229 => Some("max_met_data"),
+            258 => Some("dive_settings"),
+            259 => Some("dive_gas"),
+            262 => Some("dive_alarm"),
+            264 => Some("exercise_title"),
+            268 => Some("dive_summary"),
+            269 => Some("spo2_data"),
+            275 => Some("sleep_level"),
+            285 => Some("jump"),
+            289 => Some("aad_accel_features"),
+            290 => Some("beat_intervals"),
+            297 => Some("respiration_rate"),
+            302 => Some("hsa_accelerometer_data"),
+            304 => Some("hsa_step_data"),
+            305 => Some("hsa_spo2_data"),
+            306 => Some("hsa_stress_data"),
+            307 => Some("hsa_respiration_data"),
+            308 => Some("hsa_heart_rate_data"),
+            312 => Some("split"),
+            313 => Some("split_summary"),
+            314 => Some("hsa_body_battery_data"),
+            315 => Some("hsa_event"),
+            317 => Some("climb_pro"),
+            319 => Some("tank_update"),
+            323 => Some("tank_summary"),
+            346 => Some("sleep_assessment"),
+            370 => Some("hrv_status_summary"),
+            371 => Some("hrv_value"),
+            372 => Some("raw_bbi"),
+            375 => Some("device_aux_battery_info"),
+            376 => Some("hsa_gyroscope_data"),
+            387 => Some("chrono_shot_session"),
+            388 => Some("chrono_shot_data"),
+            389 => Some("hsa_configuration_data"),
+            393 => Some("dive_apnea_alarm"),
+            398 => Some("skin_temp_overnight"),
+            409 => Some("hsa_wrist_temperature_data"),
+            412 => Some("nap_event"),
+            470 => Some("sleep_disruption_severity_period"),
+            471 => Some("sleep_disruption_overnight_severity"),
+            0xFF00 => Some("mfg_range_min"),
+            0xFFFE => Some("mfg_range_max"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for MesgNum {
@@ -153,134 +285,50 @@ impl Default for MesgNum {
 
 impl fmt::Display for MesgNum {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "file_id"),
-            1 => write!(f, "capabilities"),
-            2 => write!(f, "device_settings"),
-            3 => write!(f, "user_profile"),
-            4 => write!(f, "hrm_profile"),
-            5 => write!(f, "sdm_profile"),
-            6 => write!(f, "bike_profile"),
-            7 => write!(f, "zones_target"),
-            8 => write!(f, "hr_zone"),
-            9 => write!(f, "power_zone"),
-            10 => write!(f, "met_zone"),
-            12 => write!(f, "sport"),
-            13 => write!(f, "training_settings"),
-            15 => write!(f, "goal"),
-            18 => write!(f, "session"),
-            19 => write!(f, "lap"),
-            20 => write!(f, "record"),
-            21 => write!(f, "event"),
-            23 => write!(f, "device_info"),
-            26 => write!(f, "workout"),
-            27 => write!(f, "workout_step"),
-            28 => write!(f, "schedule"),
-            30 => write!(f, "weight_scale"),
-            31 => write!(f, "course"),
-            32 => write!(f, "course_point"),
-            33 => write!(f, "totals"),
-            34 => write!(f, "activity"),
-            35 => write!(f, "software"),
-            37 => write!(f, "file_capabilities"),
-            38 => write!(f, "mesg_capabilities"),
-            39 => write!(f, "field_capabilities"),
-            49 => write!(f, "file_creator"),
-            51 => write!(f, "blood_pressure"),
-            53 => write!(f, "speed_zone"),
-            55 => write!(f, "monitoring"),
-            72 => write!(f, "training_file"),
-            78 => write!(f, "hrv"),
-            80 => write!(f, "ant_rx"),
-            81 => write!(f, "ant_tx"),
-            82 => write!(f, "ant_channel_id"),
-            101 => write!(f, "length"),
-            103 => write!(f, "monitoring_info"),
-            105 => write!(f, "pad"),
-            106 => write!(f, "slave_device"),
-            127 => write!(f, "connectivity"),
-            128 => write!(f, "weather_conditions"),
-            129 => write!(f, "weather_alert"),
-            131 => write!(f, "cadence_zone"),
-            132 => write!(f, "hr"),
-            142 => write!(f, "segment_lap"),
-            145 => write!(f, "memo_glob"),
-            148 => write!(f, "segment_id"),
-            149 => write!(f, "segment_leaderboard_entry"),
-            150 => write!(f, "segment_point"),
-            151 => write!(f, "segment_file"),
-            158 => write!(f, "workout_session"),
-            159 => write!(f, "watchface_settings"),
-            160 => write!(f, "gps_metadata"),
-            161 => write!(f, "camera_event"),
-            162 => write!(f, "timestamp_correlation"),
-            164 => write!(f, "gyroscope_data"),
-            165 => write!(f, "accelerometer_data"),
-            167 => write!(f, "three_d_sensor_calibration"),
-            169 => write!(f, "video_frame"),
-            174 => write!(f, "obdii_data"),
-            177 => write!(f, "nmea_sentence"),
-            178 => write!(f, "aviation_attitude"),
-            184 => write!(f, "video"),
-            185 => write!(f, "video_title"),
-            186 => write!(f, "video_description"),
-            187 => write!(f, "video_clip"),
-            188 => write!(f, "ohr_settings"),
-            200 => write!(f, "exd_screen_configuration"),
-            201 => write!(f, "exd_data_field_configuration"),
-            202 => write!(f, "exd_data_concept_configuration"),
-            206 => write!(f, "field_description"),
-            207 => write!(f, "developer_data_id"),
-            208 => write!(f, "magnetometer_data"),
-            209 => write!(f, "barometer_data"),
-            210 => write!(f, "one_d_sensor_calibration"),
-            211 => write!(f, "monitoring_hr_data"),
-            216 => write!(f, "time_in_zone"),
-            225 => write!(f, "set"),
-            227 => write!(f, "stress_level"),
-            229 => write!(f, "max_met_data"),
-            258 => write!(f, "dive_settings"),
-            259 => write!(f, "dive_gas"),
-            262 => write!(f, "dive_alarm"),
-            264 => write!(f, "exercise_title"),
-            268 => write!(f, "dive_summary"),
-            269 => write!(f, "spo2_data"),
-            275 => write!(f, "sleep_level"),
-            285 => write!(f, "jump"),
-            289 => write!(f, "aad_accel_features"),
-            290 => write!(f, "beat_intervals"),
-            297 => write!(f, "respiration_rate"),
-            302 => write!(f, "hsa_accelerometer_data"),
-            304 => write!(f, "hsa_step_data"),
-            305 => write!(f, "hsa_spo2_data"),
-            306 => write!(f, "hsa_stress_data"),
-            307 => write!(f, "hsa_respiration_data"),
-            308 => write!(f, "hsa_heart_rate_data"),
-            312 => write!(f, "split"),
-            313 => write!(f, "split_summary"),
-            314 => write!(f, "hsa_body_battery_data"),
-            315 => write!(f, "hsa_event"),
-            317 => write!(f, "climb_pro"),
-            319 => write!(f, "tank_update"),
-            323 => write!(f, "tank_summary"),
-            346 => write!(f, "sleep_assessment"),
-            370 => write!(f, "hrv_status_summary"),
-            371 => write!(f, "hrv_value"),
-            372 => write!(f, "raw_bbi"),
-            375 => write!(f, "device_aux_battery_info"),
-            376 => write!(f, "hsa_gyroscope_data"),
-            387 => write!(f, "chrono_shot_session"),
-            388 => write!(f, "chrono_shot_data"),
-            389 => write!(f, "hsa_configuration_data"),
-            393 => write!(f, "dive_apnea_alarm"),
-            398 => write!(f, "skin_temp_overnight"),
-            409 => write!(f, "hsa_wrist_temperature_data"),
-            412 => write!(f, "nap_event"),
-            470 => write!(f, "sleep_disruption_severity_period"),
-            471 => write!(f, "sleep_disruption_overnight_severity"),
-            0xFF00 => write!(f, "mfg_range_min"),
-            0xFFFE => write!(f, "mfg_range_max"),
-            _ => write!(f, "MesgNum({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "MesgNum({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MesgNum {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("MesgNum", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for MesgNum {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Course message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Course {
     pub sport: typedef::Sport,
@@ -25,13 +28,13 @@ pub struct Course {
 }
 
 impl Course {
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 4;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 5;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::COURSE_CAPABILITIES`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::CourseCapabilities
     pub const CAPABILITIES: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 7;
 
     /// Create new Course with all fields being set to its corresponding invalid value.
@@ -132,6 +135,75 @@ impl From<Course> for Message {
             num: typedef::MesgNum::COURSE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Course {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Course", n)?;
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.capabilities.0 != u32::MIN {
+            state.serialize_field("capabilities", &self.capabilities)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    sport: typedef::Sport,
+    name: String,
+    capabilities: typedef::CourseCapabilities,
+    sub_sport: typedef::SubSport,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Course {
+    fn from(m: De) -> Self {
+        Self {
+            sport: m.sport,
+            name: m.name,
+            capabilities: m.capabilities,
+            sub_sport: m.sub_sport,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            sport: typedef::Sport(u8::MAX),
+            name: String::new(),
+            capabilities: typedef::CourseCapabilities(u32::MIN),
+            sub_sport: typedef::SubSport(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

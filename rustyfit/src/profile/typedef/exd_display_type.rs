@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Exd Display Type type.
 #[repr(transparent)]
@@ -25,6 +25,23 @@ impl ExdDisplayType {
     pub const STRING: ExdDisplayType = ExdDisplayType(8);
     pub const SIMPLE_DYNAMIC_ICON: ExdDisplayType = ExdDisplayType(9);
     pub const GAUGE: ExdDisplayType = ExdDisplayType(10);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("numerical"),
+            1 => Some("simple"),
+            2 => Some("graph"),
+            3 => Some("bar"),
+            4 => Some("circle_graph"),
+            5 => Some("virtual_partner"),
+            6 => Some("balance"),
+            7 => Some("string_list"),
+            8 => Some("string"),
+            9 => Some("simple_dynamic_icon"),
+            10 => Some("gauge"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ExdDisplayType {
@@ -35,19 +52,50 @@ impl Default for ExdDisplayType {
 
 impl fmt::Display for ExdDisplayType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "numerical"),
-            1 => write!(f, "simple"),
-            2 => write!(f, "graph"),
-            3 => write!(f, "bar"),
-            4 => write!(f, "circle_graph"),
-            5 => write!(f, "virtual_partner"),
-            6 => write!(f, "balance"),
-            7 => write!(f, "string_list"),
-            8 => write!(f, "string"),
-            9 => write!(f, "simple_dynamic_icon"),
-            10 => write!(f, "gauge"),
-            _ => write!(f, "ExdDisplayType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ExdDisplayType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdDisplayType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ExdDisplayType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExdDisplayType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

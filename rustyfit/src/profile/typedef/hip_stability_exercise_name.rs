@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Hip Stability Exercise Name type.
 #[repr(transparent)]
@@ -58,6 +58,47 @@ impl HipStabilityExerciseName {
     pub const WEIGHTED_SUPINE_HIP_INTERNAL_ROTATION: HipStabilityExerciseName =
         HipStabilityExerciseName(33);
     pub const LYING_ABDUCTION_STRETCH: HipStabilityExerciseName = HipStabilityExerciseName(34);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("band_side_lying_leg_raise"),
+            1 => Some("dead_bug"),
+            2 => Some("weighted_dead_bug"),
+            3 => Some("external_hip_raise"),
+            4 => Some("weighted_external_hip_raise"),
+            5 => Some("fire_hydrant_kicks"),
+            6 => Some("weighted_fire_hydrant_kicks"),
+            7 => Some("hip_circles"),
+            8 => Some("weighted_hip_circles"),
+            9 => Some("inner_thigh_lift"),
+            10 => Some("weighted_inner_thigh_lift"),
+            11 => Some("lateral_walks_with_band_at_ankles"),
+            12 => Some("pretzel_side_kick"),
+            13 => Some("weighted_pretzel_side_kick"),
+            14 => Some("prone_hip_internal_rotation"),
+            15 => Some("weighted_prone_hip_internal_rotation"),
+            16 => Some("quadruped"),
+            17 => Some("quadruped_hip_extension"),
+            18 => Some("weighted_quadruped_hip_extension"),
+            19 => Some("quadruped_with_leg_lift"),
+            20 => Some("weighted_quadruped_with_leg_lift"),
+            21 => Some("side_lying_leg_raise"),
+            22 => Some("weighted_side_lying_leg_raise"),
+            23 => Some("sliding_hip_adduction"),
+            24 => Some("weighted_sliding_hip_adduction"),
+            25 => Some("standing_adduction"),
+            26 => Some("weighted_standing_adduction"),
+            27 => Some("standing_cable_hip_abduction"),
+            28 => Some("standing_hip_abduction"),
+            29 => Some("weighted_standing_hip_abduction"),
+            30 => Some("standing_rear_leg_raise"),
+            31 => Some("weighted_standing_rear_leg_raise"),
+            32 => Some("supine_hip_internal_rotation"),
+            33 => Some("weighted_supine_hip_internal_rotation"),
+            34 => Some("lying_abduction_stretch"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for HipStabilityExerciseName {
@@ -68,43 +109,50 @@ impl Default for HipStabilityExerciseName {
 
 impl fmt::Display for HipStabilityExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "band_side_lying_leg_raise"),
-            1 => write!(f, "dead_bug"),
-            2 => write!(f, "weighted_dead_bug"),
-            3 => write!(f, "external_hip_raise"),
-            4 => write!(f, "weighted_external_hip_raise"),
-            5 => write!(f, "fire_hydrant_kicks"),
-            6 => write!(f, "weighted_fire_hydrant_kicks"),
-            7 => write!(f, "hip_circles"),
-            8 => write!(f, "weighted_hip_circles"),
-            9 => write!(f, "inner_thigh_lift"),
-            10 => write!(f, "weighted_inner_thigh_lift"),
-            11 => write!(f, "lateral_walks_with_band_at_ankles"),
-            12 => write!(f, "pretzel_side_kick"),
-            13 => write!(f, "weighted_pretzel_side_kick"),
-            14 => write!(f, "prone_hip_internal_rotation"),
-            15 => write!(f, "weighted_prone_hip_internal_rotation"),
-            16 => write!(f, "quadruped"),
-            17 => write!(f, "quadruped_hip_extension"),
-            18 => write!(f, "weighted_quadruped_hip_extension"),
-            19 => write!(f, "quadruped_with_leg_lift"),
-            20 => write!(f, "weighted_quadruped_with_leg_lift"),
-            21 => write!(f, "side_lying_leg_raise"),
-            22 => write!(f, "weighted_side_lying_leg_raise"),
-            23 => write!(f, "sliding_hip_adduction"),
-            24 => write!(f, "weighted_sliding_hip_adduction"),
-            25 => write!(f, "standing_adduction"),
-            26 => write!(f, "weighted_standing_adduction"),
-            27 => write!(f, "standing_cable_hip_abduction"),
-            28 => write!(f, "standing_hip_abduction"),
-            29 => write!(f, "weighted_standing_hip_abduction"),
-            30 => write!(f, "standing_rear_leg_raise"),
-            31 => write!(f, "weighted_standing_rear_leg_raise"),
-            32 => write!(f, "supine_hip_internal_rotation"),
-            33 => write!(f, "weighted_supine_hip_internal_rotation"),
-            34 => write!(f, "lying_abduction_stretch"),
-            _ => write!(f, "HipStabilityExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "HipStabilityExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HipStabilityExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("HipStabilityExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for HipStabilityExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

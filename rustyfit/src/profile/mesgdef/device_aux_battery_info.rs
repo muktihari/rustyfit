@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Device Aux Battery Info message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DeviceAuxBatteryInfo {
     pub timestamp: typedef::DateTime,
@@ -24,15 +27,15 @@ pub struct DeviceAuxBatteryInfo {
 }
 
 impl DeviceAuxBatteryInfo {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::DeviceIndex
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u16`; Scale: `256`; Units: `V`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `256`; Units: `V`
     pub const BATTERY_VOLTAGE: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BATTERY_STATUS`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::BatteryStatus
     pub const BATTERY_STATUS: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const BATTERY_IDENTIFIER: u8 = 3;
 
     /// Create new DeviceAuxBatteryInfo with all fields being set to its corresponding invalid value.
@@ -165,6 +168,91 @@ impl From<DeviceAuxBatteryInfo> for Message {
             num: typedef::MesgNum::DEVICE_AUX_BATTERY_INFO,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DeviceAuxBatteryInfo {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DeviceAuxBatteryInfo", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.device_index.0 != u8::MAX {
+            state.serialize_field("device_index", &self.device_index)?;
+        }
+        if let Some(v) = self.battery_voltage_scaled() {
+            state.serialize_field("battery_voltage", &v)?;
+        }
+        if self.battery_status.0 != u8::MAX {
+            state.serialize_field("battery_status", &self.battery_status)?;
+        }
+        if self.battery_identifier != u8::MAX {
+            state.serialize_field("battery_identifier", &self.battery_identifier)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    device_index: typedef::DeviceIndex,
+    battery_voltage: f64,
+    battery_status: typedef::BatteryStatus,
+    battery_identifier: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DeviceAuxBatteryInfo {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            device_index: m.device_index,
+            battery_voltage: {
+                let unscaled = (m.battery_voltage + 0.0) * 256.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            battery_status: m.battery_status,
+            battery_identifier: m.battery_identifier,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            device_index: typedef::DeviceIndex(u8::MAX),
+            battery_voltage: f64::from_bits(u64::MAX),
+            battery_status: typedef::BatteryStatus(u8::MAX),
+            battery_identifier: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

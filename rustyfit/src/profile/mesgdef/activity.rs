@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Activity message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Activity {
     pub timestamp: typedef::DateTime,
@@ -28,21 +31,21 @@ pub struct Activity {
 }
 
 impl Activity {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUM_SESSIONS: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Activity
     pub const TYPE: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Event
     pub const EVENT: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::EventType
     pub const EVENT_TYPE: u8 = 4;
-    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocalDateTime
     pub const LOCAL_TIMESTAMP: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const EVENT_GROUP: u8 = 6;
 
     /// Create new Activity with all fields being set to its corresponding invalid value.
@@ -208,6 +211,112 @@ impl From<Activity> for Message {
             num: typedef::MesgNum::ACTIVITY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Activity {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Activity", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.total_timer_time_scaled() {
+            state.serialize_field("total_timer_time", &v)?;
+        }
+        if self.num_sessions != u16::MAX {
+            state.serialize_field("num_sessions", &self.num_sessions)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if self.event.0 != u8::MAX {
+            state.serialize_field("event", &self.event)?;
+        }
+        if self.event_type.0 != u8::MAX {
+            state.serialize_field("event_type", &self.event_type)?;
+        }
+        if let Some(v) = self.local_timestamp.unix_timestamp() {
+            state.serialize_field("local_timestamp", &v)?;
+        }
+        if self.event_group != u8::MAX {
+            state.serialize_field("event_group", &self.event_group)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    total_timer_time: f64,
+    num_sessions: u16,
+    r#type: typedef::Activity,
+    event: typedef::Event,
+    event_type: typedef::EventType,
+    local_timestamp: Option<i64>,
+    event_group: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Activity {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            total_timer_time: {
+                let unscaled = (m.total_timer_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            num_sessions: m.num_sessions,
+            r#type: m.r#type,
+            event: m.event,
+            event_type: m.event_type,
+            local_timestamp: m.local_timestamp.map_or_else(
+                || typedef::LocalDateTime(u32::MAX),
+                typedef::LocalDateTime::from_unix_timestamp,
+            ),
+            event_group: m.event_group,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            total_timer_time: f64::from_bits(u64::MAX),
+            num_sessions: u16::MAX,
+            r#type: typedef::Activity(u8::MAX),
+            event: typedef::Event(u8::MAX),
+            event_type: typedef::EventType(u8::MAX),
+            local_timestamp: None,
+            event_group: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

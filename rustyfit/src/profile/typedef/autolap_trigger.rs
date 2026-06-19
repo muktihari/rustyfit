@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Autolap Trigger type.
 #[repr(transparent)]
@@ -22,6 +22,20 @@ impl AutolapTrigger {
     pub const POSITION_MARKED: AutolapTrigger = AutolapTrigger(5);
     pub const OFF: AutolapTrigger = AutolapTrigger(6);
     pub const AUTO_SELECT: AutolapTrigger = AutolapTrigger(13);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("time"),
+            1 => Some("distance"),
+            2 => Some("position_start"),
+            3 => Some("position_lap"),
+            4 => Some("position_waypoint"),
+            5 => Some("position_marked"),
+            6 => Some("off"),
+            13 => Some("auto_select"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for AutolapTrigger {
@@ -32,16 +46,50 @@ impl Default for AutolapTrigger {
 
 impl fmt::Display for AutolapTrigger {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "time"),
-            1 => write!(f, "distance"),
-            2 => write!(f, "position_start"),
-            3 => write!(f, "position_lap"),
-            4 => write!(f, "position_waypoint"),
-            5 => write!(f, "position_marked"),
-            6 => write!(f, "off"),
-            13 => write!(f, "auto_select"),
-            _ => write!(f, "AutolapTrigger({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "AutolapTrigger({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AutolapTrigger {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("AutolapTrigger", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for AutolapTrigger {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

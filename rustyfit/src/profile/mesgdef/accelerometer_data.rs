@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Accelerometer Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct AccelerometerData {
     /// Units: s; Whole second part of the timestamp
@@ -42,29 +45,29 @@ pub struct AccelerometerData {
 }
 
 impl AccelerometerData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ACCEL_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; Units: `g`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
     pub const CALIBRATED_ACCEL_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; Units: `g`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
     pub const CALIBRATED_ACCEL_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; Units: `g`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
     pub const CALIBRATED_ACCEL_Z: u8 = 7;
-    /// Value's type: `Vec<i16>`; Units: `mG`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
     pub const COMPRESSED_CALIBRATED_ACCEL_X: u8 = 8;
-    /// Value's type: `Vec<i16>`; Units: `mG`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
     pub const COMPRESSED_CALIBRATED_ACCEL_Y: u8 = 9;
-    /// Value's type: `Vec<i16>`; Units: `mG`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
     pub const COMPRESSED_CALIBRATED_ACCEL_Z: u8 = 10;
 
     /// Create new AccelerometerData with all fields being set to its corresponding invalid value.
@@ -253,6 +256,135 @@ impl From<AccelerometerData> for Message {
             num: typedef::MesgNum::ACCELEROMETER_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AccelerometerData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("AccelerometerData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if !self.sample_time_offset.is_empty() {
+            state.serialize_field("sample_time_offset", &self.sample_time_offset)?;
+        }
+        if !self.accel_x.is_empty() {
+            state.serialize_field("accel_x", &self.accel_x)?;
+        }
+        if !self.accel_y.is_empty() {
+            state.serialize_field("accel_y", &self.accel_y)?;
+        }
+        if !self.accel_z.is_empty() {
+            state.serialize_field("accel_z", &self.accel_z)?;
+        }
+        if !self.calibrated_accel_x.is_empty() {
+            state.serialize_field("calibrated_accel_x", &self.calibrated_accel_x)?;
+        }
+        if !self.calibrated_accel_y.is_empty() {
+            state.serialize_field("calibrated_accel_y", &self.calibrated_accel_y)?;
+        }
+        if !self.calibrated_accel_z.is_empty() {
+            state.serialize_field("calibrated_accel_z", &self.calibrated_accel_z)?;
+        }
+        if !self.compressed_calibrated_accel_x.is_empty() {
+            state.serialize_field(
+                "compressed_calibrated_accel_x",
+                &self.compressed_calibrated_accel_x,
+            )?;
+        }
+        if !self.compressed_calibrated_accel_y.is_empty() {
+            state.serialize_field(
+                "compressed_calibrated_accel_y",
+                &self.compressed_calibrated_accel_y,
+            )?;
+        }
+        if !self.compressed_calibrated_accel_z.is_empty() {
+            state.serialize_field(
+                "compressed_calibrated_accel_z",
+                &self.compressed_calibrated_accel_z,
+            )?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    sample_time_offset: Vec<u16>,
+    accel_x: Vec<u16>,
+    accel_y: Vec<u16>,
+    accel_z: Vec<u16>,
+    calibrated_accel_x: Vec<f32>,
+    calibrated_accel_y: Vec<f32>,
+    calibrated_accel_z: Vec<f32>,
+    compressed_calibrated_accel_x: Vec<i16>,
+    compressed_calibrated_accel_y: Vec<i16>,
+    compressed_calibrated_accel_z: Vec<i16>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for AccelerometerData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            sample_time_offset: m.sample_time_offset,
+            accel_x: m.accel_x,
+            accel_y: m.accel_y,
+            accel_z: m.accel_z,
+            calibrated_accel_x: m.calibrated_accel_x,
+            calibrated_accel_y: m.calibrated_accel_y,
+            calibrated_accel_z: m.calibrated_accel_z,
+            compressed_calibrated_accel_x: m.compressed_calibrated_accel_x,
+            compressed_calibrated_accel_y: m.compressed_calibrated_accel_y,
+            compressed_calibrated_accel_z: m.compressed_calibrated_accel_z,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            sample_time_offset: Vec::new(),
+            accel_x: Vec::new(),
+            accel_y: Vec::new(),
+            accel_z: Vec::new(),
+            calibrated_accel_x: Vec::new(),
+            calibrated_accel_y: Vec::new(),
+            calibrated_accel_z: Vec::new(),
+            compressed_calibrated_accel_x: Vec::new(),
+            compressed_calibrated_accel_y: Vec::new(),
+            compressed_calibrated_accel_z: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

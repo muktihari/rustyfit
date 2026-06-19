@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Training Settings message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct TrainingSettings {
     /// Scale: 100; Units: m
@@ -26,13 +29,13 @@ pub struct TrainingSettings {
 }
 
 impl TrainingSettings {
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const TARGET_DISTANCE: u8 = 31;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const TARGET_SPEED: u8 = 32;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const TARGET_TIME: u8 = 33;
-    /// Value's type: `u32`; Scale: `1e+06`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1e+06`; Units: `m/s`
     pub const PRECISE_TARGET_SPEED: u8 = 153;
 
     /// Create new TrainingSettings with all fields being set to its corresponding invalid value.
@@ -196,6 +199,96 @@ impl From<TrainingSettings> for Message {
             num: typedef::MesgNum::TRAINING_SETTINGS,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TrainingSettings {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("TrainingSettings", n)?;
+        if let Some(v) = self.target_distance_scaled() {
+            state.serialize_field("target_distance", &v)?;
+        }
+        if let Some(v) = self.target_speed_scaled() {
+            state.serialize_field("target_speed", &v)?;
+        }
+        if self.target_time != u32::MAX {
+            state.serialize_field("target_time", &self.target_time)?;
+        }
+        if let Some(v) = self.precise_target_speed_scaled() {
+            state.serialize_field("precise_target_speed", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    target_distance: f64,
+    target_speed: f64,
+    target_time: u32,
+    precise_target_speed: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for TrainingSettings {
+    fn from(m: De) -> Self {
+        Self {
+            target_distance: {
+                let unscaled = (m.target_distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            target_speed: {
+                let unscaled = (m.target_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            target_time: m.target_time,
+            precise_target_speed: {
+                let unscaled = (m.precise_target_speed + 0.0) * 1000000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            target_distance: f64::from_bits(u64::MAX),
+            target_speed: f64::from_bits(u64::MAX),
+            target_time: u32::MAX,
+            precise_target_speed: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

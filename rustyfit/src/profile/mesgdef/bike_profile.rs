@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Bike Profile message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct BikeProfile {
     pub message_index: typedef::MessageIndex,
@@ -71,69 +74,69 @@ pub struct BikeProfile {
 }
 
 impl BikeProfile {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const ODOMETER: u8 = 3;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const BIKE_SPD_ANT_ID: u8 = 4;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const BIKE_CAD_ANT_ID: u8 = 5;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const BIKE_SPDCAD_ANT_ID: u8 = 6;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const BIKE_POWER_ANT_ID: u8 = 7;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m`
     pub const CUSTOM_WHEELSIZE: u8 = 8;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m`
     pub const AUTO_WHEELSIZE: u8 = 9;
-    /// Value's type: `u16`; Scale: `10`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `kg`
     pub const BIKE_WEIGHT: u8 = 10;
-    /// Value's type: `u16`; Scale: `10`; Units: `%`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
     pub const POWER_CAL_FACTOR: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const AUTO_WHEEL_CAL: u8 = 12;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const AUTO_POWER_ZERO: u8 = 13;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const ID: u8 = 14;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SPD_ENABLED: u8 = 15;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const CAD_ENABLED: u8 = 16;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SPDCAD_ENABLED: u8 = 17;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const POWER_ENABLED: u8 = 18;
-    /// Value's type: `u8`; Scale: `2`; Offset: `-110`; Units: `mm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Offset: `-110`; Units: `mm`
     pub const CRANK_LENGTH: u8 = 19;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 20;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const BIKE_SPD_ANT_ID_TRANS_TYPE: u8 = 21;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const BIKE_CAD_ANT_ID_TRANS_TYPE: u8 = 22;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const BIKE_SPDCAD_ANT_ID_TRANS_TYPE: u8 = 23;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const BIKE_POWER_ANT_ID_TRANS_TYPE: u8 = 24;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const ODOMETER_ROLLOVER: u8 = 37;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const FRONT_GEAR_NUM: u8 = 38;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const FRONT_GEAR: u8 = 39;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const REAR_GEAR_NUM: u8 = 40;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const REAR_GEAR: u8 = 41;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SHIMANO_DI2_ENABLED: u8 = 44;
 
     /// Create new BikeProfile with all fields being set to its corresponding invalid value.
@@ -668,6 +671,297 @@ impl From<BikeProfile> for Message {
             num: typedef::MesgNum::BIKE_PROFILE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BikeProfile {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("BikeProfile", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if let Some(v) = self.odometer_scaled() {
+            state.serialize_field("odometer", &v)?;
+        }
+        if self.bike_spd_ant_id != u16::MIN {
+            state.serialize_field("bike_spd_ant_id", &self.bike_spd_ant_id)?;
+        }
+        if self.bike_cad_ant_id != u16::MIN {
+            state.serialize_field("bike_cad_ant_id", &self.bike_cad_ant_id)?;
+        }
+        if self.bike_spdcad_ant_id != u16::MIN {
+            state.serialize_field("bike_spdcad_ant_id", &self.bike_spdcad_ant_id)?;
+        }
+        if self.bike_power_ant_id != u16::MIN {
+            state.serialize_field("bike_power_ant_id", &self.bike_power_ant_id)?;
+        }
+        if let Some(v) = self.custom_wheelsize_scaled() {
+            state.serialize_field("custom_wheelsize", &v)?;
+        }
+        if let Some(v) = self.auto_wheelsize_scaled() {
+            state.serialize_field("auto_wheelsize", &v)?;
+        }
+        if let Some(v) = self.bike_weight_scaled() {
+            state.serialize_field("bike_weight", &v)?;
+        }
+        if let Some(v) = self.power_cal_factor_scaled() {
+            state.serialize_field("power_cal_factor", &v)?;
+        }
+        if self.auto_wheel_cal.0 != u8::MAX {
+            state.serialize_field("auto_wheel_cal", &self.auto_wheel_cal)?;
+        }
+        if self.auto_power_zero.0 != u8::MAX {
+            state.serialize_field("auto_power_zero", &self.auto_power_zero)?;
+        }
+        if self.id != u8::MAX {
+            state.serialize_field("id", &self.id)?;
+        }
+        if self.spd_enabled.0 != u8::MAX {
+            state.serialize_field("spd_enabled", &self.spd_enabled)?;
+        }
+        if self.cad_enabled.0 != u8::MAX {
+            state.serialize_field("cad_enabled", &self.cad_enabled)?;
+        }
+        if self.spdcad_enabled.0 != u8::MAX {
+            state.serialize_field("spdcad_enabled", &self.spdcad_enabled)?;
+        }
+        if self.power_enabled.0 != u8::MAX {
+            state.serialize_field("power_enabled", &self.power_enabled)?;
+        }
+        if let Some(v) = self.crank_length_scaled() {
+            state.serialize_field("crank_length", &v)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.bike_spd_ant_id_trans_type != u8::MIN {
+            state.serialize_field(
+                "bike_spd_ant_id_trans_type",
+                &self.bike_spd_ant_id_trans_type,
+            )?;
+        }
+        if self.bike_cad_ant_id_trans_type != u8::MIN {
+            state.serialize_field(
+                "bike_cad_ant_id_trans_type",
+                &self.bike_cad_ant_id_trans_type,
+            )?;
+        }
+        if self.bike_spdcad_ant_id_trans_type != u8::MIN {
+            state.serialize_field(
+                "bike_spdcad_ant_id_trans_type",
+                &self.bike_spdcad_ant_id_trans_type,
+            )?;
+        }
+        if self.bike_power_ant_id_trans_type != u8::MIN {
+            state.serialize_field(
+                "bike_power_ant_id_trans_type",
+                &self.bike_power_ant_id_trans_type,
+            )?;
+        }
+        if self.odometer_rollover != u8::MAX {
+            state.serialize_field("odometer_rollover", &self.odometer_rollover)?;
+        }
+        if self.front_gear_num != u8::MIN {
+            state.serialize_field("front_gear_num", &self.front_gear_num)?;
+        }
+        if !self.front_gear.is_empty() {
+            state.serialize_field("front_gear", &self.front_gear)?;
+        }
+        if self.rear_gear_num != u8::MIN {
+            state.serialize_field("rear_gear_num", &self.rear_gear_num)?;
+        }
+        if !self.rear_gear.is_empty() {
+            state.serialize_field("rear_gear", &self.rear_gear)?;
+        }
+        if self.shimano_di2_enabled.0 != u8::MAX {
+            state.serialize_field("shimano_di2_enabled", &self.shimano_di2_enabled)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    name: String,
+    sport: typedef::Sport,
+    sub_sport: typedef::SubSport,
+    odometer: f64,
+    bike_spd_ant_id: u16,
+    bike_cad_ant_id: u16,
+    bike_spdcad_ant_id: u16,
+    bike_power_ant_id: u16,
+    custom_wheelsize: f64,
+    auto_wheelsize: f64,
+    bike_weight: f64,
+    power_cal_factor: f64,
+    auto_wheel_cal: typedef::Bool,
+    auto_power_zero: typedef::Bool,
+    id: u8,
+    spd_enabled: typedef::Bool,
+    cad_enabled: typedef::Bool,
+    spdcad_enabled: typedef::Bool,
+    power_enabled: typedef::Bool,
+    crank_length: f64,
+    enabled: typedef::Bool,
+    bike_spd_ant_id_trans_type: u8,
+    bike_cad_ant_id_trans_type: u8,
+    bike_spdcad_ant_id_trans_type: u8,
+    bike_power_ant_id_trans_type: u8,
+    odometer_rollover: u8,
+    front_gear_num: u8,
+    front_gear: Vec<u8>,
+    rear_gear_num: u8,
+    rear_gear: Vec<u8>,
+    shimano_di2_enabled: typedef::Bool,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for BikeProfile {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            name: m.name,
+            sport: m.sport,
+            sub_sport: m.sub_sport,
+            odometer: {
+                let unscaled = (m.odometer + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            bike_spd_ant_id: m.bike_spd_ant_id,
+            bike_cad_ant_id: m.bike_cad_ant_id,
+            bike_spdcad_ant_id: m.bike_spdcad_ant_id,
+            bike_power_ant_id: m.bike_power_ant_id,
+            custom_wheelsize: {
+                let unscaled = (m.custom_wheelsize + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            auto_wheelsize: {
+                let unscaled = (m.auto_wheelsize + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            bike_weight: {
+                let unscaled = (m.bike_weight + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            power_cal_factor: {
+                let unscaled = (m.power_cal_factor + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            auto_wheel_cal: m.auto_wheel_cal,
+            auto_power_zero: m.auto_power_zero,
+            id: m.id,
+            spd_enabled: m.spd_enabled,
+            cad_enabled: m.cad_enabled,
+            spdcad_enabled: m.spdcad_enabled,
+            power_enabled: m.power_enabled,
+            crank_length: {
+                let unscaled = (m.crank_length + -110.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            enabled: m.enabled,
+            bike_spd_ant_id_trans_type: m.bike_spd_ant_id_trans_type,
+            bike_cad_ant_id_trans_type: m.bike_cad_ant_id_trans_type,
+            bike_spdcad_ant_id_trans_type: m.bike_spdcad_ant_id_trans_type,
+            bike_power_ant_id_trans_type: m.bike_power_ant_id_trans_type,
+            odometer_rollover: m.odometer_rollover,
+            front_gear_num: m.front_gear_num,
+            front_gear: m.front_gear,
+            rear_gear_num: m.rear_gear_num,
+            rear_gear: m.rear_gear,
+            shimano_di2_enabled: m.shimano_di2_enabled,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            name: String::new(),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            odometer: f64::from_bits(u64::MAX),
+            bike_spd_ant_id: u16::MIN,
+            bike_cad_ant_id: u16::MIN,
+            bike_spdcad_ant_id: u16::MIN,
+            bike_power_ant_id: u16::MIN,
+            custom_wheelsize: f64::from_bits(u64::MAX),
+            auto_wheelsize: f64::from_bits(u64::MAX),
+            bike_weight: f64::from_bits(u64::MAX),
+            power_cal_factor: f64::from_bits(u64::MAX),
+            auto_wheel_cal: typedef::Bool(u8::MAX),
+            auto_power_zero: typedef::Bool(u8::MAX),
+            id: u8::MAX,
+            spd_enabled: typedef::Bool(u8::MAX),
+            cad_enabled: typedef::Bool(u8::MAX),
+            spdcad_enabled: typedef::Bool(u8::MAX),
+            power_enabled: typedef::Bool(u8::MAX),
+            crank_length: f64::from_bits(u64::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            bike_spd_ant_id_trans_type: u8::MIN,
+            bike_cad_ant_id_trans_type: u8::MIN,
+            bike_spdcad_ant_id_trans_type: u8::MIN,
+            bike_power_ant_id_trans_type: u8::MIN,
+            odometer_rollover: u8::MAX,
+            front_gear_num: u8::MIN,
+            front_gear: Vec::new(),
+            rear_gear_num: u8::MIN,
+            rear_gear: Vec::new(),
+            shimano_di2_enabled: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

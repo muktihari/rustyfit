@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hsa Step Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HsaStepData {
     /// Units: s
@@ -24,11 +27,11 @@ pub struct HsaStepData {
 }
 
 impl HsaStepData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u32>`; Units: `steps`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `steps`
     pub const STEPS: u8 = 1;
 
     /// Create new HsaStepData with all fields being set to its corresponding invalid value.
@@ -118,6 +121,72 @@ impl From<HsaStepData> for Message {
             num: typedef::MesgNum::HSA_STEP_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HsaStepData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HsaStepData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.processing_interval != u16::MAX {
+            state.serialize_field("processing_interval", &self.processing_interval)?;
+        }
+        if !self.steps.is_empty() {
+            state.serialize_field("steps", &self.steps)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    processing_interval: u16,
+    steps: Vec<u32>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HsaStepData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            processing_interval: m.processing_interval,
+            steps: m.steps,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            processing_interval: u16::MAX,
+            steps: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

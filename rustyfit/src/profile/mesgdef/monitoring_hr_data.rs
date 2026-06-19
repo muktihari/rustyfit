@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Monitoring Hr Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct MonitoringHrData {
     /// Units: s; Must align to logging interval, for example, time must be 00:00:00 for daily log.
@@ -24,11 +27,11 @@ pub struct MonitoringHrData {
 }
 
 impl MonitoringHrData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const RESTING_HEART_RATE: u8 = 0;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const CURRENT_DAY_RESTING_HEART_RATE: u8 = 1;
 
     /// Create new MonitoringHrData with all fields being set to its corresponding invalid value.
@@ -118,6 +121,75 @@ impl From<MonitoringHrData> for Message {
             num: typedef::MesgNum::MONITORING_HR_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MonitoringHrData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("MonitoringHrData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.resting_heart_rate != u8::MAX {
+            state.serialize_field("resting_heart_rate", &self.resting_heart_rate)?;
+        }
+        if self.current_day_resting_heart_rate != u8::MAX {
+            state.serialize_field(
+                "current_day_resting_heart_rate",
+                &self.current_day_resting_heart_rate,
+            )?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    resting_heart_rate: u8,
+    current_day_resting_heart_rate: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for MonitoringHrData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            resting_heart_rate: m.resting_heart_rate,
+            current_day_resting_heart_rate: m.current_day_resting_heart_rate,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            resting_heart_rate: u8::MAX,
+            current_day_resting_heart_rate: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

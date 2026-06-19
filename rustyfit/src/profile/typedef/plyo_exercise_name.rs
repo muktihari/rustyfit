@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Plyo Exercise Name type.
 #[repr(transparent)]
@@ -52,6 +52,50 @@ impl PlyoExerciseName {
     pub const BOX_JUMP_OVERS_OVER_THE_BOX: PlyoExerciseName = PlyoExerciseName(35);
     pub const STAR_JUMP_SQUATS: PlyoExerciseName = PlyoExerciseName(36);
     pub const JUMP_SQUAT: PlyoExerciseName = PlyoExerciseName(37);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("alternating_jump_lunge"),
+            1 => Some("weighted_alternating_jump_lunge"),
+            2 => Some("barbell_jump_squat"),
+            3 => Some("body_weight_jump_squat"),
+            4 => Some("weighted_jump_squat"),
+            5 => Some("cross_knee_strike"),
+            6 => Some("weighted_cross_knee_strike"),
+            7 => Some("depth_jump"),
+            8 => Some("weighted_depth_jump"),
+            9 => Some("dumbbell_jump_squat"),
+            10 => Some("dumbbell_split_jump"),
+            11 => Some("front_knee_strike"),
+            12 => Some("weighted_front_knee_strike"),
+            13 => Some("high_box_jump"),
+            14 => Some("weighted_high_box_jump"),
+            15 => Some("isometric_explosive_body_weight_jump_squat"),
+            16 => Some("weighted_isometric_explosive_jump_squat"),
+            17 => Some("lateral_leap_and_hop"),
+            18 => Some("weighted_lateral_leap_and_hop"),
+            19 => Some("lateral_plyo_squats"),
+            20 => Some("weighted_lateral_plyo_squats"),
+            21 => Some("lateral_slide"),
+            22 => Some("weighted_lateral_slide"),
+            23 => Some("medicine_ball_overhead_throws"),
+            24 => Some("medicine_ball_side_throw"),
+            25 => Some("medicine_ball_slam"),
+            26 => Some("side_to_side_medicine_ball_throws"),
+            27 => Some("side_to_side_shuffle_jump"),
+            28 => Some("weighted_side_to_side_shuffle_jump"),
+            29 => Some("squat_jump_onto_box"),
+            30 => Some("weighted_squat_jump_onto_box"),
+            31 => Some("squat_jumps_in_and_out"),
+            32 => Some("weighted_squat_jumps_in_and_out"),
+            33 => Some("box_jump"),
+            34 => Some("box_jump_overs"),
+            35 => Some("box_jump_overs_over_the_box"),
+            36 => Some("star_jump_squats"),
+            37 => Some("jump_squat"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for PlyoExerciseName {
@@ -62,46 +106,50 @@ impl Default for PlyoExerciseName {
 
 impl fmt::Display for PlyoExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "alternating_jump_lunge"),
-            1 => write!(f, "weighted_alternating_jump_lunge"),
-            2 => write!(f, "barbell_jump_squat"),
-            3 => write!(f, "body_weight_jump_squat"),
-            4 => write!(f, "weighted_jump_squat"),
-            5 => write!(f, "cross_knee_strike"),
-            6 => write!(f, "weighted_cross_knee_strike"),
-            7 => write!(f, "depth_jump"),
-            8 => write!(f, "weighted_depth_jump"),
-            9 => write!(f, "dumbbell_jump_squat"),
-            10 => write!(f, "dumbbell_split_jump"),
-            11 => write!(f, "front_knee_strike"),
-            12 => write!(f, "weighted_front_knee_strike"),
-            13 => write!(f, "high_box_jump"),
-            14 => write!(f, "weighted_high_box_jump"),
-            15 => write!(f, "isometric_explosive_body_weight_jump_squat"),
-            16 => write!(f, "weighted_isometric_explosive_jump_squat"),
-            17 => write!(f, "lateral_leap_and_hop"),
-            18 => write!(f, "weighted_lateral_leap_and_hop"),
-            19 => write!(f, "lateral_plyo_squats"),
-            20 => write!(f, "weighted_lateral_plyo_squats"),
-            21 => write!(f, "lateral_slide"),
-            22 => write!(f, "weighted_lateral_slide"),
-            23 => write!(f, "medicine_ball_overhead_throws"),
-            24 => write!(f, "medicine_ball_side_throw"),
-            25 => write!(f, "medicine_ball_slam"),
-            26 => write!(f, "side_to_side_medicine_ball_throws"),
-            27 => write!(f, "side_to_side_shuffle_jump"),
-            28 => write!(f, "weighted_side_to_side_shuffle_jump"),
-            29 => write!(f, "squat_jump_onto_box"),
-            30 => write!(f, "weighted_squat_jump_onto_box"),
-            31 => write!(f, "squat_jumps_in_and_out"),
-            32 => write!(f, "weighted_squat_jumps_in_and_out"),
-            33 => write!(f, "box_jump"),
-            34 => write!(f, "box_jump_overs"),
-            35 => write!(f, "box_jump_overs_over_the_box"),
-            36 => write!(f, "star_jump_squats"),
-            37 => write!(f, "jump_squat"),
-            _ => write!(f, "PlyoExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "PlyoExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for PlyoExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("PlyoExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for PlyoExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

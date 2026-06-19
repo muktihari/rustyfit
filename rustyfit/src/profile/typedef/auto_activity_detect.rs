@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Auto Activity Detect type.
 #[repr(transparent)]
@@ -21,6 +21,19 @@ impl AutoActivityDetect {
     pub const WALKING: AutoActivityDetect = AutoActivityDetect(0x00000008);
     pub const ELLIPTICAL: AutoActivityDetect = AutoActivityDetect(0x00000020);
     pub const SEDENTARY: AutoActivityDetect = AutoActivityDetect(0x00000400);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x00000000 => Some("none"),
+            0x00000001 => Some("running"),
+            0x00000002 => Some("cycling"),
+            0x00000004 => Some("swimming"),
+            0x00000008 => Some("walking"),
+            0x00000020 => Some("elliptical"),
+            0x00000400 => Some("sedentary"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for AutoActivityDetect {
@@ -31,15 +44,50 @@ impl Default for AutoActivityDetect {
 
 impl fmt::Display for AutoActivityDetect {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000000 => write!(f, "none"),
-            0x00000001 => write!(f, "running"),
-            0x00000002 => write!(f, "cycling"),
-            0x00000004 => write!(f, "swimming"),
-            0x00000008 => write!(f, "walking"),
-            0x00000020 => write!(f, "elliptical"),
-            0x00000400 => write!(f, "sedentary"),
-            _ => write!(f, "AutoActivityDetect({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "AutoActivityDetect({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AutoActivityDetect {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("AutoActivityDetect", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u32,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for AutoActivityDetect {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

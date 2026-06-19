@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Triceps Extension Exercise Name type.
 #[repr(transparent)]
@@ -90,6 +90,57 @@ impl TricepsExtensionExerciseName {
         TricepsExtensionExerciseName(43);
     pub const OVERHEAD_DUMBBELL_TRICEPS_EXTENSION_WHEELCHAIR: TricepsExtensionExerciseName =
         TricepsExtensionExerciseName(44);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bench_dip"),
+            1 => Some("weighted_bench_dip"),
+            2 => Some("body_weight_dip"),
+            3 => Some("cable_kickback"),
+            4 => Some("cable_lying_triceps_extension"),
+            5 => Some("cable_overhead_triceps_extension"),
+            6 => Some("dumbbell_kickback"),
+            7 => Some("dumbbell_lying_triceps_extension"),
+            8 => Some("ez_bar_overhead_triceps_extension"),
+            9 => Some("incline_dip"),
+            10 => Some("weighted_incline_dip"),
+            11 => Some("incline_ez_bar_lying_triceps_extension"),
+            12 => Some("lying_dumbbell_pullover_to_extension"),
+            13 => Some("lying_ez_bar_triceps_extension"),
+            14 => Some("lying_triceps_extension_to_close_grip_bench_press"),
+            15 => Some("overhead_dumbbell_triceps_extension"),
+            16 => Some("reclining_triceps_press"),
+            17 => Some("reverse_grip_pressdown"),
+            18 => Some("reverse_grip_triceps_pressdown"),
+            19 => Some("rope_pressdown"),
+            20 => Some("seated_barbell_overhead_triceps_extension"),
+            21 => Some("seated_dumbbell_overhead_triceps_extension"),
+            22 => Some("seated_ez_bar_overhead_triceps_extension"),
+            23 => Some("seated_single_arm_overhead_dumbbell_extension"),
+            24 => Some("single_arm_dumbbell_overhead_triceps_extension"),
+            25 => Some("single_dumbbell_seated_overhead_triceps_extension"),
+            26 => Some("single_leg_bench_dip_and_kick"),
+            27 => Some("weighted_single_leg_bench_dip_and_kick"),
+            28 => Some("single_leg_dip"),
+            29 => Some("weighted_single_leg_dip"),
+            30 => Some("static_lying_triceps_extension"),
+            31 => Some("suspended_dip"),
+            32 => Some("weighted_suspended_dip"),
+            33 => Some("swiss_ball_dumbbell_lying_triceps_extension"),
+            34 => Some("swiss_ball_ez_bar_lying_triceps_extension"),
+            35 => Some("swiss_ball_ez_bar_overhead_triceps_extension"),
+            36 => Some("tabletop_dip"),
+            37 => Some("weighted_tabletop_dip"),
+            38 => Some("triceps_extension_on_floor"),
+            39 => Some("triceps_pressdown"),
+            40 => Some("weighted_dip"),
+            41 => Some("alternating_dumbbell_lying_triceps_extension"),
+            42 => Some("triceps_press"),
+            43 => Some("dumbbell_kickback_wheelchair"),
+            44 => Some("overhead_dumbbell_triceps_extension_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for TricepsExtensionExerciseName {
@@ -100,53 +151,50 @@ impl Default for TricepsExtensionExerciseName {
 
 impl fmt::Display for TricepsExtensionExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bench_dip"),
-            1 => write!(f, "weighted_bench_dip"),
-            2 => write!(f, "body_weight_dip"),
-            3 => write!(f, "cable_kickback"),
-            4 => write!(f, "cable_lying_triceps_extension"),
-            5 => write!(f, "cable_overhead_triceps_extension"),
-            6 => write!(f, "dumbbell_kickback"),
-            7 => write!(f, "dumbbell_lying_triceps_extension"),
-            8 => write!(f, "ez_bar_overhead_triceps_extension"),
-            9 => write!(f, "incline_dip"),
-            10 => write!(f, "weighted_incline_dip"),
-            11 => write!(f, "incline_ez_bar_lying_triceps_extension"),
-            12 => write!(f, "lying_dumbbell_pullover_to_extension"),
-            13 => write!(f, "lying_ez_bar_triceps_extension"),
-            14 => write!(f, "lying_triceps_extension_to_close_grip_bench_press"),
-            15 => write!(f, "overhead_dumbbell_triceps_extension"),
-            16 => write!(f, "reclining_triceps_press"),
-            17 => write!(f, "reverse_grip_pressdown"),
-            18 => write!(f, "reverse_grip_triceps_pressdown"),
-            19 => write!(f, "rope_pressdown"),
-            20 => write!(f, "seated_barbell_overhead_triceps_extension"),
-            21 => write!(f, "seated_dumbbell_overhead_triceps_extension"),
-            22 => write!(f, "seated_ez_bar_overhead_triceps_extension"),
-            23 => write!(f, "seated_single_arm_overhead_dumbbell_extension"),
-            24 => write!(f, "single_arm_dumbbell_overhead_triceps_extension"),
-            25 => write!(f, "single_dumbbell_seated_overhead_triceps_extension"),
-            26 => write!(f, "single_leg_bench_dip_and_kick"),
-            27 => write!(f, "weighted_single_leg_bench_dip_and_kick"),
-            28 => write!(f, "single_leg_dip"),
-            29 => write!(f, "weighted_single_leg_dip"),
-            30 => write!(f, "static_lying_triceps_extension"),
-            31 => write!(f, "suspended_dip"),
-            32 => write!(f, "weighted_suspended_dip"),
-            33 => write!(f, "swiss_ball_dumbbell_lying_triceps_extension"),
-            34 => write!(f, "swiss_ball_ez_bar_lying_triceps_extension"),
-            35 => write!(f, "swiss_ball_ez_bar_overhead_triceps_extension"),
-            36 => write!(f, "tabletop_dip"),
-            37 => write!(f, "weighted_tabletop_dip"),
-            38 => write!(f, "triceps_extension_on_floor"),
-            39 => write!(f, "triceps_pressdown"),
-            40 => write!(f, "weighted_dip"),
-            41 => write!(f, "alternating_dumbbell_lying_triceps_extension"),
-            42 => write!(f, "triceps_press"),
-            43 => write!(f, "dumbbell_kickback_wheelchair"),
-            44 => write!(f, "overhead_dumbbell_triceps_extension_wheelchair"),
-            _ => write!(f, "TricepsExtensionExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "TricepsExtensionExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TricepsExtensionExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("TricepsExtensionExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TricepsExtensionExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

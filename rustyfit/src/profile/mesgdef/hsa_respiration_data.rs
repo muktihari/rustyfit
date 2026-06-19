@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hsa Respiration Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HsaRespirationData {
     /// Units: s
@@ -24,11 +27,11 @@ pub struct HsaRespirationData {
 }
 
 impl HsaRespirationData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `breaths/min`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `breaths/min`
     pub const RESPIRATION_RATE: u8 = 1;
 
     /// Create new HsaRespirationData with all fields being set to its corresponding invalid value.
@@ -149,6 +152,88 @@ impl From<HsaRespirationData> for Message {
             num: typedef::MesgNum::HSA_RESPIRATION_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HsaRespirationData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HsaRespirationData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.processing_interval != u16::MAX {
+            state.serialize_field("processing_interval", &self.processing_interval)?;
+        }
+        if let Some(v) = self.respiration_rate_scaled() {
+            state.serialize_field("respiration_rate", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    processing_interval: u16,
+    respiration_rate: Vec<f64>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HsaRespirationData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            processing_interval: m.processing_interval,
+            respiration_rate: {
+                if m.respiration_rate.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.respiration_rate.len());
+                    for &x in m.respiration_rate.iter() {
+                        let unscaled = (x + 0.0) * 100.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            processing_interval: u16::MAX,
+            respiration_rate: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

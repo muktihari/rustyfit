@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Hip Raise Exercise Name type.
 #[repr(transparent)]
@@ -84,6 +84,62 @@ impl HipRaiseExerciseName {
     pub const LEG_CIRCLES: HipRaiseExerciseName = HipRaiseExerciseName(47);
     pub const LEG_LIFT: HipRaiseExerciseName = HipRaiseExerciseName(48);
     pub const LEG_LIFT_IN_EXTERNAL_ROTATION: HipRaiseExerciseName = HipRaiseExerciseName(49);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("barbell_hip_thrust_on_floor"),
+            1 => Some("barbell_hip_thrust_with_bench"),
+            2 => Some("bent_knee_swiss_ball_reverse_hip_raise"),
+            3 => Some("weighted_bent_knee_swiss_ball_reverse_hip_raise"),
+            4 => Some("bridge_with_leg_extension"),
+            5 => Some("weighted_bridge_with_leg_extension"),
+            6 => Some("clam_bridge"),
+            7 => Some("front_kick_tabletop"),
+            8 => Some("weighted_front_kick_tabletop"),
+            9 => Some("hip_extension_and_cross"),
+            10 => Some("weighted_hip_extension_and_cross"),
+            11 => Some("hip_raise"),
+            12 => Some("weighted_hip_raise"),
+            13 => Some("hip_raise_with_feet_on_swiss_ball"),
+            14 => Some("weighted_hip_raise_with_feet_on_swiss_ball"),
+            15 => Some("hip_raise_with_head_on_bosu_ball"),
+            16 => Some("weighted_hip_raise_with_head_on_bosu_ball"),
+            17 => Some("hip_raise_with_head_on_swiss_ball"),
+            18 => Some("weighted_hip_raise_with_head_on_swiss_ball"),
+            19 => Some("hip_raise_with_knee_squeeze"),
+            20 => Some("weighted_hip_raise_with_knee_squeeze"),
+            21 => Some("incline_rear_leg_extension"),
+            22 => Some("weighted_incline_rear_leg_extension"),
+            23 => Some("kettlebell_swing"),
+            24 => Some("marching_hip_raise"),
+            25 => Some("weighted_marching_hip_raise"),
+            26 => Some("marching_hip_raise_with_feet_on_a_swiss_ball"),
+            27 => Some("weighted_marching_hip_raise_with_feet_on_a_swiss_ball"),
+            28 => Some("reverse_hip_raise"),
+            29 => Some("weighted_reverse_hip_raise"),
+            30 => Some("single_leg_hip_raise"),
+            31 => Some("weighted_single_leg_hip_raise"),
+            32 => Some("single_leg_hip_raise_with_foot_on_bench"),
+            33 => Some("weighted_single_leg_hip_raise_with_foot_on_bench"),
+            34 => Some("single_leg_hip_raise_with_foot_on_bosu_ball"),
+            35 => Some("weighted_single_leg_hip_raise_with_foot_on_bosu_ball"),
+            36 => Some("single_leg_hip_raise_with_foot_on_foam_roller"),
+            37 => Some("weighted_single_leg_hip_raise_with_foot_on_foam_roller"),
+            38 => Some("single_leg_hip_raise_with_foot_on_medicine_ball"),
+            39 => Some("weighted_single_leg_hip_raise_with_foot_on_medicine_ball"),
+            40 => Some("single_leg_hip_raise_with_head_on_bosu_ball"),
+            41 => Some("weighted_single_leg_hip_raise_with_head_on_bosu_ball"),
+            42 => Some("weighted_clam_bridge"),
+            43 => Some("single_leg_swiss_ball_hip_raise_and_leg_curl"),
+            44 => Some("clams"),
+            45 => Some("inner_thigh_circles"),
+            46 => Some("inner_thigh_side_lift"),
+            47 => Some("leg_circles"),
+            48 => Some("leg_lift"),
+            49 => Some("leg_lift_in_external_rotation"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for HipRaiseExerciseName {
@@ -94,61 +150,50 @@ impl Default for HipRaiseExerciseName {
 
 impl fmt::Display for HipRaiseExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "barbell_hip_thrust_on_floor"),
-            1 => write!(f, "barbell_hip_thrust_with_bench"),
-            2 => write!(f, "bent_knee_swiss_ball_reverse_hip_raise"),
-            3 => write!(f, "weighted_bent_knee_swiss_ball_reverse_hip_raise"),
-            4 => write!(f, "bridge_with_leg_extension"),
-            5 => write!(f, "weighted_bridge_with_leg_extension"),
-            6 => write!(f, "clam_bridge"),
-            7 => write!(f, "front_kick_tabletop"),
-            8 => write!(f, "weighted_front_kick_tabletop"),
-            9 => write!(f, "hip_extension_and_cross"),
-            10 => write!(f, "weighted_hip_extension_and_cross"),
-            11 => write!(f, "hip_raise"),
-            12 => write!(f, "weighted_hip_raise"),
-            13 => write!(f, "hip_raise_with_feet_on_swiss_ball"),
-            14 => write!(f, "weighted_hip_raise_with_feet_on_swiss_ball"),
-            15 => write!(f, "hip_raise_with_head_on_bosu_ball"),
-            16 => write!(f, "weighted_hip_raise_with_head_on_bosu_ball"),
-            17 => write!(f, "hip_raise_with_head_on_swiss_ball"),
-            18 => write!(f, "weighted_hip_raise_with_head_on_swiss_ball"),
-            19 => write!(f, "hip_raise_with_knee_squeeze"),
-            20 => write!(f, "weighted_hip_raise_with_knee_squeeze"),
-            21 => write!(f, "incline_rear_leg_extension"),
-            22 => write!(f, "weighted_incline_rear_leg_extension"),
-            23 => write!(f, "kettlebell_swing"),
-            24 => write!(f, "marching_hip_raise"),
-            25 => write!(f, "weighted_marching_hip_raise"),
-            26 => write!(f, "marching_hip_raise_with_feet_on_a_swiss_ball"),
-            27 => write!(f, "weighted_marching_hip_raise_with_feet_on_a_swiss_ball"),
-            28 => write!(f, "reverse_hip_raise"),
-            29 => write!(f, "weighted_reverse_hip_raise"),
-            30 => write!(f, "single_leg_hip_raise"),
-            31 => write!(f, "weighted_single_leg_hip_raise"),
-            32 => write!(f, "single_leg_hip_raise_with_foot_on_bench"),
-            33 => write!(f, "weighted_single_leg_hip_raise_with_foot_on_bench"),
-            34 => write!(f, "single_leg_hip_raise_with_foot_on_bosu_ball"),
-            35 => write!(f, "weighted_single_leg_hip_raise_with_foot_on_bosu_ball"),
-            36 => write!(f, "single_leg_hip_raise_with_foot_on_foam_roller"),
-            37 => write!(f, "weighted_single_leg_hip_raise_with_foot_on_foam_roller"),
-            38 => write!(f, "single_leg_hip_raise_with_foot_on_medicine_ball"),
-            39 => write!(
-                f,
-                "weighted_single_leg_hip_raise_with_foot_on_medicine_ball"
-            ),
-            40 => write!(f, "single_leg_hip_raise_with_head_on_bosu_ball"),
-            41 => write!(f, "weighted_single_leg_hip_raise_with_head_on_bosu_ball"),
-            42 => write!(f, "weighted_clam_bridge"),
-            43 => write!(f, "single_leg_swiss_ball_hip_raise_and_leg_curl"),
-            44 => write!(f, "clams"),
-            45 => write!(f, "inner_thigh_circles"),
-            46 => write!(f, "inner_thigh_side_lift"),
-            47 => write!(f, "leg_circles"),
-            48 => write!(f, "leg_lift"),
-            49 => write!(f, "leg_lift_in_external_rotation"),
-            _ => write!(f, "HipRaiseExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "HipRaiseExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HipRaiseExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("HipRaiseExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for HipRaiseExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

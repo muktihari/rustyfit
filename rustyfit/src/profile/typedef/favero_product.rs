@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Favero Product type.
 #[repr(transparent)]
@@ -16,6 +16,14 @@ pub struct FaveroProduct(pub u16);
 impl FaveroProduct {
     pub const ASSIOMA_UNO: FaveroProduct = FaveroProduct(10);
     pub const ASSIOMA_DUO: FaveroProduct = FaveroProduct(12);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            10 => Some("assioma_uno"),
+            12 => Some("assioma_duo"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for FaveroProduct {
@@ -26,10 +34,50 @@ impl Default for FaveroProduct {
 
 impl fmt::Display for FaveroProduct {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            10 => write!(f, "assioma_uno"),
-            12 => write!(f, "assioma_duo"),
-            _ => write!(f, "FaveroProduct({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "FaveroProduct({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FaveroProduct {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("FaveroProduct", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for FaveroProduct {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

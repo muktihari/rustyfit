@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Exd Screen Configuration message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct ExdScreenConfiguration {
     pub screen_index: u8,
@@ -23,13 +26,13 @@ pub struct ExdScreenConfiguration {
 }
 
 impl ExdScreenConfiguration {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SCREEN_INDEX: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_COUNT: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_LAYOUT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ExdLayout
     pub const LAYOUT: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SCREEN_ENABLED: u8 = 3;
 
     /// Create new ExdScreenConfiguration with all fields being set to its corresponding invalid value.
@@ -130,6 +133,75 @@ impl From<ExdScreenConfiguration> for Message {
             num: typedef::MesgNum::EXD_SCREEN_CONFIGURATION,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdScreenConfiguration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("ExdScreenConfiguration", n)?;
+        if self.screen_index != u8::MAX {
+            state.serialize_field("screen_index", &self.screen_index)?;
+        }
+        if self.field_count != u8::MAX {
+            state.serialize_field("field_count", &self.field_count)?;
+        }
+        if self.layout.0 != u8::MAX {
+            state.serialize_field("layout", &self.layout)?;
+        }
+        if self.screen_enabled.0 != u8::MAX {
+            state.serialize_field("screen_enabled", &self.screen_enabled)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    screen_index: u8,
+    field_count: u8,
+    layout: typedef::ExdLayout,
+    screen_enabled: typedef::Bool,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for ExdScreenConfiguration {
+    fn from(m: De) -> Self {
+        Self {
+            screen_index: m.screen_index,
+            field_count: m.field_count,
+            layout: m.layout,
+            screen_enabled: m.screen_enabled,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            screen_index: u8::MAX,
+            field_count: u8::MAX,
+            layout: typedef::ExdLayout(u8::MAX),
+            screen_enabled: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

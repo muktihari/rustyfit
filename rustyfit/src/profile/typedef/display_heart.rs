@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Display Heart type.
 #[repr(transparent)]
@@ -17,6 +17,15 @@ impl DisplayHeart {
     pub const BPM: DisplayHeart = DisplayHeart(0);
     pub const MAX: DisplayHeart = DisplayHeart(1);
     pub const RESERVE: DisplayHeart = DisplayHeart(2);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bpm"),
+            1 => Some("max"),
+            2 => Some("reserve"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DisplayHeart {
@@ -27,11 +36,50 @@ impl Default for DisplayHeart {
 
 impl fmt::Display for DisplayHeart {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bpm"),
-            1 => write!(f, "max"),
-            2 => write!(f, "reserve"),
-            _ => write!(f, "DisplayHeart({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DisplayHeart({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DisplayHeart {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DisplayHeart", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DisplayHeart {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

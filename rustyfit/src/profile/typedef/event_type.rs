@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Event Type type.
 #[repr(transparent)]
@@ -24,6 +24,22 @@ impl EventType {
     pub const END_ALL_DEPRECIATED: EventType = EventType(7);
     pub const STOP_DISABLE: EventType = EventType(8);
     pub const STOP_DISABLE_ALL: EventType = EventType(9);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("start"),
+            1 => Some("stop"),
+            2 => Some("consecutive_depreciated"),
+            3 => Some("marker"),
+            4 => Some("stop_all"),
+            5 => Some("begin_depreciated"),
+            6 => Some("end_depreciated"),
+            7 => Some("end_all_depreciated"),
+            8 => Some("stop_disable"),
+            9 => Some("stop_disable_all"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for EventType {
@@ -34,18 +50,50 @@ impl Default for EventType {
 
 impl fmt::Display for EventType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "start"),
-            1 => write!(f, "stop"),
-            2 => write!(f, "consecutive_depreciated"),
-            3 => write!(f, "marker"),
-            4 => write!(f, "stop_all"),
-            5 => write!(f, "begin_depreciated"),
-            6 => write!(f, "end_depreciated"),
-            7 => write!(f, "end_all_depreciated"),
-            8 => write!(f, "stop_disable"),
-            9 => write!(f, "stop_disable_all"),
-            _ => write!(f, "EventType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "EventType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for EventType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("EventType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for EventType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

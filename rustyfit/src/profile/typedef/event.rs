@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Event type.
 #[repr(transparent)]
@@ -106,6 +106,58 @@ impl Event {
     pub const TANK_POD_CONNECTED: Event = Event(81);
     /// marker - tank pod has lost connection
     pub const TANK_POD_DISCONNECTED: Event = Event(82);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("timer"),
+            3 => Some("workout"),
+            4 => Some("workout_step"),
+            5 => Some("power_down"),
+            6 => Some("power_up"),
+            7 => Some("off_course"),
+            8 => Some("session"),
+            9 => Some("lap"),
+            10 => Some("course_point"),
+            11 => Some("battery"),
+            12 => Some("virtual_partner_pace"),
+            13 => Some("hr_high_alert"),
+            14 => Some("hr_low_alert"),
+            15 => Some("speed_high_alert"),
+            16 => Some("speed_low_alert"),
+            17 => Some("cad_high_alert"),
+            18 => Some("cad_low_alert"),
+            19 => Some("power_high_alert"),
+            20 => Some("power_low_alert"),
+            21 => Some("recovery_hr"),
+            22 => Some("battery_low"),
+            23 => Some("time_duration_alert"),
+            24 => Some("distance_duration_alert"),
+            25 => Some("calorie_duration_alert"),
+            26 => Some("activity"),
+            27 => Some("fitness_equipment"),
+            28 => Some("length"),
+            32 => Some("user_marker"),
+            33 => Some("sport_point"),
+            36 => Some("calibration"),
+            42 => Some("front_gear_change"),
+            43 => Some("rear_gear_change"),
+            44 => Some("rider_position_change"),
+            45 => Some("elev_high_alert"),
+            46 => Some("elev_low_alert"),
+            47 => Some("comm_timeout"),
+            54 => Some("auto_activity_detect"),
+            56 => Some("dive_alert"),
+            57 => Some("dive_gas_switched"),
+            71 => Some("tank_pressure_reserve"),
+            72 => Some("tank_pressure_critical"),
+            73 => Some("tank_lost"),
+            75 => Some("radar_threat_alert"),
+            76 => Some("tank_battery_low"),
+            81 => Some("tank_pod_connected"),
+            82 => Some("tank_pod_disconnected"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for Event {
@@ -116,54 +168,50 @@ impl Default for Event {
 
 impl fmt::Display for Event {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "timer"),
-            3 => write!(f, "workout"),
-            4 => write!(f, "workout_step"),
-            5 => write!(f, "power_down"),
-            6 => write!(f, "power_up"),
-            7 => write!(f, "off_course"),
-            8 => write!(f, "session"),
-            9 => write!(f, "lap"),
-            10 => write!(f, "course_point"),
-            11 => write!(f, "battery"),
-            12 => write!(f, "virtual_partner_pace"),
-            13 => write!(f, "hr_high_alert"),
-            14 => write!(f, "hr_low_alert"),
-            15 => write!(f, "speed_high_alert"),
-            16 => write!(f, "speed_low_alert"),
-            17 => write!(f, "cad_high_alert"),
-            18 => write!(f, "cad_low_alert"),
-            19 => write!(f, "power_high_alert"),
-            20 => write!(f, "power_low_alert"),
-            21 => write!(f, "recovery_hr"),
-            22 => write!(f, "battery_low"),
-            23 => write!(f, "time_duration_alert"),
-            24 => write!(f, "distance_duration_alert"),
-            25 => write!(f, "calorie_duration_alert"),
-            26 => write!(f, "activity"),
-            27 => write!(f, "fitness_equipment"),
-            28 => write!(f, "length"),
-            32 => write!(f, "user_marker"),
-            33 => write!(f, "sport_point"),
-            36 => write!(f, "calibration"),
-            42 => write!(f, "front_gear_change"),
-            43 => write!(f, "rear_gear_change"),
-            44 => write!(f, "rider_position_change"),
-            45 => write!(f, "elev_high_alert"),
-            46 => write!(f, "elev_low_alert"),
-            47 => write!(f, "comm_timeout"),
-            54 => write!(f, "auto_activity_detect"),
-            56 => write!(f, "dive_alert"),
-            57 => write!(f, "dive_gas_switched"),
-            71 => write!(f, "tank_pressure_reserve"),
-            72 => write!(f, "tank_pressure_critical"),
-            73 => write!(f, "tank_lost"),
-            75 => write!(f, "radar_threat_alert"),
-            76 => write!(f, "tank_battery_low"),
-            81 => write!(f, "tank_pod_connected"),
-            82 => write!(f, "tank_pod_disconnected"),
-            _ => write!(f, "Event({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "Event({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Event {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Event", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Event {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

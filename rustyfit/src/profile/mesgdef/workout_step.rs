@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Workout Step message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct WorkoutStep {
     pub message_index: typedef::MessageIndex,
@@ -40,43 +43,43 @@ pub struct WorkoutStep {
 }
 
 impl WorkoutStep {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const WKT_STEP_NAME: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WKT_STEP_DURATION`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WktStepDuration
     pub const DURATION_TYPE: u8 = 1;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const DURATION_VALUE: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WKT_STEP_TARGET`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WktStepTarget
     pub const TARGET_TYPE: u8 = 3;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const TARGET_VALUE: u8 = 4;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const CUSTOM_TARGET_VALUE_LOW: u8 = 5;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const CUSTOM_TARGET_VALUE_HIGH: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::INTENSITY`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Intensity
     pub const INTENSITY: u8 = 7;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NOTES: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WORKOUT_EQUIPMENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WorkoutEquipment
     pub const EQUIPMENT: u8 = 9;
-    /// Value's type: `u16`; ProfileType: `ProfileType::EXERCISE_CATEGORY`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::ExerciseCategory
     pub const EXERCISE_CATEGORY: u8 = 10;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const EXERCISE_NAME: u8 = 11;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `kg`
     pub const EXERCISE_WEIGHT: u8 = 12;
-    /// Value's type: `u16`; ProfileType: `ProfileType::FIT_BASE_UNIT`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::FitBaseUnit
     pub const WEIGHT_DISPLAY_UNIT: u8 = 13;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WKT_STEP_TARGET`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WktStepTarget
     pub const SECONDARY_TARGET_TYPE: u8 = 19;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const SECONDARY_TARGET_VALUE: u8 = 20;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const SECONDARY_CUSTOM_TARGET_VALUE_LOW: u8 = 21;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const SECONDARY_CUSTOM_TARGET_VALUE_HIGH: u8 = 22;
 
     /// Create new WorkoutStep with all fields being set to its corresponding invalid value.
@@ -363,6 +366,178 @@ impl From<WorkoutStep> for Message {
             num: typedef::MesgNum::WORKOUT_STEP,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WorkoutStep {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("WorkoutStep", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if !self.wkt_step_name.is_empty() {
+            state.serialize_field("wkt_step_name", &self.wkt_step_name)?;
+        }
+        if self.duration_type.0 != u8::MAX {
+            state.serialize_field("duration_type", &self.duration_type)?;
+        }
+        if self.duration_value != u32::MAX {
+            state.serialize_field("duration_value", &self.duration_value)?;
+        }
+        if self.target_type.0 != u8::MAX {
+            state.serialize_field("target_type", &self.target_type)?;
+        }
+        if self.target_value != u32::MAX {
+            state.serialize_field("target_value", &self.target_value)?;
+        }
+        if self.custom_target_value_low != u32::MAX {
+            state.serialize_field("custom_target_value_low", &self.custom_target_value_low)?;
+        }
+        if self.custom_target_value_high != u32::MAX {
+            state.serialize_field("custom_target_value_high", &self.custom_target_value_high)?;
+        }
+        if self.intensity.0 != u8::MAX {
+            state.serialize_field("intensity", &self.intensity)?;
+        }
+        if !self.notes.is_empty() {
+            state.serialize_field("notes", &self.notes)?;
+        }
+        if self.equipment.0 != u8::MAX {
+            state.serialize_field("equipment", &self.equipment)?;
+        }
+        if self.exercise_category.0 != u16::MAX {
+            state.serialize_field("exercise_category", &self.exercise_category)?;
+        }
+        if self.exercise_name != u16::MAX {
+            state.serialize_field("exercise_name", &self.exercise_name)?;
+        }
+        if let Some(v) = self.exercise_weight_scaled() {
+            state.serialize_field("exercise_weight", &v)?;
+        }
+        if self.weight_display_unit.0 != u16::MAX {
+            state.serialize_field("weight_display_unit", &self.weight_display_unit)?;
+        }
+        if self.secondary_target_type.0 != u8::MAX {
+            state.serialize_field("secondary_target_type", &self.secondary_target_type)?;
+        }
+        if self.secondary_target_value != u32::MAX {
+            state.serialize_field("secondary_target_value", &self.secondary_target_value)?;
+        }
+        if self.secondary_custom_target_value_low != u32::MAX {
+            state.serialize_field(
+                "secondary_custom_target_value_low",
+                &self.secondary_custom_target_value_low,
+            )?;
+        }
+        if self.secondary_custom_target_value_high != u32::MAX {
+            state.serialize_field(
+                "secondary_custom_target_value_high",
+                &self.secondary_custom_target_value_high,
+            )?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    wkt_step_name: String,
+    duration_type: typedef::WktStepDuration,
+    duration_value: u32,
+    target_type: typedef::WktStepTarget,
+    target_value: u32,
+    custom_target_value_low: u32,
+    custom_target_value_high: u32,
+    intensity: typedef::Intensity,
+    notes: String,
+    equipment: typedef::WorkoutEquipment,
+    exercise_category: typedef::ExerciseCategory,
+    exercise_name: u16,
+    exercise_weight: f64,
+    weight_display_unit: typedef::FitBaseUnit,
+    secondary_target_type: typedef::WktStepTarget,
+    secondary_target_value: u32,
+    secondary_custom_target_value_low: u32,
+    secondary_custom_target_value_high: u32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for WorkoutStep {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            wkt_step_name: m.wkt_step_name,
+            duration_type: m.duration_type,
+            duration_value: m.duration_value,
+            target_type: m.target_type,
+            target_value: m.target_value,
+            custom_target_value_low: m.custom_target_value_low,
+            custom_target_value_high: m.custom_target_value_high,
+            intensity: m.intensity,
+            notes: m.notes,
+            equipment: m.equipment,
+            exercise_category: m.exercise_category,
+            exercise_name: m.exercise_name,
+            exercise_weight: {
+                let unscaled = (m.exercise_weight + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            weight_display_unit: m.weight_display_unit,
+            secondary_target_type: m.secondary_target_type,
+            secondary_target_value: m.secondary_target_value,
+            secondary_custom_target_value_low: m.secondary_custom_target_value_low,
+            secondary_custom_target_value_high: m.secondary_custom_target_value_high,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            wkt_step_name: String::new(),
+            duration_type: typedef::WktStepDuration(u8::MAX),
+            duration_value: u32::MAX,
+            target_type: typedef::WktStepTarget(u8::MAX),
+            target_value: u32::MAX,
+            custom_target_value_low: u32::MAX,
+            custom_target_value_high: u32::MAX,
+            intensity: typedef::Intensity(u8::MAX),
+            notes: String::new(),
+            equipment: typedef::WorkoutEquipment(u8::MAX),
+            exercise_category: typedef::ExerciseCategory(u16::MAX),
+            exercise_name: u16::MAX,
+            exercise_weight: f64::from_bits(u64::MAX),
+            weight_display_unit: typedef::FitBaseUnit(u16::MAX),
+            secondary_target_type: typedef::WktStepTarget(u8::MAX),
+            secondary_target_value: u32::MAX,
+            secondary_custom_target_value_low: u32::MAX,
+            secondary_custom_target_value_high: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

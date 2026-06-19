@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Device Info message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DeviceInfo {
     /// Units: s
@@ -50,43 +53,43 @@ pub struct DeviceInfo {
 }
 
 impl DeviceInfo {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::DeviceIndex
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEVICE_TYPE: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER: u8 = 2;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::Uint32z
     pub const SERIAL_NUMBER: u8 = 3;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PRODUCT: u8 = 4;
-    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`
     pub const SOFTWARE_VERSION: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const HARDWARE_VERSION: u8 = 6;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const CUM_OPERATING_TIME: u8 = 7;
-    /// Value's type: `u16`; Scale: `256`; Units: `V`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `256`; Units: `V`
     pub const BATTERY_VOLTAGE: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BATTERY_STATUS`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::BatteryStatus
     pub const BATTERY_STATUS: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BODY_LOCATION`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::BodyLocation
     pub const SENSOR_POSITION: u8 = 18;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const DESCRIPTOR: u8 = 19;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const ANT_TRANSMISSION_TYPE: u8 = 20;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const ANT_DEVICE_NUMBER: u8 = 21;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ANT_NETWORK`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::AntNetwork
     pub const ANT_NETWORK: u8 = 22;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SOURCE_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SourceType
     pub const SOURCE_TYPE: u8 = 25;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const PRODUCT_NAME: u8 = 27;
-    /// Value's type: `u8`; Units: `%`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `%`
     pub const BATTERY_LEVEL: u8 = 32;
 
     /// Create new DeviceInfo with all fields being set to its corresponding invalid value.
@@ -392,6 +395,182 @@ impl From<DeviceInfo> for Message {
             num: typedef::MesgNum::DEVICE_INFO,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DeviceInfo {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DeviceInfo", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.device_index.0 != u8::MAX {
+            state.serialize_field("device_index", &self.device_index)?;
+        }
+        if self.device_type != u8::MAX {
+            state.serialize_field("device_type", &self.device_type)?;
+        }
+        if self.manufacturer.0 != u16::MAX {
+            state.serialize_field("manufacturer", &self.manufacturer)?;
+        }
+        if self.serial_number != u32::MIN {
+            state.serialize_field("serial_number", &self.serial_number)?;
+        }
+        if self.product != u16::MAX {
+            state.serialize_field("product", &self.product)?;
+        }
+        if let Some(v) = self.software_version_scaled() {
+            state.serialize_field("software_version", &v)?;
+        }
+        if self.hardware_version != u8::MAX {
+            state.serialize_field("hardware_version", &self.hardware_version)?;
+        }
+        if self.cum_operating_time != u32::MAX {
+            state.serialize_field("cum_operating_time", &self.cum_operating_time)?;
+        }
+        if let Some(v) = self.battery_voltage_scaled() {
+            state.serialize_field("battery_voltage", &v)?;
+        }
+        if self.battery_status.0 != u8::MAX {
+            state.serialize_field("battery_status", &self.battery_status)?;
+        }
+        if self.sensor_position.0 != u8::MAX {
+            state.serialize_field("sensor_position", &self.sensor_position)?;
+        }
+        if !self.descriptor.is_empty() {
+            state.serialize_field("descriptor", &self.descriptor)?;
+        }
+        if self.ant_transmission_type != u8::MIN {
+            state.serialize_field("ant_transmission_type", &self.ant_transmission_type)?;
+        }
+        if self.ant_device_number != u16::MIN {
+            state.serialize_field("ant_device_number", &self.ant_device_number)?;
+        }
+        if self.ant_network.0 != u8::MAX {
+            state.serialize_field("ant_network", &self.ant_network)?;
+        }
+        if self.source_type.0 != u8::MAX {
+            state.serialize_field("source_type", &self.source_type)?;
+        }
+        if !self.product_name.is_empty() {
+            state.serialize_field("product_name", &self.product_name)?;
+        }
+        if self.battery_level != u8::MAX {
+            state.serialize_field("battery_level", &self.battery_level)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    device_index: typedef::DeviceIndex,
+    device_type: u8,
+    manufacturer: typedef::Manufacturer,
+    serial_number: u32,
+    product: u16,
+    software_version: f64,
+    hardware_version: u8,
+    cum_operating_time: u32,
+    battery_voltage: f64,
+    battery_status: typedef::BatteryStatus,
+    sensor_position: typedef::BodyLocation,
+    descriptor: String,
+    ant_transmission_type: u8,
+    ant_device_number: u16,
+    ant_network: typedef::AntNetwork,
+    source_type: typedef::SourceType,
+    product_name: String,
+    battery_level: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DeviceInfo {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            device_index: m.device_index,
+            device_type: m.device_type,
+            manufacturer: m.manufacturer,
+            serial_number: m.serial_number,
+            product: m.product,
+            software_version: {
+                let unscaled = (m.software_version + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            hardware_version: m.hardware_version,
+            cum_operating_time: m.cum_operating_time,
+            battery_voltage: {
+                let unscaled = (m.battery_voltage + 0.0) * 256.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            battery_status: m.battery_status,
+            sensor_position: m.sensor_position,
+            descriptor: m.descriptor,
+            ant_transmission_type: m.ant_transmission_type,
+            ant_device_number: m.ant_device_number,
+            ant_network: m.ant_network,
+            source_type: m.source_type,
+            product_name: m.product_name,
+            battery_level: m.battery_level,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            device_index: typedef::DeviceIndex(u8::MAX),
+            device_type: u8::MAX,
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            serial_number: u32::MIN,
+            product: u16::MAX,
+            software_version: f64::from_bits(u64::MAX),
+            hardware_version: u8::MAX,
+            cum_operating_time: u32::MAX,
+            battery_voltage: f64::from_bits(u64::MAX),
+            battery_status: typedef::BatteryStatus(u8::MAX),
+            sensor_position: typedef::BodyLocation(u8::MAX),
+            descriptor: String::new(),
+            ant_transmission_type: u8::MIN,
+            ant_device_number: u16::MIN,
+            ant_network: typedef::AntNetwork(u8::MAX),
+            source_type: typedef::SourceType(u8::MAX),
+            product_name: String::new(),
+            battery_level: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

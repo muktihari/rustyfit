@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Sleep Assessment message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SleepAssessment {
     /// Average of awake_time_score and awakenings_count_score. If valid: 0 (worst) to 100 (best). If unknown: FIT_UINT8_INVALID.
@@ -46,33 +49,33 @@ pub struct SleepAssessment {
 }
 
 impl SleepAssessment {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const COMBINED_AWAKE_SCORE: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const AWAKE_TIME_SCORE: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const AWAKENINGS_COUNT_SCORE: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEEP_SLEEP_SCORE: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SLEEP_DURATION_SCORE: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const LIGHT_SLEEP_SCORE: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const OVERALL_SLEEP_SCORE: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SLEEP_QUALITY_SCORE: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SLEEP_RECOVERY_SCORE: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const REM_SLEEP_SCORE: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SLEEP_RESTLESSNESS_SCORE: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const AWAKENINGS_COUNT: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const INTERRUPTIONS_SCORE: u8 = 14;
-    /// Value's type: `u16`; Scale: `100`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`
     pub const AVERAGE_STRESS_DURING_SLEEP: u8 = 15;
 
     /// Create new SleepAssessment with all fields being set to its corresponding invalid value.
@@ -302,6 +305,142 @@ impl From<SleepAssessment> for Message {
             num: typedef::MesgNum::SLEEP_ASSESSMENT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SleepAssessment {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SleepAssessment", n)?;
+        if self.combined_awake_score != u8::MAX {
+            state.serialize_field("combined_awake_score", &self.combined_awake_score)?;
+        }
+        if self.awake_time_score != u8::MAX {
+            state.serialize_field("awake_time_score", &self.awake_time_score)?;
+        }
+        if self.awakenings_count_score != u8::MAX {
+            state.serialize_field("awakenings_count_score", &self.awakenings_count_score)?;
+        }
+        if self.deep_sleep_score != u8::MAX {
+            state.serialize_field("deep_sleep_score", &self.deep_sleep_score)?;
+        }
+        if self.sleep_duration_score != u8::MAX {
+            state.serialize_field("sleep_duration_score", &self.sleep_duration_score)?;
+        }
+        if self.light_sleep_score != u8::MAX {
+            state.serialize_field("light_sleep_score", &self.light_sleep_score)?;
+        }
+        if self.overall_sleep_score != u8::MAX {
+            state.serialize_field("overall_sleep_score", &self.overall_sleep_score)?;
+        }
+        if self.sleep_quality_score != u8::MAX {
+            state.serialize_field("sleep_quality_score", &self.sleep_quality_score)?;
+        }
+        if self.sleep_recovery_score != u8::MAX {
+            state.serialize_field("sleep_recovery_score", &self.sleep_recovery_score)?;
+        }
+        if self.rem_sleep_score != u8::MAX {
+            state.serialize_field("rem_sleep_score", &self.rem_sleep_score)?;
+        }
+        if self.sleep_restlessness_score != u8::MAX {
+            state.serialize_field("sleep_restlessness_score", &self.sleep_restlessness_score)?;
+        }
+        if self.awakenings_count != u8::MAX {
+            state.serialize_field("awakenings_count", &self.awakenings_count)?;
+        }
+        if self.interruptions_score != u8::MAX {
+            state.serialize_field("interruptions_score", &self.interruptions_score)?;
+        }
+        if let Some(v) = self.average_stress_during_sleep_scaled() {
+            state.serialize_field("average_stress_during_sleep", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    combined_awake_score: u8,
+    awake_time_score: u8,
+    awakenings_count_score: u8,
+    deep_sleep_score: u8,
+    sleep_duration_score: u8,
+    light_sleep_score: u8,
+    overall_sleep_score: u8,
+    sleep_quality_score: u8,
+    sleep_recovery_score: u8,
+    rem_sleep_score: u8,
+    sleep_restlessness_score: u8,
+    awakenings_count: u8,
+    interruptions_score: u8,
+    average_stress_during_sleep: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SleepAssessment {
+    fn from(m: De) -> Self {
+        Self {
+            combined_awake_score: m.combined_awake_score,
+            awake_time_score: m.awake_time_score,
+            awakenings_count_score: m.awakenings_count_score,
+            deep_sleep_score: m.deep_sleep_score,
+            sleep_duration_score: m.sleep_duration_score,
+            light_sleep_score: m.light_sleep_score,
+            overall_sleep_score: m.overall_sleep_score,
+            sleep_quality_score: m.sleep_quality_score,
+            sleep_recovery_score: m.sleep_recovery_score,
+            rem_sleep_score: m.rem_sleep_score,
+            sleep_restlessness_score: m.sleep_restlessness_score,
+            awakenings_count: m.awakenings_count,
+            interruptions_score: m.interruptions_score,
+            average_stress_during_sleep: {
+                let unscaled = (m.average_stress_during_sleep + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            combined_awake_score: u8::MAX,
+            awake_time_score: u8::MAX,
+            awakenings_count_score: u8::MAX,
+            deep_sleep_score: u8::MAX,
+            sleep_duration_score: u8::MAX,
+            light_sleep_score: u8::MAX,
+            overall_sleep_score: u8::MAX,
+            sleep_quality_score: u8::MAX,
+            sleep_recovery_score: u8::MAX,
+            rem_sleep_score: u8::MAX,
+            sleep_restlessness_score: u8::MAX,
+            awakenings_count: u8::MAX,
+            interruptions_score: u8::MAX,
+            average_stress_during_sleep: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

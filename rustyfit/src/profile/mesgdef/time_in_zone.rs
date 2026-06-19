@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Time In Zone message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct TimeInZone {
     /// Units: s
@@ -44,39 +47,39 @@ pub struct TimeInZone {
 }
 
 impl TimeInZone {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MesgNum
     pub const REFERENCE_MESG: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 2;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 3;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 4;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 5;
-    /// Value's type: `Vec<u8>`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HR_ZONE_HIGH_BOUNDARY: u8 = 6;
-    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const SPEED_ZONE_HIGH_BOUNDARY: u8 = 7;
-    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const CADENCE_ZONE_HIGH_BOUNDARY: u8 = 8;
-    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const POWER_ZONE_HIGH_BOUNDARY: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::HR_ZONE_CALC`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::HrZoneCalc
     pub const HR_CALC_TYPE: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const MAX_HEART_RATE: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const RESTING_HEART_RATE: u8 = 12;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const THRESHOLD_HEART_RATE: u8 = 13;
-    /// Value's type: `u8`; ProfileType: `ProfileType::PWR_ZONE_CALC`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::PwrZoneCalc
     pub const PWR_CALC_TYPE: u8 = 14;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const FUNCTIONAL_THRESHOLD_POWER: u8 = 15;
 
     /// Create new TimeInZone with all fields being set to its corresponding invalid value.
@@ -475,6 +478,242 @@ impl From<TimeInZone> for Message {
             num: typedef::MesgNum::TIME_IN_ZONE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TimeInZone {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("TimeInZone", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.reference_mesg.0 != u16::MAX {
+            state.serialize_field("reference_mesg", &self.reference_mesg)?;
+        }
+        if self.reference_index.0 != u16::MAX {
+            state.serialize_field("reference_index", &self.reference_index)?;
+        }
+        if let Some(v) = self.time_in_hr_zone_scaled() {
+            state.serialize_field("time_in_hr_zone", &v)?;
+        }
+        if let Some(v) = self.time_in_speed_zone_scaled() {
+            state.serialize_field("time_in_speed_zone", &v)?;
+        }
+        if let Some(v) = self.time_in_cadence_zone_scaled() {
+            state.serialize_field("time_in_cadence_zone", &v)?;
+        }
+        if let Some(v) = self.time_in_power_zone_scaled() {
+            state.serialize_field("time_in_power_zone", &v)?;
+        }
+        if !self.hr_zone_high_boundary.is_empty() {
+            state.serialize_field("hr_zone_high_boundary", &self.hr_zone_high_boundary)?;
+        }
+        if let Some(v) = self.speed_zone_high_boundary_scaled() {
+            state.serialize_field("speed_zone_high_boundary", &v)?;
+        }
+        if !self.cadence_zone_high_boundary.is_empty() {
+            state.serialize_field(
+                "cadence_zone_high_boundary",
+                &self.cadence_zone_high_boundary,
+            )?;
+        }
+        if !self.power_zone_high_boundary.is_empty() {
+            state.serialize_field("power_zone_high_boundary", &self.power_zone_high_boundary)?;
+        }
+        if self.hr_calc_type.0 != u8::MAX {
+            state.serialize_field("hr_calc_type", &self.hr_calc_type)?;
+        }
+        if self.max_heart_rate != u8::MAX {
+            state.serialize_field("max_heart_rate", &self.max_heart_rate)?;
+        }
+        if self.resting_heart_rate != u8::MAX {
+            state.serialize_field("resting_heart_rate", &self.resting_heart_rate)?;
+        }
+        if self.threshold_heart_rate != u8::MAX {
+            state.serialize_field("threshold_heart_rate", &self.threshold_heart_rate)?;
+        }
+        if self.pwr_calc_type.0 != u8::MAX {
+            state.serialize_field("pwr_calc_type", &self.pwr_calc_type)?;
+        }
+        if self.functional_threshold_power != u16::MAX {
+            state.serialize_field(
+                "functional_threshold_power",
+                &self.functional_threshold_power,
+            )?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    reference_mesg: typedef::MesgNum,
+    reference_index: typedef::MessageIndex,
+    time_in_hr_zone: Vec<f64>,
+    time_in_speed_zone: Vec<f64>,
+    time_in_cadence_zone: Vec<f64>,
+    time_in_power_zone: Vec<f64>,
+    hr_zone_high_boundary: Vec<u8>,
+    speed_zone_high_boundary: Vec<f64>,
+    cadence_zone_high_boundary: Vec<u8>,
+    power_zone_high_boundary: Vec<u16>,
+    hr_calc_type: typedef::HrZoneCalc,
+    max_heart_rate: u8,
+    resting_heart_rate: u8,
+    threshold_heart_rate: u8,
+    pwr_calc_type: typedef::PwrZoneCalc,
+    functional_threshold_power: u16,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for TimeInZone {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            reference_mesg: m.reference_mesg,
+            reference_index: m.reference_index,
+            time_in_hr_zone: {
+                if m.time_in_hr_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_hr_zone.len());
+                    for &x in m.time_in_hr_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            time_in_speed_zone: {
+                if m.time_in_speed_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_speed_zone.len());
+                    for &x in m.time_in_speed_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            time_in_cadence_zone: {
+                if m.time_in_cadence_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_cadence_zone.len());
+                    for &x in m.time_in_cadence_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            time_in_power_zone: {
+                if m.time_in_power_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_power_zone.len());
+                    for &x in m.time_in_power_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            hr_zone_high_boundary: m.hr_zone_high_boundary,
+            speed_zone_high_boundary: {
+                if m.speed_zone_high_boundary.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.speed_zone_high_boundary.len());
+                    for &x in m.speed_zone_high_boundary.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64
+                        {
+                            vals.push(u16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u16);
+                    }
+                    vals
+                }
+            },
+            cadence_zone_high_boundary: m.cadence_zone_high_boundary,
+            power_zone_high_boundary: m.power_zone_high_boundary,
+            hr_calc_type: m.hr_calc_type,
+            max_heart_rate: m.max_heart_rate,
+            resting_heart_rate: m.resting_heart_rate,
+            threshold_heart_rate: m.threshold_heart_rate,
+            pwr_calc_type: m.pwr_calc_type,
+            functional_threshold_power: m.functional_threshold_power,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            reference_mesg: typedef::MesgNum(u16::MAX),
+            reference_index: typedef::MessageIndex(u16::MAX),
+            time_in_hr_zone: Vec::new(),
+            time_in_speed_zone: Vec::new(),
+            time_in_cadence_zone: Vec::new(),
+            time_in_power_zone: Vec::new(),
+            hr_zone_high_boundary: Vec::new(),
+            speed_zone_high_boundary: Vec::new(),
+            cadence_zone_high_boundary: Vec::new(),
+            power_zone_high_boundary: Vec::new(),
+            hr_calc_type: typedef::HrZoneCalc(u8::MAX),
+            max_heart_rate: u8::MAX,
+            resting_heart_rate: u8::MAX,
+            threshold_heart_rate: u8::MAX,
+            pwr_calc_type: typedef::PwrZoneCalc(u8::MAX),
+            functional_threshold_power: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

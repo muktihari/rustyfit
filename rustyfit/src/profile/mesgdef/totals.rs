@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Totals message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Totals {
     pub message_index: typedef::MessageIndex,
@@ -34,25 +37,25 @@ pub struct Totals {
 }
 
 impl Totals {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const TIMER_TIME: u8 = 0;
-    /// Value's type: `u32`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `m`
     pub const DISTANCE: u8 = 1;
-    /// Value's type: `u32`; Units: `kcal`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `kcal`
     pub const CALORIES: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 3;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const ELAPSED_TIME: u8 = 4;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const SESSIONS: u8 = 5;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const ACTIVE_TIME: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SPORT_INDEX: u8 = 9;
 
     /// Create new Totals with all fields being set to its corresponding invalid value.
@@ -219,6 +222,114 @@ impl From<Totals> for Message {
             num: typedef::MesgNum::TOTALS,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Totals {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Totals", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timer_time != u32::MAX {
+            state.serialize_field("timer_time", &self.timer_time)?;
+        }
+        if self.distance != u32::MAX {
+            state.serialize_field("distance", &self.distance)?;
+        }
+        if self.calories != u32::MAX {
+            state.serialize_field("calories", &self.calories)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.elapsed_time != u32::MAX {
+            state.serialize_field("elapsed_time", &self.elapsed_time)?;
+        }
+        if self.sessions != u16::MAX {
+            state.serialize_field("sessions", &self.sessions)?;
+        }
+        if self.active_time != u32::MAX {
+            state.serialize_field("active_time", &self.active_time)?;
+        }
+        if self.sport_index != u8::MAX {
+            state.serialize_field("sport_index", &self.sport_index)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    timestamp: Option<i64>,
+    timer_time: u32,
+    distance: u32,
+    calories: u32,
+    sport: typedef::Sport,
+    elapsed_time: u32,
+    sessions: u16,
+    active_time: u32,
+    sport_index: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Totals {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timer_time: m.timer_time,
+            distance: m.distance,
+            calories: m.calories,
+            sport: m.sport,
+            elapsed_time: m.elapsed_time,
+            sessions: m.sessions,
+            active_time: m.active_time,
+            sport_index: m.sport_index,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: None,
+            timer_time: u32::MAX,
+            distance: u32::MAX,
+            calories: u32::MAX,
+            sport: typedef::Sport(u8::MAX),
+            elapsed_time: u32::MAX,
+            sessions: u16::MAX,
+            active_time: u32::MAX,
+            sport_index: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

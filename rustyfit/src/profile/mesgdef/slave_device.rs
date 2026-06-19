@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Slave Device message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SlaveDevice {
     pub manufacturer: typedef::Manufacturer,
@@ -20,9 +23,9 @@ pub struct SlaveDevice {
 }
 
 impl SlaveDevice {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PRODUCT: u8 = 1;
 
     /// Create new SlaveDevice with all fields being set to its corresponding invalid value.
@@ -100,6 +103,63 @@ impl From<SlaveDevice> for Message {
             num: typedef::MesgNum::SLAVE_DEVICE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SlaveDevice {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SlaveDevice", n)?;
+        if self.manufacturer.0 != u16::MAX {
+            state.serialize_field("manufacturer", &self.manufacturer)?;
+        }
+        if self.product != u16::MAX {
+            state.serialize_field("product", &self.product)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    manufacturer: typedef::Manufacturer,
+    product: u16,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SlaveDevice {
+    fn from(m: De) -> Self {
+        Self {
+            manufacturer: m.manufacturer,
+            product: m.product,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            product: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

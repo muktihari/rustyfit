@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Body Location type.
 #[repr(transparent)]
@@ -58,6 +58,52 @@ impl BodyLocation {
     pub const WAIST_FRONT: BodyLocation = BodyLocation(37);
     pub const WAIST_LEFT: BodyLocation = BodyLocation(38);
     pub const WAIST_RIGHT: BodyLocation = BodyLocation(39);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("left_leg"),
+            1 => Some("left_calf"),
+            2 => Some("left_shin"),
+            3 => Some("left_hamstring"),
+            4 => Some("left_quad"),
+            5 => Some("left_glute"),
+            6 => Some("right_leg"),
+            7 => Some("right_calf"),
+            8 => Some("right_shin"),
+            9 => Some("right_hamstring"),
+            10 => Some("right_quad"),
+            11 => Some("right_glute"),
+            12 => Some("torso_back"),
+            13 => Some("left_lower_back"),
+            14 => Some("left_upper_back"),
+            15 => Some("right_lower_back"),
+            16 => Some("right_upper_back"),
+            17 => Some("torso_front"),
+            18 => Some("left_abdomen"),
+            19 => Some("left_chest"),
+            20 => Some("right_abdomen"),
+            21 => Some("right_chest"),
+            22 => Some("left_arm"),
+            23 => Some("left_shoulder"),
+            24 => Some("left_bicep"),
+            25 => Some("left_tricep"),
+            26 => Some("left_brachioradialis"),
+            27 => Some("left_forearm_extensors"),
+            28 => Some("right_arm"),
+            29 => Some("right_shoulder"),
+            30 => Some("right_bicep"),
+            31 => Some("right_tricep"),
+            32 => Some("right_brachioradialis"),
+            33 => Some("right_forearm_extensors"),
+            34 => Some("neck"),
+            35 => Some("throat"),
+            36 => Some("waist_mid_back"),
+            37 => Some("waist_front"),
+            38 => Some("waist_left"),
+            39 => Some("waist_right"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BodyLocation {
@@ -68,48 +114,50 @@ impl Default for BodyLocation {
 
 impl fmt::Display for BodyLocation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "left_leg"),
-            1 => write!(f, "left_calf"),
-            2 => write!(f, "left_shin"),
-            3 => write!(f, "left_hamstring"),
-            4 => write!(f, "left_quad"),
-            5 => write!(f, "left_glute"),
-            6 => write!(f, "right_leg"),
-            7 => write!(f, "right_calf"),
-            8 => write!(f, "right_shin"),
-            9 => write!(f, "right_hamstring"),
-            10 => write!(f, "right_quad"),
-            11 => write!(f, "right_glute"),
-            12 => write!(f, "torso_back"),
-            13 => write!(f, "left_lower_back"),
-            14 => write!(f, "left_upper_back"),
-            15 => write!(f, "right_lower_back"),
-            16 => write!(f, "right_upper_back"),
-            17 => write!(f, "torso_front"),
-            18 => write!(f, "left_abdomen"),
-            19 => write!(f, "left_chest"),
-            20 => write!(f, "right_abdomen"),
-            21 => write!(f, "right_chest"),
-            22 => write!(f, "left_arm"),
-            23 => write!(f, "left_shoulder"),
-            24 => write!(f, "left_bicep"),
-            25 => write!(f, "left_tricep"),
-            26 => write!(f, "left_brachioradialis"),
-            27 => write!(f, "left_forearm_extensors"),
-            28 => write!(f, "right_arm"),
-            29 => write!(f, "right_shoulder"),
-            30 => write!(f, "right_bicep"),
-            31 => write!(f, "right_tricep"),
-            32 => write!(f, "right_brachioradialis"),
-            33 => write!(f, "right_forearm_extensors"),
-            34 => write!(f, "neck"),
-            35 => write!(f, "throat"),
-            36 => write!(f, "waist_mid_back"),
-            37 => write!(f, "waist_front"),
-            38 => write!(f, "waist_left"),
-            39 => write!(f, "waist_right"),
-            _ => write!(f, "BodyLocation({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BodyLocation({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BodyLocation {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BodyLocation", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BodyLocation {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

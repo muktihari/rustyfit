@@ -9,6 +9,8 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -18,6 +20,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Exd Data Concept Configuration message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct ExdDataConceptConfiguration {
     pub screen_index: u8,
@@ -39,27 +42,27 @@ pub struct ExdDataConceptConfiguration {
 }
 
 impl ExdDataConceptConfiguration {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SCREEN_INDEX: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `u8`; FitBaseType::BYTE; ProfileType::Byte
     pub const CONCEPT_FIELD: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_ID: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CONCEPT_INDEX: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DATA_PAGE: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CONCEPT_KEY: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SCALING: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_DATA_UNITS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ExdDataUnits
     pub const DATA_UNITS: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_QUALIFIERS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ExdQualifiers
     pub const QUALIFIER: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_DESCRIPTORS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ExdDescriptors
     pub const DESCRIPTOR: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const IS_SIGNED: u8 = 11;
 
     /// Create new ExdDataConceptConfiguration with all fields being set to its corresponding invalid value.
@@ -264,6 +267,118 @@ impl From<ExdDataConceptConfiguration> for Message {
             num: typedef::MesgNum::EXD_DATA_CONCEPT_CONFIGURATION,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdDataConceptConfiguration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("ExdDataConceptConfiguration", n)?;
+        if self.screen_index != u8::MAX {
+            state.serialize_field("screen_index", &self.screen_index)?;
+        }
+        if self.concept_field != u8::MAX {
+            state.serialize_field("concept_field", &self.concept_field)?;
+        }
+        if self.field_id != u8::MAX {
+            state.serialize_field("field_id", &self.field_id)?;
+        }
+        if self.concept_index != u8::MAX {
+            state.serialize_field("concept_index", &self.concept_index)?;
+        }
+        if self.data_page != u8::MAX {
+            state.serialize_field("data_page", &self.data_page)?;
+        }
+        if self.concept_key != u8::MAX {
+            state.serialize_field("concept_key", &self.concept_key)?;
+        }
+        if self.scaling != u8::MAX {
+            state.serialize_field("scaling", &self.scaling)?;
+        }
+        if self.data_units.0 != u8::MAX {
+            state.serialize_field("data_units", &self.data_units)?;
+        }
+        if self.qualifier.0 != u8::MAX {
+            state.serialize_field("qualifier", &self.qualifier)?;
+        }
+        if self.descriptor.0 != u8::MAX {
+            state.serialize_field("descriptor", &self.descriptor)?;
+        }
+        if self.is_signed.0 != u8::MAX {
+            state.serialize_field("is_signed", &self.is_signed)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    screen_index: u8,
+    concept_field: u8,
+    field_id: u8,
+    concept_index: u8,
+    data_page: u8,
+    concept_key: u8,
+    scaling: u8,
+    data_units: typedef::ExdDataUnits,
+    qualifier: typedef::ExdQualifiers,
+    descriptor: typedef::ExdDescriptors,
+    is_signed: typedef::Bool,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for ExdDataConceptConfiguration {
+    fn from(m: De) -> Self {
+        Self {
+            screen_index: m.screen_index,
+            concept_field: m.concept_field,
+            field_id: m.field_id,
+            concept_index: m.concept_index,
+            data_page: m.data_page,
+            concept_key: m.concept_key,
+            scaling: m.scaling,
+            data_units: m.data_units,
+            qualifier: m.qualifier,
+            descriptor: m.descriptor,
+            is_signed: m.is_signed,
+            state: [0u8; 1],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            screen_index: u8::MAX,
+            concept_field: u8::MAX,
+            field_id: u8::MAX,
+            concept_index: u8::MAX,
+            data_page: u8::MAX,
+            concept_key: u8::MAX,
+            scaling: u8::MAX,
+            data_units: typedef::ExdDataUnits(u8::MAX),
+            qualifier: typedef::ExdQualifiers(u8::MAX),
+            descriptor: typedef::ExdDescriptors(u8::MAX),
+            is_signed: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

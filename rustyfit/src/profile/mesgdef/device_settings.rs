@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Device Settings message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DeviceSettings {
     /// Index into time zone arrays.
@@ -63,53 +66,53 @@ pub struct DeviceSettings {
 }
 
 impl DeviceSettings {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const ACTIVE_TIME_ZONE: u8 = 0;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const UTC_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u32>`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const TIME_OFFSET: u8 = 2;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::TIME_MODE`
+    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::TimeMode
     pub const TIME_MODE: u8 = 4;
-    /// Value's type: `Vec<i8>`; Scale: `4`; Units: `hr`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `Vec<i8>`; FitBaseType::SINT8; ProfileType::Sint8; Scale: `4`; Units: `hr`
     pub const TIME_ZONE_OFFSET: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BACKLIGHT_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::BacklightMode
     pub const BACKLIGHT_MODE: u8 = 12;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ACTIVITY_TRACKER_ENABLED: u8 = 36;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const CLOCK_TIME: u8 = 39;
-    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PAGES_ENABLED: u8 = 40;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const MOVE_ALERT_ENABLED: u8 = 46;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DATE_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DateMode
     pub const DATE_MODE: u8 = 47;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_ORIENTATION`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayOrientation
     pub const DISPLAY_ORIENTATION: u8 = 55;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SIDE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Side
     pub const MOUNTING_SIDE: u8 = 56;
-    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const DEFAULT_PAGE: u8 = 57;
-    /// Value's type: `u16`; Units: `steps`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `steps`
     pub const AUTOSYNC_MIN_STEPS: u8 = 58;
-    /// Value's type: `u16`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `minutes`
     pub const AUTOSYNC_MIN_TIME: u8 = 59;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const LACTATE_THRESHOLD_AUTODETECT_ENABLED: u8 = 80;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const BLE_AUTO_UPLOAD_ENABLED: u8 = 86;
-    /// Value's type: `u8`; ProfileType: `ProfileType::AUTO_SYNC_FREQUENCY`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::AutoSyncFrequency
     pub const AUTO_SYNC_FREQUENCY: u8 = 89;
-    /// Value's type: `u32`; ProfileType: `ProfileType::AUTO_ACTIVITY_DETECT`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::AutoActivityDetect
     pub const AUTO_ACTIVITY_DETECT: u8 = 90;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const NUMBER_OF_SCREENS: u8 = 94;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_ORIENTATION`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayOrientation
     pub const SMART_NOTIFICATION_DISPLAY_ORIENTATION: u8 = 95;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SWITCH`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Switch
     pub const TAP_INTERFACE: u8 = 134;
-    /// Value's type: `u8`; ProfileType: `ProfileType::TAP_SENSITIVITY`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::TapSensitivity
     pub const TAP_SENSITIVITY: u8 = 174;
 
     /// Create new DeviceSettings with all fields being set to its corresponding invalid value.
@@ -476,6 +479,220 @@ impl From<DeviceSettings> for Message {
             num: typedef::MesgNum::DEVICE_SETTINGS,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DeviceSettings {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DeviceSettings", n)?;
+        if self.active_time_zone != u8::MAX {
+            state.serialize_field("active_time_zone", &self.active_time_zone)?;
+        }
+        if self.utc_offset != u32::MAX {
+            state.serialize_field("utc_offset", &self.utc_offset)?;
+        }
+        if !self.time_offset.is_empty() {
+            state.serialize_field("time_offset", &self.time_offset)?;
+        }
+        if !self.time_mode.is_empty() {
+            state.serialize_field("time_mode", &self.time_mode)?;
+        }
+        if let Some(v) = self.time_zone_offset_scaled() {
+            state.serialize_field("time_zone_offset", &v)?;
+        }
+        if self.backlight_mode.0 != u8::MAX {
+            state.serialize_field("backlight_mode", &self.backlight_mode)?;
+        }
+        if self.activity_tracker_enabled.0 != u8::MAX {
+            state.serialize_field("activity_tracker_enabled", &self.activity_tracker_enabled)?;
+        }
+        if let Some(v) = self.clock_time.unix_timestamp() {
+            state.serialize_field("clock_time", &v)?;
+        }
+        if !self.pages_enabled.is_empty() {
+            state.serialize_field("pages_enabled", &self.pages_enabled)?;
+        }
+        if self.move_alert_enabled.0 != u8::MAX {
+            state.serialize_field("move_alert_enabled", &self.move_alert_enabled)?;
+        }
+        if self.date_mode.0 != u8::MAX {
+            state.serialize_field("date_mode", &self.date_mode)?;
+        }
+        if self.display_orientation.0 != u8::MAX {
+            state.serialize_field("display_orientation", &self.display_orientation)?;
+        }
+        if self.mounting_side.0 != u8::MAX {
+            state.serialize_field("mounting_side", &self.mounting_side)?;
+        }
+        if !self.default_page.is_empty() {
+            state.serialize_field("default_page", &self.default_page)?;
+        }
+        if self.autosync_min_steps != u16::MAX {
+            state.serialize_field("autosync_min_steps", &self.autosync_min_steps)?;
+        }
+        if self.autosync_min_time != u16::MAX {
+            state.serialize_field("autosync_min_time", &self.autosync_min_time)?;
+        }
+        if self.lactate_threshold_autodetect_enabled.0 != u8::MAX {
+            state.serialize_field(
+                "lactate_threshold_autodetect_enabled",
+                &self.lactate_threshold_autodetect_enabled,
+            )?;
+        }
+        if self.ble_auto_upload_enabled.0 != u8::MAX {
+            state.serialize_field("ble_auto_upload_enabled", &self.ble_auto_upload_enabled)?;
+        }
+        if self.auto_sync_frequency.0 != u8::MAX {
+            state.serialize_field("auto_sync_frequency", &self.auto_sync_frequency)?;
+        }
+        if self.auto_activity_detect.0 != u32::MAX {
+            state.serialize_field("auto_activity_detect", &self.auto_activity_detect)?;
+        }
+        if self.number_of_screens != u8::MAX {
+            state.serialize_field("number_of_screens", &self.number_of_screens)?;
+        }
+        if self.smart_notification_display_orientation.0 != u8::MAX {
+            state.serialize_field(
+                "smart_notification_display_orientation",
+                &self.smart_notification_display_orientation,
+            )?;
+        }
+        if self.tap_interface.0 != u8::MAX {
+            state.serialize_field("tap_interface", &self.tap_interface)?;
+        }
+        if self.tap_sensitivity.0 != u8::MAX {
+            state.serialize_field("tap_sensitivity", &self.tap_sensitivity)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    active_time_zone: u8,
+    utc_offset: u32,
+    time_offset: Vec<u32>,
+    time_mode: Vec<typedef::TimeMode>,
+    time_zone_offset: Vec<f64>,
+    backlight_mode: typedef::BacklightMode,
+    activity_tracker_enabled: typedef::Bool,
+    clock_time: Option<i64>,
+    pages_enabled: Vec<u16>,
+    move_alert_enabled: typedef::Bool,
+    date_mode: typedef::DateMode,
+    display_orientation: typedef::DisplayOrientation,
+    mounting_side: typedef::Side,
+    default_page: Vec<u16>,
+    autosync_min_steps: u16,
+    autosync_min_time: u16,
+    lactate_threshold_autodetect_enabled: typedef::Bool,
+    ble_auto_upload_enabled: typedef::Bool,
+    auto_sync_frequency: typedef::AutoSyncFrequency,
+    auto_activity_detect: typedef::AutoActivityDetect,
+    number_of_screens: u8,
+    smart_notification_display_orientation: typedef::DisplayOrientation,
+    tap_interface: typedef::Switch,
+    tap_sensitivity: typedef::TapSensitivity,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DeviceSettings {
+    fn from(m: De) -> Self {
+        Self {
+            active_time_zone: m.active_time_zone,
+            utc_offset: m.utc_offset,
+            time_offset: m.time_offset,
+            time_mode: m.time_mode,
+            time_zone_offset: {
+                if m.time_zone_offset.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_zone_offset.len());
+                    for &x in m.time_zone_offset.iter() {
+                        let unscaled = (x + 0.0) * 4.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i8::MAX as f64
+                        {
+                            vals.push(i8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i8);
+                    }
+                    vals
+                }
+            },
+            backlight_mode: m.backlight_mode,
+            activity_tracker_enabled: m.activity_tracker_enabled,
+            clock_time: m.clock_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            pages_enabled: m.pages_enabled,
+            move_alert_enabled: m.move_alert_enabled,
+            date_mode: m.date_mode,
+            display_orientation: m.display_orientation,
+            mounting_side: m.mounting_side,
+            default_page: m.default_page,
+            autosync_min_steps: m.autosync_min_steps,
+            autosync_min_time: m.autosync_min_time,
+            lactate_threshold_autodetect_enabled: m.lactate_threshold_autodetect_enabled,
+            ble_auto_upload_enabled: m.ble_auto_upload_enabled,
+            auto_sync_frequency: m.auto_sync_frequency,
+            auto_activity_detect: m.auto_activity_detect,
+            number_of_screens: m.number_of_screens,
+            smart_notification_display_orientation: m.smart_notification_display_orientation,
+            tap_interface: m.tap_interface,
+            tap_sensitivity: m.tap_sensitivity,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            active_time_zone: u8::MAX,
+            utc_offset: u32::MAX,
+            time_offset: Vec::new(),
+            time_mode: Vec::new(),
+            time_zone_offset: Vec::new(),
+            backlight_mode: typedef::BacklightMode(u8::MAX),
+            activity_tracker_enabled: typedef::Bool(u8::MAX),
+            clock_time: None,
+            pages_enabled: Vec::new(),
+            move_alert_enabled: typedef::Bool(u8::MAX),
+            date_mode: typedef::DateMode(u8::MAX),
+            display_orientation: typedef::DisplayOrientation(u8::MAX),
+            mounting_side: typedef::Side(u8::MAX),
+            default_page: Vec::new(),
+            autosync_min_steps: u16::MAX,
+            autosync_min_time: u16::MAX,
+            lactate_threshold_autodetect_enabled: typedef::Bool(u8::MAX),
+            ble_auto_upload_enabled: typedef::Bool(u8::MAX),
+            auto_sync_frequency: typedef::AutoSyncFrequency(u8::MAX),
+            auto_activity_detect: typedef::AutoActivityDetect(u32::MAX),
+            number_of_screens: u8::MAX,
+            smart_notification_display_orientation: typedef::DisplayOrientation(u8::MAX),
+            tap_interface: typedef::Switch(u8::MAX),
+            tap_sensitivity: typedef::TapSensitivity(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

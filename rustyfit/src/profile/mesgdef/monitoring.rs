@@ -9,6 +9,8 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -18,6 +20,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Monitoring message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Monitoring {
     /// Units: s; Must align to logging interval, for example, time must be 00:00:00 for daily log.
@@ -83,63 +86,63 @@ pub struct Monitoring {
 }
 
 impl Monitoring {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::DeviceIndex
     pub const DEVICE_INDEX: u8 = 0;
-    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
     pub const CALORIES: u8 = 1;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const DISTANCE: u8 = 2;
-    /// Value's type: `u32`; Scale: `2`; Units: `cycles`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `2`; Units: `cycles`
     pub const CYCLES: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ActivityType
     pub const ACTIVITY_TYPE: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_SUBTYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ActivitySubtype
     pub const ACTIVITY_SUBTYPE: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_LEVEL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ActivityLevel
     pub const ACTIVITY_LEVEL: u8 = 7;
-    /// Value's type: `u16`; Units: `100 * m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `100 * m`
     pub const DISTANCE_16: u8 = 8;
-    /// Value's type: `u16`; Units: `2 * cycles (steps)`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `2 * cycles (steps)`
     pub const CYCLES_16: u8 = 9;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const ACTIVE_TIME_16: u8 = 10;
-    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocalDateTime
     pub const LOCAL_TIMESTAMP: u8 = 11;
-    /// Value's type: `i16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `C`
     pub const TEMPERATURE: u8 = 12;
-    /// Value's type: `i16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `C`
     pub const TEMPERATURE_MIN: u8 = 14;
-    /// Value's type: `i16`; Scale: `100`; Units: `C`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `C`
     pub const TEMPERATURE_MAX: u8 = 15;
-    /// Value's type: `[u16; 8]`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `[u16; 8]`; FitBaseType::UINT16; ProfileType::Uint16; Units: `minutes`
     pub const ACTIVITY_TIME: u8 = 16;
-    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
     pub const ACTIVE_CALORIES: u8 = 19;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `u8`; FitBaseType::BYTE; ProfileType::Byte
     pub const CURRENT_ACTIVITY_TYPE_INTENSITY: u8 = 24;
-    /// Value's type: `u8`; Units: `min`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `min`
     pub const TIMESTAMP_MIN_8: u8 = 25;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const TIMESTAMP_16: u8 = 26;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HEART_RATE: u8 = 27;
-    /// Value's type: `u8`; Scale: `10`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `10`
     pub const INTENSITY: u8 = 28;
-    /// Value's type: `u16`; Units: `min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `min`
     pub const DURATION_MIN: u8 = 29;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const DURATION: u8 = 30;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const ASCENT: u8 = 31;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const DESCENT: u8 = 32;
-    /// Value's type: `u16`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `minutes`
     pub const MODERATE_ACTIVITY_MINUTES: u8 = 33;
-    /// Value's type: `u16`; Units: `minutes`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `minutes`
     pub const VIGOROUS_ACTIVITY_MINUTES: u8 = 34;
 
     /// Create new Monitoring with all fields being set to its corresponding invalid value.
@@ -740,6 +743,298 @@ impl From<Monitoring> for Message {
             num: typedef::MesgNum::MONITORING,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Monitoring {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Monitoring", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.device_index.0 != u8::MAX {
+            state.serialize_field("device_index", &self.device_index)?;
+        }
+        if self.calories != u16::MAX {
+            state.serialize_field("calories", &self.calories)?;
+        }
+        if let Some(v) = self.distance_scaled() {
+            state.serialize_field("distance", &v)?;
+        }
+        if let Some(v) = self.cycles_scaled() {
+            state.serialize_field("cycles", &v)?;
+        }
+        if let Some(v) = self.active_time_scaled() {
+            state.serialize_field("active_time", &v)?;
+        }
+        if self.activity_type.0 != u8::MAX {
+            state.serialize_field("activity_type", &self.activity_type)?;
+        }
+        if self.activity_subtype.0 != u8::MAX {
+            state.serialize_field("activity_subtype", &self.activity_subtype)?;
+        }
+        if self.activity_level.0 != u8::MAX {
+            state.serialize_field("activity_level", &self.activity_level)?;
+        }
+        if self.distance_16 != u16::MAX {
+            state.serialize_field("distance_16", &self.distance_16)?;
+        }
+        if self.cycles_16 != u16::MAX {
+            state.serialize_field("cycles_16", &self.cycles_16)?;
+        }
+        if self.active_time_16 != u16::MAX {
+            state.serialize_field("active_time_16", &self.active_time_16)?;
+        }
+        if let Some(v) = self.local_timestamp.unix_timestamp() {
+            state.serialize_field("local_timestamp", &v)?;
+        }
+        if let Some(v) = self.temperature_scaled() {
+            state.serialize_field("temperature", &v)?;
+        }
+        if let Some(v) = self.temperature_min_scaled() {
+            state.serialize_field("temperature_min", &v)?;
+        }
+        if let Some(v) = self.temperature_max_scaled() {
+            state.serialize_field("temperature_max", &v)?;
+        }
+        if self.activity_time != [u16::MAX; 8] {
+            state.serialize_field("activity_time", &self.activity_time)?;
+        }
+        if self.active_calories != u16::MAX {
+            state.serialize_field("active_calories", &self.active_calories)?;
+        }
+        if self.current_activity_type_intensity != u8::MAX {
+            state.serialize_field(
+                "current_activity_type_intensity",
+                &self.current_activity_type_intensity,
+            )?;
+        }
+        if self.timestamp_min_8 != u8::MAX {
+            state.serialize_field("timestamp_min_8", &self.timestamp_min_8)?;
+        }
+        if self.timestamp_16 != u16::MAX {
+            state.serialize_field("timestamp_16", &self.timestamp_16)?;
+        }
+        if self.heart_rate != u8::MAX {
+            state.serialize_field("heart_rate", &self.heart_rate)?;
+        }
+        if let Some(v) = self.intensity_scaled() {
+            state.serialize_field("intensity", &v)?;
+        }
+        if self.duration_min != u16::MAX {
+            state.serialize_field("duration_min", &self.duration_min)?;
+        }
+        if self.duration != u32::MAX {
+            state.serialize_field("duration", &self.duration)?;
+        }
+        if let Some(v) = self.ascent_scaled() {
+            state.serialize_field("ascent", &v)?;
+        }
+        if let Some(v) = self.descent_scaled() {
+            state.serialize_field("descent", &v)?;
+        }
+        if self.moderate_activity_minutes != u16::MAX {
+            state.serialize_field("moderate_activity_minutes", &self.moderate_activity_minutes)?;
+        }
+        if self.vigorous_activity_minutes != u16::MAX {
+            state.serialize_field("vigorous_activity_minutes", &self.vigorous_activity_minutes)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    device_index: typedef::DeviceIndex,
+    calories: u16,
+    distance: f64,
+    cycles: f64,
+    active_time: f64,
+    activity_type: typedef::ActivityType,
+    activity_subtype: typedef::ActivitySubtype,
+    activity_level: typedef::ActivityLevel,
+    distance_16: u16,
+    cycles_16: u16,
+    active_time_16: u16,
+    local_timestamp: Option<i64>,
+    temperature: f64,
+    temperature_min: f64,
+    temperature_max: f64,
+    activity_time: [u16; 8],
+    active_calories: u16,
+    current_activity_type_intensity: u8,
+    timestamp_min_8: u8,
+    timestamp_16: u16,
+    heart_rate: u8,
+    intensity: f64,
+    duration_min: u16,
+    duration: u32,
+    ascent: f64,
+    descent: f64,
+    moderate_activity_minutes: u16,
+    vigorous_activity_minutes: u16,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Monitoring {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            device_index: m.device_index,
+            calories: m.calories,
+            distance: {
+                let unscaled = (m.distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            cycles: {
+                let unscaled = (m.cycles + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            active_time: {
+                let unscaled = (m.active_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            activity_type: m.activity_type,
+            activity_subtype: m.activity_subtype,
+            activity_level: m.activity_level,
+            distance_16: m.distance_16,
+            cycles_16: m.cycles_16,
+            active_time_16: m.active_time_16,
+            local_timestamp: m.local_timestamp.map_or_else(
+                || typedef::LocalDateTime(u32::MAX),
+                typedef::LocalDateTime::from_unix_timestamp,
+            ),
+            temperature: {
+                let unscaled = (m.temperature + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            temperature_min: {
+                let unscaled = (m.temperature_min + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            temperature_max: {
+                let unscaled = (m.temperature_max + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            activity_time: m.activity_time,
+            active_calories: m.active_calories,
+            current_activity_type_intensity: m.current_activity_type_intensity,
+            timestamp_min_8: m.timestamp_min_8,
+            timestamp_16: m.timestamp_16,
+            heart_rate: m.heart_rate,
+            intensity: {
+                let unscaled = (m.intensity + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            duration_min: m.duration_min,
+            duration: m.duration,
+            ascent: {
+                let unscaled = (m.ascent + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            descent: {
+                let unscaled = (m.descent + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            moderate_activity_minutes: m.moderate_activity_minutes,
+            vigorous_activity_minutes: m.vigorous_activity_minutes,
+            state: [0u8; 4],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            device_index: typedef::DeviceIndex(u8::MAX),
+            calories: u16::MAX,
+            distance: f64::from_bits(u64::MAX),
+            cycles: f64::from_bits(u64::MAX),
+            active_time: f64::from_bits(u64::MAX),
+            activity_type: typedef::ActivityType(u8::MAX),
+            activity_subtype: typedef::ActivitySubtype(u8::MAX),
+            activity_level: typedef::ActivityLevel(u8::MAX),
+            distance_16: u16::MAX,
+            cycles_16: u16::MAX,
+            active_time_16: u16::MAX,
+            local_timestamp: None,
+            temperature: f64::from_bits(u64::MAX),
+            temperature_min: f64::from_bits(u64::MAX),
+            temperature_max: f64::from_bits(u64::MAX),
+            activity_time: [u16::MAX; 8],
+            active_calories: u16::MAX,
+            current_activity_type_intensity: u8::MAX,
+            timestamp_min_8: u8::MAX,
+            timestamp_16: u16::MAX,
+            heart_rate: u8::MAX,
+            intensity: f64::from_bits(u64::MAX),
+            duration_min: u16::MAX,
+            duration: u32::MAX,
+            ascent: f64::from_bits(u64::MAX),
+            descent: f64::from_bits(u64::MAX),
+            moderate_activity_minutes: u16::MAX,
+            vigorous_activity_minutes: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

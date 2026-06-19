@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Pull Up Exercise Name type.
 #[repr(transparent)]
@@ -60,6 +60,58 @@ impl PullUpExerciseName {
     pub const NEUTRAL_GRIP_PULL_UP: PullUpExerciseName = PullUpExerciseName(43);
     pub const WEIGHTED_NEUTRAL_GRIP_CHIN_UP: PullUpExerciseName = PullUpExerciseName(44);
     pub const WEIGHTED_NEUTRAL_GRIP_PULL_UP: PullUpExerciseName = PullUpExerciseName(45);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("banded_pull_ups"),
+            1 => Some("30_degree_lat_pulldown"),
+            2 => Some("band_assisted_chin_up"),
+            3 => Some("close_grip_chin_up"),
+            4 => Some("weighted_close_grip_chin_up"),
+            5 => Some("close_grip_lat_pulldown"),
+            6 => Some("crossover_chin_up"),
+            7 => Some("weighted_crossover_chin_up"),
+            8 => Some("ez_bar_pullover"),
+            9 => Some("hanging_hurdle"),
+            10 => Some("weighted_hanging_hurdle"),
+            11 => Some("kneeling_lat_pulldown"),
+            12 => Some("kneeling_underhand_grip_lat_pulldown"),
+            13 => Some("lat_pulldown"),
+            14 => Some("mixed_grip_chin_up"),
+            15 => Some("weighted_mixed_grip_chin_up"),
+            16 => Some("mixed_grip_pull_up"),
+            17 => Some("weighted_mixed_grip_pull_up"),
+            18 => Some("reverse_grip_pulldown"),
+            19 => Some("standing_cable_pullover"),
+            20 => Some("straight_arm_pulldown"),
+            21 => Some("swiss_ball_ez_bar_pullover"),
+            22 => Some("towel_pull_up"),
+            23 => Some("weighted_towel_pull_up"),
+            24 => Some("weighted_pull_up"),
+            25 => Some("wide_grip_lat_pulldown"),
+            26 => Some("wide_grip_pull_up"),
+            27 => Some("weighted_wide_grip_pull_up"),
+            28 => Some("burpee_pull_up"),
+            29 => Some("weighted_burpee_pull_up"),
+            30 => Some("jumping_pull_ups"),
+            31 => Some("weighted_jumping_pull_ups"),
+            32 => Some("kipping_pull_up"),
+            33 => Some("weighted_kipping_pull_up"),
+            34 => Some("l_pull_up"),
+            35 => Some("weighted_l_pull_up"),
+            36 => Some("suspended_chin_up"),
+            37 => Some("weighted_suspended_chin_up"),
+            38 => Some("pull_up"),
+            39 => Some("chin_up"),
+            40 => Some("neutral_grip_chin_up"),
+            41 => Some("weighted_chin_up"),
+            42 => Some("band_assisted_pull_up"),
+            43 => Some("neutral_grip_pull_up"),
+            44 => Some("weighted_neutral_grip_chin_up"),
+            45 => Some("weighted_neutral_grip_pull_up"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for PullUpExerciseName {
@@ -70,54 +122,50 @@ impl Default for PullUpExerciseName {
 
 impl fmt::Display for PullUpExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "banded_pull_ups"),
-            1 => write!(f, "30_degree_lat_pulldown"),
-            2 => write!(f, "band_assisted_chin_up"),
-            3 => write!(f, "close_grip_chin_up"),
-            4 => write!(f, "weighted_close_grip_chin_up"),
-            5 => write!(f, "close_grip_lat_pulldown"),
-            6 => write!(f, "crossover_chin_up"),
-            7 => write!(f, "weighted_crossover_chin_up"),
-            8 => write!(f, "ez_bar_pullover"),
-            9 => write!(f, "hanging_hurdle"),
-            10 => write!(f, "weighted_hanging_hurdle"),
-            11 => write!(f, "kneeling_lat_pulldown"),
-            12 => write!(f, "kneeling_underhand_grip_lat_pulldown"),
-            13 => write!(f, "lat_pulldown"),
-            14 => write!(f, "mixed_grip_chin_up"),
-            15 => write!(f, "weighted_mixed_grip_chin_up"),
-            16 => write!(f, "mixed_grip_pull_up"),
-            17 => write!(f, "weighted_mixed_grip_pull_up"),
-            18 => write!(f, "reverse_grip_pulldown"),
-            19 => write!(f, "standing_cable_pullover"),
-            20 => write!(f, "straight_arm_pulldown"),
-            21 => write!(f, "swiss_ball_ez_bar_pullover"),
-            22 => write!(f, "towel_pull_up"),
-            23 => write!(f, "weighted_towel_pull_up"),
-            24 => write!(f, "weighted_pull_up"),
-            25 => write!(f, "wide_grip_lat_pulldown"),
-            26 => write!(f, "wide_grip_pull_up"),
-            27 => write!(f, "weighted_wide_grip_pull_up"),
-            28 => write!(f, "burpee_pull_up"),
-            29 => write!(f, "weighted_burpee_pull_up"),
-            30 => write!(f, "jumping_pull_ups"),
-            31 => write!(f, "weighted_jumping_pull_ups"),
-            32 => write!(f, "kipping_pull_up"),
-            33 => write!(f, "weighted_kipping_pull_up"),
-            34 => write!(f, "l_pull_up"),
-            35 => write!(f, "weighted_l_pull_up"),
-            36 => write!(f, "suspended_chin_up"),
-            37 => write!(f, "weighted_suspended_chin_up"),
-            38 => write!(f, "pull_up"),
-            39 => write!(f, "chin_up"),
-            40 => write!(f, "neutral_grip_chin_up"),
-            41 => write!(f, "weighted_chin_up"),
-            42 => write!(f, "band_assisted_pull_up"),
-            43 => write!(f, "neutral_grip_pull_up"),
-            44 => write!(f, "weighted_neutral_grip_chin_up"),
-            45 => write!(f, "weighted_neutral_grip_pull_up"),
-            _ => write!(f, "PullUpExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "PullUpExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for PullUpExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("PullUpExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for PullUpExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

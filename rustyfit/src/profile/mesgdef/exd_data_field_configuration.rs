@@ -11,6 +11,8 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -20,6 +22,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Exd Data Field Configuration message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct ExdDataFieldConfiguration {
     pub screen_index: u8,
@@ -37,17 +40,17 @@ pub struct ExdDataFieldConfiguration {
 }
 
 impl ExdDataFieldConfiguration {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SCREEN_INDEX: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `u8`; FitBaseType::BYTE; ProfileType::Byte
     pub const CONCEPT_FIELD: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_ID: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CONCEPT_COUNT: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EXD_DISPLAY_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ExdDisplayType
     pub const DISPLAY_TYPE: u8 = 4;
-    /// Value's type: `[String; 32]`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `[String; 32]`; FitBaseType::STRING; ProfileType::String
     pub const TITLE: u8 = 5;
 
     /// Create new ExdDataFieldConfiguration with all fields being set to its corresponding invalid value.
@@ -208,6 +211,88 @@ impl From<ExdDataFieldConfiguration> for Message {
             num: typedef::MesgNum::EXD_DATA_FIELD_CONFIGURATION,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdDataFieldConfiguration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("ExdDataFieldConfiguration", n)?;
+        if self.screen_index != u8::MAX {
+            state.serialize_field("screen_index", &self.screen_index)?;
+        }
+        if self.concept_field != u8::MAX {
+            state.serialize_field("concept_field", &self.concept_field)?;
+        }
+        if self.field_id != u8::MAX {
+            state.serialize_field("field_id", &self.field_id)?;
+        }
+        if self.concept_count != u8::MAX {
+            state.serialize_field("concept_count", &self.concept_count)?;
+        }
+        if self.display_type.0 != u8::MAX {
+            state.serialize_field("display_type", &self.display_type)?;
+        }
+        if self.title != [const { String::new() }; 32] {
+            state.serialize_field("title", &self.title)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    screen_index: u8,
+    concept_field: u8,
+    field_id: u8,
+    concept_count: u8,
+    display_type: typedef::ExdDisplayType,
+    title: [String; 32],
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for ExdDataFieldConfiguration {
+    fn from(m: De) -> Self {
+        Self {
+            screen_index: m.screen_index,
+            concept_field: m.concept_field,
+            field_id: m.field_id,
+            concept_count: m.concept_count,
+            display_type: m.display_type,
+            title: m.title,
+            state: [0u8; 1],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            screen_index: u8::MAX,
+            concept_field: u8::MAX,
+            field_id: u8::MAX,
+            concept_count: u8::MAX,
+            display_type: typedef::ExdDisplayType(u8::MAX),
+            title: [const { String::new() }; 32],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

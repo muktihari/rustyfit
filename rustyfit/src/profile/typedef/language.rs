@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Language type.
 #[repr(transparent)]
@@ -53,6 +53,51 @@ impl Language {
     pub const BURMESE: Language = Language(36);
     pub const MONGOLIAN: Language = Language(37);
     pub const CUSTOM: Language = Language(254);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("english"),
+            1 => Some("french"),
+            2 => Some("italian"),
+            3 => Some("german"),
+            4 => Some("spanish"),
+            5 => Some("croatian"),
+            6 => Some("czech"),
+            7 => Some("danish"),
+            8 => Some("dutch"),
+            9 => Some("finnish"),
+            10 => Some("greek"),
+            11 => Some("hungarian"),
+            12 => Some("norwegian"),
+            13 => Some("polish"),
+            14 => Some("portuguese"),
+            15 => Some("slovakian"),
+            16 => Some("slovenian"),
+            17 => Some("swedish"),
+            18 => Some("russian"),
+            19 => Some("turkish"),
+            20 => Some("latvian"),
+            21 => Some("ukrainian"),
+            22 => Some("arabic"),
+            23 => Some("farsi"),
+            24 => Some("bulgarian"),
+            25 => Some("romanian"),
+            26 => Some("chinese"),
+            27 => Some("japanese"),
+            28 => Some("korean"),
+            29 => Some("taiwanese"),
+            30 => Some("thai"),
+            31 => Some("hebrew"),
+            32 => Some("brazilian_portuguese"),
+            33 => Some("indonesian"),
+            34 => Some("malaysian"),
+            35 => Some("vietnamese"),
+            36 => Some("burmese"),
+            37 => Some("mongolian"),
+            254 => Some("custom"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for Language {
@@ -63,47 +108,50 @@ impl Default for Language {
 
 impl fmt::Display for Language {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "english"),
-            1 => write!(f, "french"),
-            2 => write!(f, "italian"),
-            3 => write!(f, "german"),
-            4 => write!(f, "spanish"),
-            5 => write!(f, "croatian"),
-            6 => write!(f, "czech"),
-            7 => write!(f, "danish"),
-            8 => write!(f, "dutch"),
-            9 => write!(f, "finnish"),
-            10 => write!(f, "greek"),
-            11 => write!(f, "hungarian"),
-            12 => write!(f, "norwegian"),
-            13 => write!(f, "polish"),
-            14 => write!(f, "portuguese"),
-            15 => write!(f, "slovakian"),
-            16 => write!(f, "slovenian"),
-            17 => write!(f, "swedish"),
-            18 => write!(f, "russian"),
-            19 => write!(f, "turkish"),
-            20 => write!(f, "latvian"),
-            21 => write!(f, "ukrainian"),
-            22 => write!(f, "arabic"),
-            23 => write!(f, "farsi"),
-            24 => write!(f, "bulgarian"),
-            25 => write!(f, "romanian"),
-            26 => write!(f, "chinese"),
-            27 => write!(f, "japanese"),
-            28 => write!(f, "korean"),
-            29 => write!(f, "taiwanese"),
-            30 => write!(f, "thai"),
-            31 => write!(f, "hebrew"),
-            32 => write!(f, "brazilian_portuguese"),
-            33 => write!(f, "indonesian"),
-            34 => write!(f, "malaysian"),
-            35 => write!(f, "vietnamese"),
-            36 => write!(f, "burmese"),
-            37 => write!(f, "mongolian"),
-            254 => write!(f, "custom"),
-            _ => write!(f, "Language({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "Language({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Language {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Language", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Language {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

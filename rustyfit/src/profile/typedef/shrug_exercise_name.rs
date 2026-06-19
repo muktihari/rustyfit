@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Shrug Exercise Name type.
 #[repr(transparent)]
@@ -39,6 +39,37 @@ impl ShrugExerciseName {
     pub const SHRUG_ARM_MID_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(22);
     pub const SHRUG_ARM_UP_WHEELCHAIR: ShrugExerciseName = ShrugExerciseName(23);
     pub const UPRIGHT_ROW: ShrugExerciseName = ShrugExerciseName(24);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("barbell_jump_shrug"),
+            1 => Some("barbell_shrug"),
+            2 => Some("barbell_upright_row"),
+            3 => Some("behind_the_back_smith_machine_shrug"),
+            4 => Some("dumbbell_jump_shrug"),
+            5 => Some("dumbbell_shrug"),
+            6 => Some("dumbbell_upright_row"),
+            7 => Some("incline_dumbbell_shrug"),
+            8 => Some("overhead_barbell_shrug"),
+            9 => Some("overhead_dumbbell_shrug"),
+            10 => Some("scaption_and_shrug"),
+            11 => Some("scapular_retraction"),
+            12 => Some("serratus_chair_shrug"),
+            13 => Some("weighted_serratus_chair_shrug"),
+            14 => Some("serratus_shrug"),
+            15 => Some("weighted_serratus_shrug"),
+            16 => Some("wide_grip_jump_shrug"),
+            17 => Some("wide_grip_barbell_shrug"),
+            18 => Some("behind_the_back_shrug"),
+            19 => Some("dumbbell_shrug_wheelchair"),
+            20 => Some("shrug_wheelchair"),
+            21 => Some("shrug_arm_down_wheelchair"),
+            22 => Some("shrug_arm_mid_wheelchair"),
+            23 => Some("shrug_arm_up_wheelchair"),
+            24 => Some("upright_row"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ShrugExerciseName {
@@ -49,33 +80,50 @@ impl Default for ShrugExerciseName {
 
 impl fmt::Display for ShrugExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "barbell_jump_shrug"),
-            1 => write!(f, "barbell_shrug"),
-            2 => write!(f, "barbell_upright_row"),
-            3 => write!(f, "behind_the_back_smith_machine_shrug"),
-            4 => write!(f, "dumbbell_jump_shrug"),
-            5 => write!(f, "dumbbell_shrug"),
-            6 => write!(f, "dumbbell_upright_row"),
-            7 => write!(f, "incline_dumbbell_shrug"),
-            8 => write!(f, "overhead_barbell_shrug"),
-            9 => write!(f, "overhead_dumbbell_shrug"),
-            10 => write!(f, "scaption_and_shrug"),
-            11 => write!(f, "scapular_retraction"),
-            12 => write!(f, "serratus_chair_shrug"),
-            13 => write!(f, "weighted_serratus_chair_shrug"),
-            14 => write!(f, "serratus_shrug"),
-            15 => write!(f, "weighted_serratus_shrug"),
-            16 => write!(f, "wide_grip_jump_shrug"),
-            17 => write!(f, "wide_grip_barbell_shrug"),
-            18 => write!(f, "behind_the_back_shrug"),
-            19 => write!(f, "dumbbell_shrug_wheelchair"),
-            20 => write!(f, "shrug_wheelchair"),
-            21 => write!(f, "shrug_arm_down_wheelchair"),
-            22 => write!(f, "shrug_arm_mid_wheelchair"),
-            23 => write!(f, "shrug_arm_up_wheelchair"),
-            24 => write!(f, "upright_row"),
-            _ => write!(f, "ShrugExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ShrugExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ShrugExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ShrugExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ShrugExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

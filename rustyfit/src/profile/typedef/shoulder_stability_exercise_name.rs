@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Shoulder Stability Exercise Name type.
 #[repr(transparent)]
@@ -73,6 +73,48 @@ impl ShoulderStabilityExerciseName {
         ShoulderStabilityExerciseName(34);
     pub const SEATED_DUMBBELL_INTERNAL_ROTATION: ShoulderStabilityExerciseName =
         ShoulderStabilityExerciseName(35);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("90_degree_cable_external_rotation"),
+            1 => Some("band_external_rotation"),
+            2 => Some("band_internal_rotation"),
+            3 => Some("bent_arm_lateral_raise_and_external_rotation"),
+            4 => Some("cable_external_rotation"),
+            5 => Some("dumbbell_face_pull_with_external_rotation"),
+            6 => Some("floor_i_raise"),
+            7 => Some("weighted_floor_i_raise"),
+            8 => Some("floor_t_raise"),
+            9 => Some("weighted_floor_t_raise"),
+            10 => Some("floor_y_raise"),
+            11 => Some("weighted_floor_y_raise"),
+            12 => Some("incline_i_raise"),
+            13 => Some("weighted_incline_i_raise"),
+            14 => Some("incline_l_raise"),
+            15 => Some("weighted_incline_l_raise"),
+            16 => Some("incline_t_raise"),
+            17 => Some("weighted_incline_t_raise"),
+            18 => Some("incline_w_raise"),
+            19 => Some("weighted_incline_w_raise"),
+            20 => Some("incline_y_raise"),
+            21 => Some("weighted_incline_y_raise"),
+            22 => Some("lying_external_rotation"),
+            23 => Some("seated_dumbbell_external_rotation"),
+            24 => Some("standing_l_raise"),
+            25 => Some("swiss_ball_i_raise"),
+            26 => Some("weighted_swiss_ball_i_raise"),
+            27 => Some("swiss_ball_t_raise"),
+            28 => Some("weighted_swiss_ball_t_raise"),
+            29 => Some("swiss_ball_w_raise"),
+            30 => Some("weighted_swiss_ball_w_raise"),
+            31 => Some("swiss_ball_y_raise"),
+            32 => Some("weighted_swiss_ball_y_raise"),
+            33 => Some("cable_internal_rotation"),
+            34 => Some("lying_internal_rotation"),
+            35 => Some("seated_dumbbell_internal_rotation"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ShoulderStabilityExerciseName {
@@ -83,44 +125,50 @@ impl Default for ShoulderStabilityExerciseName {
 
 impl fmt::Display for ShoulderStabilityExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "90_degree_cable_external_rotation"),
-            1 => write!(f, "band_external_rotation"),
-            2 => write!(f, "band_internal_rotation"),
-            3 => write!(f, "bent_arm_lateral_raise_and_external_rotation"),
-            4 => write!(f, "cable_external_rotation"),
-            5 => write!(f, "dumbbell_face_pull_with_external_rotation"),
-            6 => write!(f, "floor_i_raise"),
-            7 => write!(f, "weighted_floor_i_raise"),
-            8 => write!(f, "floor_t_raise"),
-            9 => write!(f, "weighted_floor_t_raise"),
-            10 => write!(f, "floor_y_raise"),
-            11 => write!(f, "weighted_floor_y_raise"),
-            12 => write!(f, "incline_i_raise"),
-            13 => write!(f, "weighted_incline_i_raise"),
-            14 => write!(f, "incline_l_raise"),
-            15 => write!(f, "weighted_incline_l_raise"),
-            16 => write!(f, "incline_t_raise"),
-            17 => write!(f, "weighted_incline_t_raise"),
-            18 => write!(f, "incline_w_raise"),
-            19 => write!(f, "weighted_incline_w_raise"),
-            20 => write!(f, "incline_y_raise"),
-            21 => write!(f, "weighted_incline_y_raise"),
-            22 => write!(f, "lying_external_rotation"),
-            23 => write!(f, "seated_dumbbell_external_rotation"),
-            24 => write!(f, "standing_l_raise"),
-            25 => write!(f, "swiss_ball_i_raise"),
-            26 => write!(f, "weighted_swiss_ball_i_raise"),
-            27 => write!(f, "swiss_ball_t_raise"),
-            28 => write!(f, "weighted_swiss_ball_t_raise"),
-            29 => write!(f, "swiss_ball_w_raise"),
-            30 => write!(f, "weighted_swiss_ball_w_raise"),
-            31 => write!(f, "swiss_ball_y_raise"),
-            32 => write!(f, "weighted_swiss_ball_y_raise"),
-            33 => write!(f, "cable_internal_rotation"),
-            34 => write!(f, "lying_internal_rotation"),
-            35 => write!(f, "seated_dumbbell_internal_rotation"),
-            _ => write!(f, "ShoulderStabilityExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ShoulderStabilityExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ShoulderStabilityExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ShoulderStabilityExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ShoulderStabilityExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

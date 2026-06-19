@@ -10,6 +10,8 @@ use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -19,6 +21,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Segment Point message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SegmentPoint {
     pub message_index: typedef::MessageIndex,
@@ -42,19 +45,19 @@ pub struct SegmentPoint {
 }
 
 impl SegmentPoint {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LAT: u8 = 1;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LONG: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const DISTANCE: u8 = 3;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5`; Offset: `500`; Units: `m`
     pub const ALTITUDE: u8 = 4;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const LEADER_TIME: u8 = 5;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 6;
 
     /// Create new SegmentPoint with all fields being set to its corresponding invalid value.
@@ -331,6 +334,133 @@ impl From<SegmentPoint> for Message {
             num: typedef::MesgNum::SEGMENT_POINT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SegmentPoint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SegmentPoint", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.position_lat_degrees() {
+            state.serialize_field("position_lat", &v)?;
+        }
+        if let Some(v) = self.position_long_degrees() {
+            state.serialize_field("position_long", &v)?;
+        }
+        if let Some(v) = self.distance_scaled() {
+            state.serialize_field("distance", &v)?;
+        }
+        if let Some(v) = self.altitude_scaled() {
+            state.serialize_field("altitude", &v)?;
+        }
+        if let Some(v) = self.leader_time_scaled() {
+            state.serialize_field("leader_time", &v)?;
+        }
+        if let Some(v) = self.enhanced_altitude_scaled() {
+            state.serialize_field("enhanced_altitude", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    /// Degrees.
+    position_lat: f64,
+    /// Degrees.
+    position_long: f64,
+    distance: f64,
+    altitude: f64,
+    leader_time: Vec<f64>,
+    enhanced_altitude: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SegmentPoint {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            position_lat: semconv::to_semicircles(m.position_lat).unwrap_or(i32::MAX),
+            position_long: semconv::to_semicircles(m.position_long).unwrap_or(i32::MAX),
+            distance: {
+                let unscaled = (m.distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            altitude: {
+                let unscaled = (m.altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            leader_time: {
+                if m.leader_time.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.leader_time.len());
+                    for &x in m.leader_time.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            enhanced_altitude: {
+                let unscaled = (m.enhanced_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            state: [0u8; 1],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            position_lat: f64::from_bits(u64::MAX),
+            position_long: f64::from_bits(u64::MAX),
+            distance: f64::from_bits(u64::MAX),
+            altitude: f64::from_bits(u64::MAX),
+            leader_time: Vec::new(),
+            enhanced_altitude: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Sit Up Exercise Name type.
 #[repr(transparent)]
@@ -55,6 +55,53 @@ impl SitUpExerciseName {
     pub const GHD_SIT_UPS: SitUpExerciseName = SitUpExerciseName(38);
     pub const SIT_UP_TURKISH_GET_UP: SitUpExerciseName = SitUpExerciseName(39);
     pub const RUSSIAN_TWIST_ON_SWISS_BALL: SitUpExerciseName = SitUpExerciseName(40);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("alternating_sit_up"),
+            1 => Some("weighted_alternating_sit_up"),
+            2 => Some("bent_knee_v_up"),
+            3 => Some("weighted_bent_knee_v_up"),
+            4 => Some("butterfly_sit_up"),
+            5 => Some("weighted_butterfly_situp"),
+            6 => Some("cross_punch_roll_up"),
+            7 => Some("weighted_cross_punch_roll_up"),
+            8 => Some("crossed_arms_sit_up"),
+            9 => Some("weighted_crossed_arms_sit_up"),
+            10 => Some("get_up_sit_up"),
+            11 => Some("weighted_get_up_sit_up"),
+            12 => Some("hovering_sit_up"),
+            13 => Some("weighted_hovering_sit_up"),
+            14 => Some("kettlebell_sit_up"),
+            15 => Some("medicine_ball_alternating_v_up"),
+            16 => Some("medicine_ball_sit_up"),
+            17 => Some("medicine_ball_v_up"),
+            18 => Some("modified_sit_up"),
+            19 => Some("negative_sit_up"),
+            20 => Some("one_arm_full_sit_up"),
+            21 => Some("reclining_circle"),
+            22 => Some("weighted_reclining_circle"),
+            23 => Some("reverse_curl_up"),
+            24 => Some("weighted_reverse_curl_up"),
+            25 => Some("single_leg_swiss_ball_jackknife"),
+            26 => Some("weighted_single_leg_swiss_ball_jackknife"),
+            27 => Some("the_teaser"),
+            28 => Some("the_teaser_weighted"),
+            29 => Some("three_part_roll_down"),
+            30 => Some("weighted_three_part_roll_down"),
+            31 => Some("v_up"),
+            32 => Some("weighted_v_up"),
+            33 => Some("weighted_russian_twist_on_swiss_ball"),
+            34 => Some("weighted_sit_up"),
+            35 => Some("x_abs"),
+            36 => Some("weighted_x_abs"),
+            37 => Some("sit_up"),
+            38 => Some("ghd_sit_ups"),
+            39 => Some("sit_up_turkish_get_up"),
+            40 => Some("russian_twist_on_swiss_ball"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SitUpExerciseName {
@@ -65,49 +112,50 @@ impl Default for SitUpExerciseName {
 
 impl fmt::Display for SitUpExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "alternating_sit_up"),
-            1 => write!(f, "weighted_alternating_sit_up"),
-            2 => write!(f, "bent_knee_v_up"),
-            3 => write!(f, "weighted_bent_knee_v_up"),
-            4 => write!(f, "butterfly_sit_up"),
-            5 => write!(f, "weighted_butterfly_situp"),
-            6 => write!(f, "cross_punch_roll_up"),
-            7 => write!(f, "weighted_cross_punch_roll_up"),
-            8 => write!(f, "crossed_arms_sit_up"),
-            9 => write!(f, "weighted_crossed_arms_sit_up"),
-            10 => write!(f, "get_up_sit_up"),
-            11 => write!(f, "weighted_get_up_sit_up"),
-            12 => write!(f, "hovering_sit_up"),
-            13 => write!(f, "weighted_hovering_sit_up"),
-            14 => write!(f, "kettlebell_sit_up"),
-            15 => write!(f, "medicine_ball_alternating_v_up"),
-            16 => write!(f, "medicine_ball_sit_up"),
-            17 => write!(f, "medicine_ball_v_up"),
-            18 => write!(f, "modified_sit_up"),
-            19 => write!(f, "negative_sit_up"),
-            20 => write!(f, "one_arm_full_sit_up"),
-            21 => write!(f, "reclining_circle"),
-            22 => write!(f, "weighted_reclining_circle"),
-            23 => write!(f, "reverse_curl_up"),
-            24 => write!(f, "weighted_reverse_curl_up"),
-            25 => write!(f, "single_leg_swiss_ball_jackknife"),
-            26 => write!(f, "weighted_single_leg_swiss_ball_jackknife"),
-            27 => write!(f, "the_teaser"),
-            28 => write!(f, "the_teaser_weighted"),
-            29 => write!(f, "three_part_roll_down"),
-            30 => write!(f, "weighted_three_part_roll_down"),
-            31 => write!(f, "v_up"),
-            32 => write!(f, "weighted_v_up"),
-            33 => write!(f, "weighted_russian_twist_on_swiss_ball"),
-            34 => write!(f, "weighted_sit_up"),
-            35 => write!(f, "x_abs"),
-            36 => write!(f, "weighted_x_abs"),
-            37 => write!(f, "sit_up"),
-            38 => write!(f, "ghd_sit_ups"),
-            39 => write!(f, "sit_up_turkish_get_up"),
-            40 => write!(f, "russian_twist_on_swiss_ball"),
-            _ => write!(f, "SitUpExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SitUpExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SitUpExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SitUpExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SitUpExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

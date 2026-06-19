@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Tank Summary message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct TankSummary {
     /// Units: s
@@ -28,15 +31,15 @@ pub struct TankSummary {
 }
 
 impl TankSummary {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::ANT_CHANNEL_ID`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::AntChannelId
     pub const SENSOR: u8 = 0;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `bar`
     pub const START_PRESSURE: u8 = 1;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `bar`
     pub const END_PRESSURE: u8 = 2;
-    /// Value's type: `u32`; Scale: `100`; Units: `L`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `L`
     pub const VOLUME_USED: u8 = 3;
 
     /// Create new TankSummary with all fields being set to its corresponding invalid value.
@@ -211,6 +214,105 @@ impl From<TankSummary> for Message {
             num: typedef::MesgNum::TANK_SUMMARY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TankSummary {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("TankSummary", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.sensor.0 != u32::MIN {
+            state.serialize_field("sensor", &self.sensor)?;
+        }
+        if let Some(v) = self.start_pressure_scaled() {
+            state.serialize_field("start_pressure", &v)?;
+        }
+        if let Some(v) = self.end_pressure_scaled() {
+            state.serialize_field("end_pressure", &v)?;
+        }
+        if let Some(v) = self.volume_used_scaled() {
+            state.serialize_field("volume_used", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    sensor: typedef::AntChannelId,
+    start_pressure: f64,
+    end_pressure: f64,
+    volume_used: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for TankSummary {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            sensor: m.sensor,
+            start_pressure: {
+                let unscaled = (m.start_pressure + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            end_pressure: {
+                let unscaled = (m.end_pressure + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            volume_used: {
+                let unscaled = (m.volume_used + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            sensor: typedef::AntChannelId(u32::MIN),
+            start_pressure: f64::from_bits(u64::MAX),
+            end_pressure: f64::from_bits(u64::MAX),
+            volume_used: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

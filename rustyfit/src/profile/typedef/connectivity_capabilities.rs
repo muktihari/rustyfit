@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Connectivity Capabilities type.
 #[repr(transparent)]
@@ -65,6 +65,44 @@ impl ConnectivityCapabilities {
     pub const LIVE_TRACK_MESSAGING: ConnectivityCapabilities = ConnectivityCapabilities(0x40000000);
     /// Device supports instant input feature
     pub const INSTANT_INPUT: ConnectivityCapabilities = ConnectivityCapabilities(0x80000000);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x00000001 => Some("bluetooth"),
+            0x00000002 => Some("bluetooth_le"),
+            0x00000004 => Some("ant"),
+            0x00000008 => Some("activity_upload"),
+            0x00000010 => Some("course_download"),
+            0x00000020 => Some("workout_download"),
+            0x00000040 => Some("live_track"),
+            0x00000080 => Some("weather_conditions"),
+            0x00000100 => Some("weather_alerts"),
+            0x00000200 => Some("gps_ephemeris_download"),
+            0x00000400 => Some("explicit_archive"),
+            0x00000800 => Some("setup_incomplete"),
+            0x00001000 => Some("continue_sync_after_software_update"),
+            0x00002000 => Some("connect_iq_app_download"),
+            0x00004000 => Some("golf_course_download"),
+            0x00008000 => Some("device_initiates_sync"),
+            0x00010000 => Some("connect_iq_watch_app_download"),
+            0x00020000 => Some("connect_iq_widget_download"),
+            0x00040000 => Some("connect_iq_watch_face_download"),
+            0x00080000 => Some("connect_iq_data_field_download"),
+            0x00100000 => Some("connect_iq_app_management"),
+            0x00200000 => Some("swing_sensor"),
+            0x00400000 => Some("swing_sensor_remote"),
+            0x00800000 => Some("incident_detection"),
+            0x01000000 => Some("audio_prompts"),
+            0x02000000 => Some("wifi_verification"),
+            0x04000000 => Some("true_up"),
+            0x08000000 => Some("find_my_watch"),
+            0x10000000 => Some("remote_manual_sync"),
+            0x20000000 => Some("live_track_auto_start"),
+            0x40000000 => Some("live_track_messaging"),
+            0x80000000 => Some("instant_input"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ConnectivityCapabilities {
@@ -75,40 +113,50 @@ impl Default for ConnectivityCapabilities {
 
 impl fmt::Display for ConnectivityCapabilities {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000001 => write!(f, "bluetooth"),
-            0x00000002 => write!(f, "bluetooth_le"),
-            0x00000004 => write!(f, "ant"),
-            0x00000008 => write!(f, "activity_upload"),
-            0x00000010 => write!(f, "course_download"),
-            0x00000020 => write!(f, "workout_download"),
-            0x00000040 => write!(f, "live_track"),
-            0x00000080 => write!(f, "weather_conditions"),
-            0x00000100 => write!(f, "weather_alerts"),
-            0x00000200 => write!(f, "gps_ephemeris_download"),
-            0x00000400 => write!(f, "explicit_archive"),
-            0x00000800 => write!(f, "setup_incomplete"),
-            0x00001000 => write!(f, "continue_sync_after_software_update"),
-            0x00002000 => write!(f, "connect_iq_app_download"),
-            0x00004000 => write!(f, "golf_course_download"),
-            0x00008000 => write!(f, "device_initiates_sync"),
-            0x00010000 => write!(f, "connect_iq_watch_app_download"),
-            0x00020000 => write!(f, "connect_iq_widget_download"),
-            0x00040000 => write!(f, "connect_iq_watch_face_download"),
-            0x00080000 => write!(f, "connect_iq_data_field_download"),
-            0x00100000 => write!(f, "connect_iq_app_management"),
-            0x00200000 => write!(f, "swing_sensor"),
-            0x00400000 => write!(f, "swing_sensor_remote"),
-            0x00800000 => write!(f, "incident_detection"),
-            0x01000000 => write!(f, "audio_prompts"),
-            0x02000000 => write!(f, "wifi_verification"),
-            0x04000000 => write!(f, "true_up"),
-            0x08000000 => write!(f, "find_my_watch"),
-            0x10000000 => write!(f, "remote_manual_sync"),
-            0x20000000 => write!(f, "live_track_auto_start"),
-            0x40000000 => write!(f, "live_track_messaging"),
-            0x80000000 => write!(f, "instant_input"),
-            _ => write!(f, "ConnectivityCapabilities({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ConnectivityCapabilities({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ConnectivityCapabilities {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ConnectivityCapabilities", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u32,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ConnectivityCapabilities {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

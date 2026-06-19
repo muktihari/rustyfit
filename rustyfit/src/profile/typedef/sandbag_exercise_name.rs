@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Sandbag Exercise Name type.
 #[repr(transparent)]
@@ -34,6 +34,32 @@ impl SandbagExerciseName {
     pub const SIDE_LUNGE: SandbagExerciseName = SandbagExerciseName(17);
     pub const SPRINT: SandbagExerciseName = SandbagExerciseName(18);
     pub const ZERCHER_SQUAT: SandbagExerciseName = SandbagExerciseName(19);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("around_the_world"),
+            1 => Some("back_squat"),
+            2 => Some("bear_crawl_pull_through"),
+            3 => Some("bear_hug_squat"),
+            4 => Some("clean"),
+            5 => Some("clean_and_press"),
+            6 => Some("curl"),
+            7 => Some("front_carry"),
+            8 => Some("front_squat"),
+            9 => Some("lunge"),
+            10 => Some("overhead_press"),
+            11 => Some("plank_pull_through"),
+            12 => Some("rotational_lunge"),
+            13 => Some("row"),
+            14 => Some("russian_twist"),
+            15 => Some("shouldering"),
+            16 => Some("shoveling"),
+            17 => Some("side_lunge"),
+            18 => Some("sprint"),
+            19 => Some("zercher_squat"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SandbagExerciseName {
@@ -44,28 +70,50 @@ impl Default for SandbagExerciseName {
 
 impl fmt::Display for SandbagExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "around_the_world"),
-            1 => write!(f, "back_squat"),
-            2 => write!(f, "bear_crawl_pull_through"),
-            3 => write!(f, "bear_hug_squat"),
-            4 => write!(f, "clean"),
-            5 => write!(f, "clean_and_press"),
-            6 => write!(f, "curl"),
-            7 => write!(f, "front_carry"),
-            8 => write!(f, "front_squat"),
-            9 => write!(f, "lunge"),
-            10 => write!(f, "overhead_press"),
-            11 => write!(f, "plank_pull_through"),
-            12 => write!(f, "rotational_lunge"),
-            13 => write!(f, "row"),
-            14 => write!(f, "russian_twist"),
-            15 => write!(f, "shouldering"),
-            16 => write!(f, "shoveling"),
-            17 => write!(f, "side_lunge"),
-            18 => write!(f, "sprint"),
-            19 => write!(f, "zercher_squat"),
-            _ => write!(f, "SandbagExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SandbagExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SandbagExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SandbagExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SandbagExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Calf Raise Exercise Name type.
 #[repr(transparent)]
@@ -40,6 +40,33 @@ impl CalfRaiseExerciseName {
     pub const STANDING_CALF_RAISE: CalfRaiseExerciseName = CalfRaiseExerciseName(18);
     pub const WEIGHTED_STANDING_CALF_RAISE: CalfRaiseExerciseName = CalfRaiseExerciseName(19);
     pub const STANDING_DUMBBELL_CALF_RAISE: CalfRaiseExerciseName = CalfRaiseExerciseName(20);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("3_way_calf_raise"),
+            1 => Some("3_way_weighted_calf_raise"),
+            2 => Some("3_way_single_leg_calf_raise"),
+            3 => Some("3_way_weighted_single_leg_calf_raise"),
+            4 => Some("donkey_calf_raise"),
+            5 => Some("weighted_donkey_calf_raise"),
+            6 => Some("seated_calf_raise"),
+            7 => Some("weighted_seated_calf_raise"),
+            8 => Some("seated_dumbbell_toe_raise"),
+            9 => Some("single_leg_bent_knee_calf_raise"),
+            10 => Some("weighted_single_leg_bent_knee_calf_raise"),
+            11 => Some("single_leg_decline_push_up"),
+            12 => Some("single_leg_donkey_calf_raise"),
+            13 => Some("weighted_single_leg_donkey_calf_raise"),
+            14 => Some("single_leg_hip_raise_with_knee_hold"),
+            15 => Some("single_leg_standing_calf_raise"),
+            16 => Some("single_leg_standing_dumbbell_calf_raise"),
+            17 => Some("standing_barbell_calf_raise"),
+            18 => Some("standing_calf_raise"),
+            19 => Some("weighted_standing_calf_raise"),
+            20 => Some("standing_dumbbell_calf_raise"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CalfRaiseExerciseName {
@@ -50,29 +77,50 @@ impl Default for CalfRaiseExerciseName {
 
 impl fmt::Display for CalfRaiseExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "3_way_calf_raise"),
-            1 => write!(f, "3_way_weighted_calf_raise"),
-            2 => write!(f, "3_way_single_leg_calf_raise"),
-            3 => write!(f, "3_way_weighted_single_leg_calf_raise"),
-            4 => write!(f, "donkey_calf_raise"),
-            5 => write!(f, "weighted_donkey_calf_raise"),
-            6 => write!(f, "seated_calf_raise"),
-            7 => write!(f, "weighted_seated_calf_raise"),
-            8 => write!(f, "seated_dumbbell_toe_raise"),
-            9 => write!(f, "single_leg_bent_knee_calf_raise"),
-            10 => write!(f, "weighted_single_leg_bent_knee_calf_raise"),
-            11 => write!(f, "single_leg_decline_push_up"),
-            12 => write!(f, "single_leg_donkey_calf_raise"),
-            13 => write!(f, "weighted_single_leg_donkey_calf_raise"),
-            14 => write!(f, "single_leg_hip_raise_with_knee_hold"),
-            15 => write!(f, "single_leg_standing_calf_raise"),
-            16 => write!(f, "single_leg_standing_dumbbell_calf_raise"),
-            17 => write!(f, "standing_barbell_calf_raise"),
-            18 => write!(f, "standing_calf_raise"),
-            19 => write!(f, "weighted_standing_calf_raise"),
-            20 => write!(f, "standing_dumbbell_calf_raise"),
-            _ => write!(f, "CalfRaiseExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CalfRaiseExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CalfRaiseExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CalfRaiseExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CalfRaiseExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

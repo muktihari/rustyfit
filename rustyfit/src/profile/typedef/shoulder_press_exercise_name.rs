@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Shoulder Press Exercise Name type.
 #[repr(transparent)]
@@ -61,6 +61,43 @@ impl ShoulderPressExerciseName {
     pub const ARNOLD_PRESS_WHEELCHAIR: ShoulderPressExerciseName = ShoulderPressExerciseName(30);
     pub const OVERHEAD_DUMBBELL_PRESS_WHEELCHAIR: ShoulderPressExerciseName =
         ShoulderPressExerciseName(31);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("alternating_dumbbell_shoulder_press"),
+            1 => Some("arnold_press"),
+            2 => Some("barbell_front_squat_to_push_press"),
+            3 => Some("barbell_push_press"),
+            4 => Some("barbell_shoulder_press"),
+            5 => Some("dead_curl_press"),
+            6 => Some("dumbbell_alternating_shoulder_press_and_twist"),
+            7 => Some("dumbbell_hammer_curl_to_lunge_to_press"),
+            8 => Some("dumbbell_push_press"),
+            9 => Some("floor_inverted_shoulder_press"),
+            10 => Some("weighted_floor_inverted_shoulder_press"),
+            11 => Some("inverted_shoulder_press"),
+            12 => Some("weighted_inverted_shoulder_press"),
+            13 => Some("one_arm_push_press"),
+            14 => Some("overhead_barbell_press"),
+            15 => Some("overhead_dumbbell_press"),
+            16 => Some("seated_barbell_shoulder_press"),
+            17 => Some("seated_dumbbell_shoulder_press"),
+            18 => Some("single_arm_dumbbell_shoulder_press"),
+            19 => Some("single_arm_step_up_and_press"),
+            20 => Some("smith_machine_overhead_press"),
+            21 => Some("split_stance_hammer_curl_to_press"),
+            22 => Some("swiss_ball_dumbbell_shoulder_press"),
+            23 => Some("weight_plate_front_raise"),
+            24 => Some("dumbbell_shoulder_press"),
+            25 => Some("military_press"),
+            27 => Some("strict_press"),
+            28 => Some("dumbbell_front_raise"),
+            29 => Some("dumbbell_curl_to_overhead_press_wheelchair"),
+            30 => Some("arnold_press_wheelchair"),
+            31 => Some("overhead_dumbbell_press_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ShoulderPressExerciseName {
@@ -71,39 +108,50 @@ impl Default for ShoulderPressExerciseName {
 
 impl fmt::Display for ShoulderPressExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "alternating_dumbbell_shoulder_press"),
-            1 => write!(f, "arnold_press"),
-            2 => write!(f, "barbell_front_squat_to_push_press"),
-            3 => write!(f, "barbell_push_press"),
-            4 => write!(f, "barbell_shoulder_press"),
-            5 => write!(f, "dead_curl_press"),
-            6 => write!(f, "dumbbell_alternating_shoulder_press_and_twist"),
-            7 => write!(f, "dumbbell_hammer_curl_to_lunge_to_press"),
-            8 => write!(f, "dumbbell_push_press"),
-            9 => write!(f, "floor_inverted_shoulder_press"),
-            10 => write!(f, "weighted_floor_inverted_shoulder_press"),
-            11 => write!(f, "inverted_shoulder_press"),
-            12 => write!(f, "weighted_inverted_shoulder_press"),
-            13 => write!(f, "one_arm_push_press"),
-            14 => write!(f, "overhead_barbell_press"),
-            15 => write!(f, "overhead_dumbbell_press"),
-            16 => write!(f, "seated_barbell_shoulder_press"),
-            17 => write!(f, "seated_dumbbell_shoulder_press"),
-            18 => write!(f, "single_arm_dumbbell_shoulder_press"),
-            19 => write!(f, "single_arm_step_up_and_press"),
-            20 => write!(f, "smith_machine_overhead_press"),
-            21 => write!(f, "split_stance_hammer_curl_to_press"),
-            22 => write!(f, "swiss_ball_dumbbell_shoulder_press"),
-            23 => write!(f, "weight_plate_front_raise"),
-            24 => write!(f, "dumbbell_shoulder_press"),
-            25 => write!(f, "military_press"),
-            27 => write!(f, "strict_press"),
-            28 => write!(f, "dumbbell_front_raise"),
-            29 => write!(f, "dumbbell_curl_to_overhead_press_wheelchair"),
-            30 => write!(f, "arnold_press_wheelchair"),
-            31 => write!(f, "overhead_dumbbell_press_wheelchair"),
-            _ => write!(f, "ShoulderPressExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ShoulderPressExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ShoulderPressExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ShoulderPressExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ShoulderPressExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

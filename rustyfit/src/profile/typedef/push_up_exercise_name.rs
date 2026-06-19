@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Push Up Exercise Name type.
 #[repr(transparent)]
@@ -110,6 +110,103 @@ impl PushUpExerciseName {
     pub const WEIGHTED_PIKE_PUSH_UP: PushUpExerciseName = PushUpExerciseName(88);
     pub const KIPPING_PARALLETTE_HANDSTAND_PUSH_UP: PushUpExerciseName = PushUpExerciseName(89);
     pub const WALL_PUSH_UP: PushUpExerciseName = PushUpExerciseName(90);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("chest_press_with_band"),
+            1 => Some("alternating_staggered_push_up"),
+            2 => Some("weighted_alternating_staggered_push_up"),
+            3 => Some("alternating_hands_medicine_ball_push_up"),
+            4 => Some("weighted_alternating_hands_medicine_ball_push_up"),
+            5 => Some("bosu_ball_push_up"),
+            6 => Some("weighted_bosu_ball_push_up"),
+            7 => Some("clapping_push_up"),
+            8 => Some("weighted_clapping_push_up"),
+            9 => Some("close_grip_medicine_ball_push_up"),
+            10 => Some("weighted_close_grip_medicine_ball_push_up"),
+            11 => Some("close_hands_push_up"),
+            12 => Some("weighted_close_hands_push_up"),
+            13 => Some("decline_push_up"),
+            14 => Some("weighted_decline_push_up"),
+            15 => Some("diamond_push_up"),
+            16 => Some("weighted_diamond_push_up"),
+            17 => Some("explosive_crossover_push_up"),
+            18 => Some("weighted_explosive_crossover_push_up"),
+            19 => Some("explosive_push_up"),
+            20 => Some("weighted_explosive_push_up"),
+            21 => Some("feet_elevated_side_to_side_push_up"),
+            22 => Some("weighted_feet_elevated_side_to_side_push_up"),
+            23 => Some("hand_release_push_up"),
+            24 => Some("weighted_hand_release_push_up"),
+            25 => Some("handstand_push_up"),
+            26 => Some("weighted_handstand_push_up"),
+            27 => Some("incline_push_up"),
+            28 => Some("weighted_incline_push_up"),
+            29 => Some("isometric_explosive_push_up"),
+            30 => Some("weighted_isometric_explosive_push_up"),
+            31 => Some("judo_push_up"),
+            32 => Some("weighted_judo_push_up"),
+            33 => Some("kneeling_push_up"),
+            34 => Some("weighted_kneeling_push_up"),
+            35 => Some("medicine_ball_chest_pass"),
+            36 => Some("medicine_ball_push_up"),
+            37 => Some("weighted_medicine_ball_push_up"),
+            38 => Some("one_arm_push_up"),
+            39 => Some("weighted_one_arm_push_up"),
+            40 => Some("weighted_push_up"),
+            41 => Some("push_up_and_row"),
+            42 => Some("weighted_push_up_and_row"),
+            43 => Some("push_up_plus"),
+            44 => Some("weighted_push_up_plus"),
+            45 => Some("push_up_with_feet_on_swiss_ball"),
+            46 => Some("weighted_push_up_with_feet_on_swiss_ball"),
+            47 => Some("push_up_with_one_hand_on_medicine_ball"),
+            48 => Some("weighted_push_up_with_one_hand_on_medicine_ball"),
+            49 => Some("shoulder_push_up"),
+            50 => Some("weighted_shoulder_push_up"),
+            51 => Some("single_arm_medicine_ball_push_up"),
+            52 => Some("weighted_single_arm_medicine_ball_push_up"),
+            53 => Some("spiderman_push_up"),
+            54 => Some("weighted_spiderman_push_up"),
+            55 => Some("stacked_feet_push_up"),
+            56 => Some("weighted_stacked_feet_push_up"),
+            57 => Some("staggered_hands_push_up"),
+            58 => Some("weighted_staggered_hands_push_up"),
+            59 => Some("suspended_push_up"),
+            60 => Some("weighted_suspended_push_up"),
+            61 => Some("swiss_ball_push_up"),
+            62 => Some("weighted_swiss_ball_push_up"),
+            63 => Some("swiss_ball_push_up_plus"),
+            64 => Some("weighted_swiss_ball_push_up_plus"),
+            65 => Some("t_push_up"),
+            66 => Some("weighted_t_push_up"),
+            67 => Some("triple_stop_push_up"),
+            68 => Some("weighted_triple_stop_push_up"),
+            69 => Some("wide_hands_push_up"),
+            70 => Some("weighted_wide_hands_push_up"),
+            71 => Some("parallette_handstand_push_up"),
+            72 => Some("weighted_parallette_handstand_push_up"),
+            73 => Some("ring_handstand_push_up"),
+            74 => Some("weighted_ring_handstand_push_up"),
+            75 => Some("ring_push_up"),
+            76 => Some("weighted_ring_push_up"),
+            77 => Some("push_up"),
+            78 => Some("pilates_pushup"),
+            79 => Some("dynamic_push_up"),
+            80 => Some("kipping_handstand_push_up"),
+            81 => Some("shoulder_tapping_push_up"),
+            82 => Some("biceps_push_up"),
+            83 => Some("hindu_push_up"),
+            84 => Some("pike_push_up"),
+            85 => Some("wide_grip_push_up"),
+            86 => Some("weighted_biceps_push_up"),
+            87 => Some("weighted_hindu_push_up"),
+            88 => Some("weighted_pike_push_up"),
+            89 => Some("kipping_parallette_handstand_push_up"),
+            90 => Some("wall_push_up"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for PushUpExerciseName {
@@ -120,99 +217,50 @@ impl Default for PushUpExerciseName {
 
 impl fmt::Display for PushUpExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "chest_press_with_band"),
-            1 => write!(f, "alternating_staggered_push_up"),
-            2 => write!(f, "weighted_alternating_staggered_push_up"),
-            3 => write!(f, "alternating_hands_medicine_ball_push_up"),
-            4 => write!(f, "weighted_alternating_hands_medicine_ball_push_up"),
-            5 => write!(f, "bosu_ball_push_up"),
-            6 => write!(f, "weighted_bosu_ball_push_up"),
-            7 => write!(f, "clapping_push_up"),
-            8 => write!(f, "weighted_clapping_push_up"),
-            9 => write!(f, "close_grip_medicine_ball_push_up"),
-            10 => write!(f, "weighted_close_grip_medicine_ball_push_up"),
-            11 => write!(f, "close_hands_push_up"),
-            12 => write!(f, "weighted_close_hands_push_up"),
-            13 => write!(f, "decline_push_up"),
-            14 => write!(f, "weighted_decline_push_up"),
-            15 => write!(f, "diamond_push_up"),
-            16 => write!(f, "weighted_diamond_push_up"),
-            17 => write!(f, "explosive_crossover_push_up"),
-            18 => write!(f, "weighted_explosive_crossover_push_up"),
-            19 => write!(f, "explosive_push_up"),
-            20 => write!(f, "weighted_explosive_push_up"),
-            21 => write!(f, "feet_elevated_side_to_side_push_up"),
-            22 => write!(f, "weighted_feet_elevated_side_to_side_push_up"),
-            23 => write!(f, "hand_release_push_up"),
-            24 => write!(f, "weighted_hand_release_push_up"),
-            25 => write!(f, "handstand_push_up"),
-            26 => write!(f, "weighted_handstand_push_up"),
-            27 => write!(f, "incline_push_up"),
-            28 => write!(f, "weighted_incline_push_up"),
-            29 => write!(f, "isometric_explosive_push_up"),
-            30 => write!(f, "weighted_isometric_explosive_push_up"),
-            31 => write!(f, "judo_push_up"),
-            32 => write!(f, "weighted_judo_push_up"),
-            33 => write!(f, "kneeling_push_up"),
-            34 => write!(f, "weighted_kneeling_push_up"),
-            35 => write!(f, "medicine_ball_chest_pass"),
-            36 => write!(f, "medicine_ball_push_up"),
-            37 => write!(f, "weighted_medicine_ball_push_up"),
-            38 => write!(f, "one_arm_push_up"),
-            39 => write!(f, "weighted_one_arm_push_up"),
-            40 => write!(f, "weighted_push_up"),
-            41 => write!(f, "push_up_and_row"),
-            42 => write!(f, "weighted_push_up_and_row"),
-            43 => write!(f, "push_up_plus"),
-            44 => write!(f, "weighted_push_up_plus"),
-            45 => write!(f, "push_up_with_feet_on_swiss_ball"),
-            46 => write!(f, "weighted_push_up_with_feet_on_swiss_ball"),
-            47 => write!(f, "push_up_with_one_hand_on_medicine_ball"),
-            48 => write!(f, "weighted_push_up_with_one_hand_on_medicine_ball"),
-            49 => write!(f, "shoulder_push_up"),
-            50 => write!(f, "weighted_shoulder_push_up"),
-            51 => write!(f, "single_arm_medicine_ball_push_up"),
-            52 => write!(f, "weighted_single_arm_medicine_ball_push_up"),
-            53 => write!(f, "spiderman_push_up"),
-            54 => write!(f, "weighted_spiderman_push_up"),
-            55 => write!(f, "stacked_feet_push_up"),
-            56 => write!(f, "weighted_stacked_feet_push_up"),
-            57 => write!(f, "staggered_hands_push_up"),
-            58 => write!(f, "weighted_staggered_hands_push_up"),
-            59 => write!(f, "suspended_push_up"),
-            60 => write!(f, "weighted_suspended_push_up"),
-            61 => write!(f, "swiss_ball_push_up"),
-            62 => write!(f, "weighted_swiss_ball_push_up"),
-            63 => write!(f, "swiss_ball_push_up_plus"),
-            64 => write!(f, "weighted_swiss_ball_push_up_plus"),
-            65 => write!(f, "t_push_up"),
-            66 => write!(f, "weighted_t_push_up"),
-            67 => write!(f, "triple_stop_push_up"),
-            68 => write!(f, "weighted_triple_stop_push_up"),
-            69 => write!(f, "wide_hands_push_up"),
-            70 => write!(f, "weighted_wide_hands_push_up"),
-            71 => write!(f, "parallette_handstand_push_up"),
-            72 => write!(f, "weighted_parallette_handstand_push_up"),
-            73 => write!(f, "ring_handstand_push_up"),
-            74 => write!(f, "weighted_ring_handstand_push_up"),
-            75 => write!(f, "ring_push_up"),
-            76 => write!(f, "weighted_ring_push_up"),
-            77 => write!(f, "push_up"),
-            78 => write!(f, "pilates_pushup"),
-            79 => write!(f, "dynamic_push_up"),
-            80 => write!(f, "kipping_handstand_push_up"),
-            81 => write!(f, "shoulder_tapping_push_up"),
-            82 => write!(f, "biceps_push_up"),
-            83 => write!(f, "hindu_push_up"),
-            84 => write!(f, "pike_push_up"),
-            85 => write!(f, "wide_grip_push_up"),
-            86 => write!(f, "weighted_biceps_push_up"),
-            87 => write!(f, "weighted_hindu_push_up"),
-            88 => write!(f, "weighted_pike_push_up"),
-            89 => write!(f, "kipping_parallette_handstand_push_up"),
-            90 => write!(f, "wall_push_up"),
-            _ => write!(f, "PushUpExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "PushUpExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for PushUpExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("PushUpExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for PushUpExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Exercise Category type.
 #[repr(transparent)]
@@ -68,6 +68,65 @@ impl ExerciseCategory {
     pub const RUN_INDOOR: ExerciseCategory = ExerciseCategory(52);
     pub const BIKE_OUTDOOR: ExerciseCategory = ExerciseCategory(53);
     pub const UNKNOWN: ExerciseCategory = ExerciseCategory(65534);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bench_press"),
+            1 => Some("calf_raise"),
+            2 => Some("cardio"),
+            3 => Some("carry"),
+            4 => Some("chop"),
+            5 => Some("core"),
+            6 => Some("crunch"),
+            7 => Some("curl"),
+            8 => Some("deadlift"),
+            9 => Some("flye"),
+            10 => Some("hip_raise"),
+            11 => Some("hip_stability"),
+            12 => Some("hip_swing"),
+            13 => Some("hyperextension"),
+            14 => Some("lateral_raise"),
+            15 => Some("leg_curl"),
+            16 => Some("leg_raise"),
+            17 => Some("lunge"),
+            18 => Some("olympic_lift"),
+            19 => Some("plank"),
+            20 => Some("plyo"),
+            21 => Some("pull_up"),
+            22 => Some("push_up"),
+            23 => Some("row"),
+            24 => Some("shoulder_press"),
+            25 => Some("shoulder_stability"),
+            26 => Some("shrug"),
+            27 => Some("sit_up"),
+            28 => Some("squat"),
+            29 => Some("total_body"),
+            30 => Some("triceps_extension"),
+            31 => Some("warm_up"),
+            32 => Some("run"),
+            33 => Some("bike"),
+            34 => Some("cardio_sensors"),
+            35 => Some("move"),
+            36 => Some("pose"),
+            37 => Some("banded_exercises"),
+            38 => Some("battle_rope"),
+            39 => Some("elliptical"),
+            40 => Some("floor_climb"),
+            41 => Some("indoor_bike"),
+            42 => Some("indoor_row"),
+            43 => Some("ladder"),
+            44 => Some("sandbag"),
+            45 => Some("sled"),
+            46 => Some("sledge_hammer"),
+            47 => Some("stair_stepper"),
+            49 => Some("suspension"),
+            50 => Some("tire"),
+            52 => Some("run_indoor"),
+            53 => Some("bike_outdoor"),
+            65534 => Some("unknown"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ExerciseCategory {
@@ -78,61 +137,50 @@ impl Default for ExerciseCategory {
 
 impl fmt::Display for ExerciseCategory {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bench_press"),
-            1 => write!(f, "calf_raise"),
-            2 => write!(f, "cardio"),
-            3 => write!(f, "carry"),
-            4 => write!(f, "chop"),
-            5 => write!(f, "core"),
-            6 => write!(f, "crunch"),
-            7 => write!(f, "curl"),
-            8 => write!(f, "deadlift"),
-            9 => write!(f, "flye"),
-            10 => write!(f, "hip_raise"),
-            11 => write!(f, "hip_stability"),
-            12 => write!(f, "hip_swing"),
-            13 => write!(f, "hyperextension"),
-            14 => write!(f, "lateral_raise"),
-            15 => write!(f, "leg_curl"),
-            16 => write!(f, "leg_raise"),
-            17 => write!(f, "lunge"),
-            18 => write!(f, "olympic_lift"),
-            19 => write!(f, "plank"),
-            20 => write!(f, "plyo"),
-            21 => write!(f, "pull_up"),
-            22 => write!(f, "push_up"),
-            23 => write!(f, "row"),
-            24 => write!(f, "shoulder_press"),
-            25 => write!(f, "shoulder_stability"),
-            26 => write!(f, "shrug"),
-            27 => write!(f, "sit_up"),
-            28 => write!(f, "squat"),
-            29 => write!(f, "total_body"),
-            30 => write!(f, "triceps_extension"),
-            31 => write!(f, "warm_up"),
-            32 => write!(f, "run"),
-            33 => write!(f, "bike"),
-            34 => write!(f, "cardio_sensors"),
-            35 => write!(f, "move"),
-            36 => write!(f, "pose"),
-            37 => write!(f, "banded_exercises"),
-            38 => write!(f, "battle_rope"),
-            39 => write!(f, "elliptical"),
-            40 => write!(f, "floor_climb"),
-            41 => write!(f, "indoor_bike"),
-            42 => write!(f, "indoor_row"),
-            43 => write!(f, "ladder"),
-            44 => write!(f, "sandbag"),
-            45 => write!(f, "sled"),
-            46 => write!(f, "sledge_hammer"),
-            47 => write!(f, "stair_stepper"),
-            49 => write!(f, "suspension"),
-            50 => write!(f, "tire"),
-            52 => write!(f, "run_indoor"),
-            53 => write!(f, "bike_outdoor"),
-            65534 => write!(f, "unknown"),
-            _ => write!(f, "ExerciseCategory({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ExerciseCategory({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExerciseCategory {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ExerciseCategory", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExerciseCategory {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Display Position type.
 #[repr(transparent)]
@@ -98,6 +98,54 @@ impl DisplayPosition {
     pub const LATVIAN_GRID: DisplayPosition = DisplayPosition(40);
     /// Reference Grid 99 TM (Swedish)
     pub const SWEDISH_REF_99_GRID: DisplayPosition = DisplayPosition(41);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("degree"),
+            1 => Some("degree_minute"),
+            2 => Some("degree_minute_second"),
+            3 => Some("austrian_grid"),
+            4 => Some("british_grid"),
+            5 => Some("dutch_grid"),
+            6 => Some("hungarian_grid"),
+            7 => Some("finnish_grid"),
+            8 => Some("german_grid"),
+            9 => Some("icelandic_grid"),
+            10 => Some("indonesian_equatorial"),
+            11 => Some("indonesian_irian"),
+            12 => Some("indonesian_southern"),
+            13 => Some("india_zone_0"),
+            14 => Some("india_zone_IA"),
+            15 => Some("india_zone_IB"),
+            16 => Some("india_zone_IIA"),
+            17 => Some("india_zone_IIB"),
+            18 => Some("india_zone_IIIA"),
+            19 => Some("india_zone_IIIB"),
+            20 => Some("india_zone_IVA"),
+            21 => Some("india_zone_IVB"),
+            22 => Some("irish_transverse"),
+            23 => Some("irish_grid"),
+            24 => Some("loran"),
+            25 => Some("maidenhead_grid"),
+            26 => Some("mgrs_grid"),
+            27 => Some("new_zealand_grid"),
+            28 => Some("new_zealand_transverse"),
+            29 => Some("qatar_grid"),
+            30 => Some("modified_swedish_grid"),
+            31 => Some("swedish_grid"),
+            32 => Some("south_african_grid"),
+            33 => Some("swiss_grid"),
+            34 => Some("taiwan_grid"),
+            35 => Some("united_states_grid"),
+            36 => Some("utm_ups_grid"),
+            37 => Some("west_malayan"),
+            38 => Some("borneo_rso"),
+            39 => Some("estonian_grid"),
+            40 => Some("latvian_grid"),
+            41 => Some("swedish_ref_99_grid"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DisplayPosition {
@@ -108,50 +156,50 @@ impl Default for DisplayPosition {
 
 impl fmt::Display for DisplayPosition {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "degree"),
-            1 => write!(f, "degree_minute"),
-            2 => write!(f, "degree_minute_second"),
-            3 => write!(f, "austrian_grid"),
-            4 => write!(f, "british_grid"),
-            5 => write!(f, "dutch_grid"),
-            6 => write!(f, "hungarian_grid"),
-            7 => write!(f, "finnish_grid"),
-            8 => write!(f, "german_grid"),
-            9 => write!(f, "icelandic_grid"),
-            10 => write!(f, "indonesian_equatorial"),
-            11 => write!(f, "indonesian_irian"),
-            12 => write!(f, "indonesian_southern"),
-            13 => write!(f, "india_zone_0"),
-            14 => write!(f, "india_zone_IA"),
-            15 => write!(f, "india_zone_IB"),
-            16 => write!(f, "india_zone_IIA"),
-            17 => write!(f, "india_zone_IIB"),
-            18 => write!(f, "india_zone_IIIA"),
-            19 => write!(f, "india_zone_IIIB"),
-            20 => write!(f, "india_zone_IVA"),
-            21 => write!(f, "india_zone_IVB"),
-            22 => write!(f, "irish_transverse"),
-            23 => write!(f, "irish_grid"),
-            24 => write!(f, "loran"),
-            25 => write!(f, "maidenhead_grid"),
-            26 => write!(f, "mgrs_grid"),
-            27 => write!(f, "new_zealand_grid"),
-            28 => write!(f, "new_zealand_transverse"),
-            29 => write!(f, "qatar_grid"),
-            30 => write!(f, "modified_swedish_grid"),
-            31 => write!(f, "swedish_grid"),
-            32 => write!(f, "south_african_grid"),
-            33 => write!(f, "swiss_grid"),
-            34 => write!(f, "taiwan_grid"),
-            35 => write!(f, "united_states_grid"),
-            36 => write!(f, "utm_ups_grid"),
-            37 => write!(f, "west_malayan"),
-            38 => write!(f, "borneo_rso"),
-            39 => write!(f, "estonian_grid"),
-            40 => write!(f, "latvian_grid"),
-            41 => write!(f, "swedish_ref_99_grid"),
-            _ => write!(f, "DisplayPosition({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DisplayPosition({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DisplayPosition {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DisplayPosition", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DisplayPosition {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

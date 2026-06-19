@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hsa Accelerometer Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HsaAccelerometerData {
     /// Units: s
@@ -32,19 +35,19 @@ pub struct HsaAccelerometerData {
 }
 
 impl HsaAccelerometerData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLING_INTERVAL: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `1.024`; Units: `mG`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
     pub const ACCEL_Z: u8 = 4;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaAccelerometerData with all fields being set to its corresponding invalid value.
@@ -271,6 +274,144 @@ impl From<HsaAccelerometerData> for Message {
             num: typedef::MesgNum::HSA_ACCELEROMETER_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HsaAccelerometerData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HsaAccelerometerData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if self.sampling_interval != u16::MAX {
+            state.serialize_field("sampling_interval", &self.sampling_interval)?;
+        }
+        if let Some(v) = self.accel_x_scaled() {
+            state.serialize_field("accel_x", &v)?;
+        }
+        if let Some(v) = self.accel_y_scaled() {
+            state.serialize_field("accel_y", &v)?;
+        }
+        if let Some(v) = self.accel_z_scaled() {
+            state.serialize_field("accel_z", &v)?;
+        }
+        if self.timestamp_32k != u32::MAX {
+            state.serialize_field("timestamp_32k", &self.timestamp_32k)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    sampling_interval: u16,
+    accel_x: Vec<f64>,
+    accel_y: Vec<f64>,
+    accel_z: Vec<f64>,
+    timestamp_32k: u32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HsaAccelerometerData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            sampling_interval: m.sampling_interval,
+            accel_x: {
+                if m.accel_x.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.accel_x.len());
+                    for &x in m.accel_x.iter() {
+                        let unscaled = (x + 0.0) * 1.024;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            accel_y: {
+                if m.accel_y.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.accel_y.len());
+                    for &x in m.accel_y.iter() {
+                        let unscaled = (x + 0.0) * 1.024;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            accel_z: {
+                if m.accel_z.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.accel_z.len());
+                    for &x in m.accel_z.iter() {
+                        let unscaled = (x + 0.0) * 1.024;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            timestamp_32k: m.timestamp_32k,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            sampling_interval: u16::MAX,
+            accel_x: Vec::new(),
+            accel_y: Vec::new(),
+            accel_z: Vec::new(),
+            timestamp_32k: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

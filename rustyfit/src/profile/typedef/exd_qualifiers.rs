@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Exd Qualifiers type.
 #[repr(transparent)]
@@ -58,6 +58,56 @@ impl ExdQualifiers {
     pub const ZONE_3: ExdQualifiers = ExdQualifiers(248);
     pub const ZONE_2: ExdQualifiers = ExdQualifiers(249);
     pub const ZONE_1: ExdQualifiers = ExdQualifiers(250);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("no_qualifier"),
+            1 => Some("instantaneous"),
+            2 => Some("average"),
+            3 => Some("lap"),
+            4 => Some("maximum"),
+            5 => Some("maximum_average"),
+            6 => Some("maximum_lap"),
+            7 => Some("last_lap"),
+            8 => Some("average_lap"),
+            9 => Some("to_destination"),
+            10 => Some("to_go"),
+            11 => Some("to_next"),
+            12 => Some("next_course_point"),
+            13 => Some("total"),
+            14 => Some("three_second_average"),
+            15 => Some("ten_second_average"),
+            16 => Some("thirty_second_average"),
+            17 => Some("percent_maximum"),
+            18 => Some("percent_maximum_average"),
+            19 => Some("lap_percent_maximum"),
+            20 => Some("elapsed"),
+            21 => Some("sunrise"),
+            22 => Some("sunset"),
+            23 => Some("compared_to_virtual_partner"),
+            24 => Some("maximum_24h"),
+            25 => Some("minimum_24h"),
+            26 => Some("minimum"),
+            27 => Some("first"),
+            28 => Some("second"),
+            29 => Some("third"),
+            30 => Some("shifter"),
+            31 => Some("last_sport"),
+            32 => Some("moving"),
+            33 => Some("stopped"),
+            34 => Some("estimated_total"),
+            242 => Some("zone_9"),
+            243 => Some("zone_8"),
+            244 => Some("zone_7"),
+            245 => Some("zone_6"),
+            246 => Some("zone_5"),
+            247 => Some("zone_4"),
+            248 => Some("zone_3"),
+            249 => Some("zone_2"),
+            250 => Some("zone_1"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ExdQualifiers {
@@ -68,52 +118,50 @@ impl Default for ExdQualifiers {
 
 impl fmt::Display for ExdQualifiers {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "no_qualifier"),
-            1 => write!(f, "instantaneous"),
-            2 => write!(f, "average"),
-            3 => write!(f, "lap"),
-            4 => write!(f, "maximum"),
-            5 => write!(f, "maximum_average"),
-            6 => write!(f, "maximum_lap"),
-            7 => write!(f, "last_lap"),
-            8 => write!(f, "average_lap"),
-            9 => write!(f, "to_destination"),
-            10 => write!(f, "to_go"),
-            11 => write!(f, "to_next"),
-            12 => write!(f, "next_course_point"),
-            13 => write!(f, "total"),
-            14 => write!(f, "three_second_average"),
-            15 => write!(f, "ten_second_average"),
-            16 => write!(f, "thirty_second_average"),
-            17 => write!(f, "percent_maximum"),
-            18 => write!(f, "percent_maximum_average"),
-            19 => write!(f, "lap_percent_maximum"),
-            20 => write!(f, "elapsed"),
-            21 => write!(f, "sunrise"),
-            22 => write!(f, "sunset"),
-            23 => write!(f, "compared_to_virtual_partner"),
-            24 => write!(f, "maximum_24h"),
-            25 => write!(f, "minimum_24h"),
-            26 => write!(f, "minimum"),
-            27 => write!(f, "first"),
-            28 => write!(f, "second"),
-            29 => write!(f, "third"),
-            30 => write!(f, "shifter"),
-            31 => write!(f, "last_sport"),
-            32 => write!(f, "moving"),
-            33 => write!(f, "stopped"),
-            34 => write!(f, "estimated_total"),
-            242 => write!(f, "zone_9"),
-            243 => write!(f, "zone_8"),
-            244 => write!(f, "zone_7"),
-            245 => write!(f, "zone_6"),
-            246 => write!(f, "zone_5"),
-            247 => write!(f, "zone_4"),
-            248 => write!(f, "zone_3"),
-            249 => write!(f, "zone_2"),
-            250 => write!(f, "zone_1"),
-            _ => write!(f, "ExdQualifiers({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ExdQualifiers({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdQualifiers {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ExdQualifiers", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExdQualifiers {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

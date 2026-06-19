@@ -1,12 +1,18 @@
 #![warn(missing_docs)]
 
 use crate::profile::{
-    lookup,
+    ProfileType, lookup,
     typedef::{FitBaseType, MesgNum},
 };
 use alloc::{string::String, vec::Vec};
+#[cfg(feature = "serde")]
+use serde::{
+    Deserialize, Serialize, Serializer,
+    ser::{SerializeSeq, SerializeStruct},
+};
 
 /// FIT is FIT protocol data representative.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default)]
 pub struct FIT {
     /// File Header contains either 12 or 14 bytes
@@ -19,6 +25,7 @@ pub struct FIT {
 
 /// FileHeader is a FIT's FileHeader with either 12 bytes size without CRC or a 14 bytes size with CRC,
 /// while 14 bytes size is the preferred size.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug, Default, Clone, Copy)]
 pub struct FileHeader {
@@ -83,6 +90,7 @@ pub struct DeveloperFieldDefinition {
 }
 
 /// Message is a FIT protocol message containing the data defined in the Message Definition
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 #[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug, Default, Clone)]
 pub struct Message {
@@ -140,7 +148,83 @@ impl Message {
     }
 }
 
+#[cfg(feature = "serde")]
+impl Serialize for Message {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        struct SerializeFields<'a>(MesgNum, &'a [Field]);
+
+        impl<'a> Serialize for SerializeFields<'a> {
+            fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: Serializer,
+            {
+                #[derive(Serialize)]
+                struct Element<'a> {
+                    num: u8,
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    name: Option<&'a str>,
+                    base_type: FitBaseType,
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    profile_type: Option<ProfileType>,
+                    value: &'a Value,
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    scale: Option<f64>,
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    offset: Option<f64>,
+                    #[serde(skip_serializing_if = "Option::is_none")]
+                    units: Option<&'a str>,
+                    is_expanded: bool,
+                }
+
+                let mut seq = serializer.serialize_seq(Some(self.1.len()))?;
+                for field in self.1 {
+                    let mut element = Element {
+                        num: field.num,
+                        name: None,
+                        base_type: field.base_type,
+                        profile_type: None,
+                        value: &field.value,
+                        scale: None,
+                        offset: None,
+                        units: None,
+                        is_expanded: field.is_expanded,
+                    };
+
+                    if let Some(field_ref) = lookup::field_reference(self.0, field.num) {
+                        element.name = Some(field_ref.name.as_str());
+                        element.profile_type = Some(field_ref.profile_type);
+                        element.scale = Some(field_ref.scale);
+                        element.offset = Some(field_ref.offset);
+                        if let units = field_ref.units.as_str()
+                            && !units.is_empty()
+                        {
+                            element.units = Some(units);
+                        }
+                    }
+
+                    seq.serialize_element(&element)?;
+                }
+                seq.end()
+            }
+        }
+
+        let mut state = serializer.serialize_struct("Message", 3)?;
+        state.serialize_field("num", &self.num)?;
+        if !self.fields.is_empty() {
+            state.serialize_field("fields", &SerializeFields(self.num, &self.fields))?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
 /// Field represents the full representation of a field, as specified in the Global FIT Profile.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug, Clone)]
 pub struct Field {
@@ -169,6 +253,7 @@ impl Field {
 ///
 /// NOTE: If DeveloperField contains a valid NativeMesgNum and NativeFieldNum, the value should be treated as
 /// native value (scale, offset, etc shall apply). [Added since protocol version 2.0]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug, Clone)]
 pub struct DeveloperField {
@@ -182,6 +267,11 @@ pub struct DeveloperField {
 
 /// Value representation of Message's Field.
 #[allow(missing_docs)]
+#[cfg_attr(
+    feature = "serde",
+    derive(Serialize, Deserialize),
+    serde(tag = "t", content = "c", rename_all = "snake_case")
+)]
 #[cfg_attr(test, derive(PartialEq))]
 #[derive(Debug, Default, Clone)]
 pub enum Value {
@@ -830,6 +920,7 @@ impl Value {
 }
 
 /// Protocol Version representation.
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, Copy, PartialEq)]
 pub struct ProtocolVersion(pub u8);
 
@@ -1600,5 +1691,171 @@ mod tests {
             let val = Value::from_parts(&tc.buf, tc.array, tc.base_type, tc.arch);
             assert_eq!(tc.expected, val);
         }
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_message_field_serde() {
+        use crate::{
+            profile::{mesgdef, typedef},
+            proto::{DeveloperField, Field, Message, Value},
+        };
+
+        let mesg = Message {
+            header: 0,
+            num: typedef::MesgNum::FILE_ID,
+            fields: [Field {
+                num: mesgdef::FileId::TYPE,
+                base_type: FitBaseType::ENUM,
+                value: Value::Uint8(typedef::File::ACTIVITY.0),
+                is_expanded: false,
+            }]
+            .into(),
+            developer_fields: [DeveloperField {
+                num: 0,
+                developer_data_index: 0,
+                value: Value::Uint16(10),
+            }]
+            .into(),
+        };
+
+        let s = "{\
+            \"num\":{\
+                \"t\":\"file_id\",\
+                \"c\":0\
+            },\
+            \"fields\":[\
+                {\
+                    \"num\":0,\
+                    \"name\":\"type\",\
+                    \"base_type\":{\
+                        \"t\":\"enum\",\
+                        \"c\":0\
+                    },\
+                    \"profile_type\":\"file\",\
+                    \"value\":{\
+                        \"t\":\"uint8\",\
+                        \"c\":4\
+                    },\
+                    \"scale\":1.0,\
+                    \"offset\":0.0,\
+                    \"is_expanded\":false\
+                }\
+            ],\
+            \"developer_fields\":[\
+                {\
+                    \"num\":0,\
+                    \"developer_data_index\":0,\
+                    \"value\":{\
+                        \"t\":\"uint16\",\
+                        \"c\":10\
+                    }\
+                }\
+            ]\
+        }";
+
+        assert_eq!(serde_json::to_string(&mesg).unwrap(), s);
+
+        let deserialized_mesg = serde_json::from_str(s).unwrap();
+
+        assert_eq!(mesg, deserialized_mesg);
+    }
+
+    #[cfg(feature = "serde")]
+    #[test]
+    fn test_value_serde() {
+        use crate::proto::Value;
+
+        assert_eq!(
+            serde_json::to_string(&Value::Int8(1)).unwrap(),
+            r#"{"t":"int8","c":1}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Uint8(1)).unwrap(),
+            r#"{"t":"uint8","c":1}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Int16(2)).unwrap(),
+            r#"{"t":"int16","c":2}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Uint16(2)).unwrap(),
+            r#"{"t":"uint16","c":2}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Int32(3)).unwrap(),
+            r#"{"t":"int32","c":3}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Uint32(3)).unwrap(),
+            r#"{"t":"uint32","c":3}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Int64(4)).unwrap(),
+            r#"{"t":"int64","c":4}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Uint64(4)).unwrap(),
+            r#"{"t":"uint64","c":4}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Float32(5.0)).unwrap(),
+            r#"{"t":"float32","c":5.0}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::Float64(6.0)).unwrap(),
+            r#"{"t":"float64","c":6.0}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::String("fit".to_owned())).unwrap(),
+            r#"{"t":"string","c":"fit"}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecInt8([1, 1].into())).unwrap(),
+            r#"{"t":"vec_int8","c":[1,1]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecUint8([1, 1].into())).unwrap(),
+            r#"{"t":"vec_uint8","c":[1,1]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecInt16([2, 2].into())).unwrap(),
+            r#"{"t":"vec_int16","c":[2,2]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecUint16([2, 2].into())).unwrap(),
+            r#"{"t":"vec_uint16","c":[2,2]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecInt32([3, 3].into())).unwrap(),
+            r#"{"t":"vec_int32","c":[3,3]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecUint32([3, 3].into())).unwrap(),
+            r#"{"t":"vec_uint32","c":[3,3]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecInt64([4, 4].into())).unwrap(),
+            r#"{"t":"vec_int64","c":[4,4]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecUint64([4, 4].into())).unwrap(),
+            r#"{"t":"vec_uint64","c":[4,4]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecFloat32([5.0, 5.0].into())).unwrap(),
+            r#"{"t":"vec_float32","c":[5.0,5.0]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecFloat64([6.0, 6.0].into())).unwrap(),
+            r#"{"t":"vec_float64","c":[6.0,6.0]}"#
+        );
+        assert_eq!(
+            serde_json::to_string(&Value::VecString(
+                ["rusty".to_owned(), "fit".to_owned()].into()
+            ))
+            .unwrap(),
+            r#"{"t":"vec_string","c":["rusty","fit"]}"#
+        );
     }
 }

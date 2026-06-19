@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Camera Event Type type.
 #[repr(transparent)]
@@ -34,6 +34,25 @@ impl CameraEventType {
     /// Mark when a video recording has been resumed
     pub const VIDEO_RESUME: CameraEventType = CameraEventType(13);
     pub const VIDEO_SECOND_STREAM_RESUME: CameraEventType = CameraEventType(14);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("video_start"),
+            1 => Some("video_split"),
+            2 => Some("video_end"),
+            3 => Some("photo_taken"),
+            4 => Some("video_second_stream_start"),
+            5 => Some("video_second_stream_split"),
+            6 => Some("video_second_stream_end"),
+            7 => Some("video_split_start"),
+            8 => Some("video_second_stream_split_start"),
+            11 => Some("video_pause"),
+            12 => Some("video_second_stream_pause"),
+            13 => Some("video_resume"),
+            14 => Some("video_second_stream_resume"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CameraEventType {
@@ -44,21 +63,50 @@ impl Default for CameraEventType {
 
 impl fmt::Display for CameraEventType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "video_start"),
-            1 => write!(f, "video_split"),
-            2 => write!(f, "video_end"),
-            3 => write!(f, "photo_taken"),
-            4 => write!(f, "video_second_stream_start"),
-            5 => write!(f, "video_second_stream_split"),
-            6 => write!(f, "video_second_stream_end"),
-            7 => write!(f, "video_split_start"),
-            8 => write!(f, "video_second_stream_split_start"),
-            11 => write!(f, "video_pause"),
-            12 => write!(f, "video_second_stream_pause"),
-            13 => write!(f, "video_resume"),
-            14 => write!(f, "video_second_stream_resume"),
-            _ => write!(f, "CameraEventType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CameraEventType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CameraEventType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CameraEventType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CameraEventType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

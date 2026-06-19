@@ -8,8 +8,11 @@ use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Climb Pro message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct ClimbPro {
     /// Units: s
@@ -30,19 +33,19 @@ pub struct ClimbPro {
 }
 
 impl ClimbPro {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LAT: u8 = 0;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LONG: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::CLIMB_PRO_EVENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ClimbProEvent
     pub const CLIMB_PRO_EVENT: u8 = 2;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const CLIMB_NUMBER: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CLIMB_CATEGORY: u8 = 4;
-    /// Value's type: `f32`; Units: `m`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `m`
     pub const CURRENT_DIST: u8 = 5;
 
     /// Create new ClimbPro with all fields being set to its corresponding invalid value.
@@ -198,6 +201,98 @@ impl From<ClimbPro> for Message {
             num: typedef::MesgNum::CLIMB_PRO,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ClimbPro {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("ClimbPro", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.position_lat_degrees() {
+            state.serialize_field("position_lat", &v)?;
+        }
+        if let Some(v) = self.position_long_degrees() {
+            state.serialize_field("position_long", &v)?;
+        }
+        if self.climb_pro_event.0 != u8::MAX {
+            state.serialize_field("climb_pro_event", &self.climb_pro_event)?;
+        }
+        if self.climb_number != u16::MAX {
+            state.serialize_field("climb_number", &self.climb_number)?;
+        }
+        if self.climb_category != u8::MAX {
+            state.serialize_field("climb_category", &self.climb_category)?;
+        }
+        if self.current_dist.to_bits() != u32::MAX {
+            state.serialize_field("current_dist", &self.current_dist)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    /// Degrees.
+    position_lat: f64,
+    /// Degrees.
+    position_long: f64,
+    climb_pro_event: typedef::ClimbProEvent,
+    climb_number: u16,
+    climb_category: u8,
+    current_dist: f32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for ClimbPro {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            position_lat: semconv::to_semicircles(m.position_lat).unwrap_or(i32::MAX),
+            position_long: semconv::to_semicircles(m.position_long).unwrap_or(i32::MAX),
+            climb_pro_event: m.climb_pro_event,
+            climb_number: m.climb_number,
+            climb_category: m.climb_category,
+            current_dist: m.current_dist,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            position_lat: f64::from_bits(u64::MAX),
+            position_long: f64::from_bits(u64::MAX),
+            climb_pro_event: typedef::ClimbProEvent(u8::MAX),
+            climb_number: u16::MAX,
+            climb_category: u8::MAX,
+            current_dist: f32::from_bits(u32::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

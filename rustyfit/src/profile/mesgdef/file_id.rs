@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// File Id message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct FileId {
     pub r#type: typedef::File,
@@ -29,19 +32,19 @@ pub struct FileId {
 }
 
 impl FileId {
-    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::File
     pub const TYPE: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PRODUCT: u8 = 2;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::Uint32z
     pub const SERIAL_NUMBER: u8 = 3;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIME_CREATED: u8 = 4;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUMBER: u8 = 5;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const PRODUCT_NAME: u8 = 8;
 
     /// Create new FileId with all fields being set to its corresponding invalid value.
@@ -173,6 +176,90 @@ impl From<FileId> for Message {
             num: typedef::MesgNum::FILE_ID,
             fields,
             developer_fields: Vec::new(),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FileId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("FileId", n)?;
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if self.manufacturer.0 != u16::MAX {
+            state.serialize_field("manufacturer", &self.manufacturer)?;
+        }
+        if self.product != u16::MAX {
+            state.serialize_field("product", &self.product)?;
+        }
+        if self.serial_number != u32::MIN {
+            state.serialize_field("serial_number", &self.serial_number)?;
+        }
+        if let Some(v) = self.time_created.unix_timestamp() {
+            state.serialize_field("time_created", &v)?;
+        }
+        if self.number != u16::MAX {
+            state.serialize_field("number", &self.number)?;
+        }
+        if !self.product_name.is_empty() {
+            state.serialize_field("product_name", &self.product_name)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    r#type: typedef::File,
+    manufacturer: typedef::Manufacturer,
+    product: u16,
+    serial_number: u32,
+    time_created: Option<i64>,
+    number: u16,
+    product_name: String,
+    unknown_fields: Vec<Field>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for FileId {
+    fn from(m: De) -> Self {
+        Self {
+            r#type: m.r#type,
+            manufacturer: m.manufacturer,
+            product: m.product,
+            serial_number: m.serial_number,
+            time_created: m.time_created.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            number: m.number,
+            product_name: m.product_name,
+            unknown_fields: m.unknown_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            r#type: typedef::File(u8::MAX),
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            product: u16::MAX,
+            serial_number: u32::MIN,
+            time_created: None,
+            number: u16::MAX,
+            product_name: String::new(),
+            unknown_fields: Vec::new(),
         }
     }
 }

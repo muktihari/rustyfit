@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Turn Type type.
 #[repr(transparent)]
@@ -52,6 +52,50 @@ impl TurnType {
     pub const UTURN_RIGHT_IDX: TurnType = TurnType(35);
     pub const ICON_INV_IDX: TurnType = TurnType(36);
     pub const ICON_IDX_CNT: TurnType = TurnType(37);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("arriving_idx"),
+            1 => Some("arriving_left_idx"),
+            2 => Some("arriving_right_idx"),
+            3 => Some("arriving_via_idx"),
+            4 => Some("arriving_via_left_idx"),
+            5 => Some("arriving_via_right_idx"),
+            6 => Some("bear_keep_left_idx"),
+            7 => Some("bear_keep_right_idx"),
+            8 => Some("continue_idx"),
+            9 => Some("exit_left_idx"),
+            10 => Some("exit_right_idx"),
+            11 => Some("ferry_idx"),
+            12 => Some("roundabout_45_idx"),
+            13 => Some("roundabout_90_idx"),
+            14 => Some("roundabout_135_idx"),
+            15 => Some("roundabout_180_idx"),
+            16 => Some("roundabout_225_idx"),
+            17 => Some("roundabout_270_idx"),
+            18 => Some("roundabout_315_idx"),
+            19 => Some("roundabout_360_idx"),
+            20 => Some("roundabout_neg_45_idx"),
+            21 => Some("roundabout_neg_90_idx"),
+            22 => Some("roundabout_neg_135_idx"),
+            23 => Some("roundabout_neg_180_idx"),
+            24 => Some("roundabout_neg_225_idx"),
+            25 => Some("roundabout_neg_270_idx"),
+            26 => Some("roundabout_neg_315_idx"),
+            27 => Some("roundabout_neg_360_idx"),
+            28 => Some("roundabout_generic_idx"),
+            29 => Some("roundabout_neg_generic_idx"),
+            30 => Some("sharp_turn_left_idx"),
+            31 => Some("sharp_turn_right_idx"),
+            32 => Some("turn_left_idx"),
+            33 => Some("turn_right_idx"),
+            34 => Some("uturn_left_idx"),
+            35 => Some("uturn_right_idx"),
+            36 => Some("icon_inv_idx"),
+            37 => Some("icon_idx_cnt"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for TurnType {
@@ -62,46 +106,50 @@ impl Default for TurnType {
 
 impl fmt::Display for TurnType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "arriving_idx"),
-            1 => write!(f, "arriving_left_idx"),
-            2 => write!(f, "arriving_right_idx"),
-            3 => write!(f, "arriving_via_idx"),
-            4 => write!(f, "arriving_via_left_idx"),
-            5 => write!(f, "arriving_via_right_idx"),
-            6 => write!(f, "bear_keep_left_idx"),
-            7 => write!(f, "bear_keep_right_idx"),
-            8 => write!(f, "continue_idx"),
-            9 => write!(f, "exit_left_idx"),
-            10 => write!(f, "exit_right_idx"),
-            11 => write!(f, "ferry_idx"),
-            12 => write!(f, "roundabout_45_idx"),
-            13 => write!(f, "roundabout_90_idx"),
-            14 => write!(f, "roundabout_135_idx"),
-            15 => write!(f, "roundabout_180_idx"),
-            16 => write!(f, "roundabout_225_idx"),
-            17 => write!(f, "roundabout_270_idx"),
-            18 => write!(f, "roundabout_315_idx"),
-            19 => write!(f, "roundabout_360_idx"),
-            20 => write!(f, "roundabout_neg_45_idx"),
-            21 => write!(f, "roundabout_neg_90_idx"),
-            22 => write!(f, "roundabout_neg_135_idx"),
-            23 => write!(f, "roundabout_neg_180_idx"),
-            24 => write!(f, "roundabout_neg_225_idx"),
-            25 => write!(f, "roundabout_neg_270_idx"),
-            26 => write!(f, "roundabout_neg_315_idx"),
-            27 => write!(f, "roundabout_neg_360_idx"),
-            28 => write!(f, "roundabout_generic_idx"),
-            29 => write!(f, "roundabout_neg_generic_idx"),
-            30 => write!(f, "sharp_turn_left_idx"),
-            31 => write!(f, "sharp_turn_right_idx"),
-            32 => write!(f, "turn_left_idx"),
-            33 => write!(f, "turn_right_idx"),
-            34 => write!(f, "uturn_left_idx"),
-            35 => write!(f, "uturn_right_idx"),
-            36 => write!(f, "icon_inv_idx"),
-            37 => write!(f, "icon_idx_cnt"),
-            _ => write!(f, "TurnType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "TurnType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TurnType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("TurnType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TurnType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

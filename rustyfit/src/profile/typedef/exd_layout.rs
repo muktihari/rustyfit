@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Exd Layout type.
 #[repr(transparent)]
@@ -24,6 +24,21 @@ impl ExdLayout {
     pub const HALF_HORIZONTAL_TOP_SPLIT: ExdLayout = ExdLayout(7);
     /// The EXD may display the configured concepts in any layout it sees fit.
     pub const DYNAMIC: ExdLayout = ExdLayout(8);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("full_screen"),
+            1 => Some("half_vertical"),
+            2 => Some("half_horizontal"),
+            3 => Some("half_vertical_right_split"),
+            4 => Some("half_horizontal_bottom_split"),
+            5 => Some("full_quarter_split"),
+            6 => Some("half_vertical_left_split"),
+            7 => Some("half_horizontal_top_split"),
+            8 => Some("dynamic"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ExdLayout {
@@ -34,17 +49,50 @@ impl Default for ExdLayout {
 
 impl fmt::Display for ExdLayout {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "full_screen"),
-            1 => write!(f, "half_vertical"),
-            2 => write!(f, "half_horizontal"),
-            3 => write!(f, "half_vertical_right_split"),
-            4 => write!(f, "half_horizontal_bottom_split"),
-            5 => write!(f, "full_quarter_split"),
-            6 => write!(f, "half_vertical_left_split"),
-            7 => write!(f, "half_horizontal_top_split"),
-            8 => write!(f, "dynamic"),
-            _ => write!(f, "ExdLayout({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ExdLayout({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdLayout {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ExdLayout", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExdLayout {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

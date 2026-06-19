@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Battle Rope Exercise Name type.
 #[repr(transparent)]
@@ -44,6 +44,40 @@ impl BattleRopeExerciseName {
     pub const STAGE_COACH: BattleRopeExerciseName = BattleRopeExerciseName(25);
     pub const ULTIMATE_WARRIOR: BattleRopeExerciseName = BattleRopeExerciseName(26);
     pub const UPPER_CUTS: BattleRopeExerciseName = BattleRopeExerciseName(27);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("alternating_figure_eight"),
+            1 => Some("alternating_jump_wave"),
+            2 => Some("alternating_kneeling_to_standing_wave"),
+            3 => Some("alternating_lunge_wave"),
+            4 => Some("alternating_squat_wave"),
+            5 => Some("alternating_wave"),
+            6 => Some("alternating_wave_with_lateral_shuffle"),
+            7 => Some("clap_wave"),
+            8 => Some("double_arm_figure_eight"),
+            9 => Some("double_arm_side_to_side_snake"),
+            10 => Some("double_arm_side_wave"),
+            11 => Some("double_arm_slam"),
+            12 => Some("double_arm_wave"),
+            13 => Some("grappler_toss"),
+            14 => Some("hip_toss"),
+            15 => Some("in_and_out_wave"),
+            16 => Some("inside_circle"),
+            17 => Some("jumping_jacks"),
+            18 => Some("outside_circle"),
+            19 => Some("rainbow"),
+            20 => Some("side_plank_wave"),
+            21 => Some("sidewinder"),
+            22 => Some("sitting_russian_twist"),
+            23 => Some("snake_wave"),
+            24 => Some("split_jack"),
+            25 => Some("stage_coach"),
+            26 => Some("ultimate_warrior"),
+            27 => Some("upper_cuts"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BattleRopeExerciseName {
@@ -54,36 +88,50 @@ impl Default for BattleRopeExerciseName {
 
 impl fmt::Display for BattleRopeExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "alternating_figure_eight"),
-            1 => write!(f, "alternating_jump_wave"),
-            2 => write!(f, "alternating_kneeling_to_standing_wave"),
-            3 => write!(f, "alternating_lunge_wave"),
-            4 => write!(f, "alternating_squat_wave"),
-            5 => write!(f, "alternating_wave"),
-            6 => write!(f, "alternating_wave_with_lateral_shuffle"),
-            7 => write!(f, "clap_wave"),
-            8 => write!(f, "double_arm_figure_eight"),
-            9 => write!(f, "double_arm_side_to_side_snake"),
-            10 => write!(f, "double_arm_side_wave"),
-            11 => write!(f, "double_arm_slam"),
-            12 => write!(f, "double_arm_wave"),
-            13 => write!(f, "grappler_toss"),
-            14 => write!(f, "hip_toss"),
-            15 => write!(f, "in_and_out_wave"),
-            16 => write!(f, "inside_circle"),
-            17 => write!(f, "jumping_jacks"),
-            18 => write!(f, "outside_circle"),
-            19 => write!(f, "rainbow"),
-            20 => write!(f, "side_plank_wave"),
-            21 => write!(f, "sidewinder"),
-            22 => write!(f, "sitting_russian_twist"),
-            23 => write!(f, "snake_wave"),
-            24 => write!(f, "split_jack"),
-            25 => write!(f, "stage_coach"),
-            26 => write!(f, "ultimate_warrior"),
-            27 => write!(f, "upper_cuts"),
-            _ => write!(f, "BattleRopeExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BattleRopeExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BattleRopeExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BattleRopeExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BattleRopeExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

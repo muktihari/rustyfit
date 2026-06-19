@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Plank Exercise Name type.
 #[repr(transparent)]
@@ -163,6 +163,148 @@ impl PlankExerciseName {
     pub const PLANK_WITH_LEG_LIFT: PlankExerciseName = PlankExerciseName(133);
     pub const REVERSE_PLANK_WITH_LEG_PULL: PlankExerciseName = PlankExerciseName(134);
     pub const RING_PLANK_SPRAWLS: PlankExerciseName = PlankExerciseName(135);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("45_degree_plank"),
+            1 => Some("weighted_45_degree_plank"),
+            2 => Some("90_degree_static_hold"),
+            3 => Some("weighted_90_degree_static_hold"),
+            4 => Some("bear_crawl"),
+            5 => Some("weighted_bear_crawl"),
+            6 => Some("cross_body_mountain_climber"),
+            7 => Some("weighted_cross_body_mountain_climber"),
+            8 => Some("elbow_plank_pike_jacks"),
+            9 => Some("weighted_elbow_plank_pike_jacks"),
+            10 => Some("elevated_feet_plank"),
+            11 => Some("weighted_elevated_feet_plank"),
+            12 => Some("elevator_abs"),
+            13 => Some("weighted_elevator_abs"),
+            14 => Some("extended_plank"),
+            15 => Some("weighted_extended_plank"),
+            16 => Some("full_plank_passe_twist"),
+            17 => Some("weighted_full_plank_passe_twist"),
+            18 => Some("inching_elbow_plank"),
+            19 => Some("weighted_inching_elbow_plank"),
+            20 => Some("inchworm_to_side_plank"),
+            21 => Some("weighted_inchworm_to_side_plank"),
+            22 => Some("kneeling_plank"),
+            23 => Some("weighted_kneeling_plank"),
+            24 => Some("kneeling_side_plank_with_leg_lift"),
+            25 => Some("weighted_kneeling_side_plank_with_leg_lift"),
+            26 => Some("lateral_roll"),
+            27 => Some("weighted_lateral_roll"),
+            28 => Some("lying_reverse_plank"),
+            29 => Some("weighted_lying_reverse_plank"),
+            30 => Some("medicine_ball_mountain_climber"),
+            31 => Some("weighted_medicine_ball_mountain_climber"),
+            32 => Some("modified_mountain_climber_and_extension"),
+            33 => Some("weighted_modified_mountain_climber_and_extension"),
+            34 => Some("mountain_climber"),
+            35 => Some("weighted_mountain_climber"),
+            36 => Some("mountain_climber_on_sliding_discs"),
+            37 => Some("weighted_mountain_climber_on_sliding_discs"),
+            38 => Some("mountain_climber_with_feet_on_bosu_ball"),
+            39 => Some("weighted_mountain_climber_with_feet_on_bosu_ball"),
+            40 => Some("mountain_climber_with_hands_on_bench"),
+            41 => Some("mountain_climber_with_hands_on_swiss_ball"),
+            42 => Some("weighted_mountain_climber_with_hands_on_swiss_ball"),
+            43 => Some("plank"),
+            44 => Some("plank_jacks_with_feet_on_sliding_discs"),
+            45 => Some("weighted_plank_jacks_with_feet_on_sliding_discs"),
+            46 => Some("plank_knee_twist"),
+            47 => Some("weighted_plank_knee_twist"),
+            48 => Some("plank_pike_jumps"),
+            49 => Some("weighted_plank_pike_jumps"),
+            50 => Some("plank_pikes"),
+            51 => Some("weighted_plank_pikes"),
+            52 => Some("plank_to_stand_up"),
+            53 => Some("weighted_plank_to_stand_up"),
+            54 => Some("plank_with_arm_raise"),
+            55 => Some("weighted_plank_with_arm_raise"),
+            56 => Some("plank_with_knee_to_elbow"),
+            57 => Some("weighted_plank_with_knee_to_elbow"),
+            58 => Some("plank_with_oblique_crunch"),
+            59 => Some("weighted_plank_with_oblique_crunch"),
+            60 => Some("plyometric_side_plank"),
+            61 => Some("weighted_plyometric_side_plank"),
+            62 => Some("rolling_side_plank"),
+            63 => Some("weighted_rolling_side_plank"),
+            64 => Some("side_kick_plank"),
+            65 => Some("weighted_side_kick_plank"),
+            66 => Some("side_plank"),
+            67 => Some("weighted_side_plank"),
+            68 => Some("side_plank_and_row"),
+            69 => Some("weighted_side_plank_and_row"),
+            70 => Some("side_plank_lift"),
+            71 => Some("weighted_side_plank_lift"),
+            72 => Some("side_plank_with_elbow_on_bosu_ball"),
+            73 => Some("weighted_side_plank_with_elbow_on_bosu_ball"),
+            74 => Some("side_plank_with_feet_on_bench"),
+            75 => Some("weighted_side_plank_with_feet_on_bench"),
+            76 => Some("side_plank_with_knee_circle"),
+            77 => Some("weighted_side_plank_with_knee_circle"),
+            78 => Some("side_plank_with_knee_tuck"),
+            79 => Some("weighted_side_plank_with_knee_tuck"),
+            80 => Some("side_plank_with_leg_lift"),
+            81 => Some("weighted_side_plank_with_leg_lift"),
+            82 => Some("side_plank_with_reach_under"),
+            83 => Some("weighted_side_plank_with_reach_under"),
+            84 => Some("single_leg_elevated_feet_plank"),
+            85 => Some("weighted_single_leg_elevated_feet_plank"),
+            86 => Some("single_leg_flex_and_extend"),
+            87 => Some("weighted_single_leg_flex_and_extend"),
+            88 => Some("single_leg_side_plank"),
+            89 => Some("weighted_single_leg_side_plank"),
+            90 => Some("spiderman_plank"),
+            91 => Some("weighted_spiderman_plank"),
+            92 => Some("straight_arm_plank"),
+            93 => Some("weighted_straight_arm_plank"),
+            94 => Some("straight_arm_plank_with_shoulder_touch"),
+            95 => Some("weighted_straight_arm_plank_with_shoulder_touch"),
+            96 => Some("swiss_ball_plank"),
+            97 => Some("weighted_swiss_ball_plank"),
+            98 => Some("swiss_ball_plank_leg_lift"),
+            99 => Some("weighted_swiss_ball_plank_leg_lift"),
+            100 => Some("swiss_ball_plank_leg_lift_and_hold"),
+            101 => Some("swiss_ball_plank_with_feet_on_bench"),
+            102 => Some("weighted_swiss_ball_plank_with_feet_on_bench"),
+            103 => Some("swiss_ball_prone_jackknife"),
+            104 => Some("weighted_swiss_ball_prone_jackknife"),
+            105 => Some("swiss_ball_side_plank"),
+            106 => Some("weighted_swiss_ball_side_plank"),
+            107 => Some("three_way_plank"),
+            108 => Some("weighted_three_way_plank"),
+            109 => Some("towel_plank_and_knee_in"),
+            110 => Some("weighted_towel_plank_and_knee_in"),
+            111 => Some("t_stabilization"),
+            112 => Some("weighted_t_stabilization"),
+            113 => Some("turkish_get_up_to_side_plank"),
+            114 => Some("weighted_turkish_get_up_to_side_plank"),
+            115 => Some("two_point_plank"),
+            116 => Some("weighted_two_point_plank"),
+            117 => Some("weighted_plank"),
+            118 => Some("wide_stance_plank_with_diagonal_arm_lift"),
+            119 => Some("weighted_wide_stance_plank_with_diagonal_arm_lift"),
+            120 => Some("wide_stance_plank_with_diagonal_leg_lift"),
+            121 => Some("weighted_wide_stance_plank_with_diagonal_leg_lift"),
+            122 => Some("wide_stance_plank_with_leg_lift"),
+            123 => Some("weighted_wide_stance_plank_with_leg_lift"),
+            124 => Some("wide_stance_plank_with_opposite_arm_and_leg_lift"),
+            125 => Some("weighted_mountain_climber_with_hands_on_bench"),
+            126 => Some("weighted_swiss_ball_plank_leg_lift_and_hold"),
+            127 => Some("weighted_wide_stance_plank_with_opposite_arm_and_leg_lift"),
+            128 => Some("plank_with_feet_on_swiss_ball"),
+            129 => Some("side_plank_to_plank_with_reach_under"),
+            130 => Some("bridge_with_glute_lower_lift"),
+            131 => Some("bridge_one_leg_bridge"),
+            132 => Some("plank_with_arm_variations"),
+            133 => Some("plank_with_leg_lift"),
+            134 => Some("reverse_plank_with_leg_pull"),
+            135 => Some("ring_plank_sprawls"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for PlankExerciseName {
@@ -173,147 +315,50 @@ impl Default for PlankExerciseName {
 
 impl fmt::Display for PlankExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "45_degree_plank"),
-            1 => write!(f, "weighted_45_degree_plank"),
-            2 => write!(f, "90_degree_static_hold"),
-            3 => write!(f, "weighted_90_degree_static_hold"),
-            4 => write!(f, "bear_crawl"),
-            5 => write!(f, "weighted_bear_crawl"),
-            6 => write!(f, "cross_body_mountain_climber"),
-            7 => write!(f, "weighted_cross_body_mountain_climber"),
-            8 => write!(f, "elbow_plank_pike_jacks"),
-            9 => write!(f, "weighted_elbow_plank_pike_jacks"),
-            10 => write!(f, "elevated_feet_plank"),
-            11 => write!(f, "weighted_elevated_feet_plank"),
-            12 => write!(f, "elevator_abs"),
-            13 => write!(f, "weighted_elevator_abs"),
-            14 => write!(f, "extended_plank"),
-            15 => write!(f, "weighted_extended_plank"),
-            16 => write!(f, "full_plank_passe_twist"),
-            17 => write!(f, "weighted_full_plank_passe_twist"),
-            18 => write!(f, "inching_elbow_plank"),
-            19 => write!(f, "weighted_inching_elbow_plank"),
-            20 => write!(f, "inchworm_to_side_plank"),
-            21 => write!(f, "weighted_inchworm_to_side_plank"),
-            22 => write!(f, "kneeling_plank"),
-            23 => write!(f, "weighted_kneeling_plank"),
-            24 => write!(f, "kneeling_side_plank_with_leg_lift"),
-            25 => write!(f, "weighted_kneeling_side_plank_with_leg_lift"),
-            26 => write!(f, "lateral_roll"),
-            27 => write!(f, "weighted_lateral_roll"),
-            28 => write!(f, "lying_reverse_plank"),
-            29 => write!(f, "weighted_lying_reverse_plank"),
-            30 => write!(f, "medicine_ball_mountain_climber"),
-            31 => write!(f, "weighted_medicine_ball_mountain_climber"),
-            32 => write!(f, "modified_mountain_climber_and_extension"),
-            33 => write!(f, "weighted_modified_mountain_climber_and_extension"),
-            34 => write!(f, "mountain_climber"),
-            35 => write!(f, "weighted_mountain_climber"),
-            36 => write!(f, "mountain_climber_on_sliding_discs"),
-            37 => write!(f, "weighted_mountain_climber_on_sliding_discs"),
-            38 => write!(f, "mountain_climber_with_feet_on_bosu_ball"),
-            39 => write!(f, "weighted_mountain_climber_with_feet_on_bosu_ball"),
-            40 => write!(f, "mountain_climber_with_hands_on_bench"),
-            41 => write!(f, "mountain_climber_with_hands_on_swiss_ball"),
-            42 => write!(f, "weighted_mountain_climber_with_hands_on_swiss_ball"),
-            43 => write!(f, "plank"),
-            44 => write!(f, "plank_jacks_with_feet_on_sliding_discs"),
-            45 => write!(f, "weighted_plank_jacks_with_feet_on_sliding_discs"),
-            46 => write!(f, "plank_knee_twist"),
-            47 => write!(f, "weighted_plank_knee_twist"),
-            48 => write!(f, "plank_pike_jumps"),
-            49 => write!(f, "weighted_plank_pike_jumps"),
-            50 => write!(f, "plank_pikes"),
-            51 => write!(f, "weighted_plank_pikes"),
-            52 => write!(f, "plank_to_stand_up"),
-            53 => write!(f, "weighted_plank_to_stand_up"),
-            54 => write!(f, "plank_with_arm_raise"),
-            55 => write!(f, "weighted_plank_with_arm_raise"),
-            56 => write!(f, "plank_with_knee_to_elbow"),
-            57 => write!(f, "weighted_plank_with_knee_to_elbow"),
-            58 => write!(f, "plank_with_oblique_crunch"),
-            59 => write!(f, "weighted_plank_with_oblique_crunch"),
-            60 => write!(f, "plyometric_side_plank"),
-            61 => write!(f, "weighted_plyometric_side_plank"),
-            62 => write!(f, "rolling_side_plank"),
-            63 => write!(f, "weighted_rolling_side_plank"),
-            64 => write!(f, "side_kick_plank"),
-            65 => write!(f, "weighted_side_kick_plank"),
-            66 => write!(f, "side_plank"),
-            67 => write!(f, "weighted_side_plank"),
-            68 => write!(f, "side_plank_and_row"),
-            69 => write!(f, "weighted_side_plank_and_row"),
-            70 => write!(f, "side_plank_lift"),
-            71 => write!(f, "weighted_side_plank_lift"),
-            72 => write!(f, "side_plank_with_elbow_on_bosu_ball"),
-            73 => write!(f, "weighted_side_plank_with_elbow_on_bosu_ball"),
-            74 => write!(f, "side_plank_with_feet_on_bench"),
-            75 => write!(f, "weighted_side_plank_with_feet_on_bench"),
-            76 => write!(f, "side_plank_with_knee_circle"),
-            77 => write!(f, "weighted_side_plank_with_knee_circle"),
-            78 => write!(f, "side_plank_with_knee_tuck"),
-            79 => write!(f, "weighted_side_plank_with_knee_tuck"),
-            80 => write!(f, "side_plank_with_leg_lift"),
-            81 => write!(f, "weighted_side_plank_with_leg_lift"),
-            82 => write!(f, "side_plank_with_reach_under"),
-            83 => write!(f, "weighted_side_plank_with_reach_under"),
-            84 => write!(f, "single_leg_elevated_feet_plank"),
-            85 => write!(f, "weighted_single_leg_elevated_feet_plank"),
-            86 => write!(f, "single_leg_flex_and_extend"),
-            87 => write!(f, "weighted_single_leg_flex_and_extend"),
-            88 => write!(f, "single_leg_side_plank"),
-            89 => write!(f, "weighted_single_leg_side_plank"),
-            90 => write!(f, "spiderman_plank"),
-            91 => write!(f, "weighted_spiderman_plank"),
-            92 => write!(f, "straight_arm_plank"),
-            93 => write!(f, "weighted_straight_arm_plank"),
-            94 => write!(f, "straight_arm_plank_with_shoulder_touch"),
-            95 => write!(f, "weighted_straight_arm_plank_with_shoulder_touch"),
-            96 => write!(f, "swiss_ball_plank"),
-            97 => write!(f, "weighted_swiss_ball_plank"),
-            98 => write!(f, "swiss_ball_plank_leg_lift"),
-            99 => write!(f, "weighted_swiss_ball_plank_leg_lift"),
-            100 => write!(f, "swiss_ball_plank_leg_lift_and_hold"),
-            101 => write!(f, "swiss_ball_plank_with_feet_on_bench"),
-            102 => write!(f, "weighted_swiss_ball_plank_with_feet_on_bench"),
-            103 => write!(f, "swiss_ball_prone_jackknife"),
-            104 => write!(f, "weighted_swiss_ball_prone_jackknife"),
-            105 => write!(f, "swiss_ball_side_plank"),
-            106 => write!(f, "weighted_swiss_ball_side_plank"),
-            107 => write!(f, "three_way_plank"),
-            108 => write!(f, "weighted_three_way_plank"),
-            109 => write!(f, "towel_plank_and_knee_in"),
-            110 => write!(f, "weighted_towel_plank_and_knee_in"),
-            111 => write!(f, "t_stabilization"),
-            112 => write!(f, "weighted_t_stabilization"),
-            113 => write!(f, "turkish_get_up_to_side_plank"),
-            114 => write!(f, "weighted_turkish_get_up_to_side_plank"),
-            115 => write!(f, "two_point_plank"),
-            116 => write!(f, "weighted_two_point_plank"),
-            117 => write!(f, "weighted_plank"),
-            118 => write!(f, "wide_stance_plank_with_diagonal_arm_lift"),
-            119 => write!(f, "weighted_wide_stance_plank_with_diagonal_arm_lift"),
-            120 => write!(f, "wide_stance_plank_with_diagonal_leg_lift"),
-            121 => write!(f, "weighted_wide_stance_plank_with_diagonal_leg_lift"),
-            122 => write!(f, "wide_stance_plank_with_leg_lift"),
-            123 => write!(f, "weighted_wide_stance_plank_with_leg_lift"),
-            124 => write!(f, "wide_stance_plank_with_opposite_arm_and_leg_lift"),
-            125 => write!(f, "weighted_mountain_climber_with_hands_on_bench"),
-            126 => write!(f, "weighted_swiss_ball_plank_leg_lift_and_hold"),
-            127 => write!(
-                f,
-                "weighted_wide_stance_plank_with_opposite_arm_and_leg_lift"
-            ),
-            128 => write!(f, "plank_with_feet_on_swiss_ball"),
-            129 => write!(f, "side_plank_to_plank_with_reach_under"),
-            130 => write!(f, "bridge_with_glute_lower_lift"),
-            131 => write!(f, "bridge_one_leg_bridge"),
-            132 => write!(f, "plank_with_arm_variations"),
-            133 => write!(f, "plank_with_leg_lift"),
-            134 => write!(f, "reverse_plank_with_leg_pull"),
-            135 => write!(f, "ring_plank_sprawls"),
-            _ => write!(f, "PlankExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "PlankExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for PlankExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("PlankExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for PlankExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

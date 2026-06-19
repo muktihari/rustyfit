@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Workout Capabilities type.
 #[repr(transparent)]
@@ -36,6 +36,26 @@ impl WorkoutCapabilities {
     /// Resistance source required for workout step.
     pub const RESISTANCE: WorkoutCapabilities = WorkoutCapabilities(0x00002000);
     pub const PROTECTED: WorkoutCapabilities = WorkoutCapabilities(0x00004000);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x00000001 => Some("interval"),
+            0x00000002 => Some("custom"),
+            0x00000004 => Some("fitness_equipment"),
+            0x00000008 => Some("firstbeat"),
+            0x00000010 => Some("new_leaf"),
+            0x00000020 => Some("tcx"),
+            0x00000080 => Some("speed"),
+            0x00000100 => Some("heart_rate"),
+            0x00000200 => Some("distance"),
+            0x00000400 => Some("cadence"),
+            0x00000800 => Some("power"),
+            0x00001000 => Some("grade"),
+            0x00002000 => Some("resistance"),
+            0x00004000 => Some("protected"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for WorkoutCapabilities {
@@ -46,22 +66,50 @@ impl Default for WorkoutCapabilities {
 
 impl fmt::Display for WorkoutCapabilities {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000001 => write!(f, "interval"),
-            0x00000002 => write!(f, "custom"),
-            0x00000004 => write!(f, "fitness_equipment"),
-            0x00000008 => write!(f, "firstbeat"),
-            0x00000010 => write!(f, "new_leaf"),
-            0x00000020 => write!(f, "tcx"),
-            0x00000080 => write!(f, "speed"),
-            0x00000100 => write!(f, "heart_rate"),
-            0x00000200 => write!(f, "distance"),
-            0x00000400 => write!(f, "cadence"),
-            0x00000800 => write!(f, "power"),
-            0x00001000 => write!(f, "grade"),
-            0x00002000 => write!(f, "resistance"),
-            0x00004000 => write!(f, "protected"),
-            _ => write!(f, "WorkoutCapabilities({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "WorkoutCapabilities({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WorkoutCapabilities {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("WorkoutCapabilities", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u32,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for WorkoutCapabilities {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

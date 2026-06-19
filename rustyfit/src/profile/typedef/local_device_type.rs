@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Local Device Type type.
 #[repr(transparent)]
@@ -30,6 +30,20 @@ impl LocalDeviceType {
     pub const WHR: LocalDeviceType = LocalDeviceType(10);
     /// Onboard software package
     pub const SENSOR_HUB: LocalDeviceType = LocalDeviceType(12);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("gps"),
+            1 => Some("glonass"),
+            2 => Some("gps_glonass"),
+            3 => Some("accelerometer"),
+            4 => Some("barometer"),
+            5 => Some("temperature"),
+            10 => Some("whr"),
+            12 => Some("sensor_hub"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for LocalDeviceType {
@@ -40,16 +54,50 @@ impl Default for LocalDeviceType {
 
 impl fmt::Display for LocalDeviceType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "gps"),
-            1 => write!(f, "glonass"),
-            2 => write!(f, "gps_glonass"),
-            3 => write!(f, "accelerometer"),
-            4 => write!(f, "barometer"),
-            5 => write!(f, "temperature"),
-            10 => write!(f, "whr"),
-            12 => write!(f, "sensor_hub"),
-            _ => write!(f, "LocalDeviceType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "LocalDeviceType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for LocalDeviceType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("LocalDeviceType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for LocalDeviceType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

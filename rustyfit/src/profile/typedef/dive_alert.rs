@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Dive Alert type.
 #[repr(transparent)]
@@ -60,6 +60,51 @@ impl DiveAlert {
     pub const APNEA_HIGH_SPEED: DiveAlert = DiveAlert(38);
     /// Low Speed Apnea Alarm triggered
     pub const APNEA_LOW_SPEED: DiveAlert = DiveAlert(39);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("ndl_reached"),
+            1 => Some("gas_switch_prompted"),
+            2 => Some("near_surface"),
+            3 => Some("approaching_ndl"),
+            4 => Some("po2_warn"),
+            5 => Some("po2_crit_high"),
+            6 => Some("po2_crit_low"),
+            7 => Some("time_alert"),
+            8 => Some("depth_alert"),
+            9 => Some("deco_ceiling_broken"),
+            10 => Some("deco_complete"),
+            11 => Some("safety_stop_broken"),
+            12 => Some("safety_stop_complete"),
+            13 => Some("cns_warning"),
+            14 => Some("cns_critical"),
+            15 => Some("otu_warning"),
+            16 => Some("otu_critical"),
+            17 => Some("ascent_critical"),
+            18 => Some("alert_dismissed_by_key"),
+            19 => Some("alert_dismissed_by_timeout"),
+            20 => Some("battery_low"),
+            21 => Some("battery_critical"),
+            22 => Some("safety_stop_started"),
+            23 => Some("approaching_first_deco_stop"),
+            24 => Some("setpoint_switch_auto_low"),
+            25 => Some("setpoint_switch_auto_high"),
+            26 => Some("setpoint_switch_manual_low"),
+            27 => Some("setpoint_switch_manual_high"),
+            28 => Some("auto_setpoint_switch_ignored"),
+            29 => Some("switched_to_open_circuit"),
+            30 => Some("switched_to_closed_circuit"),
+            32 => Some("tank_battery_low"),
+            33 => Some("po2_ccr_dil_low"),
+            34 => Some("deco_stop_cleared"),
+            35 => Some("apnea_neutral_buoyancy"),
+            36 => Some("apnea_target_depth"),
+            37 => Some("apnea_surface"),
+            38 => Some("apnea_high_speed"),
+            39 => Some("apnea_low_speed"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DiveAlert {
@@ -70,47 +115,50 @@ impl Default for DiveAlert {
 
 impl fmt::Display for DiveAlert {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ndl_reached"),
-            1 => write!(f, "gas_switch_prompted"),
-            2 => write!(f, "near_surface"),
-            3 => write!(f, "approaching_ndl"),
-            4 => write!(f, "po2_warn"),
-            5 => write!(f, "po2_crit_high"),
-            6 => write!(f, "po2_crit_low"),
-            7 => write!(f, "time_alert"),
-            8 => write!(f, "depth_alert"),
-            9 => write!(f, "deco_ceiling_broken"),
-            10 => write!(f, "deco_complete"),
-            11 => write!(f, "safety_stop_broken"),
-            12 => write!(f, "safety_stop_complete"),
-            13 => write!(f, "cns_warning"),
-            14 => write!(f, "cns_critical"),
-            15 => write!(f, "otu_warning"),
-            16 => write!(f, "otu_critical"),
-            17 => write!(f, "ascent_critical"),
-            18 => write!(f, "alert_dismissed_by_key"),
-            19 => write!(f, "alert_dismissed_by_timeout"),
-            20 => write!(f, "battery_low"),
-            21 => write!(f, "battery_critical"),
-            22 => write!(f, "safety_stop_started"),
-            23 => write!(f, "approaching_first_deco_stop"),
-            24 => write!(f, "setpoint_switch_auto_low"),
-            25 => write!(f, "setpoint_switch_auto_high"),
-            26 => write!(f, "setpoint_switch_manual_low"),
-            27 => write!(f, "setpoint_switch_manual_high"),
-            28 => write!(f, "auto_setpoint_switch_ignored"),
-            29 => write!(f, "switched_to_open_circuit"),
-            30 => write!(f, "switched_to_closed_circuit"),
-            32 => write!(f, "tank_battery_low"),
-            33 => write!(f, "po2_ccr_dil_low"),
-            34 => write!(f, "deco_stop_cleared"),
-            35 => write!(f, "apnea_neutral_buoyancy"),
-            36 => write!(f, "apnea_target_depth"),
-            37 => write!(f, "apnea_surface"),
-            38 => write!(f, "apnea_high_speed"),
-            39 => write!(f, "apnea_low_speed"),
-            _ => write!(f, "DiveAlert({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DiveAlert({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DiveAlert {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DiveAlert", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DiveAlert {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Dive Summary message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DiveSummary {
     /// Units: s
@@ -61,51 +64,51 @@ pub struct DiveSummary {
 }
 
 impl DiveSummary {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MesgNum
     pub const REFERENCE_MESG: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const AVG_DEPTH: u8 = 2;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const MAX_DEPTH: u8 = 3;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const SURFACE_INTERVAL: u8 = 4;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const START_CNS: u8 = 5;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const END_CNS: u8 = 6;
-    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `percent`
     pub const START_N2: u8 = 7;
-    /// Value's type: `u16`; Units: `percent`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `percent`
     pub const END_N2: u8 = 8;
-    /// Value's type: `u16`; Units: `OTUs`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `OTUs`
     pub const O2_TOXICITY: u8 = 9;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const DIVE_NUMBER: u8 = 10;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const BOTTOM_TIME: u8 = 11;
-    /// Value's type: `u16`; Scale: `100`; Units: `bar/min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `bar/min`
     pub const AVG_PRESSURE_SAC: u8 = 12;
-    /// Value's type: `u16`; Scale: `100`; Units: `L/min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `L/min`
     pub const AVG_VOLUME_SAC: u8 = 13;
-    /// Value's type: `u16`; Scale: `100`; Units: `L/min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `L/min`
     pub const AVG_RMV: u8 = 14;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const DESCENT_TIME: u8 = 15;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ASCENT_TIME: u8 = 16;
-    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Scale: `1000`; Units: `m/s`
     pub const AVG_ASCENT_RATE: u8 = 17;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const AVG_DESCENT_RATE: u8 = 22;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const MAX_ASCENT_RATE: u8 = 23;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const MAX_DESCENT_RATE: u8 = 24;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const HANG_TIME: u8 = 25;
 
     /// Create new DiveSummary with all fields being set to its corresponding invalid value.
@@ -688,6 +691,283 @@ impl From<DiveSummary> for Message {
             num: typedef::MesgNum::DIVE_SUMMARY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DiveSummary {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DiveSummary", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.reference_mesg.0 != u16::MAX {
+            state.serialize_field("reference_mesg", &self.reference_mesg)?;
+        }
+        if self.reference_index.0 != u16::MAX {
+            state.serialize_field("reference_index", &self.reference_index)?;
+        }
+        if let Some(v) = self.avg_depth_scaled() {
+            state.serialize_field("avg_depth", &v)?;
+        }
+        if let Some(v) = self.max_depth_scaled() {
+            state.serialize_field("max_depth", &v)?;
+        }
+        if self.surface_interval != u32::MAX {
+            state.serialize_field("surface_interval", &self.surface_interval)?;
+        }
+        if self.start_cns != u8::MAX {
+            state.serialize_field("start_cns", &self.start_cns)?;
+        }
+        if self.end_cns != u8::MAX {
+            state.serialize_field("end_cns", &self.end_cns)?;
+        }
+        if self.start_n2 != u16::MAX {
+            state.serialize_field("start_n2", &self.start_n2)?;
+        }
+        if self.end_n2 != u16::MAX {
+            state.serialize_field("end_n2", &self.end_n2)?;
+        }
+        if self.o2_toxicity != u16::MAX {
+            state.serialize_field("o2_toxicity", &self.o2_toxicity)?;
+        }
+        if self.dive_number != u32::MAX {
+            state.serialize_field("dive_number", &self.dive_number)?;
+        }
+        if let Some(v) = self.bottom_time_scaled() {
+            state.serialize_field("bottom_time", &v)?;
+        }
+        if let Some(v) = self.avg_pressure_sac_scaled() {
+            state.serialize_field("avg_pressure_sac", &v)?;
+        }
+        if let Some(v) = self.avg_volume_sac_scaled() {
+            state.serialize_field("avg_volume_sac", &v)?;
+        }
+        if let Some(v) = self.avg_rmv_scaled() {
+            state.serialize_field("avg_rmv", &v)?;
+        }
+        if let Some(v) = self.descent_time_scaled() {
+            state.serialize_field("descent_time", &v)?;
+        }
+        if let Some(v) = self.ascent_time_scaled() {
+            state.serialize_field("ascent_time", &v)?;
+        }
+        if let Some(v) = self.avg_ascent_rate_scaled() {
+            state.serialize_field("avg_ascent_rate", &v)?;
+        }
+        if let Some(v) = self.avg_descent_rate_scaled() {
+            state.serialize_field("avg_descent_rate", &v)?;
+        }
+        if let Some(v) = self.max_ascent_rate_scaled() {
+            state.serialize_field("max_ascent_rate", &v)?;
+        }
+        if let Some(v) = self.max_descent_rate_scaled() {
+            state.serialize_field("max_descent_rate", &v)?;
+        }
+        if let Some(v) = self.hang_time_scaled() {
+            state.serialize_field("hang_time", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    reference_mesg: typedef::MesgNum,
+    reference_index: typedef::MessageIndex,
+    avg_depth: f64,
+    max_depth: f64,
+    surface_interval: u32,
+    start_cns: u8,
+    end_cns: u8,
+    start_n2: u16,
+    end_n2: u16,
+    o2_toxicity: u16,
+    dive_number: u32,
+    bottom_time: f64,
+    avg_pressure_sac: f64,
+    avg_volume_sac: f64,
+    avg_rmv: f64,
+    descent_time: f64,
+    ascent_time: f64,
+    avg_ascent_rate: f64,
+    avg_descent_rate: f64,
+    max_ascent_rate: f64,
+    max_descent_rate: f64,
+    hang_time: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DiveSummary {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            reference_mesg: m.reference_mesg,
+            reference_index: m.reference_index,
+            avg_depth: {
+                let unscaled = (m.avg_depth + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            max_depth: {
+                let unscaled = (m.max_depth + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            surface_interval: m.surface_interval,
+            start_cns: m.start_cns,
+            end_cns: m.end_cns,
+            start_n2: m.start_n2,
+            end_n2: m.end_n2,
+            o2_toxicity: m.o2_toxicity,
+            dive_number: m.dive_number,
+            bottom_time: {
+                let unscaled = (m.bottom_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_pressure_sac: {
+                let unscaled = (m.avg_pressure_sac + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_volume_sac: {
+                let unscaled = (m.avg_volume_sac + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_rmv: {
+                let unscaled = (m.avg_rmv + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            descent_time: {
+                let unscaled = (m.descent_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            ascent_time: {
+                let unscaled = (m.ascent_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_ascent_rate: {
+                let unscaled = (m.avg_ascent_rate + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
+                    i32::MAX
+                } else {
+                    unscaled as i32
+                }
+            },
+            avg_descent_rate: {
+                let unscaled = (m.avg_descent_rate + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            max_ascent_rate: {
+                let unscaled = (m.max_ascent_rate + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            max_descent_rate: {
+                let unscaled = (m.max_descent_rate + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            hang_time: {
+                let unscaled = (m.hang_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            reference_mesg: typedef::MesgNum(u16::MAX),
+            reference_index: typedef::MessageIndex(u16::MAX),
+            avg_depth: f64::from_bits(u64::MAX),
+            max_depth: f64::from_bits(u64::MAX),
+            surface_interval: u32::MAX,
+            start_cns: u8::MAX,
+            end_cns: u8::MAX,
+            start_n2: u16::MAX,
+            end_n2: u16::MAX,
+            o2_toxicity: u16::MAX,
+            dive_number: u32::MAX,
+            bottom_time: f64::from_bits(u64::MAX),
+            avg_pressure_sac: f64::from_bits(u64::MAX),
+            avg_volume_sac: f64::from_bits(u64::MAX),
+            avg_rmv: f64::from_bits(u64::MAX),
+            descent_time: f64::from_bits(u64::MAX),
+            ascent_time: f64::from_bits(u64::MAX),
+            avg_ascent_rate: f64::from_bits(u64::MAX),
+            avg_descent_rate: f64::from_bits(u64::MAX),
+            max_ascent_rate: f64::from_bits(u64::MAX),
+            max_descent_rate: f64::from_bits(u64::MAX),
+            hang_time: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

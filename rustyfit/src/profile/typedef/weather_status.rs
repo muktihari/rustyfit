@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Weather Status type.
 #[repr(transparent)]
@@ -35,6 +35,33 @@ impl WeatherStatus {
     pub const LIGHT_RAIN_SNOW: WeatherStatus = WeatherStatus(20);
     pub const HEAVY_RAIN_SNOW: WeatherStatus = WeatherStatus(21);
     pub const CLOUDY: WeatherStatus = WeatherStatus(22);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("clear"),
+            1 => Some("partly_cloudy"),
+            2 => Some("mostly_cloudy"),
+            3 => Some("rain"),
+            4 => Some("snow"),
+            5 => Some("windy"),
+            6 => Some("thunderstorms"),
+            7 => Some("wintry_mix"),
+            8 => Some("fog"),
+            11 => Some("hazy"),
+            12 => Some("hail"),
+            13 => Some("scattered_showers"),
+            14 => Some("scattered_thunderstorms"),
+            15 => Some("unknown_precipitation"),
+            16 => Some("light_rain"),
+            17 => Some("heavy_rain"),
+            18 => Some("light_snow"),
+            19 => Some("heavy_snow"),
+            20 => Some("light_rain_snow"),
+            21 => Some("heavy_rain_snow"),
+            22 => Some("cloudy"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for WeatherStatus {
@@ -45,29 +72,50 @@ impl Default for WeatherStatus {
 
 impl fmt::Display for WeatherStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "clear"),
-            1 => write!(f, "partly_cloudy"),
-            2 => write!(f, "mostly_cloudy"),
-            3 => write!(f, "rain"),
-            4 => write!(f, "snow"),
-            5 => write!(f, "windy"),
-            6 => write!(f, "thunderstorms"),
-            7 => write!(f, "wintry_mix"),
-            8 => write!(f, "fog"),
-            11 => write!(f, "hazy"),
-            12 => write!(f, "hail"),
-            13 => write!(f, "scattered_showers"),
-            14 => write!(f, "scattered_thunderstorms"),
-            15 => write!(f, "unknown_precipitation"),
-            16 => write!(f, "light_rain"),
-            17 => write!(f, "heavy_rain"),
-            18 => write!(f, "light_snow"),
-            19 => write!(f, "heavy_snow"),
-            20 => write!(f, "light_rain_snow"),
-            21 => write!(f, "heavy_rain_snow"),
-            22 => write!(f, "cloudy"),
-            _ => write!(f, "WeatherStatus({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "WeatherStatus({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WeatherStatus {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("WeatherStatus", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for WeatherStatus {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

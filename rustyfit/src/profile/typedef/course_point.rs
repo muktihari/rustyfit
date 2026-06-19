@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Course Point type.
 #[repr(transparent)]
@@ -68,6 +68,65 @@ impl CoursePoint {
     pub const TRANSPORT: CoursePoint = CoursePoint(51);
     pub const ALERT: CoursePoint = CoursePoint(52);
     pub const INFO: CoursePoint = CoursePoint(53);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("generic"),
+            1 => Some("summit"),
+            2 => Some("valley"),
+            3 => Some("water"),
+            4 => Some("food"),
+            5 => Some("danger"),
+            6 => Some("left"),
+            7 => Some("right"),
+            8 => Some("straight"),
+            9 => Some("first_aid"),
+            10 => Some("fourth_category"),
+            11 => Some("third_category"),
+            12 => Some("second_category"),
+            13 => Some("first_category"),
+            14 => Some("hors_category"),
+            15 => Some("sprint"),
+            16 => Some("left_fork"),
+            17 => Some("right_fork"),
+            18 => Some("middle_fork"),
+            19 => Some("slight_left"),
+            20 => Some("sharp_left"),
+            21 => Some("slight_right"),
+            22 => Some("sharp_right"),
+            23 => Some("u_turn"),
+            24 => Some("segment_start"),
+            25 => Some("segment_end"),
+            27 => Some("campsite"),
+            28 => Some("aid_station"),
+            29 => Some("rest_area"),
+            30 => Some("general_distance"),
+            31 => Some("service"),
+            32 => Some("energy_gel"),
+            33 => Some("sports_drink"),
+            34 => Some("mile_marker"),
+            35 => Some("checkpoint"),
+            36 => Some("shelter"),
+            37 => Some("meeting_spot"),
+            38 => Some("overlook"),
+            39 => Some("toilet"),
+            40 => Some("shower"),
+            41 => Some("gear"),
+            42 => Some("sharp_curve"),
+            43 => Some("steep_incline"),
+            44 => Some("tunnel"),
+            45 => Some("bridge"),
+            46 => Some("obstacle"),
+            47 => Some("crossing"),
+            48 => Some("store"),
+            49 => Some("transition"),
+            50 => Some("navaid"),
+            51 => Some("transport"),
+            52 => Some("alert"),
+            53 => Some("info"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CoursePoint {
@@ -78,61 +137,50 @@ impl Default for CoursePoint {
 
 impl fmt::Display for CoursePoint {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "generic"),
-            1 => write!(f, "summit"),
-            2 => write!(f, "valley"),
-            3 => write!(f, "water"),
-            4 => write!(f, "food"),
-            5 => write!(f, "danger"),
-            6 => write!(f, "left"),
-            7 => write!(f, "right"),
-            8 => write!(f, "straight"),
-            9 => write!(f, "first_aid"),
-            10 => write!(f, "fourth_category"),
-            11 => write!(f, "third_category"),
-            12 => write!(f, "second_category"),
-            13 => write!(f, "first_category"),
-            14 => write!(f, "hors_category"),
-            15 => write!(f, "sprint"),
-            16 => write!(f, "left_fork"),
-            17 => write!(f, "right_fork"),
-            18 => write!(f, "middle_fork"),
-            19 => write!(f, "slight_left"),
-            20 => write!(f, "sharp_left"),
-            21 => write!(f, "slight_right"),
-            22 => write!(f, "sharp_right"),
-            23 => write!(f, "u_turn"),
-            24 => write!(f, "segment_start"),
-            25 => write!(f, "segment_end"),
-            27 => write!(f, "campsite"),
-            28 => write!(f, "aid_station"),
-            29 => write!(f, "rest_area"),
-            30 => write!(f, "general_distance"),
-            31 => write!(f, "service"),
-            32 => write!(f, "energy_gel"),
-            33 => write!(f, "sports_drink"),
-            34 => write!(f, "mile_marker"),
-            35 => write!(f, "checkpoint"),
-            36 => write!(f, "shelter"),
-            37 => write!(f, "meeting_spot"),
-            38 => write!(f, "overlook"),
-            39 => write!(f, "toilet"),
-            40 => write!(f, "shower"),
-            41 => write!(f, "gear"),
-            42 => write!(f, "sharp_curve"),
-            43 => write!(f, "steep_incline"),
-            44 => write!(f, "tunnel"),
-            45 => write!(f, "bridge"),
-            46 => write!(f, "obstacle"),
-            47 => write!(f, "crossing"),
-            48 => write!(f, "store"),
-            49 => write!(f, "transition"),
-            50 => write!(f, "navaid"),
-            51 => write!(f, "transport"),
-            52 => write!(f, "alert"),
-            53 => write!(f, "info"),
-            _ => write!(f, "CoursePoint({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CoursePoint({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CoursePoint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CoursePoint", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CoursePoint {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

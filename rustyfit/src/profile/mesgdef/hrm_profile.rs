@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hrm Profile message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HrmProfile {
     pub message_index: typedef::MessageIndex,
@@ -25,15 +28,15 @@ pub struct HrmProfile {
 }
 
 impl HrmProfile {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 0;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const HRM_ANT_ID: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const LOG_HRV: u8 = 2;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const HRM_ANT_ID_TRANS_TYPE: u8 = 3;
 
     /// Create new HrmProfile with all fields being set to its corresponding invalid value.
@@ -145,6 +148,81 @@ impl From<HrmProfile> for Message {
             num: typedef::MesgNum::HRM_PROFILE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HrmProfile {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HrmProfile", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.hrm_ant_id != u16::MIN {
+            state.serialize_field("hrm_ant_id", &self.hrm_ant_id)?;
+        }
+        if self.log_hrv.0 != u8::MAX {
+            state.serialize_field("log_hrv", &self.log_hrv)?;
+        }
+        if self.hrm_ant_id_trans_type != u8::MIN {
+            state.serialize_field("hrm_ant_id_trans_type", &self.hrm_ant_id_trans_type)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    enabled: typedef::Bool,
+    hrm_ant_id: u16,
+    log_hrv: typedef::Bool,
+    hrm_ant_id_trans_type: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HrmProfile {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            enabled: m.enabled,
+            hrm_ant_id: m.hrm_ant_id,
+            log_hrv: m.log_hrv,
+            hrm_ant_id_trans_type: m.hrm_ant_id_trans_type,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            hrm_ant_id: u16::MIN,
+            log_hrv: typedef::Bool(u8::MAX),
+            hrm_ant_id_trans_type: u8::MIN,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

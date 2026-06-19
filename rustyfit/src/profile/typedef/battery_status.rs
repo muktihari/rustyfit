@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Battery Status type.
 #[repr(transparent)]
@@ -21,6 +21,19 @@ impl BatteryStatus {
     pub const CRITICAL: BatteryStatus = BatteryStatus(5);
     pub const CHARGING: BatteryStatus = BatteryStatus(6);
     pub const UNKNOWN: BatteryStatus = BatteryStatus(7);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            1 => Some("new"),
+            2 => Some("good"),
+            3 => Some("ok"),
+            4 => Some("low"),
+            5 => Some("critical"),
+            6 => Some("charging"),
+            7 => Some("unknown"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BatteryStatus {
@@ -31,15 +44,50 @@ impl Default for BatteryStatus {
 
 impl fmt::Display for BatteryStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "new"),
-            2 => write!(f, "good"),
-            3 => write!(f, "ok"),
-            4 => write!(f, "low"),
-            5 => write!(f, "critical"),
-            6 => write!(f, "charging"),
-            7 => write!(f, "unknown"),
-            _ => write!(f, "BatteryStatus({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BatteryStatus({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BatteryStatus {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BatteryStatus", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BatteryStatus {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

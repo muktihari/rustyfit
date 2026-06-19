@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Hyperextension Exercise Name type.
 #[repr(transparent)]
@@ -74,6 +74,52 @@ impl HyperextensionExerciseName {
     pub const COBRA: HyperextensionExerciseName = HyperextensionExerciseName(38);
     /// Deprecated do not use
     pub const SUPINE_FLOOR_BARRE: HyperextensionExerciseName = HyperextensionExerciseName(39);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("back_extension_with_opposite_arm_and_leg_reach"),
+            1 => Some("weighted_back_extension_with_opposite_arm_and_leg_reach"),
+            2 => Some("base_rotations"),
+            3 => Some("weighted_base_rotations"),
+            4 => Some("bent_knee_reverse_hyperextension"),
+            5 => Some("weighted_bent_knee_reverse_hyperextension"),
+            6 => Some("hollow_hold_and_roll"),
+            7 => Some("weighted_hollow_hold_and_roll"),
+            8 => Some("kicks"),
+            9 => Some("weighted_kicks"),
+            10 => Some("knee_raises"),
+            11 => Some("weighted_knee_raises"),
+            12 => Some("kneeling_superman"),
+            13 => Some("weighted_kneeling_superman"),
+            14 => Some("lat_pull_down_with_row"),
+            15 => Some("medicine_ball_deadlift_to_reach"),
+            16 => Some("one_arm_one_leg_row"),
+            17 => Some("one_arm_row_with_band"),
+            18 => Some("overhead_lunge_with_medicine_ball"),
+            19 => Some("plank_knee_tucks"),
+            20 => Some("weighted_plank_knee_tucks"),
+            21 => Some("side_step"),
+            22 => Some("weighted_side_step"),
+            23 => Some("single_leg_back_extension"),
+            24 => Some("weighted_single_leg_back_extension"),
+            25 => Some("spine_extension"),
+            26 => Some("weighted_spine_extension"),
+            27 => Some("static_back_extension"),
+            28 => Some("weighted_static_back_extension"),
+            29 => Some("superman_from_floor"),
+            30 => Some("weighted_superman_from_floor"),
+            31 => Some("swiss_ball_back_extension"),
+            32 => Some("weighted_swiss_ball_back_extension"),
+            33 => Some("swiss_ball_hyperextension"),
+            34 => Some("weighted_swiss_ball_hyperextension"),
+            35 => Some("swiss_ball_opposite_arm_and_leg_lift"),
+            36 => Some("weighted_swiss_ball_opposite_arm_and_leg_lift"),
+            37 => Some("superman_on_swiss_ball"),
+            38 => Some("cobra"),
+            39 => Some("supine_floor_barre"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for HyperextensionExerciseName {
@@ -84,48 +130,50 @@ impl Default for HyperextensionExerciseName {
 
 impl fmt::Display for HyperextensionExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "back_extension_with_opposite_arm_and_leg_reach"),
-            1 => write!(f, "weighted_back_extension_with_opposite_arm_and_leg_reach"),
-            2 => write!(f, "base_rotations"),
-            3 => write!(f, "weighted_base_rotations"),
-            4 => write!(f, "bent_knee_reverse_hyperextension"),
-            5 => write!(f, "weighted_bent_knee_reverse_hyperextension"),
-            6 => write!(f, "hollow_hold_and_roll"),
-            7 => write!(f, "weighted_hollow_hold_and_roll"),
-            8 => write!(f, "kicks"),
-            9 => write!(f, "weighted_kicks"),
-            10 => write!(f, "knee_raises"),
-            11 => write!(f, "weighted_knee_raises"),
-            12 => write!(f, "kneeling_superman"),
-            13 => write!(f, "weighted_kneeling_superman"),
-            14 => write!(f, "lat_pull_down_with_row"),
-            15 => write!(f, "medicine_ball_deadlift_to_reach"),
-            16 => write!(f, "one_arm_one_leg_row"),
-            17 => write!(f, "one_arm_row_with_band"),
-            18 => write!(f, "overhead_lunge_with_medicine_ball"),
-            19 => write!(f, "plank_knee_tucks"),
-            20 => write!(f, "weighted_plank_knee_tucks"),
-            21 => write!(f, "side_step"),
-            22 => write!(f, "weighted_side_step"),
-            23 => write!(f, "single_leg_back_extension"),
-            24 => write!(f, "weighted_single_leg_back_extension"),
-            25 => write!(f, "spine_extension"),
-            26 => write!(f, "weighted_spine_extension"),
-            27 => write!(f, "static_back_extension"),
-            28 => write!(f, "weighted_static_back_extension"),
-            29 => write!(f, "superman_from_floor"),
-            30 => write!(f, "weighted_superman_from_floor"),
-            31 => write!(f, "swiss_ball_back_extension"),
-            32 => write!(f, "weighted_swiss_ball_back_extension"),
-            33 => write!(f, "swiss_ball_hyperextension"),
-            34 => write!(f, "weighted_swiss_ball_hyperextension"),
-            35 => write!(f, "swiss_ball_opposite_arm_and_leg_lift"),
-            36 => write!(f, "weighted_swiss_ball_opposite_arm_and_leg_lift"),
-            37 => write!(f, "superman_on_swiss_ball"),
-            38 => write!(f, "cobra"),
-            39 => write!(f, "supine_floor_barre"),
-            _ => write!(f, "HyperextensionExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "HyperextensionExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HyperextensionExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("HyperextensionExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for HyperextensionExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Camera Event message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct CameraEvent {
     /// Units: s; Whole second part of the timestamp.
@@ -27,15 +30,15 @@ pub struct CameraEvent {
 }
 
 impl CameraEvent {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::CAMERA_EVENT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CameraEventType
     pub const CAMERA_EVENT_TYPE: u8 = 1;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const CAMERA_FILE_UUID: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::CAMERA_ORIENTATION_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CameraOrientationType
     pub const CAMERA_ORIENTATION: u8 = 3;
 
     /// Create new CameraEvent with all fields being set to its corresponding invalid value.
@@ -147,6 +150,84 @@ impl From<CameraEvent> for Message {
             num: typedef::MesgNum::CAMERA_EVENT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CameraEvent {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("CameraEvent", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if self.camera_event_type.0 != u8::MAX {
+            state.serialize_field("camera_event_type", &self.camera_event_type)?;
+        }
+        if !self.camera_file_uuid.is_empty() {
+            state.serialize_field("camera_file_uuid", &self.camera_file_uuid)?;
+        }
+        if self.camera_orientation.0 != u8::MAX {
+            state.serialize_field("camera_orientation", &self.camera_orientation)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    camera_event_type: typedef::CameraEventType,
+    camera_file_uuid: String,
+    camera_orientation: typedef::CameraOrientationType,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for CameraEvent {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            camera_event_type: m.camera_event_type,
+            camera_file_uuid: m.camera_file_uuid,
+            camera_orientation: m.camera_orientation,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            camera_event_type: typedef::CameraEventType(u8::MAX),
+            camera_file_uuid: String::new(),
+            camera_orientation: typedef::CameraOrientationType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

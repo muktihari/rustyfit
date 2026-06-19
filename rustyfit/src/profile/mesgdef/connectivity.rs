@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Connectivity message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Connectivity {
     /// Use Bluetooth for connectivity features
@@ -36,31 +39,31 @@ pub struct Connectivity {
 }
 
 impl Connectivity {
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const BLUETOOTH_ENABLED: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const BLUETOOTH_LE_ENABLED: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ANT_ENABLED: u8 = 2;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const LIVE_TRACKING_ENABLED: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const WEATHER_CONDITIONS_ENABLED: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const WEATHER_ALERTS_ENABLED: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const AUTO_ACTIVITY_UPLOAD_ENABLED: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const COURSE_DOWNLOAD_ENABLED: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const WORKOUT_DOWNLOAD_ENABLED: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const GPS_EPHEMERIS_DOWNLOAD_ENABLED: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const INCIDENT_DETECTION_ENABLED: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const GROUPTRACK_ENABLED: u8 = 12;
 
     /// Create new Connectivity with all fields being set to its corresponding invalid value.
@@ -260,6 +263,141 @@ impl From<Connectivity> for Message {
             num: typedef::MesgNum::CONNECTIVITY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Connectivity {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Connectivity", n)?;
+        if self.bluetooth_enabled.0 != u8::MAX {
+            state.serialize_field("bluetooth_enabled", &self.bluetooth_enabled)?;
+        }
+        if self.bluetooth_le_enabled.0 != u8::MAX {
+            state.serialize_field("bluetooth_le_enabled", &self.bluetooth_le_enabled)?;
+        }
+        if self.ant_enabled.0 != u8::MAX {
+            state.serialize_field("ant_enabled", &self.ant_enabled)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.live_tracking_enabled.0 != u8::MAX {
+            state.serialize_field("live_tracking_enabled", &self.live_tracking_enabled)?;
+        }
+        if self.weather_conditions_enabled.0 != u8::MAX {
+            state.serialize_field(
+                "weather_conditions_enabled",
+                &self.weather_conditions_enabled,
+            )?;
+        }
+        if self.weather_alerts_enabled.0 != u8::MAX {
+            state.serialize_field("weather_alerts_enabled", &self.weather_alerts_enabled)?;
+        }
+        if self.auto_activity_upload_enabled.0 != u8::MAX {
+            state.serialize_field(
+                "auto_activity_upload_enabled",
+                &self.auto_activity_upload_enabled,
+            )?;
+        }
+        if self.course_download_enabled.0 != u8::MAX {
+            state.serialize_field("course_download_enabled", &self.course_download_enabled)?;
+        }
+        if self.workout_download_enabled.0 != u8::MAX {
+            state.serialize_field("workout_download_enabled", &self.workout_download_enabled)?;
+        }
+        if self.gps_ephemeris_download_enabled.0 != u8::MAX {
+            state.serialize_field(
+                "gps_ephemeris_download_enabled",
+                &self.gps_ephemeris_download_enabled,
+            )?;
+        }
+        if self.incident_detection_enabled.0 != u8::MAX {
+            state.serialize_field(
+                "incident_detection_enabled",
+                &self.incident_detection_enabled,
+            )?;
+        }
+        if self.grouptrack_enabled.0 != u8::MAX {
+            state.serialize_field("grouptrack_enabled", &self.grouptrack_enabled)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    bluetooth_enabled: typedef::Bool,
+    bluetooth_le_enabled: typedef::Bool,
+    ant_enabled: typedef::Bool,
+    name: String,
+    live_tracking_enabled: typedef::Bool,
+    weather_conditions_enabled: typedef::Bool,
+    weather_alerts_enabled: typedef::Bool,
+    auto_activity_upload_enabled: typedef::Bool,
+    course_download_enabled: typedef::Bool,
+    workout_download_enabled: typedef::Bool,
+    gps_ephemeris_download_enabled: typedef::Bool,
+    incident_detection_enabled: typedef::Bool,
+    grouptrack_enabled: typedef::Bool,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Connectivity {
+    fn from(m: De) -> Self {
+        Self {
+            bluetooth_enabled: m.bluetooth_enabled,
+            bluetooth_le_enabled: m.bluetooth_le_enabled,
+            ant_enabled: m.ant_enabled,
+            name: m.name,
+            live_tracking_enabled: m.live_tracking_enabled,
+            weather_conditions_enabled: m.weather_conditions_enabled,
+            weather_alerts_enabled: m.weather_alerts_enabled,
+            auto_activity_upload_enabled: m.auto_activity_upload_enabled,
+            course_download_enabled: m.course_download_enabled,
+            workout_download_enabled: m.workout_download_enabled,
+            gps_ephemeris_download_enabled: m.gps_ephemeris_download_enabled,
+            incident_detection_enabled: m.incident_detection_enabled,
+            grouptrack_enabled: m.grouptrack_enabled,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            bluetooth_enabled: typedef::Bool(u8::MAX),
+            bluetooth_le_enabled: typedef::Bool(u8::MAX),
+            ant_enabled: typedef::Bool(u8::MAX),
+            name: String::new(),
+            live_tracking_enabled: typedef::Bool(u8::MAX),
+            weather_conditions_enabled: typedef::Bool(u8::MAX),
+            weather_alerts_enabled: typedef::Bool(u8::MAX),
+            auto_activity_upload_enabled: typedef::Bool(u8::MAX),
+            course_download_enabled: typedef::Bool(u8::MAX),
+            workout_download_enabled: typedef::Bool(u8::MAX),
+            gps_ephemeris_download_enabled: typedef::Bool(u8::MAX),
+            incident_detection_enabled: typedef::Bool(u8::MAX),
+            grouptrack_enabled: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }
