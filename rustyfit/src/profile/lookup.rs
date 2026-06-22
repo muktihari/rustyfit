@@ -4,13 +4,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// Skip default formatting, fitgen formats the code for fewer LoC while keeping it readable.
-// In general, the rule is one line per struct. If it contains slices, one line per slice's item.
-#![cfg_attr(rustfmt, rustfmt_skip)]
-
 use crate::profile::ProfileType;
 use crate::profile::typedef::{FitBaseType, MesgNum};
-use crate::proto::*;
 
 pub(crate) const MAX_COMPONENT_BITS: usize = 240;
 
@@ -24,60 +19,142 @@ pub(crate) const MAX_COMPONENT_BITS: usize = 240;
 /// - `hr`: event_timestamp_12
 pub(crate) const TOTAL_ACCUMULATE: usize = 7;
 
-const FR_DEF: FieldReference = FieldReference { num: 0, name: "", base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, array: false, accumulate: false, scale: 1.0, offset: 0.0, units: "", components: &[], sub_fields: &[] };
-const SF_DEF: SubField = SubField { name: "", base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: "", components: &[], maps: &[] };
+/// FieldReference acts as a representation of a field as defined in the Global FIT Profile.
+#[derive(Debug, Clone, Copy)]
+pub struct FieldReference<'a> {
+    /// Defined in the Global FIT profile for the specified FIT message, otherwise
+    /// its a manufaturer specific name (defined by manufacturer).
+    pub name: Name,
+    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
+    pub base_type: FitBaseType,
+    /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
+    pub profile_type: ProfileType,
+    /// Flag whether the value of this field is an array
+    pub array: bool,
+    /// Flag to indicate if the value of the field is accumulable.
+    pub accumulate: bool,
+    /// A scale or offset specified in the FIT profile for binary fields (sint/uint etc.) only.
+    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default: 1)
+    pub scale: f64,
+    /// A scale or offset specified in the FIT profile for binary fields (sint/uint etc.) only.
+    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default: 0)
+    pub offset: f64,
+    /// Units of the value, such as m (meter), m/s (meter per second), s (second), etc.
+    pub units: Unit,
+    /// List of component
+    pub components: &'a [Component],
+    /// List of sub-field
+    pub sub_fields: &'a [SubField<'a>],
+}
+
+/// Component is a way of compressing one or more fields into a bit field expressed in a single containing field.
+/// The component can be expanded as a main Field in a Message or to update the value of the destination main Field.
+#[derive(Debug)]
+pub struct Component {
+    /// Refer to Field's Number.
+    pub field_num: u8,
+    /// A flag whether this component should be accumulated.
+    pub accumulate: bool,
+    /// The size of data of this component in bits  
+    pub bits: u8,
+    /// Similar to FieldReference's scale, but for this component.
+    pub scale: f64,
+    /// Similar to FieldReference's offset, but for this component.
+    pub offset: f64,
+}
+
+/// SubField is a dynamic interpretation of the main Field in a Message when the SubFieldMap mapping match. See SubFieldMap's docs.
+#[derive(Debug)]
+pub struct SubField<'a> {
+    /// Name
+    pub name: Name,
+    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
+    pub base_type: FitBaseType,
+    /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
+    pub profile_type: ProfileType,
+    /// Scale
+    pub scale: f64,
+    /// Offset
+    pub offset: f64,
+    /// Units
+    pub units: Unit,
+    /// List of SubFieldMap
+    pub maps: &'a [SubFieldMap],
+    /// List of Component
+    pub components: &'a [Component],
+}
+
+/// SubFieldMap is the mapping between SubField and the corresponding main Field in a Message.
+/// When any Field in a Message has Field.Num == RefFieldNum and Field.Value == RefFieldValue, then the SubField containing
+/// this mapping can be interpreted as the main Field's properties (name, scale, type etc.)
+#[derive(Debug)]
+pub struct SubFieldMap {
+    /// Mapping reference to targeted Field's Number.
+    pub ref_field_num: u8,
+    /// Mapping reference to targeted Field's Value.
+    pub ref_field_value: i64,
+}
+
+// Skip default formatting, fitgen formats the code for fewer LoC while keeping it readable.
+// In general, the rule is one line per struct. If it contains slices, one line per slice's item.
+
+#[rustfmt::skip]
+const FR_DEF: FieldReference = FieldReference { name: Name::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, array: false, accumulate: false, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], sub_fields: &[] };
+#[rustfmt::skip]
+const SF_DEF: SubField = SubField { name: Name::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], maps: &[] };
 
 /// Find FieldReference defined in the Global Profile (Profile.xlsx).
+#[rustfmt::skip]
 pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<FieldReference<'a>> {
     match mesg_num {
         MesgNum::FILE_ID => { match field_num {
-            0 => Some(FieldReference { name: "type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
-            1 => Some(FieldReference { name: "manufacturer", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            2 => Some(FieldReference { name: "product", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: "favero_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+            0 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
+                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: "garmin_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 89 /* tacx */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "serial_number", num: 3, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
-            4 => Some(FieldReference { name: "time_created", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            5 => Some(FieldReference { name: "number", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            8 => Some(FieldReference { name: "product_name", num: 8, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::SerialNumber, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TimeCreated, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Number, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::ProductName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::FILE_CREATOR => { match field_num {
-            0 => Some(FieldReference { name: "software_version", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            1 => Some(FieldReference { name: "hardware_version", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SoftwareVersion, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::HardwareVersion, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TIMESTAMP_CORRELATION => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "fractional_timestamp", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "system_timestamp", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            2 => Some(FieldReference { name: "fractional_system_timestamp", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: "s", ..FR_DEF }),
-            3 => Some(FieldReference { name: "local_timestamp", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, units: "s", ..FR_DEF }),
-            4 => Some(FieldReference { name: "timestamp_ms", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            5 => Some(FieldReference { name: "system_timestamp_ms", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::FractionalTimestamp, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SystemTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::FractionalSystemTimestamp, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: Unit::Second, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::LocalTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, units: Unit::Second, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::SystemTimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SOFTWARE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            3 => Some(FieldReference { name: "version", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
-            5 => Some(FieldReference { name: "part_number", num: 5, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Version, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::PartNumber, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SLAVE_DEVICE => { match field_num {
-            0 => Some(FieldReference { name: "manufacturer", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            1 => Some(FieldReference { name: "product", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: "favero_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+            0 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
+                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: "garmin_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
@@ -87,926 +164,926 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
            _ => None,
         }},
         MesgNum::CAPABILITIES => { match field_num {
-            0 => Some(FieldReference { name: "languages", num: 0, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
-            1 => Some(FieldReference { name: "sports", num: 1, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::SportBits0, array: true /* [N] */, ..FR_DEF }),
-            21 => Some(FieldReference { name: "workouts_supported", num: 21, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::WorkoutCapabilities, ..FR_DEF }),
-            23 => Some(FieldReference { name: "connectivity_supported", num: 23, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::ConnectivityCapabilities, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Languages, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Sports, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::SportBits0, array: true /* [N] */, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::WorkoutsSupported, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::WorkoutCapabilities, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::ConnectivitySupported, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::ConnectivityCapabilities, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::FILE_CAPABILITIES => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
-            1 => Some(FieldReference { name: "flags", num: 1, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::FileFlags, ..FR_DEF }),
-            2 => Some(FieldReference { name: "directory", num: 2, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            3 => Some(FieldReference { name: "max_count", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            4 => Some(FieldReference { name: "max_size", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "bytes", ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Flags, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::FileFlags, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Directory, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::MaxCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::MaxSize, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Bytes, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MESG_CAPABILITIES => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "file", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
-            1 => Some(FieldReference { name: "mesg_num", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
-            2 => Some(FieldReference { name: "count_type", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::MesgCount, ..FR_DEF }),
-            3 => Some(FieldReference { name: "count", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: "num_per_file", base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::File, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MesgNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::CountType, base_type: FitBaseType::ENUM, profile_type: ProfileType::MesgCount, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Count, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
+                    SubField { name: Name::NumPerFile, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
                         SubFieldMap { ref_field_num: 2 /* count_type */, ref_field_value: 0 /* num_per_file */ },
                     ], ..SF_DEF },
-                    SubField { name: "max_per_file", base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
+                    SubField { name: Name::MaxPerFile, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
                         SubFieldMap { ref_field_num: 2 /* count_type */, ref_field_value: 1 /* max_per_file */ },
                     ], ..SF_DEF },
-                    SubField { name: "max_per_file_type", base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
+                    SubField { name: Name::MaxPerFileType, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
                         SubFieldMap { ref_field_num: 2 /* count_type */, ref_field_value: 2 /* max_per_file_type */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
            _ => None,
         }},
         MesgNum::FIELD_CAPABILITIES => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "file", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
-            1 => Some(FieldReference { name: "mesg_num", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
-            2 => Some(FieldReference { name: "field_num", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            3 => Some(FieldReference { name: "count", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::File, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MesgNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::FieldNum, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Count, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DEVICE_SETTINGS => { match field_num {
-            0 => Some(FieldReference { name: "active_time_zone", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "utc_offset", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            2 => Some(FieldReference { name: "time_offset", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: "s", ..FR_DEF }),
-            4 => Some(FieldReference { name: "time_mode", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::TimeMode, array: true /* [N] */, ..FR_DEF }),
-            5 => Some(FieldReference { name: "time_zone_offset", num: 5, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, array: true /* [N] */, scale: 4.0, units: "hr", ..FR_DEF }),
-            12 => Some(FieldReference { name: "backlight_mode", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::BacklightMode, ..FR_DEF }),
-            36 => Some(FieldReference { name: "activity_tracker_enabled", num: 36, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            39 => Some(FieldReference { name: "clock_time", num: 39, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            40 => Some(FieldReference { name: "pages_enabled", num: 40, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, ..FR_DEF }),
-            46 => Some(FieldReference { name: "move_alert_enabled", num: 46, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            47 => Some(FieldReference { name: "date_mode", num: 47, base_type: FitBaseType::ENUM, profile_type: ProfileType::DateMode, ..FR_DEF }),
-            55 => Some(FieldReference { name: "display_orientation", num: 55, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayOrientation, ..FR_DEF }),
-            56 => Some(FieldReference { name: "mounting_side", num: 56, base_type: FitBaseType::ENUM, profile_type: ProfileType::Side, ..FR_DEF }),
-            57 => Some(FieldReference { name: "default_page", num: 57, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, ..FR_DEF }),
-            58 => Some(FieldReference { name: "autosync_min_steps", num: 58, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "steps", ..FR_DEF }),
-            59 => Some(FieldReference { name: "autosync_min_time", num: 59, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "minutes", ..FR_DEF }),
-            80 => Some(FieldReference { name: "lactate_threshold_autodetect_enabled", num: 80, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            86 => Some(FieldReference { name: "ble_auto_upload_enabled", num: 86, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            89 => Some(FieldReference { name: "auto_sync_frequency", num: 89, base_type: FitBaseType::ENUM, profile_type: ProfileType::AutoSyncFrequency, ..FR_DEF }),
-            90 => Some(FieldReference { name: "auto_activity_detect", num: 90, base_type: FitBaseType::UINT32, profile_type: ProfileType::AutoActivityDetect, ..FR_DEF }),
-            94 => Some(FieldReference { name: "number_of_screens", num: 94, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            95 => Some(FieldReference { name: "smart_notification_display_orientation", num: 95, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayOrientation, ..FR_DEF }),
-            134 => Some(FieldReference { name: "tap_interface", num: 134, base_type: FitBaseType::ENUM, profile_type: ProfileType::Switch, ..FR_DEF }),
-            174 => Some(FieldReference { name: "tap_sensitivity", num: 174, base_type: FitBaseType::ENUM, profile_type: ProfileType::TapSensitivity, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ActiveTimeZone, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::UtcOffset, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::TimeOffset, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: Unit::Second, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TimeMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::TimeMode, array: true /* [N] */, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::TimeZoneOffset, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, array: true /* [N] */, scale: 4.0, units: Unit::Hour, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::BacklightMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::BacklightMode, ..FR_DEF }),
+            36 => Some(FieldReference { name: Name::ActivityTrackerEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::ClockTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::PagesEnabled, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, ..FR_DEF }),
+            46 => Some(FieldReference { name: Name::MoveAlertEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::DateMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::DateMode, ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::DisplayOrientation, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayOrientation, ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::MountingSide, base_type: FitBaseType::ENUM, profile_type: ProfileType::Side, ..FR_DEF }),
+            57 => Some(FieldReference { name: Name::DefaultPage, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::AutosyncMinSteps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Step, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::AutosyncMinTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Minute, ..FR_DEF }),
+            80 => Some(FieldReference { name: Name::LactateThresholdAutodetectEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            86 => Some(FieldReference { name: Name::BleAutoUploadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            89 => Some(FieldReference { name: Name::AutoSyncFrequency, base_type: FitBaseType::ENUM, profile_type: ProfileType::AutoSyncFrequency, ..FR_DEF }),
+            90 => Some(FieldReference { name: Name::AutoActivityDetect, base_type: FitBaseType::UINT32, profile_type: ProfileType::AutoActivityDetect, ..FR_DEF }),
+            94 => Some(FieldReference { name: Name::NumberOfScreens, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            95 => Some(FieldReference { name: Name::SmartNotificationDisplayOrientation, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayOrientation, ..FR_DEF }),
+            134 => Some(FieldReference { name: Name::TapInterface, base_type: FitBaseType::ENUM, profile_type: ProfileType::Switch, ..FR_DEF }),
+            174 => Some(FieldReference { name: Name::TapSensitivity, base_type: FitBaseType::ENUM, profile_type: ProfileType::TapSensitivity, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::USER_PROFILE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "friendly_name", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "gender", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::Gender, ..FR_DEF }),
-            2 => Some(FieldReference { name: "age", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "years", ..FR_DEF }),
-            3 => Some(FieldReference { name: "height", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "weight", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "kg", ..FR_DEF }),
-            5 => Some(FieldReference { name: "language", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::Language, ..FR_DEF }),
-            6 => Some(FieldReference { name: "elev_setting", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            7 => Some(FieldReference { name: "weight_setting", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            8 => Some(FieldReference { name: "resting_heart_rate", num: 8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            9 => Some(FieldReference { name: "default_max_running_heart_rate", num: 9, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            10 => Some(FieldReference { name: "default_max_biking_heart_rate", num: 10, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            11 => Some(FieldReference { name: "default_max_heart_rate", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            12 => Some(FieldReference { name: "hr_setting", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayHeart, ..FR_DEF }),
-            13 => Some(FieldReference { name: "speed_setting", num: 13, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            14 => Some(FieldReference { name: "dist_setting", num: 14, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            16 => Some(FieldReference { name: "power_setting", num: 16, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayPower, ..FR_DEF }),
-            17 => Some(FieldReference { name: "activity_class", num: 17, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityClass, ..FR_DEF }),
-            18 => Some(FieldReference { name: "position_setting", num: 18, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayPosition, ..FR_DEF }),
-            21 => Some(FieldReference { name: "temperature_setting", num: 21, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            22 => Some(FieldReference { name: "local_id", num: 22, base_type: FitBaseType::UINT16, profile_type: ProfileType::UserLocalId, ..FR_DEF }),
-            23 => Some(FieldReference { name: "global_id", num: 23, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [6] */, ..FR_DEF }),
-            28 => Some(FieldReference { name: "wake_time", num: 28, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocaltimeIntoDay, ..FR_DEF }),
-            29 => Some(FieldReference { name: "sleep_time", num: 29, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocaltimeIntoDay, ..FR_DEF }),
-            30 => Some(FieldReference { name: "height_setting", num: 30, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            31 => Some(FieldReference { name: "user_running_step_length", num: 31, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m", ..FR_DEF }),
-            32 => Some(FieldReference { name: "user_walking_step_length", num: 32, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m", ..FR_DEF }),
-            47 => Some(FieldReference { name: "depth_setting", num: 47, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            49 => Some(FieldReference { name: "dive_count", num: 49, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::FriendlyName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Gender, base_type: FitBaseType::ENUM, profile_type: ProfileType::Gender, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Age, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Year, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Height, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Weight, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Kilogram, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Language, base_type: FitBaseType::ENUM, profile_type: ProfileType::Language, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::ElevSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::WeightSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::RestingHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::DefaultMaxRunningHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::DefaultMaxBikingHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::DefaultMaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::HrSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayHeart, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::SpeedSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::DistSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::PowerSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayPower, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::ActivityClass, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityClass, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::PositionSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayPosition, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::TemperatureSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::LocalId, base_type: FitBaseType::UINT16, profile_type: ProfileType::UserLocalId, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::GlobalId, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [6] */, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::WakeTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocaltimeIntoDay, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::SleepTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocaltimeIntoDay, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::HeightSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::UserRunningStepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::UserWalkingStepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::DepthSetting, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::DiveCount, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HRM_PROFILE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "enabled", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            1 => Some(FieldReference { name: "hrm_ant_id", num: 1, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            2 => Some(FieldReference { name: "log_hrv", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            3 => Some(FieldReference { name: "hrm_ant_id_trans_type", num: 3, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::HrmAntId, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::LogHrv, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::HrmAntIdTransType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SDM_PROFILE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "enabled", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            1 => Some(FieldReference { name: "sdm_ant_id", num: 1, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            2 => Some(FieldReference { name: "sdm_cal_factor", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "%", ..FR_DEF }),
-            3 => Some(FieldReference { name: "odometer", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "speed_source", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            5 => Some(FieldReference { name: "sdm_ant_id_trans_type", num: 5, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            7 => Some(FieldReference { name: "odometer_rollover", num: 7, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SdmAntId, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::SdmCalFactor, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Odometer, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::SpeedSource, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::SdmAntIdTransType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::OdometerRollover, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::BIKE_PROFILE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "name", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "sport", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            2 => Some(FieldReference { name: "sub_sport", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            3 => Some(FieldReference { name: "odometer", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "bike_spd_ant_id", num: 4, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            5 => Some(FieldReference { name: "bike_cad_ant_id", num: 5, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            6 => Some(FieldReference { name: "bike_spdcad_ant_id", num: 6, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            7 => Some(FieldReference { name: "bike_power_ant_id", num: 7, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            8 => Some(FieldReference { name: "custom_wheelsize", num: 8, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m", ..FR_DEF }),
-            9 => Some(FieldReference { name: "auto_wheelsize", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m", ..FR_DEF }),
-            10 => Some(FieldReference { name: "bike_weight", num: 10, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "kg", ..FR_DEF }),
-            11 => Some(FieldReference { name: "power_cal_factor", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "%", ..FR_DEF }),
-            12 => Some(FieldReference { name: "auto_wheel_cal", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            13 => Some(FieldReference { name: "auto_power_zero", num: 13, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            14 => Some(FieldReference { name: "id", num: 14, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            15 => Some(FieldReference { name: "spd_enabled", num: 15, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            16 => Some(FieldReference { name: "cad_enabled", num: 16, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            17 => Some(FieldReference { name: "spdcad_enabled", num: 17, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            18 => Some(FieldReference { name: "power_enabled", num: 18, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            19 => Some(FieldReference { name: "crank_length", num: 19, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, offset: -110.0,units: "mm", ..FR_DEF }),
-            20 => Some(FieldReference { name: "enabled", num: 20, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            21 => Some(FieldReference { name: "bike_spd_ant_id_trans_type", num: 21, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            22 => Some(FieldReference { name: "bike_cad_ant_id_trans_type", num: 22, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            23 => Some(FieldReference { name: "bike_spdcad_ant_id_trans_type", num: 23, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            24 => Some(FieldReference { name: "bike_power_ant_id_trans_type", num: 24, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            37 => Some(FieldReference { name: "odometer_rollover", num: 37, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            38 => Some(FieldReference { name: "front_gear_num", num: 38, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            39 => Some(FieldReference { name: "front_gear", num: 39, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
-            40 => Some(FieldReference { name: "rear_gear_num", num: 40, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            41 => Some(FieldReference { name: "rear_gear", num: 41, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
-            44 => Some(FieldReference { name: "shimano_di2_enabled", num: 44, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Odometer, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::BikeSpdAntId, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::BikeCadAntId, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::BikeSpdcadAntId, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::BikePowerAntId, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::CustomWheelsize, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::AutoWheelsize, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::BikeWeight, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Kilogram, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::PowerCalFactor, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::AutoWheelCal, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::AutoPowerZero, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::Id, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::SpdEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::CadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::SpdcadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::PowerEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::CrankLength, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, offset: -110.0,units: Unit::Millimeter, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::BikeSpdAntIdTransType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::BikeCadAntIdTransType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::BikeSpdcadAntIdTransType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::BikePowerAntIdTransType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::OdometerRollover, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            38 => Some(FieldReference { name: Name::FrontGearNum, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::FrontGear, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::RearGearNum, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::RearGear, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
+            44 => Some(FieldReference { name: Name::ShimanoDi2Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CONNECTIVITY => { match field_num {
-            0 => Some(FieldReference { name: "bluetooth_enabled", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            1 => Some(FieldReference { name: "bluetooth_le_enabled", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            2 => Some(FieldReference { name: "ant_enabled", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            3 => Some(FieldReference { name: "name", num: 3, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            4 => Some(FieldReference { name: "live_tracking_enabled", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            5 => Some(FieldReference { name: "weather_conditions_enabled", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            6 => Some(FieldReference { name: "weather_alerts_enabled", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            7 => Some(FieldReference { name: "auto_activity_upload_enabled", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            8 => Some(FieldReference { name: "course_download_enabled", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            9 => Some(FieldReference { name: "workout_download_enabled", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            10 => Some(FieldReference { name: "gps_ephemeris_download_enabled", num: 10, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            11 => Some(FieldReference { name: "incident_detection_enabled", num: 11, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            12 => Some(FieldReference { name: "grouptrack_enabled", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::BluetoothEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::BluetoothLeEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::AntEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::LiveTrackingEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::WeatherConditionsEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::WeatherAlertsEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::AutoActivityUploadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::CourseDownloadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::WorkoutDownloadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::GpsEphemerisDownloadEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::IncidentDetectionEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::GrouptrackEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WATCHFACE_SETTINGS => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "mode", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::WatchfaceMode, ..FR_DEF }),
-            1 => Some(FieldReference { name: "layout", num: 1, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, sub_fields: &[
-                    SubField { name: "digital_layout", base_type: FitBaseType::BYTE, profile_type: ProfileType::DigitalWatchfaceLayout, maps: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Mode, base_type: FitBaseType::ENUM, profile_type: ProfileType::WatchfaceMode, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Layout, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, sub_fields: &[
+                    SubField { name: Name::DigitalLayout, base_type: FitBaseType::BYTE, profile_type: ProfileType::DigitalWatchfaceLayout, maps: &[
                         SubFieldMap { ref_field_num: 0 /* mode */, ref_field_value: 0 /* digital */ },
                     ], ..SF_DEF },
-                    SubField { name: "analog_layout", base_type: FitBaseType::BYTE, profile_type: ProfileType::AnalogWatchfaceLayout, maps: &[
+                    SubField { name: Name::AnalogLayout, base_type: FitBaseType::BYTE, profile_type: ProfileType::AnalogWatchfaceLayout, maps: &[
                         SubFieldMap { ref_field_num: 0 /* mode */, ref_field_value: 1 /* analog */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
            _ => None,
         }},
         MesgNum::OHR_SETTINGS => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "enabled", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Switch, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Switch, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TIME_IN_ZONE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "reference_mesg", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
-            1 => Some(FieldReference { name: "reference_index", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            2 => Some(FieldReference { name: "time_in_hr_zone", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            3 => Some(FieldReference { name: "time_in_speed_zone", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            4 => Some(FieldReference { name: "time_in_cadence_zone", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "time_in_power_zone", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            6 => Some(FieldReference { name: "hr_zone_high_boundary", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "bpm", ..FR_DEF }),
-            7 => Some(FieldReference { name: "speed_zone_high_boundary", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            8 => Some(FieldReference { name: "cadence_zone_high_boundary", num: 8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            9 => Some(FieldReference { name: "power_zone_high_boundary", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            10 => Some(FieldReference { name: "hr_calc_type", num: 10, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrZoneCalc, ..FR_DEF }),
-            11 => Some(FieldReference { name: "max_heart_rate", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            12 => Some(FieldReference { name: "resting_heart_rate", num: 12, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            13 => Some(FieldReference { name: "threshold_heart_rate", num: 13, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            14 => Some(FieldReference { name: "pwr_calc_type", num: 14, base_type: FitBaseType::ENUM, profile_type: ProfileType::PwrZoneCalc, ..FR_DEF }),
-            15 => Some(FieldReference { name: "functional_threshold_power", num: 15, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ReferenceMesg, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ReferenceIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::TimeInHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::TimeInSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TimeInCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::TimeInPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::HrZoneHighBoundary, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::SpeedZoneHighBoundary, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::CadenceZoneHighBoundary, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::PowerZoneHighBoundary, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::HrCalcType, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrZoneCalc, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::RestingHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::ThresholdHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::PwrCalcType, base_type: FitBaseType::ENUM, profile_type: ProfileType::PwrZoneCalc, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::FunctionalThresholdPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ZONES_TARGET => { match field_num {
-            1 => Some(FieldReference { name: "max_heart_rate", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "threshold_heart_rate", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            3 => Some(FieldReference { name: "functional_threshold_power", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            5 => Some(FieldReference { name: "hr_calc_type", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrZoneCalc, ..FR_DEF }),
-            7 => Some(FieldReference { name: "pwr_calc_type", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::PwrZoneCalc, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::ThresholdHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::FunctionalThresholdPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::HrCalcType, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrZoneCalc, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::PwrCalcType, base_type: FitBaseType::ENUM, profile_type: ProfileType::PwrZoneCalc, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SPORT => { match field_num {
-            0 => Some(FieldReference { name: "sport", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            1 => Some(FieldReference { name: "sub_sport", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            3 => Some(FieldReference { name: "name", num: 3, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HR_ZONE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "high_bpm", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            2 => Some(FieldReference { name: "name", num: 2, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::HighBpm, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SPEED_ZONE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "high_value", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "name", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::HighValue, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CADENCE_ZONE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "high_value", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", ..FR_DEF }),
-            1 => Some(FieldReference { name: "name", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::HighValue, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::POWER_ZONE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "high_value", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            2 => Some(FieldReference { name: "name", num: 2, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::HighValue, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MET_ZONE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "high_bpm", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "calories", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "kcal / min", ..FR_DEF }),
-            3 => Some(FieldReference { name: "fat_calories", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, units: "kcal / min", ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::HighBpm, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Calories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::KilocaloriesPerMinute, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::FatCalories, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, units: Unit::KilocaloriesPerMinute, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TRAINING_SETTINGS => { match field_num {
-            31 => Some(FieldReference { name: "target_distance", num: 31, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            32 => Some(FieldReference { name: "target_speed", num: 32, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            33 => Some(FieldReference { name: "target_time", num: 33, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            153 => Some(FieldReference { name: "precise_target_speed", num: 153, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000000.0, units: "m/s", ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::TargetDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::TargetSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::TargetTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            153 => Some(FieldReference { name: Name::PreciseTargetSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DIVE_SETTINGS => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "name", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "model", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::TissueModelType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "gf_low", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            3 => Some(FieldReference { name: "gf_high", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            4 => Some(FieldReference { name: "water_type", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::WaterType, ..FR_DEF }),
-            5 => Some(FieldReference { name: "water_density", num: 5, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kg/m^3", ..FR_DEF }),
-            6 => Some(FieldReference { name: "po2_warn", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "percent", ..FR_DEF }),
-            7 => Some(FieldReference { name: "po2_critical", num: 7, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "percent", ..FR_DEF }),
-            8 => Some(FieldReference { name: "po2_deco", num: 8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "percent", ..FR_DEF }),
-            9 => Some(FieldReference { name: "safety_stop_enabled", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            10 => Some(FieldReference { name: "bottom_depth", num: 10, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
-            11 => Some(FieldReference { name: "bottom_time", num: 11, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            12 => Some(FieldReference { name: "apnea_countdown_enabled", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            13 => Some(FieldReference { name: "apnea_countdown_time", num: 13, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            14 => Some(FieldReference { name: "backlight_mode", num: 14, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveBacklightMode, ..FR_DEF }),
-            15 => Some(FieldReference { name: "backlight_brightness", num: 15, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            16 => Some(FieldReference { name: "backlight_timeout", num: 16, base_type: FitBaseType::UINT8, profile_type: ProfileType::BacklightTimeout, ..FR_DEF }),
-            17 => Some(FieldReference { name: "repeat_dive_interval", num: 17, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            18 => Some(FieldReference { name: "safety_stop_time", num: 18, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            19 => Some(FieldReference { name: "heart_rate_source_type", num: 19, base_type: FitBaseType::ENUM, profile_type: ProfileType::SourceType, ..FR_DEF }),
-            20 => Some(FieldReference { name: "heart_rate_source", num: 20, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, sub_fields: &[
-                    SubField { name: "heart_rate_antplus_device_type", base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Model, base_type: FitBaseType::ENUM, profile_type: ProfileType::TissueModelType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::GfLow, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::GfHigh, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::WaterType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WaterType, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::WaterDensity, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KilogramsPerCubicMeter, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Po2Warn, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Po2Critical, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Po2Deco, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::SafetyStopEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::BottomDepth, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::BottomTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::ApneaCountdownEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::ApneaCountdownTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::BacklightMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveBacklightMode, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::BacklightBrightness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::BacklightTimeout, base_type: FitBaseType::UINT8, profile_type: ProfileType::BacklightTimeout, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::RepeatDiveInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::SafetyStopTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::HeartRateSourceType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SourceType, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::HeartRateSource, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, sub_fields: &[
+                    SubField { name: Name::HeartRateAntplusDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 19 /* heart_rate_source_type */, ref_field_value: 1 /* antplus */ },
                     ], ..SF_DEF },
-                    SubField { name: "heart_rate_local_device_type", base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
+                    SubField { name: Name::HeartRateLocalDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 19 /* heart_rate_source_type */, ref_field_value: 5 /* local */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            21 => Some(FieldReference { name: "travel_gas", num: 21, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            22 => Some(FieldReference { name: "ccr_low_setpoint_switch_mode", num: 22, base_type: FitBaseType::ENUM, profile_type: ProfileType::CcrSetpointSwitchMode, ..FR_DEF }),
-            23 => Some(FieldReference { name: "ccr_low_setpoint", num: 23, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "percent", ..FR_DEF }),
-            24 => Some(FieldReference { name: "ccr_low_setpoint_depth", num: 24, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            25 => Some(FieldReference { name: "ccr_high_setpoint_switch_mode", num: 25, base_type: FitBaseType::ENUM, profile_type: ProfileType::CcrSetpointSwitchMode, ..FR_DEF }),
-            26 => Some(FieldReference { name: "ccr_high_setpoint", num: 26, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "percent", ..FR_DEF }),
-            27 => Some(FieldReference { name: "ccr_high_setpoint_depth", num: 27, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            29 => Some(FieldReference { name: "gas_consumption_display", num: 29, base_type: FitBaseType::ENUM, profile_type: ProfileType::GasConsumptionRateType, ..FR_DEF }),
-            30 => Some(FieldReference { name: "up_key_enabled", num: 30, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            35 => Some(FieldReference { name: "dive_sounds", num: 35, base_type: FitBaseType::ENUM, profile_type: ProfileType::Tone, ..FR_DEF }),
-            36 => Some(FieldReference { name: "last_stop_multiple", num: 36, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
-            37 => Some(FieldReference { name: "no_fly_time_mode", num: 37, base_type: FitBaseType::ENUM, profile_type: ProfileType::NoFlyTimeMode, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::TravelGas, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::CcrLowSetpointSwitchMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::CcrSetpointSwitchMode, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::CcrLowSetpoint, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::CcrLowSetpointDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::CcrHighSetpointSwitchMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::CcrSetpointSwitchMode, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::CcrHighSetpoint, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::CcrHighSetpointDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::GasConsumptionDisplay, base_type: FitBaseType::ENUM, profile_type: ProfileType::GasConsumptionRateType, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::UpKeyEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            35 => Some(FieldReference { name: Name::DiveSounds, base_type: FitBaseType::ENUM, profile_type: ProfileType::Tone, ..FR_DEF }),
+            36 => Some(FieldReference { name: Name::LastStopMultiple, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::NoFlyTimeMode, base_type: FitBaseType::ENUM, profile_type: ProfileType::NoFlyTimeMode, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DIVE_ALARM => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "depth", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            1 => Some(FieldReference { name: "time", num: 1, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "s", ..FR_DEF }),
-            2 => Some(FieldReference { name: "enabled", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            3 => Some(FieldReference { name: "alarm_type", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveAlarmType, ..FR_DEF }),
-            4 => Some(FieldReference { name: "sound", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Tone, ..FR_DEF }),
-            5 => Some(FieldReference { name: "dive_types", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, array: true /* [N] */, ..FR_DEF }),
-            6 => Some(FieldReference { name: "id", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            7 => Some(FieldReference { name: "popup_enabled", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            8 => Some(FieldReference { name: "trigger_on_descent", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            9 => Some(FieldReference { name: "trigger_on_ascent", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            10 => Some(FieldReference { name: "repeating", num: 10, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            11 => Some(FieldReference { name: "speed", num: 11, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "mps", ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Depth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Time, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Second, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::AlarmType, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveAlarmType, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Sound, base_type: FitBaseType::ENUM, profile_type: ProfileType::Tone, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::DiveTypes, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, array: true /* [N] */, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Id, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::PopupEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::TriggerOnDescent, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::TriggerOnAscent, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Repeating, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::Speed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DIVE_APNEA_ALARM => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "depth", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            1 => Some(FieldReference { name: "time", num: 1, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "s", ..FR_DEF }),
-            2 => Some(FieldReference { name: "enabled", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            3 => Some(FieldReference { name: "alarm_type", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveAlarmType, ..FR_DEF }),
-            4 => Some(FieldReference { name: "sound", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Tone, ..FR_DEF }),
-            5 => Some(FieldReference { name: "dive_types", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, array: true /* [N] */, ..FR_DEF }),
-            6 => Some(FieldReference { name: "id", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            7 => Some(FieldReference { name: "popup_enabled", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            8 => Some(FieldReference { name: "trigger_on_descent", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            9 => Some(FieldReference { name: "trigger_on_ascent", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            10 => Some(FieldReference { name: "repeating", num: 10, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            11 => Some(FieldReference { name: "speed", num: 11, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "mps", ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Depth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Time, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Second, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::AlarmType, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveAlarmType, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Sound, base_type: FitBaseType::ENUM, profile_type: ProfileType::Tone, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::DiveTypes, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, array: true /* [N] */, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Id, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::PopupEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::TriggerOnDescent, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::TriggerOnAscent, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Repeating, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::Speed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DIVE_GAS => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "helium_content", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            1 => Some(FieldReference { name: "oxygen_content", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            2 => Some(FieldReference { name: "status", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveGasStatus, ..FR_DEF }),
-            3 => Some(FieldReference { name: "mode", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveGasMode, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::HeliumContent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::OxygenContent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Status, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveGasStatus, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Mode, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveGasMode, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::GOAL => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "sport", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            1 => Some(FieldReference { name: "sub_sport", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            2 => Some(FieldReference { name: "start_date", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            3 => Some(FieldReference { name: "end_date", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            4 => Some(FieldReference { name: "type", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Goal, ..FR_DEF }),
-            5 => Some(FieldReference { name: "value", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            6 => Some(FieldReference { name: "repeat", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            7 => Some(FieldReference { name: "target_value", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            8 => Some(FieldReference { name: "recurrence", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::GoalRecurrence, ..FR_DEF }),
-            9 => Some(FieldReference { name: "recurrence_value", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            10 => Some(FieldReference { name: "enabled", num: 10, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            11 => Some(FieldReference { name: "source", num: 11, base_type: FitBaseType::ENUM, profile_type: ProfileType::GoalSource, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::StartDate, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::EndDate, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::Goal, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Value, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Repeat, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::TargetValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Recurrence, base_type: FitBaseType::ENUM, profile_type: ProfileType::GoalRecurrence, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::RecurrenceValue, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::Source, base_type: FitBaseType::ENUM, profile_type: ProfileType::GoalSource, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ACTIVITY => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "total_timer_time", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "num_sessions", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            2 => Some(FieldReference { name: "type", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Activity, ..FR_DEF }),
-            3 => Some(FieldReference { name: "event", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
-            4 => Some(FieldReference { name: "event_type", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
-            5 => Some(FieldReference { name: "local_timestamp", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
-            6 => Some(FieldReference { name: "event_group", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::NumSessions, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::Activity, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Event, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::EventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::LocalTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SESSION => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "event", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
-            1 => Some(FieldReference { name: "event_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "start_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            3 => Some(FieldReference { name: "start_position_lat", num: 3, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            4 => Some(FieldReference { name: "start_position_long", num: 4, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            5 => Some(FieldReference { name: "sport", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            6 => Some(FieldReference { name: "sub_sport", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            7 => Some(FieldReference { name: "total_elapsed_time", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            8 => Some(FieldReference { name: "total_timer_time", num: 8, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            9 => Some(FieldReference { name: "total_distance", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            10 => Some(FieldReference { name: "total_cycles", num: 10, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "cycles", sub_fields: &[
-                    SubField { name: "total_strides", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "strides", maps: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Event, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::EventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::StartPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::StartPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::TotalElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 11 /* walking */ },
                     ], ..SF_DEF },
-                    SubField { name: "total_strokes", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "strokes", maps: &[
+                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            11 => Some(FieldReference { name: "total_calories", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            13 => Some(FieldReference { name: "total_fat_calories", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            14 => Some(FieldReference { name: "avg_speed", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", components: &[
+            11 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::TotalFatCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, components: &[
                     Component { field_num: 124 /* enhanced_avg_speed */, scale: 1000.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            15 => Some(FieldReference { name: "max_speed", num: 15, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", components: &[
+            15 => Some(FieldReference { name: Name::MaxSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, components: &[
                     Component { field_num: 125 /* enhanced_max_speed */, scale: 1000.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            16 => Some(FieldReference { name: "avg_heart_rate", num: 16, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            17 => Some(FieldReference { name: "max_heart_rate", num: 17, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            18 => Some(FieldReference { name: "avg_cadence", num: 18, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", sub_fields: &[
-                    SubField { name: "avg_running_cadence", base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "strides/min", maps: &[
+            16 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            19 => Some(FieldReference { name: "max_cadence", num: 19, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", sub_fields: &[
-                    SubField { name: "max_running_cadence", base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "strides/min", maps: &[
+            19 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            20 => Some(FieldReference { name: "avg_power", num: 20, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            21 => Some(FieldReference { name: "max_power", num: 21, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            22 => Some(FieldReference { name: "total_ascent", num: 22, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            23 => Some(FieldReference { name: "total_descent", num: 23, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            24 => Some(FieldReference { name: "total_training_effect", num: 24, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
-            25 => Some(FieldReference { name: "first_lap_index", num: 25, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            26 => Some(FieldReference { name: "num_laps", num: 26, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            27 => Some(FieldReference { name: "event_group", num: 27, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            28 => Some(FieldReference { name: "trigger", num: 28, base_type: FitBaseType::ENUM, profile_type: ProfileType::SessionTrigger, ..FR_DEF }),
-            29 => Some(FieldReference { name: "nec_lat", num: 29, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            30 => Some(FieldReference { name: "nec_long", num: 30, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            31 => Some(FieldReference { name: "swc_lat", num: 31, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            32 => Some(FieldReference { name: "swc_long", num: 32, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            33 => Some(FieldReference { name: "num_lengths", num: 33, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "lengths", ..FR_DEF }),
-            34 => Some(FieldReference { name: "normalized_power", num: 34, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            35 => Some(FieldReference { name: "training_stress_score", num: 35, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "tss", ..FR_DEF }),
-            36 => Some(FieldReference { name: "intensity_factor", num: 36, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "if", ..FR_DEF }),
-            37 => Some(FieldReference { name: "left_right_balance", num: 37, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
-            38 => Some(FieldReference { name: "end_position_lat", num: 38, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            39 => Some(FieldReference { name: "end_position_long", num: 39, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            41 => Some(FieldReference { name: "avg_stroke_count", num: 41, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 10.0, units: "strokes/lap", ..FR_DEF }),
-            42 => Some(FieldReference { name: "avg_stroke_distance", num: 42, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m", ..FR_DEF }),
-            43 => Some(FieldReference { name: "swim_stroke", num: 43, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, units: "swim_stroke", ..FR_DEF }),
-            44 => Some(FieldReference { name: "pool_length", num: 44, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m", ..FR_DEF }),
-            45 => Some(FieldReference { name: "threshold_power", num: 45, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            46 => Some(FieldReference { name: "pool_length_unit", num: 46, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            47 => Some(FieldReference { name: "num_active_lengths", num: 47, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "lengths", ..FR_DEF }),
-            48 => Some(FieldReference { name: "total_work", num: 48, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "J", ..FR_DEF }),
-            49 => Some(FieldReference { name: "avg_altitude", num: 49, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            20 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::MaxPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::TotalAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::TotalDescent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::TotalTrainingEffect, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::FirstLapIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::NumLaps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::Trigger, base_type: FitBaseType::ENUM, profile_type: ProfileType::SessionTrigger, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::NecLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::NecLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::SwcLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::SwcLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::NumLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
+            34 => Some(FieldReference { name: Name::NormalizedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            35 => Some(FieldReference { name: Name::TrainingStressScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::TrainingStressScore, ..FR_DEF }),
+            36 => Some(FieldReference { name: Name::IntensityFactor, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::IntensityFactor, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
+            38 => Some(FieldReference { name: Name::EndPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::EndPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::AvgStrokeCount, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 10.0, units: Unit::StrokePerLap, ..FR_DEF }),
+            42 => Some(FieldReference { name: Name::AvgStrokeDistance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            43 => Some(FieldReference { name: Name::SwimStroke, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, units: Unit::SwimStroke, ..FR_DEF }),
+            44 => Some(FieldReference { name: Name::PoolLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            45 => Some(FieldReference { name: Name::ThresholdPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            46 => Some(FieldReference { name: Name::PoolLengthUnit, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::NumActiveLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
+            48 => Some(FieldReference { name: Name::TotalWork, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Joule, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::AvgAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 126 /* enhanced_avg_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            50 => Some(FieldReference { name: "max_altitude", num: 50, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            50 => Some(FieldReference { name: Name::MaxAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 128 /* enhanced_max_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            51 => Some(FieldReference { name: "gps_accuracy", num: 51, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "m", ..FR_DEF }),
-            52 => Some(FieldReference { name: "avg_grade", num: 52, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            53 => Some(FieldReference { name: "avg_pos_grade", num: 53, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            54 => Some(FieldReference { name: "avg_neg_grade", num: 54, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            55 => Some(FieldReference { name: "max_pos_grade", num: 55, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            56 => Some(FieldReference { name: "max_neg_grade", num: 56, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            57 => Some(FieldReference { name: "avg_temperature", num: 57, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            58 => Some(FieldReference { name: "max_temperature", num: 58, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            59 => Some(FieldReference { name: "total_moving_time", num: 59, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            60 => Some(FieldReference { name: "avg_pos_vertical_speed", num: 60, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            61 => Some(FieldReference { name: "avg_neg_vertical_speed", num: 61, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            62 => Some(FieldReference { name: "max_pos_vertical_speed", num: 62, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            63 => Some(FieldReference { name: "max_neg_vertical_speed", num: 63, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            64 => Some(FieldReference { name: "min_heart_rate", num: 64, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            65 => Some(FieldReference { name: "time_in_hr_zone", num: 65, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            66 => Some(FieldReference { name: "time_in_speed_zone", num: 66, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            67 => Some(FieldReference { name: "time_in_cadence_zone", num: 67, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            68 => Some(FieldReference { name: "time_in_power_zone", num: 68, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            69 => Some(FieldReference { name: "avg_lap_time", num: 69, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            70 => Some(FieldReference { name: "best_lap_index", num: 70, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            71 => Some(FieldReference { name: "min_altitude", num: 71, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            51 => Some(FieldReference { name: Name::GpsAccuracy, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Meter, ..FR_DEF }),
+            52 => Some(FieldReference { name: Name::AvgGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            53 => Some(FieldReference { name: Name::AvgPosGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            54 => Some(FieldReference { name: Name::AvgNegGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::MaxPosGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::MaxNegGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            57 => Some(FieldReference { name: Name::AvgTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::MaxTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            60 => Some(FieldReference { name: Name::AvgPosVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            61 => Some(FieldReference { name: Name::AvgNegVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            62 => Some(FieldReference { name: Name::MaxPosVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            63 => Some(FieldReference { name: Name::MaxNegVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            64 => Some(FieldReference { name: Name::MinHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            65 => Some(FieldReference { name: Name::TimeInHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            66 => Some(FieldReference { name: Name::TimeInSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            67 => Some(FieldReference { name: Name::TimeInCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            68 => Some(FieldReference { name: Name::TimeInPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            69 => Some(FieldReference { name: Name::AvgLapTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            70 => Some(FieldReference { name: Name::BestLapIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            71 => Some(FieldReference { name: Name::MinAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 127 /* enhanced_min_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            78 => Some(FieldReference { name: "active_time", num: 78, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            82 => Some(FieldReference { name: "player_score", num: 82, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            83 => Some(FieldReference { name: "opponent_score", num: 83, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            84 => Some(FieldReference { name: "opponent_name", num: 84, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            85 => Some(FieldReference { name: "stroke_count", num: 85, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            86 => Some(FieldReference { name: "zone_count", num: 86, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            87 => Some(FieldReference { name: "max_ball_speed", num: 87, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m/s", ..FR_DEF }),
-            88 => Some(FieldReference { name: "avg_ball_speed", num: 88, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m/s", ..FR_DEF }),
-            89 => Some(FieldReference { name: "avg_vertical_oscillation", num: 89, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mm", ..FR_DEF }),
-            90 => Some(FieldReference { name: "avg_stance_time_percent", num: 90, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            91 => Some(FieldReference { name: "avg_stance_time", num: 91, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "ms", ..FR_DEF }),
-            92 => Some(FieldReference { name: "avg_fractional_cadence", num: 92, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            93 => Some(FieldReference { name: "max_fractional_cadence", num: 93, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            94 => Some(FieldReference { name: "total_fractional_cycles", num: 94, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "cycles", ..FR_DEF }),
-            95 => Some(FieldReference { name: "avg_total_hemoglobin_conc", num: 95, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            96 => Some(FieldReference { name: "min_total_hemoglobin_conc", num: 96, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            97 => Some(FieldReference { name: "max_total_hemoglobin_conc", num: 97, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            98 => Some(FieldReference { name: "avg_saturated_hemoglobin_percent", num: 98, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: "%", ..FR_DEF }),
-            99 => Some(FieldReference { name: "min_saturated_hemoglobin_percent", num: 99, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: "%", ..FR_DEF }),
-            100 => Some(FieldReference { name: "max_saturated_hemoglobin_percent", num: 100, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: "%", ..FR_DEF }),
-            101 => Some(FieldReference { name: "avg_left_torque_effectiveness", num: 101, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            102 => Some(FieldReference { name: "avg_right_torque_effectiveness", num: 102, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            103 => Some(FieldReference { name: "avg_left_pedal_smoothness", num: 103, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            104 => Some(FieldReference { name: "avg_right_pedal_smoothness", num: 104, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            105 => Some(FieldReference { name: "avg_combined_pedal_smoothness", num: 105, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            110 => Some(FieldReference { name: "sport_profile_name", num: 110, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            111 => Some(FieldReference { name: "sport_index", num: 111, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            112 => Some(FieldReference { name: "time_standing", num: 112, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            113 => Some(FieldReference { name: "stand_count", num: 113, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            114 => Some(FieldReference { name: "avg_left_pco", num: 114, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            115 => Some(FieldReference { name: "avg_right_pco", num: 115, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            116 => Some(FieldReference { name: "avg_left_power_phase", num: 116, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            117 => Some(FieldReference { name: "avg_left_power_phase_peak", num: 117, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            118 => Some(FieldReference { name: "avg_right_power_phase", num: 118, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            119 => Some(FieldReference { name: "avg_right_power_phase_peak", num: 119, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            120 => Some(FieldReference { name: "avg_power_position", num: 120, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            121 => Some(FieldReference { name: "max_power_position", num: 121, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            122 => Some(FieldReference { name: "avg_cadence_position", num: 122, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            123 => Some(FieldReference { name: "max_cadence_position", num: 123, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            124 => Some(FieldReference { name: "enhanced_avg_speed", num: 124, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            125 => Some(FieldReference { name: "enhanced_max_speed", num: 125, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            126 => Some(FieldReference { name: "enhanced_avg_altitude", num: 126, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            127 => Some(FieldReference { name: "enhanced_min_altitude", num: 127, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            128 => Some(FieldReference { name: "enhanced_max_altitude", num: 128, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            129 => Some(FieldReference { name: "avg_lev_motor_power", num: 129, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            130 => Some(FieldReference { name: "max_lev_motor_power", num: 130, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            131 => Some(FieldReference { name: "lev_battery_consumption", num: 131, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            132 => Some(FieldReference { name: "avg_vertical_ratio", num: 132, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            133 => Some(FieldReference { name: "avg_stance_time_balance", num: 133, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            134 => Some(FieldReference { name: "avg_step_length", num: 134, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mm", ..FR_DEF }),
-            137 => Some(FieldReference { name: "total_anaerobic_training_effect", num: 137, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
-            139 => Some(FieldReference { name: "avg_vam", num: 139, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            140 => Some(FieldReference { name: "avg_depth", num: 140, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            141 => Some(FieldReference { name: "max_depth", num: 141, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            142 => Some(FieldReference { name: "surface_interval", num: 142, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            143 => Some(FieldReference { name: "start_cns", num: 143, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            144 => Some(FieldReference { name: "end_cns", num: 144, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            145 => Some(FieldReference { name: "start_n2", num: 145, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "percent", ..FR_DEF }),
-            146 => Some(FieldReference { name: "end_n2", num: 146, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "percent", ..FR_DEF }),
-            147 => Some(FieldReference { name: "avg_respiration_rate", num: 147, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            78 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            82 => Some(FieldReference { name: Name::PlayerScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            83 => Some(FieldReference { name: Name::OpponentScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            84 => Some(FieldReference { name: Name::OpponentName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            85 => Some(FieldReference { name: Name::StrokeCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            86 => Some(FieldReference { name: Name::ZoneCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            87 => Some(FieldReference { name: Name::MaxBallSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            88 => Some(FieldReference { name: Name::AvgBallSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            89 => Some(FieldReference { name: Name::AvgVerticalOscillation, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            90 => Some(FieldReference { name: Name::AvgStanceTimePercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            91 => Some(FieldReference { name: Name::AvgStanceTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millisecond, ..FR_DEF }),
+            92 => Some(FieldReference { name: Name::AvgFractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            93 => Some(FieldReference { name: Name::MaxFractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            94 => Some(FieldReference { name: Name::TotalFractionalCycles, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::Cycle, ..FR_DEF }),
+            95 => Some(FieldReference { name: Name::AvgTotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            96 => Some(FieldReference { name: Name::MinTotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            97 => Some(FieldReference { name: Name::MaxTotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            98 => Some(FieldReference { name: Name::AvgSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            99 => Some(FieldReference { name: Name::MinSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            100 => Some(FieldReference { name: Name::MaxSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            101 => Some(FieldReference { name: Name::AvgLeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            102 => Some(FieldReference { name: Name::AvgRightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            103 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            104 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            105 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            110 => Some(FieldReference { name: Name::SportProfileName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            111 => Some(FieldReference { name: Name::SportIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            112 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            113 => Some(FieldReference { name: Name::StandCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            114 => Some(FieldReference { name: Name::AvgLeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            115 => Some(FieldReference { name: Name::AvgRightPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            116 => Some(FieldReference { name: Name::AvgLeftPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            117 => Some(FieldReference { name: Name::AvgLeftPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            118 => Some(FieldReference { name: Name::AvgRightPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            119 => Some(FieldReference { name: Name::AvgRightPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            120 => Some(FieldReference { name: Name::AvgPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            121 => Some(FieldReference { name: Name::MaxPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            122 => Some(FieldReference { name: Name::AvgCadencePosition, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            123 => Some(FieldReference { name: Name::MaxCadencePosition, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            124 => Some(FieldReference { name: Name::EnhancedAvgSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            125 => Some(FieldReference { name: Name::EnhancedMaxSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            126 => Some(FieldReference { name: Name::EnhancedAvgAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            127 => Some(FieldReference { name: Name::EnhancedMinAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            128 => Some(FieldReference { name: Name::EnhancedMaxAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            129 => Some(FieldReference { name: Name::AvgLevMotorPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            130 => Some(FieldReference { name: Name::MaxLevMotorPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            131 => Some(FieldReference { name: Name::LevBatteryConsumption, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            132 => Some(FieldReference { name: Name::AvgVerticalRatio, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            133 => Some(FieldReference { name: Name::AvgStanceTimeBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            134 => Some(FieldReference { name: Name::AvgStepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            137 => Some(FieldReference { name: Name::TotalAnaerobicTrainingEffect, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
+            139 => Some(FieldReference { name: Name::AvgVam, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            140 => Some(FieldReference { name: Name::AvgDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            141 => Some(FieldReference { name: Name::MaxDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            142 => Some(FieldReference { name: Name::SurfaceInterval, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            143 => Some(FieldReference { name: Name::StartCns, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            144 => Some(FieldReference { name: Name::EndCns, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            145 => Some(FieldReference { name: Name::StartN2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Percent, ..FR_DEF }),
+            146 => Some(FieldReference { name: Name::EndN2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Percent, ..FR_DEF }),
+            147 => Some(FieldReference { name: Name::AvgRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 169 /* enhanced_avg_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            148 => Some(FieldReference { name: "max_respiration_rate", num: 148, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            148 => Some(FieldReference { name: Name::MaxRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 170 /* enhanced_max_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            149 => Some(FieldReference { name: "min_respiration_rate", num: 149, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            149 => Some(FieldReference { name: Name::MinRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 180 /* enhanced_min_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            150 => Some(FieldReference { name: "min_temperature", num: 150, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            155 => Some(FieldReference { name: "o2_toxicity", num: 155, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "OTUs", ..FR_DEF }),
-            156 => Some(FieldReference { name: "dive_number", num: 156, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            168 => Some(FieldReference { name: "training_load_peak", num: 168, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 65536.0, ..FR_DEF }),
-            169 => Some(FieldReference { name: "enhanced_avg_respiration_rate", num: 169, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            170 => Some(FieldReference { name: "enhanced_max_respiration_rate", num: 170, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            180 => Some(FieldReference { name: "enhanced_min_respiration_rate", num: 180, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
-            181 => Some(FieldReference { name: "total_grit", num: 181, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kGrit", ..FR_DEF }),
-            182 => Some(FieldReference { name: "total_flow", num: 182, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "Flow", ..FR_DEF }),
-            183 => Some(FieldReference { name: "jump_count", num: 183, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            186 => Some(FieldReference { name: "avg_grit", num: 186, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kGrit", ..FR_DEF }),
-            187 => Some(FieldReference { name: "avg_flow", num: 187, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "Flow", ..FR_DEF }),
-            192 => Some(FieldReference { name: "workout_feel", num: 192, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            193 => Some(FieldReference { name: "workout_rpe", num: 193, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            194 => Some(FieldReference { name: "avg_spo2", num: 194, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            195 => Some(FieldReference { name: "avg_stress", num: 195, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            196 => Some(FieldReference { name: "metabolic_calories", num: 196, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            197 => Some(FieldReference { name: "sdrr_hrv", num: 197, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "mS", ..FR_DEF }),
-            198 => Some(FieldReference { name: "rmssd_hrv", num: 198, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "mS", ..FR_DEF }),
-            199 => Some(FieldReference { name: "total_fractional_ascent", num: 199, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            200 => Some(FieldReference { name: "total_fractional_descent", num: 200, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            208 => Some(FieldReference { name: "avg_core_temperature", num: 208, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
-            209 => Some(FieldReference { name: "min_core_temperature", num: 209, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
-            210 => Some(FieldReference { name: "max_core_temperature", num: 210, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
+            150 => Some(FieldReference { name: Name::MinTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            155 => Some(FieldReference { name: Name::O2Toxicity, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::OxygenToxicityUnit, ..FR_DEF }),
+            156 => Some(FieldReference { name: Name::DiveNumber, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            168 => Some(FieldReference { name: Name::TrainingLoadPeak, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 65536.0, ..FR_DEF }),
+            169 => Some(FieldReference { name: Name::EnhancedAvgRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            170 => Some(FieldReference { name: Name::EnhancedMaxRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            180 => Some(FieldReference { name: Name::EnhancedMinRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
+            181 => Some(FieldReference { name: Name::TotalGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            182 => Some(FieldReference { name: Name::TotalFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            183 => Some(FieldReference { name: Name::JumpCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            186 => Some(FieldReference { name: Name::AvgGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            187 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            192 => Some(FieldReference { name: Name::WorkoutFeel, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            193 => Some(FieldReference { name: Name::WorkoutRpe, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            194 => Some(FieldReference { name: Name::AvgSpo2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            195 => Some(FieldReference { name: Name::AvgStress, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            196 => Some(FieldReference { name: Name::MetabolicCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            197 => Some(FieldReference { name: Name::SdrrHrv, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Millisecond, ..FR_DEF }),
+            198 => Some(FieldReference { name: Name::RmssdHrv, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Millisecond, ..FR_DEF }),
+            199 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            200 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            208 => Some(FieldReference { name: Name::AvgCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            209 => Some(FieldReference { name: Name::MinCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            210 => Some(FieldReference { name: Name::MaxCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::LAP => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "event", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
-            1 => Some(FieldReference { name: "event_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "start_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            3 => Some(FieldReference { name: "start_position_lat", num: 3, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            4 => Some(FieldReference { name: "start_position_long", num: 4, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            5 => Some(FieldReference { name: "end_position_lat", num: 5, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            6 => Some(FieldReference { name: "end_position_long", num: 6, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            7 => Some(FieldReference { name: "total_elapsed_time", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            8 => Some(FieldReference { name: "total_timer_time", num: 8, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            9 => Some(FieldReference { name: "total_distance", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            10 => Some(FieldReference { name: "total_cycles", num: 10, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "cycles", sub_fields: &[
-                    SubField { name: "total_strides", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "strides", maps: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Event, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::EventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::StartPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::StartPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::EndPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::EndPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::TotalElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 11 /* walking */ },
                     ], ..SF_DEF },
-                    SubField { name: "total_strokes", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "strokes", maps: &[
+                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            11 => Some(FieldReference { name: "total_calories", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            12 => Some(FieldReference { name: "total_fat_calories", num: 12, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            13 => Some(FieldReference { name: "avg_speed", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", components: &[
+            11 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::TotalFatCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, components: &[
                     Component { field_num: 110 /* enhanced_avg_speed */, scale: 1000.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            14 => Some(FieldReference { name: "max_speed", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", components: &[
+            14 => Some(FieldReference { name: Name::MaxSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, components: &[
                     Component { field_num: 111 /* enhanced_max_speed */, scale: 1000.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            15 => Some(FieldReference { name: "avg_heart_rate", num: 15, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            16 => Some(FieldReference { name: "max_heart_rate", num: 16, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            17 => Some(FieldReference { name: "avg_cadence", num: 17, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", sub_fields: &[
-                    SubField { name: "avg_running_cadence", base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "strides/min", maps: &[
+            15 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            18 => Some(FieldReference { name: "max_cadence", num: 18, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", sub_fields: &[
-                    SubField { name: "max_running_cadence", base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "strides/min", maps: &[
+            18 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            19 => Some(FieldReference { name: "avg_power", num: 19, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            20 => Some(FieldReference { name: "max_power", num: 20, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            21 => Some(FieldReference { name: "total_ascent", num: 21, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            22 => Some(FieldReference { name: "total_descent", num: 22, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            23 => Some(FieldReference { name: "intensity", num: 23, base_type: FitBaseType::ENUM, profile_type: ProfileType::Intensity, ..FR_DEF }),
-            24 => Some(FieldReference { name: "lap_trigger", num: 24, base_type: FitBaseType::ENUM, profile_type: ProfileType::LapTrigger, ..FR_DEF }),
-            25 => Some(FieldReference { name: "sport", num: 25, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            26 => Some(FieldReference { name: "event_group", num: 26, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            32 => Some(FieldReference { name: "num_lengths", num: 32, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "lengths", ..FR_DEF }),
-            33 => Some(FieldReference { name: "normalized_power", num: 33, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            34 => Some(FieldReference { name: "left_right_balance", num: 34, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
-            35 => Some(FieldReference { name: "first_length_index", num: 35, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            37 => Some(FieldReference { name: "avg_stroke_distance", num: 37, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m", ..FR_DEF }),
-            38 => Some(FieldReference { name: "swim_stroke", num: 38, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, ..FR_DEF }),
-            39 => Some(FieldReference { name: "sub_sport", num: 39, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            40 => Some(FieldReference { name: "num_active_lengths", num: 40, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "lengths", ..FR_DEF }),
-            41 => Some(FieldReference { name: "total_work", num: 41, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "J", ..FR_DEF }),
-            42 => Some(FieldReference { name: "avg_altitude", num: 42, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            19 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::MaxPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::TotalAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::TotalDescent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::Intensity, base_type: FitBaseType::ENUM, profile_type: ProfileType::Intensity, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::LapTrigger, base_type: FitBaseType::ENUM, profile_type: ProfileType::LapTrigger, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::NumLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::NormalizedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            34 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
+            35 => Some(FieldReference { name: Name::FirstLengthIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::AvgStrokeDistance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            38 => Some(FieldReference { name: Name::SwimStroke, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::NumActiveLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::TotalWork, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Joule, ..FR_DEF }),
+            42 => Some(FieldReference { name: Name::AvgAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 112 /* enhanced_avg_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            43 => Some(FieldReference { name: "max_altitude", num: 43, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            43 => Some(FieldReference { name: Name::MaxAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 114 /* enhanced_max_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            44 => Some(FieldReference { name: "gps_accuracy", num: 44, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "m", ..FR_DEF }),
-            45 => Some(FieldReference { name: "avg_grade", num: 45, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            46 => Some(FieldReference { name: "avg_pos_grade", num: 46, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            47 => Some(FieldReference { name: "avg_neg_grade", num: 47, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            48 => Some(FieldReference { name: "max_pos_grade", num: 48, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            49 => Some(FieldReference { name: "max_neg_grade", num: 49, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            50 => Some(FieldReference { name: "avg_temperature", num: 50, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            51 => Some(FieldReference { name: "max_temperature", num: 51, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            52 => Some(FieldReference { name: "total_moving_time", num: 52, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            53 => Some(FieldReference { name: "avg_pos_vertical_speed", num: 53, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            54 => Some(FieldReference { name: "avg_neg_vertical_speed", num: 54, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            55 => Some(FieldReference { name: "max_pos_vertical_speed", num: 55, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            56 => Some(FieldReference { name: "max_neg_vertical_speed", num: 56, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            57 => Some(FieldReference { name: "time_in_hr_zone", num: 57, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            58 => Some(FieldReference { name: "time_in_speed_zone", num: 58, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            59 => Some(FieldReference { name: "time_in_cadence_zone", num: 59, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            60 => Some(FieldReference { name: "time_in_power_zone", num: 60, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            61 => Some(FieldReference { name: "repetition_num", num: 61, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            62 => Some(FieldReference { name: "min_altitude", num: 62, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            44 => Some(FieldReference { name: Name::GpsAccuracy, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Meter, ..FR_DEF }),
+            45 => Some(FieldReference { name: Name::AvgGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            46 => Some(FieldReference { name: Name::AvgPosGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::AvgNegGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            48 => Some(FieldReference { name: Name::MaxPosGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::MaxNegGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            50 => Some(FieldReference { name: Name::AvgTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            51 => Some(FieldReference { name: Name::MaxTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            52 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            53 => Some(FieldReference { name: Name::AvgPosVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            54 => Some(FieldReference { name: Name::AvgNegVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::MaxPosVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::MaxNegVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            57 => Some(FieldReference { name: Name::TimeInHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::TimeInSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::TimeInCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            60 => Some(FieldReference { name: Name::TimeInPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            61 => Some(FieldReference { name: Name::RepetitionNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            62 => Some(FieldReference { name: Name::MinAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 113 /* enhanced_min_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            63 => Some(FieldReference { name: "min_heart_rate", num: 63, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            70 => Some(FieldReference { name: "active_time", num: 70, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            71 => Some(FieldReference { name: "wkt_step_index", num: 71, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            74 => Some(FieldReference { name: "opponent_score", num: 74, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            75 => Some(FieldReference { name: "stroke_count", num: 75, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            76 => Some(FieldReference { name: "zone_count", num: 76, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            77 => Some(FieldReference { name: "avg_vertical_oscillation", num: 77, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mm", ..FR_DEF }),
-            78 => Some(FieldReference { name: "avg_stance_time_percent", num: 78, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            79 => Some(FieldReference { name: "avg_stance_time", num: 79, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "ms", ..FR_DEF }),
-            80 => Some(FieldReference { name: "avg_fractional_cadence", num: 80, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            81 => Some(FieldReference { name: "max_fractional_cadence", num: 81, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            82 => Some(FieldReference { name: "total_fractional_cycles", num: 82, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "cycles", ..FR_DEF }),
-            83 => Some(FieldReference { name: "player_score", num: 83, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            84 => Some(FieldReference { name: "avg_total_hemoglobin_conc", num: 84, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            85 => Some(FieldReference { name: "min_total_hemoglobin_conc", num: 85, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            86 => Some(FieldReference { name: "max_total_hemoglobin_conc", num: 86, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            87 => Some(FieldReference { name: "avg_saturated_hemoglobin_percent", num: 87, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: "%", ..FR_DEF }),
-            88 => Some(FieldReference { name: "min_saturated_hemoglobin_percent", num: 88, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: "%", ..FR_DEF }),
-            89 => Some(FieldReference { name: "max_saturated_hemoglobin_percent", num: 89, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: "%", ..FR_DEF }),
-            91 => Some(FieldReference { name: "avg_left_torque_effectiveness", num: 91, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            92 => Some(FieldReference { name: "avg_right_torque_effectiveness", num: 92, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            93 => Some(FieldReference { name: "avg_left_pedal_smoothness", num: 93, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            94 => Some(FieldReference { name: "avg_right_pedal_smoothness", num: 94, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            95 => Some(FieldReference { name: "avg_combined_pedal_smoothness", num: 95, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            98 => Some(FieldReference { name: "time_standing", num: 98, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            99 => Some(FieldReference { name: "stand_count", num: 99, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            100 => Some(FieldReference { name: "avg_left_pco", num: 100, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            101 => Some(FieldReference { name: "avg_right_pco", num: 101, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            102 => Some(FieldReference { name: "avg_left_power_phase", num: 102, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            103 => Some(FieldReference { name: "avg_left_power_phase_peak", num: 103, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            104 => Some(FieldReference { name: "avg_right_power_phase", num: 104, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            105 => Some(FieldReference { name: "avg_right_power_phase_peak", num: 105, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            106 => Some(FieldReference { name: "avg_power_position", num: 106, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            107 => Some(FieldReference { name: "max_power_position", num: 107, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            108 => Some(FieldReference { name: "avg_cadence_position", num: 108, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            109 => Some(FieldReference { name: "max_cadence_position", num: 109, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            110 => Some(FieldReference { name: "enhanced_avg_speed", num: 110, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            111 => Some(FieldReference { name: "enhanced_max_speed", num: 111, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            112 => Some(FieldReference { name: "enhanced_avg_altitude", num: 112, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            113 => Some(FieldReference { name: "enhanced_min_altitude", num: 113, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            114 => Some(FieldReference { name: "enhanced_max_altitude", num: 114, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            115 => Some(FieldReference { name: "avg_lev_motor_power", num: 115, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            116 => Some(FieldReference { name: "max_lev_motor_power", num: 116, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            117 => Some(FieldReference { name: "lev_battery_consumption", num: 117, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            118 => Some(FieldReference { name: "avg_vertical_ratio", num: 118, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            119 => Some(FieldReference { name: "avg_stance_time_balance", num: 119, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            120 => Some(FieldReference { name: "avg_step_length", num: 120, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mm", ..FR_DEF }),
-            121 => Some(FieldReference { name: "avg_vam", num: 121, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            122 => Some(FieldReference { name: "avg_depth", num: 122, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            123 => Some(FieldReference { name: "max_depth", num: 123, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            124 => Some(FieldReference { name: "min_temperature", num: 124, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            136 => Some(FieldReference { name: "enhanced_avg_respiration_rate", num: 136, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            137 => Some(FieldReference { name: "enhanced_max_respiration_rate", num: 137, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            147 => Some(FieldReference { name: "avg_respiration_rate", num: 147, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            63 => Some(FieldReference { name: Name::MinHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            70 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            71 => Some(FieldReference { name: Name::WktStepIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            74 => Some(FieldReference { name: Name::OpponentScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            75 => Some(FieldReference { name: Name::StrokeCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            76 => Some(FieldReference { name: Name::ZoneCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            77 => Some(FieldReference { name: Name::AvgVerticalOscillation, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            78 => Some(FieldReference { name: Name::AvgStanceTimePercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            79 => Some(FieldReference { name: Name::AvgStanceTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millisecond, ..FR_DEF }),
+            80 => Some(FieldReference { name: Name::AvgFractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            81 => Some(FieldReference { name: Name::MaxFractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            82 => Some(FieldReference { name: Name::TotalFractionalCycles, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::Cycle, ..FR_DEF }),
+            83 => Some(FieldReference { name: Name::PlayerScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            84 => Some(FieldReference { name: Name::AvgTotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            85 => Some(FieldReference { name: Name::MinTotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            86 => Some(FieldReference { name: Name::MaxTotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            87 => Some(FieldReference { name: Name::AvgSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            88 => Some(FieldReference { name: Name::MinSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            89 => Some(FieldReference { name: Name::MaxSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            91 => Some(FieldReference { name: Name::AvgLeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            92 => Some(FieldReference { name: Name::AvgRightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            93 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            94 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            95 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            98 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            99 => Some(FieldReference { name: Name::StandCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            100 => Some(FieldReference { name: Name::AvgLeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            101 => Some(FieldReference { name: Name::AvgRightPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            102 => Some(FieldReference { name: Name::AvgLeftPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            103 => Some(FieldReference { name: Name::AvgLeftPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            104 => Some(FieldReference { name: Name::AvgRightPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            105 => Some(FieldReference { name: Name::AvgRightPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            106 => Some(FieldReference { name: Name::AvgPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            107 => Some(FieldReference { name: Name::MaxPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            108 => Some(FieldReference { name: Name::AvgCadencePosition, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            109 => Some(FieldReference { name: Name::MaxCadencePosition, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            110 => Some(FieldReference { name: Name::EnhancedAvgSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            111 => Some(FieldReference { name: Name::EnhancedMaxSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            112 => Some(FieldReference { name: Name::EnhancedAvgAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            113 => Some(FieldReference { name: Name::EnhancedMinAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            114 => Some(FieldReference { name: Name::EnhancedMaxAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            115 => Some(FieldReference { name: Name::AvgLevMotorPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            116 => Some(FieldReference { name: Name::MaxLevMotorPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            117 => Some(FieldReference { name: Name::LevBatteryConsumption, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            118 => Some(FieldReference { name: Name::AvgVerticalRatio, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            119 => Some(FieldReference { name: Name::AvgStanceTimeBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            120 => Some(FieldReference { name: Name::AvgStepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            121 => Some(FieldReference { name: Name::AvgVam, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            122 => Some(FieldReference { name: Name::AvgDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            123 => Some(FieldReference { name: Name::MaxDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            124 => Some(FieldReference { name: Name::MinTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            136 => Some(FieldReference { name: Name::EnhancedAvgRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            137 => Some(FieldReference { name: Name::EnhancedMaxRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            147 => Some(FieldReference { name: Name::AvgRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 136 /* enhanced_avg_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            148 => Some(FieldReference { name: "max_respiration_rate", num: 148, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            148 => Some(FieldReference { name: Name::MaxRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 137 /* enhanced_max_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            149 => Some(FieldReference { name: "total_grit", num: 149, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kGrit", ..FR_DEF }),
-            150 => Some(FieldReference { name: "total_flow", num: 150, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "Flow", ..FR_DEF }),
-            151 => Some(FieldReference { name: "jump_count", num: 151, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            153 => Some(FieldReference { name: "avg_grit", num: 153, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kGrit", ..FR_DEF }),
-            154 => Some(FieldReference { name: "avg_flow", num: 154, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "Flow", ..FR_DEF }),
-            156 => Some(FieldReference { name: "total_fractional_ascent", num: 156, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            157 => Some(FieldReference { name: "total_fractional_descent", num: 157, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            158 => Some(FieldReference { name: "avg_core_temperature", num: 158, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
-            159 => Some(FieldReference { name: "min_core_temperature", num: 159, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
-            160 => Some(FieldReference { name: "max_core_temperature", num: 160, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
+            149 => Some(FieldReference { name: Name::TotalGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            150 => Some(FieldReference { name: Name::TotalFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            151 => Some(FieldReference { name: Name::JumpCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            153 => Some(FieldReference { name: Name::AvgGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            154 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            156 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            157 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            158 => Some(FieldReference { name: Name::AvgCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            159 => Some(FieldReference { name: Name::MinCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            160 => Some(FieldReference { name: Name::MaxCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::LENGTH => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "event", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
-            1 => Some(FieldReference { name: "event_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "start_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            3 => Some(FieldReference { name: "total_elapsed_time", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            4 => Some(FieldReference { name: "total_timer_time", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "total_strokes", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "strokes", ..FR_DEF }),
-            6 => Some(FieldReference { name: "avg_speed", num: 6, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            7 => Some(FieldReference { name: "swim_stroke", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, units: "swim_stroke", ..FR_DEF }),
-            9 => Some(FieldReference { name: "avg_swimming_cadence", num: 9, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "strokes/min", ..FR_DEF }),
-            10 => Some(FieldReference { name: "event_group", num: 10, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            11 => Some(FieldReference { name: "total_calories", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            12 => Some(FieldReference { name: "length_type", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::LengthType, ..FR_DEF }),
-            18 => Some(FieldReference { name: "player_score", num: 18, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            19 => Some(FieldReference { name: "opponent_score", num: 19, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            20 => Some(FieldReference { name: "stroke_count", num: 20, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            21 => Some(FieldReference { name: "zone_count", num: 21, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            22 => Some(FieldReference { name: "enhanced_avg_respiration_rate", num: 22, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            23 => Some(FieldReference { name: "enhanced_max_respiration_rate", num: 23, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            24 => Some(FieldReference { name: "avg_respiration_rate", num: 24, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Event, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::EventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::TotalElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::TotalStrokes, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Stroke, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::SwimStroke, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, units: Unit::SwimStroke, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::LengthType, base_type: FitBaseType::ENUM, profile_type: ProfileType::LengthType, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::PlayerScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::OpponentScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::StrokeCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::ZoneCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::EnhancedAvgRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::EnhancedMaxRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::AvgRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 22 /* enhanced_avg_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            25 => Some(FieldReference { name: "max_respiration_rate", num: 25, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
+            25 => Some(FieldReference { name: Name::MaxRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 23 /* enhanced_max_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
            _ => None,
         }},
         MesgNum::RECORD => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "position_lat", num: 0, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            1 => Some(FieldReference { name: "position_long", num: 1, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            2 => Some(FieldReference { name: "altitude", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::PositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::PositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Altitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 78 /* enhanced_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "heart_rate", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            4 => Some(FieldReference { name: "cadence", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", ..FR_DEF }),
-            5 => Some(FieldReference { name: "distance", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, accumulate: true, scale: 100.0, units: "m", ..FR_DEF }),
-            6 => Some(FieldReference { name: "speed", num: 6, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", components: &[
+            3 => Some(FieldReference { name: Name::HeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Cadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, accumulate: true, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Speed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, components: &[
                     Component { field_num: 73 /* enhanced_speed */, scale: 1000.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            7 => Some(FieldReference { name: "power", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            8 => Some(FieldReference { name: "compressed_speed_distance", num: 8, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [3] */, units: "m/s,m", components: &[
+            7 => Some(FieldReference { name: Name::Power, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::CompressedSpeedDistance, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [3] */, units: Unit::MetersPerSecondAndMeter, components: &[
                     Component { field_num: 6 /* speed */, scale: 100.0, offset: 0.0, accumulate: false, bits: 12 },
                     Component { field_num: 5 /* distance */, scale: 16.0, offset: 0.0, accumulate: true, bits: 12 }
                 ], ..FR_DEF }),
-            9 => Some(FieldReference { name: "grade", num: 9, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            10 => Some(FieldReference { name: "resistance", num: 10, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            11 => Some(FieldReference { name: "time_from_course", num: 11, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            12 => Some(FieldReference { name: "cycle_length", num: 12, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            13 => Some(FieldReference { name: "temperature", num: 13, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            17 => Some(FieldReference { name: "speed_1s", num: 17, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 16.0, units: "m/s", ..FR_DEF }),
-            18 => Some(FieldReference { name: "cycles", num: 18, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, accumulate: true, units: "cycles", components: &[
+            9 => Some(FieldReference { name: Name::Grade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Resistance, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::TimeFromCourse, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::CycleLength, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::Temperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::Speed1S, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 16.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::Cycles, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, accumulate: true, units: Unit::Cycle, components: &[
                     Component { field_num: 19 /* total_cycles */, scale: 1.0, offset: 0.0, accumulate: true, bits: 8 }
                 ], ..FR_DEF }),
-            19 => Some(FieldReference { name: "total_cycles", num: 19, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, accumulate: true, units: "cycles", ..FR_DEF }),
-            28 => Some(FieldReference { name: "compressed_accumulated_power", num: 28, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, accumulate: true, units: "watts", components: &[
+            19 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, accumulate: true, units: Unit::Cycle, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::CompressedAccumulatedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, accumulate: true, units: Unit::Watt, components: &[
                     Component { field_num: 29 /* accumulated_power */, scale: 1.0, offset: 0.0, accumulate: true, bits: 16 }
                 ], ..FR_DEF }),
-            29 => Some(FieldReference { name: "accumulated_power", num: 29, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, accumulate: true, units: "watts", ..FR_DEF }),
-            30 => Some(FieldReference { name: "left_right_balance", num: 30, base_type: FitBaseType::UINT8, profile_type: ProfileType::LeftRightBalance, ..FR_DEF }),
-            31 => Some(FieldReference { name: "gps_accuracy", num: 31, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "m", ..FR_DEF }),
-            32 => Some(FieldReference { name: "vertical_speed", num: 32, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            33 => Some(FieldReference { name: "calories", num: 33, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            39 => Some(FieldReference { name: "vertical_oscillation", num: 39, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mm", ..FR_DEF }),
-            40 => Some(FieldReference { name: "stance_time_percent", num: 40, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            41 => Some(FieldReference { name: "stance_time", num: 41, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "ms", ..FR_DEF }),
-            42 => Some(FieldReference { name: "activity_type", num: 42, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
-            43 => Some(FieldReference { name: "left_torque_effectiveness", num: 43, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            44 => Some(FieldReference { name: "right_torque_effectiveness", num: 44, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            45 => Some(FieldReference { name: "left_pedal_smoothness", num: 45, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            46 => Some(FieldReference { name: "right_pedal_smoothness", num: 46, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            47 => Some(FieldReference { name: "combined_pedal_smoothness", num: 47, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            48 => Some(FieldReference { name: "time128", num: 48, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "s", ..FR_DEF }),
-            49 => Some(FieldReference { name: "stroke_type", num: 49, base_type: FitBaseType::ENUM, profile_type: ProfileType::StrokeType, ..FR_DEF }),
-            50 => Some(FieldReference { name: "zone", num: 50, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            51 => Some(FieldReference { name: "ball_speed", num: 51, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m/s", ..FR_DEF }),
-            52 => Some(FieldReference { name: "cadence256", num: 52, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 256.0, units: "rpm", ..FR_DEF }),
-            53 => Some(FieldReference { name: "fractional_cadence", num: 53, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            54 => Some(FieldReference { name: "total_hemoglobin_conc", num: 54, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            55 => Some(FieldReference { name: "total_hemoglobin_conc_min", num: 55, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            56 => Some(FieldReference { name: "total_hemoglobin_conc_max", num: 56, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "g/dL", ..FR_DEF }),
-            57 => Some(FieldReference { name: "saturated_hemoglobin_percent", num: 57, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "%", ..FR_DEF }),
-            58 => Some(FieldReference { name: "saturated_hemoglobin_percent_min", num: 58, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "%", ..FR_DEF }),
-            59 => Some(FieldReference { name: "saturated_hemoglobin_percent_max", num: 59, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "%", ..FR_DEF }),
-            62 => Some(FieldReference { name: "device_index", num: 62, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
-            67 => Some(FieldReference { name: "left_pco", num: 67, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            68 => Some(FieldReference { name: "right_pco", num: 68, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            69 => Some(FieldReference { name: "left_power_phase", num: 69, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            70 => Some(FieldReference { name: "left_power_phase_peak", num: 70, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            71 => Some(FieldReference { name: "right_power_phase", num: 71, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            72 => Some(FieldReference { name: "right_power_phase_peak", num: 72, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            73 => Some(FieldReference { name: "enhanced_speed", num: 73, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            78 => Some(FieldReference { name: "enhanced_altitude", num: 78, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            81 => Some(FieldReference { name: "battery_soc", num: 81, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            82 => Some(FieldReference { name: "motor_power", num: 82, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            83 => Some(FieldReference { name: "vertical_ratio", num: 83, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            84 => Some(FieldReference { name: "stance_time_balance", num: 84, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "percent", ..FR_DEF }),
-            85 => Some(FieldReference { name: "step_length", num: 85, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mm", ..FR_DEF }),
-            87 => Some(FieldReference { name: "cycle_length16", num: 87, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m", ..FR_DEF }),
-            91 => Some(FieldReference { name: "absolute_pressure", num: 91, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "Pa", ..FR_DEF }),
-            92 => Some(FieldReference { name: "depth", num: 92, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            93 => Some(FieldReference { name: "next_stop_depth", num: 93, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            94 => Some(FieldReference { name: "next_stop_time", num: 94, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            95 => Some(FieldReference { name: "time_to_surface", num: 95, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            96 => Some(FieldReference { name: "ndl_time", num: 96, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            97 => Some(FieldReference { name: "cns_load", num: 97, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            98 => Some(FieldReference { name: "n2_load", num: 98, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "percent", ..FR_DEF }),
-            99 => Some(FieldReference { name: "respiration_rate", num: 99, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "s", components: &[
+            29 => Some(FieldReference { name: Name::AccumulatedPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, accumulate: true, units: Unit::Watt, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT8, profile_type: ProfileType::LeftRightBalance, ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::GpsAccuracy, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Meter, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::VerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::Calories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::VerticalOscillation, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::StanceTimePercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::StanceTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millisecond, ..FR_DEF }),
+            42 => Some(FieldReference { name: Name::ActivityType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
+            43 => Some(FieldReference { name: Name::LeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            44 => Some(FieldReference { name: Name::RightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            45 => Some(FieldReference { name: Name::LeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            46 => Some(FieldReference { name: Name::RightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::CombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            48 => Some(FieldReference { name: Name::Time128, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::Second, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::StrokeType, base_type: FitBaseType::ENUM, profile_type: ProfileType::StrokeType, ..FR_DEF }),
+            50 => Some(FieldReference { name: Name::Zone, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            51 => Some(FieldReference { name: Name::BallSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            52 => Some(FieldReference { name: Name::Cadence256, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 256.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            53 => Some(FieldReference { name: Name::FractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            54 => Some(FieldReference { name: Name::TotalHemoglobinConc, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::TotalHemoglobinConcMin, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::TotalHemoglobinConcMax, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::GramPerDeciliter, ..FR_DEF }),
+            57 => Some(FieldReference { name: Name::SaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::SaturatedHemoglobinPercentMin, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::SaturatedHemoglobinPercentMax, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            62 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
+            67 => Some(FieldReference { name: Name::LeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            68 => Some(FieldReference { name: Name::RightPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            69 => Some(FieldReference { name: Name::LeftPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            70 => Some(FieldReference { name: Name::LeftPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            71 => Some(FieldReference { name: Name::RightPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            72 => Some(FieldReference { name: Name::RightPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            73 => Some(FieldReference { name: Name::EnhancedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            78 => Some(FieldReference { name: Name::EnhancedAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            81 => Some(FieldReference { name: Name::BatterySoc, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            82 => Some(FieldReference { name: Name::MotorPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            83 => Some(FieldReference { name: Name::VerticalRatio, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            84 => Some(FieldReference { name: Name::StanceTimeBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            85 => Some(FieldReference { name: Name::StepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            87 => Some(FieldReference { name: Name::CycleLength16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            91 => Some(FieldReference { name: Name::AbsolutePressure, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Pascal, ..FR_DEF }),
+            92 => Some(FieldReference { name: Name::Depth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            93 => Some(FieldReference { name: Name::NextStopDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            94 => Some(FieldReference { name: Name::NextStopTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            95 => Some(FieldReference { name: Name::TimeToSurface, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            96 => Some(FieldReference { name: Name::NdlTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            97 => Some(FieldReference { name: Name::CnsLoad, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            98 => Some(FieldReference { name: Name::N2Load, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Percent, ..FR_DEF }),
+            99 => Some(FieldReference { name: Name::RespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Second, components: &[
                     Component { field_num: 108 /* enhanced_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            108 => Some(FieldReference { name: "enhanced_respiration_rate", num: 108, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "Breaths/min", ..FR_DEF }),
-            114 => Some(FieldReference { name: "grit", num: 114, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
-            115 => Some(FieldReference { name: "flow", num: 115, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
-            116 => Some(FieldReference { name: "current_stress", num: 116, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
-            117 => Some(FieldReference { name: "ebike_travel_range", num: 117, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "km", ..FR_DEF }),
-            118 => Some(FieldReference { name: "ebike_battery_level", num: 118, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            119 => Some(FieldReference { name: "ebike_assist_mode", num: 119, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "depends on sensor", ..FR_DEF }),
-            120 => Some(FieldReference { name: "ebike_assist_level_percent", num: 120, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            123 => Some(FieldReference { name: "air_time_remaining", num: 123, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            124 => Some(FieldReference { name: "pressure_sac", num: 124, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "bar/min", ..FR_DEF }),
-            125 => Some(FieldReference { name: "volume_sac", num: 125, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "L/min", ..FR_DEF }),
-            126 => Some(FieldReference { name: "rmv", num: 126, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "L/min", ..FR_DEF }),
-            127 => Some(FieldReference { name: "ascent_rate", num: 127, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            129 => Some(FieldReference { name: "po2", num: 129, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "percent", ..FR_DEF }),
-            139 => Some(FieldReference { name: "core_temperature", num: 139, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "C", ..FR_DEF }),
+            108 => Some(FieldReference { name: Name::EnhancedRespirationRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
+            114 => Some(FieldReference { name: Name::Grit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            115 => Some(FieldReference { name: Name::Flow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            116 => Some(FieldReference { name: Name::CurrentStress, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
+            117 => Some(FieldReference { name: Name::EbikeTravelRange, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilometer, ..FR_DEF }),
+            118 => Some(FieldReference { name: Name::EbikeBatteryLevel, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            119 => Some(FieldReference { name: Name::EbikeAssistMode, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::DependsOnSensor, ..FR_DEF }),
+            120 => Some(FieldReference { name: Name::EbikeAssistLevelPercent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            123 => Some(FieldReference { name: Name::AirTimeRemaining, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            124 => Some(FieldReference { name: Name::PressureSac, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BarPerMinute, ..FR_DEF }),
+            125 => Some(FieldReference { name: Name::VolumeSac, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::LiterPerMinute, ..FR_DEF }),
+            126 => Some(FieldReference { name: Name::Rmv, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::LiterPerMinute, ..FR_DEF }),
+            127 => Some(FieldReference { name: Name::AscentRate, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            129 => Some(FieldReference { name: Name::Po2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            139 => Some(FieldReference { name: Name::CoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::EVENT => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "event", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
-            1 => Some(FieldReference { name: "event_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "data16", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Event, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::EventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Data16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, components: &[
                     Component { field_num: 3 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "data", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "timer_trigger", base_type: FitBaseType::UINT32, profile_type: ProfileType::TimerTrigger, maps: &[
+            3 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::TimerTrigger, base_type: FitBaseType::UINT32, profile_type: ProfileType::TimerTrigger, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 0 /* timer */ },
                     ], ..SF_DEF },
-                    SubField { name: "course_point_index", base_type: FitBaseType::UINT32, profile_type: ProfileType::MessageIndex, maps: &[
+                    SubField { name: Name::CoursePointIndex, base_type: FitBaseType::UINT32, profile_type: ProfileType::MessageIndex, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 10 /* course_point */ },
                     ], ..SF_DEF },
-                    SubField { name: "battery_level", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: "V", maps: &[
+                    SubField { name: Name::BatteryLevel, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Voltage, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 11 /* battery */ },
                     ], ..SF_DEF },
-                    SubField { name: "virtual_partner_speed", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", maps: &[
+                    SubField { name: Name::VirtualPartnerSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 12 /* virtual_partner_pace */ },
                     ], ..SF_DEF },
-                    SubField { name: "hr_high_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: "bpm", maps: &[
+                    SubField { name: Name::HrHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 13 /* hr_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "hr_low_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: "bpm", maps: &[
+                    SubField { name: Name::HrLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 14 /* hr_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "speed_high_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", maps: &[
+                    SubField { name: Name::SpeedHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 15 /* speed_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "speed_low_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", maps: &[
+                    SubField { name: Name::SpeedLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 16 /* speed_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "cad_high_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: "rpm", maps: &[
+                    SubField { name: Name::CadHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 17 /* cad_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "cad_low_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: "rpm", maps: &[
+                    SubField { name: Name::CadLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 18 /* cad_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "power_high_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: "watts", maps: &[
+                    SubField { name: Name::PowerHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Watt, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 19 /* power_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "power_low_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: "watts", maps: &[
+                    SubField { name: Name::PowerLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Watt, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 20 /* power_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "time_duration_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", maps: &[
+                    SubField { name: Name::TimeDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 23 /* time_duration_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "distance_duration_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", maps: &[
+                    SubField { name: Name::DistanceDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 24 /* distance_duration_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "calorie_duration_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "calories", maps: &[
+                    SubField { name: Name::CalorieDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 25 /* calorie_duration_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "fitness_equipment_state", base_type: FitBaseType::UINT32, profile_type: ProfileType::FitnessEquipmentState, maps: &[
+                    SubField { name: Name::FitnessEquipmentState, base_type: FitBaseType::UINT32, profile_type: ProfileType::FitnessEquipmentState, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 27 /* fitness_equipment */ },
                     ], ..SF_DEF },
-                    SubField { name: "sport_point", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
+                    SubField { name: Name::SportPoint, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
                         Component { field_num: 7 /* score */, scale: 1.0, offset: 0.0, accumulate: false, bits: 16 },
                         Component { field_num: 8 /* opponent_score */, scale: 1.0, offset: 0.0, accumulate: false, bits: 16 }
                     ], maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 33 /* sport_point */ },
                     ], ..SF_DEF },
-                    SubField { name: "gear_change_data", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
+                    SubField { name: Name::GearChangeData, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
                         Component { field_num: 11 /* rear_gear_num */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 12 /* rear_gear */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 9 /* front_gear_num */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
@@ -1015,19 +1092,19 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 42 /* front_gear_change */ },
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 43 /* rear_gear_change */ },
                     ], ..SF_DEF },
-                    SubField { name: "rider_position", base_type: FitBaseType::UINT32, profile_type: ProfileType::RiderPositionType, maps: &[
+                    SubField { name: Name::RiderPosition, base_type: FitBaseType::UINT32, profile_type: ProfileType::RiderPositionType, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 44 /* rider_position_change */ },
                     ], ..SF_DEF },
-                    SubField { name: "comm_timeout", base_type: FitBaseType::UINT32, profile_type: ProfileType::CommTimeoutType, maps: &[
+                    SubField { name: Name::CommTimeout, base_type: FitBaseType::UINT32, profile_type: ProfileType::CommTimeoutType, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 47 /* comm_timeout */ },
                     ], ..SF_DEF },
-                    SubField { name: "dive_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::DiveAlert, maps: &[
+                    SubField { name: Name::DiveAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::DiveAlert, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 56 /* dive_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: "auto_activity_detect_duration", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: "min", maps: &[
+                    SubField { name: Name::AutoActivityDetectDuration, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Minute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 54 /* auto_activity_detect */ },
                     ], ..SF_DEF },
-                    SubField { name: "radar_threat_alert", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
+                    SubField { name: Name::RadarThreatAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
                         Component { field_num: 21 /* radar_threat_level_max */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 22 /* radar_threat_count */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 23 /* radar_threat_avg_approach_speed */, scale: 10.0, offset: 0.0, accumulate: false, bits: 8 },
@@ -1036,608 +1113,608 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 75 /* radar_threat_alert */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            4 => Some(FieldReference { name: "event_group", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            7 => Some(FieldReference { name: "score", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            8 => Some(FieldReference { name: "opponent_score", num: 8, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            9 => Some(FieldReference { name: "front_gear_num", num: 9, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            10 => Some(FieldReference { name: "front_gear", num: 10, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            11 => Some(FieldReference { name: "rear_gear_num", num: 11, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            12 => Some(FieldReference { name: "rear_gear", num: 12, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            13 => Some(FieldReference { name: "device_index", num: 13, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
-            14 => Some(FieldReference { name: "activity_type", num: 14, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
-            15 => Some(FieldReference { name: "start_timestamp", num: 15, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", sub_fields: &[
-                    SubField { name: "auto_activity_detect_start_timestamp", base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", maps: &[
+            4 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Score, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::OpponentScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::FrontGearNum, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::FrontGear, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::RearGearNum, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::RearGear, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::ActivityType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::StartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, sub_fields: &[
+                    SubField { name: Name::AutoActivityDetectStartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 54 /* auto_activity_detect */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            21 => Some(FieldReference { name: "radar_threat_level_max", num: 21, base_type: FitBaseType::ENUM, profile_type: ProfileType::RadarThreatLevelType, ..FR_DEF }),
-            22 => Some(FieldReference { name: "radar_threat_count", num: 22, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            23 => Some(FieldReference { name: "radar_threat_avg_approach_speed", num: 23, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, units: "m/s", ..FR_DEF }),
-            24 => Some(FieldReference { name: "radar_threat_max_approach_speed", num: 24, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, units: "m/s", ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::RadarThreatLevelMax, base_type: FitBaseType::ENUM, profile_type: ProfileType::RadarThreatLevelType, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::RadarThreatCount, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::RadarThreatAvgApproachSpeed, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::RadarThreatMaxApproachSpeed, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DEVICE_INFO => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "device_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "device_type", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, sub_fields: &[
-                    SubField { name: "ble_device_type", base_type: FitBaseType::UINT8, profile_type: ProfileType::BleDeviceType, maps: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::DeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, sub_fields: &[
+                    SubField { name: Name::BleDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::BleDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 3 /* bluetooth_low_energy */ },
                     ], ..SF_DEF },
-                    SubField { name: "antplus_device_type", base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
+                    SubField { name: Name::AntplusDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 1 /* antplus */ },
                     ], ..SF_DEF },
-                    SubField { name: "ant_device_type", base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, maps: &[
+                    SubField { name: Name::AntDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 0 /* ant */ },
                     ], ..SF_DEF },
-                    SubField { name: "local_device_type", base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
+                    SubField { name: Name::LocalDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 5 /* local */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "manufacturer", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            3 => Some(FieldReference { name: "serial_number", num: 3, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
-            4 => Some(FieldReference { name: "product", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: "favero_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+            2 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::SerialNumber, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
+                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: "garmin_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 89 /* tacx */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            5 => Some(FieldReference { name: "software_version", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
-            6 => Some(FieldReference { name: "hardware_version", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            7 => Some(FieldReference { name: "cum_operating_time", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            10 => Some(FieldReference { name: "battery_voltage", num: 10, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 256.0, units: "V", ..FR_DEF }),
-            11 => Some(FieldReference { name: "battery_status", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::BatteryStatus, ..FR_DEF }),
-            18 => Some(FieldReference { name: "sensor_position", num: 18, base_type: FitBaseType::ENUM, profile_type: ProfileType::BodyLocation, ..FR_DEF }),
-            19 => Some(FieldReference { name: "descriptor", num: 19, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            20 => Some(FieldReference { name: "ant_transmission_type", num: 20, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            21 => Some(FieldReference { name: "ant_device_number", num: 21, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            22 => Some(FieldReference { name: "ant_network", num: 22, base_type: FitBaseType::ENUM, profile_type: ProfileType::AntNetwork, ..FR_DEF }),
-            25 => Some(FieldReference { name: "source_type", num: 25, base_type: FitBaseType::ENUM, profile_type: ProfileType::SourceType, ..FR_DEF }),
-            27 => Some(FieldReference { name: "product_name", num: 27, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            32 => Some(FieldReference { name: "battery_level", num: 32, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "%", ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::SoftwareVersion, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::HardwareVersion, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::CumOperatingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::BatteryVoltage, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 256.0, units: Unit::Voltage, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::BatteryStatus, base_type: FitBaseType::UINT8, profile_type: ProfileType::BatteryStatus, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::SensorPosition, base_type: FitBaseType::ENUM, profile_type: ProfileType::BodyLocation, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::Descriptor, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::AntTransmissionType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::AntDeviceNumber, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::AntNetwork, base_type: FitBaseType::ENUM, profile_type: ProfileType::AntNetwork, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::SourceType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SourceType, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::ProductName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::BatteryLevel, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DEVICE_AUX_BATTERY_INFO => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "device_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "battery_voltage", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 256.0, units: "V", ..FR_DEF }),
-            2 => Some(FieldReference { name: "battery_status", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::BatteryStatus, ..FR_DEF }),
-            3 => Some(FieldReference { name: "battery_identifier", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::BatteryVoltage, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 256.0, units: Unit::Voltage, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::BatteryStatus, base_type: FitBaseType::UINT8, profile_type: ProfileType::BatteryStatus, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::BatteryIdentifier, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TRAINING_FILE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
-            1 => Some(FieldReference { name: "manufacturer", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            2 => Some(FieldReference { name: "product", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: "favero_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
+                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: "garmin_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 89 /* tacx */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "serial_number", num: 3, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
-            4 => Some(FieldReference { name: "time_created", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::SerialNumber, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TimeCreated, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WEATHER_CONDITIONS => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "weather_report", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherReport, ..FR_DEF }),
-            1 => Some(FieldReference { name: "temperature", num: 1, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            2 => Some(FieldReference { name: "condition", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherStatus, ..FR_DEF }),
-            3 => Some(FieldReference { name: "wind_direction", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "degrees", ..FR_DEF }),
-            4 => Some(FieldReference { name: "wind_speed", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "precipitation_probability", num: 5, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            6 => Some(FieldReference { name: "temperature_feels_like", num: 6, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            7 => Some(FieldReference { name: "relative_humidity", num: 7, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            8 => Some(FieldReference { name: "location", num: 8, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            9 => Some(FieldReference { name: "observed_at_time", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            10 => Some(FieldReference { name: "observed_location_lat", num: 10, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            11 => Some(FieldReference { name: "observed_location_long", num: 11, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            12 => Some(FieldReference { name: "day_of_week", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::DayOfWeek, ..FR_DEF }),
-            13 => Some(FieldReference { name: "high_temperature", num: 13, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            14 => Some(FieldReference { name: "low_temperature", num: 14, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::WeatherReport, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherReport, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Temperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Condition, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherStatus, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::WindDirection, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Degree, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::WindSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::PrecipitationProbability, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::TemperatureFeelsLike, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::RelativeHumidity, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Location, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::ObservedAtTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::ObservedLocationLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::ObservedLocationLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::DayOfWeek, base_type: FitBaseType::ENUM, profile_type: ProfileType::DayOfWeek, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::HighTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::LowTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WEATHER_ALERT => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "report_id", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "issue_time", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            2 => Some(FieldReference { name: "expire_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            3 => Some(FieldReference { name: "severity", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherSeverity, ..FR_DEF }),
-            4 => Some(FieldReference { name: "type", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherSevereType, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ReportId, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::IssueTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::ExpireTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Severity, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherSeverity, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherSevereType, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::GPS_METADATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "position_lat", num: 1, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            2 => Some(FieldReference { name: "position_long", num: 2, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            3 => Some(FieldReference { name: "enhanced_altitude", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "enhanced_speed", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "heading", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "degrees", ..FR_DEF }),
-            6 => Some(FieldReference { name: "utc_timestamp", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            7 => Some(FieldReference { name: "velocity", num: 7, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [3] */, scale: 100.0, units: "m/s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::PositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::PositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::EnhancedAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::EnhancedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Heading, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Degree, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::UtcTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Velocity, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [3] */, scale: 100.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CAMERA_EVENT => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "camera_event_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::CameraEventType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "camera_file_uuid", num: 2, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            3 => Some(FieldReference { name: "camera_orientation", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::CameraOrientationType, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::CameraEventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::CameraEventType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::CameraFileUuid, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::CameraOrientation, base_type: FitBaseType::ENUM, profile_type: ProfileType::CameraOrientationType, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::GYROSCOPE_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sample_time_offset", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "gyro_x", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            3 => Some(FieldReference { name: "gyro_y", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            4 => Some(FieldReference { name: "gyro_z", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            5 => Some(FieldReference { name: "calibrated_gyro_x", num: 5, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "deg/s", ..FR_DEF }),
-            6 => Some(FieldReference { name: "calibrated_gyro_y", num: 6, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "deg/s", ..FR_DEF }),
-            7 => Some(FieldReference { name: "calibrated_gyro_z", num: 7, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "deg/s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SampleTimeOffset, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::GyroX, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::GyroY, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::GyroZ, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::CalibratedGyroX, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::DegreesPerSecond, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::CalibratedGyroY, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::DegreesPerSecond, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::CalibratedGyroZ, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::DegreesPerSecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ACCELEROMETER_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sample_time_offset", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "accel_x", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            3 => Some(FieldReference { name: "accel_y", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            4 => Some(FieldReference { name: "accel_z", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            5 => Some(FieldReference { name: "calibrated_accel_x", num: 5, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "g", ..FR_DEF }),
-            6 => Some(FieldReference { name: "calibrated_accel_y", num: 6, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "g", ..FR_DEF }),
-            7 => Some(FieldReference { name: "calibrated_accel_z", num: 7, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "g", ..FR_DEF }),
-            8 => Some(FieldReference { name: "compressed_calibrated_accel_x", num: 8, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, units: "mG", ..FR_DEF }),
-            9 => Some(FieldReference { name: "compressed_calibrated_accel_y", num: 9, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, units: "mG", ..FR_DEF }),
-            10 => Some(FieldReference { name: "compressed_calibrated_accel_z", num: 10, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, units: "mG", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SampleTimeOffset, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::AccelX, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::AccelY, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::AccelZ, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::CalibratedAccelX, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::Gee, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::CalibratedAccelY, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::Gee, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::CalibratedAccelZ, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::Gee, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::CompressedCalibratedAccelX, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, units: Unit::Milligee, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::CompressedCalibratedAccelY, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, units: Unit::Milligee, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::CompressedCalibratedAccelZ, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, units: Unit::Milligee, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MAGNETOMETER_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sample_time_offset", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "mag_x", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            3 => Some(FieldReference { name: "mag_y", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            4 => Some(FieldReference { name: "mag_z", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "counts", ..FR_DEF }),
-            5 => Some(FieldReference { name: "calibrated_mag_x", num: 5, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "G", ..FR_DEF }),
-            6 => Some(FieldReference { name: "calibrated_mag_y", num: 6, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "G", ..FR_DEF }),
-            7 => Some(FieldReference { name: "calibrated_mag_z", num: 7, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: "G", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SampleTimeOffset, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::MagX, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::MagY, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::MagZ, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::CalibratedMagX, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::Gauss, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::CalibratedMagY, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::Gauss, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::CalibratedMagZ, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, array: true /* [N] */, units: Unit::Gauss, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::BAROMETER_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sample_time_offset", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "baro_pres", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: "Pa", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SampleTimeOffset, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::BaroPres, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: Unit::Pascal, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::THREE_D_SENSOR_CALIBRATION => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "sensor_type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SensorType, ..FR_DEF }),
-            1 => Some(FieldReference { name: "calibration_factor", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "accel_cal_factor", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "g", maps: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SensorType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SensorType, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::CalibrationFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::AccelCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Gee, maps: &[
                         SubFieldMap { ref_field_num: 0 /* sensor_type */, ref_field_value: 0 /* accelerometer */ },
                     ], ..SF_DEF },
-                    SubField { name: "gyro_cal_factor", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "deg/s", maps: &[
+                    SubField { name: Name::GyroCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::DegreesPerSecond, maps: &[
                         SubFieldMap { ref_field_num: 0 /* sensor_type */, ref_field_value: 1 /* gyroscope */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "calibration_divisor", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "counts", ..FR_DEF }),
-            3 => Some(FieldReference { name: "level_shift", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            4 => Some(FieldReference { name: "offset_cal", num: 4, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, array: true /* [3] */, ..FR_DEF }),
-            5 => Some(FieldReference { name: "orientation_matrix", num: 5, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, array: true /* [9] */, scale: 65535.0, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::CalibrationDivisor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Count, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::LevelShift, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::OffsetCal, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, array: true /* [3] */, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::OrientationMatrix, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, array: true /* [9] */, scale: 65535.0, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ONE_D_SENSOR_CALIBRATION => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "sensor_type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SensorType, ..FR_DEF }),
-            1 => Some(FieldReference { name: "calibration_factor", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "baro_cal_factor", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "Pa", maps: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SensorType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SensorType, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::CalibrationFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::BaroCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Pascal, maps: &[
                         SubFieldMap { ref_field_num: 0 /* sensor_type */, ref_field_value: 3 /* barometer */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "calibration_divisor", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "counts", ..FR_DEF }),
-            3 => Some(FieldReference { name: "level_shift", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            4 => Some(FieldReference { name: "offset_cal", num: 4, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::CalibrationDivisor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Count, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::LevelShift, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::OffsetCal, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::VIDEO_FRAME => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "frame_number", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::FrameNumber, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::OBDII_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "time_offset", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "pid", num: 2, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, ..FR_DEF }),
-            3 => Some(FieldReference { name: "raw_data", num: 3, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
-            4 => Some(FieldReference { name: "pid_data_size", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
-            5 => Some(FieldReference { name: "system_time", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, ..FR_DEF }),
-            6 => Some(FieldReference { name: "start_timestamp", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            7 => Some(FieldReference { name: "start_timestamp_ms", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::TimeOffset, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Pid, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::RawData, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::PidDataSize, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::SystemTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::StartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::StartTimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::NMEA_SENTENCE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sentence", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Sentence, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::AVIATION_ATTITUDE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "system_time", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "pitch", num: 2, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 10430.38, units: "radians", ..FR_DEF }),
-            3 => Some(FieldReference { name: "roll", num: 3, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 10430.38, units: "radians", ..FR_DEF }),
-            4 => Some(FieldReference { name: "accel_lateral", num: 4, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 100.0, units: "m/s^2", ..FR_DEF }),
-            5 => Some(FieldReference { name: "accel_normal", num: 5, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 100.0, units: "m/s^2", ..FR_DEF }),
-            6 => Some(FieldReference { name: "turn_rate", num: 6, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1024.0, units: "radians/second", ..FR_DEF }),
-            7 => Some(FieldReference { name: "stage", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::AttitudeStage, array: true /* [N] */, ..FR_DEF }),
-            8 => Some(FieldReference { name: "attitude_stage_complete", num: 8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "%", ..FR_DEF }),
-            9 => Some(FieldReference { name: "track", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10430.38, units: "radians", ..FR_DEF }),
-            10 => Some(FieldReference { name: "validity", num: 10, base_type: FitBaseType::UINT16, profile_type: ProfileType::AttitudeValidity, array: true /* [N] */, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SystemTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Pitch, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 10430.38, units: Unit::Radian, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Roll, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 10430.38, units: Unit::Radian, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::AccelLateral, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 100.0, units: Unit::MetersPerSecondSquared, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::AccelNormal, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 100.0, units: Unit::MetersPerSecondSquared, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::TurnRate, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1024.0, units: Unit::RadiansPerSecond, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Stage, base_type: FitBaseType::ENUM, profile_type: ProfileType::AttitudeStage, array: true /* [N] */, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::AttitudeStageComplete, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::Percent, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::Track, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10430.38, units: Unit::Radian, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Validity, base_type: FitBaseType::UINT16, profile_type: ProfileType::AttitudeValidity, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::VIDEO => { match field_num {
-            0 => Some(FieldReference { name: "url", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "hosting_provider", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            2 => Some(FieldReference { name: "duration", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "ms", ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Url, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::HostingProvider, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Duration, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Millisecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::VIDEO_TITLE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "message_count", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            1 => Some(FieldReference { name: "text", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::MessageCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Text, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::VIDEO_DESCRIPTION => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "message_count", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            1 => Some(FieldReference { name: "text", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::MessageCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Text, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::VIDEO_CLIP => { match field_num {
-            0 => Some(FieldReference { name: "clip_number", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            1 => Some(FieldReference { name: "start_timestamp", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            2 => Some(FieldReference { name: "start_timestamp_ms", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            3 => Some(FieldReference { name: "end_timestamp", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            4 => Some(FieldReference { name: "end_timestamp_ms", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            6 => Some(FieldReference { name: "clip_start", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "ms", ..FR_DEF }),
-            7 => Some(FieldReference { name: "clip_end", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "ms", ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ClipNumber, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::StartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::StartTimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::EndTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::EndTimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::ClipStart, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Millisecond, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::ClipEnd, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Millisecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SET => { match field_num {
-            254 => Some(FieldReference { name: "timestamp", num: 254, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "duration", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            3 => Some(FieldReference { name: "repetitions", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            4 => Some(FieldReference { name: "weight", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 16.0, units: "kg", ..FR_DEF }),
-            5 => Some(FieldReference { name: "set_type", num: 5, base_type: FitBaseType::UINT8, profile_type: ProfileType::SetType, ..FR_DEF }),
-            6 => Some(FieldReference { name: "start_time", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            7 => Some(FieldReference { name: "category", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::ExerciseCategory, array: true /* [N] */, ..FR_DEF }),
-            8 => Some(FieldReference { name: "category_subtype", num: 8, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, ..FR_DEF }),
-            9 => Some(FieldReference { name: "weight_display_unit", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
-            10 => Some(FieldReference { name: "message_index", num: 10, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            11 => Some(FieldReference { name: "wkt_step_index", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Duration, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Repetitions, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Weight, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 16.0, units: Unit::Kilogram, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::SetType, base_type: FitBaseType::UINT8, profile_type: ProfileType::SetType, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Category, base_type: FitBaseType::UINT16, profile_type: ProfileType::ExerciseCategory, array: true /* [N] */, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::CategorySubtype, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::WeightDisplayUnit, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::WktStepIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::JUMP => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "distance", num: 0, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "m", ..FR_DEF }),
-            1 => Some(FieldReference { name: "height", num: 1, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "m", ..FR_DEF }),
-            2 => Some(FieldReference { name: "rotations", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            3 => Some(FieldReference { name: "hang_time", num: 3, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "s", ..FR_DEF }),
-            4 => Some(FieldReference { name: "score", num: 4, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
-            5 => Some(FieldReference { name: "position_lat", num: 5, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            6 => Some(FieldReference { name: "position_long", num: 6, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            7 => Some(FieldReference { name: "speed", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Meter, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Height, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Meter, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Rotations, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::HangTime, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Second, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Score, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::PositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::PositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Speed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, components: &[
                     Component { field_num: 8 /* enhanced_speed */, scale: 1000.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            8 => Some(FieldReference { name: "enhanced_speed", num: 8, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::EnhancedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SPLIT => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "split_type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitType, ..FR_DEF }),
-            1 => Some(FieldReference { name: "total_elapsed_time", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            2 => Some(FieldReference { name: "total_timer_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            3 => Some(FieldReference { name: "total_distance", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "avg_speed", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            9 => Some(FieldReference { name: "start_time", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            13 => Some(FieldReference { name: "total_ascent", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            14 => Some(FieldReference { name: "total_descent", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            21 => Some(FieldReference { name: "start_position_lat", num: 21, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            22 => Some(FieldReference { name: "start_position_long", num: 22, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            23 => Some(FieldReference { name: "end_position_lat", num: 23, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            24 => Some(FieldReference { name: "end_position_long", num: 24, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            25 => Some(FieldReference { name: "max_speed", num: 25, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            26 => Some(FieldReference { name: "avg_vert_speed", num: 26, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            27 => Some(FieldReference { name: "end_time", num: 27, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            28 => Some(FieldReference { name: "total_calories", num: 28, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "kcal", ..FR_DEF }),
-            74 => Some(FieldReference { name: "start_elevation", num: 74, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            78 => Some(FieldReference { name: "active_time", num: 78, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            110 => Some(FieldReference { name: "total_moving_time", num: 110, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SplitType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitType, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::TotalElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::TotalAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::TotalDescent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::StartPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::StartPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::EndPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::EndPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::MaxSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::AvgVertSpeed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::EndTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
+            74 => Some(FieldReference { name: Name::StartElevation, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            78 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            110 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SPLIT_SUMMARY => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "split_type", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitType, ..FR_DEF }),
-            3 => Some(FieldReference { name: "num_splits", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            4 => Some(FieldReference { name: "total_timer_time", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "total_distance", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            6 => Some(FieldReference { name: "avg_speed", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            7 => Some(FieldReference { name: "max_speed", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            8 => Some(FieldReference { name: "total_ascent", num: 8, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            9 => Some(FieldReference { name: "total_descent", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            10 => Some(FieldReference { name: "avg_heart_rate", num: 10, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            11 => Some(FieldReference { name: "max_heart_rate", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            12 => Some(FieldReference { name: "avg_vert_speed", num: 12, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            13 => Some(FieldReference { name: "total_calories", num: 13, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "kcal", ..FR_DEF }),
-            65 => Some(FieldReference { name: "active_time", num: 65, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            77 => Some(FieldReference { name: "total_moving_time", num: 77, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SplitType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitType, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::NumSplits, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::MaxSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::TotalAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::TotalDescent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::AvgVertSpeed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
+            65 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            77 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CLIMB_PRO => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "position_lat", num: 0, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            1 => Some(FieldReference { name: "position_long", num: 1, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            2 => Some(FieldReference { name: "climb_pro_event", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::ClimbProEvent, ..FR_DEF }),
-            3 => Some(FieldReference { name: "climb_number", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            4 => Some(FieldReference { name: "climb_category", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            5 => Some(FieldReference { name: "current_dist", num: 5, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "m", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::PositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::PositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::ClimbProEvent, base_type: FitBaseType::ENUM, profile_type: ProfileType::ClimbProEvent, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ClimbNumber, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::ClimbCategory, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::CurrentDist, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Meter, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::FIELD_DESCRIPTION => { match field_num {
-            0 => Some(FieldReference { name: "developer_data_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "field_definition_number", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "fit_base_type_id", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::FitBaseType, ..FR_DEF }),
-            3 => Some(FieldReference { name: "field_name", num: 3, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
-            4 => Some(FieldReference { name: "array", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            5 => Some(FieldReference { name: "components", num: 5, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            6 => Some(FieldReference { name: "scale", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            7 => Some(FieldReference { name: "offset", num: 7, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, ..FR_DEF }),
-            8 => Some(FieldReference { name: "units", num: 8, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
-            9 => Some(FieldReference { name: "bits", num: 9, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            10 => Some(FieldReference { name: "accumulate", num: 10, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            13 => Some(FieldReference { name: "fit_base_unit_id", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
-            14 => Some(FieldReference { name: "native_mesg_num", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
-            15 => Some(FieldReference { name: "native_field_num", num: 15, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::DeveloperDataIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::FieldDefinitionNumber, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::FitBaseTypeId, base_type: FitBaseType::UINT8, profile_type: ProfileType::FitBaseType, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::FieldName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Array, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Components, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Scale, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::Offset, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Units, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::Bits, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Accumulate, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::FitBaseUnitId, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::NativeMesgNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::NativeFieldNum, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DEVELOPER_DATA_ID => { match field_num {
-            0 => Some(FieldReference { name: "developer_id", num: 0, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
-            1 => Some(FieldReference { name: "application_id", num: 1, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
-            2 => Some(FieldReference { name: "manufacturer_id", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            3 => Some(FieldReference { name: "developer_data_index", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "application_version", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::DeveloperId, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ApplicationId, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::ManufacturerId, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::DeveloperDataIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::ApplicationVersion, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::COURSE => { match field_num {
-            4 => Some(FieldReference { name: "sport", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            5 => Some(FieldReference { name: "name", num: 5, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            6 => Some(FieldReference { name: "capabilities", num: 6, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::CourseCapabilities, ..FR_DEF }),
-            7 => Some(FieldReference { name: "sub_sport", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Capabilities, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::CourseCapabilities, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::COURSE_POINT => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "timestamp", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            2 => Some(FieldReference { name: "position_lat", num: 2, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            3 => Some(FieldReference { name: "position_long", num: 3, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            4 => Some(FieldReference { name: "distance", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            5 => Some(FieldReference { name: "type", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::CoursePoint, ..FR_DEF }),
-            6 => Some(FieldReference { name: "name", num: 6, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            8 => Some(FieldReference { name: "favorite", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::PositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::PositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::CoursePoint, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Favorite, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SEGMENT_ID => { match field_num {
-            0 => Some(FieldReference { name: "name", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "uuid", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            2 => Some(FieldReference { name: "sport", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            3 => Some(FieldReference { name: "enabled", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            4 => Some(FieldReference { name: "user_profile_primary_key", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            5 => Some(FieldReference { name: "device_id", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            6 => Some(FieldReference { name: "default_race_leader", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            7 => Some(FieldReference { name: "delete_status", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentDeleteStatus, ..FR_DEF }),
-            8 => Some(FieldReference { name: "selection_type", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentSelectionType, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Uuid, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::UserProfilePrimaryKey, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::DeviceId, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::DefaultRaceLeader, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::DeleteStatus, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentDeleteStatus, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::SelectionType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentSelectionType, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SEGMENT_LEADERBOARD_ENTRY => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "name", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentLeaderboardType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "group_primary_key", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            3 => Some(FieldReference { name: "activity_id", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            4 => Some(FieldReference { name: "segment_time", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "activity_id_string", num: 5, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentLeaderboardType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::GroupPrimaryKey, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ActivityId, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::SegmentTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::ActivityIdString, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SEGMENT_POINT => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "position_lat", num: 1, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            2 => Some(FieldReference { name: "position_long", num: 2, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            3 => Some(FieldReference { name: "distance", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "altitude", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::PositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::PositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Altitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 6 /* enhanced_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            5 => Some(FieldReference { name: "leader_time", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            6 => Some(FieldReference { name: "enhanced_altitude", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::LeaderTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::EnhancedAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SEGMENT_LAP => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "event", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
-            1 => Some(FieldReference { name: "event_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
-            2 => Some(FieldReference { name: "start_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            3 => Some(FieldReference { name: "start_position_lat", num: 3, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            4 => Some(FieldReference { name: "start_position_long", num: 4, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            5 => Some(FieldReference { name: "end_position_lat", num: 5, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            6 => Some(FieldReference { name: "end_position_long", num: 6, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            7 => Some(FieldReference { name: "total_elapsed_time", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            8 => Some(FieldReference { name: "total_timer_time", num: 8, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            9 => Some(FieldReference { name: "total_distance", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            10 => Some(FieldReference { name: "total_cycles", num: 10, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "cycles", sub_fields: &[
-                    SubField { name: "total_strokes", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "strokes", maps: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Event, base_type: FitBaseType::ENUM, profile_type: ProfileType::Event, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::EventType, base_type: FitBaseType::ENUM, profile_type: ProfileType::EventType, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::StartPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::StartPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::EndPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::EndPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::TotalElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 23 /* sport */, ref_field_value: 2 /* cycling */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            11 => Some(FieldReference { name: "total_calories", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            12 => Some(FieldReference { name: "total_fat_calories", num: 12, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            13 => Some(FieldReference { name: "avg_speed", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            14 => Some(FieldReference { name: "max_speed", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            15 => Some(FieldReference { name: "avg_heart_rate", num: 15, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            16 => Some(FieldReference { name: "max_heart_rate", num: 16, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            17 => Some(FieldReference { name: "avg_cadence", num: 17, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", ..FR_DEF }),
-            18 => Some(FieldReference { name: "max_cadence", num: 18, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "rpm", ..FR_DEF }),
-            19 => Some(FieldReference { name: "avg_power", num: 19, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            20 => Some(FieldReference { name: "max_power", num: 20, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            21 => Some(FieldReference { name: "total_ascent", num: 21, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            22 => Some(FieldReference { name: "total_descent", num: 22, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "m", ..FR_DEF }),
-            23 => Some(FieldReference { name: "sport", num: 23, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            24 => Some(FieldReference { name: "event_group", num: 24, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            25 => Some(FieldReference { name: "nec_lat", num: 25, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            26 => Some(FieldReference { name: "nec_long", num: 26, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            27 => Some(FieldReference { name: "swc_lat", num: 27, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            28 => Some(FieldReference { name: "swc_long", num: 28, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: "semicircles", ..FR_DEF }),
-            29 => Some(FieldReference { name: "name", num: 29, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            30 => Some(FieldReference { name: "normalized_power", num: 30, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "watts", ..FR_DEF }),
-            31 => Some(FieldReference { name: "left_right_balance", num: 31, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
-            32 => Some(FieldReference { name: "sub_sport", num: 32, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            33 => Some(FieldReference { name: "total_work", num: 33, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "J", ..FR_DEF }),
-            34 => Some(FieldReference { name: "avg_altitude", num: 34, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            11 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::TotalFatCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::MaxSpeed, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::MaxPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::TotalAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::TotalDescent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::NecLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::NecLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::SwcLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::SwcLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::Name, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::NormalizedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::TotalWork, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Joule, ..FR_DEF }),
+            34 => Some(FieldReference { name: Name::AvgAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 91 /* enhanced_avg_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            35 => Some(FieldReference { name: "max_altitude", num: 35, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            35 => Some(FieldReference { name: Name::MaxAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 92 /* enhanced_max_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            36 => Some(FieldReference { name: "gps_accuracy", num: 36, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "m", ..FR_DEF }),
-            37 => Some(FieldReference { name: "avg_grade", num: 37, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            38 => Some(FieldReference { name: "avg_pos_grade", num: 38, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            39 => Some(FieldReference { name: "avg_neg_grade", num: 39, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            40 => Some(FieldReference { name: "max_pos_grade", num: 40, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            41 => Some(FieldReference { name: "max_neg_grade", num: 41, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "%", ..FR_DEF }),
-            42 => Some(FieldReference { name: "avg_temperature", num: 42, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            43 => Some(FieldReference { name: "max_temperature", num: 43, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "C", ..FR_DEF }),
-            44 => Some(FieldReference { name: "total_moving_time", num: 44, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            45 => Some(FieldReference { name: "avg_pos_vertical_speed", num: 45, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            46 => Some(FieldReference { name: "avg_neg_vertical_speed", num: 46, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            47 => Some(FieldReference { name: "max_pos_vertical_speed", num: 47, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            48 => Some(FieldReference { name: "max_neg_vertical_speed", num: 48, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            49 => Some(FieldReference { name: "time_in_hr_zone", num: 49, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            50 => Some(FieldReference { name: "time_in_speed_zone", num: 50, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            51 => Some(FieldReference { name: "time_in_cadence_zone", num: 51, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            52 => Some(FieldReference { name: "time_in_power_zone", num: 52, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
-            53 => Some(FieldReference { name: "repetition_num", num: 53, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            54 => Some(FieldReference { name: "min_altitude", num: 54, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: "m", components: &[
+            36 => Some(FieldReference { name: Name::GpsAccuracy, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Meter, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::AvgGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            38 => Some(FieldReference { name: Name::AvgPosGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::AvgNegGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::MaxPosGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::MaxNegGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            42 => Some(FieldReference { name: Name::AvgTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            43 => Some(FieldReference { name: Name::MaxTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            44 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            45 => Some(FieldReference { name: Name::AvgPosVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            46 => Some(FieldReference { name: Name::AvgNegVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::MaxPosVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            48 => Some(FieldReference { name: Name::MaxNegVerticalSpeed, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::TimeInHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            50 => Some(FieldReference { name: Name::TimeInSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            51 => Some(FieldReference { name: Name::TimeInCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            52 => Some(FieldReference { name: Name::TimeInPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            53 => Some(FieldReference { name: Name::RepetitionNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            54 => Some(FieldReference { name: Name::MinAltitude, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 5.0, offset: 500.0,units: Unit::Meter, components: &[
                     Component { field_num: 93 /* enhanced_min_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
-            55 => Some(FieldReference { name: "min_heart_rate", num: 55, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            56 => Some(FieldReference { name: "active_time", num: 56, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            57 => Some(FieldReference { name: "wkt_step_index", num: 57, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            58 => Some(FieldReference { name: "sport_event", num: 58, base_type: FitBaseType::ENUM, profile_type: ProfileType::SportEvent, ..FR_DEF }),
-            59 => Some(FieldReference { name: "avg_left_torque_effectiveness", num: 59, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            60 => Some(FieldReference { name: "avg_right_torque_effectiveness", num: 60, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            61 => Some(FieldReference { name: "avg_left_pedal_smoothness", num: 61, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            62 => Some(FieldReference { name: "avg_right_pedal_smoothness", num: 62, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            63 => Some(FieldReference { name: "avg_combined_pedal_smoothness", num: 63, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: "percent", ..FR_DEF }),
-            64 => Some(FieldReference { name: "status", num: 64, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentLapStatus, ..FR_DEF }),
-            65 => Some(FieldReference { name: "uuid", num: 65, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            66 => Some(FieldReference { name: "avg_fractional_cadence", num: 66, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            67 => Some(FieldReference { name: "max_fractional_cadence", num: 67, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "rpm", ..FR_DEF }),
-            68 => Some(FieldReference { name: "total_fractional_cycles", num: 68, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: "cycles", ..FR_DEF }),
-            69 => Some(FieldReference { name: "front_gear_shift_count", num: 69, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            70 => Some(FieldReference { name: "rear_gear_shift_count", num: 70, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            71 => Some(FieldReference { name: "time_standing", num: 71, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            72 => Some(FieldReference { name: "stand_count", num: 72, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            73 => Some(FieldReference { name: "avg_left_pco", num: 73, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            74 => Some(FieldReference { name: "avg_right_pco", num: 74, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: "mm", ..FR_DEF }),
-            75 => Some(FieldReference { name: "avg_left_power_phase", num: 75, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            76 => Some(FieldReference { name: "avg_left_power_phase_peak", num: 76, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            77 => Some(FieldReference { name: "avg_right_power_phase", num: 77, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            78 => Some(FieldReference { name: "avg_right_power_phase_peak", num: 78, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: "degrees", ..FR_DEF }),
-            79 => Some(FieldReference { name: "avg_power_position", num: 79, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            80 => Some(FieldReference { name: "max_power_position", num: 80, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "watts", ..FR_DEF }),
-            81 => Some(FieldReference { name: "avg_cadence_position", num: 81, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            82 => Some(FieldReference { name: "max_cadence_position", num: 82, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "rpm", ..FR_DEF }),
-            83 => Some(FieldReference { name: "manufacturer", num: 83, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            84 => Some(FieldReference { name: "total_grit", num: 84, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kGrit", ..FR_DEF }),
-            85 => Some(FieldReference { name: "total_flow", num: 85, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "Flow", ..FR_DEF }),
-            86 => Some(FieldReference { name: "avg_grit", num: 86, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "kGrit", ..FR_DEF }),
-            87 => Some(FieldReference { name: "avg_flow", num: 87, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: "Flow", ..FR_DEF }),
-            89 => Some(FieldReference { name: "total_fractional_ascent", num: 89, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            90 => Some(FieldReference { name: "total_fractional_descent", num: 90, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: "m", ..FR_DEF }),
-            91 => Some(FieldReference { name: "enhanced_avg_altitude", num: 91, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            92 => Some(FieldReference { name: "enhanced_max_altitude", num: 92, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
-            93 => Some(FieldReference { name: "enhanced_min_altitude", num: 93, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: "m", ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::MinHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            57 => Some(FieldReference { name: Name::WktStepIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::SportEvent, base_type: FitBaseType::ENUM, profile_type: ProfileType::SportEvent, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::AvgLeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            60 => Some(FieldReference { name: Name::AvgRightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            61 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            62 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            63 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            64 => Some(FieldReference { name: Name::Status, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentLapStatus, ..FR_DEF }),
+            65 => Some(FieldReference { name: Name::Uuid, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            66 => Some(FieldReference { name: Name::AvgFractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            67 => Some(FieldReference { name: Name::MaxFractionalCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            68 => Some(FieldReference { name: Name::TotalFractionalCycles, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::Cycle, ..FR_DEF }),
+            69 => Some(FieldReference { name: Name::FrontGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            70 => Some(FieldReference { name: Name::RearGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            71 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            72 => Some(FieldReference { name: Name::StandCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            73 => Some(FieldReference { name: Name::AvgLeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            74 => Some(FieldReference { name: Name::AvgRightPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            75 => Some(FieldReference { name: Name::AvgLeftPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            76 => Some(FieldReference { name: Name::AvgLeftPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            77 => Some(FieldReference { name: Name::AvgRightPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            78 => Some(FieldReference { name: Name::AvgRightPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            79 => Some(FieldReference { name: Name::AvgPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            80 => Some(FieldReference { name: Name::MaxPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            81 => Some(FieldReference { name: Name::AvgCadencePosition, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            82 => Some(FieldReference { name: Name::MaxCadencePosition, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::RevolutionPerMinute, ..FR_DEF }),
+            83 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            84 => Some(FieldReference { name: Name::TotalGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            85 => Some(FieldReference { name: Name::TotalFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            86 => Some(FieldReference { name: Name::AvgGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            87 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            89 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            90 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            91 => Some(FieldReference { name: Name::EnhancedAvgAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            92 => Some(FieldReference { name: Name::EnhancedMaxAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
+            93 => Some(FieldReference { name: Name::EnhancedMinAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SEGMENT_FILE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "file_uuid", num: 1, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            3 => Some(FieldReference { name: "enabled", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            4 => Some(FieldReference { name: "user_profile_primary_key", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            7 => Some(FieldReference { name: "leader_type", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentLeaderboardType, array: true /* [N] */, ..FR_DEF }),
-            8 => Some(FieldReference { name: "leader_group_primary_key", num: 8, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, ..FR_DEF }),
-            9 => Some(FieldReference { name: "leader_activity_id", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, ..FR_DEF }),
-            10 => Some(FieldReference { name: "leader_activity_id_string", num: 10, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
-            11 => Some(FieldReference { name: "default_race_leader", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::FileUuid, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Enabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::UserProfilePrimaryKey, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::LeaderType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SegmentLeaderboardType, array: true /* [N] */, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::LeaderGroupPrimaryKey, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::LeaderActivityId, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::LeaderActivityIdString, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::DefaultRaceLeader, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WORKOUT => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            4 => Some(FieldReference { name: "sport", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            5 => Some(FieldReference { name: "capabilities", num: 5, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::WorkoutCapabilities, ..FR_DEF }),
-            6 => Some(FieldReference { name: "num_valid_steps", num: 6, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            8 => Some(FieldReference { name: "wkt_name", num: 8, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            11 => Some(FieldReference { name: "sub_sport", num: 11, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            14 => Some(FieldReference { name: "pool_length", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m", ..FR_DEF }),
-            15 => Some(FieldReference { name: "pool_length_unit", num: 15, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
-            17 => Some(FieldReference { name: "wkt_description", num: 17, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Capabilities, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::WorkoutCapabilities, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::NumValidSteps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::WktName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::PoolLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::PoolLengthUnit, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::WktDescription, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WORKOUT_SESSION => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "sport", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            1 => Some(FieldReference { name: "sub_sport", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            2 => Some(FieldReference { name: "num_valid_steps", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            3 => Some(FieldReference { name: "first_step_index", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            4 => Some(FieldReference { name: "pool_length", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "m", ..FR_DEF }),
-            5 => Some(FieldReference { name: "pool_length_unit", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::NumValidSteps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::FirstStepIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::PoolLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::PoolLengthUnit, base_type: FitBaseType::ENUM, profile_type: ProfileType::DisplayMeasure, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WORKOUT_STEP => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "wkt_step_name", num: 0, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            1 => Some(FieldReference { name: "duration_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepDuration, ..FR_DEF }),
-            2 => Some(FieldReference { name: "duration_value", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "duration_time", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", maps: &[
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::WktStepName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::DurationType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepDuration, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::DurationValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::DurationTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 0 /* time */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 28 /* repetition_time */ },
                     ], ..SF_DEF },
-                    SubField { name: "duration_distance", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", maps: &[
+                    SubField { name: Name::DurationDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 1 /* distance */ },
                     ], ..SF_DEF },
-                    SubField { name: "duration_hr", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: "% or bpm", maps: &[
+                    SubField { name: Name::DurationHr, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 2 /* hr_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 3 /* hr_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: "duration_calories", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "calories", maps: &[
+                    SubField { name: Name::DurationCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 4 /* calories */ },
                     ], ..SF_DEF },
-                    SubField { name: "duration_step", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::DurationStep, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 6 /* repeat_until_steps_cmplt */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 7 /* repeat_until_time */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 8 /* repeat_until_distance */ },
@@ -1647,281 +1724,281 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 12 /* repeat_until_power_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 13 /* repeat_until_power_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: "duration_power", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: "% or watts", maps: &[
+                    SubField { name: Name::DurationPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 14 /* power_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 15 /* power_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: "duration_reps", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::DurationReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 29 /* reps */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "target_type", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepTarget, ..FR_DEF }),
-            4 => Some(FieldReference { name: "target_value", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "target_speed_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+            3 => Some(FieldReference { name: Name::TargetType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepTarget, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TargetValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::TargetSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: "target_hr_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::TargetHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: "target_cadence_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::TargetCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: "target_power_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::TargetPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF },
-                    SubField { name: "repeat_steps", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::RepeatSteps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 6 /* repeat_until_steps_cmplt */ },
                     ], ..SF_DEF },
-                    SubField { name: "repeat_time", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", maps: &[
+                    SubField { name: Name::RepeatTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 7 /* repeat_until_time */ },
                     ], ..SF_DEF },
-                    SubField { name: "repeat_distance", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", maps: &[
+                    SubField { name: Name::RepeatDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 8 /* repeat_until_distance */ },
                     ], ..SF_DEF },
-                    SubField { name: "repeat_calories", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "calories", maps: &[
+                    SubField { name: Name::RepeatCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 9 /* repeat_until_calories */ },
                     ], ..SF_DEF },
-                    SubField { name: "repeat_hr", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: "% or bpm", maps: &[
+                    SubField { name: Name::RepeatHr, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 10 /* repeat_until_hr_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 11 /* repeat_until_hr_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: "repeat_power", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: "% or watts", maps: &[
+                    SubField { name: Name::RepeatPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 12 /* repeat_until_power_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 13 /* repeat_until_power_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: "target_stroke_type", base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
+                    SubField { name: Name::TargetStrokeType, base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 11 /* swim_stroke */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            5 => Some(FieldReference { name: "custom_target_value_low", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "custom_target_speed_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", maps: &[
+            5 => Some(FieldReference { name: Name::CustomTargetValueLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::CustomTargetSpeedLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: "custom_target_heart_rate_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: "% or bpm", maps: &[
+                    SubField { name: Name::CustomTargetHeartRateLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: "custom_target_cadence_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "rpm", maps: &[
+                    SubField { name: Name::CustomTargetCadenceLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: "custom_target_power_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: "% or watts", maps: &[
+                    SubField { name: Name::CustomTargetPowerLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            6 => Some(FieldReference { name: "custom_target_value_high", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "custom_target_speed_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", maps: &[
+            6 => Some(FieldReference { name: Name::CustomTargetValueHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::CustomTargetSpeedHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: "custom_target_heart_rate_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: "% or bpm", maps: &[
+                    SubField { name: Name::CustomTargetHeartRateHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: "custom_target_cadence_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "rpm", maps: &[
+                    SubField { name: Name::CustomTargetCadenceHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: "custom_target_power_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: "% or watts", maps: &[
+                    SubField { name: Name::CustomTargetPowerHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            7 => Some(FieldReference { name: "intensity", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::Intensity, ..FR_DEF }),
-            8 => Some(FieldReference { name: "notes", num: 8, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
-            9 => Some(FieldReference { name: "equipment", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::WorkoutEquipment, ..FR_DEF }),
-            10 => Some(FieldReference { name: "exercise_category", num: 10, base_type: FitBaseType::UINT16, profile_type: ProfileType::ExerciseCategory, ..FR_DEF }),
-            11 => Some(FieldReference { name: "exercise_name", num: 11, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            12 => Some(FieldReference { name: "exercise_weight", num: 12, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "kg", ..FR_DEF }),
-            13 => Some(FieldReference { name: "weight_display_unit", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
-            19 => Some(FieldReference { name: "secondary_target_type", num: 19, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepTarget, ..FR_DEF }),
-            20 => Some(FieldReference { name: "secondary_target_value", num: 20, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "secondary_target_speed_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+            7 => Some(FieldReference { name: Name::Intensity, base_type: FitBaseType::ENUM, profile_type: ProfileType::Intensity, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Notes, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::Equipment, base_type: FitBaseType::ENUM, profile_type: ProfileType::WorkoutEquipment, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::ExerciseCategory, base_type: FitBaseType::UINT16, profile_type: ProfileType::ExerciseCategory, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::ExerciseName, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::ExerciseWeight, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Kilogram, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::WeightDisplayUnit, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::SecondaryTargetType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepTarget, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::SecondaryTargetValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::SecondaryTargetSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_target_hr_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::SecondaryTargetHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_target_cadence_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::SecondaryTargetCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_target_power_zone", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: Name::SecondaryTargetPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_target_stroke_type", base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
+                    SubField { name: Name::SecondaryTargetStrokeType, base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 11 /* swim_stroke */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            21 => Some(FieldReference { name: "secondary_custom_target_value_low", num: 21, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "secondary_custom_target_speed_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", maps: &[
+            21 => Some(FieldReference { name: Name::SecondaryCustomTargetValueLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::SecondaryCustomTargetSpeedLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_custom_target_heart_rate_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: "% or bpm", maps: &[
+                    SubField { name: Name::SecondaryCustomTargetHeartRateLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_custom_target_cadence_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "rpm", maps: &[
+                    SubField { name: Name::SecondaryCustomTargetCadenceLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_custom_target_power_low", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: "% or watts", maps: &[
+                    SubField { name: Name::SecondaryCustomTargetPowerLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            22 => Some(FieldReference { name: "secondary_custom_target_value_high", num: 22, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: "secondary_custom_target_speed_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", maps: &[
+            22 => Some(FieldReference { name: Name::SecondaryCustomTargetValueHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::SecondaryCustomTargetSpeedHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_custom_target_heart_rate_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: "% or bpm", maps: &[
+                    SubField { name: Name::SecondaryCustomTargetHeartRateHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_custom_target_cadence_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "rpm", maps: &[
+                    SubField { name: Name::SecondaryCustomTargetCadenceHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: "secondary_custom_target_power_high", base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: "% or watts", maps: &[
+                    SubField { name: Name::SecondaryCustomTargetPowerHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
            _ => None,
         }},
         MesgNum::EXERCISE_TITLE => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            0 => Some(FieldReference { name: "exercise_category", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::ExerciseCategory, ..FR_DEF }),
-            1 => Some(FieldReference { name: "exercise_name", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            2 => Some(FieldReference { name: "wkt_step_name", num: 2, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ExerciseCategory, base_type: FitBaseType::UINT16, profile_type: ProfileType::ExerciseCategory, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ExerciseName, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::WktStepName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SCHEDULE => { match field_num {
-            0 => Some(FieldReference { name: "manufacturer", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
-            1 => Some(FieldReference { name: "product", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: "favero_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+            0 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
+                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: "garmin_product", base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 89 /* tacx */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "serial_number", num: 2, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
-            3 => Some(FieldReference { name: "time_created", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            4 => Some(FieldReference { name: "completed", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            5 => Some(FieldReference { name: "type", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::Schedule, ..FR_DEF }),
-            6 => Some(FieldReference { name: "scheduled_time", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::SerialNumber, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::TimeCreated, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Completed, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::Schedule, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::ScheduledTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TOTALS => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timer_time", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "distance", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "m", ..FR_DEF }),
-            2 => Some(FieldReference { name: "calories", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "kcal", ..FR_DEF }),
-            3 => Some(FieldReference { name: "sport", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            4 => Some(FieldReference { name: "elapsed_time", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "sessions", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            6 => Some(FieldReference { name: "active_time", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            9 => Some(FieldReference { name: "sport_index", num: 9, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Meter, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Calories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::ElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Sessions, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::SportIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::WEIGHT_SCALE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "weight", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Weight, scale: 100.0, units: "kg", ..FR_DEF }),
-            1 => Some(FieldReference { name: "percent_fat", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "%", ..FR_DEF }),
-            2 => Some(FieldReference { name: "percent_hydration", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "%", ..FR_DEF }),
-            3 => Some(FieldReference { name: "visceral_fat_mass", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "kg", ..FR_DEF }),
-            4 => Some(FieldReference { name: "bone_mass", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "kg", ..FR_DEF }),
-            5 => Some(FieldReference { name: "muscle_mass", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "kg", ..FR_DEF }),
-            7 => Some(FieldReference { name: "basal_met", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 4.0, units: "kcal/day", ..FR_DEF }),
-            8 => Some(FieldReference { name: "physique_rating", num: 8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            9 => Some(FieldReference { name: "active_met", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 4.0, units: "kcal/day", ..FR_DEF }),
-            10 => Some(FieldReference { name: "metabolic_age", num: 10, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "years", ..FR_DEF }),
-            11 => Some(FieldReference { name: "visceral_fat_rating", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            12 => Some(FieldReference { name: "user_profile_index", num: 12, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            13 => Some(FieldReference { name: "bmi", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "kg/m^2", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Weight, base_type: FitBaseType::UINT16, profile_type: ProfileType::Weight, scale: 100.0, units: Unit::Kilogram, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::PercentFat, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::PercentHydration, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::VisceralFatMass, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Kilogram, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::BoneMass, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Kilogram, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::MuscleMass, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Kilogram, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::BasalMet, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 4.0, units: Unit::KilocaloriesPerDay, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::PhysiqueRating, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::ActiveMet, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 4.0, units: Unit::KilocaloriesPerDay, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::MetabolicAge, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Year, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::VisceralFatRating, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::UserProfileIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::Bmi, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::KilogramsPerSquareMeter, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::BLOOD_PRESSURE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "systolic_pressure", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "mmHg", ..FR_DEF }),
-            1 => Some(FieldReference { name: "diastolic_pressure", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "mmHg", ..FR_DEF }),
-            2 => Some(FieldReference { name: "mean_arterial_pressure", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "mmHg", ..FR_DEF }),
-            3 => Some(FieldReference { name: "map_3_sample_mean", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "mmHg", ..FR_DEF }),
-            4 => Some(FieldReference { name: "map_morning_values", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "mmHg", ..FR_DEF }),
-            5 => Some(FieldReference { name: "map_evening_values", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "mmHg", ..FR_DEF }),
-            6 => Some(FieldReference { name: "heart_rate", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            7 => Some(FieldReference { name: "heart_rate_type", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrType, ..FR_DEF }),
-            8 => Some(FieldReference { name: "status", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::BpStatus, ..FR_DEF }),
-            9 => Some(FieldReference { name: "user_profile_index", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SystolicPressure, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::MillimetersOfMercury, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::DiastolicPressure, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::MillimetersOfMercury, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::MeanArterialPressure, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::MillimetersOfMercury, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Map3SampleMean, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::MillimetersOfMercury, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::MapMorningValues, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::MillimetersOfMercury, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::MapEveningValues, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::MillimetersOfMercury, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::HeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::HeartRateType, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrType, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Status, base_type: FitBaseType::ENUM, profile_type: ProfileType::BpStatus, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::UserProfileIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MONITORING_INFO => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "local_timestamp", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "activity_type", num: 1, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, array: true /* [N] */, ..FR_DEF }),
-            3 => Some(FieldReference { name: "cycles_to_distance", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 5000.0, units: "m/cycle", ..FR_DEF }),
-            4 => Some(FieldReference { name: "cycles_to_calories", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 5000.0, units: "kcal/cycle", ..FR_DEF }),
-            5 => Some(FieldReference { name: "resting_metabolic_rate", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal / day", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::LocalTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ActivityType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, array: true /* [N] */, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::CyclesToDistance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 5000.0, units: Unit::MetersPerCycle, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::CyclesToCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 5000.0, units: Unit::KilocaloriesPerCycle, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::RestingMetabolicRate, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::KilocaloriesPerDay, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MONITORING => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "device_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
-            1 => Some(FieldReference { name: "calories", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            2 => Some(FieldReference { name: "distance", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "m", ..FR_DEF }),
-            3 => Some(FieldReference { name: "cycles", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: "cycles", sub_fields: &[
-                    SubField { name: "steps", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "steps", maps: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Calories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Cycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::Steps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Step, maps: &[
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 6 /* walking */ },
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: "strokes", base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: "strokes", maps: &[
+                    SubField { name: Name::Strokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
-            4 => Some(FieldReference { name: "active_time", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "activity_type", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
-            6 => Some(FieldReference { name: "activity_subtype", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivitySubtype, ..FR_DEF }),
-            7 => Some(FieldReference { name: "activity_level", num: 7, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityLevel, ..FR_DEF }),
-            8 => Some(FieldReference { name: "distance_16", num: 8, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "100 * m", ..FR_DEF }),
-            9 => Some(FieldReference { name: "cycles_16", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "2 * cycles (steps)", ..FR_DEF }),
-            10 => Some(FieldReference { name: "active_time_16", num: 10, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            11 => Some(FieldReference { name: "local_timestamp", num: 11, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
-            12 => Some(FieldReference { name: "temperature", num: 12, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "C", ..FR_DEF }),
-            14 => Some(FieldReference { name: "temperature_min", num: 14, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "C", ..FR_DEF }),
-            15 => Some(FieldReference { name: "temperature_max", num: 15, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "C", ..FR_DEF }),
-            16 => Some(FieldReference { name: "activity_time", num: 16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [8] */, units: "minutes", ..FR_DEF }),
-            19 => Some(FieldReference { name: "active_calories", num: 19, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "kcal", ..FR_DEF }),
-            24 => Some(FieldReference { name: "current_activity_type_intensity", num: 24, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, components: &[
+            4 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::ActivityType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::ActivitySubtype, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivitySubtype, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::ActivityLevel, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityLevel, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::Distance16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Hectometer, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::Cycles16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::TwoCyclesSteps, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::ActiveTime16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::LocalTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::Temperature, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::TemperatureMin, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::TemperatureMax, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::ActivityTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [8] */, units: Unit::Minute, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::ActiveCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::CurrentActivityTypeIntensity, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, components: &[
                     Component { field_num: 5 /* activity_type */, scale: 1.0, offset: 0.0, accumulate: false, bits: 5 },
                     Component { field_num: 28 /* intensity */, scale: 1.0, offset: 0.0, accumulate: false, bits: 3 }
                 ], ..FR_DEF }),
-            25 => Some(FieldReference { name: "timestamp_min_8", num: 25, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "min", ..FR_DEF }),
-            26 => Some(FieldReference { name: "timestamp_16", num: 26, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            27 => Some(FieldReference { name: "heart_rate", num: 27, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            28 => Some(FieldReference { name: "intensity", num: 28, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
-            29 => Some(FieldReference { name: "duration_min", num: 29, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "min", ..FR_DEF }),
-            30 => Some(FieldReference { name: "duration", num: 30, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            31 => Some(FieldReference { name: "ascent", num: 31, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            32 => Some(FieldReference { name: "descent", num: 32, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            33 => Some(FieldReference { name: "moderate_activity_minutes", num: 33, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "minutes", ..FR_DEF }),
-            34 => Some(FieldReference { name: "vigorous_activity_minutes", num: 34, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "minutes", ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::TimestampMin8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Minute, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::Timestamp16, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::HeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::Intensity, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::DurationMin, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Minute, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::Duration, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::Ascent, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::Descent, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::ModerateActivityMinutes, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Minute, ..FR_DEF }),
+            34 => Some(FieldReference { name: Name::VigorousActivityMinutes, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Minute, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MONITORING_HR_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "resting_heart_rate", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
-            1 => Some(FieldReference { name: "current_day_resting_heart_rate", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "bpm", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::RestingHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::CurrentDayRestingHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SPO2_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "reading_spo2", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            1 => Some(FieldReference { name: "reading_confidence", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "mode", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::Spo2MeasurementType, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ReadingSpo2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ReadingConfidence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Mode, base_type: FitBaseType::ENUM, profile_type: ProfileType::Spo2MeasurementType, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HR => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "fractional_timestamp", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "time256", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 256.0, units: "s", components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::FractionalTimestamp, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Time256, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 256.0, units: Unit::Second, components: &[
                     Component { field_num: 0 /* fractional_timestamp */, scale: 256.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            6 => Some(FieldReference { name: "filtered_bpm", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "bpm", ..FR_DEF }),
-            9 => Some(FieldReference { name: "event_timestamp", num: 9, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, accumulate: true, scale: 1024.0, units: "s", ..FR_DEF }),
-            10 => Some(FieldReference { name: "event_timestamp_12", num: 10, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, accumulate: true, units: "s", components: &[
+            6 => Some(FieldReference { name: Name::FilteredBpm, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::EventTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, accumulate: true, scale: 1024.0, units: Unit::Second, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::EventTimestamp12, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, accumulate: true, units: Unit::Second, components: &[
                     Component { field_num: 9 /* event_timestamp */, scale: 1024.0, offset: 0.0, accumulate: true, bits: 12 },
                     Component { field_num: 9 /* event_timestamp */, scale: 1024.0, offset: 0.0, accumulate: true, bits: 12 },
                     Component { field_num: 9 /* event_timestamp */, scale: 1024.0, offset: 0.0, accumulate: true, bits: 12 },
@@ -1936,125 +2013,125 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
            _ => None,
         }},
         MesgNum::STRESS_LEVEL => { match field_num {
-            0 => Some(FieldReference { name: "stress_level_value", num: 0, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, ..FR_DEF }),
-            1 => Some(FieldReference { name: "stress_level_time", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::StressLevelValue, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::StressLevelTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MAX_MET_DATA => { match field_num {
-            0 => Some(FieldReference { name: "update_time", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            2 => Some(FieldReference { name: "vo2_max", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: "mL/kg/min", ..FR_DEF }),
-            5 => Some(FieldReference { name: "sport", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
-            6 => Some(FieldReference { name: "sub_sport", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
-            8 => Some(FieldReference { name: "max_met_category", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::MaxMetCategory, ..FR_DEF }),
-            9 => Some(FieldReference { name: "calibrated_data", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            12 => Some(FieldReference { name: "hr_source", num: 12, base_type: FitBaseType::ENUM, profile_type: ProfileType::MaxMetHeartRateSource, ..FR_DEF }),
-            13 => Some(FieldReference { name: "speed_source", num: 13, base_type: FitBaseType::ENUM, profile_type: ProfileType::MaxMetSpeedSource, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::UpdateTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Vo2Max, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::MillilitersPerKilogramPerMinute, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::MaxMetCategory, base_type: FitBaseType::ENUM, profile_type: ProfileType::MaxMetCategory, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::CalibratedData, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::HrSource, base_type: FitBaseType::ENUM, profile_type: ProfileType::MaxMetHeartRateSource, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::SpeedSource, base_type: FitBaseType::ENUM, profile_type: ProfileType::MaxMetSpeedSource, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_BODY_BATTERY_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "level", num: 1, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, array: true /* [N] */, units: "percent", ..FR_DEF }),
-            2 => Some(FieldReference { name: "charged", num: 2, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, ..FR_DEF }),
-            3 => Some(FieldReference { name: "uncharged", num: 3, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Level, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, array: true /* [N] */, units: Unit::Percent, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Charged, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Uncharged, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_EVENT => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "event_id", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::EventId, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_ACCELEROMETER_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sampling_interval", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "accel_x", num: 2, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1.024, units: "mG", ..FR_DEF }),
-            3 => Some(FieldReference { name: "accel_y", num: 3, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1.024, units: "mG", ..FR_DEF }),
-            4 => Some(FieldReference { name: "accel_z", num: 4, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1.024, units: "mG", ..FR_DEF }),
-            5 => Some(FieldReference { name: "timestamp_32k", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SamplingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::AccelX, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1.024, units: Unit::Milligee, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::AccelY, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1.024, units: Unit::Milligee, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::AccelZ, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 1.024, units: Unit::Milligee, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Timestamp32K, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_GYROSCOPE_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "sampling_interval", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "1/32768 s", ..FR_DEF }),
-            2 => Some(FieldReference { name: "gyro_x", num: 2, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 28.57143, units: "deg/s", ..FR_DEF }),
-            3 => Some(FieldReference { name: "gyro_y", num: 3, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 28.57143, units: "deg/s", ..FR_DEF }),
-            4 => Some(FieldReference { name: "gyro_z", num: 4, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 28.57143, units: "deg/s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "timestamp_32k", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "1/32768 s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::SamplingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::OnePer32768Seconds, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::GyroX, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 28.57143, units: Unit::DegreesPerSecond, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::GyroY, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 28.57143, units: Unit::DegreesPerSecond, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::GyroZ, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 28.57143, units: Unit::DegreesPerSecond, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Timestamp32K, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::OnePer32768Seconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_STEP_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "steps", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: "steps", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Steps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: Unit::Step, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_SPO2_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "reading_spo2", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "percent", ..FR_DEF }),
-            2 => Some(FieldReference { name: "confidence", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ReadingSpo2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::Percent, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Confidence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_STRESS_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "stress_level", num: 1, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, array: true /* [N] */, units: "s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::StressLevel, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, array: true /* [N] */, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_RESPIRATION_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "respiration_rate", num: 1, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 100.0, units: "breaths/min", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::RespirationRate, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, array: true /* [N] */, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_HEART_RATE_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "status", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "heart_rate", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: "bpm", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Status, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::HeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, units: Unit::BeatsPerMinute, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_CONFIGURATION_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "data", num: 0, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
-            1 => Some(FieldReference { name: "data_size", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::DataSize, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HSA_WRIST_TEMPERATURE_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "processing_interval", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "value", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 1000.0, units: "C", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ProcessingInterval, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Value, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 1000.0, units: Unit::Celcius, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MEMO_GLOB => { match field_num {
-            250 => Some(FieldReference { name: "part_index", num: 250, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            0 => Some(FieldReference { name: "memo", num: 0, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
-            1 => Some(FieldReference { name: "mesg_num", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
-            2 => Some(FieldReference { name: "parent_index", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            3 => Some(FieldReference { name: "field_num", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "data", num: 4, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
+            250 => Some(FieldReference { name: Name::PartIndex, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Memo, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MesgNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::ParentIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::FieldNum, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SLEEP_LEVEL => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "sleep_level", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SleepLevel, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::SleepLevel, base_type: FitBaseType::ENUM, profile_type: ProfileType::SleepLevel, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ANT_CHANNEL_ID => { match field_num {
-            0 => Some(FieldReference { name: "channel_number", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "device_type", num: 1, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            2 => Some(FieldReference { name: "device_number", num: 2, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
-            3 => Some(FieldReference { name: "transmission_type", num: 3, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
-            4 => Some(FieldReference { name: "device_index", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ChannelNumber, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::DeviceType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::DeviceNumber, base_type: FitBaseType::UINT16Z, profile_type: ProfileType::Uint16z, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::TransmissionType, base_type: FitBaseType::UINT8Z, profile_type: ProfileType::Uint8z, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ANT_RX => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "fractional_timestamp", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "mesg_id", num: 1, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, ..FR_DEF }),
-            2 => Some(FieldReference { name: "mesg_data", num: 2, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::FractionalTimestamp, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MesgId, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::MesgData, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, components: &[
                     Component { field_num: 3 /* channel_number */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
@@ -2065,15 +2142,15 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "channel_number", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "data", num: 4, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ChannelNumber, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::ANT_TX => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "fractional_timestamp", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "mesg_id", num: 1, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, ..FR_DEF }),
-            2 => Some(FieldReference { name: "mesg_data", num: 2, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::FractionalTimestamp, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 32768.0, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MesgId, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::MesgData, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, components: &[
                     Component { field_num: 3 /* channel_number */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
@@ -2084,111 +2161,111 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                     Component { field_num: 4 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
-            3 => Some(FieldReference { name: "channel_number", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "data", num: 4, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ChannelNumber, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::EXD_SCREEN_CONFIGURATION => { match field_num {
-            0 => Some(FieldReference { name: "screen_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "field_count", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "layout", num: 2, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdLayout, ..FR_DEF }),
-            3 => Some(FieldReference { name: "screen_enabled", num: 3, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ScreenIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::FieldCount, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Layout, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdLayout, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ScreenEnabled, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::EXD_DATA_FIELD_CONFIGURATION => { match field_num {
-            0 => Some(FieldReference { name: "screen_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "concept_field", num: 1, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, components: &[
+            0 => Some(FieldReference { name: Name::ScreenIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ConceptField, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, components: &[
                     Component { field_num: 2 /* field_id */, scale: 1.0, offset: 0.0, accumulate: false, bits: 4 },
                     Component { field_num: 3 /* concept_count */, scale: 1.0, offset: 0.0, accumulate: false, bits: 4 }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "field_id", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            3 => Some(FieldReference { name: "concept_count", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "display_type", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdDisplayType, ..FR_DEF }),
-            5 => Some(FieldReference { name: "title", num: 5, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [32] */, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::FieldId, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ConceptCount, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::DisplayType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdDisplayType, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::Title, base_type: FitBaseType::STRING, profile_type: ProfileType::String, array: true /* [32] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::EXD_DATA_CONCEPT_CONFIGURATION => { match field_num {
-            0 => Some(FieldReference { name: "screen_index", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "concept_field", num: 1, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, components: &[
+            0 => Some(FieldReference { name: Name::ScreenIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ConceptField, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, components: &[
                     Component { field_num: 2 /* field_id */, scale: 1.0, offset: 0.0, accumulate: false, bits: 4 },
                     Component { field_num: 3 /* concept_index */, scale: 1.0, offset: 0.0, accumulate: false, bits: 4 }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "field_id", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            3 => Some(FieldReference { name: "concept_index", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "data_page", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            5 => Some(FieldReference { name: "concept_key", num: 5, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            6 => Some(FieldReference { name: "scaling", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            8 => Some(FieldReference { name: "data_units", num: 8, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdDataUnits, ..FR_DEF }),
-            9 => Some(FieldReference { name: "qualifier", num: 9, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdQualifiers, ..FR_DEF }),
-            10 => Some(FieldReference { name: "descriptor", num: 10, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdDescriptors, ..FR_DEF }),
-            11 => Some(FieldReference { name: "is_signed", num: 11, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::FieldId, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ConceptIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::DataPage, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::ConceptKey, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Scaling, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::DataUnits, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdDataUnits, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::Qualifier, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdQualifiers, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::Descriptor, base_type: FitBaseType::ENUM, profile_type: ProfileType::ExdDescriptors, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::IsSigned, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::DIVE_SUMMARY => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "reference_mesg", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
-            1 => Some(FieldReference { name: "reference_index", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            2 => Some(FieldReference { name: "avg_depth", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            3 => Some(FieldReference { name: "max_depth", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m", ..FR_DEF }),
-            4 => Some(FieldReference { name: "surface_interval", num: 4, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: "s", ..FR_DEF }),
-            5 => Some(FieldReference { name: "start_cns", num: 5, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            6 => Some(FieldReference { name: "end_cns", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: "percent", ..FR_DEF }),
-            7 => Some(FieldReference { name: "start_n2", num: 7, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "percent", ..FR_DEF }),
-            8 => Some(FieldReference { name: "end_n2", num: 8, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "percent", ..FR_DEF }),
-            9 => Some(FieldReference { name: "o2_toxicity", num: 9, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "OTUs", ..FR_DEF }),
-            10 => Some(FieldReference { name: "dive_number", num: 10, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            11 => Some(FieldReference { name: "bottom_time", num: 11, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            12 => Some(FieldReference { name: "avg_pressure_sac", num: 12, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "bar/min", ..FR_DEF }),
-            13 => Some(FieldReference { name: "avg_volume_sac", num: 13, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "L/min", ..FR_DEF }),
-            14 => Some(FieldReference { name: "avg_rmv", num: 14, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "L/min", ..FR_DEF }),
-            15 => Some(FieldReference { name: "descent_time", num: 15, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            16 => Some(FieldReference { name: "ascent_time", num: 16, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
-            17 => Some(FieldReference { name: "avg_ascent_rate", num: 17, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            22 => Some(FieldReference { name: "avg_descent_rate", num: 22, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            23 => Some(FieldReference { name: "max_ascent_rate", num: 23, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            24 => Some(FieldReference { name: "max_descent_rate", num: 24, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            25 => Some(FieldReference { name: "hang_time", num: 25, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ReferenceMesg, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ReferenceIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::AvgDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::MaxDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::SurfaceInterval, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::StartCns, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::EndCns, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::StartN2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Percent, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::EndN2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Percent, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::O2Toxicity, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::OxygenToxicityUnit, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::DiveNumber, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::BottomTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::AvgPressureSac, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::BarPerMinute, ..FR_DEF }),
+            13 => Some(FieldReference { name: Name::AvgVolumeSac, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::LiterPerMinute, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::AvgRmv, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::LiterPerMinute, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::DescentTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::AscentTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::AvgAscentRate, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::AvgDescentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::MaxAscentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::MaxDescentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::HangTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::AAD_ACCEL_FEATURES => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "time", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "energy_total", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
-            2 => Some(FieldReference { name: "zero_cross_cnt", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            3 => Some(FieldReference { name: "instance", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "time_above_threshold", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 25.0, units: "s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Time, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::EnergyTotal, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::ZeroCrossCnt, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Instance, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::TimeAboveThreshold, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 25.0, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HRV => { match field_num {
-            0 => Some(FieldReference { name: "time", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 1000.0, units: "s", ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Time, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::BEAT_INTERVALS => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "time", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Time, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HRV_STATUS_SUMMARY => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "weekly_average", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "last_night_average", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
-            2 => Some(FieldReference { name: "last_night_5_min_high", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
-            3 => Some(FieldReference { name: "baseline_low_upper", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
-            4 => Some(FieldReference { name: "baseline_balanced_lower", num: 4, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
-            5 => Some(FieldReference { name: "baseline_balanced_upper", num: 5, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
-            6 => Some(FieldReference { name: "status", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrvStatus, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::WeeklyAverage, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::LastNightAverage, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::LastNight5MinHigh, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::BaselineLowUpper, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::BaselineBalancedLower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::BaselineBalancedUpper, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Status, base_type: FitBaseType::ENUM, profile_type: ProfileType::HrvStatus, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::HRV_VALUE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "value", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: "ms", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Value, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::Millisecond, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::RAW_BBI => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "timestamp_ms", num: 0, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: "ms", ..FR_DEF }),
-            1 => Some(FieldReference { name: "data", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, components: &[
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, components: &[
                     Component { field_num: 2 /* time */, scale: 1.0, offset: 0.0, accumulate: false, bits: 14 },
                     Component { field_num: 3 /* quality */, scale: 1.0, offset: 0.0, accumulate: false, bits: 1 },
                     Component { field_num: 4 /* gap */, scale: 1.0, offset: 0.0, accumulate: false, bits: 1 },
@@ -2235,96 +2312,2875 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                     Component { field_num: 3 /* quality */, scale: 1.0, offset: 0.0, accumulate: false, bits: 1 },
                     Component { field_num: 4 /* gap */, scale: 1.0, offset: 0.0, accumulate: false, bits: 1 }
                 ], ..FR_DEF }),
-            2 => Some(FieldReference { name: "time", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: "ms", ..FR_DEF }),
-            3 => Some(FieldReference { name: "quality", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
-            4 => Some(FieldReference { name: "gap", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Time, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::Quality, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Gap, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::RESPIRATION_RATE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "respiration_rate", num: 0, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: "breaths/min", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::RespirationRate, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::BreathsPerMinute, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CHRONO_SHOT_SESSION => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "min_speed", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "max_speed", num: 1, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            2 => Some(FieldReference { name: "avg_speed", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            3 => Some(FieldReference { name: "shot_count", num: 3, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
-            4 => Some(FieldReference { name: "projectile_type", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::ProjectileType, ..FR_DEF }),
-            5 => Some(FieldReference { name: "grain_weight", num: 5, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 10.0, units: "gr", ..FR_DEF }),
-            6 => Some(FieldReference { name: "standard_deviation", num: 6, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::MinSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::MaxSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::ShotCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::ProjectileType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ProjectileType, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::GrainWeight, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 10.0, units: Unit::Gram, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::StandardDeviation, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CHRONO_SHOT_DATA => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "shot_speed", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: "m/s", ..FR_DEF }),
-            1 => Some(FieldReference { name: "shot_num", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::ShotSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::ShotNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TANK_UPDATE => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "sensor", num: 0, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::AntChannelId, ..FR_DEF }),
-            1 => Some(FieldReference { name: "pressure", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "bar", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Sensor, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::AntChannelId, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Pressure, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Bar, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::TANK_SUMMARY => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "s", ..FR_DEF }),
-            0 => Some(FieldReference { name: "sensor", num: 0, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::AntChannelId, ..FR_DEF }),
-            1 => Some(FieldReference { name: "start_pressure", num: 1, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "bar", ..FR_DEF }),
-            2 => Some(FieldReference { name: "end_pressure", num: 2, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: "bar", ..FR_DEF }),
-            3 => Some(FieldReference { name: "volume_used", num: 3, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: "L", ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Sensor, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::AntChannelId, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::StartPressure, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Bar, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::EndPressure, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Bar, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::VolumeUsed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Liter, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SLEEP_ASSESSMENT => { match field_num {
-            0 => Some(FieldReference { name: "combined_awake_score", num: 0, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            1 => Some(FieldReference { name: "awake_time_score", num: 1, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            2 => Some(FieldReference { name: "awakenings_count_score", num: 2, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            3 => Some(FieldReference { name: "deep_sleep_score", num: 3, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            4 => Some(FieldReference { name: "sleep_duration_score", num: 4, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            5 => Some(FieldReference { name: "light_sleep_score", num: 5, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            6 => Some(FieldReference { name: "overall_sleep_score", num: 6, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            7 => Some(FieldReference { name: "sleep_quality_score", num: 7, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            8 => Some(FieldReference { name: "sleep_recovery_score", num: 8, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            9 => Some(FieldReference { name: "rem_sleep_score", num: 9, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            10 => Some(FieldReference { name: "sleep_restlessness_score", num: 10, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            11 => Some(FieldReference { name: "awakenings_count", num: 11, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            14 => Some(FieldReference { name: "interruptions_score", num: 14, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
-            15 => Some(FieldReference { name: "average_stress_during_sleep", num: 15, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::CombinedAwakeScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::AwakeTimeScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::AwakeningsCountScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::DeepSleepScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::SleepDurationScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::LightSleepScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::OverallSleepScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::SleepQualityScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            8 => Some(FieldReference { name: Name::SleepRecoveryScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            9 => Some(FieldReference { name: Name::RemSleepScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            10 => Some(FieldReference { name: Name::SleepRestlessnessScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::AwakeningsCount, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::InterruptionsScore, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::AverageStressDuringSleep, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SLEEP_DISRUPTION_SEVERITY_PERIOD => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "severity", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SleepDisruptionSeverity, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Severity, base_type: FitBaseType::ENUM, profile_type: ProfileType::SleepDisruptionSeverity, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SLEEP_DISRUPTION_OVERNIGHT_SEVERITY => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "severity", num: 0, base_type: FitBaseType::ENUM, profile_type: ProfileType::SleepDisruptionSeverity, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::Severity, base_type: FitBaseType::ENUM, profile_type: ProfileType::SleepDisruptionSeverity, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::NAP_EVENT => { match field_num {
-            254 => Some(FieldReference { name: "message_index", num: 254, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "start_time", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "seconds", ..FR_DEF }),
-            1 => Some(FieldReference { name: "start_timezone_offset", num: 1, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, units: "minutes", ..FR_DEF }),
-            2 => Some(FieldReference { name: "end_time", num: 2, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: "seconds", ..FR_DEF }),
-            3 => Some(FieldReference { name: "end_timezone_offset", num: 3, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, units: "minutes", ..FR_DEF }),
-            4 => Some(FieldReference { name: "feedback", num: 4, base_type: FitBaseType::ENUM, profile_type: ProfileType::NapPeriodFeedback, ..FR_DEF }),
-            5 => Some(FieldReference { name: "is_deleted", num: 5, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
-            6 => Some(FieldReference { name: "source", num: 6, base_type: FitBaseType::ENUM, profile_type: ProfileType::NapSource, ..FR_DEF }),
-            7 => Some(FieldReference { name: "update_timestamp", num: 7, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::StartTimezoneOffset, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, units: Unit::Minute, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::EndTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::EndTimezoneOffset, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, units: Unit::Minute, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::Feedback, base_type: FitBaseType::ENUM, profile_type: ProfileType::NapPeriodFeedback, ..FR_DEF }),
+            5 => Some(FieldReference { name: Name::IsDeleted, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
+            6 => Some(FieldReference { name: Name::Source, base_type: FitBaseType::ENUM, profile_type: ProfileType::NapSource, ..FR_DEF }),
+            7 => Some(FieldReference { name: Name::UpdateTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SKIN_TEMP_OVERNIGHT => { match field_num {
-            253 => Some(FieldReference { name: "timestamp", num: 253, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
-            0 => Some(FieldReference { name: "local_timestamp", num: 0, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
-            1 => Some(FieldReference { name: "average_deviation", num: 1, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
-            2 => Some(FieldReference { name: "average_7_day_deviation", num: 2, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
-            4 => Some(FieldReference { name: "nightly_value", num: 4, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            0 => Some(FieldReference { name: Name::LocalTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::LocalDateTime, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::AverageDeviation, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Average7DayDeviation, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
+            4 => Some(FieldReference { name: Name::NightlyValue, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, ..FR_DEF }),
            _ => None,
         }},
         _ => None
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Name {
+    /// "absolute_pressure"
+    AbsolutePressure,
+    /// "accel_cal_factor"
+    AccelCalFactor,
+    /// "accel_lateral"
+    AccelLateral,
+    /// "accel_normal"
+    AccelNormal,
+    /// "accel_x"
+    AccelX,
+    /// "accel_y"
+    AccelY,
+    /// "accel_z"
+    AccelZ,
+    /// "accumulate"
+    Accumulate,
+    /// "accumulated_power"
+    AccumulatedPower,
+    /// "active_calories"
+    ActiveCalories,
+    /// "active_met"
+    ActiveMet,
+    /// "active_time"
+    ActiveTime,
+    /// "active_time_16"
+    ActiveTime16,
+    /// "active_time_zone"
+    ActiveTimeZone,
+    /// "activity_class"
+    ActivityClass,
+    /// "activity_id"
+    ActivityId,
+    /// "activity_id_string"
+    ActivityIdString,
+    /// "activity_level"
+    ActivityLevel,
+    /// "activity_subtype"
+    ActivitySubtype,
+    /// "activity_time"
+    ActivityTime,
+    /// "activity_tracker_enabled"
+    ActivityTrackerEnabled,
+    /// "activity_type"
+    ActivityType,
+    /// "age"
+    Age,
+    /// "air_time_remaining"
+    AirTimeRemaining,
+    /// "alarm_type"
+    AlarmType,
+    /// "altitude"
+    Altitude,
+    /// "analog_layout"
+    AnalogLayout,
+    /// "ant_device_number"
+    AntDeviceNumber,
+    /// "ant_device_type"
+    AntDeviceType,
+    /// "ant_enabled"
+    AntEnabled,
+    /// "ant_network"
+    AntNetwork,
+    /// "ant_transmission_type"
+    AntTransmissionType,
+    /// "antplus_device_type"
+    AntplusDeviceType,
+    /// "apnea_countdown_enabled"
+    ApneaCountdownEnabled,
+    /// "apnea_countdown_time"
+    ApneaCountdownTime,
+    /// "application_id"
+    ApplicationId,
+    /// "application_version"
+    ApplicationVersion,
+    /// "array"
+    Array,
+    /// "ascent"
+    Ascent,
+    /// "ascent_rate"
+    AscentRate,
+    /// "ascent_time"
+    AscentTime,
+    /// "attitude_stage_complete"
+    AttitudeStageComplete,
+    /// "auto_activity_detect"
+    AutoActivityDetect,
+    /// "auto_activity_detect_duration"
+    AutoActivityDetectDuration,
+    /// "auto_activity_detect_start_timestamp"
+    AutoActivityDetectStartTimestamp,
+    /// "auto_activity_upload_enabled"
+    AutoActivityUploadEnabled,
+    /// "auto_power_zero"
+    AutoPowerZero,
+    /// "auto_sync_frequency"
+    AutoSyncFrequency,
+    /// "auto_wheel_cal"
+    AutoWheelCal,
+    /// "auto_wheelsize"
+    AutoWheelsize,
+    /// "autosync_min_steps"
+    AutosyncMinSteps,
+    /// "autosync_min_time"
+    AutosyncMinTime,
+    /// "average_7_day_deviation"
+    Average7DayDeviation,
+    /// "average_deviation"
+    AverageDeviation,
+    /// "average_stress_during_sleep"
+    AverageStressDuringSleep,
+    /// "avg_altitude"
+    AvgAltitude,
+    /// "avg_ascent_rate"
+    AvgAscentRate,
+    /// "avg_ball_speed"
+    AvgBallSpeed,
+    /// "avg_cadence"
+    AvgCadence,
+    /// "avg_cadence_position"
+    AvgCadencePosition,
+    /// "avg_combined_pedal_smoothness"
+    AvgCombinedPedalSmoothness,
+    /// "avg_core_temperature"
+    AvgCoreTemperature,
+    /// "avg_depth"
+    AvgDepth,
+    /// "avg_descent_rate"
+    AvgDescentRate,
+    /// "avg_flow"
+    AvgFlow,
+    /// "avg_fractional_cadence"
+    AvgFractionalCadence,
+    /// "avg_grade"
+    AvgGrade,
+    /// "avg_grit"
+    AvgGrit,
+    /// "avg_heart_rate"
+    AvgHeartRate,
+    /// "avg_lap_time"
+    AvgLapTime,
+    /// "avg_left_pco"
+    AvgLeftPco,
+    /// "avg_left_pedal_smoothness"
+    AvgLeftPedalSmoothness,
+    /// "avg_left_power_phase"
+    AvgLeftPowerPhase,
+    /// "avg_left_power_phase_peak"
+    AvgLeftPowerPhasePeak,
+    /// "avg_left_torque_effectiveness"
+    AvgLeftTorqueEffectiveness,
+    /// "avg_lev_motor_power"
+    AvgLevMotorPower,
+    /// "avg_neg_grade"
+    AvgNegGrade,
+    /// "avg_neg_vertical_speed"
+    AvgNegVerticalSpeed,
+    /// "avg_pos_grade"
+    AvgPosGrade,
+    /// "avg_pos_vertical_speed"
+    AvgPosVerticalSpeed,
+    /// "avg_power"
+    AvgPower,
+    /// "avg_power_position"
+    AvgPowerPosition,
+    /// "avg_pressure_sac"
+    AvgPressureSac,
+    /// "avg_respiration_rate"
+    AvgRespirationRate,
+    /// "avg_right_pco"
+    AvgRightPco,
+    /// "avg_right_pedal_smoothness"
+    AvgRightPedalSmoothness,
+    /// "avg_right_power_phase"
+    AvgRightPowerPhase,
+    /// "avg_right_power_phase_peak"
+    AvgRightPowerPhasePeak,
+    /// "avg_right_torque_effectiveness"
+    AvgRightTorqueEffectiveness,
+    /// "avg_rmv"
+    AvgRmv,
+    /// "avg_running_cadence"
+    AvgRunningCadence,
+    /// "avg_saturated_hemoglobin_percent"
+    AvgSaturatedHemoglobinPercent,
+    /// "avg_speed"
+    AvgSpeed,
+    /// "avg_spo2"
+    AvgSpo2,
+    /// "avg_stance_time"
+    AvgStanceTime,
+    /// "avg_stance_time_balance"
+    AvgStanceTimeBalance,
+    /// "avg_stance_time_percent"
+    AvgStanceTimePercent,
+    /// "avg_step_length"
+    AvgStepLength,
+    /// "avg_stress"
+    AvgStress,
+    /// "avg_stroke_count"
+    AvgStrokeCount,
+    /// "avg_stroke_distance"
+    AvgStrokeDistance,
+    /// "avg_swimming_cadence"
+    AvgSwimmingCadence,
+    /// "avg_temperature"
+    AvgTemperature,
+    /// "avg_total_hemoglobin_conc"
+    AvgTotalHemoglobinConc,
+    /// "avg_vam"
+    AvgVam,
+    /// "avg_vert_speed"
+    AvgVertSpeed,
+    /// "avg_vertical_oscillation"
+    AvgVerticalOscillation,
+    /// "avg_vertical_ratio"
+    AvgVerticalRatio,
+    /// "avg_volume_sac"
+    AvgVolumeSac,
+    /// "awake_time_score"
+    AwakeTimeScore,
+    /// "awakenings_count"
+    AwakeningsCount,
+    /// "awakenings_count_score"
+    AwakeningsCountScore,
+    /// "backlight_brightness"
+    BacklightBrightness,
+    /// "backlight_mode"
+    BacklightMode,
+    /// "backlight_timeout"
+    BacklightTimeout,
+    /// "ball_speed"
+    BallSpeed,
+    /// "baro_cal_factor"
+    BaroCalFactor,
+    /// "baro_pres"
+    BaroPres,
+    /// "basal_met"
+    BasalMet,
+    /// "baseline_balanced_lower"
+    BaselineBalancedLower,
+    /// "baseline_balanced_upper"
+    BaselineBalancedUpper,
+    /// "baseline_low_upper"
+    BaselineLowUpper,
+    /// "battery_identifier"
+    BatteryIdentifier,
+    /// "battery_level"
+    BatteryLevel,
+    /// "battery_soc"
+    BatterySoc,
+    /// "battery_status"
+    BatteryStatus,
+    /// "battery_voltage"
+    BatteryVoltage,
+    /// "best_lap_index"
+    BestLapIndex,
+    /// "bike_cad_ant_id"
+    BikeCadAntId,
+    /// "bike_cad_ant_id_trans_type"
+    BikeCadAntIdTransType,
+    /// "bike_power_ant_id"
+    BikePowerAntId,
+    /// "bike_power_ant_id_trans_type"
+    BikePowerAntIdTransType,
+    /// "bike_spd_ant_id"
+    BikeSpdAntId,
+    /// "bike_spd_ant_id_trans_type"
+    BikeSpdAntIdTransType,
+    /// "bike_spdcad_ant_id"
+    BikeSpdcadAntId,
+    /// "bike_spdcad_ant_id_trans_type"
+    BikeSpdcadAntIdTransType,
+    /// "bike_weight"
+    BikeWeight,
+    /// "bits"
+    Bits,
+    /// "ble_auto_upload_enabled"
+    BleAutoUploadEnabled,
+    /// "ble_device_type"
+    BleDeviceType,
+    /// "bluetooth_enabled"
+    BluetoothEnabled,
+    /// "bluetooth_le_enabled"
+    BluetoothLeEnabled,
+    /// "bmi"
+    Bmi,
+    /// "bone_mass"
+    BoneMass,
+    /// "bottom_depth"
+    BottomDepth,
+    /// "bottom_time"
+    BottomTime,
+    /// "cad_enabled"
+    CadEnabled,
+    /// "cad_high_alert"
+    CadHighAlert,
+    /// "cad_low_alert"
+    CadLowAlert,
+    /// "cadence"
+    Cadence,
+    /// "cadence256"
+    Cadence256,
+    /// "cadence_zone_high_boundary"
+    CadenceZoneHighBoundary,
+    /// "calibrated_accel_x"
+    CalibratedAccelX,
+    /// "calibrated_accel_y"
+    CalibratedAccelY,
+    /// "calibrated_accel_z"
+    CalibratedAccelZ,
+    /// "calibrated_data"
+    CalibratedData,
+    /// "calibrated_gyro_x"
+    CalibratedGyroX,
+    /// "calibrated_gyro_y"
+    CalibratedGyroY,
+    /// "calibrated_gyro_z"
+    CalibratedGyroZ,
+    /// "calibrated_mag_x"
+    CalibratedMagX,
+    /// "calibrated_mag_y"
+    CalibratedMagY,
+    /// "calibrated_mag_z"
+    CalibratedMagZ,
+    /// "calibration_divisor"
+    CalibrationDivisor,
+    /// "calibration_factor"
+    CalibrationFactor,
+    /// "calorie_duration_alert"
+    CalorieDurationAlert,
+    /// "calories"
+    Calories,
+    /// "camera_event_type"
+    CameraEventType,
+    /// "camera_file_uuid"
+    CameraFileUuid,
+    /// "camera_orientation"
+    CameraOrientation,
+    /// "capabilities"
+    Capabilities,
+    /// "category"
+    Category,
+    /// "category_subtype"
+    CategorySubtype,
+    /// "ccr_high_setpoint"
+    CcrHighSetpoint,
+    /// "ccr_high_setpoint_depth"
+    CcrHighSetpointDepth,
+    /// "ccr_high_setpoint_switch_mode"
+    CcrHighSetpointSwitchMode,
+    /// "ccr_low_setpoint"
+    CcrLowSetpoint,
+    /// "ccr_low_setpoint_depth"
+    CcrLowSetpointDepth,
+    /// "ccr_low_setpoint_switch_mode"
+    CcrLowSetpointSwitchMode,
+    /// "channel_number"
+    ChannelNumber,
+    /// "charged"
+    Charged,
+    /// "climb_category"
+    ClimbCategory,
+    /// "climb_number"
+    ClimbNumber,
+    /// "climb_pro_event"
+    ClimbProEvent,
+    /// "clip_end"
+    ClipEnd,
+    /// "clip_number"
+    ClipNumber,
+    /// "clip_start"
+    ClipStart,
+    /// "clock_time"
+    ClockTime,
+    /// "cns_load"
+    CnsLoad,
+    /// "combined_awake_score"
+    CombinedAwakeScore,
+    /// "combined_pedal_smoothness"
+    CombinedPedalSmoothness,
+    /// "comm_timeout"
+    CommTimeout,
+    /// "completed"
+    Completed,
+    /// "components"
+    Components,
+    /// "compressed_accumulated_power"
+    CompressedAccumulatedPower,
+    /// "compressed_calibrated_accel_x"
+    CompressedCalibratedAccelX,
+    /// "compressed_calibrated_accel_y"
+    CompressedCalibratedAccelY,
+    /// "compressed_calibrated_accel_z"
+    CompressedCalibratedAccelZ,
+    /// "compressed_speed_distance"
+    CompressedSpeedDistance,
+    /// "concept_count"
+    ConceptCount,
+    /// "concept_field"
+    ConceptField,
+    /// "concept_index"
+    ConceptIndex,
+    /// "concept_key"
+    ConceptKey,
+    /// "condition"
+    Condition,
+    /// "confidence"
+    Confidence,
+    /// "connectivity_supported"
+    ConnectivitySupported,
+    /// "core_temperature"
+    CoreTemperature,
+    /// "count"
+    Count,
+    /// "count_type"
+    CountType,
+    /// "course_download_enabled"
+    CourseDownloadEnabled,
+    /// "course_point_index"
+    CoursePointIndex,
+    /// "crank_length"
+    CrankLength,
+    /// "cum_operating_time"
+    CumOperatingTime,
+    /// "current_activity_type_intensity"
+    CurrentActivityTypeIntensity,
+    /// "current_day_resting_heart_rate"
+    CurrentDayRestingHeartRate,
+    /// "current_dist"
+    CurrentDist,
+    /// "current_stress"
+    CurrentStress,
+    /// "custom_target_cadence_high"
+    CustomTargetCadenceHigh,
+    /// "custom_target_cadence_low"
+    CustomTargetCadenceLow,
+    /// "custom_target_heart_rate_high"
+    CustomTargetHeartRateHigh,
+    /// "custom_target_heart_rate_low"
+    CustomTargetHeartRateLow,
+    /// "custom_target_power_high"
+    CustomTargetPowerHigh,
+    /// "custom_target_power_low"
+    CustomTargetPowerLow,
+    /// "custom_target_speed_high"
+    CustomTargetSpeedHigh,
+    /// "custom_target_speed_low"
+    CustomTargetSpeedLow,
+    /// "custom_target_value_high"
+    CustomTargetValueHigh,
+    /// "custom_target_value_low"
+    CustomTargetValueLow,
+    /// "custom_wheelsize"
+    CustomWheelsize,
+    /// "cycle_length"
+    CycleLength,
+    /// "cycle_length16"
+    CycleLength16,
+    /// "cycles"
+    Cycles,
+    /// "cycles_16"
+    Cycles16,
+    /// "cycles_to_calories"
+    CyclesToCalories,
+    /// "cycles_to_distance"
+    CyclesToDistance,
+    /// "data"
+    Data,
+    /// "data16"
+    Data16,
+    /// "data_page"
+    DataPage,
+    /// "data_size"
+    DataSize,
+    /// "data_units"
+    DataUnits,
+    /// "date_mode"
+    DateMode,
+    /// "day_of_week"
+    DayOfWeek,
+    /// "deep_sleep_score"
+    DeepSleepScore,
+    /// "default_max_biking_heart_rate"
+    DefaultMaxBikingHeartRate,
+    /// "default_max_heart_rate"
+    DefaultMaxHeartRate,
+    /// "default_max_running_heart_rate"
+    DefaultMaxRunningHeartRate,
+    /// "default_page"
+    DefaultPage,
+    /// "default_race_leader"
+    DefaultRaceLeader,
+    /// "delete_status"
+    DeleteStatus,
+    /// "depth"
+    Depth,
+    /// "depth_setting"
+    DepthSetting,
+    /// "descent"
+    Descent,
+    /// "descent_time"
+    DescentTime,
+    /// "descriptor"
+    Descriptor,
+    /// "developer_data_index"
+    DeveloperDataIndex,
+    /// "developer_id"
+    DeveloperId,
+    /// "device_id"
+    DeviceId,
+    /// "device_index"
+    DeviceIndex,
+    /// "device_number"
+    DeviceNumber,
+    /// "device_type"
+    DeviceType,
+    /// "diastolic_pressure"
+    DiastolicPressure,
+    /// "digital_layout"
+    DigitalLayout,
+    /// "directory"
+    Directory,
+    /// "display_orientation"
+    DisplayOrientation,
+    /// "display_type"
+    DisplayType,
+    /// "dist_setting"
+    DistSetting,
+    /// "distance"
+    Distance,
+    /// "distance_16"
+    Distance16,
+    /// "distance_duration_alert"
+    DistanceDurationAlert,
+    /// "dive_alert"
+    DiveAlert,
+    /// "dive_count"
+    DiveCount,
+    /// "dive_number"
+    DiveNumber,
+    /// "dive_sounds"
+    DiveSounds,
+    /// "dive_types"
+    DiveTypes,
+    /// "duration"
+    Duration,
+    /// "duration_calories"
+    DurationCalories,
+    /// "duration_distance"
+    DurationDistance,
+    /// "duration_hr"
+    DurationHr,
+    /// "duration_min"
+    DurationMin,
+    /// "duration_power"
+    DurationPower,
+    /// "duration_reps"
+    DurationReps,
+    /// "duration_step"
+    DurationStep,
+    /// "duration_time"
+    DurationTime,
+    /// "duration_type"
+    DurationType,
+    /// "duration_value"
+    DurationValue,
+    /// "ebike_assist_level_percent"
+    EbikeAssistLevelPercent,
+    /// "ebike_assist_mode"
+    EbikeAssistMode,
+    /// "ebike_battery_level"
+    EbikeBatteryLevel,
+    /// "ebike_travel_range"
+    EbikeTravelRange,
+    /// "elapsed_time"
+    ElapsedTime,
+    /// "elev_setting"
+    ElevSetting,
+
+    Empty,
+    /// "enabled"
+    Enabled,
+    /// "end_cns"
+    EndCns,
+    /// "end_date"
+    EndDate,
+    /// "end_n2"
+    EndN2,
+    /// "end_position_lat"
+    EndPositionLat,
+    /// "end_position_long"
+    EndPositionLong,
+    /// "end_pressure"
+    EndPressure,
+    /// "end_time"
+    EndTime,
+    /// "end_timestamp"
+    EndTimestamp,
+    /// "end_timestamp_ms"
+    EndTimestampMs,
+    /// "end_timezone_offset"
+    EndTimezoneOffset,
+    /// "energy_total"
+    EnergyTotal,
+    /// "enhanced_altitude"
+    EnhancedAltitude,
+    /// "enhanced_avg_altitude"
+    EnhancedAvgAltitude,
+    /// "enhanced_avg_respiration_rate"
+    EnhancedAvgRespirationRate,
+    /// "enhanced_avg_speed"
+    EnhancedAvgSpeed,
+    /// "enhanced_max_altitude"
+    EnhancedMaxAltitude,
+    /// "enhanced_max_respiration_rate"
+    EnhancedMaxRespirationRate,
+    /// "enhanced_max_speed"
+    EnhancedMaxSpeed,
+    /// "enhanced_min_altitude"
+    EnhancedMinAltitude,
+    /// "enhanced_min_respiration_rate"
+    EnhancedMinRespirationRate,
+    /// "enhanced_respiration_rate"
+    EnhancedRespirationRate,
+    /// "enhanced_speed"
+    EnhancedSpeed,
+    /// "equipment"
+    Equipment,
+    /// "event"
+    Event,
+    /// "event_group"
+    EventGroup,
+    /// "event_id"
+    EventId,
+    /// "event_timestamp"
+    EventTimestamp,
+    /// "event_timestamp_12"
+    EventTimestamp12,
+    /// "event_type"
+    EventType,
+    /// "exercise_category"
+    ExerciseCategory,
+    /// "exercise_name"
+    ExerciseName,
+    /// "exercise_weight"
+    ExerciseWeight,
+    /// "expire_time"
+    ExpireTime,
+    /// "fat_calories"
+    FatCalories,
+    /// "favero_product"
+    FaveroProduct,
+    /// "favorite"
+    Favorite,
+    /// "feedback"
+    Feedback,
+    /// "field_count"
+    FieldCount,
+    /// "field_definition_number"
+    FieldDefinitionNumber,
+    /// "field_id"
+    FieldId,
+    /// "field_name"
+    FieldName,
+    /// "field_num"
+    FieldNum,
+    /// "file"
+    File,
+    /// "file_uuid"
+    FileUuid,
+    /// "filtered_bpm"
+    FilteredBpm,
+    /// "first_lap_index"
+    FirstLapIndex,
+    /// "first_length_index"
+    FirstLengthIndex,
+    /// "first_step_index"
+    FirstStepIndex,
+    /// "fit_base_type_id"
+    FitBaseTypeId,
+    /// "fit_base_unit_id"
+    FitBaseUnitId,
+    /// "fitness_equipment_state"
+    FitnessEquipmentState,
+    /// "flags"
+    Flags,
+    /// "flow"
+    Flow,
+    /// "fractional_cadence"
+    FractionalCadence,
+    /// "fractional_system_timestamp"
+    FractionalSystemTimestamp,
+    /// "fractional_timestamp"
+    FractionalTimestamp,
+    /// "frame_number"
+    FrameNumber,
+    /// "friendly_name"
+    FriendlyName,
+    /// "front_gear"
+    FrontGear,
+    /// "front_gear_num"
+    FrontGearNum,
+    /// "front_gear_shift_count"
+    FrontGearShiftCount,
+    /// "functional_threshold_power"
+    FunctionalThresholdPower,
+    /// "gap"
+    Gap,
+    /// "garmin_product"
+    GarminProduct,
+    /// "gas_consumption_display"
+    GasConsumptionDisplay,
+    /// "gear_change_data"
+    GearChangeData,
+    /// "gender"
+    Gender,
+    /// "gf_high"
+    GfHigh,
+    /// "gf_low"
+    GfLow,
+    /// "global_id"
+    GlobalId,
+    /// "gps_accuracy"
+    GpsAccuracy,
+    /// "gps_ephemeris_download_enabled"
+    GpsEphemerisDownloadEnabled,
+    /// "grade"
+    Grade,
+    /// "grain_weight"
+    GrainWeight,
+    /// "grit"
+    Grit,
+    /// "group_primary_key"
+    GroupPrimaryKey,
+    /// "grouptrack_enabled"
+    GrouptrackEnabled,
+    /// "gyro_cal_factor"
+    GyroCalFactor,
+    /// "gyro_x"
+    GyroX,
+    /// "gyro_y"
+    GyroY,
+    /// "gyro_z"
+    GyroZ,
+    /// "hang_time"
+    HangTime,
+    /// "hardware_version"
+    HardwareVersion,
+    /// "heading"
+    Heading,
+    /// "heart_rate"
+    HeartRate,
+    /// "heart_rate_antplus_device_type"
+    HeartRateAntplusDeviceType,
+    /// "heart_rate_local_device_type"
+    HeartRateLocalDeviceType,
+    /// "heart_rate_source"
+    HeartRateSource,
+    /// "heart_rate_source_type"
+    HeartRateSourceType,
+    /// "heart_rate_type"
+    HeartRateType,
+    /// "height"
+    Height,
+    /// "height_setting"
+    HeightSetting,
+    /// "helium_content"
+    HeliumContent,
+    /// "high_bpm"
+    HighBpm,
+    /// "high_temperature"
+    HighTemperature,
+    /// "high_value"
+    HighValue,
+    /// "hosting_provider"
+    HostingProvider,
+    /// "hr_calc_type"
+    HrCalcType,
+    /// "hr_high_alert"
+    HrHighAlert,
+    /// "hr_low_alert"
+    HrLowAlert,
+    /// "hr_setting"
+    HrSetting,
+    /// "hr_source"
+    HrSource,
+    /// "hr_zone_high_boundary"
+    HrZoneHighBoundary,
+    /// "hrm_ant_id"
+    HrmAntId,
+    /// "hrm_ant_id_trans_type"
+    HrmAntIdTransType,
+    /// "id"
+    Id,
+    /// "incident_detection_enabled"
+    IncidentDetectionEnabled,
+    /// "instance"
+    Instance,
+    /// "intensity"
+    Intensity,
+    /// "intensity_factor"
+    IntensityFactor,
+    /// "interruptions_score"
+    InterruptionsScore,
+    /// "is_deleted"
+    IsDeleted,
+    /// "is_signed"
+    IsSigned,
+    /// "issue_time"
+    IssueTime,
+    /// "jump_count"
+    JumpCount,
+    /// "lactate_threshold_autodetect_enabled"
+    LactateThresholdAutodetectEnabled,
+    /// "language"
+    Language,
+    /// "languages"
+    Languages,
+    /// "lap_trigger"
+    LapTrigger,
+    /// "last_night_5_min_high"
+    LastNight5MinHigh,
+    /// "last_night_average"
+    LastNightAverage,
+    /// "last_stop_multiple"
+    LastStopMultiple,
+    /// "layout"
+    Layout,
+    /// "leader_activity_id"
+    LeaderActivityId,
+    /// "leader_activity_id_string"
+    LeaderActivityIdString,
+    /// "leader_group_primary_key"
+    LeaderGroupPrimaryKey,
+    /// "leader_time"
+    LeaderTime,
+    /// "leader_type"
+    LeaderType,
+    /// "left_pco"
+    LeftPco,
+    /// "left_pedal_smoothness"
+    LeftPedalSmoothness,
+    /// "left_power_phase"
+    LeftPowerPhase,
+    /// "left_power_phase_peak"
+    LeftPowerPhasePeak,
+    /// "left_right_balance"
+    LeftRightBalance,
+    /// "left_torque_effectiveness"
+    LeftTorqueEffectiveness,
+    /// "length_type"
+    LengthType,
+    /// "lev_battery_consumption"
+    LevBatteryConsumption,
+    /// "level"
+    Level,
+    /// "level_shift"
+    LevelShift,
+    /// "light_sleep_score"
+    LightSleepScore,
+    /// "live_tracking_enabled"
+    LiveTrackingEnabled,
+    /// "local_device_type"
+    LocalDeviceType,
+    /// "local_id"
+    LocalId,
+    /// "local_timestamp"
+    LocalTimestamp,
+    /// "location"
+    Location,
+    /// "log_hrv"
+    LogHrv,
+    /// "low_temperature"
+    LowTemperature,
+    /// "mag_x"
+    MagX,
+    /// "mag_y"
+    MagY,
+    /// "mag_z"
+    MagZ,
+    /// "manufacturer"
+    Manufacturer,
+    /// "manufacturer_id"
+    ManufacturerId,
+    /// "map_3_sample_mean"
+    Map3SampleMean,
+    /// "map_evening_values"
+    MapEveningValues,
+    /// "map_morning_values"
+    MapMorningValues,
+    /// "max_altitude"
+    MaxAltitude,
+    /// "max_ascent_rate"
+    MaxAscentRate,
+    /// "max_ball_speed"
+    MaxBallSpeed,
+    /// "max_cadence"
+    MaxCadence,
+    /// "max_cadence_position"
+    MaxCadencePosition,
+    /// "max_core_temperature"
+    MaxCoreTemperature,
+    /// "max_count"
+    MaxCount,
+    /// "max_depth"
+    MaxDepth,
+    /// "max_descent_rate"
+    MaxDescentRate,
+    /// "max_fractional_cadence"
+    MaxFractionalCadence,
+    /// "max_heart_rate"
+    MaxHeartRate,
+    /// "max_lev_motor_power"
+    MaxLevMotorPower,
+    /// "max_met_category"
+    MaxMetCategory,
+    /// "max_neg_grade"
+    MaxNegGrade,
+    /// "max_neg_vertical_speed"
+    MaxNegVerticalSpeed,
+    /// "max_per_file"
+    MaxPerFile,
+    /// "max_per_file_type"
+    MaxPerFileType,
+    /// "max_pos_grade"
+    MaxPosGrade,
+    /// "max_pos_vertical_speed"
+    MaxPosVerticalSpeed,
+    /// "max_power"
+    MaxPower,
+    /// "max_power_position"
+    MaxPowerPosition,
+    /// "max_respiration_rate"
+    MaxRespirationRate,
+    /// "max_running_cadence"
+    MaxRunningCadence,
+    /// "max_saturated_hemoglobin_percent"
+    MaxSaturatedHemoglobinPercent,
+    /// "max_size"
+    MaxSize,
+    /// "max_speed"
+    MaxSpeed,
+    /// "max_temperature"
+    MaxTemperature,
+    /// "max_total_hemoglobin_conc"
+    MaxTotalHemoglobinConc,
+    /// "mean_arterial_pressure"
+    MeanArterialPressure,
+    /// "memo"
+    Memo,
+    /// "mesg_data"
+    MesgData,
+    /// "mesg_id"
+    MesgId,
+    /// "mesg_num"
+    MesgNum,
+    /// "message_count"
+    MessageCount,
+    /// "message_index"
+    MessageIndex,
+    /// "metabolic_age"
+    MetabolicAge,
+    /// "metabolic_calories"
+    MetabolicCalories,
+    /// "min_altitude"
+    MinAltitude,
+    /// "min_core_temperature"
+    MinCoreTemperature,
+    /// "min_heart_rate"
+    MinHeartRate,
+    /// "min_respiration_rate"
+    MinRespirationRate,
+    /// "min_saturated_hemoglobin_percent"
+    MinSaturatedHemoglobinPercent,
+    /// "min_speed"
+    MinSpeed,
+    /// "min_temperature"
+    MinTemperature,
+    /// "min_total_hemoglobin_conc"
+    MinTotalHemoglobinConc,
+    /// "mode"
+    Mode,
+    /// "model"
+    Model,
+    /// "moderate_activity_minutes"
+    ModerateActivityMinutes,
+    /// "motor_power"
+    MotorPower,
+    /// "mounting_side"
+    MountingSide,
+    /// "move_alert_enabled"
+    MoveAlertEnabled,
+    /// "muscle_mass"
+    MuscleMass,
+    /// "n2_load"
+    N2Load,
+    /// "name"
+    Name,
+    /// "native_field_num"
+    NativeFieldNum,
+    /// "native_mesg_num"
+    NativeMesgNum,
+    /// "ndl_time"
+    NdlTime,
+    /// "nec_lat"
+    NecLat,
+    /// "nec_long"
+    NecLong,
+    /// "next_stop_depth"
+    NextStopDepth,
+    /// "next_stop_time"
+    NextStopTime,
+    /// "nightly_value"
+    NightlyValue,
+    /// "no_fly_time_mode"
+    NoFlyTimeMode,
+    /// "normalized_power"
+    NormalizedPower,
+    /// "notes"
+    Notes,
+    /// "num_active_lengths"
+    NumActiveLengths,
+    /// "num_laps"
+    NumLaps,
+    /// "num_lengths"
+    NumLengths,
+    /// "num_per_file"
+    NumPerFile,
+    /// "num_sessions"
+    NumSessions,
+    /// "num_splits"
+    NumSplits,
+    /// "num_valid_steps"
+    NumValidSteps,
+    /// "number"
+    Number,
+    /// "number_of_screens"
+    NumberOfScreens,
+    /// "o2_toxicity"
+    O2Toxicity,
+    /// "observed_at_time"
+    ObservedAtTime,
+    /// "observed_location_lat"
+    ObservedLocationLat,
+    /// "observed_location_long"
+    ObservedLocationLong,
+    /// "odometer"
+    Odometer,
+    /// "odometer_rollover"
+    OdometerRollover,
+    /// "offset"
+    Offset,
+    /// "offset_cal"
+    OffsetCal,
+    /// "opponent_name"
+    OpponentName,
+    /// "opponent_score"
+    OpponentScore,
+    /// "orientation_matrix"
+    OrientationMatrix,
+    /// "overall_sleep_score"
+    OverallSleepScore,
+    /// "oxygen_content"
+    OxygenContent,
+    /// "pages_enabled"
+    PagesEnabled,
+    /// "parent_index"
+    ParentIndex,
+    /// "part_index"
+    PartIndex,
+    /// "part_number"
+    PartNumber,
+    /// "percent_fat"
+    PercentFat,
+    /// "percent_hydration"
+    PercentHydration,
+    /// "physique_rating"
+    PhysiqueRating,
+    /// "pid"
+    Pid,
+    /// "pid_data_size"
+    PidDataSize,
+    /// "pitch"
+    Pitch,
+    /// "player_score"
+    PlayerScore,
+    /// "po2"
+    Po2,
+    /// "po2_critical"
+    Po2Critical,
+    /// "po2_deco"
+    Po2Deco,
+    /// "po2_warn"
+    Po2Warn,
+    /// "pool_length"
+    PoolLength,
+    /// "pool_length_unit"
+    PoolLengthUnit,
+    /// "popup_enabled"
+    PopupEnabled,
+    /// "position_lat"
+    PositionLat,
+    /// "position_long"
+    PositionLong,
+    /// "position_setting"
+    PositionSetting,
+    /// "power"
+    Power,
+    /// "power_cal_factor"
+    PowerCalFactor,
+    /// "power_enabled"
+    PowerEnabled,
+    /// "power_high_alert"
+    PowerHighAlert,
+    /// "power_low_alert"
+    PowerLowAlert,
+    /// "power_setting"
+    PowerSetting,
+    /// "power_zone_high_boundary"
+    PowerZoneHighBoundary,
+    /// "precipitation_probability"
+    PrecipitationProbability,
+    /// "precise_target_speed"
+    PreciseTargetSpeed,
+    /// "pressure"
+    Pressure,
+    /// "pressure_sac"
+    PressureSac,
+    /// "processing_interval"
+    ProcessingInterval,
+    /// "product"
+    Product,
+    /// "product_name"
+    ProductName,
+    /// "projectile_type"
+    ProjectileType,
+    /// "pwr_calc_type"
+    PwrCalcType,
+    /// "qualifier"
+    Qualifier,
+    /// "quality"
+    Quality,
+    /// "radar_threat_alert"
+    RadarThreatAlert,
+    /// "radar_threat_avg_approach_speed"
+    RadarThreatAvgApproachSpeed,
+    /// "radar_threat_count"
+    RadarThreatCount,
+    /// "radar_threat_level_max"
+    RadarThreatLevelMax,
+    /// "radar_threat_max_approach_speed"
+    RadarThreatMaxApproachSpeed,
+    /// "raw_data"
+    RawData,
+    /// "reading_confidence"
+    ReadingConfidence,
+    /// "reading_spo2"
+    ReadingSpo2,
+    /// "rear_gear"
+    RearGear,
+    /// "rear_gear_num"
+    RearGearNum,
+    /// "rear_gear_shift_count"
+    RearGearShiftCount,
+    /// "recurrence"
+    Recurrence,
+    /// "recurrence_value"
+    RecurrenceValue,
+    /// "reference_index"
+    ReferenceIndex,
+    /// "reference_mesg"
+    ReferenceMesg,
+    /// "relative_humidity"
+    RelativeHumidity,
+    /// "rem_sleep_score"
+    RemSleepScore,
+    /// "repeat"
+    Repeat,
+    /// "repeat_calories"
+    RepeatCalories,
+    /// "repeat_distance"
+    RepeatDistance,
+    /// "repeat_dive_interval"
+    RepeatDiveInterval,
+    /// "repeat_hr"
+    RepeatHr,
+    /// "repeat_power"
+    RepeatPower,
+    /// "repeat_steps"
+    RepeatSteps,
+    /// "repeat_time"
+    RepeatTime,
+    /// "repeating"
+    Repeating,
+    /// "repetition_num"
+    RepetitionNum,
+    /// "repetitions"
+    Repetitions,
+    /// "report_id"
+    ReportId,
+    /// "resistance"
+    Resistance,
+    /// "respiration_rate"
+    RespirationRate,
+    /// "resting_heart_rate"
+    RestingHeartRate,
+    /// "resting_metabolic_rate"
+    RestingMetabolicRate,
+    /// "rider_position"
+    RiderPosition,
+    /// "right_pco"
+    RightPco,
+    /// "right_pedal_smoothness"
+    RightPedalSmoothness,
+    /// "right_power_phase"
+    RightPowerPhase,
+    /// "right_power_phase_peak"
+    RightPowerPhasePeak,
+    /// "right_torque_effectiveness"
+    RightTorqueEffectiveness,
+    /// "rmssd_hrv"
+    RmssdHrv,
+    /// "rmv"
+    Rmv,
+    /// "roll"
+    Roll,
+    /// "rotations"
+    Rotations,
+    /// "safety_stop_enabled"
+    SafetyStopEnabled,
+    /// "safety_stop_time"
+    SafetyStopTime,
+    /// "sample_time_offset"
+    SampleTimeOffset,
+    /// "sampling_interval"
+    SamplingInterval,
+    /// "saturated_hemoglobin_percent"
+    SaturatedHemoglobinPercent,
+    /// "saturated_hemoglobin_percent_max"
+    SaturatedHemoglobinPercentMax,
+    /// "saturated_hemoglobin_percent_min"
+    SaturatedHemoglobinPercentMin,
+    /// "scale"
+    Scale,
+    /// "scaling"
+    Scaling,
+    /// "scheduled_time"
+    ScheduledTime,
+    /// "score"
+    Score,
+    /// "screen_enabled"
+    ScreenEnabled,
+    /// "screen_index"
+    ScreenIndex,
+    /// "sdm_ant_id"
+    SdmAntId,
+    /// "sdm_ant_id_trans_type"
+    SdmAntIdTransType,
+    /// "sdm_cal_factor"
+    SdmCalFactor,
+    /// "sdrr_hrv"
+    SdrrHrv,
+    /// "secondary_custom_target_cadence_high"
+    SecondaryCustomTargetCadenceHigh,
+    /// "secondary_custom_target_cadence_low"
+    SecondaryCustomTargetCadenceLow,
+    /// "secondary_custom_target_heart_rate_high"
+    SecondaryCustomTargetHeartRateHigh,
+    /// "secondary_custom_target_heart_rate_low"
+    SecondaryCustomTargetHeartRateLow,
+    /// "secondary_custom_target_power_high"
+    SecondaryCustomTargetPowerHigh,
+    /// "secondary_custom_target_power_low"
+    SecondaryCustomTargetPowerLow,
+    /// "secondary_custom_target_speed_high"
+    SecondaryCustomTargetSpeedHigh,
+    /// "secondary_custom_target_speed_low"
+    SecondaryCustomTargetSpeedLow,
+    /// "secondary_custom_target_value_high"
+    SecondaryCustomTargetValueHigh,
+    /// "secondary_custom_target_value_low"
+    SecondaryCustomTargetValueLow,
+    /// "secondary_target_cadence_zone"
+    SecondaryTargetCadenceZone,
+    /// "secondary_target_hr_zone"
+    SecondaryTargetHrZone,
+    /// "secondary_target_power_zone"
+    SecondaryTargetPowerZone,
+    /// "secondary_target_speed_zone"
+    SecondaryTargetSpeedZone,
+    /// "secondary_target_stroke_type"
+    SecondaryTargetStrokeType,
+    /// "secondary_target_type"
+    SecondaryTargetType,
+    /// "secondary_target_value"
+    SecondaryTargetValue,
+    /// "segment_time"
+    SegmentTime,
+    /// "selection_type"
+    SelectionType,
+    /// "sensor"
+    Sensor,
+    /// "sensor_position"
+    SensorPosition,
+    /// "sensor_type"
+    SensorType,
+    /// "sentence"
+    Sentence,
+    /// "serial_number"
+    SerialNumber,
+    /// "sessions"
+    Sessions,
+    /// "set_type"
+    SetType,
+    /// "severity"
+    Severity,
+    /// "shimano_di2_enabled"
+    ShimanoDi2Enabled,
+    /// "shot_count"
+    ShotCount,
+    /// "shot_num"
+    ShotNum,
+    /// "shot_speed"
+    ShotSpeed,
+    /// "sleep_duration_score"
+    SleepDurationScore,
+    /// "sleep_level"
+    SleepLevel,
+    /// "sleep_quality_score"
+    SleepQualityScore,
+    /// "sleep_recovery_score"
+    SleepRecoveryScore,
+    /// "sleep_restlessness_score"
+    SleepRestlessnessScore,
+    /// "sleep_time"
+    SleepTime,
+    /// "smart_notification_display_orientation"
+    SmartNotificationDisplayOrientation,
+    /// "software_version"
+    SoftwareVersion,
+    /// "sound"
+    Sound,
+    /// "source"
+    Source,
+    /// "source_type"
+    SourceType,
+    /// "spd_enabled"
+    SpdEnabled,
+    /// "spdcad_enabled"
+    SpdcadEnabled,
+    /// "speed"
+    Speed,
+    /// "speed_1s"
+    Speed1S,
+    /// "speed_high_alert"
+    SpeedHighAlert,
+    /// "speed_low_alert"
+    SpeedLowAlert,
+    /// "speed_setting"
+    SpeedSetting,
+    /// "speed_source"
+    SpeedSource,
+    /// "speed_zone_high_boundary"
+    SpeedZoneHighBoundary,
+    /// "split_type"
+    SplitType,
+    /// "sport"
+    Sport,
+    /// "sport_event"
+    SportEvent,
+    /// "sport_index"
+    SportIndex,
+    /// "sport_point"
+    SportPoint,
+    /// "sport_profile_name"
+    SportProfileName,
+    /// "sports"
+    Sports,
+    /// "stage"
+    Stage,
+    /// "stance_time"
+    StanceTime,
+    /// "stance_time_balance"
+    StanceTimeBalance,
+    /// "stance_time_percent"
+    StanceTimePercent,
+    /// "stand_count"
+    StandCount,
+    /// "standard_deviation"
+    StandardDeviation,
+    /// "start_cns"
+    StartCns,
+    /// "start_date"
+    StartDate,
+    /// "start_elevation"
+    StartElevation,
+    /// "start_n2"
+    StartN2,
+    /// "start_position_lat"
+    StartPositionLat,
+    /// "start_position_long"
+    StartPositionLong,
+    /// "start_pressure"
+    StartPressure,
+    /// "start_time"
+    StartTime,
+    /// "start_timestamp"
+    StartTimestamp,
+    /// "start_timestamp_ms"
+    StartTimestampMs,
+    /// "start_timezone_offset"
+    StartTimezoneOffset,
+    /// "status"
+    Status,
+    /// "step_length"
+    StepLength,
+    /// "steps"
+    Steps,
+    /// "stress_level"
+    StressLevel,
+    /// "stress_level_time"
+    StressLevelTime,
+    /// "stress_level_value"
+    StressLevelValue,
+    /// "stroke_count"
+    StrokeCount,
+    /// "stroke_type"
+    StrokeType,
+    /// "strokes"
+    Strokes,
+    /// "sub_sport"
+    SubSport,
+    /// "surface_interval"
+    SurfaceInterval,
+    /// "swc_lat"
+    SwcLat,
+    /// "swc_long"
+    SwcLong,
+    /// "swim_stroke"
+    SwimStroke,
+    /// "system_time"
+    SystemTime,
+    /// "system_timestamp"
+    SystemTimestamp,
+    /// "system_timestamp_ms"
+    SystemTimestampMs,
+    /// "systolic_pressure"
+    SystolicPressure,
+    /// "tap_interface"
+    TapInterface,
+    /// "tap_sensitivity"
+    TapSensitivity,
+    /// "target_cadence_zone"
+    TargetCadenceZone,
+    /// "target_distance"
+    TargetDistance,
+    /// "target_hr_zone"
+    TargetHrZone,
+    /// "target_power_zone"
+    TargetPowerZone,
+    /// "target_speed"
+    TargetSpeed,
+    /// "target_speed_zone"
+    TargetSpeedZone,
+    /// "target_stroke_type"
+    TargetStrokeType,
+    /// "target_time"
+    TargetTime,
+    /// "target_type"
+    TargetType,
+    /// "target_value"
+    TargetValue,
+    /// "temperature"
+    Temperature,
+    /// "temperature_feels_like"
+    TemperatureFeelsLike,
+    /// "temperature_max"
+    TemperatureMax,
+    /// "temperature_min"
+    TemperatureMin,
+    /// "temperature_setting"
+    TemperatureSetting,
+    /// "text"
+    Text,
+    /// "threshold_heart_rate"
+    ThresholdHeartRate,
+    /// "threshold_power"
+    ThresholdPower,
+    /// "time"
+    Time,
+    /// "time128"
+    Time128,
+    /// "time256"
+    Time256,
+    /// "time_above_threshold"
+    TimeAboveThreshold,
+    /// "time_created"
+    TimeCreated,
+    /// "time_duration_alert"
+    TimeDurationAlert,
+    /// "time_from_course"
+    TimeFromCourse,
+    /// "time_in_cadence_zone"
+    TimeInCadenceZone,
+    /// "time_in_hr_zone"
+    TimeInHrZone,
+    /// "time_in_power_zone"
+    TimeInPowerZone,
+    /// "time_in_speed_zone"
+    TimeInSpeedZone,
+    /// "time_mode"
+    TimeMode,
+    /// "time_offset"
+    TimeOffset,
+    /// "time_standing"
+    TimeStanding,
+    /// "time_to_surface"
+    TimeToSurface,
+    /// "time_zone_offset"
+    TimeZoneOffset,
+    /// "timer_time"
+    TimerTime,
+    /// "timer_trigger"
+    TimerTrigger,
+    /// "timestamp"
+    Timestamp,
+    /// "timestamp_16"
+    Timestamp16,
+    /// "timestamp_32k"
+    Timestamp32K,
+    /// "timestamp_min_8"
+    TimestampMin8,
+    /// "timestamp_ms"
+    TimestampMs,
+    /// "title"
+    Title,
+    /// "total_anaerobic_training_effect"
+    TotalAnaerobicTrainingEffect,
+    /// "total_ascent"
+    TotalAscent,
+    /// "total_calories"
+    TotalCalories,
+    /// "total_cycles"
+    TotalCycles,
+    /// "total_descent"
+    TotalDescent,
+    /// "total_distance"
+    TotalDistance,
+    /// "total_elapsed_time"
+    TotalElapsedTime,
+    /// "total_fat_calories"
+    TotalFatCalories,
+    /// "total_flow"
+    TotalFlow,
+    /// "total_fractional_ascent"
+    TotalFractionalAscent,
+    /// "total_fractional_cycles"
+    TotalFractionalCycles,
+    /// "total_fractional_descent"
+    TotalFractionalDescent,
+    /// "total_grit"
+    TotalGrit,
+    /// "total_hemoglobin_conc"
+    TotalHemoglobinConc,
+    /// "total_hemoglobin_conc_max"
+    TotalHemoglobinConcMax,
+    /// "total_hemoglobin_conc_min"
+    TotalHemoglobinConcMin,
+    /// "total_moving_time"
+    TotalMovingTime,
+    /// "total_strides"
+    TotalStrides,
+    /// "total_strokes"
+    TotalStrokes,
+    /// "total_timer_time"
+    TotalTimerTime,
+    /// "total_training_effect"
+    TotalTrainingEffect,
+    /// "total_work"
+    TotalWork,
+    /// "track"
+    Track,
+    /// "training_load_peak"
+    TrainingLoadPeak,
+    /// "training_stress_score"
+    TrainingStressScore,
+    /// "transmission_type"
+    TransmissionType,
+    /// "travel_gas"
+    TravelGas,
+    /// "trigger"
+    Trigger,
+    /// "trigger_on_ascent"
+    TriggerOnAscent,
+    /// "trigger_on_descent"
+    TriggerOnDescent,
+    /// "turn_rate"
+    TurnRate,
+    /// "type"
+    Type,
+    /// "uncharged"
+    Uncharged,
+    /// "units"
+    Units,
+    /// "up_key_enabled"
+    UpKeyEnabled,
+    /// "update_time"
+    UpdateTime,
+    /// "update_timestamp"
+    UpdateTimestamp,
+    /// "url"
+    Url,
+    /// "user_profile_index"
+    UserProfileIndex,
+    /// "user_profile_primary_key"
+    UserProfilePrimaryKey,
+    /// "user_running_step_length"
+    UserRunningStepLength,
+    /// "user_walking_step_length"
+    UserWalkingStepLength,
+    /// "utc_offset"
+    UtcOffset,
+    /// "utc_timestamp"
+    UtcTimestamp,
+    /// "uuid"
+    Uuid,
+    /// "validity"
+    Validity,
+    /// "value"
+    Value,
+    /// "velocity"
+    Velocity,
+    /// "version"
+    Version,
+    /// "vertical_oscillation"
+    VerticalOscillation,
+    /// "vertical_ratio"
+    VerticalRatio,
+    /// "vertical_speed"
+    VerticalSpeed,
+    /// "vigorous_activity_minutes"
+    VigorousActivityMinutes,
+    /// "virtual_partner_speed"
+    VirtualPartnerSpeed,
+    /// "visceral_fat_mass"
+    VisceralFatMass,
+    /// "visceral_fat_rating"
+    VisceralFatRating,
+    /// "vo2_max"
+    Vo2Max,
+    /// "volume_sac"
+    VolumeSac,
+    /// "volume_used"
+    VolumeUsed,
+    /// "wake_time"
+    WakeTime,
+    /// "water_density"
+    WaterDensity,
+    /// "water_type"
+    WaterType,
+    /// "weather_alerts_enabled"
+    WeatherAlertsEnabled,
+    /// "weather_conditions_enabled"
+    WeatherConditionsEnabled,
+    /// "weather_report"
+    WeatherReport,
+    /// "weekly_average"
+    WeeklyAverage,
+    /// "weight"
+    Weight,
+    /// "weight_display_unit"
+    WeightDisplayUnit,
+    /// "weight_setting"
+    WeightSetting,
+    /// "wind_direction"
+    WindDirection,
+    /// "wind_speed"
+    WindSpeed,
+    /// "wkt_description"
+    WktDescription,
+    /// "wkt_name"
+    WktName,
+    /// "wkt_step_index"
+    WktStepIndex,
+    /// "wkt_step_name"
+    WktStepName,
+    /// "workout_download_enabled"
+    WorkoutDownloadEnabled,
+    /// "workout_feel"
+    WorkoutFeel,
+    /// "workout_rpe"
+    WorkoutRpe,
+    /// "workouts_supported"
+    WorkoutsSupported,
+    /// "zero_cross_cnt"
+    ZeroCrossCnt,
+    /// "zone"
+    Zone,
+    /// "zone_count"
+    ZoneCount,
+}
+
+impl Name {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::AbsolutePressure => "absolute_pressure",
+            Self::AccelCalFactor => "accel_cal_factor",
+            Self::AccelLateral => "accel_lateral",
+            Self::AccelNormal => "accel_normal",
+            Self::AccelX => "accel_x",
+            Self::AccelY => "accel_y",
+            Self::AccelZ => "accel_z",
+            Self::Accumulate => "accumulate",
+            Self::AccumulatedPower => "accumulated_power",
+            Self::ActiveCalories => "active_calories",
+            Self::ActiveMet => "active_met",
+            Self::ActiveTime => "active_time",
+            Self::ActiveTime16 => "active_time_16",
+            Self::ActiveTimeZone => "active_time_zone",
+            Self::ActivityClass => "activity_class",
+            Self::ActivityId => "activity_id",
+            Self::ActivityIdString => "activity_id_string",
+            Self::ActivityLevel => "activity_level",
+            Self::ActivitySubtype => "activity_subtype",
+            Self::ActivityTime => "activity_time",
+            Self::ActivityTrackerEnabled => "activity_tracker_enabled",
+            Self::ActivityType => "activity_type",
+            Self::Age => "age",
+            Self::AirTimeRemaining => "air_time_remaining",
+            Self::AlarmType => "alarm_type",
+            Self::Altitude => "altitude",
+            Self::AnalogLayout => "analog_layout",
+            Self::AntDeviceNumber => "ant_device_number",
+            Self::AntDeviceType => "ant_device_type",
+            Self::AntEnabled => "ant_enabled",
+            Self::AntNetwork => "ant_network",
+            Self::AntTransmissionType => "ant_transmission_type",
+            Self::AntplusDeviceType => "antplus_device_type",
+            Self::ApneaCountdownEnabled => "apnea_countdown_enabled",
+            Self::ApneaCountdownTime => "apnea_countdown_time",
+            Self::ApplicationId => "application_id",
+            Self::ApplicationVersion => "application_version",
+            Self::Array => "array",
+            Self::Ascent => "ascent",
+            Self::AscentRate => "ascent_rate",
+            Self::AscentTime => "ascent_time",
+            Self::AttitudeStageComplete => "attitude_stage_complete",
+            Self::AutoActivityDetect => "auto_activity_detect",
+            Self::AutoActivityDetectDuration => "auto_activity_detect_duration",
+            Self::AutoActivityDetectStartTimestamp => "auto_activity_detect_start_timestamp",
+            Self::AutoActivityUploadEnabled => "auto_activity_upload_enabled",
+            Self::AutoPowerZero => "auto_power_zero",
+            Self::AutoSyncFrequency => "auto_sync_frequency",
+            Self::AutoWheelCal => "auto_wheel_cal",
+            Self::AutoWheelsize => "auto_wheelsize",
+            Self::AutosyncMinSteps => "autosync_min_steps",
+            Self::AutosyncMinTime => "autosync_min_time",
+            Self::Average7DayDeviation => "average_7_day_deviation",
+            Self::AverageDeviation => "average_deviation",
+            Self::AverageStressDuringSleep => "average_stress_during_sleep",
+            Self::AvgAltitude => "avg_altitude",
+            Self::AvgAscentRate => "avg_ascent_rate",
+            Self::AvgBallSpeed => "avg_ball_speed",
+            Self::AvgCadence => "avg_cadence",
+            Self::AvgCadencePosition => "avg_cadence_position",
+            Self::AvgCombinedPedalSmoothness => "avg_combined_pedal_smoothness",
+            Self::AvgCoreTemperature => "avg_core_temperature",
+            Self::AvgDepth => "avg_depth",
+            Self::AvgDescentRate => "avg_descent_rate",
+            Self::AvgFlow => "avg_flow",
+            Self::AvgFractionalCadence => "avg_fractional_cadence",
+            Self::AvgGrade => "avg_grade",
+            Self::AvgGrit => "avg_grit",
+            Self::AvgHeartRate => "avg_heart_rate",
+            Self::AvgLapTime => "avg_lap_time",
+            Self::AvgLeftPco => "avg_left_pco",
+            Self::AvgLeftPedalSmoothness => "avg_left_pedal_smoothness",
+            Self::AvgLeftPowerPhase => "avg_left_power_phase",
+            Self::AvgLeftPowerPhasePeak => "avg_left_power_phase_peak",
+            Self::AvgLeftTorqueEffectiveness => "avg_left_torque_effectiveness",
+            Self::AvgLevMotorPower => "avg_lev_motor_power",
+            Self::AvgNegGrade => "avg_neg_grade",
+            Self::AvgNegVerticalSpeed => "avg_neg_vertical_speed",
+            Self::AvgPosGrade => "avg_pos_grade",
+            Self::AvgPosVerticalSpeed => "avg_pos_vertical_speed",
+            Self::AvgPower => "avg_power",
+            Self::AvgPowerPosition => "avg_power_position",
+            Self::AvgPressureSac => "avg_pressure_sac",
+            Self::AvgRespirationRate => "avg_respiration_rate",
+            Self::AvgRightPco => "avg_right_pco",
+            Self::AvgRightPedalSmoothness => "avg_right_pedal_smoothness",
+            Self::AvgRightPowerPhase => "avg_right_power_phase",
+            Self::AvgRightPowerPhasePeak => "avg_right_power_phase_peak",
+            Self::AvgRightTorqueEffectiveness => "avg_right_torque_effectiveness",
+            Self::AvgRmv => "avg_rmv",
+            Self::AvgRunningCadence => "avg_running_cadence",
+            Self::AvgSaturatedHemoglobinPercent => "avg_saturated_hemoglobin_percent",
+            Self::AvgSpeed => "avg_speed",
+            Self::AvgSpo2 => "avg_spo2",
+            Self::AvgStanceTime => "avg_stance_time",
+            Self::AvgStanceTimeBalance => "avg_stance_time_balance",
+            Self::AvgStanceTimePercent => "avg_stance_time_percent",
+            Self::AvgStepLength => "avg_step_length",
+            Self::AvgStress => "avg_stress",
+            Self::AvgStrokeCount => "avg_stroke_count",
+            Self::AvgStrokeDistance => "avg_stroke_distance",
+            Self::AvgSwimmingCadence => "avg_swimming_cadence",
+            Self::AvgTemperature => "avg_temperature",
+            Self::AvgTotalHemoglobinConc => "avg_total_hemoglobin_conc",
+            Self::AvgVam => "avg_vam",
+            Self::AvgVertSpeed => "avg_vert_speed",
+            Self::AvgVerticalOscillation => "avg_vertical_oscillation",
+            Self::AvgVerticalRatio => "avg_vertical_ratio",
+            Self::AvgVolumeSac => "avg_volume_sac",
+            Self::AwakeTimeScore => "awake_time_score",
+            Self::AwakeningsCount => "awakenings_count",
+            Self::AwakeningsCountScore => "awakenings_count_score",
+            Self::BacklightBrightness => "backlight_brightness",
+            Self::BacklightMode => "backlight_mode",
+            Self::BacklightTimeout => "backlight_timeout",
+            Self::BallSpeed => "ball_speed",
+            Self::BaroCalFactor => "baro_cal_factor",
+            Self::BaroPres => "baro_pres",
+            Self::BasalMet => "basal_met",
+            Self::BaselineBalancedLower => "baseline_balanced_lower",
+            Self::BaselineBalancedUpper => "baseline_balanced_upper",
+            Self::BaselineLowUpper => "baseline_low_upper",
+            Self::BatteryIdentifier => "battery_identifier",
+            Self::BatteryLevel => "battery_level",
+            Self::BatterySoc => "battery_soc",
+            Self::BatteryStatus => "battery_status",
+            Self::BatteryVoltage => "battery_voltage",
+            Self::BestLapIndex => "best_lap_index",
+            Self::BikeCadAntId => "bike_cad_ant_id",
+            Self::BikeCadAntIdTransType => "bike_cad_ant_id_trans_type",
+            Self::BikePowerAntId => "bike_power_ant_id",
+            Self::BikePowerAntIdTransType => "bike_power_ant_id_trans_type",
+            Self::BikeSpdAntId => "bike_spd_ant_id",
+            Self::BikeSpdAntIdTransType => "bike_spd_ant_id_trans_type",
+            Self::BikeSpdcadAntId => "bike_spdcad_ant_id",
+            Self::BikeSpdcadAntIdTransType => "bike_spdcad_ant_id_trans_type",
+            Self::BikeWeight => "bike_weight",
+            Self::Bits => "bits",
+            Self::BleAutoUploadEnabled => "ble_auto_upload_enabled",
+            Self::BleDeviceType => "ble_device_type",
+            Self::BluetoothEnabled => "bluetooth_enabled",
+            Self::BluetoothLeEnabled => "bluetooth_le_enabled",
+            Self::Bmi => "bmi",
+            Self::BoneMass => "bone_mass",
+            Self::BottomDepth => "bottom_depth",
+            Self::BottomTime => "bottom_time",
+            Self::CadEnabled => "cad_enabled",
+            Self::CadHighAlert => "cad_high_alert",
+            Self::CadLowAlert => "cad_low_alert",
+            Self::Cadence => "cadence",
+            Self::Cadence256 => "cadence256",
+            Self::CadenceZoneHighBoundary => "cadence_zone_high_boundary",
+            Self::CalibratedAccelX => "calibrated_accel_x",
+            Self::CalibratedAccelY => "calibrated_accel_y",
+            Self::CalibratedAccelZ => "calibrated_accel_z",
+            Self::CalibratedData => "calibrated_data",
+            Self::CalibratedGyroX => "calibrated_gyro_x",
+            Self::CalibratedGyroY => "calibrated_gyro_y",
+            Self::CalibratedGyroZ => "calibrated_gyro_z",
+            Self::CalibratedMagX => "calibrated_mag_x",
+            Self::CalibratedMagY => "calibrated_mag_y",
+            Self::CalibratedMagZ => "calibrated_mag_z",
+            Self::CalibrationDivisor => "calibration_divisor",
+            Self::CalibrationFactor => "calibration_factor",
+            Self::CalorieDurationAlert => "calorie_duration_alert",
+            Self::Calories => "calories",
+            Self::CameraEventType => "camera_event_type",
+            Self::CameraFileUuid => "camera_file_uuid",
+            Self::CameraOrientation => "camera_orientation",
+            Self::Capabilities => "capabilities",
+            Self::Category => "category",
+            Self::CategorySubtype => "category_subtype",
+            Self::CcrHighSetpoint => "ccr_high_setpoint",
+            Self::CcrHighSetpointDepth => "ccr_high_setpoint_depth",
+            Self::CcrHighSetpointSwitchMode => "ccr_high_setpoint_switch_mode",
+            Self::CcrLowSetpoint => "ccr_low_setpoint",
+            Self::CcrLowSetpointDepth => "ccr_low_setpoint_depth",
+            Self::CcrLowSetpointSwitchMode => "ccr_low_setpoint_switch_mode",
+            Self::ChannelNumber => "channel_number",
+            Self::Charged => "charged",
+            Self::ClimbCategory => "climb_category",
+            Self::ClimbNumber => "climb_number",
+            Self::ClimbProEvent => "climb_pro_event",
+            Self::ClipEnd => "clip_end",
+            Self::ClipNumber => "clip_number",
+            Self::ClipStart => "clip_start",
+            Self::ClockTime => "clock_time",
+            Self::CnsLoad => "cns_load",
+            Self::CombinedAwakeScore => "combined_awake_score",
+            Self::CombinedPedalSmoothness => "combined_pedal_smoothness",
+            Self::CommTimeout => "comm_timeout",
+            Self::Completed => "completed",
+            Self::Components => "components",
+            Self::CompressedAccumulatedPower => "compressed_accumulated_power",
+            Self::CompressedCalibratedAccelX => "compressed_calibrated_accel_x",
+            Self::CompressedCalibratedAccelY => "compressed_calibrated_accel_y",
+            Self::CompressedCalibratedAccelZ => "compressed_calibrated_accel_z",
+            Self::CompressedSpeedDistance => "compressed_speed_distance",
+            Self::ConceptCount => "concept_count",
+            Self::ConceptField => "concept_field",
+            Self::ConceptIndex => "concept_index",
+            Self::ConceptKey => "concept_key",
+            Self::Condition => "condition",
+            Self::Confidence => "confidence",
+            Self::ConnectivitySupported => "connectivity_supported",
+            Self::CoreTemperature => "core_temperature",
+            Self::Count => "count",
+            Self::CountType => "count_type",
+            Self::CourseDownloadEnabled => "course_download_enabled",
+            Self::CoursePointIndex => "course_point_index",
+            Self::CrankLength => "crank_length",
+            Self::CumOperatingTime => "cum_operating_time",
+            Self::CurrentActivityTypeIntensity => "current_activity_type_intensity",
+            Self::CurrentDayRestingHeartRate => "current_day_resting_heart_rate",
+            Self::CurrentDist => "current_dist",
+            Self::CurrentStress => "current_stress",
+            Self::CustomTargetCadenceHigh => "custom_target_cadence_high",
+            Self::CustomTargetCadenceLow => "custom_target_cadence_low",
+            Self::CustomTargetHeartRateHigh => "custom_target_heart_rate_high",
+            Self::CustomTargetHeartRateLow => "custom_target_heart_rate_low",
+            Self::CustomTargetPowerHigh => "custom_target_power_high",
+            Self::CustomTargetPowerLow => "custom_target_power_low",
+            Self::CustomTargetSpeedHigh => "custom_target_speed_high",
+            Self::CustomTargetSpeedLow => "custom_target_speed_low",
+            Self::CustomTargetValueHigh => "custom_target_value_high",
+            Self::CustomTargetValueLow => "custom_target_value_low",
+            Self::CustomWheelsize => "custom_wheelsize",
+            Self::CycleLength => "cycle_length",
+            Self::CycleLength16 => "cycle_length16",
+            Self::Cycles => "cycles",
+            Self::Cycles16 => "cycles_16",
+            Self::CyclesToCalories => "cycles_to_calories",
+            Self::CyclesToDistance => "cycles_to_distance",
+            Self::Data => "data",
+            Self::Data16 => "data16",
+            Self::DataPage => "data_page",
+            Self::DataSize => "data_size",
+            Self::DataUnits => "data_units",
+            Self::DateMode => "date_mode",
+            Self::DayOfWeek => "day_of_week",
+            Self::DeepSleepScore => "deep_sleep_score",
+            Self::DefaultMaxBikingHeartRate => "default_max_biking_heart_rate",
+            Self::DefaultMaxHeartRate => "default_max_heart_rate",
+            Self::DefaultMaxRunningHeartRate => "default_max_running_heart_rate",
+            Self::DefaultPage => "default_page",
+            Self::DefaultRaceLeader => "default_race_leader",
+            Self::DeleteStatus => "delete_status",
+            Self::Depth => "depth",
+            Self::DepthSetting => "depth_setting",
+            Self::Descent => "descent",
+            Self::DescentTime => "descent_time",
+            Self::Descriptor => "descriptor",
+            Self::DeveloperDataIndex => "developer_data_index",
+            Self::DeveloperId => "developer_id",
+            Self::DeviceId => "device_id",
+            Self::DeviceIndex => "device_index",
+            Self::DeviceNumber => "device_number",
+            Self::DeviceType => "device_type",
+            Self::DiastolicPressure => "diastolic_pressure",
+            Self::DigitalLayout => "digital_layout",
+            Self::Directory => "directory",
+            Self::DisplayOrientation => "display_orientation",
+            Self::DisplayType => "display_type",
+            Self::DistSetting => "dist_setting",
+            Self::Distance => "distance",
+            Self::Distance16 => "distance_16",
+            Self::DistanceDurationAlert => "distance_duration_alert",
+            Self::DiveAlert => "dive_alert",
+            Self::DiveCount => "dive_count",
+            Self::DiveNumber => "dive_number",
+            Self::DiveSounds => "dive_sounds",
+            Self::DiveTypes => "dive_types",
+            Self::Duration => "duration",
+            Self::DurationCalories => "duration_calories",
+            Self::DurationDistance => "duration_distance",
+            Self::DurationHr => "duration_hr",
+            Self::DurationMin => "duration_min",
+            Self::DurationPower => "duration_power",
+            Self::DurationReps => "duration_reps",
+            Self::DurationStep => "duration_step",
+            Self::DurationTime => "duration_time",
+            Self::DurationType => "duration_type",
+            Self::DurationValue => "duration_value",
+            Self::EbikeAssistLevelPercent => "ebike_assist_level_percent",
+            Self::EbikeAssistMode => "ebike_assist_mode",
+            Self::EbikeBatteryLevel => "ebike_battery_level",
+            Self::EbikeTravelRange => "ebike_travel_range",
+            Self::ElapsedTime => "elapsed_time",
+            Self::ElevSetting => "elev_setting",
+            Self::Empty => "",
+            Self::Enabled => "enabled",
+            Self::EndCns => "end_cns",
+            Self::EndDate => "end_date",
+            Self::EndN2 => "end_n2",
+            Self::EndPositionLat => "end_position_lat",
+            Self::EndPositionLong => "end_position_long",
+            Self::EndPressure => "end_pressure",
+            Self::EndTime => "end_time",
+            Self::EndTimestamp => "end_timestamp",
+            Self::EndTimestampMs => "end_timestamp_ms",
+            Self::EndTimezoneOffset => "end_timezone_offset",
+            Self::EnergyTotal => "energy_total",
+            Self::EnhancedAltitude => "enhanced_altitude",
+            Self::EnhancedAvgAltitude => "enhanced_avg_altitude",
+            Self::EnhancedAvgRespirationRate => "enhanced_avg_respiration_rate",
+            Self::EnhancedAvgSpeed => "enhanced_avg_speed",
+            Self::EnhancedMaxAltitude => "enhanced_max_altitude",
+            Self::EnhancedMaxRespirationRate => "enhanced_max_respiration_rate",
+            Self::EnhancedMaxSpeed => "enhanced_max_speed",
+            Self::EnhancedMinAltitude => "enhanced_min_altitude",
+            Self::EnhancedMinRespirationRate => "enhanced_min_respiration_rate",
+            Self::EnhancedRespirationRate => "enhanced_respiration_rate",
+            Self::EnhancedSpeed => "enhanced_speed",
+            Self::Equipment => "equipment",
+            Self::Event => "event",
+            Self::EventGroup => "event_group",
+            Self::EventId => "event_id",
+            Self::EventTimestamp => "event_timestamp",
+            Self::EventTimestamp12 => "event_timestamp_12",
+            Self::EventType => "event_type",
+            Self::ExerciseCategory => "exercise_category",
+            Self::ExerciseName => "exercise_name",
+            Self::ExerciseWeight => "exercise_weight",
+            Self::ExpireTime => "expire_time",
+            Self::FatCalories => "fat_calories",
+            Self::FaveroProduct => "favero_product",
+            Self::Favorite => "favorite",
+            Self::Feedback => "feedback",
+            Self::FieldCount => "field_count",
+            Self::FieldDefinitionNumber => "field_definition_number",
+            Self::FieldId => "field_id",
+            Self::FieldName => "field_name",
+            Self::FieldNum => "field_num",
+            Self::File => "file",
+            Self::FileUuid => "file_uuid",
+            Self::FilteredBpm => "filtered_bpm",
+            Self::FirstLapIndex => "first_lap_index",
+            Self::FirstLengthIndex => "first_length_index",
+            Self::FirstStepIndex => "first_step_index",
+            Self::FitBaseTypeId => "fit_base_type_id",
+            Self::FitBaseUnitId => "fit_base_unit_id",
+            Self::FitnessEquipmentState => "fitness_equipment_state",
+            Self::Flags => "flags",
+            Self::Flow => "flow",
+            Self::FractionalCadence => "fractional_cadence",
+            Self::FractionalSystemTimestamp => "fractional_system_timestamp",
+            Self::FractionalTimestamp => "fractional_timestamp",
+            Self::FrameNumber => "frame_number",
+            Self::FriendlyName => "friendly_name",
+            Self::FrontGear => "front_gear",
+            Self::FrontGearNum => "front_gear_num",
+            Self::FrontGearShiftCount => "front_gear_shift_count",
+            Self::FunctionalThresholdPower => "functional_threshold_power",
+            Self::Gap => "gap",
+            Self::GarminProduct => "garmin_product",
+            Self::GasConsumptionDisplay => "gas_consumption_display",
+            Self::GearChangeData => "gear_change_data",
+            Self::Gender => "gender",
+            Self::GfHigh => "gf_high",
+            Self::GfLow => "gf_low",
+            Self::GlobalId => "global_id",
+            Self::GpsAccuracy => "gps_accuracy",
+            Self::GpsEphemerisDownloadEnabled => "gps_ephemeris_download_enabled",
+            Self::Grade => "grade",
+            Self::GrainWeight => "grain_weight",
+            Self::Grit => "grit",
+            Self::GroupPrimaryKey => "group_primary_key",
+            Self::GrouptrackEnabled => "grouptrack_enabled",
+            Self::GyroCalFactor => "gyro_cal_factor",
+            Self::GyroX => "gyro_x",
+            Self::GyroY => "gyro_y",
+            Self::GyroZ => "gyro_z",
+            Self::HangTime => "hang_time",
+            Self::HardwareVersion => "hardware_version",
+            Self::Heading => "heading",
+            Self::HeartRate => "heart_rate",
+            Self::HeartRateAntplusDeviceType => "heart_rate_antplus_device_type",
+            Self::HeartRateLocalDeviceType => "heart_rate_local_device_type",
+            Self::HeartRateSource => "heart_rate_source",
+            Self::HeartRateSourceType => "heart_rate_source_type",
+            Self::HeartRateType => "heart_rate_type",
+            Self::Height => "height",
+            Self::HeightSetting => "height_setting",
+            Self::HeliumContent => "helium_content",
+            Self::HighBpm => "high_bpm",
+            Self::HighTemperature => "high_temperature",
+            Self::HighValue => "high_value",
+            Self::HostingProvider => "hosting_provider",
+            Self::HrCalcType => "hr_calc_type",
+            Self::HrHighAlert => "hr_high_alert",
+            Self::HrLowAlert => "hr_low_alert",
+            Self::HrSetting => "hr_setting",
+            Self::HrSource => "hr_source",
+            Self::HrZoneHighBoundary => "hr_zone_high_boundary",
+            Self::HrmAntId => "hrm_ant_id",
+            Self::HrmAntIdTransType => "hrm_ant_id_trans_type",
+            Self::Id => "id",
+            Self::IncidentDetectionEnabled => "incident_detection_enabled",
+            Self::Instance => "instance",
+            Self::Intensity => "intensity",
+            Self::IntensityFactor => "intensity_factor",
+            Self::InterruptionsScore => "interruptions_score",
+            Self::IsDeleted => "is_deleted",
+            Self::IsSigned => "is_signed",
+            Self::IssueTime => "issue_time",
+            Self::JumpCount => "jump_count",
+            Self::LactateThresholdAutodetectEnabled => "lactate_threshold_autodetect_enabled",
+            Self::Language => "language",
+            Self::Languages => "languages",
+            Self::LapTrigger => "lap_trigger",
+            Self::LastNight5MinHigh => "last_night_5_min_high",
+            Self::LastNightAverage => "last_night_average",
+            Self::LastStopMultiple => "last_stop_multiple",
+            Self::Layout => "layout",
+            Self::LeaderActivityId => "leader_activity_id",
+            Self::LeaderActivityIdString => "leader_activity_id_string",
+            Self::LeaderGroupPrimaryKey => "leader_group_primary_key",
+            Self::LeaderTime => "leader_time",
+            Self::LeaderType => "leader_type",
+            Self::LeftPco => "left_pco",
+            Self::LeftPedalSmoothness => "left_pedal_smoothness",
+            Self::LeftPowerPhase => "left_power_phase",
+            Self::LeftPowerPhasePeak => "left_power_phase_peak",
+            Self::LeftRightBalance => "left_right_balance",
+            Self::LeftTorqueEffectiveness => "left_torque_effectiveness",
+            Self::LengthType => "length_type",
+            Self::LevBatteryConsumption => "lev_battery_consumption",
+            Self::Level => "level",
+            Self::LevelShift => "level_shift",
+            Self::LightSleepScore => "light_sleep_score",
+            Self::LiveTrackingEnabled => "live_tracking_enabled",
+            Self::LocalDeviceType => "local_device_type",
+            Self::LocalId => "local_id",
+            Self::LocalTimestamp => "local_timestamp",
+            Self::Location => "location",
+            Self::LogHrv => "log_hrv",
+            Self::LowTemperature => "low_temperature",
+            Self::MagX => "mag_x",
+            Self::MagY => "mag_y",
+            Self::MagZ => "mag_z",
+            Self::Manufacturer => "manufacturer",
+            Self::ManufacturerId => "manufacturer_id",
+            Self::Map3SampleMean => "map_3_sample_mean",
+            Self::MapEveningValues => "map_evening_values",
+            Self::MapMorningValues => "map_morning_values",
+            Self::MaxAltitude => "max_altitude",
+            Self::MaxAscentRate => "max_ascent_rate",
+            Self::MaxBallSpeed => "max_ball_speed",
+            Self::MaxCadence => "max_cadence",
+            Self::MaxCadencePosition => "max_cadence_position",
+            Self::MaxCoreTemperature => "max_core_temperature",
+            Self::MaxCount => "max_count",
+            Self::MaxDepth => "max_depth",
+            Self::MaxDescentRate => "max_descent_rate",
+            Self::MaxFractionalCadence => "max_fractional_cadence",
+            Self::MaxHeartRate => "max_heart_rate",
+            Self::MaxLevMotorPower => "max_lev_motor_power",
+            Self::MaxMetCategory => "max_met_category",
+            Self::MaxNegGrade => "max_neg_grade",
+            Self::MaxNegVerticalSpeed => "max_neg_vertical_speed",
+            Self::MaxPerFile => "max_per_file",
+            Self::MaxPerFileType => "max_per_file_type",
+            Self::MaxPosGrade => "max_pos_grade",
+            Self::MaxPosVerticalSpeed => "max_pos_vertical_speed",
+            Self::MaxPower => "max_power",
+            Self::MaxPowerPosition => "max_power_position",
+            Self::MaxRespirationRate => "max_respiration_rate",
+            Self::MaxRunningCadence => "max_running_cadence",
+            Self::MaxSaturatedHemoglobinPercent => "max_saturated_hemoglobin_percent",
+            Self::MaxSize => "max_size",
+            Self::MaxSpeed => "max_speed",
+            Self::MaxTemperature => "max_temperature",
+            Self::MaxTotalHemoglobinConc => "max_total_hemoglobin_conc",
+            Self::MeanArterialPressure => "mean_arterial_pressure",
+            Self::Memo => "memo",
+            Self::MesgData => "mesg_data",
+            Self::MesgId => "mesg_id",
+            Self::MesgNum => "mesg_num",
+            Self::MessageCount => "message_count",
+            Self::MessageIndex => "message_index",
+            Self::MetabolicAge => "metabolic_age",
+            Self::MetabolicCalories => "metabolic_calories",
+            Self::MinAltitude => "min_altitude",
+            Self::MinCoreTemperature => "min_core_temperature",
+            Self::MinHeartRate => "min_heart_rate",
+            Self::MinRespirationRate => "min_respiration_rate",
+            Self::MinSaturatedHemoglobinPercent => "min_saturated_hemoglobin_percent",
+            Self::MinSpeed => "min_speed",
+            Self::MinTemperature => "min_temperature",
+            Self::MinTotalHemoglobinConc => "min_total_hemoglobin_conc",
+            Self::Mode => "mode",
+            Self::Model => "model",
+            Self::ModerateActivityMinutes => "moderate_activity_minutes",
+            Self::MotorPower => "motor_power",
+            Self::MountingSide => "mounting_side",
+            Self::MoveAlertEnabled => "move_alert_enabled",
+            Self::MuscleMass => "muscle_mass",
+            Self::N2Load => "n2_load",
+            Self::Name => "name",
+            Self::NativeFieldNum => "native_field_num",
+            Self::NativeMesgNum => "native_mesg_num",
+            Self::NdlTime => "ndl_time",
+            Self::NecLat => "nec_lat",
+            Self::NecLong => "nec_long",
+            Self::NextStopDepth => "next_stop_depth",
+            Self::NextStopTime => "next_stop_time",
+            Self::NightlyValue => "nightly_value",
+            Self::NoFlyTimeMode => "no_fly_time_mode",
+            Self::NormalizedPower => "normalized_power",
+            Self::Notes => "notes",
+            Self::NumActiveLengths => "num_active_lengths",
+            Self::NumLaps => "num_laps",
+            Self::NumLengths => "num_lengths",
+            Self::NumPerFile => "num_per_file",
+            Self::NumSessions => "num_sessions",
+            Self::NumSplits => "num_splits",
+            Self::NumValidSteps => "num_valid_steps",
+            Self::Number => "number",
+            Self::NumberOfScreens => "number_of_screens",
+            Self::O2Toxicity => "o2_toxicity",
+            Self::ObservedAtTime => "observed_at_time",
+            Self::ObservedLocationLat => "observed_location_lat",
+            Self::ObservedLocationLong => "observed_location_long",
+            Self::Odometer => "odometer",
+            Self::OdometerRollover => "odometer_rollover",
+            Self::Offset => "offset",
+            Self::OffsetCal => "offset_cal",
+            Self::OpponentName => "opponent_name",
+            Self::OpponentScore => "opponent_score",
+            Self::OrientationMatrix => "orientation_matrix",
+            Self::OverallSleepScore => "overall_sleep_score",
+            Self::OxygenContent => "oxygen_content",
+            Self::PagesEnabled => "pages_enabled",
+            Self::ParentIndex => "parent_index",
+            Self::PartIndex => "part_index",
+            Self::PartNumber => "part_number",
+            Self::PercentFat => "percent_fat",
+            Self::PercentHydration => "percent_hydration",
+            Self::PhysiqueRating => "physique_rating",
+            Self::Pid => "pid",
+            Self::PidDataSize => "pid_data_size",
+            Self::Pitch => "pitch",
+            Self::PlayerScore => "player_score",
+            Self::Po2 => "po2",
+            Self::Po2Critical => "po2_critical",
+            Self::Po2Deco => "po2_deco",
+            Self::Po2Warn => "po2_warn",
+            Self::PoolLength => "pool_length",
+            Self::PoolLengthUnit => "pool_length_unit",
+            Self::PopupEnabled => "popup_enabled",
+            Self::PositionLat => "position_lat",
+            Self::PositionLong => "position_long",
+            Self::PositionSetting => "position_setting",
+            Self::Power => "power",
+            Self::PowerCalFactor => "power_cal_factor",
+            Self::PowerEnabled => "power_enabled",
+            Self::PowerHighAlert => "power_high_alert",
+            Self::PowerLowAlert => "power_low_alert",
+            Self::PowerSetting => "power_setting",
+            Self::PowerZoneHighBoundary => "power_zone_high_boundary",
+            Self::PrecipitationProbability => "precipitation_probability",
+            Self::PreciseTargetSpeed => "precise_target_speed",
+            Self::Pressure => "pressure",
+            Self::PressureSac => "pressure_sac",
+            Self::ProcessingInterval => "processing_interval",
+            Self::Product => "product",
+            Self::ProductName => "product_name",
+            Self::ProjectileType => "projectile_type",
+            Self::PwrCalcType => "pwr_calc_type",
+            Self::Qualifier => "qualifier",
+            Self::Quality => "quality",
+            Self::RadarThreatAlert => "radar_threat_alert",
+            Self::RadarThreatAvgApproachSpeed => "radar_threat_avg_approach_speed",
+            Self::RadarThreatCount => "radar_threat_count",
+            Self::RadarThreatLevelMax => "radar_threat_level_max",
+            Self::RadarThreatMaxApproachSpeed => "radar_threat_max_approach_speed",
+            Self::RawData => "raw_data",
+            Self::ReadingConfidence => "reading_confidence",
+            Self::ReadingSpo2 => "reading_spo2",
+            Self::RearGear => "rear_gear",
+            Self::RearGearNum => "rear_gear_num",
+            Self::RearGearShiftCount => "rear_gear_shift_count",
+            Self::Recurrence => "recurrence",
+            Self::RecurrenceValue => "recurrence_value",
+            Self::ReferenceIndex => "reference_index",
+            Self::ReferenceMesg => "reference_mesg",
+            Self::RelativeHumidity => "relative_humidity",
+            Self::RemSleepScore => "rem_sleep_score",
+            Self::Repeat => "repeat",
+            Self::RepeatCalories => "repeat_calories",
+            Self::RepeatDistance => "repeat_distance",
+            Self::RepeatDiveInterval => "repeat_dive_interval",
+            Self::RepeatHr => "repeat_hr",
+            Self::RepeatPower => "repeat_power",
+            Self::RepeatSteps => "repeat_steps",
+            Self::RepeatTime => "repeat_time",
+            Self::Repeating => "repeating",
+            Self::RepetitionNum => "repetition_num",
+            Self::Repetitions => "repetitions",
+            Self::ReportId => "report_id",
+            Self::Resistance => "resistance",
+            Self::RespirationRate => "respiration_rate",
+            Self::RestingHeartRate => "resting_heart_rate",
+            Self::RestingMetabolicRate => "resting_metabolic_rate",
+            Self::RiderPosition => "rider_position",
+            Self::RightPco => "right_pco",
+            Self::RightPedalSmoothness => "right_pedal_smoothness",
+            Self::RightPowerPhase => "right_power_phase",
+            Self::RightPowerPhasePeak => "right_power_phase_peak",
+            Self::RightTorqueEffectiveness => "right_torque_effectiveness",
+            Self::RmssdHrv => "rmssd_hrv",
+            Self::Rmv => "rmv",
+            Self::Roll => "roll",
+            Self::Rotations => "rotations",
+            Self::SafetyStopEnabled => "safety_stop_enabled",
+            Self::SafetyStopTime => "safety_stop_time",
+            Self::SampleTimeOffset => "sample_time_offset",
+            Self::SamplingInterval => "sampling_interval",
+            Self::SaturatedHemoglobinPercent => "saturated_hemoglobin_percent",
+            Self::SaturatedHemoglobinPercentMax => "saturated_hemoglobin_percent_max",
+            Self::SaturatedHemoglobinPercentMin => "saturated_hemoglobin_percent_min",
+            Self::Scale => "scale",
+            Self::Scaling => "scaling",
+            Self::ScheduledTime => "scheduled_time",
+            Self::Score => "score",
+            Self::ScreenEnabled => "screen_enabled",
+            Self::ScreenIndex => "screen_index",
+            Self::SdmAntId => "sdm_ant_id",
+            Self::SdmAntIdTransType => "sdm_ant_id_trans_type",
+            Self::SdmCalFactor => "sdm_cal_factor",
+            Self::SdrrHrv => "sdrr_hrv",
+            Self::SecondaryCustomTargetCadenceHigh => "secondary_custom_target_cadence_high",
+            Self::SecondaryCustomTargetCadenceLow => "secondary_custom_target_cadence_low",
+            Self::SecondaryCustomTargetHeartRateHigh => "secondary_custom_target_heart_rate_high",
+            Self::SecondaryCustomTargetHeartRateLow => "secondary_custom_target_heart_rate_low",
+            Self::SecondaryCustomTargetPowerHigh => "secondary_custom_target_power_high",
+            Self::SecondaryCustomTargetPowerLow => "secondary_custom_target_power_low",
+            Self::SecondaryCustomTargetSpeedHigh => "secondary_custom_target_speed_high",
+            Self::SecondaryCustomTargetSpeedLow => "secondary_custom_target_speed_low",
+            Self::SecondaryCustomTargetValueHigh => "secondary_custom_target_value_high",
+            Self::SecondaryCustomTargetValueLow => "secondary_custom_target_value_low",
+            Self::SecondaryTargetCadenceZone => "secondary_target_cadence_zone",
+            Self::SecondaryTargetHrZone => "secondary_target_hr_zone",
+            Self::SecondaryTargetPowerZone => "secondary_target_power_zone",
+            Self::SecondaryTargetSpeedZone => "secondary_target_speed_zone",
+            Self::SecondaryTargetStrokeType => "secondary_target_stroke_type",
+            Self::SecondaryTargetType => "secondary_target_type",
+            Self::SecondaryTargetValue => "secondary_target_value",
+            Self::SegmentTime => "segment_time",
+            Self::SelectionType => "selection_type",
+            Self::Sensor => "sensor",
+            Self::SensorPosition => "sensor_position",
+            Self::SensorType => "sensor_type",
+            Self::Sentence => "sentence",
+            Self::SerialNumber => "serial_number",
+            Self::Sessions => "sessions",
+            Self::SetType => "set_type",
+            Self::Severity => "severity",
+            Self::ShimanoDi2Enabled => "shimano_di2_enabled",
+            Self::ShotCount => "shot_count",
+            Self::ShotNum => "shot_num",
+            Self::ShotSpeed => "shot_speed",
+            Self::SleepDurationScore => "sleep_duration_score",
+            Self::SleepLevel => "sleep_level",
+            Self::SleepQualityScore => "sleep_quality_score",
+            Self::SleepRecoveryScore => "sleep_recovery_score",
+            Self::SleepRestlessnessScore => "sleep_restlessness_score",
+            Self::SleepTime => "sleep_time",
+            Self::SmartNotificationDisplayOrientation => "smart_notification_display_orientation",
+            Self::SoftwareVersion => "software_version",
+            Self::Sound => "sound",
+            Self::Source => "source",
+            Self::SourceType => "source_type",
+            Self::SpdEnabled => "spd_enabled",
+            Self::SpdcadEnabled => "spdcad_enabled",
+            Self::Speed => "speed",
+            Self::Speed1S => "speed_1s",
+            Self::SpeedHighAlert => "speed_high_alert",
+            Self::SpeedLowAlert => "speed_low_alert",
+            Self::SpeedSetting => "speed_setting",
+            Self::SpeedSource => "speed_source",
+            Self::SpeedZoneHighBoundary => "speed_zone_high_boundary",
+            Self::SplitType => "split_type",
+            Self::Sport => "sport",
+            Self::SportEvent => "sport_event",
+            Self::SportIndex => "sport_index",
+            Self::SportPoint => "sport_point",
+            Self::SportProfileName => "sport_profile_name",
+            Self::Sports => "sports",
+            Self::Stage => "stage",
+            Self::StanceTime => "stance_time",
+            Self::StanceTimeBalance => "stance_time_balance",
+            Self::StanceTimePercent => "stance_time_percent",
+            Self::StandCount => "stand_count",
+            Self::StandardDeviation => "standard_deviation",
+            Self::StartCns => "start_cns",
+            Self::StartDate => "start_date",
+            Self::StartElevation => "start_elevation",
+            Self::StartN2 => "start_n2",
+            Self::StartPositionLat => "start_position_lat",
+            Self::StartPositionLong => "start_position_long",
+            Self::StartPressure => "start_pressure",
+            Self::StartTime => "start_time",
+            Self::StartTimestamp => "start_timestamp",
+            Self::StartTimestampMs => "start_timestamp_ms",
+            Self::StartTimezoneOffset => "start_timezone_offset",
+            Self::Status => "status",
+            Self::StepLength => "step_length",
+            Self::Steps => "steps",
+            Self::StressLevel => "stress_level",
+            Self::StressLevelTime => "stress_level_time",
+            Self::StressLevelValue => "stress_level_value",
+            Self::StrokeCount => "stroke_count",
+            Self::StrokeType => "stroke_type",
+            Self::Strokes => "strokes",
+            Self::SubSport => "sub_sport",
+            Self::SurfaceInterval => "surface_interval",
+            Self::SwcLat => "swc_lat",
+            Self::SwcLong => "swc_long",
+            Self::SwimStroke => "swim_stroke",
+            Self::SystemTime => "system_time",
+            Self::SystemTimestamp => "system_timestamp",
+            Self::SystemTimestampMs => "system_timestamp_ms",
+            Self::SystolicPressure => "systolic_pressure",
+            Self::TapInterface => "tap_interface",
+            Self::TapSensitivity => "tap_sensitivity",
+            Self::TargetCadenceZone => "target_cadence_zone",
+            Self::TargetDistance => "target_distance",
+            Self::TargetHrZone => "target_hr_zone",
+            Self::TargetPowerZone => "target_power_zone",
+            Self::TargetSpeed => "target_speed",
+            Self::TargetSpeedZone => "target_speed_zone",
+            Self::TargetStrokeType => "target_stroke_type",
+            Self::TargetTime => "target_time",
+            Self::TargetType => "target_type",
+            Self::TargetValue => "target_value",
+            Self::Temperature => "temperature",
+            Self::TemperatureFeelsLike => "temperature_feels_like",
+            Self::TemperatureMax => "temperature_max",
+            Self::TemperatureMin => "temperature_min",
+            Self::TemperatureSetting => "temperature_setting",
+            Self::Text => "text",
+            Self::ThresholdHeartRate => "threshold_heart_rate",
+            Self::ThresholdPower => "threshold_power",
+            Self::Time => "time",
+            Self::Time128 => "time128",
+            Self::Time256 => "time256",
+            Self::TimeAboveThreshold => "time_above_threshold",
+            Self::TimeCreated => "time_created",
+            Self::TimeDurationAlert => "time_duration_alert",
+            Self::TimeFromCourse => "time_from_course",
+            Self::TimeInCadenceZone => "time_in_cadence_zone",
+            Self::TimeInHrZone => "time_in_hr_zone",
+            Self::TimeInPowerZone => "time_in_power_zone",
+            Self::TimeInSpeedZone => "time_in_speed_zone",
+            Self::TimeMode => "time_mode",
+            Self::TimeOffset => "time_offset",
+            Self::TimeStanding => "time_standing",
+            Self::TimeToSurface => "time_to_surface",
+            Self::TimeZoneOffset => "time_zone_offset",
+            Self::TimerTime => "timer_time",
+            Self::TimerTrigger => "timer_trigger",
+            Self::Timestamp => "timestamp",
+            Self::Timestamp16 => "timestamp_16",
+            Self::Timestamp32K => "timestamp_32k",
+            Self::TimestampMin8 => "timestamp_min_8",
+            Self::TimestampMs => "timestamp_ms",
+            Self::Title => "title",
+            Self::TotalAnaerobicTrainingEffect => "total_anaerobic_training_effect",
+            Self::TotalAscent => "total_ascent",
+            Self::TotalCalories => "total_calories",
+            Self::TotalCycles => "total_cycles",
+            Self::TotalDescent => "total_descent",
+            Self::TotalDistance => "total_distance",
+            Self::TotalElapsedTime => "total_elapsed_time",
+            Self::TotalFatCalories => "total_fat_calories",
+            Self::TotalFlow => "total_flow",
+            Self::TotalFractionalAscent => "total_fractional_ascent",
+            Self::TotalFractionalCycles => "total_fractional_cycles",
+            Self::TotalFractionalDescent => "total_fractional_descent",
+            Self::TotalGrit => "total_grit",
+            Self::TotalHemoglobinConc => "total_hemoglobin_conc",
+            Self::TotalHemoglobinConcMax => "total_hemoglobin_conc_max",
+            Self::TotalHemoglobinConcMin => "total_hemoglobin_conc_min",
+            Self::TotalMovingTime => "total_moving_time",
+            Self::TotalStrides => "total_strides",
+            Self::TotalStrokes => "total_strokes",
+            Self::TotalTimerTime => "total_timer_time",
+            Self::TotalTrainingEffect => "total_training_effect",
+            Self::TotalWork => "total_work",
+            Self::Track => "track",
+            Self::TrainingLoadPeak => "training_load_peak",
+            Self::TrainingStressScore => "training_stress_score",
+            Self::TransmissionType => "transmission_type",
+            Self::TravelGas => "travel_gas",
+            Self::Trigger => "trigger",
+            Self::TriggerOnAscent => "trigger_on_ascent",
+            Self::TriggerOnDescent => "trigger_on_descent",
+            Self::TurnRate => "turn_rate",
+            Self::Type => "type",
+            Self::Uncharged => "uncharged",
+            Self::Units => "units",
+            Self::UpKeyEnabled => "up_key_enabled",
+            Self::UpdateTime => "update_time",
+            Self::UpdateTimestamp => "update_timestamp",
+            Self::Url => "url",
+            Self::UserProfileIndex => "user_profile_index",
+            Self::UserProfilePrimaryKey => "user_profile_primary_key",
+            Self::UserRunningStepLength => "user_running_step_length",
+            Self::UserWalkingStepLength => "user_walking_step_length",
+            Self::UtcOffset => "utc_offset",
+            Self::UtcTimestamp => "utc_timestamp",
+            Self::Uuid => "uuid",
+            Self::Validity => "validity",
+            Self::Value => "value",
+            Self::Velocity => "velocity",
+            Self::Version => "version",
+            Self::VerticalOscillation => "vertical_oscillation",
+            Self::VerticalRatio => "vertical_ratio",
+            Self::VerticalSpeed => "vertical_speed",
+            Self::VigorousActivityMinutes => "vigorous_activity_minutes",
+            Self::VirtualPartnerSpeed => "virtual_partner_speed",
+            Self::VisceralFatMass => "visceral_fat_mass",
+            Self::VisceralFatRating => "visceral_fat_rating",
+            Self::Vo2Max => "vo2_max",
+            Self::VolumeSac => "volume_sac",
+            Self::VolumeUsed => "volume_used",
+            Self::WakeTime => "wake_time",
+            Self::WaterDensity => "water_density",
+            Self::WaterType => "water_type",
+            Self::WeatherAlertsEnabled => "weather_alerts_enabled",
+            Self::WeatherConditionsEnabled => "weather_conditions_enabled",
+            Self::WeatherReport => "weather_report",
+            Self::WeeklyAverage => "weekly_average",
+            Self::Weight => "weight",
+            Self::WeightDisplayUnit => "weight_display_unit",
+            Self::WeightSetting => "weight_setting",
+            Self::WindDirection => "wind_direction",
+            Self::WindSpeed => "wind_speed",
+            Self::WktDescription => "wkt_description",
+            Self::WktName => "wkt_name",
+            Self::WktStepIndex => "wkt_step_index",
+            Self::WktStepName => "wkt_step_name",
+            Self::WorkoutDownloadEnabled => "workout_download_enabled",
+            Self::WorkoutFeel => "workout_feel",
+            Self::WorkoutRpe => "workout_rpe",
+            Self::WorkoutsSupported => "workouts_supported",
+            Self::ZeroCrossCnt => "zero_cross_cnt",
+            Self::Zone => "zone",
+            Self::ZoneCount => "zone_count",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum Unit {
+    /// "bar"
+    Bar,
+    /// "bar/min"
+    BarPerMinute,
+    /// "bpm"
+    BeatsPerMinute,
+    /// "Breaths/min"
+    BreathsPerMinute,
+    /// "bytes"
+    Bytes,
+    /// "calories"
+    Calorie,
+    /// "C"
+    Celcius,
+    /// "counts"
+    Count,
+    /// "cycles"
+    Cycle,
+    /// "degrees"
+    Degree,
+    /// "deg/s"
+    DegreesPerSecond,
+    /// "depends on sensor"
+    DependsOnSensor,
+
+    Empty,
+    /// "Flow"
+    Flow,
+    /// "G"
+    Gauss,
+    /// "g"
+    Gee,
+    /// "gr"
+    Gram,
+    /// "g/dL"
+    GramPerDeciliter,
+    /// "100 * m"
+    Hectometer,
+    /// "hr"
+    Hour,
+    /// "if"
+    IntensityFactor,
+    /// "J"
+    Joule,
+    /// "kGrit"
+    KGrit,
+    /// "kcal"
+    Kilocalorie,
+    /// "kcal/cycle"
+    KilocaloriesPerCycle,
+    /// "kcal/day"
+    KilocaloriesPerDay,
+    /// "kcal/min"
+    KilocaloriesPerMinute,
+    /// "kg"
+    Kilogram,
+    /// "kg/m^3"
+    KilogramsPerCubicMeter,
+    /// "kg/m^2"
+    KilogramsPerSquareMeter,
+    /// "km"
+    Kilometer,
+    /// "lengths"
+    Length,
+    /// "L"
+    Liter,
+    /// "L/min"
+    LiterPerMinute,
+    /// "m"
+    Meter,
+    /// "m/cycle"
+    MetersPerCycle,
+    /// "mps"
+    MetersPerSecond,
+    /// "m/s,m"
+    MetersPerSecondAndMeter,
+    /// "m/s^2"
+    MetersPerSecondSquared,
+    /// "m/s"
+    MetersPerSeconds,
+    /// "mG"
+    Milligee,
+    /// "mL/kg/min"
+    MillilitersPerKilogramPerMinute,
+    /// "mm"
+    Millimeter,
+    /// "mmHg"
+    MillimetersOfMercury,
+    /// "ms"
+    Millisecond,
+    /// "minutes"
+    Minute,
+    /// "1/32768 s"
+    OnePer32768Seconds,
+    /// "OTUs"
+    OxygenToxicityUnit,
+    /// "Pa"
+    Pascal,
+    /// "%"
+    Percent,
+    /// "% or bpm"
+    PercentOrBeatsPerMinute,
+    /// "% or watts"
+    PercentOrWatts,
+    /// "radians"
+    Radian,
+    /// "radians/second"
+    RadiansPerSecond,
+    /// "rpm"
+    RevolutionPerMinute,
+    /// "s"
+    Second,
+    /// "semicircles"
+    Semicircle,
+    /// "steps"
+    Step,
+    /// "strides"
+    Stride,
+    /// "strides/min"
+    StridesPerMinute,
+    /// "strokes"
+    Stroke,
+    /// "strokes/lap"
+    StrokePerLap,
+    /// "strokes/min"
+    StrokesPerMinute,
+    /// "swim_stroke"
+    SwimStroke,
+    /// "tss"
+    TrainingStressScore,
+    /// "2 * cycles (steps)"
+    TwoCyclesSteps,
+    /// "V"
+    Voltage,
+    /// "watts"
+    Watt,
+    /// "years"
+    Year,
+}
+
+impl Unit {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Bar => "bar",
+            Self::BarPerMinute => "bar/min",
+            Self::BeatsPerMinute => "bpm",
+            Self::BreathsPerMinute => "Breaths/min",
+            Self::Bytes => "bytes",
+            Self::Calorie => "calories",
+            Self::Celcius => "C",
+            Self::Count => "counts",
+            Self::Cycle => "cycles",
+            Self::Degree => "degrees",
+            Self::DegreesPerSecond => "deg/s",
+            Self::DependsOnSensor => "depends on sensor",
+            Self::Empty => "",
+            Self::Flow => "Flow",
+            Self::Gauss => "G",
+            Self::Gee => "g",
+            Self::Gram => "gr",
+            Self::GramPerDeciliter => "g/dL",
+            Self::Hectometer => "100 * m",
+            Self::Hour => "hr",
+            Self::IntensityFactor => "if",
+            Self::Joule => "J",
+            Self::KGrit => "kGrit",
+            Self::Kilocalorie => "kcal",
+            Self::KilocaloriesPerCycle => "kcal/cycle",
+            Self::KilocaloriesPerDay => "kcal/day",
+            Self::KilocaloriesPerMinute => "kcal/min",
+            Self::Kilogram => "kg",
+            Self::KilogramsPerCubicMeter => "kg/m^3",
+            Self::KilogramsPerSquareMeter => "kg/m^2",
+            Self::Kilometer => "km",
+            Self::Length => "lengths",
+            Self::Liter => "L",
+            Self::LiterPerMinute => "L/min",
+            Self::Meter => "m",
+            Self::MetersPerCycle => "m/cycle",
+            Self::MetersPerSecond => "mps",
+            Self::MetersPerSecondAndMeter => "m/s,m",
+            Self::MetersPerSecondSquared => "m/s^2",
+            Self::MetersPerSeconds => "m/s",
+            Self::Milligee => "mG",
+            Self::MillilitersPerKilogramPerMinute => "mL/kg/min",
+            Self::Millimeter => "mm",
+            Self::MillimetersOfMercury => "mmHg",
+            Self::Millisecond => "ms",
+            Self::Minute => "minutes",
+            Self::OnePer32768Seconds => "1/32768 s",
+            Self::OxygenToxicityUnit => "OTUs",
+            Self::Pascal => "Pa",
+            Self::Percent => "%",
+            Self::PercentOrBeatsPerMinute => "% or bpm",
+            Self::PercentOrWatts => "% or watts",
+            Self::Radian => "radians",
+            Self::RadiansPerSecond => "radians/second",
+            Self::RevolutionPerMinute => "rpm",
+            Self::Second => "s",
+            Self::Semicircle => "semicircles",
+            Self::Step => "steps",
+            Self::Stride => "strides",
+            Self::StridesPerMinute => "strides/min",
+            Self::Stroke => "strokes",
+            Self::StrokePerLap => "strokes/lap",
+            Self::StrokesPerMinute => "strokes/min",
+            Self::SwimStroke => "swim_stroke",
+            Self::TrainingStressScore => "tss",
+            Self::TwoCyclesSteps => "2 * cycles (steps)",
+            Self::Voltage => "V",
+            Self::Watt => "watts",
+            Self::Year => "years",
+        }
     }
 }

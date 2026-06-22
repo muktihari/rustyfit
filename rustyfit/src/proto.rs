@@ -1,7 +1,7 @@
 #![warn(missing_docs)]
 
 use crate::profile::{
-    ProfileType,
+    lookup,
     typedef::{FitBaseType, MesgNum},
 };
 use alloc::{string::String, vec::Vec};
@@ -121,21 +121,18 @@ impl Message {
     /// Used for right-shifting the 5 least significant bits (lsb) of compressed time.
     pub(crate) const COMPRESSED_BIT_SHIFT: u8 = 5;
 
-    /// SubFieldSubstitution returns any sub-field that can substitute
-    /// the properties interpretation of the parent Field (Dynamic Field).
+    /// Returns any sub_field that can substitute the properties interpretation of any Field in the Message (Dynamic Field).
     pub fn sub_field_substitution<'a>(
         &self,
-        field_ref: &FieldReference<'a>,
-    ) -> Option<&'a SubField<'a>> {
-        for sub_field in field_ref.sub_fields {
-            for sub_field_map in sub_field.maps {
-                for field in &self.fields {
-                    if field.num != sub_field_map.ref_field_num {
-                        continue;
-                    }
-                    if field.value.cast_i64() == sub_field_map.ref_field_value {
-                        return Some(sub_field);
-                    }
+        sub_fields: &'a [lookup::SubField<'a>],
+    ) -> Option<&'a lookup::SubField<'a>> {
+        for sub_field in sub_fields {
+            for map in sub_field.maps {
+                let Some(field) = self.fields.iter().find(|f| f.num == map.ref_field_num) else {
+                    continue;
+                };
+                if field.value.cast_i64() == map.ref_field_value {
+                    return Some(sub_field);
                 }
             }
         }
@@ -164,37 +161,6 @@ impl Field {
     pub(crate) const TIMESTAMP: u8 = 253;
 }
 
-/// FieldReference acts as a representation of a field as defined in the Global FIT Profile.
-#[derive(Debug, Clone, Copy)]
-pub struct FieldReference<'a> {
-    /// Defined in the Global FIT profile for the specified FIT message, otherwise
-    /// its a manufaturer specific number (defined by manufacturer). (255 == invalid)
-    pub num: u8,
-    /// Defined in the Global FIT profile for the specified FIT message, otherwise
-    /// its a manufaturer specific name (defined by manufacturer).
-    pub name: &'a str,
-    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
-    pub base_type: FitBaseType,
-    /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
-    pub profile_type: ProfileType,
-    /// Flag whether the value of this field is an array
-    pub array: bool,
-    /// Flag to indicate if the value of the field is accumulable.
-    pub accumulate: bool,
-    /// A scale or offset specified in the FIT profile for binary fields (sint/uint etc.) only.
-    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default: 1)
-    pub scale: f64,
-    /// A scale or offset specified in the FIT profile for binary fields (sint/uint etc.) only.
-    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default: 0)
-    pub offset: f64,
-    /// Units of the value, such as m (meter), m/s (meter per second), s (second), etc.
-    pub units: &'a str,
-    /// List of component
-    pub components: &'a [Component],
-    /// List of sub-field
-    pub sub_fields: &'a [SubField<'a>],
-}
-
 /// DeveloperField is a way to add custom data fields to existing messages. Developer Data Fields can be added
 /// to any message at runtime by providing a self-describing FieldDefinition messages prior to that message.
 /// The combination of the DeveloperDataIndex and FieldDefinitionNumber create a unique id for each FieldDescription.
@@ -212,54 +178,6 @@ pub struct DeveloperField {
     pub developer_data_index: u8,
     /// Value
     pub value: Value,
-}
-
-/// Component is a way of compressing one or more fields into a bit field expressed in a single containing field.
-/// The component can be expanded as a main Field in a Message or to update the value of the destination main Field.
-#[derive(Debug)]
-pub struct Component {
-    /// Refer to Field's Number.
-    pub field_num: u8,
-    /// A flag whether this component should be accumulated.
-    pub accumulate: bool,
-    /// The size of data of this component in bits  
-    pub bits: u8,
-    /// Similar to FieldReference's scale, but for this component.
-    pub scale: f64,
-    /// Similar to FieldReference's offset, but for this component.
-    pub offset: f64,
-}
-
-/// SubField is a dynamic interpretation of the main Field in a Message when the SubFieldMap mapping match. See SubFieldMap's docs.
-#[derive(Debug)]
-pub struct SubField<'a> {
-    /// Name
-    pub name: &'a str,
-    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
-    pub base_type: FitBaseType,
-    /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
-    pub profile_type: ProfileType,
-    /// Scale
-    pub scale: f64,
-    /// Offset
-    pub offset: f64,
-    /// Units
-    pub units: &'a str,
-    /// List of SubFieldMap
-    pub maps: &'a [SubFieldMap],
-    /// List of Component
-    pub components: &'a [Component],
-}
-
-/// SubFieldMap is the mapping between SubField and the corresponding main Field in a Message.
-/// When any Field in a Message has Field.Num == RefFieldNum and Field.Value == RefFieldValue, then the SubField containing
-/// this mapping can be interpreted as the main Field's properties (name, scale, type etc.)
-#[derive(Debug)]
-pub struct SubFieldMap {
-    /// Mapping reference to targeted Field's Number.
-    pub ref_field_num: u8,
-    /// Mapping reference to targeted Field's Value.
-    pub ref_field_value: i64,
 }
 
 /// Value representation of Message's Field.

@@ -10,4 +10,16 @@ type Data struct {
 	TotalAccumulate     int
 	TotalAccumulateList string
 	Refs                string
+	Names               []Name
+	Units               []Unit
+}
+
+type Name struct {
+	Variant string
+	String  string
+}
+
+type Unit struct {
+	Variant string
+	String  string
 }
