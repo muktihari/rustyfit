@@ -3,6 +3,7 @@ static TABLE: [u16; 16] = [
     0x5000, 0x9C01, 0x8801, 0x4400,
 ];
 
+#[derive(Clone, Copy)]
 pub(crate) struct Crc16(u16);
 
 impl Crc16 {
@@ -22,7 +23,7 @@ impl Crc16 {
         }
     }
 
-    pub fn sum16(&self) -> u16 {
+    pub fn sum16(self) -> u16 {
         self.0
     }
 
