@@ -7,7 +7,7 @@ use crate::{
     crc16::Crc16,
     decoder::{accumulator::Accumulator, bits::Bits},
     profile::{
-        lookup,
+        lookup::{self, Component},
         typedef::{FitBaseType, MesgNum},
     },
     proto::*,
@@ -381,7 +381,7 @@ impl Decoder {
             let Some(field_ref) = lookup::field_reference(mesg.num, field.num) else {
                 continue;
             };
-            let components = match mesg.sub_field_substitution(&field_ref) {
+            let components = match mesg.sub_field_substitution(field_ref.sub_fields) {
                 Some(sub_field) => sub_field.components,
                 None => field_ref.components,
             };
@@ -511,7 +511,7 @@ impl Decoder {
                 }
             };
 
-            let components = match mesg.sub_field_substitution(&field_ref) {
+            let components = match mesg.sub_field_substitution(field_ref.sub_fields) {
                 Some(sub_field) => sub_field.components,
                 None => field_ref.components,
             };
