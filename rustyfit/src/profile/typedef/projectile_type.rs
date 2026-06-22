@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Projectile Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ProjectileType(pub u8);
 
 impl ProjectileType {
@@ -43,20 +43,6 @@ impl fmt::Display for ProjectileType {
             3 => write!(f, "shotshell"),
             4 => write!(f, "air_rifle_pellet"),
             5 => write!(f, "other"),
-            _ => write!(f, "ProjectileType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ProjectileType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ProjectileType::ARROW(0)"),
-            1 => write!(f, "ProjectileType::RIFLE_CARTRIDGE(1)"),
-            2 => write!(f, "ProjectileType::PISTOL_CARTRIDGE(2)"),
-            3 => write!(f, "ProjectileType::SHOTSHELL(3)"),
-            4 => write!(f, "ProjectileType::AIR_RIFLE_PELLET(4)"),
-            5 => write!(f, "ProjectileType::OTHER(5)"),
             _ => write!(f, "ProjectileType({})", self.0),
         }
     }

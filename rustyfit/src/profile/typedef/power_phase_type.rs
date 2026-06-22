@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Power Phase Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PowerPhaseType(pub u8);
 
 impl PowerPhaseType {
@@ -33,18 +33,6 @@ impl fmt::Display for PowerPhaseType {
             1 => write!(f, "power_phase_end_angle"),
             2 => write!(f, "power_phase_arc_length"),
             3 => write!(f, "power_phase_center"),
-            _ => write!(f, "PowerPhaseType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for PowerPhaseType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "PowerPhaseType::POWER_PHASE_START_ANGLE(0)"),
-            1 => write!(f, "PowerPhaseType::POWER_PHASE_END_ANGLE(1)"),
-            2 => write!(f, "PowerPhaseType::POWER_PHASE_ARC_LENGTH(2)"),
-            3 => write!(f, "PowerPhaseType::POWER_PHASE_CENTER(3)"),
             _ => write!(f, "PowerPhaseType({})", self.0),
         }
     }

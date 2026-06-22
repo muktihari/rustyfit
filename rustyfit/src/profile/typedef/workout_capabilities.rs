@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Workout Capabilities type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WorkoutCapabilities(pub u32);
 
 impl WorkoutCapabilities {
@@ -61,28 +61,6 @@ impl fmt::Display for WorkoutCapabilities {
             0x00001000 => write!(f, "grade"),
             0x00002000 => write!(f, "resistance"),
             0x00004000 => write!(f, "protected"),
-            _ => write!(f, "WorkoutCapabilities({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WorkoutCapabilities {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000001 => write!(f, "WorkoutCapabilities::INTERVAL(0x00000001)"),
-            0x00000002 => write!(f, "WorkoutCapabilities::CUSTOM(0x00000002)"),
-            0x00000004 => write!(f, "WorkoutCapabilities::FITNESS_EQUIPMENT(0x00000004)"),
-            0x00000008 => write!(f, "WorkoutCapabilities::FIRSTBEAT(0x00000008)"),
-            0x00000010 => write!(f, "WorkoutCapabilities::NEW_LEAF(0x00000010)"),
-            0x00000020 => write!(f, "WorkoutCapabilities::TCX(0x00000020)"),
-            0x00000080 => write!(f, "WorkoutCapabilities::SPEED(0x00000080)"),
-            0x00000100 => write!(f, "WorkoutCapabilities::HEART_RATE(0x00000100)"),
-            0x00000200 => write!(f, "WorkoutCapabilities::DISTANCE(0x00000200)"),
-            0x00000400 => write!(f, "WorkoutCapabilities::CADENCE(0x00000400)"),
-            0x00000800 => write!(f, "WorkoutCapabilities::POWER(0x00000800)"),
-            0x00001000 => write!(f, "WorkoutCapabilities::GRADE(0x00001000)"),
-            0x00002000 => write!(f, "WorkoutCapabilities::RESISTANCE(0x00002000)"),
-            0x00004000 => write!(f, "WorkoutCapabilities::PROTECTED(0x00004000)"),
             _ => write!(f, "WorkoutCapabilities({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Autoscroll type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Autoscroll(pub u8);
 
 impl Autoscroll {
@@ -33,18 +33,6 @@ impl fmt::Display for Autoscroll {
             1 => write!(f, "slow"),
             2 => write!(f, "medium"),
             3 => write!(f, "fast"),
-            _ => write!(f, "Autoscroll({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Autoscroll {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Autoscroll::NONE(0)"),
-            1 => write!(f, "Autoscroll::SLOW(1)"),
-            2 => write!(f, "Autoscroll::MEDIUM(2)"),
-            3 => write!(f, "Autoscroll::FAST(3)"),
             _ => write!(f, "Autoscroll({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Stroke Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct StrokeType(pub u8);
 
 impl StrokeType {
@@ -38,20 +38,6 @@ impl fmt::Display for StrokeType {
             3 => write!(f, "forehand"),
             4 => write!(f, "backhand"),
             5 => write!(f, "smash"),
-            _ => write!(f, "StrokeType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for StrokeType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "StrokeType::NO_EVENT(0)"),
-            1 => write!(f, "StrokeType::OTHER(1)"),
-            2 => write!(f, "StrokeType::SERVE(2)"),
-            3 => write!(f, "StrokeType::FOREHAND(3)"),
-            4 => write!(f, "StrokeType::BACKHAND(4)"),
-            5 => write!(f, "StrokeType::SMASH(5)"),
             _ => write!(f, "StrokeType({})", self.0),
         }
     }

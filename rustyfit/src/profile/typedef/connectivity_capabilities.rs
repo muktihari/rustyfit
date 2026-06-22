@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Connectivity Capabilities type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ConnectivityCapabilities(pub u32);
 
 impl ConnectivityCapabilities {
@@ -108,94 +108,6 @@ impl fmt::Display for ConnectivityCapabilities {
             0x20000000 => write!(f, "live_track_auto_start"),
             0x40000000 => write!(f, "live_track_messaging"),
             0x80000000 => write!(f, "instant_input"),
-            _ => write!(f, "ConnectivityCapabilities({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ConnectivityCapabilities {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000001 => write!(f, "ConnectivityCapabilities::BLUETOOTH(0x00000001)"),
-            0x00000002 => write!(f, "ConnectivityCapabilities::BLUETOOTH_LE(0x00000002)"),
-            0x00000004 => write!(f, "ConnectivityCapabilities::ANT(0x00000004)"),
-            0x00000008 => write!(f, "ConnectivityCapabilities::ACTIVITY_UPLOAD(0x00000008)"),
-            0x00000010 => write!(f, "ConnectivityCapabilities::COURSE_DOWNLOAD(0x00000010)"),
-            0x00000020 => write!(f, "ConnectivityCapabilities::WORKOUT_DOWNLOAD(0x00000020)"),
-            0x00000040 => write!(f, "ConnectivityCapabilities::LIVE_TRACK(0x00000040)"),
-            0x00000080 => write!(
-                f,
-                "ConnectivityCapabilities::WEATHER_CONDITIONS(0x00000080)"
-            ),
-            0x00000100 => write!(f, "ConnectivityCapabilities::WEATHER_ALERTS(0x00000100)"),
-            0x00000200 => write!(
-                f,
-                "ConnectivityCapabilities::GPS_EPHEMERIS_DOWNLOAD(0x00000200)"
-            ),
-            0x00000400 => write!(f, "ConnectivityCapabilities::EXPLICIT_ARCHIVE(0x00000400)"),
-            0x00000800 => write!(f, "ConnectivityCapabilities::SETUP_INCOMPLETE(0x00000800)"),
-            0x00001000 => write!(
-                f,
-                "ConnectivityCapabilities::CONTINUE_SYNC_AFTER_SOFTWARE_UPDATE(0x00001000)"
-            ),
-            0x00002000 => write!(
-                f,
-                "ConnectivityCapabilities::CONNECT_IQ_APP_DOWNLOAD(0x00002000)"
-            ),
-            0x00004000 => write!(
-                f,
-                "ConnectivityCapabilities::GOLF_COURSE_DOWNLOAD(0x00004000)"
-            ),
-            0x00008000 => write!(
-                f,
-                "ConnectivityCapabilities::DEVICE_INITIATES_SYNC(0x00008000)"
-            ),
-            0x00010000 => write!(
-                f,
-                "ConnectivityCapabilities::CONNECT_IQ_WATCH_APP_DOWNLOAD(0x00010000)"
-            ),
-            0x00020000 => write!(
-                f,
-                "ConnectivityCapabilities::CONNECT_IQ_WIDGET_DOWNLOAD(0x00020000)"
-            ),
-            0x00040000 => write!(
-                f,
-                "ConnectivityCapabilities::CONNECT_IQ_WATCH_FACE_DOWNLOAD(0x00040000)"
-            ),
-            0x00080000 => write!(
-                f,
-                "ConnectivityCapabilities::CONNECT_IQ_DATA_FIELD_DOWNLOAD(0x00080000)"
-            ),
-            0x00100000 => write!(
-                f,
-                "ConnectivityCapabilities::CONNECT_IQ_APP_MANAGEMENT(0x00100000)"
-            ),
-            0x00200000 => write!(f, "ConnectivityCapabilities::SWING_SENSOR(0x00200000)"),
-            0x00400000 => write!(
-                f,
-                "ConnectivityCapabilities::SWING_SENSOR_REMOTE(0x00400000)"
-            ),
-            0x00800000 => write!(
-                f,
-                "ConnectivityCapabilities::INCIDENT_DETECTION(0x00800000)"
-            ),
-            0x01000000 => write!(f, "ConnectivityCapabilities::AUDIO_PROMPTS(0x01000000)"),
-            0x02000000 => write!(f, "ConnectivityCapabilities::WIFI_VERIFICATION(0x02000000)"),
-            0x04000000 => write!(f, "ConnectivityCapabilities::TRUE_UP(0x04000000)"),
-            0x08000000 => write!(f, "ConnectivityCapabilities::FIND_MY_WATCH(0x08000000)"),
-            0x10000000 => write!(
-                f,
-                "ConnectivityCapabilities::REMOTE_MANUAL_SYNC(0x10000000)"
-            ),
-            0x20000000 => write!(
-                f,
-                "ConnectivityCapabilities::LIVE_TRACK_AUTO_START(0x20000000)"
-            ),
-            0x40000000 => write!(
-                f,
-                "ConnectivityCapabilities::LIVE_TRACK_MESSAGING(0x40000000)"
-            ),
-            0x80000000 => write!(f, "ConnectivityCapabilities::INSTANT_INPUT(0x80000000)"),
             _ => write!(f, "ConnectivityCapabilities({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Run Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RunExerciseName(pub u16);
 
 impl RunExerciseName {
@@ -39,21 +39,6 @@ impl fmt::Display for RunExerciseName {
             4 => write!(f, "run_or_walk"),
             5 => write!(f, "speed_walk"),
             6 => write!(f, "warm_up"),
-            _ => write!(f, "RunExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for RunExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "RunExerciseName::RUN(0)"),
-            1 => write!(f, "RunExerciseName::WALK(1)"),
-            2 => write!(f, "RunExerciseName::JOG(2)"),
-            3 => write!(f, "RunExerciseName::SPRINT(3)"),
-            4 => write!(f, "RunExerciseName::RUN_OR_WALK(4)"),
-            5 => write!(f, "RunExerciseName::SPEED_WALK(5)"),
-            6 => write!(f, "RunExerciseName::WARM_UP(6)"),
             _ => write!(f, "RunExerciseName({})", self.0),
         }
     }

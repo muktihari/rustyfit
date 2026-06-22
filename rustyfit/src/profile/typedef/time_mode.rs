@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Time Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TimeMode(pub u8);
 
 impl TimeMode {
@@ -39,20 +39,6 @@ impl fmt::Display for TimeMode {
             3 => write!(f, "hour_12_with_seconds"),
             4 => write!(f, "hour_24_with_seconds"),
             5 => write!(f, "utc"),
-            _ => write!(f, "TimeMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TimeMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TimeMode::HOUR12(0)"),
-            1 => write!(f, "TimeMode::HOUR24(1)"),
-            2 => write!(f, "TimeMode::MILITARY(2)"),
-            3 => write!(f, "TimeMode::HOUR_12_WITH_SECONDS(3)"),
-            4 => write!(f, "TimeMode::HOUR_24_WITH_SECONDS(4)"),
-            5 => write!(f, "TimeMode::UTC(5)"),
             _ => write!(f, "TimeMode({})", self.0),
         }
     }

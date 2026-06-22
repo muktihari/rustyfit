@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Display Power type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DisplayPower(pub u8);
 
 impl DisplayPower {
@@ -29,16 +29,6 @@ impl fmt::Display for DisplayPower {
         match self.0 {
             0 => write!(f, "watts"),
             1 => write!(f, "percent_ftp"),
-            _ => write!(f, "DisplayPower({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DisplayPower {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DisplayPower::WATTS(0)"),
-            1 => write!(f, "DisplayPower::PERCENT_FTP(1)"),
             _ => write!(f, "DisplayPower({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Date Time type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DateTime(pub u32);
 
 impl DateTime {
@@ -53,15 +53,6 @@ impl fmt::Display for DateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0x10000000 => write!(f, "min"),
-            _ => write!(f, "DateTime({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DateTime {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x10000000 => write!(f, "DateTime::MIN(0x10000000)"),
             _ => write!(f, "DateTime({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Comm Timeout Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CommTimeoutType(pub u16);
 
 impl CommTimeoutType {
@@ -37,18 +37,6 @@ impl fmt::Display for CommTimeoutType {
             1 => write!(f, "pairing_timeout"),
             2 => write!(f, "connection_lost"),
             3 => write!(f, "connection_timeout"),
-            _ => write!(f, "CommTimeoutType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CommTimeoutType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CommTimeoutType::WILDCARD_PAIRING_TIMEOUT(0)"),
-            1 => write!(f, "CommTimeoutType::PAIRING_TIMEOUT(1)"),
-            2 => write!(f, "CommTimeoutType::CONNECTION_LOST(2)"),
-            3 => write!(f, "CommTimeoutType::CONNECTION_TIMEOUT(3)"),
             _ => write!(f, "CommTimeoutType({})", self.0),
         }
     }

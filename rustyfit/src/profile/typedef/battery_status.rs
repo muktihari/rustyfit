@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Battery Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BatteryStatus(pub u8);
 
 impl BatteryStatus {
@@ -39,21 +39,6 @@ impl fmt::Display for BatteryStatus {
             5 => write!(f, "critical"),
             6 => write!(f, "charging"),
             7 => write!(f, "unknown"),
-            _ => write!(f, "BatteryStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BatteryStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "BatteryStatus::NEW(1)"),
-            2 => write!(f, "BatteryStatus::GOOD(2)"),
-            3 => write!(f, "BatteryStatus::OK(3)"),
-            4 => write!(f, "BatteryStatus::LOW(4)"),
-            5 => write!(f, "BatteryStatus::CRITICAL(5)"),
-            6 => write!(f, "BatteryStatus::CHARGING(6)"),
-            7 => write!(f, "BatteryStatus::UNKNOWN(7)"),
             _ => write!(f, "BatteryStatus({})", self.0),
         }
     }

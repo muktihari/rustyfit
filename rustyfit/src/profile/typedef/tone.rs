@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Tone type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Tone(pub u8);
 
 impl Tone {
@@ -33,18 +33,6 @@ impl fmt::Display for Tone {
             1 => write!(f, "tone"),
             2 => write!(f, "vibrate"),
             3 => write!(f, "tone_and_vibrate"),
-            _ => write!(f, "Tone({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Tone {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Tone::OFF(0)"),
-            1 => write!(f, "Tone::TONE(1)"),
-            2 => write!(f, "Tone::VIBRATE(2)"),
-            3 => write!(f, "Tone::TONE_AND_VIBRATE(3)"),
             _ => write!(f, "Tone({})", self.0),
         }
     }

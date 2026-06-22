@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Weather Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WeatherStatus(pub u8);
 
 impl WeatherStatus {
@@ -67,35 +67,6 @@ impl fmt::Display for WeatherStatus {
             20 => write!(f, "light_rain_snow"),
             21 => write!(f, "heavy_rain_snow"),
             22 => write!(f, "cloudy"),
-            _ => write!(f, "WeatherStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WeatherStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WeatherStatus::CLEAR(0)"),
-            1 => write!(f, "WeatherStatus::PARTLY_CLOUDY(1)"),
-            2 => write!(f, "WeatherStatus::MOSTLY_CLOUDY(2)"),
-            3 => write!(f, "WeatherStatus::RAIN(3)"),
-            4 => write!(f, "WeatherStatus::SNOW(4)"),
-            5 => write!(f, "WeatherStatus::WINDY(5)"),
-            6 => write!(f, "WeatherStatus::THUNDERSTORMS(6)"),
-            7 => write!(f, "WeatherStatus::WINTRY_MIX(7)"),
-            8 => write!(f, "WeatherStatus::FOG(8)"),
-            11 => write!(f, "WeatherStatus::HAZY(11)"),
-            12 => write!(f, "WeatherStatus::HAIL(12)"),
-            13 => write!(f, "WeatherStatus::SCATTERED_SHOWERS(13)"),
-            14 => write!(f, "WeatherStatus::SCATTERED_THUNDERSTORMS(14)"),
-            15 => write!(f, "WeatherStatus::UNKNOWN_PRECIPITATION(15)"),
-            16 => write!(f, "WeatherStatus::LIGHT_RAIN(16)"),
-            17 => write!(f, "WeatherStatus::HEAVY_RAIN(17)"),
-            18 => write!(f, "WeatherStatus::LIGHT_SNOW(18)"),
-            19 => write!(f, "WeatherStatus::HEAVY_SNOW(19)"),
-            20 => write!(f, "WeatherStatus::LIGHT_RAIN_SNOW(20)"),
-            21 => write!(f, "WeatherStatus::HEAVY_RAIN_SNOW(21)"),
-            22 => write!(f, "WeatherStatus::CLOUDY(22)"),
             _ => write!(f, "WeatherStatus({})", self.0),
         }
     }

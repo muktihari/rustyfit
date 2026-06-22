@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Pwr Zone Calc type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PwrZoneCalc(pub u8);
 
 impl PwrZoneCalc {
@@ -29,16 +29,6 @@ impl fmt::Display for PwrZoneCalc {
         match self.0 {
             0 => write!(f, "custom"),
             1 => write!(f, "percent_ftp"),
-            _ => write!(f, "PwrZoneCalc({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for PwrZoneCalc {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "PwrZoneCalc::CUSTOM(0)"),
-            1 => write!(f, "PwrZoneCalc::PERCENT_FTP(1)"),
             _ => write!(f, "PwrZoneCalc({})", self.0),
         }
     }

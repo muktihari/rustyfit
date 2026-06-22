@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Time Into Day type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TimeIntoDay(pub u32);
 
 impl TimeIntoDay {}
@@ -22,14 +22,6 @@ impl Default for TimeIntoDay {
 }
 
 impl fmt::Display for TimeIntoDay {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            _ => write!(f, "TimeIntoDay({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TimeIntoDay {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             _ => write!(f, "TimeIntoDay({})", self.0),

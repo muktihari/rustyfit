@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Display Orientation type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DisplayOrientation(pub u8);
 
 impl DisplayOrientation {
@@ -38,19 +38,6 @@ impl fmt::Display for DisplayOrientation {
             2 => write!(f, "landscape"),
             3 => write!(f, "portrait_flipped"),
             4 => write!(f, "landscape_flipped"),
-            _ => write!(f, "DisplayOrientation({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DisplayOrientation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DisplayOrientation::AUTO(0)"),
-            1 => write!(f, "DisplayOrientation::PORTRAIT(1)"),
-            2 => write!(f, "DisplayOrientation::LANDSCAPE(2)"),
-            3 => write!(f, "DisplayOrientation::PORTRAIT_FLIPPED(3)"),
-            4 => write!(f, "DisplayOrientation::LANDSCAPE_FLIPPED(4)"),
             _ => write!(f, "DisplayOrientation({})", self.0),
         }
     }

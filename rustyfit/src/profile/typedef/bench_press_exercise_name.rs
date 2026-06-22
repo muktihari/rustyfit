@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Bench Press Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BenchPressExerciseName(pub u16);
 
 impl BenchPressExerciseName {
@@ -83,86 +83,6 @@ impl fmt::Display for BenchPressExerciseName {
             24 => write!(f, "triple_stop_barbell_bench_press"),
             25 => write!(f, "wide_grip_barbell_bench_press"),
             26 => write!(f, "alternating_dumbbell_chest_press"),
-            _ => write!(f, "BenchPressExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BenchPressExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(
-                f,
-                "BenchPressExerciseName::ALTERNATING_DUMBBELL_CHEST_PRESS_ON_SWISS_BALL(0)"
-            ),
-            1 => write!(f, "BenchPressExerciseName::BARBELL_BENCH_PRESS(1)"),
-            2 => write!(f, "BenchPressExerciseName::BARBELL_BOARD_BENCH_PRESS(2)"),
-            3 => write!(f, "BenchPressExerciseName::BARBELL_FLOOR_PRESS(3)"),
-            4 => write!(
-                f,
-                "BenchPressExerciseName::CLOSE_GRIP_BARBELL_BENCH_PRESS(4)"
-            ),
-            5 => write!(f, "BenchPressExerciseName::DECLINE_DUMBBELL_BENCH_PRESS(5)"),
-            6 => write!(f, "BenchPressExerciseName::DUMBBELL_BENCH_PRESS(6)"),
-            7 => write!(f, "BenchPressExerciseName::DUMBBELL_FLOOR_PRESS(7)"),
-            8 => write!(f, "BenchPressExerciseName::INCLINE_BARBELL_BENCH_PRESS(8)"),
-            9 => write!(f, "BenchPressExerciseName::INCLINE_DUMBBELL_BENCH_PRESS(9)"),
-            10 => write!(
-                f,
-                "BenchPressExerciseName::INCLINE_SMITH_MACHINE_BENCH_PRESS(10)"
-            ),
-            11 => write!(
-                f,
-                "BenchPressExerciseName::ISOMETRIC_BARBELL_BENCH_PRESS(11)"
-            ),
-            12 => write!(f, "BenchPressExerciseName::KETTLEBELL_CHEST_PRESS(12)"),
-            13 => write!(
-                f,
-                "BenchPressExerciseName::NEUTRAL_GRIP_DUMBBELL_BENCH_PRESS(13)"
-            ),
-            14 => write!(
-                f,
-                "BenchPressExerciseName::NEUTRAL_GRIP_DUMBBELL_INCLINE_BENCH_PRESS(14)"
-            ),
-            15 => write!(f, "BenchPressExerciseName::ONE_ARM_FLOOR_PRESS(15)"),
-            16 => write!(
-                f,
-                "BenchPressExerciseName::WEIGHTED_ONE_ARM_FLOOR_PRESS(16)"
-            ),
-            17 => write!(f, "BenchPressExerciseName::PARTIAL_LOCKOUT(17)"),
-            18 => write!(
-                f,
-                "BenchPressExerciseName::REVERSE_GRIP_BARBELL_BENCH_PRESS(18)"
-            ),
-            19 => write!(
-                f,
-                "BenchPressExerciseName::REVERSE_GRIP_INCLINE_BENCH_PRESS(19)"
-            ),
-            20 => write!(
-                f,
-                "BenchPressExerciseName::SINGLE_ARM_CABLE_CHEST_PRESS(20)"
-            ),
-            21 => write!(
-                f,
-                "BenchPressExerciseName::SINGLE_ARM_DUMBBELL_BENCH_PRESS(21)"
-            ),
-            22 => write!(f, "BenchPressExerciseName::SMITH_MACHINE_BENCH_PRESS(22)"),
-            23 => write!(
-                f,
-                "BenchPressExerciseName::SWISS_BALL_DUMBBELL_CHEST_PRESS(23)"
-            ),
-            24 => write!(
-                f,
-                "BenchPressExerciseName::TRIPLE_STOP_BARBELL_BENCH_PRESS(24)"
-            ),
-            25 => write!(
-                f,
-                "BenchPressExerciseName::WIDE_GRIP_BARBELL_BENCH_PRESS(25)"
-            ),
-            26 => write!(
-                f,
-                "BenchPressExerciseName::ALTERNATING_DUMBBELL_CHEST_PRESS(26)"
-            ),
             _ => write!(f, "BenchPressExerciseName({})", self.0),
         }
     }

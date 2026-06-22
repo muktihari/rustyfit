@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Split Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SplitType(pub u8);
 
 impl SplitType {
@@ -71,35 +71,6 @@ impl fmt::Display for SplitType {
             23 => write!(f, "transition"),
             28 => write!(f, "ski_lift_split"),
             29 => write!(f, "ski_run_split"),
-            _ => write!(f, "SplitType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SplitType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "SplitType::ASCENT_SPLIT(1)"),
-            2 => write!(f, "SplitType::DESCENT_SPLIT(2)"),
-            3 => write!(f, "SplitType::INTERVAL_ACTIVE(3)"),
-            4 => write!(f, "SplitType::INTERVAL_REST(4)"),
-            5 => write!(f, "SplitType::INTERVAL_WARMUP(5)"),
-            6 => write!(f, "SplitType::INTERVAL_COOLDOWN(6)"),
-            7 => write!(f, "SplitType::INTERVAL_RECOVERY(7)"),
-            8 => write!(f, "SplitType::INTERVAL_OTHER(8)"),
-            9 => write!(f, "SplitType::CLIMB_ACTIVE(9)"),
-            10 => write!(f, "SplitType::CLIMB_REST(10)"),
-            11 => write!(f, "SplitType::SURF_ACTIVE(11)"),
-            12 => write!(f, "SplitType::RUN_ACTIVE(12)"),
-            13 => write!(f, "SplitType::RUN_REST(13)"),
-            14 => write!(f, "SplitType::WORKOUT_ROUND(14)"),
-            17 => write!(f, "SplitType::RWD_RUN(17)"),
-            18 => write!(f, "SplitType::RWD_WALK(18)"),
-            21 => write!(f, "SplitType::WINDSURF_ACTIVE(21)"),
-            22 => write!(f, "SplitType::RWD_STAND(22)"),
-            23 => write!(f, "SplitType::TRANSITION(23)"),
-            28 => write!(f, "SplitType::SKI_LIFT_SPLIT(28)"),
-            29 => write!(f, "SplitType::SKI_RUN_SPLIT(29)"),
             _ => write!(f, "SplitType({})", self.0),
         }
     }

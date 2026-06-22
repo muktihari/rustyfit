@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Display Measure type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DisplayMeasure(pub u8);
 
 impl DisplayMeasure {
@@ -31,17 +31,6 @@ impl fmt::Display for DisplayMeasure {
             0 => write!(f, "metric"),
             1 => write!(f, "statute"),
             2 => write!(f, "nautical"),
-            _ => write!(f, "DisplayMeasure({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DisplayMeasure {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DisplayMeasure::METRIC(0)"),
-            1 => write!(f, "DisplayMeasure::STATUTE(1)"),
-            2 => write!(f, "DisplayMeasure::NAUTICAL(2)"),
             _ => write!(f, "DisplayMeasure({})", self.0),
         }
     }

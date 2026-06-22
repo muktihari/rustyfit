@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Exercise Category type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ExerciseCategory(pub u16);
 
 impl ExerciseCategory {
@@ -132,67 +132,6 @@ impl fmt::Display for ExerciseCategory {
             52 => write!(f, "run_indoor"),
             53 => write!(f, "bike_outdoor"),
             65534 => write!(f, "unknown"),
-            _ => write!(f, "ExerciseCategory({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ExerciseCategory {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ExerciseCategory::BENCH_PRESS(0)"),
-            1 => write!(f, "ExerciseCategory::CALF_RAISE(1)"),
-            2 => write!(f, "ExerciseCategory::CARDIO(2)"),
-            3 => write!(f, "ExerciseCategory::CARRY(3)"),
-            4 => write!(f, "ExerciseCategory::CHOP(4)"),
-            5 => write!(f, "ExerciseCategory::CORE(5)"),
-            6 => write!(f, "ExerciseCategory::CRUNCH(6)"),
-            7 => write!(f, "ExerciseCategory::CURL(7)"),
-            8 => write!(f, "ExerciseCategory::DEADLIFT(8)"),
-            9 => write!(f, "ExerciseCategory::FLYE(9)"),
-            10 => write!(f, "ExerciseCategory::HIP_RAISE(10)"),
-            11 => write!(f, "ExerciseCategory::HIP_STABILITY(11)"),
-            12 => write!(f, "ExerciseCategory::HIP_SWING(12)"),
-            13 => write!(f, "ExerciseCategory::HYPEREXTENSION(13)"),
-            14 => write!(f, "ExerciseCategory::LATERAL_RAISE(14)"),
-            15 => write!(f, "ExerciseCategory::LEG_CURL(15)"),
-            16 => write!(f, "ExerciseCategory::LEG_RAISE(16)"),
-            17 => write!(f, "ExerciseCategory::LUNGE(17)"),
-            18 => write!(f, "ExerciseCategory::OLYMPIC_LIFT(18)"),
-            19 => write!(f, "ExerciseCategory::PLANK(19)"),
-            20 => write!(f, "ExerciseCategory::PLYO(20)"),
-            21 => write!(f, "ExerciseCategory::PULL_UP(21)"),
-            22 => write!(f, "ExerciseCategory::PUSH_UP(22)"),
-            23 => write!(f, "ExerciseCategory::ROW(23)"),
-            24 => write!(f, "ExerciseCategory::SHOULDER_PRESS(24)"),
-            25 => write!(f, "ExerciseCategory::SHOULDER_STABILITY(25)"),
-            26 => write!(f, "ExerciseCategory::SHRUG(26)"),
-            27 => write!(f, "ExerciseCategory::SIT_UP(27)"),
-            28 => write!(f, "ExerciseCategory::SQUAT(28)"),
-            29 => write!(f, "ExerciseCategory::TOTAL_BODY(29)"),
-            30 => write!(f, "ExerciseCategory::TRICEPS_EXTENSION(30)"),
-            31 => write!(f, "ExerciseCategory::WARM_UP(31)"),
-            32 => write!(f, "ExerciseCategory::RUN(32)"),
-            33 => write!(f, "ExerciseCategory::BIKE(33)"),
-            34 => write!(f, "ExerciseCategory::CARDIO_SENSORS(34)"),
-            35 => write!(f, "ExerciseCategory::MOVE(35)"),
-            36 => write!(f, "ExerciseCategory::POSE(36)"),
-            37 => write!(f, "ExerciseCategory::BANDED_EXERCISES(37)"),
-            38 => write!(f, "ExerciseCategory::BATTLE_ROPE(38)"),
-            39 => write!(f, "ExerciseCategory::ELLIPTICAL(39)"),
-            40 => write!(f, "ExerciseCategory::FLOOR_CLIMB(40)"),
-            41 => write!(f, "ExerciseCategory::INDOOR_BIKE(41)"),
-            42 => write!(f, "ExerciseCategory::INDOOR_ROW(42)"),
-            43 => write!(f, "ExerciseCategory::LADDER(43)"),
-            44 => write!(f, "ExerciseCategory::SANDBAG(44)"),
-            45 => write!(f, "ExerciseCategory::SLED(45)"),
-            46 => write!(f, "ExerciseCategory::SLEDGE_HAMMER(46)"),
-            47 => write!(f, "ExerciseCategory::STAIR_STEPPER(47)"),
-            49 => write!(f, "ExerciseCategory::SUSPENSION(49)"),
-            50 => write!(f, "ExerciseCategory::TIRE(50)"),
-            52 => write!(f, "ExerciseCategory::RUN_INDOOR(52)"),
-            53 => write!(f, "ExerciseCategory::BIKE_OUTDOOR(53)"),
-            65534 => write!(f, "ExerciseCategory::UNKNOWN(65534)"),
             _ => write!(f, "ExerciseCategory({})", self.0),
         }
     }

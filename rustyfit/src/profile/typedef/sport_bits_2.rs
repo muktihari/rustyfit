@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sport Bits 2 type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SportBits2(pub u8);
 
 impl SportBits2 {
@@ -41,22 +41,6 @@ impl fmt::Display for SportBits2 {
             0x20 => write!(f, "e_biking"),
             0x40 => write!(f, "motorcycling"),
             0x80 => write!(f, "boating"),
-            _ => write!(f, "SportBits2({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SportBits2 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x01 => write!(f, "SportBits2::MOUNTAINEERING(0x01)"),
-            0x02 => write!(f, "SportBits2::HIKING(0x02)"),
-            0x04 => write!(f, "SportBits2::MULTISPORT(0x04)"),
-            0x08 => write!(f, "SportBits2::PADDLING(0x08)"),
-            0x10 => write!(f, "SportBits2::FLYING(0x10)"),
-            0x20 => write!(f, "SportBits2::E_BIKING(0x20)"),
-            0x40 => write!(f, "SportBits2::MOTORCYCLING(0x40)"),
-            0x80 => write!(f, "SportBits2::BOATING(0x80)"),
             _ => write!(f, "SportBits2({})", self.0),
         }
     }

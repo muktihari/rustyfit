@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Max Met Category type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MaxMetCategory(pub u8);
 
 impl MaxMetCategory {
@@ -29,16 +29,6 @@ impl fmt::Display for MaxMetCategory {
         match self.0 {
             0 => write!(f, "generic"),
             1 => write!(f, "cycling"),
-            _ => write!(f, "MaxMetCategory({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for MaxMetCategory {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "MaxMetCategory::GENERIC(0)"),
-            1 => write!(f, "MaxMetCategory::CYCLING(1)"),
             _ => write!(f, "MaxMetCategory({})", self.0),
         }
     }

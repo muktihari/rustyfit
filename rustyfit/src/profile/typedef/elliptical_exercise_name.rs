@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Elliptical Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct EllipticalExerciseName(pub u16);
 
 impl EllipticalExerciseName {
@@ -27,15 +27,6 @@ impl fmt::Display for EllipticalExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "elliptical"),
-            _ => write!(f, "EllipticalExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for EllipticalExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "EllipticalExerciseName::ELLIPTICAL(0)"),
             _ => write!(f, "EllipticalExerciseName({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Auto Activity Detect type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AutoActivityDetect(pub u32);
 
 impl AutoActivityDetect {
@@ -39,21 +39,6 @@ impl fmt::Display for AutoActivityDetect {
             0x00000008 => write!(f, "walking"),
             0x00000020 => write!(f, "elliptical"),
             0x00000400 => write!(f, "sedentary"),
-            _ => write!(f, "AutoActivityDetect({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AutoActivityDetect {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000000 => write!(f, "AutoActivityDetect::NONE(0x00000000)"),
-            0x00000001 => write!(f, "AutoActivityDetect::RUNNING(0x00000001)"),
-            0x00000002 => write!(f, "AutoActivityDetect::CYCLING(0x00000002)"),
-            0x00000004 => write!(f, "AutoActivityDetect::SWIMMING(0x00000004)"),
-            0x00000008 => write!(f, "AutoActivityDetect::WALKING(0x00000008)"),
-            0x00000020 => write!(f, "AutoActivityDetect::ELLIPTICAL(0x00000020)"),
-            0x00000400 => write!(f, "AutoActivityDetect::SEDENTARY(0x00000400)"),
             _ => write!(f, "AutoActivityDetect({})", self.0),
         }
     }

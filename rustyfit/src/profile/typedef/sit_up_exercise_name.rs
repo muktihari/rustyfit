@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sit Up Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SitUpExerciseName(pub u16);
 
 impl SitUpExerciseName {
@@ -107,61 +107,6 @@ impl fmt::Display for SitUpExerciseName {
             38 => write!(f, "ghd_sit_ups"),
             39 => write!(f, "sit_up_turkish_get_up"),
             40 => write!(f, "russian_twist_on_swiss_ball"),
-            _ => write!(f, "SitUpExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SitUpExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SitUpExerciseName::ALTERNATING_SIT_UP(0)"),
-            1 => write!(f, "SitUpExerciseName::WEIGHTED_ALTERNATING_SIT_UP(1)"),
-            2 => write!(f, "SitUpExerciseName::BENT_KNEE_V_UP(2)"),
-            3 => write!(f, "SitUpExerciseName::WEIGHTED_BENT_KNEE_V_UP(3)"),
-            4 => write!(f, "SitUpExerciseName::BUTTERFLY_SIT_UP(4)"),
-            5 => write!(f, "SitUpExerciseName::WEIGHTED_BUTTERFLY_SITUP(5)"),
-            6 => write!(f, "SitUpExerciseName::CROSS_PUNCH_ROLL_UP(6)"),
-            7 => write!(f, "SitUpExerciseName::WEIGHTED_CROSS_PUNCH_ROLL_UP(7)"),
-            8 => write!(f, "SitUpExerciseName::CROSSED_ARMS_SIT_UP(8)"),
-            9 => write!(f, "SitUpExerciseName::WEIGHTED_CROSSED_ARMS_SIT_UP(9)"),
-            10 => write!(f, "SitUpExerciseName::GET_UP_SIT_UP(10)"),
-            11 => write!(f, "SitUpExerciseName::WEIGHTED_GET_UP_SIT_UP(11)"),
-            12 => write!(f, "SitUpExerciseName::HOVERING_SIT_UP(12)"),
-            13 => write!(f, "SitUpExerciseName::WEIGHTED_HOVERING_SIT_UP(13)"),
-            14 => write!(f, "SitUpExerciseName::KETTLEBELL_SIT_UP(14)"),
-            15 => write!(f, "SitUpExerciseName::MEDICINE_BALL_ALTERNATING_V_UP(15)"),
-            16 => write!(f, "SitUpExerciseName::MEDICINE_BALL_SIT_UP(16)"),
-            17 => write!(f, "SitUpExerciseName::MEDICINE_BALL_V_UP(17)"),
-            18 => write!(f, "SitUpExerciseName::MODIFIED_SIT_UP(18)"),
-            19 => write!(f, "SitUpExerciseName::NEGATIVE_SIT_UP(19)"),
-            20 => write!(f, "SitUpExerciseName::ONE_ARM_FULL_SIT_UP(20)"),
-            21 => write!(f, "SitUpExerciseName::RECLINING_CIRCLE(21)"),
-            22 => write!(f, "SitUpExerciseName::WEIGHTED_RECLINING_CIRCLE(22)"),
-            23 => write!(f, "SitUpExerciseName::REVERSE_CURL_UP(23)"),
-            24 => write!(f, "SitUpExerciseName::WEIGHTED_REVERSE_CURL_UP(24)"),
-            25 => write!(f, "SitUpExerciseName::SINGLE_LEG_SWISS_BALL_JACKKNIFE(25)"),
-            26 => write!(
-                f,
-                "SitUpExerciseName::WEIGHTED_SINGLE_LEG_SWISS_BALL_JACKKNIFE(26)"
-            ),
-            27 => write!(f, "SitUpExerciseName::THE_TEASER(27)"),
-            28 => write!(f, "SitUpExerciseName::THE_TEASER_WEIGHTED(28)"),
-            29 => write!(f, "SitUpExerciseName::THREE_PART_ROLL_DOWN(29)"),
-            30 => write!(f, "SitUpExerciseName::WEIGHTED_THREE_PART_ROLL_DOWN(30)"),
-            31 => write!(f, "SitUpExerciseName::V_UP(31)"),
-            32 => write!(f, "SitUpExerciseName::WEIGHTED_V_UP(32)"),
-            33 => write!(
-                f,
-                "SitUpExerciseName::WEIGHTED_RUSSIAN_TWIST_ON_SWISS_BALL(33)"
-            ),
-            34 => write!(f, "SitUpExerciseName::WEIGHTED_SIT_UP(34)"),
-            35 => write!(f, "SitUpExerciseName::X_ABS(35)"),
-            36 => write!(f, "SitUpExerciseName::WEIGHTED_X_ABS(36)"),
-            37 => write!(f, "SitUpExerciseName::SIT_UP(37)"),
-            38 => write!(f, "SitUpExerciseName::GHD_SIT_UPS(38)"),
-            39 => write!(f, "SitUpExerciseName::SIT_UP_TURKISH_GET_UP(39)"),
-            40 => write!(f, "SitUpExerciseName::RUSSIAN_TWIST_ON_SWISS_BALL(40)"),
             _ => write!(f, "SitUpExerciseName({})", self.0),
         }
     }

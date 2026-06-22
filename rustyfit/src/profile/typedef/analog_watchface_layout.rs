@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Analog Watchface Layout type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AnalogWatchfaceLayout(pub u8);
 
 impl AnalogWatchfaceLayout {
@@ -31,17 +31,6 @@ impl fmt::Display for AnalogWatchfaceLayout {
             0 => write!(f, "minimal"),
             1 => write!(f, "traditional"),
             2 => write!(f, "modern"),
-            _ => write!(f, "AnalogWatchfaceLayout({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AnalogWatchfaceLayout {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "AnalogWatchfaceLayout::MINIMAL(0)"),
-            1 => write!(f, "AnalogWatchfaceLayout::TRADITIONAL(1)"),
-            2 => write!(f, "AnalogWatchfaceLayout::MODERN(2)"),
             _ => write!(f, "AnalogWatchfaceLayout({})", self.0),
         }
     }

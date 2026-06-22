@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Autolap Trigger type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AutolapTrigger(pub u8);
 
 impl AutolapTrigger {
@@ -41,22 +41,6 @@ impl fmt::Display for AutolapTrigger {
             5 => write!(f, "position_marked"),
             6 => write!(f, "off"),
             13 => write!(f, "auto_select"),
-            _ => write!(f, "AutolapTrigger({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AutolapTrigger {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "AutolapTrigger::TIME(0)"),
-            1 => write!(f, "AutolapTrigger::DISTANCE(1)"),
-            2 => write!(f, "AutolapTrigger::POSITION_START(2)"),
-            3 => write!(f, "AutolapTrigger::POSITION_LAP(3)"),
-            4 => write!(f, "AutolapTrigger::POSITION_WAYPOINT(4)"),
-            5 => write!(f, "AutolapTrigger::POSITION_MARKED(5)"),
-            6 => write!(f, "AutolapTrigger::OFF(6)"),
-            13 => write!(f, "AutolapTrigger::AUTO_SELECT(13)"),
             _ => write!(f, "AutolapTrigger({})", self.0),
         }
     }

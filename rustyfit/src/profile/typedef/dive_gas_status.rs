@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Dive Gas Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DiveGasStatus(pub u8);
 
 impl DiveGasStatus {
@@ -31,17 +31,6 @@ impl fmt::Display for DiveGasStatus {
             0 => write!(f, "disabled"),
             1 => write!(f, "enabled"),
             2 => write!(f, "backup_only"),
-            _ => write!(f, "DiveGasStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DiveGasStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DiveGasStatus::DISABLED(0)"),
-            1 => write!(f, "DiveGasStatus::ENABLED(1)"),
-            2 => write!(f, "DiveGasStatus::BACKUP_ONLY(2)"),
             _ => write!(f, "DiveGasStatus({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Display Position type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DisplayPosition(pub u8);
 
 impl DisplayPosition {
@@ -151,56 +151,6 @@ impl fmt::Display for DisplayPosition {
             39 => write!(f, "estonian_grid"),
             40 => write!(f, "latvian_grid"),
             41 => write!(f, "swedish_ref_99_grid"),
-            _ => write!(f, "DisplayPosition({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DisplayPosition {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DisplayPosition::DEGREE(0)"),
-            1 => write!(f, "DisplayPosition::DEGREE_MINUTE(1)"),
-            2 => write!(f, "DisplayPosition::DEGREE_MINUTE_SECOND(2)"),
-            3 => write!(f, "DisplayPosition::AUSTRIAN_GRID(3)"),
-            4 => write!(f, "DisplayPosition::BRITISH_GRID(4)"),
-            5 => write!(f, "DisplayPosition::DUTCH_GRID(5)"),
-            6 => write!(f, "DisplayPosition::HUNGARIAN_GRID(6)"),
-            7 => write!(f, "DisplayPosition::FINNISH_GRID(7)"),
-            8 => write!(f, "DisplayPosition::GERMAN_GRID(8)"),
-            9 => write!(f, "DisplayPosition::ICELANDIC_GRID(9)"),
-            10 => write!(f, "DisplayPosition::INDONESIAN_EQUATORIAL(10)"),
-            11 => write!(f, "DisplayPosition::INDONESIAN_IRIAN(11)"),
-            12 => write!(f, "DisplayPosition::INDONESIAN_SOUTHERN(12)"),
-            13 => write!(f, "DisplayPosition::INDIA_ZONE_0(13)"),
-            14 => write!(f, "DisplayPosition::INDIA_ZONE_IA(14)"),
-            15 => write!(f, "DisplayPosition::INDIA_ZONE_IB(15)"),
-            16 => write!(f, "DisplayPosition::INDIA_ZONE_IIA(16)"),
-            17 => write!(f, "DisplayPosition::INDIA_ZONE_IIB(17)"),
-            18 => write!(f, "DisplayPosition::INDIA_ZONE_IIIA(18)"),
-            19 => write!(f, "DisplayPosition::INDIA_ZONE_IIIB(19)"),
-            20 => write!(f, "DisplayPosition::INDIA_ZONE_IVA(20)"),
-            21 => write!(f, "DisplayPosition::INDIA_ZONE_IVB(21)"),
-            22 => write!(f, "DisplayPosition::IRISH_TRANSVERSE(22)"),
-            23 => write!(f, "DisplayPosition::IRISH_GRID(23)"),
-            24 => write!(f, "DisplayPosition::LORAN(24)"),
-            25 => write!(f, "DisplayPosition::MAIDENHEAD_GRID(25)"),
-            26 => write!(f, "DisplayPosition::MGRS_GRID(26)"),
-            27 => write!(f, "DisplayPosition::NEW_ZEALAND_GRID(27)"),
-            28 => write!(f, "DisplayPosition::NEW_ZEALAND_TRANSVERSE(28)"),
-            29 => write!(f, "DisplayPosition::QATAR_GRID(29)"),
-            30 => write!(f, "DisplayPosition::MODIFIED_SWEDISH_GRID(30)"),
-            31 => write!(f, "DisplayPosition::SWEDISH_GRID(31)"),
-            32 => write!(f, "DisplayPosition::SOUTH_AFRICAN_GRID(32)"),
-            33 => write!(f, "DisplayPosition::SWISS_GRID(33)"),
-            34 => write!(f, "DisplayPosition::TAIWAN_GRID(34)"),
-            35 => write!(f, "DisplayPosition::UNITED_STATES_GRID(35)"),
-            36 => write!(f, "DisplayPosition::UTM_UPS_GRID(36)"),
-            37 => write!(f, "DisplayPosition::WEST_MALAYAN(37)"),
-            38 => write!(f, "DisplayPosition::BORNEO_RSO(38)"),
-            39 => write!(f, "DisplayPosition::ESTONIAN_GRID(39)"),
-            40 => write!(f, "DisplayPosition::LATVIAN_GRID(40)"),
-            41 => write!(f, "DisplayPosition::SWEDISH_REF_99_GRID(41)"),
             _ => write!(f, "DisplayPosition({})", self.0),
         }
     }

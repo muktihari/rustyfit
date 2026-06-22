@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Ladder Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LadderExerciseName(pub u16);
 
 impl LadderExerciseName {
@@ -29,16 +29,6 @@ impl fmt::Display for LadderExerciseName {
         match self.0 {
             0 => write!(f, "agility"),
             1 => write!(f, "speed"),
-            _ => write!(f, "LadderExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LadderExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "LadderExerciseName::AGILITY(0)"),
-            1 => write!(f, "LadderExerciseName::SPEED(1)"),
             _ => write!(f, "LadderExerciseName({})", self.0),
         }
     }

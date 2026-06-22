@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Activity Class type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ActivityClass(pub u8);
 
 impl ActivityClass {
@@ -32,17 +32,6 @@ impl fmt::Display for ActivityClass {
             0x7F => write!(f, "level"),
             100 => write!(f, "level_max"),
             0x80 => write!(f, "athlete"),
-            _ => write!(f, "ActivityClass({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ActivityClass {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x7F => write!(f, "ActivityClass::LEVEL(0x7F)"),
-            100 => write!(f, "ActivityClass::LEVEL_MAX(100)"),
-            0x80 => write!(f, "ActivityClass::ATHLETE(0x80)"),
             _ => write!(f, "ActivityClass({})", self.0),
         }
     }

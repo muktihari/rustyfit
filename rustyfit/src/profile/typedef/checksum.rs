@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Checksum type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Checksum(pub u8);
 
 impl Checksum {
@@ -31,16 +31,6 @@ impl fmt::Display for Checksum {
         match self.0 {
             0 => write!(f, "clear"),
             1 => write!(f, "ok"),
-            _ => write!(f, "Checksum({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Checksum {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Checksum::CLEAR(0)"),
-            1 => write!(f, "Checksum::OK(1)"),
             _ => write!(f, "Checksum({})", self.0),
         }
     }

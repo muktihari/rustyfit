@@ -10,7 +10,7 @@ use core::fmt;
 
 /// File type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct File(pub u8);
 
 impl File {
@@ -84,34 +84,6 @@ impl fmt::Display for File {
             40 => write!(f, "exd_configuration"),
             0xF7 => write!(f, "mfg_range_min"),
             0xFE => write!(f, "mfg_range_max"),
-            _ => write!(f, "File({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for File {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "File::DEVICE(1)"),
-            2 => write!(f, "File::SETTINGS(2)"),
-            3 => write!(f, "File::SPORT(3)"),
-            4 => write!(f, "File::ACTIVITY(4)"),
-            5 => write!(f, "File::WORKOUT(5)"),
-            6 => write!(f, "File::COURSE(6)"),
-            7 => write!(f, "File::SCHEDULES(7)"),
-            9 => write!(f, "File::WEIGHT(9)"),
-            10 => write!(f, "File::TOTALS(10)"),
-            11 => write!(f, "File::GOALS(11)"),
-            14 => write!(f, "File::BLOOD_PRESSURE(14)"),
-            15 => write!(f, "File::MONITORING_A(15)"),
-            20 => write!(f, "File::ACTIVITY_SUMMARY(20)"),
-            28 => write!(f, "File::MONITORING_DAILY(28)"),
-            32 => write!(f, "File::MONITORING_B(32)"),
-            34 => write!(f, "File::SEGMENT(34)"),
-            35 => write!(f, "File::SEGMENT_LIST(35)"),
-            40 => write!(f, "File::EXD_CONFIGURATION(40)"),
-            0xF7 => write!(f, "File::MFG_RANGE_MIN(0xF7)"),
-            0xFE => write!(f, "File::MFG_RANGE_MAX(0xFE)"),
             _ => write!(f, "File({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Radar Threat Level Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RadarThreatLevelType(pub u8);
 
 impl RadarThreatLevelType {
@@ -33,18 +33,6 @@ impl fmt::Display for RadarThreatLevelType {
             1 => write!(f, "threat_none"),
             2 => write!(f, "threat_approaching"),
             3 => write!(f, "threat_approaching_fast"),
-            _ => write!(f, "RadarThreatLevelType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for RadarThreatLevelType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "RadarThreatLevelType::THREAT_UNKNOWN(0)"),
-            1 => write!(f, "RadarThreatLevelType::THREAT_NONE(1)"),
-            2 => write!(f, "RadarThreatLevelType::THREAT_APPROACHING(2)"),
-            3 => write!(f, "RadarThreatLevelType::THREAT_APPROACHING_FAST(3)"),
             _ => write!(f, "RadarThreatLevelType({})", self.0),
         }
     }

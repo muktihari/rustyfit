@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sleep Level type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SleepLevel(pub u8);
 
 impl SleepLevel {
@@ -35,19 +35,6 @@ impl fmt::Display for SleepLevel {
             2 => write!(f, "light"),
             3 => write!(f, "deep"),
             4 => write!(f, "rem"),
-            _ => write!(f, "SleepLevel({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SleepLevel {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SleepLevel::UNMEASURABLE(0)"),
-            1 => write!(f, "SleepLevel::AWAKE(1)"),
-            2 => write!(f, "SleepLevel::LIGHT(2)"),
-            3 => write!(f, "SleepLevel::DEEP(3)"),
-            4 => write!(f, "SleepLevel::REM(4)"),
             _ => write!(f, "SleepLevel({})", self.0),
         }
     }

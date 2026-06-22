@@ -10,7 +10,7 @@ use core::fmt;
 
 /// User Local Id type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct UserLocalId(pub u16);
 
 impl UserLocalId {
@@ -37,20 +37,6 @@ impl fmt::Display for UserLocalId {
             0x00FF => write!(f, "stationary_max"),
             0x0100 => write!(f, "portable_min"),
             0xFFFE => write!(f, "portable_max"),
-            _ => write!(f, "UserLocalId({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for UserLocalId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x0000 => write!(f, "UserLocalId::LOCAL_MIN(0x0000)"),
-            0x000F => write!(f, "UserLocalId::LOCAL_MAX(0x000F)"),
-            0x0010 => write!(f, "UserLocalId::STATIONARY_MIN(0x0010)"),
-            0x00FF => write!(f, "UserLocalId::STATIONARY_MAX(0x00FF)"),
-            0x0100 => write!(f, "UserLocalId::PORTABLE_MIN(0x0100)"),
-            0xFFFE => write!(f, "UserLocalId::PORTABLE_MAX(0xFFFE)"),
             _ => write!(f, "UserLocalId({})", self.0),
         }
     }

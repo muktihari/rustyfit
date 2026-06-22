@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Olympic Lift Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct OlympicLiftExerciseName(pub u16);
 
 impl OlympicLiftExerciseName {
@@ -85,58 +85,6 @@ impl fmt::Display for OlympicLiftExerciseName {
             26 => write!(f, "medicine_ball_clean"),
             27 => write!(f, "clean_and_press"),
             28 => write!(f, "snatch"),
-            _ => write!(f, "OlympicLiftExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for OlympicLiftExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_POWER_CLEAN(0)"),
-            1 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_SQUAT_CLEAN(1)"),
-            2 => write!(f, "OlympicLiftExerciseName::BARBELL_POWER_CLEAN(2)"),
-            3 => write!(f, "OlympicLiftExerciseName::BARBELL_POWER_SNATCH(3)"),
-            4 => write!(f, "OlympicLiftExerciseName::BARBELL_SQUAT_CLEAN(4)"),
-            5 => write!(f, "OlympicLiftExerciseName::CLEAN_AND_JERK(5)"),
-            6 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_POWER_SNATCH(6)"),
-            7 => write!(f, "OlympicLiftExerciseName::BARBELL_HANG_PULL(7)"),
-            8 => write!(f, "OlympicLiftExerciseName::BARBELL_HIGH_PULL(8)"),
-            9 => write!(f, "OlympicLiftExerciseName::BARBELL_SNATCH(9)"),
-            10 => write!(f, "OlympicLiftExerciseName::BARBELL_SPLIT_JERK(10)"),
-            11 => write!(f, "OlympicLiftExerciseName::CLEAN(11)"),
-            12 => write!(f, "OlympicLiftExerciseName::DUMBBELL_CLEAN(12)"),
-            13 => write!(f, "OlympicLiftExerciseName::DUMBBELL_HANG_PULL(13)"),
-            14 => write!(
-                f,
-                "OlympicLiftExerciseName::ONE_HAND_DUMBBELL_SPLIT_SNATCH(14)"
-            ),
-            15 => write!(f, "OlympicLiftExerciseName::PUSH_JERK(15)"),
-            16 => write!(f, "OlympicLiftExerciseName::SINGLE_ARM_DUMBBELL_SNATCH(16)"),
-            17 => write!(f, "OlympicLiftExerciseName::SINGLE_ARM_HANG_SNATCH(17)"),
-            18 => write!(
-                f,
-                "OlympicLiftExerciseName::SINGLE_ARM_KETTLEBELL_SNATCH(18)"
-            ),
-            19 => write!(f, "OlympicLiftExerciseName::SPLIT_JERK(19)"),
-            20 => write!(f, "OlympicLiftExerciseName::SQUAT_CLEAN_AND_JERK(20)"),
-            21 => write!(f, "OlympicLiftExerciseName::DUMBBELL_HANG_SNATCH(21)"),
-            22 => write!(
-                f,
-                "OlympicLiftExerciseName::DUMBBELL_POWER_CLEAN_AND_JERK(22)"
-            ),
-            23 => write!(
-                f,
-                "OlympicLiftExerciseName::DUMBBELL_POWER_CLEAN_AND_PUSH_PRESS(23)"
-            ),
-            24 => write!(
-                f,
-                "OlympicLiftExerciseName::DUMBBELL_POWER_CLEAN_AND_STRICT_PRESS(24)"
-            ),
-            25 => write!(f, "OlympicLiftExerciseName::DUMBBELL_SNATCH(25)"),
-            26 => write!(f, "OlympicLiftExerciseName::MEDICINE_BALL_CLEAN(26)"),
-            27 => write!(f, "OlympicLiftExerciseName::CLEAN_AND_PRESS(27)"),
-            28 => write!(f, "OlympicLiftExerciseName::SNATCH(28)"),
             _ => write!(f, "OlympicLiftExerciseName({})", self.0),
         }
     }

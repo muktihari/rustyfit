@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Goal Recurrence type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GoalRecurrence(pub u8);
 
 impl GoalRecurrence {
@@ -37,20 +37,6 @@ impl fmt::Display for GoalRecurrence {
             3 => write!(f, "monthly"),
             4 => write!(f, "yearly"),
             5 => write!(f, "custom"),
-            _ => write!(f, "GoalRecurrence({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for GoalRecurrence {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "GoalRecurrence::OFF(0)"),
-            1 => write!(f, "GoalRecurrence::DAILY(1)"),
-            2 => write!(f, "GoalRecurrence::WEEKLY(2)"),
-            3 => write!(f, "GoalRecurrence::MONTHLY(3)"),
-            4 => write!(f, "GoalRecurrence::YEARLY(4)"),
-            5 => write!(f, "GoalRecurrence::CUSTOM(5)"),
             _ => write!(f, "GoalRecurrence({})", self.0),
         }
     }

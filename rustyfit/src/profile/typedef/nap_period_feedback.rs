@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Nap Period Feedback type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct NapPeriodFeedback(pub u8);
 
 impl NapPeriodFeedback {
@@ -61,59 +61,6 @@ impl fmt::Display for NapPeriodFeedback {
             15 => write!(f, "ideal_duration_high_need"),
             16 => write!(f, "long_duration_low_need"),
             17 => write!(f, "long_duration_high_need"),
-            _ => write!(f, "NapPeriodFeedback({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for NapPeriodFeedback {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "NapPeriodFeedback::NONE(0)"),
-            1 => write!(f, "NapPeriodFeedback::MULTIPLE_NAPS_DURING_DAY(1)"),
-            2 => write!(
-                f,
-                "NapPeriodFeedback::JETLAG_IDEAL_TIMING_IDEAL_DURATION(2)"
-            ),
-            3 => write!(f, "NapPeriodFeedback::JETLAG_IDEAL_TIMING_LONG_DURATION(3)"),
-            4 => write!(f, "NapPeriodFeedback::JETLAG_LATE_TIMING_IDEAL_DURATION(4)"),
-            5 => write!(f, "NapPeriodFeedback::JETLAG_LATE_TIMING_LONG_DURATION(5)"),
-            6 => write!(
-                f,
-                "NapPeriodFeedback::IDEAL_TIMING_IDEAL_DURATION_LOW_NEED(6)"
-            ),
-            7 => write!(
-                f,
-                "NapPeriodFeedback::IDEAL_TIMING_IDEAL_DURATION_HIGH_NEED(7)"
-            ),
-            8 => write!(
-                f,
-                "NapPeriodFeedback::IDEAL_TIMING_LONG_DURATION_LOW_NEED(8)"
-            ),
-            9 => write!(
-                f,
-                "NapPeriodFeedback::IDEAL_TIMING_LONG_DURATION_HIGH_NEED(9)"
-            ),
-            10 => write!(
-                f,
-                "NapPeriodFeedback::LATE_TIMING_IDEAL_DURATION_LOW_NEED(10)"
-            ),
-            11 => write!(
-                f,
-                "NapPeriodFeedback::LATE_TIMING_IDEAL_DURATION_HIGH_NEED(11)"
-            ),
-            12 => write!(
-                f,
-                "NapPeriodFeedback::LATE_TIMING_LONG_DURATION_LOW_NEED(12)"
-            ),
-            13 => write!(
-                f,
-                "NapPeriodFeedback::LATE_TIMING_LONG_DURATION_HIGH_NEED(13)"
-            ),
-            14 => write!(f, "NapPeriodFeedback::IDEAL_DURATION_LOW_NEED(14)"),
-            15 => write!(f, "NapPeriodFeedback::IDEAL_DURATION_HIGH_NEED(15)"),
-            16 => write!(f, "NapPeriodFeedback::LONG_DURATION_LOW_NEED(16)"),
-            17 => write!(f, "NapPeriodFeedback::LONG_DURATION_HIGH_NEED(17)"),
             _ => write!(f, "NapPeriodFeedback({})", self.0),
         }
     }

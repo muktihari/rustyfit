@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Banded Exercises Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BandedExercisesExerciseName(pub u16);
 
 impl BandedExercisesExerciseName {
@@ -157,110 +157,6 @@ impl fmt::Display for BandedExercisesExerciseName {
             59 => write!(f, "pull_apart_wheelchair"),
             60 => write!(f, "side_curl_wheelchair"),
             61 => write!(f, "overhead_press_wheelchair"),
-            _ => write!(f, "BandedExercisesExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BandedExercisesExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "BandedExercisesExerciseName::AB_TWIST(1)"),
-            2 => write!(f, "BandedExercisesExerciseName::BACK_EXTENSION(2)"),
-            3 => write!(f, "BandedExercisesExerciseName::BICYCLE_CRUNCH(3)"),
-            4 => write!(f, "BandedExercisesExerciseName::CALF_RAISES(4)"),
-            5 => write!(f, "BandedExercisesExerciseName::CHEST_PRESS(5)"),
-            6 => write!(f, "BandedExercisesExerciseName::CLAM_SHELLS(6)"),
-            7 => write!(f, "BandedExercisesExerciseName::CURL(7)"),
-            8 => write!(f, "BandedExercisesExerciseName::DEADBUG(8)"),
-            9 => write!(f, "BandedExercisesExerciseName::DEADLIFT(9)"),
-            10 => write!(f, "BandedExercisesExerciseName::DONKEY_KICK(10)"),
-            11 => write!(f, "BandedExercisesExerciseName::EXTERNAL_ROTATION(11)"),
-            12 => write!(
-                f,
-                "BandedExercisesExerciseName::EXTERNAL_ROTATION_AT_90_DEGREE_ABDUCTION(12)"
-            ),
-            13 => write!(f, "BandedExercisesExerciseName::FACE_PULL(13)"),
-            14 => write!(f, "BandedExercisesExerciseName::FIRE_HYDRANT(14)"),
-            15 => write!(f, "BandedExercisesExerciseName::FLY(15)"),
-            16 => write!(f, "BandedExercisesExerciseName::FRONT_RAISE(16)"),
-            17 => write!(f, "BandedExercisesExerciseName::GLUTE_BRIDGE(17)"),
-            18 => write!(f, "BandedExercisesExerciseName::HAMSTRING_CURLS(18)"),
-            19 => write!(f, "BandedExercisesExerciseName::HIGH_PLANK_LEG_LIFTS(19)"),
-            20 => write!(f, "BandedExercisesExerciseName::HIP_EXTENSION(20)"),
-            21 => write!(f, "BandedExercisesExerciseName::INTERNAL_ROTATION(21)"),
-            22 => write!(f, "BandedExercisesExerciseName::JUMPING_JACK(22)"),
-            23 => write!(f, "BandedExercisesExerciseName::KNEELING_CRUNCH(23)"),
-            24 => write!(f, "BandedExercisesExerciseName::LATERAL_BAND_WALKS(24)"),
-            25 => write!(f, "BandedExercisesExerciseName::LATERAL_RAISE(25)"),
-            26 => write!(f, "BandedExercisesExerciseName::LATPULL(26)"),
-            27 => write!(f, "BandedExercisesExerciseName::LEG_ABDUCTION(27)"),
-            28 => write!(f, "BandedExercisesExerciseName::LEG_ADDUCTION(28)"),
-            29 => write!(f, "BandedExercisesExerciseName::LEG_EXTENSION(29)"),
-            30 => write!(f, "BandedExercisesExerciseName::LUNGE(30)"),
-            31 => write!(f, "BandedExercisesExerciseName::PLANK(31)"),
-            32 => write!(f, "BandedExercisesExerciseName::PULL_APART(32)"),
-            33 => write!(f, "BandedExercisesExerciseName::PUSH_UPS(33)"),
-            34 => write!(f, "BandedExercisesExerciseName::REVERSE_CRUNCH(34)"),
-            35 => write!(f, "BandedExercisesExerciseName::ROW(35)"),
-            36 => write!(f, "BandedExercisesExerciseName::SHOULDER_ABDUCTION(36)"),
-            37 => write!(f, "BandedExercisesExerciseName::SHOULDER_EXTENSION(37)"),
-            38 => write!(
-                f,
-                "BandedExercisesExerciseName::SHOULDER_EXTERNAL_ROTATION(38)"
-            ),
-            39 => write!(
-                f,
-                "BandedExercisesExerciseName::SHOULDER_FLEXION_TO_90_DEGREES(39)"
-            ),
-            40 => write!(f, "BandedExercisesExerciseName::SIDE_PLANK_LEG_LIFTS(40)"),
-            41 => write!(f, "BandedExercisesExerciseName::SIDE_RAISE(41)"),
-            42 => write!(f, "BandedExercisesExerciseName::SQUAT(42)"),
-            43 => write!(f, "BandedExercisesExerciseName::SQUAT_TO_PRESS(43)"),
-            44 => write!(f, "BandedExercisesExerciseName::TRICEP_EXTENSION(44)"),
-            45 => write!(f, "BandedExercisesExerciseName::TRICEP_KICKBACK(45)"),
-            46 => write!(f, "BandedExercisesExerciseName::UPRIGHT_ROW(46)"),
-            47 => write!(
-                f,
-                "BandedExercisesExerciseName::WALL_CRAWL_WITH_EXTERNAL_ROTATION(47)"
-            ),
-            49 => write!(
-                f,
-                "BandedExercisesExerciseName::LATERAL_RAISE_WHEELCHAIR(49)"
-            ),
-            50 => write!(
-                f,
-                "BandedExercisesExerciseName::TRICEPS_EXTENSION_WHEELCHAIR(50)"
-            ),
-            51 => write!(
-                f,
-                "BandedExercisesExerciseName::CHEST_FLY_INCLINE_WHEELCHAIR(51)"
-            ),
-            52 => write!(
-                f,
-                "BandedExercisesExerciseName::CHEST_FLY_DECLINE_WHEELCHAIR(52)"
-            ),
-            53 => write!(f, "BandedExercisesExerciseName::PULL_DOWN_WHEELCHAIR(53)"),
-            54 => write!(
-                f,
-                "BandedExercisesExerciseName::STRAIGHT_ARM_PULL_DOWN_WHEELCHAIR(54)"
-            ),
-            55 => write!(f, "BandedExercisesExerciseName::CURL_WHEELCHAIR(55)"),
-            56 => write!(
-                f,
-                "BandedExercisesExerciseName::OVERHEAD_CURL_WHEELCHAIR(56)"
-            ),
-            57 => write!(f, "BandedExercisesExerciseName::FACE_PULL_WHEELCHAIR(57)"),
-            58 => write!(
-                f,
-                "BandedExercisesExerciseName::AROUND_THE_WORLD_WHEELCHAIR(58)"
-            ),
-            59 => write!(f, "BandedExercisesExerciseName::PULL_APART_WHEELCHAIR(59)"),
-            60 => write!(f, "BandedExercisesExerciseName::SIDE_CURL_WHEELCHAIR(60)"),
-            61 => write!(
-                f,
-                "BandedExercisesExerciseName::OVERHEAD_PRESS_WHEELCHAIR(61)"
-            ),
             _ => write!(f, "BandedExercisesExerciseName({})", self.0),
         }
     }

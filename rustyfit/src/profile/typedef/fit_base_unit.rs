@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Fit Base Unit type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FitBaseUnit(pub u16);
 
 impl FitBaseUnit {
@@ -31,17 +31,6 @@ impl fmt::Display for FitBaseUnit {
             0 => write!(f, "other"),
             1 => write!(f, "kilogram"),
             2 => write!(f, "pound"),
-            _ => write!(f, "FitBaseUnit({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FitBaseUnit {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "FitBaseUnit::OTHER(0)"),
-            1 => write!(f, "FitBaseUnit::KILOGRAM(1)"),
-            2 => write!(f, "FitBaseUnit::POUND(2)"),
             _ => write!(f, "FitBaseUnit({})", self.0),
         }
     }

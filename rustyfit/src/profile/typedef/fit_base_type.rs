@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Fit Base Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FitBaseType(pub u8);
 
 impl FitBaseType {
@@ -72,31 +72,6 @@ impl fmt::Display for FitBaseType {
             142 => write!(f, "sint64"),
             143 => write!(f, "uint64"),
             144 => write!(f, "uint64z"),
-            _ => write!(f, "FitBaseType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FitBaseType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "FitBaseType::ENUM(0)"),
-            1 => write!(f, "FitBaseType::SINT8(1)"),
-            2 => write!(f, "FitBaseType::UINT8(2)"),
-            131 => write!(f, "FitBaseType::SINT16(131)"),
-            132 => write!(f, "FitBaseType::UINT16(132)"),
-            133 => write!(f, "FitBaseType::SINT32(133)"),
-            134 => write!(f, "FitBaseType::UINT32(134)"),
-            7 => write!(f, "FitBaseType::STRING(7)"),
-            136 => write!(f, "FitBaseType::FLOAT32(136)"),
-            137 => write!(f, "FitBaseType::FLOAT64(137)"),
-            10 => write!(f, "FitBaseType::UINT8Z(10)"),
-            139 => write!(f, "FitBaseType::UINT16Z(139)"),
-            140 => write!(f, "FitBaseType::UINT32Z(140)"),
-            13 => write!(f, "FitBaseType::BYTE(13)"),
-            142 => write!(f, "FitBaseType::SINT64(142)"),
-            143 => write!(f, "FitBaseType::UINT64(143)"),
-            144 => write!(f, "FitBaseType::UINT64Z(144)"),
             _ => write!(f, "FitBaseType({})", self.0),
         }
     }

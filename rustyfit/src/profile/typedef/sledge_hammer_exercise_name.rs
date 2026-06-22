@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sledge Hammer Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SledgeHammerExerciseName(pub u16);
 
 impl SledgeHammerExerciseName {
@@ -29,16 +29,6 @@ impl fmt::Display for SledgeHammerExerciseName {
         match self.0 {
             0 => write!(f, "lateral_swing"),
             1 => write!(f, "hammer_slam"),
-            _ => write!(f, "SledgeHammerExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SledgeHammerExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SledgeHammerExerciseName::LATERAL_SWING(0)"),
-            1 => write!(f, "SledgeHammerExerciseName::HAMMER_SLAM(1)"),
             _ => write!(f, "SledgeHammerExerciseName({})", self.0),
         }
     }

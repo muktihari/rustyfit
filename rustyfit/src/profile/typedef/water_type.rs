@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Water Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WaterType(pub u8);
 
 impl WaterType {
@@ -33,18 +33,6 @@ impl fmt::Display for WaterType {
             1 => write!(f, "salt"),
             2 => write!(f, "en13319"),
             3 => write!(f, "custom"),
-            _ => write!(f, "WaterType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WaterType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WaterType::FRESH(0)"),
-            1 => write!(f, "WaterType::SALT(1)"),
-            2 => write!(f, "WaterType::EN13319(2)"),
-            3 => write!(f, "WaterType::CUSTOM(3)"),
             _ => write!(f, "WaterType({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Turn Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TurnType(pub u8);
 
 impl TurnType {
@@ -101,52 +101,6 @@ impl fmt::Display for TurnType {
             35 => write!(f, "uturn_right_idx"),
             36 => write!(f, "icon_inv_idx"),
             37 => write!(f, "icon_idx_cnt"),
-            _ => write!(f, "TurnType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TurnType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TurnType::ARRIVING_IDX(0)"),
-            1 => write!(f, "TurnType::ARRIVING_LEFT_IDX(1)"),
-            2 => write!(f, "TurnType::ARRIVING_RIGHT_IDX(2)"),
-            3 => write!(f, "TurnType::ARRIVING_VIA_IDX(3)"),
-            4 => write!(f, "TurnType::ARRIVING_VIA_LEFT_IDX(4)"),
-            5 => write!(f, "TurnType::ARRIVING_VIA_RIGHT_IDX(5)"),
-            6 => write!(f, "TurnType::BEAR_KEEP_LEFT_IDX(6)"),
-            7 => write!(f, "TurnType::BEAR_KEEP_RIGHT_IDX(7)"),
-            8 => write!(f, "TurnType::CONTINUE_IDX(8)"),
-            9 => write!(f, "TurnType::EXIT_LEFT_IDX(9)"),
-            10 => write!(f, "TurnType::EXIT_RIGHT_IDX(10)"),
-            11 => write!(f, "TurnType::FERRY_IDX(11)"),
-            12 => write!(f, "TurnType::ROUNDABOUT_45_IDX(12)"),
-            13 => write!(f, "TurnType::ROUNDABOUT_90_IDX(13)"),
-            14 => write!(f, "TurnType::ROUNDABOUT_135_IDX(14)"),
-            15 => write!(f, "TurnType::ROUNDABOUT_180_IDX(15)"),
-            16 => write!(f, "TurnType::ROUNDABOUT_225_IDX(16)"),
-            17 => write!(f, "TurnType::ROUNDABOUT_270_IDX(17)"),
-            18 => write!(f, "TurnType::ROUNDABOUT_315_IDX(18)"),
-            19 => write!(f, "TurnType::ROUNDABOUT_360_IDX(19)"),
-            20 => write!(f, "TurnType::ROUNDABOUT_NEG_45_IDX(20)"),
-            21 => write!(f, "TurnType::ROUNDABOUT_NEG_90_IDX(21)"),
-            22 => write!(f, "TurnType::ROUNDABOUT_NEG_135_IDX(22)"),
-            23 => write!(f, "TurnType::ROUNDABOUT_NEG_180_IDX(23)"),
-            24 => write!(f, "TurnType::ROUNDABOUT_NEG_225_IDX(24)"),
-            25 => write!(f, "TurnType::ROUNDABOUT_NEG_270_IDX(25)"),
-            26 => write!(f, "TurnType::ROUNDABOUT_NEG_315_IDX(26)"),
-            27 => write!(f, "TurnType::ROUNDABOUT_NEG_360_IDX(27)"),
-            28 => write!(f, "TurnType::ROUNDABOUT_GENERIC_IDX(28)"),
-            29 => write!(f, "TurnType::ROUNDABOUT_NEG_GENERIC_IDX(29)"),
-            30 => write!(f, "TurnType::SHARP_TURN_LEFT_IDX(30)"),
-            31 => write!(f, "TurnType::SHARP_TURN_RIGHT_IDX(31)"),
-            32 => write!(f, "TurnType::TURN_LEFT_IDX(32)"),
-            33 => write!(f, "TurnType::TURN_RIGHT_IDX(33)"),
-            34 => write!(f, "TurnType::UTURN_LEFT_IDX(34)"),
-            35 => write!(f, "TurnType::UTURN_RIGHT_IDX(35)"),
-            36 => write!(f, "TurnType::ICON_INV_IDX(36)"),
-            37 => write!(f, "TurnType::ICON_IDX_CNT(37)"),
             _ => write!(f, "TurnType({})", self.0),
         }
     }

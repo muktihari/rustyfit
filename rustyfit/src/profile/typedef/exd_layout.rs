@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Exd Layout type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ExdLayout(pub u8);
 
 impl ExdLayout {
@@ -44,23 +44,6 @@ impl fmt::Display for ExdLayout {
             6 => write!(f, "half_vertical_left_split"),
             7 => write!(f, "half_horizontal_top_split"),
             8 => write!(f, "dynamic"),
-            _ => write!(f, "ExdLayout({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ExdLayout {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ExdLayout::FULL_SCREEN(0)"),
-            1 => write!(f, "ExdLayout::HALF_VERTICAL(1)"),
-            2 => write!(f, "ExdLayout::HALF_HORIZONTAL(2)"),
-            3 => write!(f, "ExdLayout::HALF_VERTICAL_RIGHT_SPLIT(3)"),
-            4 => write!(f, "ExdLayout::HALF_HORIZONTAL_BOTTOM_SPLIT(4)"),
-            5 => write!(f, "ExdLayout::FULL_QUARTER_SPLIT(5)"),
-            6 => write!(f, "ExdLayout::HALF_VERTICAL_LEFT_SPLIT(6)"),
-            7 => write!(f, "ExdLayout::HALF_HORIZONTAL_TOP_SPLIT(7)"),
-            8 => write!(f, "ExdLayout::DYNAMIC(8)"),
             _ => write!(f, "ExdLayout({})", self.0),
         }
     }

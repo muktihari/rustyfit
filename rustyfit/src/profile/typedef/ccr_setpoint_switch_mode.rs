@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Ccr Setpoint Switch Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CcrSetpointSwitchMode(pub u8);
 
 impl CcrSetpointSwitchMode {
@@ -31,16 +31,6 @@ impl fmt::Display for CcrSetpointSwitchMode {
         match self.0 {
             0 => write!(f, "manual"),
             1 => write!(f, "automatic"),
-            _ => write!(f, "CcrSetpointSwitchMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CcrSetpointSwitchMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CcrSetpointSwitchMode::MANUAL(0)"),
-            1 => write!(f, "CcrSetpointSwitchMode::AUTOMATIC(1)"),
             _ => write!(f, "CcrSetpointSwitchMode({})", self.0),
         }
     }

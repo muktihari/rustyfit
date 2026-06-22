@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Row Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RowExerciseName(pub u16);
 
 impl RowExerciseName {
@@ -132,88 +132,6 @@ impl fmt::Display for RowExerciseName {
             50 => write!(f, "weighted_inverted_row"),
             51 => write!(f, "weighted_trx_inverted_row"),
             52 => write!(f, "dumbbell_row_wheelchair"),
-            _ => write!(f, "RowExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for RowExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(
-                f,
-                "RowExerciseName::BARBELL_STRAIGHT_LEG_DEADLIFT_TO_ROW(0)"
-            ),
-            1 => write!(f, "RowExerciseName::CABLE_ROW_STANDING(1)"),
-            2 => write!(f, "RowExerciseName::DUMBBELL_ROW(2)"),
-            3 => write!(f, "RowExerciseName::ELEVATED_FEET_INVERTED_ROW(3)"),
-            4 => write!(f, "RowExerciseName::WEIGHTED_ELEVATED_FEET_INVERTED_ROW(4)"),
-            5 => write!(f, "RowExerciseName::FACE_PULL(5)"),
-            6 => write!(f, "RowExerciseName::FACE_PULL_WITH_EXTERNAL_ROTATION(6)"),
-            7 => write!(
-                f,
-                "RowExerciseName::INVERTED_ROW_WITH_FEET_ON_SWISS_BALL(7)"
-            ),
-            8 => write!(
-                f,
-                "RowExerciseName::WEIGHTED_INVERTED_ROW_WITH_FEET_ON_SWISS_BALL(8)"
-            ),
-            9 => write!(f, "RowExerciseName::KETTLEBELL_ROW(9)"),
-            10 => write!(f, "RowExerciseName::MODIFIED_INVERTED_ROW(10)"),
-            11 => write!(f, "RowExerciseName::WEIGHTED_MODIFIED_INVERTED_ROW(11)"),
-            12 => write!(
-                f,
-                "RowExerciseName::NEUTRAL_GRIP_ALTERNATING_DUMBBELL_ROW(12)"
-            ),
-            13 => write!(f, "RowExerciseName::ONE_ARM_BENT_OVER_ROW(13)"),
-            14 => write!(f, "RowExerciseName::ONE_LEGGED_DUMBBELL_ROW(14)"),
-            15 => write!(f, "RowExerciseName::RENEGADE_ROW(15)"),
-            16 => write!(f, "RowExerciseName::REVERSE_GRIP_BARBELL_ROW(16)"),
-            17 => write!(f, "RowExerciseName::ROPE_HANDLE_CABLE_ROW(17)"),
-            18 => write!(f, "RowExerciseName::SEATED_CABLE_ROW(18)"),
-            19 => write!(f, "RowExerciseName::SEATED_DUMBBELL_ROW(19)"),
-            20 => write!(f, "RowExerciseName::SINGLE_ARM_CABLE_ROW(20)"),
-            21 => write!(f, "RowExerciseName::SINGLE_ARM_CABLE_ROW_AND_ROTATION(21)"),
-            22 => write!(f, "RowExerciseName::SINGLE_ARM_INVERTED_ROW(22)"),
-            23 => write!(f, "RowExerciseName::WEIGHTED_SINGLE_ARM_INVERTED_ROW(23)"),
-            24 => write!(
-                f,
-                "RowExerciseName::SINGLE_ARM_NEUTRAL_GRIP_DUMBBELL_ROW(24)"
-            ),
-            25 => write!(
-                f,
-                "RowExerciseName::SINGLE_ARM_NEUTRAL_GRIP_DUMBBELL_ROW_AND_ROTATION(25)"
-            ),
-            26 => write!(f, "RowExerciseName::SUSPENDED_INVERTED_ROW(26)"),
-            27 => write!(f, "RowExerciseName::WEIGHTED_SUSPENDED_INVERTED_ROW(27)"),
-            28 => write!(f, "RowExerciseName::T_BAR_ROW(28)"),
-            29 => write!(f, "RowExerciseName::TOWEL_GRIP_INVERTED_ROW(29)"),
-            30 => write!(f, "RowExerciseName::WEIGHTED_TOWEL_GRIP_INVERTED_ROW(30)"),
-            31 => write!(f, "RowExerciseName::UNDERHAND_GRIP_CABLE_ROW(31)"),
-            32 => write!(f, "RowExerciseName::V_GRIP_CABLE_ROW(32)"),
-            33 => write!(f, "RowExerciseName::WIDE_GRIP_SEATED_CABLE_ROW(33)"),
-            34 => write!(f, "RowExerciseName::ALTERNATING_DUMBBELL_ROW(34)"),
-            35 => write!(f, "RowExerciseName::INVERTED_ROW(35)"),
-            36 => write!(f, "RowExerciseName::ROW(36)"),
-            37 => write!(f, "RowExerciseName::WEIGHTED_ROW(37)"),
-            38 => write!(f, "RowExerciseName::INDOOR_ROW(38)"),
-            39 => write!(f, "RowExerciseName::BANDED_FACE_PULLS(39)"),
-            40 => write!(f, "RowExerciseName::CHEST_SUPPORTED_DUMBBELL_ROW(40)"),
-            41 => write!(f, "RowExerciseName::DECLINE_RING_ROW(41)"),
-            42 => write!(f, "RowExerciseName::ELEVATED_RING_ROW(42)"),
-            43 => write!(
-                f,
-                "RowExerciseName::RDL_BENT_OVER_ROW_WITH_BARBELL_DUMBBELL(43)"
-            ),
-            44 => write!(f, "RowExerciseName::RING_ROW(44)"),
-            45 => write!(f, "RowExerciseName::BARBELL_ROW(45)"),
-            46 => write!(f, "RowExerciseName::BENT_OVER_ROW_WITH_BARBELL(46)"),
-            47 => write!(f, "RowExerciseName::BENT_OVER_ROW_WITH_DUMBELL(47)"),
-            48 => write!(f, "RowExerciseName::SEATED_UNDERHAND_GRIP_CABLE_ROW(48)"),
-            49 => write!(f, "RowExerciseName::TRX_INVERTED_ROW(49)"),
-            50 => write!(f, "RowExerciseName::WEIGHTED_INVERTED_ROW(50)"),
-            51 => write!(f, "RowExerciseName::WEIGHTED_TRX_INVERTED_ROW(51)"),
-            52 => write!(f, "RowExerciseName::DUMBBELL_ROW_WHEELCHAIR(52)"),
             _ => write!(f, "RowExerciseName({})", self.0),
         }
     }

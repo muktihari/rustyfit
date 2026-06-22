@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Activity type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Activity(pub u8);
 
 impl Activity {
@@ -29,16 +29,6 @@ impl fmt::Display for Activity {
         match self.0 {
             0 => write!(f, "manual"),
             1 => write!(f, "auto_multi_sport"),
-            _ => write!(f, "Activity({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Activity {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Activity::MANUAL(0)"),
-            1 => write!(f, "Activity::AUTO_MULTI_SPORT(1)"),
             _ => write!(f, "Activity({})", self.0),
         }
     }

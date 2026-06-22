@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Display Heart type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DisplayHeart(pub u8);
 
 impl DisplayHeart {
@@ -31,17 +31,6 @@ impl fmt::Display for DisplayHeart {
             0 => write!(f, "bpm"),
             1 => write!(f, "max"),
             2 => write!(f, "reserve"),
-            _ => write!(f, "DisplayHeart({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DisplayHeart {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DisplayHeart::BPM(0)"),
-            1 => write!(f, "DisplayHeart::MAX(1)"),
-            2 => write!(f, "DisplayHeart::RESERVE(2)"),
             _ => write!(f, "DisplayHeart({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Activity Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ActivityType(pub u8);
 
 impl ActivityType {
@@ -45,23 +45,6 @@ impl fmt::Display for ActivityType {
             6 => write!(f, "walking"),
             8 => write!(f, "sedentary"),
             254 => write!(f, "all"),
-            _ => write!(f, "ActivityType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ActivityType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ActivityType::GENERIC(0)"),
-            1 => write!(f, "ActivityType::RUNNING(1)"),
-            2 => write!(f, "ActivityType::CYCLING(2)"),
-            3 => write!(f, "ActivityType::TRANSITION(3)"),
-            4 => write!(f, "ActivityType::FITNESS_EQUIPMENT(4)"),
-            5 => write!(f, "ActivityType::SWIMMING(5)"),
-            6 => write!(f, "ActivityType::WALKING(6)"),
-            8 => write!(f, "ActivityType::SEDENTARY(8)"),
-            254 => write!(f, "ActivityType::ALL(254)"),
             _ => write!(f, "ActivityType({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sensor Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SensorType(pub u8);
 
 impl SensorType {
@@ -34,18 +34,6 @@ impl fmt::Display for SensorType {
             1 => write!(f, "gyroscope"),
             2 => write!(f, "compass"),
             3 => write!(f, "barometer"),
-            _ => write!(f, "SensorType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SensorType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SensorType::ACCELEROMETER(0)"),
-            1 => write!(f, "SensorType::GYROSCOPE(1)"),
-            2 => write!(f, "SensorType::COMPASS(2)"),
-            3 => write!(f, "SensorType::BAROMETER(3)"),
             _ => write!(f, "SensorType({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Indoor Row Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct IndoorRowExerciseName(pub u16);
 
 impl IndoorRowExerciseName {
@@ -27,15 +27,6 @@ impl fmt::Display for IndoorRowExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "rowing_machine"),
-            _ => write!(f, "IndoorRowExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for IndoorRowExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "IndoorRowExerciseName::ROWING_MACHINE(0)"),
             _ => write!(f, "IndoorRowExerciseName({})", self.0),
         }
     }

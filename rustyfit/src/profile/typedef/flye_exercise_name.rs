@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Flye Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FlyeExerciseName(pub u16);
 
 impl FlyeExerciseName {
@@ -51,30 +51,6 @@ impl fmt::Display for FlyeExerciseName {
             10 => write!(f, "face_down_incline_reverse_flye"),
             11 => write!(f, "incline_reverse_flye"),
             12 => write!(f, "rear_delt_fly_wheelchair"),
-            _ => write!(f, "FlyeExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FlyeExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "FlyeExerciseName::CABLE_CROSSOVER(0)"),
-            1 => write!(f, "FlyeExerciseName::DECLINE_DUMBBELL_FLYE(1)"),
-            2 => write!(f, "FlyeExerciseName::DUMBBELL_FLYE(2)"),
-            3 => write!(f, "FlyeExerciseName::INCLINE_DUMBBELL_FLYE(3)"),
-            4 => write!(f, "FlyeExerciseName::KETTLEBELL_FLYE(4)"),
-            5 => write!(f, "FlyeExerciseName::KNEELING_REAR_FLYE(5)"),
-            6 => write!(
-                f,
-                "FlyeExerciseName::SINGLE_ARM_STANDING_CABLE_REVERSE_FLYE(6)"
-            ),
-            7 => write!(f, "FlyeExerciseName::SWISS_BALL_DUMBBELL_FLYE(7)"),
-            8 => write!(f, "FlyeExerciseName::ARM_ROTATIONS(8)"),
-            9 => write!(f, "FlyeExerciseName::HUG_A_TREE(9)"),
-            10 => write!(f, "FlyeExerciseName::FACE_DOWN_INCLINE_REVERSE_FLYE(10)"),
-            11 => write!(f, "FlyeExerciseName::INCLINE_REVERSE_FLYE(11)"),
-            12 => write!(f, "FlyeExerciseName::REAR_DELT_FLY_WHEELCHAIR(12)"),
             _ => write!(f, "FlyeExerciseName({})", self.0),
         }
     }

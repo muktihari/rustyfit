@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Tap Sensitivity type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TapSensitivity(pub u8);
 
 impl TapSensitivity {
@@ -31,17 +31,6 @@ impl fmt::Display for TapSensitivity {
             0 => write!(f, "high"),
             1 => write!(f, "medium"),
             2 => write!(f, "low"),
-            _ => write!(f, "TapSensitivity({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TapSensitivity {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TapSensitivity::HIGH(0)"),
-            1 => write!(f, "TapSensitivity::MEDIUM(1)"),
-            2 => write!(f, "TapSensitivity::LOW(2)"),
             _ => write!(f, "TapSensitivity({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Exd Data Units type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ExdDataUnits(pub u8);
 
 impl ExdDataUnits {
@@ -125,64 +125,6 @@ impl fmt::Display for ExdDataUnits {
             47 => write!(f, "meters_per_min"),
             48 => write!(f, "meters_per_sec"),
             49 => write!(f, "eight_cardinal"),
-            _ => write!(f, "ExdDataUnits({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ExdDataUnits {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ExdDataUnits::NO_UNITS(0)"),
-            1 => write!(f, "ExdDataUnits::LAPS(1)"),
-            2 => write!(f, "ExdDataUnits::MILES_PER_HOUR(2)"),
-            3 => write!(f, "ExdDataUnits::KILOMETERS_PER_HOUR(3)"),
-            4 => write!(f, "ExdDataUnits::FEET_PER_HOUR(4)"),
-            5 => write!(f, "ExdDataUnits::METERS_PER_HOUR(5)"),
-            6 => write!(f, "ExdDataUnits::DEGREES_CELSIUS(6)"),
-            7 => write!(f, "ExdDataUnits::DEGREES_FAHRENHEIT(7)"),
-            8 => write!(f, "ExdDataUnits::ZONE(8)"),
-            9 => write!(f, "ExdDataUnits::GEAR(9)"),
-            10 => write!(f, "ExdDataUnits::RPM(10)"),
-            11 => write!(f, "ExdDataUnits::BPM(11)"),
-            12 => write!(f, "ExdDataUnits::DEGREES(12)"),
-            13 => write!(f, "ExdDataUnits::MILLIMETERS(13)"),
-            14 => write!(f, "ExdDataUnits::METERS(14)"),
-            15 => write!(f, "ExdDataUnits::KILOMETERS(15)"),
-            16 => write!(f, "ExdDataUnits::FEET(16)"),
-            17 => write!(f, "ExdDataUnits::YARDS(17)"),
-            18 => write!(f, "ExdDataUnits::KILOFEET(18)"),
-            19 => write!(f, "ExdDataUnits::MILES(19)"),
-            20 => write!(f, "ExdDataUnits::TIME(20)"),
-            21 => write!(f, "ExdDataUnits::ENUM_TURN_TYPE(21)"),
-            22 => write!(f, "ExdDataUnits::PERCENT(22)"),
-            23 => write!(f, "ExdDataUnits::WATTS(23)"),
-            24 => write!(f, "ExdDataUnits::WATTS_PER_KILOGRAM(24)"),
-            25 => write!(f, "ExdDataUnits::ENUM_BATTERY_STATUS(25)"),
-            26 => write!(f, "ExdDataUnits::ENUM_BIKE_LIGHT_BEAM_ANGLE_MODE(26)"),
-            27 => write!(f, "ExdDataUnits::ENUM_BIKE_LIGHT_BATTERY_STATUS(27)"),
-            28 => write!(f, "ExdDataUnits::ENUM_BIKE_LIGHT_NETWORK_CONFIG_TYPE(28)"),
-            29 => write!(f, "ExdDataUnits::LIGHTS(29)"),
-            30 => write!(f, "ExdDataUnits::SECONDS(30)"),
-            31 => write!(f, "ExdDataUnits::MINUTES(31)"),
-            32 => write!(f, "ExdDataUnits::HOURS(32)"),
-            33 => write!(f, "ExdDataUnits::CALORIES(33)"),
-            34 => write!(f, "ExdDataUnits::KILOJOULES(34)"),
-            35 => write!(f, "ExdDataUnits::MILLISECONDS(35)"),
-            36 => write!(f, "ExdDataUnits::SECOND_PER_MILE(36)"),
-            37 => write!(f, "ExdDataUnits::SECOND_PER_KILOMETER(37)"),
-            38 => write!(f, "ExdDataUnits::CENTIMETER(38)"),
-            39 => write!(f, "ExdDataUnits::ENUM_COURSE_POINT(39)"),
-            40 => write!(f, "ExdDataUnits::BRADIANS(40)"),
-            41 => write!(f, "ExdDataUnits::ENUM_SPORT(41)"),
-            42 => write!(f, "ExdDataUnits::INCHES_HG(42)"),
-            43 => write!(f, "ExdDataUnits::MM_HG(43)"),
-            44 => write!(f, "ExdDataUnits::MBARS(44)"),
-            45 => write!(f, "ExdDataUnits::HECTO_PASCALS(45)"),
-            46 => write!(f, "ExdDataUnits::FEET_PER_MIN(46)"),
-            47 => write!(f, "ExdDataUnits::METERS_PER_MIN(47)"),
-            48 => write!(f, "ExdDataUnits::METERS_PER_SEC(48)"),
-            49 => write!(f, "ExdDataUnits::EIGHT_CARDINAL(49)"),
             _ => write!(f, "ExdDataUnits({})", self.0),
         }
     }

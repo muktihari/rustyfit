@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Floor Climb Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FloorClimbExerciseName(pub u16);
 
 impl FloorClimbExerciseName {
@@ -27,15 +27,6 @@ impl fmt::Display for FloorClimbExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "floor_climb"),
-            _ => write!(f, "FloorClimbExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FloorClimbExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "FloorClimbExerciseName::FLOOR_CLIMB(0)"),
             _ => write!(f, "FloorClimbExerciseName({})", self.0),
         }
     }

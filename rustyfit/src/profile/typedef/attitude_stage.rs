@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Attitude Stage type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AttitudeStage(pub u8);
 
 impl AttitudeStage {
@@ -33,18 +33,6 @@ impl fmt::Display for AttitudeStage {
             1 => write!(f, "aligning"),
             2 => write!(f, "degraded"),
             3 => write!(f, "valid"),
-            _ => write!(f, "AttitudeStage({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AttitudeStage {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "AttitudeStage::FAILED(0)"),
-            1 => write!(f, "AttitudeStage::ALIGNING(1)"),
-            2 => write!(f, "AttitudeStage::DEGRADED(2)"),
-            3 => write!(f, "AttitudeStage::VALID(3)"),
             _ => write!(f, "AttitudeStage({})", self.0),
         }
     }

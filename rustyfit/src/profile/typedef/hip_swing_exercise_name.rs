@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hip Swing Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HipSwingExerciseName(pub u16);
 
 impl HipSwingExerciseName {
@@ -33,18 +33,6 @@ impl fmt::Display for HipSwingExerciseName {
             1 => write!(f, "single_arm_dumbbell_swing"),
             2 => write!(f, "step_out_swing"),
             3 => write!(f, "one_arm_swing"),
-            _ => write!(f, "HipSwingExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HipSwingExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "HipSwingExerciseName::SINGLE_ARM_KETTLEBELL_SWING(0)"),
-            1 => write!(f, "HipSwingExerciseName::SINGLE_ARM_DUMBBELL_SWING(1)"),
-            2 => write!(f, "HipSwingExerciseName::STEP_OUT_SWING(2)"),
-            3 => write!(f, "HipSwingExerciseName::ONE_ARM_SWING(3)"),
             _ => write!(f, "HipSwingExerciseName({})", self.0),
         }
     }

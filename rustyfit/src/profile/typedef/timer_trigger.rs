@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Timer Trigger type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TimerTrigger(pub u8);
 
 impl TimerTrigger {
@@ -31,17 +31,6 @@ impl fmt::Display for TimerTrigger {
             0 => write!(f, "manual"),
             1 => write!(f, "auto"),
             2 => write!(f, "fitness_equipment"),
-            _ => write!(f, "TimerTrigger({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TimerTrigger {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TimerTrigger::MANUAL(0)"),
-            1 => write!(f, "TimerTrigger::AUTO(1)"),
-            2 => write!(f, "TimerTrigger::FITNESS_EQUIPMENT(2)"),
             _ => write!(f, "TimerTrigger({})", self.0),
         }
     }

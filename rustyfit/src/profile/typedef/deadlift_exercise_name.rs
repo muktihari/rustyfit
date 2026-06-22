@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Deadlift Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DeadliftExerciseName(pub u16);
 
 impl DeadliftExerciseName {
@@ -76,56 +76,6 @@ impl fmt::Display for DeadliftExerciseName {
             23 => write!(f, "romanian_deadlift"),
             24 => write!(f, "single_leg_romanian_deadlift_circuit"),
             25 => write!(f, "straight_leg_deadlift"),
-            _ => write!(f, "DeadliftExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DeadliftExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DeadliftExerciseName::BARBELL_DEADLIFT(0)"),
-            1 => write!(f, "DeadliftExerciseName::BARBELL_STRAIGHT_LEG_DEADLIFT(1)"),
-            2 => write!(f, "DeadliftExerciseName::DUMBBELL_DEADLIFT(2)"),
-            3 => write!(
-                f,
-                "DeadliftExerciseName::DUMBBELL_SINGLE_LEG_DEADLIFT_TO_ROW(3)"
-            ),
-            4 => write!(f, "DeadliftExerciseName::DUMBBELL_STRAIGHT_LEG_DEADLIFT(4)"),
-            5 => write!(f, "DeadliftExerciseName::KETTLEBELL_FLOOR_TO_SHELF(5)"),
-            6 => write!(f, "DeadliftExerciseName::ONE_ARM_ONE_LEG_DEADLIFT(6)"),
-            7 => write!(f, "DeadliftExerciseName::RACK_PULL(7)"),
-            8 => write!(
-                f,
-                "DeadliftExerciseName::ROTATIONAL_DUMBBELL_STRAIGHT_LEG_DEADLIFT(8)"
-            ),
-            9 => write!(f, "DeadliftExerciseName::SINGLE_ARM_DEADLIFT(9)"),
-            10 => write!(f, "DeadliftExerciseName::SINGLE_LEG_BARBELL_DEADLIFT(10)"),
-            11 => write!(
-                f,
-                "DeadliftExerciseName::SINGLE_LEG_BARBELL_STRAIGHT_LEG_DEADLIFT(11)"
-            ),
-            12 => write!(
-                f,
-                "DeadliftExerciseName::SINGLE_LEG_DEADLIFT_WITH_BARBELL(12)"
-            ),
-            13 => write!(f, "DeadliftExerciseName::SINGLE_LEG_RDL_CIRCUIT(13)"),
-            14 => write!(
-                f,
-                "DeadliftExerciseName::SINGLE_LEG_ROMANIAN_DEADLIFT_WITH_DUMBBELL(14)"
-            ),
-            15 => write!(f, "DeadliftExerciseName::SUMO_DEADLIFT(15)"),
-            16 => write!(f, "DeadliftExerciseName::SUMO_DEADLIFT_HIGH_PULL(16)"),
-            17 => write!(f, "DeadliftExerciseName::TRAP_BAR_DEADLIFT(17)"),
-            18 => write!(f, "DeadliftExerciseName::WIDE_GRIP_BARBELL_DEADLIFT(18)"),
-            20 => write!(f, "DeadliftExerciseName::KETTLEBELL_DEADLIFT(20)"),
-            21 => write!(f, "DeadliftExerciseName::KETTLEBELL_SUMO_DEADLIFT(21)"),
-            23 => write!(f, "DeadliftExerciseName::ROMANIAN_DEADLIFT(23)"),
-            24 => write!(
-                f,
-                "DeadliftExerciseName::SINGLE_LEG_ROMANIAN_DEADLIFT_CIRCUIT(24)"
-            ),
-            25 => write!(f, "DeadliftExerciseName::STRAIGHT_LEG_DEADLIFT(25)"),
             _ => write!(f, "DeadliftExerciseName({})", self.0),
         }
     }

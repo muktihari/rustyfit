@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Goal Source type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GoalSource(pub u8);
 
 impl GoalSource {
@@ -34,17 +34,6 @@ impl fmt::Display for GoalSource {
             0 => write!(f, "auto"),
             1 => write!(f, "community"),
             2 => write!(f, "user"),
-            _ => write!(f, "GoalSource({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for GoalSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "GoalSource::AUTO(0)"),
-            1 => write!(f, "GoalSource::COMMUNITY(1)"),
-            2 => write!(f, "GoalSource::USER(2)"),
             _ => write!(f, "GoalSource({})", self.0),
         }
     }

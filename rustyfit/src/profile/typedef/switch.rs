@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Switch type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Switch(pub u8);
 
 impl Switch {
@@ -31,17 +31,6 @@ impl fmt::Display for Switch {
             0 => write!(f, "off"),
             1 => write!(f, "on"),
             2 => write!(f, "auto"),
-            _ => write!(f, "Switch({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Switch {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Switch::OFF(0)"),
-            1 => write!(f, "Switch::ON(1)"),
-            2 => write!(f, "Switch::AUTO(2)"),
             _ => write!(f, "Switch({})", self.0),
         }
     }

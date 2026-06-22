@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Event Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct EventType(pub u8);
 
 impl EventType {
@@ -45,24 +45,6 @@ impl fmt::Display for EventType {
             7 => write!(f, "end_all_depreciated"),
             8 => write!(f, "stop_disable"),
             9 => write!(f, "stop_disable_all"),
-            _ => write!(f, "EventType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for EventType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "EventType::START(0)"),
-            1 => write!(f, "EventType::STOP(1)"),
-            2 => write!(f, "EventType::CONSECUTIVE_DEPRECIATED(2)"),
-            3 => write!(f, "EventType::MARKER(3)"),
-            4 => write!(f, "EventType::STOP_ALL(4)"),
-            5 => write!(f, "EventType::BEGIN_DEPRECIATED(5)"),
-            6 => write!(f, "EventType::END_DEPRECIATED(6)"),
-            7 => write!(f, "EventType::END_ALL_DEPRECIATED(7)"),
-            8 => write!(f, "EventType::STOP_DISABLE(8)"),
-            9 => write!(f, "EventType::STOP_DISABLE_ALL(9)"),
             _ => write!(f, "EventType({})", self.0),
         }
     }

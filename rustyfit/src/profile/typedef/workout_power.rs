@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Workout Power type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WorkoutPower(pub u32);
 
 impl WorkoutPower {
@@ -27,15 +27,6 @@ impl fmt::Display for WorkoutPower {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             1000 => write!(f, "watts_offset"),
-            _ => write!(f, "WorkoutPower({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WorkoutPower {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1000 => write!(f, "WorkoutPower::WATTS_OFFSET(1000)"),
             _ => write!(f, "WorkoutPower({})", self.0),
         }
     }

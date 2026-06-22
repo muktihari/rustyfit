@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Wkt Step Duration type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WktStepDuration(pub u8);
 
 impl WktStepDuration {
@@ -87,51 +87,6 @@ impl fmt::Display for WktStepDuration {
             28 => write!(f, "repetition_time"),
             29 => write!(f, "reps"),
             31 => write!(f, "time_only"),
-            _ => write!(f, "WktStepDuration({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WktStepDuration {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WktStepDuration::TIME(0)"),
-            1 => write!(f, "WktStepDuration::DISTANCE(1)"),
-            2 => write!(f, "WktStepDuration::HR_LESS_THAN(2)"),
-            3 => write!(f, "WktStepDuration::HR_GREATER_THAN(3)"),
-            4 => write!(f, "WktStepDuration::CALORIES(4)"),
-            5 => write!(f, "WktStepDuration::OPEN(5)"),
-            6 => write!(f, "WktStepDuration::REPEAT_UNTIL_STEPS_CMPLT(6)"),
-            7 => write!(f, "WktStepDuration::REPEAT_UNTIL_TIME(7)"),
-            8 => write!(f, "WktStepDuration::REPEAT_UNTIL_DISTANCE(8)"),
-            9 => write!(f, "WktStepDuration::REPEAT_UNTIL_CALORIES(9)"),
-            10 => write!(f, "WktStepDuration::REPEAT_UNTIL_HR_LESS_THAN(10)"),
-            11 => write!(f, "WktStepDuration::REPEAT_UNTIL_HR_GREATER_THAN(11)"),
-            12 => write!(f, "WktStepDuration::REPEAT_UNTIL_POWER_LESS_THAN(12)"),
-            13 => write!(f, "WktStepDuration::REPEAT_UNTIL_POWER_GREATER_THAN(13)"),
-            14 => write!(f, "WktStepDuration::POWER_LESS_THAN(14)"),
-            15 => write!(f, "WktStepDuration::POWER_GREATER_THAN(15)"),
-            16 => write!(f, "WktStepDuration::TRAINING_PEAKS_TSS(16)"),
-            17 => write!(
-                f,
-                "WktStepDuration::REPEAT_UNTIL_POWER_LAST_LAP_LESS_THAN(17)"
-            ),
-            18 => write!(
-                f,
-                "WktStepDuration::REPEAT_UNTIL_MAX_POWER_LAST_LAP_LESS_THAN(18)"
-            ),
-            19 => write!(f, "WktStepDuration::POWER_3S_LESS_THAN(19)"),
-            20 => write!(f, "WktStepDuration::POWER_10S_LESS_THAN(20)"),
-            21 => write!(f, "WktStepDuration::POWER_30S_LESS_THAN(21)"),
-            22 => write!(f, "WktStepDuration::POWER_3S_GREATER_THAN(22)"),
-            23 => write!(f, "WktStepDuration::POWER_10S_GREATER_THAN(23)"),
-            24 => write!(f, "WktStepDuration::POWER_30S_GREATER_THAN(24)"),
-            25 => write!(f, "WktStepDuration::POWER_LAP_LESS_THAN(25)"),
-            26 => write!(f, "WktStepDuration::POWER_LAP_GREATER_THAN(26)"),
-            27 => write!(f, "WktStepDuration::REPEAT_UNTIL_TRAINING_PEAKS_TSS(27)"),
-            28 => write!(f, "WktStepDuration::REPETITION_TIME(28)"),
-            29 => write!(f, "WktStepDuration::REPS(29)"),
-            31 => write!(f, "WktStepDuration::TIME_ONLY(31)"),
             _ => write!(f, "WktStepDuration({})", self.0),
         }
     }

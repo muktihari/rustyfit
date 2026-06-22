@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Event type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Event(pub u8);
 
 impl Event {
@@ -163,60 +163,6 @@ impl fmt::Display for Event {
             76 => write!(f, "tank_battery_low"),
             81 => write!(f, "tank_pod_connected"),
             82 => write!(f, "tank_pod_disconnected"),
-            _ => write!(f, "Event({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Event {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Event::TIMER(0)"),
-            3 => write!(f, "Event::WORKOUT(3)"),
-            4 => write!(f, "Event::WORKOUT_STEP(4)"),
-            5 => write!(f, "Event::POWER_DOWN(5)"),
-            6 => write!(f, "Event::POWER_UP(6)"),
-            7 => write!(f, "Event::OFF_COURSE(7)"),
-            8 => write!(f, "Event::SESSION(8)"),
-            9 => write!(f, "Event::LAP(9)"),
-            10 => write!(f, "Event::COURSE_POINT(10)"),
-            11 => write!(f, "Event::BATTERY(11)"),
-            12 => write!(f, "Event::VIRTUAL_PARTNER_PACE(12)"),
-            13 => write!(f, "Event::HR_HIGH_ALERT(13)"),
-            14 => write!(f, "Event::HR_LOW_ALERT(14)"),
-            15 => write!(f, "Event::SPEED_HIGH_ALERT(15)"),
-            16 => write!(f, "Event::SPEED_LOW_ALERT(16)"),
-            17 => write!(f, "Event::CAD_HIGH_ALERT(17)"),
-            18 => write!(f, "Event::CAD_LOW_ALERT(18)"),
-            19 => write!(f, "Event::POWER_HIGH_ALERT(19)"),
-            20 => write!(f, "Event::POWER_LOW_ALERT(20)"),
-            21 => write!(f, "Event::RECOVERY_HR(21)"),
-            22 => write!(f, "Event::BATTERY_LOW(22)"),
-            23 => write!(f, "Event::TIME_DURATION_ALERT(23)"),
-            24 => write!(f, "Event::DISTANCE_DURATION_ALERT(24)"),
-            25 => write!(f, "Event::CALORIE_DURATION_ALERT(25)"),
-            26 => write!(f, "Event::ACTIVITY(26)"),
-            27 => write!(f, "Event::FITNESS_EQUIPMENT(27)"),
-            28 => write!(f, "Event::LENGTH(28)"),
-            32 => write!(f, "Event::USER_MARKER(32)"),
-            33 => write!(f, "Event::SPORT_POINT(33)"),
-            36 => write!(f, "Event::CALIBRATION(36)"),
-            42 => write!(f, "Event::FRONT_GEAR_CHANGE(42)"),
-            43 => write!(f, "Event::REAR_GEAR_CHANGE(43)"),
-            44 => write!(f, "Event::RIDER_POSITION_CHANGE(44)"),
-            45 => write!(f, "Event::ELEV_HIGH_ALERT(45)"),
-            46 => write!(f, "Event::ELEV_LOW_ALERT(46)"),
-            47 => write!(f, "Event::COMM_TIMEOUT(47)"),
-            54 => write!(f, "Event::AUTO_ACTIVITY_DETECT(54)"),
-            56 => write!(f, "Event::DIVE_ALERT(56)"),
-            57 => write!(f, "Event::DIVE_GAS_SWITCHED(57)"),
-            71 => write!(f, "Event::TANK_PRESSURE_RESERVE(71)"),
-            72 => write!(f, "Event::TANK_PRESSURE_CRITICAL(72)"),
-            73 => write!(f, "Event::TANK_LOST(73)"),
-            75 => write!(f, "Event::RADAR_THREAT_ALERT(75)"),
-            76 => write!(f, "Event::TANK_BATTERY_LOW(76)"),
-            81 => write!(f, "Event::TANK_POD_CONNECTED(81)"),
-            82 => write!(f, "Event::TANK_POD_DISCONNECTED(82)"),
             _ => write!(f, "Event({})", self.0),
         }
     }

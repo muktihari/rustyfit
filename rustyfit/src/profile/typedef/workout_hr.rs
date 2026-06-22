@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Workout Hr type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WorkoutHr(pub u32);
 
 impl WorkoutHr {
@@ -27,15 +27,6 @@ impl fmt::Display for WorkoutHr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             100 => write!(f, "bpm_offset"),
-            _ => write!(f, "WorkoutHr({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WorkoutHr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            100 => write!(f, "WorkoutHr::BPM_OFFSET(100)"),
             _ => write!(f, "WorkoutHr({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Side type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Side(pub u8);
 
 impl Side {
@@ -29,16 +29,6 @@ impl fmt::Display for Side {
         match self.0 {
             0 => write!(f, "right"),
             1 => write!(f, "left"),
-            _ => write!(f, "Side({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Side {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Side::RIGHT(0)"),
-            1 => write!(f, "Side::LEFT(1)"),
             _ => write!(f, "Side({})", self.0),
         }
     }

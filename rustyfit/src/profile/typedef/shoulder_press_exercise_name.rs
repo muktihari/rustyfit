@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Shoulder Press Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ShoulderPressExerciseName(pub u16);
 
 impl ShoulderPressExerciseName {
@@ -103,93 +103,6 @@ impl fmt::Display for ShoulderPressExerciseName {
             29 => write!(f, "dumbbell_curl_to_overhead_press_wheelchair"),
             30 => write!(f, "arnold_press_wheelchair"),
             31 => write!(f, "overhead_dumbbell_press_wheelchair"),
-            _ => write!(f, "ShoulderPressExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ShoulderPressExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(
-                f,
-                "ShoulderPressExerciseName::ALTERNATING_DUMBBELL_SHOULDER_PRESS(0)"
-            ),
-            1 => write!(f, "ShoulderPressExerciseName::ARNOLD_PRESS(1)"),
-            2 => write!(
-                f,
-                "ShoulderPressExerciseName::BARBELL_FRONT_SQUAT_TO_PUSH_PRESS(2)"
-            ),
-            3 => write!(f, "ShoulderPressExerciseName::BARBELL_PUSH_PRESS(3)"),
-            4 => write!(f, "ShoulderPressExerciseName::BARBELL_SHOULDER_PRESS(4)"),
-            5 => write!(f, "ShoulderPressExerciseName::DEAD_CURL_PRESS(5)"),
-            6 => write!(
-                f,
-                "ShoulderPressExerciseName::DUMBBELL_ALTERNATING_SHOULDER_PRESS_AND_TWIST(6)"
-            ),
-            7 => write!(
-                f,
-                "ShoulderPressExerciseName::DUMBBELL_HAMMER_CURL_TO_LUNGE_TO_PRESS(7)"
-            ),
-            8 => write!(f, "ShoulderPressExerciseName::DUMBBELL_PUSH_PRESS(8)"),
-            9 => write!(
-                f,
-                "ShoulderPressExerciseName::FLOOR_INVERTED_SHOULDER_PRESS(9)"
-            ),
-            10 => write!(
-                f,
-                "ShoulderPressExerciseName::WEIGHTED_FLOOR_INVERTED_SHOULDER_PRESS(10)"
-            ),
-            11 => write!(f, "ShoulderPressExerciseName::INVERTED_SHOULDER_PRESS(11)"),
-            12 => write!(
-                f,
-                "ShoulderPressExerciseName::WEIGHTED_INVERTED_SHOULDER_PRESS(12)"
-            ),
-            13 => write!(f, "ShoulderPressExerciseName::ONE_ARM_PUSH_PRESS(13)"),
-            14 => write!(f, "ShoulderPressExerciseName::OVERHEAD_BARBELL_PRESS(14)"),
-            15 => write!(f, "ShoulderPressExerciseName::OVERHEAD_DUMBBELL_PRESS(15)"),
-            16 => write!(
-                f,
-                "ShoulderPressExerciseName::SEATED_BARBELL_SHOULDER_PRESS(16)"
-            ),
-            17 => write!(
-                f,
-                "ShoulderPressExerciseName::SEATED_DUMBBELL_SHOULDER_PRESS(17)"
-            ),
-            18 => write!(
-                f,
-                "ShoulderPressExerciseName::SINGLE_ARM_DUMBBELL_SHOULDER_PRESS(18)"
-            ),
-            19 => write!(
-                f,
-                "ShoulderPressExerciseName::SINGLE_ARM_STEP_UP_AND_PRESS(19)"
-            ),
-            20 => write!(
-                f,
-                "ShoulderPressExerciseName::SMITH_MACHINE_OVERHEAD_PRESS(20)"
-            ),
-            21 => write!(
-                f,
-                "ShoulderPressExerciseName::SPLIT_STANCE_HAMMER_CURL_TO_PRESS(21)"
-            ),
-            22 => write!(
-                f,
-                "ShoulderPressExerciseName::SWISS_BALL_DUMBBELL_SHOULDER_PRESS(22)"
-            ),
-            23 => write!(f, "ShoulderPressExerciseName::WEIGHT_PLATE_FRONT_RAISE(23)"),
-            24 => write!(f, "ShoulderPressExerciseName::DUMBBELL_SHOULDER_PRESS(24)"),
-            25 => write!(f, "ShoulderPressExerciseName::MILITARY_PRESS(25)"),
-            27 => write!(f, "ShoulderPressExerciseName::STRICT_PRESS(27)"),
-            28 => write!(f, "ShoulderPressExerciseName::DUMBBELL_FRONT_RAISE(28)"),
-            29 => write!(
-                f,
-                "ShoulderPressExerciseName::DUMBBELL_CURL_TO_OVERHEAD_PRESS_WHEELCHAIR(29)"
-            ),
-            30 => write!(f, "ShoulderPressExerciseName::ARNOLD_PRESS_WHEELCHAIR(30)"),
-            31 => write!(
-                f,
-                "ShoulderPressExerciseName::OVERHEAD_DUMBBELL_PRESS_WHEELCHAIR(31)"
-            ),
             _ => write!(f, "ShoulderPressExerciseName({})", self.0),
         }
     }

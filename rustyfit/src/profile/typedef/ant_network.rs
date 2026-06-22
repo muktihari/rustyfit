@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Ant Network type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AntNetwork(pub u8);
 
 impl AntNetwork {
@@ -33,18 +33,6 @@ impl fmt::Display for AntNetwork {
             1 => write!(f, "antplus"),
             2 => write!(f, "antfs"),
             3 => write!(f, "private"),
-            _ => write!(f, "AntNetwork({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AntNetwork {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "AntNetwork::PUBLIC(0)"),
-            1 => write!(f, "AntNetwork::ANTPLUS(1)"),
-            2 => write!(f, "AntNetwork::ANTFS(2)"),
-            3 => write!(f, "AntNetwork::PRIVATE(3)"),
             _ => write!(f, "AntNetwork({})", self.0),
         }
     }

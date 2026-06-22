@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Language Bits 4 type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LanguageBits4(pub u8);
 
 impl LanguageBits4 {
@@ -37,20 +37,6 @@ impl fmt::Display for LanguageBits4 {
             0x08 => write!(f, "vietnamese"),
             0x10 => write!(f, "burmese"),
             0x20 => write!(f, "mongolian"),
-            _ => write!(f, "LanguageBits4({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LanguageBits4 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x01 => write!(f, "LanguageBits4::BRAZILIAN_PORTUGUESE(0x01)"),
-            0x02 => write!(f, "LanguageBits4::INDONESIAN(0x02)"),
-            0x04 => write!(f, "LanguageBits4::MALAYSIAN(0x04)"),
-            0x08 => write!(f, "LanguageBits4::VIETNAMESE(0x08)"),
-            0x10 => write!(f, "LanguageBits4::BURMESE(0x10)"),
-            0x20 => write!(f, "LanguageBits4::MONGOLIAN(0x20)"),
             _ => write!(f, "LanguageBits4({})", self.0),
         }
     }

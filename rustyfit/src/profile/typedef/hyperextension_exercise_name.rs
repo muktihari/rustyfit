@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hyperextension Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HyperextensionExerciseName(pub u16);
 
 impl HyperextensionExerciseName {
@@ -125,114 +125,6 @@ impl fmt::Display for HyperextensionExerciseName {
             37 => write!(f, "superman_on_swiss_ball"),
             38 => write!(f, "cobra"),
             39 => write!(f, "supine_floor_barre"),
-            _ => write!(f, "HyperextensionExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HyperextensionExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(
-                f,
-                "HyperextensionExerciseName::BACK_EXTENSION_WITH_OPPOSITE_ARM_AND_LEG_REACH(0)"
-            ),
-            1 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_BACK_EXTENSION_WITH_OPPOSITE_ARM_AND_LEG_REACH(1)"
-            ),
-            2 => write!(f, "HyperextensionExerciseName::BASE_ROTATIONS(2)"),
-            3 => write!(f, "HyperextensionExerciseName::WEIGHTED_BASE_ROTATIONS(3)"),
-            4 => write!(
-                f,
-                "HyperextensionExerciseName::BENT_KNEE_REVERSE_HYPEREXTENSION(4)"
-            ),
-            5 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_BENT_KNEE_REVERSE_HYPEREXTENSION(5)"
-            ),
-            6 => write!(f, "HyperextensionExerciseName::HOLLOW_HOLD_AND_ROLL(6)"),
-            7 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_HOLLOW_HOLD_AND_ROLL(7)"
-            ),
-            8 => write!(f, "HyperextensionExerciseName::KICKS(8)"),
-            9 => write!(f, "HyperextensionExerciseName::WEIGHTED_KICKS(9)"),
-            10 => write!(f, "HyperextensionExerciseName::KNEE_RAISES(10)"),
-            11 => write!(f, "HyperextensionExerciseName::WEIGHTED_KNEE_RAISES(11)"),
-            12 => write!(f, "HyperextensionExerciseName::KNEELING_SUPERMAN(12)"),
-            13 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_KNEELING_SUPERMAN(13)"
-            ),
-            14 => write!(f, "HyperextensionExerciseName::LAT_PULL_DOWN_WITH_ROW(14)"),
-            15 => write!(
-                f,
-                "HyperextensionExerciseName::MEDICINE_BALL_DEADLIFT_TO_REACH(15)"
-            ),
-            16 => write!(f, "HyperextensionExerciseName::ONE_ARM_ONE_LEG_ROW(16)"),
-            17 => write!(f, "HyperextensionExerciseName::ONE_ARM_ROW_WITH_BAND(17)"),
-            18 => write!(
-                f,
-                "HyperextensionExerciseName::OVERHEAD_LUNGE_WITH_MEDICINE_BALL(18)"
-            ),
-            19 => write!(f, "HyperextensionExerciseName::PLANK_KNEE_TUCKS(19)"),
-            20 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_PLANK_KNEE_TUCKS(20)"
-            ),
-            21 => write!(f, "HyperextensionExerciseName::SIDE_STEP(21)"),
-            22 => write!(f, "HyperextensionExerciseName::WEIGHTED_SIDE_STEP(22)"),
-            23 => write!(
-                f,
-                "HyperextensionExerciseName::SINGLE_LEG_BACK_EXTENSION(23)"
-            ),
-            24 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_SINGLE_LEG_BACK_EXTENSION(24)"
-            ),
-            25 => write!(f, "HyperextensionExerciseName::SPINE_EXTENSION(25)"),
-            26 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_SPINE_EXTENSION(26)"
-            ),
-            27 => write!(f, "HyperextensionExerciseName::STATIC_BACK_EXTENSION(27)"),
-            28 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_STATIC_BACK_EXTENSION(28)"
-            ),
-            29 => write!(f, "HyperextensionExerciseName::SUPERMAN_FROM_FLOOR(29)"),
-            30 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_SUPERMAN_FROM_FLOOR(30)"
-            ),
-            31 => write!(
-                f,
-                "HyperextensionExerciseName::SWISS_BALL_BACK_EXTENSION(31)"
-            ),
-            32 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_SWISS_BALL_BACK_EXTENSION(32)"
-            ),
-            33 => write!(
-                f,
-                "HyperextensionExerciseName::SWISS_BALL_HYPEREXTENSION(33)"
-            ),
-            34 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_SWISS_BALL_HYPEREXTENSION(34)"
-            ),
-            35 => write!(
-                f,
-                "HyperextensionExerciseName::SWISS_BALL_OPPOSITE_ARM_AND_LEG_LIFT(35)"
-            ),
-            36 => write!(
-                f,
-                "HyperextensionExerciseName::WEIGHTED_SWISS_BALL_OPPOSITE_ARM_AND_LEG_LIFT(36)"
-            ),
-            37 => write!(f, "HyperextensionExerciseName::SUPERMAN_ON_SWISS_BALL(37)"),
-            38 => write!(f, "HyperextensionExerciseName::COBRA(38)"),
-            39 => write!(f, "HyperextensionExerciseName::SUPINE_FLOOR_BARRE(39)"),
             _ => write!(f, "HyperextensionExerciseName({})", self.0),
         }
     }

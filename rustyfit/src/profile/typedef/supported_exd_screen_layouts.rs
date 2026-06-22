@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Supported Exd Screen Layouts type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SupportedExdScreenLayouts(pub u32);
 
 impl SupportedExdScreenLayouts {
@@ -45,37 +45,6 @@ impl fmt::Display for SupportedExdScreenLayouts {
             0x00000020 => write!(f, "full_quarter_split"),
             0x00000040 => write!(f, "half_vertical_left_split"),
             0x00000080 => write!(f, "half_horizontal_top_split"),
-            _ => write!(f, "SupportedExdScreenLayouts({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SupportedExdScreenLayouts {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000001 => write!(f, "SupportedExdScreenLayouts::FULL_SCREEN(0x00000001)"),
-            0x00000002 => write!(f, "SupportedExdScreenLayouts::HALF_VERTICAL(0x00000002)"),
-            0x00000004 => write!(f, "SupportedExdScreenLayouts::HALF_HORIZONTAL(0x00000004)"),
-            0x00000008 => write!(
-                f,
-                "SupportedExdScreenLayouts::HALF_VERTICAL_RIGHT_SPLIT(0x00000008)"
-            ),
-            0x00000010 => write!(
-                f,
-                "SupportedExdScreenLayouts::HALF_HORIZONTAL_BOTTOM_SPLIT(0x00000010)"
-            ),
-            0x00000020 => write!(
-                f,
-                "SupportedExdScreenLayouts::FULL_QUARTER_SPLIT(0x00000020)"
-            ),
-            0x00000040 => write!(
-                f,
-                "SupportedExdScreenLayouts::HALF_VERTICAL_LEFT_SPLIT(0x00000040)"
-            ),
-            0x00000080 => write!(
-                f,
-                "SupportedExdScreenLayouts::HALF_HORIZONTAL_TOP_SPLIT(0x00000080)"
-            ),
             _ => write!(f, "SupportedExdScreenLayouts({})", self.0),
         }
     }

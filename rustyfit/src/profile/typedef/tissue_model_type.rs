@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Tissue Model Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TissueModelType(pub u8);
 
 impl TissueModelType {
@@ -28,15 +28,6 @@ impl fmt::Display for TissueModelType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "zhl_16c"),
-            _ => write!(f, "TissueModelType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TissueModelType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TissueModelType::ZHL_16C(0)"),
             _ => write!(f, "TissueModelType({})", self.0),
         }
     }

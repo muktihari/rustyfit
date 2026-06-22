@@ -10,7 +10,7 @@ use core::fmt;
 
 /// File Flags type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FileFlags(pub u8);
 
 impl FileFlags {
@@ -31,17 +31,6 @@ impl fmt::Display for FileFlags {
             0x02 => write!(f, "read"),
             0x04 => write!(f, "write"),
             0x08 => write!(f, "erase"),
-            _ => write!(f, "FileFlags({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FileFlags {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x02 => write!(f, "FileFlags::READ(0x02)"),
-            0x04 => write!(f, "FileFlags::WRITE(0x04)"),
-            0x08 => write!(f, "FileFlags::ERASE(0x08)"),
             _ => write!(f, "FileFlags({})", self.0),
         }
     }

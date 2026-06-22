@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Schedule type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Schedule(pub u8);
 
 impl Schedule {
@@ -29,16 +29,6 @@ impl fmt::Display for Schedule {
         match self.0 {
             0 => write!(f, "workout"),
             1 => write!(f, "course"),
-            _ => write!(f, "Schedule({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Schedule {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Schedule::WORKOUT(0)"),
-            1 => write!(f, "Schedule::COURSE(1)"),
             _ => write!(f, "Schedule({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Date Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DateMode(pub u8);
 
 impl DateMode {
@@ -29,16 +29,6 @@ impl fmt::Display for DateMode {
         match self.0 {
             0 => write!(f, "day_month"),
             1 => write!(f, "month_day"),
-            _ => write!(f, "DateMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DateMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DateMode::DAY_MONTH(0)"),
-            1 => write!(f, "DateMode::MONTH_DAY(1)"),
             _ => write!(f, "DateMode({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Carry Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CarryExerciseName(pub u16);
 
 impl CarryExerciseName {
@@ -43,23 +43,6 @@ impl fmt::Display for CarryExerciseName {
             6 => write!(f, "farmers_carry_walk_lunge"),
             7 => write!(f, "farmers_carry"),
             8 => write!(f, "farmers_carry_on_toes"),
-            _ => write!(f, "CarryExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CarryExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CarryExerciseName::BAR_HOLDS(0)"),
-            1 => write!(f, "CarryExerciseName::FARMERS_WALK(1)"),
-            2 => write!(f, "CarryExerciseName::FARMERS_WALK_ON_TOES(2)"),
-            3 => write!(f, "CarryExerciseName::HEX_DUMBBELL_HOLD(3)"),
-            4 => write!(f, "CarryExerciseName::OVERHEAD_CARRY(4)"),
-            5 => write!(f, "CarryExerciseName::DUMBBELL_WAITER_CARRY(5)"),
-            6 => write!(f, "CarryExerciseName::FARMERS_CARRY_WALK_LUNGE(6)"),
-            7 => write!(f, "CarryExerciseName::FARMERS_CARRY(7)"),
-            8 => write!(f, "CarryExerciseName::FARMERS_CARRY_ON_TOES(8)"),
             _ => write!(f, "CarryExerciseName({})", self.0),
         }
     }

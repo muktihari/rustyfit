@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Camera Event Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CameraEventType(pub u8);
 
 impl CameraEventType {
@@ -58,27 +58,6 @@ impl fmt::Display for CameraEventType {
             12 => write!(f, "video_second_stream_pause"),
             13 => write!(f, "video_resume"),
             14 => write!(f, "video_second_stream_resume"),
-            _ => write!(f, "CameraEventType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CameraEventType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CameraEventType::VIDEO_START(0)"),
-            1 => write!(f, "CameraEventType::VIDEO_SPLIT(1)"),
-            2 => write!(f, "CameraEventType::VIDEO_END(2)"),
-            3 => write!(f, "CameraEventType::PHOTO_TAKEN(3)"),
-            4 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_START(4)"),
-            5 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_SPLIT(5)"),
-            6 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_END(6)"),
-            7 => write!(f, "CameraEventType::VIDEO_SPLIT_START(7)"),
-            8 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_SPLIT_START(8)"),
-            11 => write!(f, "CameraEventType::VIDEO_PAUSE(11)"),
-            12 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_PAUSE(12)"),
-            13 => write!(f, "CameraEventType::VIDEO_RESUME(13)"),
-            14 => write!(f, "CameraEventType::VIDEO_SECOND_STREAM_RESUME(14)"),
             _ => write!(f, "CameraEventType({})", self.0),
         }
     }

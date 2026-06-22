@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Spo2 Measurement Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Spo2MeasurementType(pub u8);
 
 impl Spo2MeasurementType {
@@ -33,18 +33,6 @@ impl fmt::Display for Spo2MeasurementType {
             1 => write!(f, "spot_check"),
             2 => write!(f, "continuous_check"),
             3 => write!(f, "periodic"),
-            _ => write!(f, "Spo2MeasurementType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Spo2MeasurementType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Spo2MeasurementType::OFF_WRIST(0)"),
-            1 => write!(f, "Spo2MeasurementType::SPOT_CHECK(1)"),
-            2 => write!(f, "Spo2MeasurementType::CONTINUOUS_CHECK(2)"),
-            3 => write!(f, "Spo2MeasurementType::PERIODIC(3)"),
             _ => write!(f, "Spo2MeasurementType({})", self.0),
         }
     }
