@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -133,7 +133,7 @@ impl From<NapEvent> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -141,7 +141,7 @@ impl From<NapEvent> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -149,7 +149,7 @@ impl From<NapEvent> for Message {
         if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
             });
@@ -157,7 +157,7 @@ impl From<NapEvent> for Message {
         if m.start_timezone_offset != i16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.start_timezone_offset),
                 is_expanded: false,
             });
@@ -165,7 +165,7 @@ impl From<NapEvent> for Message {
         if m.end_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.end_time.0),
                 is_expanded: false,
             });
@@ -173,7 +173,7 @@ impl From<NapEvent> for Message {
         if m.end_timezone_offset != i16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.end_timezone_offset),
                 is_expanded: false,
             });
@@ -181,7 +181,7 @@ impl From<NapEvent> for Message {
         if m.feedback.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::NAP_PERIOD_FEEDBACK,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.feedback.0),
                 is_expanded: false,
             });
@@ -189,7 +189,7 @@ impl From<NapEvent> for Message {
         if m.is_deleted.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.is_deleted.0),
                 is_expanded: false,
             });
@@ -197,7 +197,7 @@ impl From<NapEvent> for Message {
         if m.source.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::NAP_SOURCE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.source.0),
                 is_expanded: false,
             });
@@ -205,7 +205,7 @@ impl From<NapEvent> for Message {
         if m.update_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.update_timestamp.0),
                 is_expanded: false,
             });

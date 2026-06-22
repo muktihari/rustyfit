@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -93,7 +93,7 @@ impl From<ExdScreenConfiguration> for Message {
         if m.screen_index != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
             });
@@ -101,7 +101,7 @@ impl From<ExdScreenConfiguration> for Message {
         if m.field_count != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.field_count),
                 is_expanded: false,
             });
@@ -109,7 +109,7 @@ impl From<ExdScreenConfiguration> for Message {
         if m.layout.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::EXD_LAYOUT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.layout.0),
                 is_expanded: false,
             });
@@ -117,7 +117,7 @@ impl From<ExdScreenConfiguration> for Message {
         if m.screen_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.screen_enabled.0),
                 is_expanded: false,
             });

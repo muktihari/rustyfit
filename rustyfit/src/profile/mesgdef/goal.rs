@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -146,7 +146,7 @@ impl From<Goal> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -154,7 +154,7 @@ impl From<Goal> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -162,7 +162,7 @@ impl From<Goal> for Message {
         if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
@@ -170,7 +170,7 @@ impl From<Goal> for Message {
         if m.start_date.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_date.0),
                 is_expanded: false,
             });
@@ -178,7 +178,7 @@ impl From<Goal> for Message {
         if m.end_date.0 != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.end_date.0),
                 is_expanded: false,
             });
@@ -186,7 +186,7 @@ impl From<Goal> for Message {
         if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::GOAL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
             });
@@ -194,7 +194,7 @@ impl From<Goal> for Message {
         if m.value != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.value),
                 is_expanded: false,
             });
@@ -202,7 +202,7 @@ impl From<Goal> for Message {
         if m.repeat.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.repeat.0),
                 is_expanded: false,
             });
@@ -210,7 +210,7 @@ impl From<Goal> for Message {
         if m.target_value != u32::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.target_value),
                 is_expanded: false,
             });
@@ -218,7 +218,7 @@ impl From<Goal> for Message {
         if m.recurrence.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::GOAL_RECURRENCE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.recurrence.0),
                 is_expanded: false,
             });
@@ -226,7 +226,7 @@ impl From<Goal> for Message {
         if m.recurrence_value != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.recurrence_value),
                 is_expanded: false,
             });
@@ -234,7 +234,7 @@ impl From<Goal> for Message {
         if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
             });
@@ -242,7 +242,7 @@ impl From<Goal> for Message {
         if m.source.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::GOAL_SOURCE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.source.0),
                 is_expanded: false,
             });

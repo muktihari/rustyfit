@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -79,7 +79,7 @@ impl From<FileCreator> for Message {
         if m.software_version != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.software_version),
                 is_expanded: false,
             });
@@ -87,7 +87,7 @@ impl From<FileCreator> for Message {
         if m.hardware_version != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.hardware_version),
                 is_expanded: false,
             });

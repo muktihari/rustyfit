@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -101,7 +101,7 @@ impl From<RespirationRate> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -109,7 +109,7 @@ impl From<RespirationRate> for Message {
         if m.respiration_rate != i16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.respiration_rate),
                 is_expanded: false,
             });

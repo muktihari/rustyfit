@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -248,7 +248,7 @@ impl From<HrvStatusSummary> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -256,7 +256,7 @@ impl From<HrvStatusSummary> for Message {
         if m.weekly_average != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.weekly_average),
                 is_expanded: false,
             });
@@ -264,7 +264,7 @@ impl From<HrvStatusSummary> for Message {
         if m.last_night_average != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.last_night_average),
                 is_expanded: false,
             });
@@ -272,7 +272,7 @@ impl From<HrvStatusSummary> for Message {
         if m.last_night_5_min_high != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.last_night_5_min_high),
                 is_expanded: false,
             });
@@ -280,7 +280,7 @@ impl From<HrvStatusSummary> for Message {
         if m.baseline_low_upper != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.baseline_low_upper),
                 is_expanded: false,
             });
@@ -288,7 +288,7 @@ impl From<HrvStatusSummary> for Message {
         if m.baseline_balanced_lower != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.baseline_balanced_lower),
                 is_expanded: false,
             });
@@ -296,7 +296,7 @@ impl From<HrvStatusSummary> for Message {
         if m.baseline_balanced_upper != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.baseline_balanced_upper),
                 is_expanded: false,
             });
@@ -304,7 +304,7 @@ impl From<HrvStatusSummary> for Message {
         if m.status.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::HRV_STATUS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,
             });

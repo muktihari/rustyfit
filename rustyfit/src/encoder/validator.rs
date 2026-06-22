@@ -139,11 +139,11 @@ impl MessageValidator {
             }
 
             for (i, field) in mesg.fields.iter().enumerate() {
-                if field.profile_type.base_type().0 & FitBaseType::NUM_MASK
+                if field.base_type.0 & FitBaseType::NUM_MASK
                     > FitBaseType::BYTE.0 & FitBaseType::NUM_MASK
                 {
                     return Err(MessageValidationError::UnsupportedFitBaseType {
-                        base_type: field.profile_type.base_type(),
+                        base_type: field.base_type,
                         field_index: i,
                     });
                 }
@@ -157,7 +157,7 @@ impl MessageValidator {
                 continue;
             }
 
-            if let Err(err) = self.validate_field(&field.value, field.profile_type.base_type()) {
+            if let Err(err) = self.validate_field(&field.value, field.base_type) {
                 return Err(MessageValidationError::FieldValidation {
                     field_index: i,
                     err,

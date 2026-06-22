@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -102,7 +102,7 @@ impl From<CameraEvent> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -110,7 +110,7 @@ impl From<CameraEvent> for Message {
         if m.timestamp_ms != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
             });
@@ -118,7 +118,7 @@ impl From<CameraEvent> for Message {
         if m.camera_event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::CAMERA_EVENT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.camera_event_type.0),
                 is_expanded: false,
             });
@@ -126,7 +126,7 @@ impl From<CameraEvent> for Message {
         if !m.camera_file_uuid.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.camera_file_uuid),
                 is_expanded: false,
             });
@@ -134,7 +134,7 @@ impl From<CameraEvent> for Message {
         if m.camera_orientation.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::CAMERA_ORIENTATION_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.camera_orientation.0),
                 is_expanded: false,
             });

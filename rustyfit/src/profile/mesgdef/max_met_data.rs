@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -142,7 +142,7 @@ impl From<MaxMetData> for Message {
         if m.update_time.0 != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.update_time.0),
                 is_expanded: false,
             });
@@ -150,7 +150,7 @@ impl From<MaxMetData> for Message {
         if m.vo2_max != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.vo2_max),
                 is_expanded: false,
             });
@@ -158,7 +158,7 @@ impl From<MaxMetData> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -166,7 +166,7 @@ impl From<MaxMetData> for Message {
         if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
@@ -174,7 +174,7 @@ impl From<MaxMetData> for Message {
         if m.max_met_category.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::MAX_MET_CATEGORY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.max_met_category.0),
                 is_expanded: false,
             });
@@ -182,7 +182,7 @@ impl From<MaxMetData> for Message {
         if m.calibrated_data.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.calibrated_data.0),
                 is_expanded: false,
             });
@@ -190,7 +190,7 @@ impl From<MaxMetData> for Message {
         if m.hr_source.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::MAX_MET_HEART_RATE_SOURCE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.hr_source.0),
                 is_expanded: false,
             });
@@ -198,7 +198,7 @@ impl From<MaxMetData> for Message {
         if m.speed_source.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::MAX_MET_SPEED_SOURCE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.speed_source.0),
                 is_expanded: false,
             });

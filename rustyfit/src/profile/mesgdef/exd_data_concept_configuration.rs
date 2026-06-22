@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -171,7 +171,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.screen_index != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
             });
@@ -179,7 +179,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.concept_field != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::Uint8(m.concept_field),
                 is_expanded: false,
             });
@@ -187,7 +187,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.field_id != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.field_id),
                 is_expanded: is_expanded(&m.state, 2),
             });
@@ -195,7 +195,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.concept_index != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.concept_index),
                 is_expanded: is_expanded(&m.state, 3),
             });
@@ -203,7 +203,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.data_page != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.data_page),
                 is_expanded: false,
             });
@@ -211,7 +211,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.concept_key != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.concept_key),
                 is_expanded: false,
             });
@@ -219,7 +219,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.scaling != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.scaling),
                 is_expanded: false,
             });
@@ -227,7 +227,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.data_units.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::EXD_DATA_UNITS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.data_units.0),
                 is_expanded: false,
             });
@@ -235,7 +235,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.qualifier.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::EXD_QUALIFIERS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.qualifier.0),
                 is_expanded: false,
             });
@@ -243,7 +243,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.descriptor.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::EXD_DESCRIPTORS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.descriptor.0),
                 is_expanded: false,
             });
@@ -251,7 +251,7 @@ impl From<ExdDataConceptConfiguration> for Message {
         if m.is_signed.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.is_signed.0),
                 is_expanded: false,
             });

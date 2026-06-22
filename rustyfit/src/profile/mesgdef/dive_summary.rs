@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -499,7 +499,7 @@ impl From<DiveSummary> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -507,7 +507,7 @@ impl From<DiveSummary> for Message {
         if m.reference_mesg.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::MESG_NUM,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.reference_mesg.0),
                 is_expanded: false,
             });
@@ -515,7 +515,7 @@ impl From<DiveSummary> for Message {
         if m.reference_index.0 != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.reference_index.0),
                 is_expanded: false,
             });
@@ -523,7 +523,7 @@ impl From<DiveSummary> for Message {
         if m.avg_depth != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.avg_depth),
                 is_expanded: false,
             });
@@ -531,7 +531,7 @@ impl From<DiveSummary> for Message {
         if m.max_depth != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.max_depth),
                 is_expanded: false,
             });
@@ -539,7 +539,7 @@ impl From<DiveSummary> for Message {
         if m.surface_interval != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.surface_interval),
                 is_expanded: false,
             });
@@ -547,7 +547,7 @@ impl From<DiveSummary> for Message {
         if m.start_cns != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.start_cns),
                 is_expanded: false,
             });
@@ -555,7 +555,7 @@ impl From<DiveSummary> for Message {
         if m.end_cns != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.end_cns),
                 is_expanded: false,
             });
@@ -563,7 +563,7 @@ impl From<DiveSummary> for Message {
         if m.start_n2 != u16::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.start_n2),
                 is_expanded: false,
             });
@@ -571,7 +571,7 @@ impl From<DiveSummary> for Message {
         if m.end_n2 != u16::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.end_n2),
                 is_expanded: false,
             });
@@ -579,7 +579,7 @@ impl From<DiveSummary> for Message {
         if m.o2_toxicity != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.o2_toxicity),
                 is_expanded: false,
             });
@@ -587,7 +587,7 @@ impl From<DiveSummary> for Message {
         if m.dive_number != u32::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.dive_number),
                 is_expanded: false,
             });
@@ -595,7 +595,7 @@ impl From<DiveSummary> for Message {
         if m.bottom_time != u32::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.bottom_time),
                 is_expanded: false,
             });
@@ -603,7 +603,7 @@ impl From<DiveSummary> for Message {
         if m.avg_pressure_sac != u16::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_pressure_sac),
                 is_expanded: false,
             });
@@ -611,7 +611,7 @@ impl From<DiveSummary> for Message {
         if m.avg_volume_sac != u16::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_volume_sac),
                 is_expanded: false,
             });
@@ -619,7 +619,7 @@ impl From<DiveSummary> for Message {
         if m.avg_rmv != u16::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_rmv),
                 is_expanded: false,
             });
@@ -627,7 +627,7 @@ impl From<DiveSummary> for Message {
         if m.descent_time != u32::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.descent_time),
                 is_expanded: false,
             });
@@ -635,7 +635,7 @@ impl From<DiveSummary> for Message {
         if m.ascent_time != u32::MAX {
             fields.push(Field {
                 num: 16,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.ascent_time),
                 is_expanded: false,
             });
@@ -643,7 +643,7 @@ impl From<DiveSummary> for Message {
         if m.avg_ascent_rate != i32::MAX {
             fields.push(Field {
                 num: 17,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.avg_ascent_rate),
                 is_expanded: false,
             });
@@ -651,7 +651,7 @@ impl From<DiveSummary> for Message {
         if m.avg_descent_rate != u32::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.avg_descent_rate),
                 is_expanded: false,
             });
@@ -659,7 +659,7 @@ impl From<DiveSummary> for Message {
         if m.max_ascent_rate != u32::MAX {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.max_ascent_rate),
                 is_expanded: false,
             });
@@ -667,7 +667,7 @@ impl From<DiveSummary> for Message {
         if m.max_descent_rate != u32::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.max_descent_rate),
                 is_expanded: false,
             });
@@ -675,7 +675,7 @@ impl From<DiveSummary> for Message {
         if m.hang_time != u32::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.hang_time),
                 is_expanded: false,
             });

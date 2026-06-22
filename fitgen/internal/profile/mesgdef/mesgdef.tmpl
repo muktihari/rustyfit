@@ -14,7 +14,7 @@
 #![allow(clippy::manual_range_patterns)]
 {{ end }}
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 {{- range $key, $val := .Imports -}}
@@ -267,7 +267,7 @@ impl From<{{ .Name }}> for Message {
         if {{ .IfNotEqualInvalid }} {
             fields.push(Field {
                 num: {{ .Num }},
-                profile_type: {{ .ProfileType }},
+                base_type: FitBaseType::{{ .BaseType }},
                 value: {{ .ProtoValue }},
                 {{ if .CanExpand }} is_expanded: is_expanded(&m.state, {{ .Num }}), {{ else }} is_expanded: false, {{ end }}
             });

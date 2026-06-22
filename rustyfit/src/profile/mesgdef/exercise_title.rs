@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::string::String;
 use alloc::vec::Vec;
@@ -93,7 +93,7 @@ impl From<ExerciseTitle> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -101,7 +101,7 @@ impl From<ExerciseTitle> for Message {
         if m.exercise_category.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::EXERCISE_CATEGORY,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.exercise_category.0),
                 is_expanded: false,
             });
@@ -109,7 +109,7 @@ impl From<ExerciseTitle> for Message {
         if m.exercise_name != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.exercise_name),
                 is_expanded: false,
             });
@@ -117,7 +117,7 @@ impl From<ExerciseTitle> for Message {
         if !m.wkt_step_name.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::VecString(m.wkt_step_name),
                 is_expanded: false,
             });

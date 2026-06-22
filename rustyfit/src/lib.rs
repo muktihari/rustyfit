@@ -206,7 +206,11 @@
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
-//! use rustyfit::{Encoder, profile::{ProfileType, mesgdef, typedef}, proto::{FIT, Field, Message, Value}};
+//! use rustyfit::{
+//!     Encoder,
+//!     profile::{mesgdef, typedef::{self, FitBaseType}},
+//!     proto::{FIT, Field, Message, Value},
+//! };
 //! use std::{error::Error, fs::File, io::{BufWriter, Write}};
 //!
 //! fn main() -> Result<(), Box<dyn Error>> {
@@ -217,19 +221,19 @@
 //!                 fields: vec![
 //!                     Field {
 //!                         num: mesgdef::FileId::TYPE,
-//!                         profile_type: ProfileType::FILE, // or ProfileType::UINT8 is also valid
+//!                         base_type: FitBaseType::UINT8,
 //!                         value: Value::Uint8(typedef::File::ACTIVITY.0),
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::FileId::MANUFACTURER,
-//!                         profile_type: ProfileType::MANUFACTURER, // or ProfileType::UINT16 is also valid
+//!                         base_type: FitBaseType::UINT16,
 //!                         value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::FileId::PRODUCT,
-//!                         profile_type: ProfileType::UINT16,
+//!                         base_type: FitBaseType::UINT16,
 //!                         value: Value::Uint16(typedef::GarminProduct::FENIX8_SOLAR.0),
 //!                         is_expanded: false,
 //!                     },
@@ -241,19 +245,19 @@
 //!                 fields: vec![
 //!                     Field {
 //!                         num: mesgdef::Record::DISTANCE,
-//!                         profile_type: ProfileType::UINT32,
+//!                         base_type: FitBaseType::UINT32,
 //!                         value: Value::Uint32(100 * 100), // 100 m
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::Record::HEART_RATE,
-//!                         profile_type: ProfileType::UINT8,
+//!                         base_type: FitBaseType::UINT8,
 //!                         value: Value::Uint8(70), // 70 bpm
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::Record::SPEED,
-//!                         profile_type: ProfileType::UINT16,
+//!                         base_type: FitBaseType::UINT16,
 //!                         value: Value::Uint16(2 * 1000), // 2 m/s
 //!                         is_expanded: false,
 //!                     },

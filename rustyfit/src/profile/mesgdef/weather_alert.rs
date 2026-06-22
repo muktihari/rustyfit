@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -111,7 +111,7 @@ impl From<WeatherAlert> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -119,7 +119,7 @@ impl From<WeatherAlert> for Message {
         if !m.report_id.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.report_id),
                 is_expanded: false,
             });
@@ -127,7 +127,7 @@ impl From<WeatherAlert> for Message {
         if m.issue_time.0 != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.issue_time.0),
                 is_expanded: false,
             });
@@ -135,7 +135,7 @@ impl From<WeatherAlert> for Message {
         if m.expire_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.expire_time.0),
                 is_expanded: false,
             });
@@ -143,7 +143,7 @@ impl From<WeatherAlert> for Message {
         if m.severity.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::WEATHER_SEVERITY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.severity.0),
                 is_expanded: false,
             });
@@ -151,7 +151,7 @@ impl From<WeatherAlert> for Message {
         if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::WEATHER_SEVERE_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
             });

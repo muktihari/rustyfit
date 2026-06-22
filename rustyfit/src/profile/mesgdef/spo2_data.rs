@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -95,7 +95,7 @@ impl From<Spo2Data> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -103,7 +103,7 @@ impl From<Spo2Data> for Message {
         if m.reading_spo2 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.reading_spo2),
                 is_expanded: false,
             });
@@ -111,7 +111,7 @@ impl From<Spo2Data> for Message {
         if m.reading_confidence != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.reading_confidence),
                 is_expanded: false,
             });
@@ -119,7 +119,7 @@ impl From<Spo2Data> for Message {
         if m.mode.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SPO2_MEASUREMENT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.mode.0),
                 is_expanded: false,
             });

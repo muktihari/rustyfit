@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -101,7 +101,7 @@ impl From<AntChannelId> for Message {
         if m.channel_number != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.channel_number),
                 is_expanded: false,
             });
@@ -109,7 +109,7 @@ impl From<AntChannelId> for Message {
         if m.device_type != u8::MIN {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.device_type),
                 is_expanded: false,
             });
@@ -117,7 +117,7 @@ impl From<AntChannelId> for Message {
         if m.device_number != u16::MIN {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16Z,
+                base_type: FitBaseType::UINT16Z,
                 value: Value::Uint16(m.device_number),
                 is_expanded: false,
             });
@@ -125,7 +125,7 @@ impl From<AntChannelId> for Message {
         if m.transmission_type != u8::MIN {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.transmission_type),
                 is_expanded: false,
             });
@@ -133,7 +133,7 @@ impl From<AntChannelId> for Message {
         if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::DEVICE_INDEX,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
             });

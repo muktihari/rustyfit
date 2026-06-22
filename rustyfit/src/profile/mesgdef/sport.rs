@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -88,7 +88,7 @@ impl From<Sport> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -96,7 +96,7 @@ impl From<Sport> for Message {
         if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
@@ -104,7 +104,7 @@ impl From<Sport> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });

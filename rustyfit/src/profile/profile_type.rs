@@ -4,945 +4,231 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::typedef::FitBaseType;
-use core::fmt;
-
 /// Current profile version.
 pub const PROFILE_VERSION: u16 = 21205;
 
 /// ProfileType is an abstraction layer over primitive-types such as sint, uint, etc.
 /// For example, if a Field has u32 value having ProfileType::DATE_TIME, that u32 value
 /// should be interpreted as a timestamp relative to the FIT Epoch.
-#[derive(Clone, Copy, PartialEq)]
-pub struct ProfileType(pub u16);
-
-impl ProfileType {
-    /// FitBaseType::ENUM
-    pub const ENUM: ProfileType = ProfileType(0x0000);
-    /// FitBaseType::SINT8
-    pub const SINT8: ProfileType = ProfileType(0x0001);
-    /// FitBaseType::UINT8
-    pub const UINT8: ProfileType = ProfileType(0x0002);
-    /// FitBaseType::SINT16
-    pub const SINT16: ProfileType = ProfileType(0x0003);
-    /// FitBaseType::UINT16
-    pub const UINT16: ProfileType = ProfileType(0x0004);
-    /// FitBaseType::SINT32
-    pub const SINT32: ProfileType = ProfileType(0x0005);
-    /// FitBaseType::UINT32
-    pub const UINT32: ProfileType = ProfileType(0x0006);
-    /// FitBaseType::STRING
-    pub const STRING: ProfileType = ProfileType(0x0007);
-    /// FitBaseType::FLOAT32
-    pub const FLOAT32: ProfileType = ProfileType(0x0008);
-    /// FitBaseType::FLOAT64
-    pub const FLOAT64: ProfileType = ProfileType(0x0009);
-    /// FitBaseType::UINT8Z
-    pub const UINT8Z: ProfileType = ProfileType(0x000A);
-    /// FitBaseType::UINT16Z
-    pub const UINT16Z: ProfileType = ProfileType(0x000B);
-    /// FitBaseType::UINT32Z
-    pub const UINT32Z: ProfileType = ProfileType(0x000C);
-    /// FitBaseType::BYTE
-    pub const BYTE: ProfileType = ProfileType(0x000D);
-    /// FitBaseType::SINT64
-    pub const SINT64: ProfileType = ProfileType(0x000E);
-    /// FitBaseType::UINT64
-    pub const UINT64: ProfileType = ProfileType(0x000F);
-    /// FitBaseType::UINT64Z
-    pub const UINT64Z: ProfileType = ProfileType(0x0010);
-    /// FitBaseType::ENUM
-    pub const BOOL: ProfileType = ProfileType(0x0020);
-    /// FitBaseType::ENUM
-    pub const FILE: ProfileType = ProfileType(0x0040);
-    /// FitBaseType::UINT16
-    pub const MESG_NUM: ProfileType = ProfileType(0x0064);
-    /// FitBaseType::UINT8
-    pub const CHECKSUM: ProfileType = ProfileType(0x0082);
-    /// FitBaseType::UINT8Z
-    pub const FILE_FLAGS: ProfileType = ProfileType(0x00AA);
-    /// FitBaseType::ENUM
-    pub const MESG_COUNT: ProfileType = ProfileType(0x00C0);
-    /// FitBaseType::UINT32
-    pub const DATE_TIME: ProfileType = ProfileType(0x00E6);
-    /// FitBaseType::UINT32
-    pub const LOCAL_DATE_TIME: ProfileType = ProfileType(0x0106);
-    /// FitBaseType::UINT16
-    pub const MESSAGE_INDEX: ProfileType = ProfileType(0x0124);
-    /// FitBaseType::UINT8
-    pub const DEVICE_INDEX: ProfileType = ProfileType(0x0142);
-    /// FitBaseType::ENUM
-    pub const GENDER: ProfileType = ProfileType(0x0160);
-    /// FitBaseType::ENUM
-    pub const LANGUAGE: ProfileType = ProfileType(0x0180);
-    /// FitBaseType::UINT8Z
-    pub const LANGUAGE_BITS_0: ProfileType = ProfileType(0x01AA);
-    /// FitBaseType::UINT8Z
-    pub const LANGUAGE_BITS_1: ProfileType = ProfileType(0x01CA);
-    /// FitBaseType::UINT8Z
-    pub const LANGUAGE_BITS_2: ProfileType = ProfileType(0x01EA);
-    /// FitBaseType::UINT8Z
-    pub const LANGUAGE_BITS_3: ProfileType = ProfileType(0x020A);
-    /// FitBaseType::UINT8Z
-    pub const LANGUAGE_BITS_4: ProfileType = ProfileType(0x022A);
-    /// FitBaseType::ENUM
-    pub const TIME_ZONE: ProfileType = ProfileType(0x0240);
-    /// FitBaseType::ENUM
-    pub const DISPLAY_MEASURE: ProfileType = ProfileType(0x0260);
-    /// FitBaseType::ENUM
-    pub const DISPLAY_HEART: ProfileType = ProfileType(0x0280);
-    /// FitBaseType::ENUM
-    pub const DISPLAY_POWER: ProfileType = ProfileType(0x02A0);
-    /// FitBaseType::ENUM
-    pub const DISPLAY_POSITION: ProfileType = ProfileType(0x02C0);
-    /// FitBaseType::ENUM
-    pub const SWITCH: ProfileType = ProfileType(0x02E0);
-    /// FitBaseType::ENUM
-    pub const SPORT: ProfileType = ProfileType(0x0300);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_0: ProfileType = ProfileType(0x032A);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_1: ProfileType = ProfileType(0x034A);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_2: ProfileType = ProfileType(0x036A);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_3: ProfileType = ProfileType(0x038A);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_4: ProfileType = ProfileType(0x03AA);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_5: ProfileType = ProfileType(0x03CA);
-    /// FitBaseType::UINT8Z
-    pub const SPORT_BITS_6: ProfileType = ProfileType(0x03EA);
-    /// FitBaseType::ENUM
-    pub const SUB_SPORT: ProfileType = ProfileType(0x0400);
-    /// FitBaseType::ENUM
-    pub const SPORT_EVENT: ProfileType = ProfileType(0x0420);
-    /// FitBaseType::ENUM
-    pub const ACTIVITY: ProfileType = ProfileType(0x0440);
-    /// FitBaseType::ENUM
-    pub const INTENSITY: ProfileType = ProfileType(0x0460);
-    /// FitBaseType::ENUM
-    pub const SESSION_TRIGGER: ProfileType = ProfileType(0x0480);
-    /// FitBaseType::ENUM
-    pub const AUTOLAP_TRIGGER: ProfileType = ProfileType(0x04A0);
-    /// FitBaseType::ENUM
-    pub const LAP_TRIGGER: ProfileType = ProfileType(0x04C0);
-    /// FitBaseType::ENUM
-    pub const TIME_MODE: ProfileType = ProfileType(0x04E0);
-    /// FitBaseType::ENUM
-    pub const BACKLIGHT_MODE: ProfileType = ProfileType(0x0500);
-    /// FitBaseType::ENUM
-    pub const DATE_MODE: ProfileType = ProfileType(0x0520);
-    /// FitBaseType::UINT8
-    pub const BACKLIGHT_TIMEOUT: ProfileType = ProfileType(0x0542);
-    /// FitBaseType::ENUM
-    pub const EVENT: ProfileType = ProfileType(0x0560);
-    /// FitBaseType::ENUM
-    pub const EVENT_TYPE: ProfileType = ProfileType(0x0580);
-    /// FitBaseType::ENUM
-    pub const TIMER_TRIGGER: ProfileType = ProfileType(0x05A0);
-    /// FitBaseType::ENUM
-    pub const FITNESS_EQUIPMENT_STATE: ProfileType = ProfileType(0x05C0);
-    /// FitBaseType::ENUM
-    pub const TONE: ProfileType = ProfileType(0x05E0);
-    /// FitBaseType::ENUM
-    pub const AUTOSCROLL: ProfileType = ProfileType(0x0600);
-    /// FitBaseType::ENUM
-    pub const ACTIVITY_CLASS: ProfileType = ProfileType(0x0620);
-    /// FitBaseType::ENUM
-    pub const HR_ZONE_CALC: ProfileType = ProfileType(0x0640);
-    /// FitBaseType::ENUM
-    pub const PWR_ZONE_CALC: ProfileType = ProfileType(0x0660);
-    /// FitBaseType::ENUM
-    pub const WKT_STEP_DURATION: ProfileType = ProfileType(0x0680);
-    /// FitBaseType::ENUM
-    pub const WKT_STEP_TARGET: ProfileType = ProfileType(0x06A0);
-    /// FitBaseType::ENUM
-    pub const GOAL: ProfileType = ProfileType(0x06C0);
-    /// FitBaseType::ENUM
-    pub const GOAL_RECURRENCE: ProfileType = ProfileType(0x06E0);
-    /// FitBaseType::ENUM
-    pub const GOAL_SOURCE: ProfileType = ProfileType(0x0700);
-    /// FitBaseType::ENUM
-    pub const SCHEDULE: ProfileType = ProfileType(0x0720);
-    /// FitBaseType::ENUM
-    pub const COURSE_POINT: ProfileType = ProfileType(0x0740);
-    /// FitBaseType::UINT16
-    pub const MANUFACTURER: ProfileType = ProfileType(0x0764);
-    /// FitBaseType::UINT16
-    pub const GARMIN_PRODUCT: ProfileType = ProfileType(0x0784);
-    /// FitBaseType::UINT8
-    pub const ANTPLUS_DEVICE_TYPE: ProfileType = ProfileType(0x07A2);
-    /// FitBaseType::ENUM
-    pub const ANT_NETWORK: ProfileType = ProfileType(0x07C0);
-    /// FitBaseType::UINT32Z
-    pub const WORKOUT_CAPABILITIES: ProfileType = ProfileType(0x07EC);
-    /// FitBaseType::UINT8
-    pub const BATTERY_STATUS: ProfileType = ProfileType(0x0802);
-    /// FitBaseType::ENUM
-    pub const HR_TYPE: ProfileType = ProfileType(0x0820);
-    /// FitBaseType::UINT32Z
-    pub const COURSE_CAPABILITIES: ProfileType = ProfileType(0x084C);
-    /// FitBaseType::UINT16
-    pub const WEIGHT: ProfileType = ProfileType(0x0864);
-    /// FitBaseType::UINT32
-    pub const WORKOUT_HR: ProfileType = ProfileType(0x0886);
-    /// FitBaseType::UINT32
-    pub const WORKOUT_POWER: ProfileType = ProfileType(0x08A6);
-    /// FitBaseType::ENUM
-    pub const BP_STATUS: ProfileType = ProfileType(0x08C0);
-    /// FitBaseType::UINT16
-    pub const USER_LOCAL_ID: ProfileType = ProfileType(0x08E4);
-    /// FitBaseType::ENUM
-    pub const SWIM_STROKE: ProfileType = ProfileType(0x0900);
-    /// FitBaseType::ENUM
-    pub const ACTIVITY_TYPE: ProfileType = ProfileType(0x0920);
-    /// FitBaseType::ENUM
-    pub const ACTIVITY_SUBTYPE: ProfileType = ProfileType(0x0940);
-    /// FitBaseType::ENUM
-    pub const ACTIVITY_LEVEL: ProfileType = ProfileType(0x0960);
-    /// FitBaseType::ENUM
-    pub const SIDE: ProfileType = ProfileType(0x0980);
-    /// FitBaseType::UINT8
-    pub const LEFT_RIGHT_BALANCE: ProfileType = ProfileType(0x09A2);
-    /// FitBaseType::UINT16
-    pub const LEFT_RIGHT_BALANCE_100: ProfileType = ProfileType(0x09C4);
-    /// FitBaseType::ENUM
-    pub const LENGTH_TYPE: ProfileType = ProfileType(0x09E0);
-    /// FitBaseType::ENUM
-    pub const DAY_OF_WEEK: ProfileType = ProfileType(0x0A00);
-    /// FitBaseType::UINT32Z
-    pub const CONNECTIVITY_CAPABILITIES: ProfileType = ProfileType(0x0A2C);
-    /// FitBaseType::ENUM
-    pub const WEATHER_REPORT: ProfileType = ProfileType(0x0A40);
-    /// FitBaseType::ENUM
-    pub const WEATHER_STATUS: ProfileType = ProfileType(0x0A60);
-    /// FitBaseType::ENUM
-    pub const WEATHER_SEVERITY: ProfileType = ProfileType(0x0A80);
-    /// FitBaseType::ENUM
-    pub const WEATHER_SEVERE_TYPE: ProfileType = ProfileType(0x0AA0);
-    /// FitBaseType::UINT32
-    pub const TIME_INTO_DAY: ProfileType = ProfileType(0x0AC6);
-    /// FitBaseType::UINT32
-    pub const LOCALTIME_INTO_DAY: ProfileType = ProfileType(0x0AE6);
-    /// FitBaseType::ENUM
-    pub const STROKE_TYPE: ProfileType = ProfileType(0x0B00);
-    /// FitBaseType::ENUM
-    pub const BODY_LOCATION: ProfileType = ProfileType(0x0B20);
-    /// FitBaseType::ENUM
-    pub const SEGMENT_LAP_STATUS: ProfileType = ProfileType(0x0B40);
-    /// FitBaseType::ENUM
-    pub const SEGMENT_LEADERBOARD_TYPE: ProfileType = ProfileType(0x0B60);
-    /// FitBaseType::ENUM
-    pub const SEGMENT_DELETE_STATUS: ProfileType = ProfileType(0x0B80);
-    /// FitBaseType::ENUM
-    pub const SEGMENT_SELECTION_TYPE: ProfileType = ProfileType(0x0BA0);
-    /// FitBaseType::ENUM
-    pub const SOURCE_TYPE: ProfileType = ProfileType(0x0BC0);
-    /// FitBaseType::UINT8
-    pub const LOCAL_DEVICE_TYPE: ProfileType = ProfileType(0x0BE2);
-    /// FitBaseType::UINT8
-    pub const BLE_DEVICE_TYPE: ProfileType = ProfileType(0x0C02);
-    /// FitBaseType::UINT32Z
-    pub const ANT_CHANNEL_ID: ProfileType = ProfileType(0x0C2C);
-    /// FitBaseType::ENUM
-    pub const DISPLAY_ORIENTATION: ProfileType = ProfileType(0x0C40);
-    /// FitBaseType::ENUM
-    pub const WORKOUT_EQUIPMENT: ProfileType = ProfileType(0x0C60);
-    /// FitBaseType::ENUM
-    pub const WATCHFACE_MODE: ProfileType = ProfileType(0x0C80);
-    /// FitBaseType::ENUM
-    pub const DIGITAL_WATCHFACE_LAYOUT: ProfileType = ProfileType(0x0CA0);
-    /// FitBaseType::ENUM
-    pub const ANALOG_WATCHFACE_LAYOUT: ProfileType = ProfileType(0x0CC0);
-    /// FitBaseType::ENUM
-    pub const RIDER_POSITION_TYPE: ProfileType = ProfileType(0x0CE0);
-    /// FitBaseType::ENUM
-    pub const POWER_PHASE_TYPE: ProfileType = ProfileType(0x0D00);
-    /// FitBaseType::ENUM
-    pub const CAMERA_EVENT_TYPE: ProfileType = ProfileType(0x0D20);
-    /// FitBaseType::ENUM
-    pub const SENSOR_TYPE: ProfileType = ProfileType(0x0D40);
-    /// FitBaseType::ENUM
-    pub const BIKE_LIGHT_NETWORK_CONFIG_TYPE: ProfileType = ProfileType(0x0D60);
-    /// FitBaseType::UINT16
-    pub const COMM_TIMEOUT_TYPE: ProfileType = ProfileType(0x0D84);
-    /// FitBaseType::ENUM
-    pub const CAMERA_ORIENTATION_TYPE: ProfileType = ProfileType(0x0DA0);
-    /// FitBaseType::ENUM
-    pub const ATTITUDE_STAGE: ProfileType = ProfileType(0x0DC0);
-    /// FitBaseType::UINT16
-    pub const ATTITUDE_VALIDITY: ProfileType = ProfileType(0x0DE4);
-    /// FitBaseType::ENUM
-    pub const AUTO_SYNC_FREQUENCY: ProfileType = ProfileType(0x0E00);
-    /// FitBaseType::ENUM
-    pub const EXD_LAYOUT: ProfileType = ProfileType(0x0E20);
-    /// FitBaseType::ENUM
-    pub const EXD_DISPLAY_TYPE: ProfileType = ProfileType(0x0E40);
-    /// FitBaseType::ENUM
-    pub const EXD_DATA_UNITS: ProfileType = ProfileType(0x0E60);
-    /// FitBaseType::ENUM
-    pub const EXD_QUALIFIERS: ProfileType = ProfileType(0x0E80);
-    /// FitBaseType::ENUM
-    pub const EXD_DESCRIPTORS: ProfileType = ProfileType(0x0EA0);
-    /// FitBaseType::UINT32
-    pub const AUTO_ACTIVITY_DETECT: ProfileType = ProfileType(0x0EC6);
-    /// FitBaseType::UINT32Z
-    pub const SUPPORTED_EXD_SCREEN_LAYOUTS: ProfileType = ProfileType(0x0EEC);
-    /// FitBaseType::UINT8
-    pub const FIT_BASE_TYPE: ProfileType = ProfileType(0x0F02);
-    /// FitBaseType::ENUM
-    pub const TURN_TYPE: ProfileType = ProfileType(0x0F20);
-    /// FitBaseType::UINT8
-    pub const BIKE_LIGHT_BEAM_ANGLE_MODE: ProfileType = ProfileType(0x0F42);
-    /// FitBaseType::UINT16
-    pub const FIT_BASE_UNIT: ProfileType = ProfileType(0x0F64);
-    /// FitBaseType::UINT8
-    pub const SET_TYPE: ProfileType = ProfileType(0x0F82);
-    /// FitBaseType::ENUM
-    pub const MAX_MET_CATEGORY: ProfileType = ProfileType(0x0FA0);
-    /// FitBaseType::UINT16
-    pub const EXERCISE_CATEGORY: ProfileType = ProfileType(0x0FC4);
-    /// FitBaseType::UINT16
-    pub const BENCH_PRESS_EXERCISE_NAME: ProfileType = ProfileType(0x0FE4);
-    /// FitBaseType::UINT16
-    pub const CALF_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x1004);
-    /// FitBaseType::UINT16
-    pub const CARDIO_EXERCISE_NAME: ProfileType = ProfileType(0x1024);
-    /// FitBaseType::UINT16
-    pub const CARRY_EXERCISE_NAME: ProfileType = ProfileType(0x1044);
-    /// FitBaseType::UINT16
-    pub const CHOP_EXERCISE_NAME: ProfileType = ProfileType(0x1064);
-    /// FitBaseType::UINT16
-    pub const CORE_EXERCISE_NAME: ProfileType = ProfileType(0x1084);
-    /// FitBaseType::UINT16
-    pub const CRUNCH_EXERCISE_NAME: ProfileType = ProfileType(0x10A4);
-    /// FitBaseType::UINT16
-    pub const CURL_EXERCISE_NAME: ProfileType = ProfileType(0x10C4);
-    /// FitBaseType::UINT16
-    pub const DEADLIFT_EXERCISE_NAME: ProfileType = ProfileType(0x10E4);
-    /// FitBaseType::UINT16
-    pub const FLYE_EXERCISE_NAME: ProfileType = ProfileType(0x1104);
-    /// FitBaseType::UINT16
-    pub const HIP_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x1124);
-    /// FitBaseType::UINT16
-    pub const HIP_STABILITY_EXERCISE_NAME: ProfileType = ProfileType(0x1144);
-    /// FitBaseType::UINT16
-    pub const HIP_SWING_EXERCISE_NAME: ProfileType = ProfileType(0x1164);
-    /// FitBaseType::UINT16
-    pub const HYPEREXTENSION_EXERCISE_NAME: ProfileType = ProfileType(0x1184);
-    /// FitBaseType::UINT16
-    pub const LATERAL_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x11A4);
-    /// FitBaseType::UINT16
-    pub const LEG_CURL_EXERCISE_NAME: ProfileType = ProfileType(0x11C4);
-    /// FitBaseType::UINT16
-    pub const LEG_RAISE_EXERCISE_NAME: ProfileType = ProfileType(0x11E4);
-    /// FitBaseType::UINT16
-    pub const LUNGE_EXERCISE_NAME: ProfileType = ProfileType(0x1204);
-    /// FitBaseType::UINT16
-    pub const OLYMPIC_LIFT_EXERCISE_NAME: ProfileType = ProfileType(0x1224);
-    /// FitBaseType::UINT16
-    pub const PLANK_EXERCISE_NAME: ProfileType = ProfileType(0x1244);
-    /// FitBaseType::UINT16
-    pub const PLYO_EXERCISE_NAME: ProfileType = ProfileType(0x1264);
-    /// FitBaseType::UINT16
-    pub const PULL_UP_EXERCISE_NAME: ProfileType = ProfileType(0x1284);
-    /// FitBaseType::UINT16
-    pub const PUSH_UP_EXERCISE_NAME: ProfileType = ProfileType(0x12A4);
-    /// FitBaseType::UINT16
-    pub const ROW_EXERCISE_NAME: ProfileType = ProfileType(0x12C4);
-    /// FitBaseType::UINT16
-    pub const SHOULDER_PRESS_EXERCISE_NAME: ProfileType = ProfileType(0x12E4);
-    /// FitBaseType::UINT16
-    pub const SHOULDER_STABILITY_EXERCISE_NAME: ProfileType = ProfileType(0x1304);
-    /// FitBaseType::UINT16
-    pub const SHRUG_EXERCISE_NAME: ProfileType = ProfileType(0x1324);
-    /// FitBaseType::UINT16
-    pub const SIT_UP_EXERCISE_NAME: ProfileType = ProfileType(0x1344);
-    /// FitBaseType::UINT16
-    pub const SQUAT_EXERCISE_NAME: ProfileType = ProfileType(0x1364);
-    /// FitBaseType::UINT16
-    pub const TOTAL_BODY_EXERCISE_NAME: ProfileType = ProfileType(0x1384);
-    /// FitBaseType::UINT16
-    pub const MOVE_EXERCISE_NAME: ProfileType = ProfileType(0x13A4);
-    /// FitBaseType::UINT16
-    pub const POSE_EXERCISE_NAME: ProfileType = ProfileType(0x13C4);
-    /// FitBaseType::UINT16
-    pub const TRICEPS_EXTENSION_EXERCISE_NAME: ProfileType = ProfileType(0x13E4);
-    /// FitBaseType::UINT16
-    pub const WARM_UP_EXERCISE_NAME: ProfileType = ProfileType(0x1404);
-    /// FitBaseType::UINT16
-    pub const RUN_EXERCISE_NAME: ProfileType = ProfileType(0x1424);
-    /// FitBaseType::UINT16
-    pub const BIKE_EXERCISE_NAME: ProfileType = ProfileType(0x1444);
-    /// FitBaseType::UINT16
-    pub const BANDED_EXERCISES_EXERCISE_NAME: ProfileType = ProfileType(0x1464);
-    /// FitBaseType::UINT16
-    pub const BATTLE_ROPE_EXERCISE_NAME: ProfileType = ProfileType(0x1484);
-    /// FitBaseType::UINT16
-    pub const ELLIPTICAL_EXERCISE_NAME: ProfileType = ProfileType(0x14A4);
-    /// FitBaseType::UINT16
-    pub const FLOOR_CLIMB_EXERCISE_NAME: ProfileType = ProfileType(0x14C4);
-    /// FitBaseType::UINT16
-    pub const INDOOR_BIKE_EXERCISE_NAME: ProfileType = ProfileType(0x14E4);
-    /// FitBaseType::UINT16
-    pub const INDOOR_ROW_EXERCISE_NAME: ProfileType = ProfileType(0x1504);
-    /// FitBaseType::UINT16
-    pub const LADDER_EXERCISE_NAME: ProfileType = ProfileType(0x1524);
-    /// FitBaseType::UINT16
-    pub const SANDBAG_EXERCISE_NAME: ProfileType = ProfileType(0x1544);
-    /// FitBaseType::UINT16
-    pub const SLED_EXERCISE_NAME: ProfileType = ProfileType(0x1564);
-    /// FitBaseType::UINT16
-    pub const SLEDGE_HAMMER_EXERCISE_NAME: ProfileType = ProfileType(0x1584);
-    /// FitBaseType::UINT16
-    pub const STAIR_STEPPER_EXERCISE_NAME: ProfileType = ProfileType(0x15A4);
-    /// FitBaseType::UINT16
-    pub const SUSPENSION_EXERCISE_NAME: ProfileType = ProfileType(0x15C4);
-    /// FitBaseType::UINT16
-    pub const TIRE_EXERCISE_NAME: ProfileType = ProfileType(0x15E4);
-    /// FitBaseType::UINT16
-    pub const BIKE_OUTDOOR_EXERCISE_NAME: ProfileType = ProfileType(0x1604);
-    /// FitBaseType::UINT16
-    pub const RUN_INDOOR_EXERCISE_NAME: ProfileType = ProfileType(0x1624);
-    /// FitBaseType::ENUM
-    pub const WATER_TYPE: ProfileType = ProfileType(0x1640);
-    /// FitBaseType::ENUM
-    pub const TISSUE_MODEL_TYPE: ProfileType = ProfileType(0x1660);
-    /// FitBaseType::ENUM
-    pub const DIVE_GAS_STATUS: ProfileType = ProfileType(0x1680);
-    /// FitBaseType::ENUM
-    pub const DIVE_ALERT: ProfileType = ProfileType(0x16A0);
-    /// FitBaseType::ENUM
-    pub const DIVE_ALARM_TYPE: ProfileType = ProfileType(0x16C0);
-    /// FitBaseType::ENUM
-    pub const DIVE_BACKLIGHT_MODE: ProfileType = ProfileType(0x16E0);
-    /// FitBaseType::ENUM
-    pub const SLEEP_LEVEL: ProfileType = ProfileType(0x1700);
-    /// FitBaseType::ENUM
-    pub const SPO2_MEASUREMENT_TYPE: ProfileType = ProfileType(0x1720);
-    /// FitBaseType::ENUM
-    pub const CCR_SETPOINT_SWITCH_MODE: ProfileType = ProfileType(0x1740);
-    /// FitBaseType::ENUM
-    pub const DIVE_GAS_MODE: ProfileType = ProfileType(0x1760);
-    /// FitBaseType::ENUM
-    pub const PROJECTILE_TYPE: ProfileType = ProfileType(0x1780);
-    /// FitBaseType::UINT16
-    pub const FAVERO_PRODUCT: ProfileType = ProfileType(0x17A4);
-    /// FitBaseType::ENUM
-    pub const SPLIT_TYPE: ProfileType = ProfileType(0x17C0);
-    /// FitBaseType::ENUM
-    pub const CLIMB_PRO_EVENT: ProfileType = ProfileType(0x17E0);
-    /// FitBaseType::ENUM
-    pub const GAS_CONSUMPTION_RATE_TYPE: ProfileType = ProfileType(0x1800);
-    /// FitBaseType::ENUM
-    pub const TAP_SENSITIVITY: ProfileType = ProfileType(0x1820);
-    /// FitBaseType::ENUM
-    pub const RADAR_THREAT_LEVEL_TYPE: ProfileType = ProfileType(0x1840);
-    /// FitBaseType::ENUM
-    pub const SLEEP_DISRUPTION_SEVERITY: ProfileType = ProfileType(0x1860);
-    /// FitBaseType::ENUM
-    pub const NAP_PERIOD_FEEDBACK: ProfileType = ProfileType(0x1880);
-    /// FitBaseType::ENUM
-    pub const NAP_SOURCE: ProfileType = ProfileType(0x18A0);
-    /// FitBaseType::ENUM
-    pub const MAX_MET_SPEED_SOURCE: ProfileType = ProfileType(0x18C0);
-    /// FitBaseType::ENUM
-    pub const MAX_MET_HEART_RATE_SOURCE: ProfileType = ProfileType(0x18E0);
-    /// FitBaseType::ENUM
-    pub const HRV_STATUS: ProfileType = ProfileType(0x1900);
-    /// FitBaseType::ENUM
-    pub const NO_FLY_TIME_MODE: ProfileType = ProfileType(0x1920);
-
-    const BASE_TYPES: [FitBaseType; 17] = [
-        FitBaseType::ENUM,
-        FitBaseType::SINT8,
-        FitBaseType::UINT8,
-        FitBaseType::SINT16,
-        FitBaseType::UINT16,
-        FitBaseType::SINT32,
-        FitBaseType::UINT32,
-        FitBaseType::STRING,
-        FitBaseType::FLOAT32,
-        FitBaseType::FLOAT64,
-        FitBaseType::UINT8Z,
-        FitBaseType::UINT16Z,
-        FitBaseType::UINT32Z,
-        FitBaseType::BYTE,
-        FitBaseType::SINT64,
-        FitBaseType::UINT64,
-        FitBaseType::UINT64Z,
-    ];
-
-    pub const fn base_type(self) -> FitBaseType {
-        let index = self.0 as usize & FitBaseType::NUM_MASK as usize;
-        if index < ProfileType::BASE_TYPES.len() {
-            return ProfileType::BASE_TYPES[index];
-        }
-        FitBaseType(u8::MAX)
-    }
-}
-
-impl Default for ProfileType {
-    fn default() -> Self {
-        Self(u16::MAX)
-    }
-}
-
-impl fmt::Display for ProfileType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x0000 => write!(f, "enum"),
-            0x0001 => write!(f, "sint8"),
-            0x0002 => write!(f, "uint8"),
-            0x0003 => write!(f, "sint16"),
-            0x0004 => write!(f, "uint16"),
-            0x0005 => write!(f, "sint32"),
-            0x0006 => write!(f, "uint32"),
-            0x0007 => write!(f, "string"),
-            0x0008 => write!(f, "float32"),
-            0x0009 => write!(f, "float64"),
-            0x000A => write!(f, "uint8z"),
-            0x000B => write!(f, "uint16z"),
-            0x000C => write!(f, "uint32z"),
-            0x000D => write!(f, "byte"),
-            0x000E => write!(f, "sint64"),
-            0x000F => write!(f, "uint64"),
-            0x0010 => write!(f, "uint64z"),
-            0x0020 => write!(f, "bool"),
-            0x0040 => write!(f, "file"),
-            0x0064 => write!(f, "mesg_num"),
-            0x0082 => write!(f, "checksum"),
-            0x00AA => write!(f, "file_flags"),
-            0x00C0 => write!(f, "mesg_count"),
-            0x00E6 => write!(f, "date_time"),
-            0x0106 => write!(f, "local_date_time"),
-            0x0124 => write!(f, "message_index"),
-            0x0142 => write!(f, "device_index"),
-            0x0160 => write!(f, "gender"),
-            0x0180 => write!(f, "language"),
-            0x01AA => write!(f, "language_bits_0"),
-            0x01CA => write!(f, "language_bits_1"),
-            0x01EA => write!(f, "language_bits_2"),
-            0x020A => write!(f, "language_bits_3"),
-            0x022A => write!(f, "language_bits_4"),
-            0x0240 => write!(f, "time_zone"),
-            0x0260 => write!(f, "display_measure"),
-            0x0280 => write!(f, "display_heart"),
-            0x02A0 => write!(f, "display_power"),
-            0x02C0 => write!(f, "display_position"),
-            0x02E0 => write!(f, "switch"),
-            0x0300 => write!(f, "sport"),
-            0x032A => write!(f, "sport_bits_0"),
-            0x034A => write!(f, "sport_bits_1"),
-            0x036A => write!(f, "sport_bits_2"),
-            0x038A => write!(f, "sport_bits_3"),
-            0x03AA => write!(f, "sport_bits_4"),
-            0x03CA => write!(f, "sport_bits_5"),
-            0x03EA => write!(f, "sport_bits_6"),
-            0x0400 => write!(f, "sub_sport"),
-            0x0420 => write!(f, "sport_event"),
-            0x0440 => write!(f, "activity"),
-            0x0460 => write!(f, "intensity"),
-            0x0480 => write!(f, "session_trigger"),
-            0x04A0 => write!(f, "autolap_trigger"),
-            0x04C0 => write!(f, "lap_trigger"),
-            0x04E0 => write!(f, "time_mode"),
-            0x0500 => write!(f, "backlight_mode"),
-            0x0520 => write!(f, "date_mode"),
-            0x0542 => write!(f, "backlight_timeout"),
-            0x0560 => write!(f, "event"),
-            0x0580 => write!(f, "event_type"),
-            0x05A0 => write!(f, "timer_trigger"),
-            0x05C0 => write!(f, "fitness_equipment_state"),
-            0x05E0 => write!(f, "tone"),
-            0x0600 => write!(f, "autoscroll"),
-            0x0620 => write!(f, "activity_class"),
-            0x0640 => write!(f, "hr_zone_calc"),
-            0x0660 => write!(f, "pwr_zone_calc"),
-            0x0680 => write!(f, "wkt_step_duration"),
-            0x06A0 => write!(f, "wkt_step_target"),
-            0x06C0 => write!(f, "goal"),
-            0x06E0 => write!(f, "goal_recurrence"),
-            0x0700 => write!(f, "goal_source"),
-            0x0720 => write!(f, "schedule"),
-            0x0740 => write!(f, "course_point"),
-            0x0764 => write!(f, "manufacturer"),
-            0x0784 => write!(f, "garmin_product"),
-            0x07A2 => write!(f, "antplus_device_type"),
-            0x07C0 => write!(f, "ant_network"),
-            0x07EC => write!(f, "workout_capabilities"),
-            0x0802 => write!(f, "battery_status"),
-            0x0820 => write!(f, "hr_type"),
-            0x084C => write!(f, "course_capabilities"),
-            0x0864 => write!(f, "weight"),
-            0x0886 => write!(f, "workout_hr"),
-            0x08A6 => write!(f, "workout_power"),
-            0x08C0 => write!(f, "bp_status"),
-            0x08E4 => write!(f, "user_local_id"),
-            0x0900 => write!(f, "swim_stroke"),
-            0x0920 => write!(f, "activity_type"),
-            0x0940 => write!(f, "activity_subtype"),
-            0x0960 => write!(f, "activity_level"),
-            0x0980 => write!(f, "side"),
-            0x09A2 => write!(f, "left_right_balance"),
-            0x09C4 => write!(f, "left_right_balance_100"),
-            0x09E0 => write!(f, "length_type"),
-            0x0A00 => write!(f, "day_of_week"),
-            0x0A2C => write!(f, "connectivity_capabilities"),
-            0x0A40 => write!(f, "weather_report"),
-            0x0A60 => write!(f, "weather_status"),
-            0x0A80 => write!(f, "weather_severity"),
-            0x0AA0 => write!(f, "weather_severe_type"),
-            0x0AC6 => write!(f, "time_into_day"),
-            0x0AE6 => write!(f, "localtime_into_day"),
-            0x0B00 => write!(f, "stroke_type"),
-            0x0B20 => write!(f, "body_location"),
-            0x0B40 => write!(f, "segment_lap_status"),
-            0x0B60 => write!(f, "segment_leaderboard_type"),
-            0x0B80 => write!(f, "segment_delete_status"),
-            0x0BA0 => write!(f, "segment_selection_type"),
-            0x0BC0 => write!(f, "source_type"),
-            0x0BE2 => write!(f, "local_device_type"),
-            0x0C02 => write!(f, "ble_device_type"),
-            0x0C2C => write!(f, "ant_channel_id"),
-            0x0C40 => write!(f, "display_orientation"),
-            0x0C60 => write!(f, "workout_equipment"),
-            0x0C80 => write!(f, "watchface_mode"),
-            0x0CA0 => write!(f, "digital_watchface_layout"),
-            0x0CC0 => write!(f, "analog_watchface_layout"),
-            0x0CE0 => write!(f, "rider_position_type"),
-            0x0D00 => write!(f, "power_phase_type"),
-            0x0D20 => write!(f, "camera_event_type"),
-            0x0D40 => write!(f, "sensor_type"),
-            0x0D60 => write!(f, "bike_light_network_config_type"),
-            0x0D84 => write!(f, "comm_timeout_type"),
-            0x0DA0 => write!(f, "camera_orientation_type"),
-            0x0DC0 => write!(f, "attitude_stage"),
-            0x0DE4 => write!(f, "attitude_validity"),
-            0x0E00 => write!(f, "auto_sync_frequency"),
-            0x0E20 => write!(f, "exd_layout"),
-            0x0E40 => write!(f, "exd_display_type"),
-            0x0E60 => write!(f, "exd_data_units"),
-            0x0E80 => write!(f, "exd_qualifiers"),
-            0x0EA0 => write!(f, "exd_descriptors"),
-            0x0EC6 => write!(f, "auto_activity_detect"),
-            0x0EEC => write!(f, "supported_exd_screen_layouts"),
-            0x0F02 => write!(f, "fit_base_type"),
-            0x0F20 => write!(f, "turn_type"),
-            0x0F42 => write!(f, "bike_light_beam_angle_mode"),
-            0x0F64 => write!(f, "fit_base_unit"),
-            0x0F82 => write!(f, "set_type"),
-            0x0FA0 => write!(f, "max_met_category"),
-            0x0FC4 => write!(f, "exercise_category"),
-            0x0FE4 => write!(f, "bench_press_exercise_name"),
-            0x1004 => write!(f, "calf_raise_exercise_name"),
-            0x1024 => write!(f, "cardio_exercise_name"),
-            0x1044 => write!(f, "carry_exercise_name"),
-            0x1064 => write!(f, "chop_exercise_name"),
-            0x1084 => write!(f, "core_exercise_name"),
-            0x10A4 => write!(f, "crunch_exercise_name"),
-            0x10C4 => write!(f, "curl_exercise_name"),
-            0x10E4 => write!(f, "deadlift_exercise_name"),
-            0x1104 => write!(f, "flye_exercise_name"),
-            0x1124 => write!(f, "hip_raise_exercise_name"),
-            0x1144 => write!(f, "hip_stability_exercise_name"),
-            0x1164 => write!(f, "hip_swing_exercise_name"),
-            0x1184 => write!(f, "hyperextension_exercise_name"),
-            0x11A4 => write!(f, "lateral_raise_exercise_name"),
-            0x11C4 => write!(f, "leg_curl_exercise_name"),
-            0x11E4 => write!(f, "leg_raise_exercise_name"),
-            0x1204 => write!(f, "lunge_exercise_name"),
-            0x1224 => write!(f, "olympic_lift_exercise_name"),
-            0x1244 => write!(f, "plank_exercise_name"),
-            0x1264 => write!(f, "plyo_exercise_name"),
-            0x1284 => write!(f, "pull_up_exercise_name"),
-            0x12A4 => write!(f, "push_up_exercise_name"),
-            0x12C4 => write!(f, "row_exercise_name"),
-            0x12E4 => write!(f, "shoulder_press_exercise_name"),
-            0x1304 => write!(f, "shoulder_stability_exercise_name"),
-            0x1324 => write!(f, "shrug_exercise_name"),
-            0x1344 => write!(f, "sit_up_exercise_name"),
-            0x1364 => write!(f, "squat_exercise_name"),
-            0x1384 => write!(f, "total_body_exercise_name"),
-            0x13A4 => write!(f, "move_exercise_name"),
-            0x13C4 => write!(f, "pose_exercise_name"),
-            0x13E4 => write!(f, "triceps_extension_exercise_name"),
-            0x1404 => write!(f, "warm_up_exercise_name"),
-            0x1424 => write!(f, "run_exercise_name"),
-            0x1444 => write!(f, "bike_exercise_name"),
-            0x1464 => write!(f, "banded_exercises_exercise_name"),
-            0x1484 => write!(f, "battle_rope_exercise_name"),
-            0x14A4 => write!(f, "elliptical_exercise_name"),
-            0x14C4 => write!(f, "floor_climb_exercise_name"),
-            0x14E4 => write!(f, "indoor_bike_exercise_name"),
-            0x1504 => write!(f, "indoor_row_exercise_name"),
-            0x1524 => write!(f, "ladder_exercise_name"),
-            0x1544 => write!(f, "sandbag_exercise_name"),
-            0x1564 => write!(f, "sled_exercise_name"),
-            0x1584 => write!(f, "sledge_hammer_exercise_name"),
-            0x15A4 => write!(f, "stair_stepper_exercise_name"),
-            0x15C4 => write!(f, "suspension_exercise_name"),
-            0x15E4 => write!(f, "tire_exercise_name"),
-            0x1604 => write!(f, "bike_outdoor_exercise_name"),
-            0x1624 => write!(f, "run_indoor_exercise_name"),
-            0x1640 => write!(f, "water_type"),
-            0x1660 => write!(f, "tissue_model_type"),
-            0x1680 => write!(f, "dive_gas_status"),
-            0x16A0 => write!(f, "dive_alert"),
-            0x16C0 => write!(f, "dive_alarm_type"),
-            0x16E0 => write!(f, "dive_backlight_mode"),
-            0x1700 => write!(f, "sleep_level"),
-            0x1720 => write!(f, "spo2_measurement_type"),
-            0x1740 => write!(f, "ccr_setpoint_switch_mode"),
-            0x1760 => write!(f, "dive_gas_mode"),
-            0x1780 => write!(f, "projectile_type"),
-            0x17A4 => write!(f, "favero_product"),
-            0x17C0 => write!(f, "split_type"),
-            0x17E0 => write!(f, "climb_pro_event"),
-            0x1800 => write!(f, "gas_consumption_rate_type"),
-            0x1820 => write!(f, "tap_sensitivity"),
-            0x1840 => write!(f, "radar_threat_level_type"),
-            0x1860 => write!(f, "sleep_disruption_severity"),
-            0x1880 => write!(f, "nap_period_feedback"),
-            0x18A0 => write!(f, "nap_source"),
-            0x18C0 => write!(f, "max_met_speed_source"),
-            0x18E0 => write!(f, "max_met_heart_rate_source"),
-            0x1900 => write!(f, "hrv_status"),
-            0x1920 => write!(f, "no_fly_time_mode"),
-            _ => write!(f, "ProfileType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ProfileType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x0000 => write!(f, "ProfileType::ENUM(0x0000)"),
-            0x0001 => write!(f, "ProfileType::SINT8(0x0001)"),
-            0x0002 => write!(f, "ProfileType::UINT8(0x0002)"),
-            0x0003 => write!(f, "ProfileType::SINT16(0x0003)"),
-            0x0004 => write!(f, "ProfileType::UINT16(0x0004)"),
-            0x0005 => write!(f, "ProfileType::SINT32(0x0005)"),
-            0x0006 => write!(f, "ProfileType::UINT32(0x0006)"),
-            0x0007 => write!(f, "ProfileType::STRING(0x0007)"),
-            0x0008 => write!(f, "ProfileType::FLOAT32(0x0008)"),
-            0x0009 => write!(f, "ProfileType::FLOAT64(0x0009)"),
-            0x000A => write!(f, "ProfileType::UINT8Z(0x000A)"),
-            0x000B => write!(f, "ProfileType::UINT16Z(0x000B)"),
-            0x000C => write!(f, "ProfileType::UINT32Z(0x000C)"),
-            0x000D => write!(f, "ProfileType::BYTE(0x000D)"),
-            0x000E => write!(f, "ProfileType::SINT64(0x000E)"),
-            0x000F => write!(f, "ProfileType::UINT64(0x000F)"),
-            0x0010 => write!(f, "ProfileType::UINT64Z(0x0010)"),
-            0x0020 => write!(f, "ProfileType::BOOL(0x0020)"),
-            0x0040 => write!(f, "ProfileType::FILE(0x0040)"),
-            0x0064 => write!(f, "ProfileType::MESG_NUM(0x0064)"),
-            0x0082 => write!(f, "ProfileType::CHECKSUM(0x0082)"),
-            0x00AA => write!(f, "ProfileType::FILE_FLAGS(0x00AA)"),
-            0x00C0 => write!(f, "ProfileType::MESG_COUNT(0x00C0)"),
-            0x00E6 => write!(f, "ProfileType::DATE_TIME(0x00E6)"),
-            0x0106 => write!(f, "ProfileType::LOCAL_DATE_TIME(0x0106)"),
-            0x0124 => write!(f, "ProfileType::MESSAGE_INDEX(0x0124)"),
-            0x0142 => write!(f, "ProfileType::DEVICE_INDEX(0x0142)"),
-            0x0160 => write!(f, "ProfileType::GENDER(0x0160)"),
-            0x0180 => write!(f, "ProfileType::LANGUAGE(0x0180)"),
-            0x01AA => write!(f, "ProfileType::LANGUAGE_BITS_0(0x01AA)"),
-            0x01CA => write!(f, "ProfileType::LANGUAGE_BITS_1(0x01CA)"),
-            0x01EA => write!(f, "ProfileType::LANGUAGE_BITS_2(0x01EA)"),
-            0x020A => write!(f, "ProfileType::LANGUAGE_BITS_3(0x020A)"),
-            0x022A => write!(f, "ProfileType::LANGUAGE_BITS_4(0x022A)"),
-            0x0240 => write!(f, "ProfileType::TIME_ZONE(0x0240)"),
-            0x0260 => write!(f, "ProfileType::DISPLAY_MEASURE(0x0260)"),
-            0x0280 => write!(f, "ProfileType::DISPLAY_HEART(0x0280)"),
-            0x02A0 => write!(f, "ProfileType::DISPLAY_POWER(0x02A0)"),
-            0x02C0 => write!(f, "ProfileType::DISPLAY_POSITION(0x02C0)"),
-            0x02E0 => write!(f, "ProfileType::SWITCH(0x02E0)"),
-            0x0300 => write!(f, "ProfileType::SPORT(0x0300)"),
-            0x032A => write!(f, "ProfileType::SPORT_BITS_0(0x032A)"),
-            0x034A => write!(f, "ProfileType::SPORT_BITS_1(0x034A)"),
-            0x036A => write!(f, "ProfileType::SPORT_BITS_2(0x036A)"),
-            0x038A => write!(f, "ProfileType::SPORT_BITS_3(0x038A)"),
-            0x03AA => write!(f, "ProfileType::SPORT_BITS_4(0x03AA)"),
-            0x03CA => write!(f, "ProfileType::SPORT_BITS_5(0x03CA)"),
-            0x03EA => write!(f, "ProfileType::SPORT_BITS_6(0x03EA)"),
-            0x0400 => write!(f, "ProfileType::SUB_SPORT(0x0400)"),
-            0x0420 => write!(f, "ProfileType::SPORT_EVENT(0x0420)"),
-            0x0440 => write!(f, "ProfileType::ACTIVITY(0x0440)"),
-            0x0460 => write!(f, "ProfileType::INTENSITY(0x0460)"),
-            0x0480 => write!(f, "ProfileType::SESSION_TRIGGER(0x0480)"),
-            0x04A0 => write!(f, "ProfileType::AUTOLAP_TRIGGER(0x04A0)"),
-            0x04C0 => write!(f, "ProfileType::LAP_TRIGGER(0x04C0)"),
-            0x04E0 => write!(f, "ProfileType::TIME_MODE(0x04E0)"),
-            0x0500 => write!(f, "ProfileType::BACKLIGHT_MODE(0x0500)"),
-            0x0520 => write!(f, "ProfileType::DATE_MODE(0x0520)"),
-            0x0542 => write!(f, "ProfileType::BACKLIGHT_TIMEOUT(0x0542)"),
-            0x0560 => write!(f, "ProfileType::EVENT(0x0560)"),
-            0x0580 => write!(f, "ProfileType::EVENT_TYPE(0x0580)"),
-            0x05A0 => write!(f, "ProfileType::TIMER_TRIGGER(0x05A0)"),
-            0x05C0 => write!(f, "ProfileType::FITNESS_EQUIPMENT_STATE(0x05C0)"),
-            0x05E0 => write!(f, "ProfileType::TONE(0x05E0)"),
-            0x0600 => write!(f, "ProfileType::AUTOSCROLL(0x0600)"),
-            0x0620 => write!(f, "ProfileType::ACTIVITY_CLASS(0x0620)"),
-            0x0640 => write!(f, "ProfileType::HR_ZONE_CALC(0x0640)"),
-            0x0660 => write!(f, "ProfileType::PWR_ZONE_CALC(0x0660)"),
-            0x0680 => write!(f, "ProfileType::WKT_STEP_DURATION(0x0680)"),
-            0x06A0 => write!(f, "ProfileType::WKT_STEP_TARGET(0x06A0)"),
-            0x06C0 => write!(f, "ProfileType::GOAL(0x06C0)"),
-            0x06E0 => write!(f, "ProfileType::GOAL_RECURRENCE(0x06E0)"),
-            0x0700 => write!(f, "ProfileType::GOAL_SOURCE(0x0700)"),
-            0x0720 => write!(f, "ProfileType::SCHEDULE(0x0720)"),
-            0x0740 => write!(f, "ProfileType::COURSE_POINT(0x0740)"),
-            0x0764 => write!(f, "ProfileType::MANUFACTURER(0x0764)"),
-            0x0784 => write!(f, "ProfileType::GARMIN_PRODUCT(0x0784)"),
-            0x07A2 => write!(f, "ProfileType::ANTPLUS_DEVICE_TYPE(0x07A2)"),
-            0x07C0 => write!(f, "ProfileType::ANT_NETWORK(0x07C0)"),
-            0x07EC => write!(f, "ProfileType::WORKOUT_CAPABILITIES(0x07EC)"),
-            0x0802 => write!(f, "ProfileType::BATTERY_STATUS(0x0802)"),
-            0x0820 => write!(f, "ProfileType::HR_TYPE(0x0820)"),
-            0x084C => write!(f, "ProfileType::COURSE_CAPABILITIES(0x084C)"),
-            0x0864 => write!(f, "ProfileType::WEIGHT(0x0864)"),
-            0x0886 => write!(f, "ProfileType::WORKOUT_HR(0x0886)"),
-            0x08A6 => write!(f, "ProfileType::WORKOUT_POWER(0x08A6)"),
-            0x08C0 => write!(f, "ProfileType::BP_STATUS(0x08C0)"),
-            0x08E4 => write!(f, "ProfileType::USER_LOCAL_ID(0x08E4)"),
-            0x0900 => write!(f, "ProfileType::SWIM_STROKE(0x0900)"),
-            0x0920 => write!(f, "ProfileType::ACTIVITY_TYPE(0x0920)"),
-            0x0940 => write!(f, "ProfileType::ACTIVITY_SUBTYPE(0x0940)"),
-            0x0960 => write!(f, "ProfileType::ACTIVITY_LEVEL(0x0960)"),
-            0x0980 => write!(f, "ProfileType::SIDE(0x0980)"),
-            0x09A2 => write!(f, "ProfileType::LEFT_RIGHT_BALANCE(0x09A2)"),
-            0x09C4 => write!(f, "ProfileType::LEFT_RIGHT_BALANCE_100(0x09C4)"),
-            0x09E0 => write!(f, "ProfileType::LENGTH_TYPE(0x09E0)"),
-            0x0A00 => write!(f, "ProfileType::DAY_OF_WEEK(0x0A00)"),
-            0x0A2C => write!(f, "ProfileType::CONNECTIVITY_CAPABILITIES(0x0A2C)"),
-            0x0A40 => write!(f, "ProfileType::WEATHER_REPORT(0x0A40)"),
-            0x0A60 => write!(f, "ProfileType::WEATHER_STATUS(0x0A60)"),
-            0x0A80 => write!(f, "ProfileType::WEATHER_SEVERITY(0x0A80)"),
-            0x0AA0 => write!(f, "ProfileType::WEATHER_SEVERE_TYPE(0x0AA0)"),
-            0x0AC6 => write!(f, "ProfileType::TIME_INTO_DAY(0x0AC6)"),
-            0x0AE6 => write!(f, "ProfileType::LOCALTIME_INTO_DAY(0x0AE6)"),
-            0x0B00 => write!(f, "ProfileType::STROKE_TYPE(0x0B00)"),
-            0x0B20 => write!(f, "ProfileType::BODY_LOCATION(0x0B20)"),
-            0x0B40 => write!(f, "ProfileType::SEGMENT_LAP_STATUS(0x0B40)"),
-            0x0B60 => write!(f, "ProfileType::SEGMENT_LEADERBOARD_TYPE(0x0B60)"),
-            0x0B80 => write!(f, "ProfileType::SEGMENT_DELETE_STATUS(0x0B80)"),
-            0x0BA0 => write!(f, "ProfileType::SEGMENT_SELECTION_TYPE(0x0BA0)"),
-            0x0BC0 => write!(f, "ProfileType::SOURCE_TYPE(0x0BC0)"),
-            0x0BE2 => write!(f, "ProfileType::LOCAL_DEVICE_TYPE(0x0BE2)"),
-            0x0C02 => write!(f, "ProfileType::BLE_DEVICE_TYPE(0x0C02)"),
-            0x0C2C => write!(f, "ProfileType::ANT_CHANNEL_ID(0x0C2C)"),
-            0x0C40 => write!(f, "ProfileType::DISPLAY_ORIENTATION(0x0C40)"),
-            0x0C60 => write!(f, "ProfileType::WORKOUT_EQUIPMENT(0x0C60)"),
-            0x0C80 => write!(f, "ProfileType::WATCHFACE_MODE(0x0C80)"),
-            0x0CA0 => write!(f, "ProfileType::DIGITAL_WATCHFACE_LAYOUT(0x0CA0)"),
-            0x0CC0 => write!(f, "ProfileType::ANALOG_WATCHFACE_LAYOUT(0x0CC0)"),
-            0x0CE0 => write!(f, "ProfileType::RIDER_POSITION_TYPE(0x0CE0)"),
-            0x0D00 => write!(f, "ProfileType::POWER_PHASE_TYPE(0x0D00)"),
-            0x0D20 => write!(f, "ProfileType::CAMERA_EVENT_TYPE(0x0D20)"),
-            0x0D40 => write!(f, "ProfileType::SENSOR_TYPE(0x0D40)"),
-            0x0D60 => write!(f, "ProfileType::BIKE_LIGHT_NETWORK_CONFIG_TYPE(0x0D60)"),
-            0x0D84 => write!(f, "ProfileType::COMM_TIMEOUT_TYPE(0x0D84)"),
-            0x0DA0 => write!(f, "ProfileType::CAMERA_ORIENTATION_TYPE(0x0DA0)"),
-            0x0DC0 => write!(f, "ProfileType::ATTITUDE_STAGE(0x0DC0)"),
-            0x0DE4 => write!(f, "ProfileType::ATTITUDE_VALIDITY(0x0DE4)"),
-            0x0E00 => write!(f, "ProfileType::AUTO_SYNC_FREQUENCY(0x0E00)"),
-            0x0E20 => write!(f, "ProfileType::EXD_LAYOUT(0x0E20)"),
-            0x0E40 => write!(f, "ProfileType::EXD_DISPLAY_TYPE(0x0E40)"),
-            0x0E60 => write!(f, "ProfileType::EXD_DATA_UNITS(0x0E60)"),
-            0x0E80 => write!(f, "ProfileType::EXD_QUALIFIERS(0x0E80)"),
-            0x0EA0 => write!(f, "ProfileType::EXD_DESCRIPTORS(0x0EA0)"),
-            0x0EC6 => write!(f, "ProfileType::AUTO_ACTIVITY_DETECT(0x0EC6)"),
-            0x0EEC => write!(f, "ProfileType::SUPPORTED_EXD_SCREEN_LAYOUTS(0x0EEC)"),
-            0x0F02 => write!(f, "ProfileType::FIT_BASE_TYPE(0x0F02)"),
-            0x0F20 => write!(f, "ProfileType::TURN_TYPE(0x0F20)"),
-            0x0F42 => write!(f, "ProfileType::BIKE_LIGHT_BEAM_ANGLE_MODE(0x0F42)"),
-            0x0F64 => write!(f, "ProfileType::FIT_BASE_UNIT(0x0F64)"),
-            0x0F82 => write!(f, "ProfileType::SET_TYPE(0x0F82)"),
-            0x0FA0 => write!(f, "ProfileType::MAX_MET_CATEGORY(0x0FA0)"),
-            0x0FC4 => write!(f, "ProfileType::EXERCISE_CATEGORY(0x0FC4)"),
-            0x0FE4 => write!(f, "ProfileType::BENCH_PRESS_EXERCISE_NAME(0x0FE4)"),
-            0x1004 => write!(f, "ProfileType::CALF_RAISE_EXERCISE_NAME(0x1004)"),
-            0x1024 => write!(f, "ProfileType::CARDIO_EXERCISE_NAME(0x1024)"),
-            0x1044 => write!(f, "ProfileType::CARRY_EXERCISE_NAME(0x1044)"),
-            0x1064 => write!(f, "ProfileType::CHOP_EXERCISE_NAME(0x1064)"),
-            0x1084 => write!(f, "ProfileType::CORE_EXERCISE_NAME(0x1084)"),
-            0x10A4 => write!(f, "ProfileType::CRUNCH_EXERCISE_NAME(0x10A4)"),
-            0x10C4 => write!(f, "ProfileType::CURL_EXERCISE_NAME(0x10C4)"),
-            0x10E4 => write!(f, "ProfileType::DEADLIFT_EXERCISE_NAME(0x10E4)"),
-            0x1104 => write!(f, "ProfileType::FLYE_EXERCISE_NAME(0x1104)"),
-            0x1124 => write!(f, "ProfileType::HIP_RAISE_EXERCISE_NAME(0x1124)"),
-            0x1144 => write!(f, "ProfileType::HIP_STABILITY_EXERCISE_NAME(0x1144)"),
-            0x1164 => write!(f, "ProfileType::HIP_SWING_EXERCISE_NAME(0x1164)"),
-            0x1184 => write!(f, "ProfileType::HYPEREXTENSION_EXERCISE_NAME(0x1184)"),
-            0x11A4 => write!(f, "ProfileType::LATERAL_RAISE_EXERCISE_NAME(0x11A4)"),
-            0x11C4 => write!(f, "ProfileType::LEG_CURL_EXERCISE_NAME(0x11C4)"),
-            0x11E4 => write!(f, "ProfileType::LEG_RAISE_EXERCISE_NAME(0x11E4)"),
-            0x1204 => write!(f, "ProfileType::LUNGE_EXERCISE_NAME(0x1204)"),
-            0x1224 => write!(f, "ProfileType::OLYMPIC_LIFT_EXERCISE_NAME(0x1224)"),
-            0x1244 => write!(f, "ProfileType::PLANK_EXERCISE_NAME(0x1244)"),
-            0x1264 => write!(f, "ProfileType::PLYO_EXERCISE_NAME(0x1264)"),
-            0x1284 => write!(f, "ProfileType::PULL_UP_EXERCISE_NAME(0x1284)"),
-            0x12A4 => write!(f, "ProfileType::PUSH_UP_EXERCISE_NAME(0x12A4)"),
-            0x12C4 => write!(f, "ProfileType::ROW_EXERCISE_NAME(0x12C4)"),
-            0x12E4 => write!(f, "ProfileType::SHOULDER_PRESS_EXERCISE_NAME(0x12E4)"),
-            0x1304 => write!(f, "ProfileType::SHOULDER_STABILITY_EXERCISE_NAME(0x1304)"),
-            0x1324 => write!(f, "ProfileType::SHRUG_EXERCISE_NAME(0x1324)"),
-            0x1344 => write!(f, "ProfileType::SIT_UP_EXERCISE_NAME(0x1344)"),
-            0x1364 => write!(f, "ProfileType::SQUAT_EXERCISE_NAME(0x1364)"),
-            0x1384 => write!(f, "ProfileType::TOTAL_BODY_EXERCISE_NAME(0x1384)"),
-            0x13A4 => write!(f, "ProfileType::MOVE_EXERCISE_NAME(0x13A4)"),
-            0x13C4 => write!(f, "ProfileType::POSE_EXERCISE_NAME(0x13C4)"),
-            0x13E4 => write!(f, "ProfileType::TRICEPS_EXTENSION_EXERCISE_NAME(0x13E4)"),
-            0x1404 => write!(f, "ProfileType::WARM_UP_EXERCISE_NAME(0x1404)"),
-            0x1424 => write!(f, "ProfileType::RUN_EXERCISE_NAME(0x1424)"),
-            0x1444 => write!(f, "ProfileType::BIKE_EXERCISE_NAME(0x1444)"),
-            0x1464 => write!(f, "ProfileType::BANDED_EXERCISES_EXERCISE_NAME(0x1464)"),
-            0x1484 => write!(f, "ProfileType::BATTLE_ROPE_EXERCISE_NAME(0x1484)"),
-            0x14A4 => write!(f, "ProfileType::ELLIPTICAL_EXERCISE_NAME(0x14A4)"),
-            0x14C4 => write!(f, "ProfileType::FLOOR_CLIMB_EXERCISE_NAME(0x14C4)"),
-            0x14E4 => write!(f, "ProfileType::INDOOR_BIKE_EXERCISE_NAME(0x14E4)"),
-            0x1504 => write!(f, "ProfileType::INDOOR_ROW_EXERCISE_NAME(0x1504)"),
-            0x1524 => write!(f, "ProfileType::LADDER_EXERCISE_NAME(0x1524)"),
-            0x1544 => write!(f, "ProfileType::SANDBAG_EXERCISE_NAME(0x1544)"),
-            0x1564 => write!(f, "ProfileType::SLED_EXERCISE_NAME(0x1564)"),
-            0x1584 => write!(f, "ProfileType::SLEDGE_HAMMER_EXERCISE_NAME(0x1584)"),
-            0x15A4 => write!(f, "ProfileType::STAIR_STEPPER_EXERCISE_NAME(0x15A4)"),
-            0x15C4 => write!(f, "ProfileType::SUSPENSION_EXERCISE_NAME(0x15C4)"),
-            0x15E4 => write!(f, "ProfileType::TIRE_EXERCISE_NAME(0x15E4)"),
-            0x1604 => write!(f, "ProfileType::BIKE_OUTDOOR_EXERCISE_NAME(0x1604)"),
-            0x1624 => write!(f, "ProfileType::RUN_INDOOR_EXERCISE_NAME(0x1624)"),
-            0x1640 => write!(f, "ProfileType::WATER_TYPE(0x1640)"),
-            0x1660 => write!(f, "ProfileType::TISSUE_MODEL_TYPE(0x1660)"),
-            0x1680 => write!(f, "ProfileType::DIVE_GAS_STATUS(0x1680)"),
-            0x16A0 => write!(f, "ProfileType::DIVE_ALERT(0x16A0)"),
-            0x16C0 => write!(f, "ProfileType::DIVE_ALARM_TYPE(0x16C0)"),
-            0x16E0 => write!(f, "ProfileType::DIVE_BACKLIGHT_MODE(0x16E0)"),
-            0x1700 => write!(f, "ProfileType::SLEEP_LEVEL(0x1700)"),
-            0x1720 => write!(f, "ProfileType::SPO2_MEASUREMENT_TYPE(0x1720)"),
-            0x1740 => write!(f, "ProfileType::CCR_SETPOINT_SWITCH_MODE(0x1740)"),
-            0x1760 => write!(f, "ProfileType::DIVE_GAS_MODE(0x1760)"),
-            0x1780 => write!(f, "ProfileType::PROJECTILE_TYPE(0x1780)"),
-            0x17A4 => write!(f, "ProfileType::FAVERO_PRODUCT(0x17A4)"),
-            0x17C0 => write!(f, "ProfileType::SPLIT_TYPE(0x17C0)"),
-            0x17E0 => write!(f, "ProfileType::CLIMB_PRO_EVENT(0x17E0)"),
-            0x1800 => write!(f, "ProfileType::GAS_CONSUMPTION_RATE_TYPE(0x1800)"),
-            0x1820 => write!(f, "ProfileType::TAP_SENSITIVITY(0x1820)"),
-            0x1840 => write!(f, "ProfileType::RADAR_THREAT_LEVEL_TYPE(0x1840)"),
-            0x1860 => write!(f, "ProfileType::SLEEP_DISRUPTION_SEVERITY(0x1860)"),
-            0x1880 => write!(f, "ProfileType::NAP_PERIOD_FEEDBACK(0x1880)"),
-            0x18A0 => write!(f, "ProfileType::NAP_SOURCE(0x18A0)"),
-            0x18C0 => write!(f, "ProfileType::MAX_MET_SPEED_SOURCE(0x18C0)"),
-            0x18E0 => write!(f, "ProfileType::MAX_MET_HEART_RATE_SOURCE(0x18E0)"),
-            0x1900 => write!(f, "ProfileType::HRV_STATUS(0x1900)"),
-            0x1920 => write!(f, "ProfileType::NO_FLY_TIME_MODE(0x1920)"),
-            _ => write!(f, "ProfileType({})", self.0),
-        }
-    }
-}
-
-impl From<FitBaseType> for ProfileType {
-    fn from(base_type: FitBaseType) -> ProfileType {
-        ProfileType((base_type.0 & FitBaseType::NUM_MASK) as u16)
-    }
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ProfileType {
+    Enum,
+    Sint8,
+    Uint8,
+    Sint16,
+    Uint16,
+    Sint32,
+    Uint32,
+    String,
+    Float32,
+    Float64,
+    Uint8z,
+    Uint16z,
+    Uint32z,
+    Byte,
+    Sint64,
+    Uint64,
+    Uint64z,
+    Bool,
+    File,
+    MesgNum,
+    Checksum,
+    FileFlags,
+    MesgCount,
+    DateTime,
+    LocalDateTime,
+    MessageIndex,
+    DeviceIndex,
+    Gender,
+    Language,
+    LanguageBits0,
+    LanguageBits1,
+    LanguageBits2,
+    LanguageBits3,
+    LanguageBits4,
+    TimeZone,
+    DisplayMeasure,
+    DisplayHeart,
+    DisplayPower,
+    DisplayPosition,
+    Switch,
+    Sport,
+    SportBits0,
+    SportBits1,
+    SportBits2,
+    SportBits3,
+    SportBits4,
+    SportBits5,
+    SportBits6,
+    SubSport,
+    SportEvent,
+    Activity,
+    Intensity,
+    SessionTrigger,
+    AutolapTrigger,
+    LapTrigger,
+    TimeMode,
+    BacklightMode,
+    DateMode,
+    BacklightTimeout,
+    Event,
+    EventType,
+    TimerTrigger,
+    FitnessEquipmentState,
+    Tone,
+    Autoscroll,
+    ActivityClass,
+    HrZoneCalc,
+    PwrZoneCalc,
+    WktStepDuration,
+    WktStepTarget,
+    Goal,
+    GoalRecurrence,
+    GoalSource,
+    Schedule,
+    CoursePoint,
+    Manufacturer,
+    GarminProduct,
+    AntplusDeviceType,
+    AntNetwork,
+    WorkoutCapabilities,
+    BatteryStatus,
+    HrType,
+    CourseCapabilities,
+    Weight,
+    WorkoutHr,
+    WorkoutPower,
+    BpStatus,
+    UserLocalId,
+    SwimStroke,
+    ActivityType,
+    ActivitySubtype,
+    ActivityLevel,
+    Side,
+    LeftRightBalance,
+    LeftRightBalance100,
+    LengthType,
+    DayOfWeek,
+    ConnectivityCapabilities,
+    WeatherReport,
+    WeatherStatus,
+    WeatherSeverity,
+    WeatherSevereType,
+    TimeIntoDay,
+    LocaltimeIntoDay,
+    StrokeType,
+    BodyLocation,
+    SegmentLapStatus,
+    SegmentLeaderboardType,
+    SegmentDeleteStatus,
+    SegmentSelectionType,
+    SourceType,
+    LocalDeviceType,
+    BleDeviceType,
+    AntChannelId,
+    DisplayOrientation,
+    WorkoutEquipment,
+    WatchfaceMode,
+    DigitalWatchfaceLayout,
+    AnalogWatchfaceLayout,
+    RiderPositionType,
+    PowerPhaseType,
+    CameraEventType,
+    SensorType,
+    BikeLightNetworkConfigType,
+    CommTimeoutType,
+    CameraOrientationType,
+    AttitudeStage,
+    AttitudeValidity,
+    AutoSyncFrequency,
+    ExdLayout,
+    ExdDisplayType,
+    ExdDataUnits,
+    ExdQualifiers,
+    ExdDescriptors,
+    AutoActivityDetect,
+    SupportedExdScreenLayouts,
+    FitBaseType,
+    TurnType,
+    BikeLightBeamAngleMode,
+    FitBaseUnit,
+    SetType,
+    MaxMetCategory,
+    ExerciseCategory,
+    BenchPressExerciseName,
+    CalfRaiseExerciseName,
+    CardioExerciseName,
+    CarryExerciseName,
+    ChopExerciseName,
+    CoreExerciseName,
+    CrunchExerciseName,
+    CurlExerciseName,
+    DeadliftExerciseName,
+    FlyeExerciseName,
+    HipRaiseExerciseName,
+    HipStabilityExerciseName,
+    HipSwingExerciseName,
+    HyperextensionExerciseName,
+    LateralRaiseExerciseName,
+    LegCurlExerciseName,
+    LegRaiseExerciseName,
+    LungeExerciseName,
+    OlympicLiftExerciseName,
+    PlankExerciseName,
+    PlyoExerciseName,
+    PullUpExerciseName,
+    PushUpExerciseName,
+    RowExerciseName,
+    ShoulderPressExerciseName,
+    ShoulderStabilityExerciseName,
+    ShrugExerciseName,
+    SitUpExerciseName,
+    SquatExerciseName,
+    TotalBodyExerciseName,
+    MoveExerciseName,
+    PoseExerciseName,
+    TricepsExtensionExerciseName,
+    WarmUpExerciseName,
+    RunExerciseName,
+    BikeExerciseName,
+    BandedExercisesExerciseName,
+    BattleRopeExerciseName,
+    EllipticalExerciseName,
+    FloorClimbExerciseName,
+    IndoorBikeExerciseName,
+    IndoorRowExerciseName,
+    LadderExerciseName,
+    SandbagExerciseName,
+    SledExerciseName,
+    SledgeHammerExerciseName,
+    StairStepperExerciseName,
+    SuspensionExerciseName,
+    TireExerciseName,
+    BikeOutdoorExerciseName,
+    RunIndoorExerciseName,
+    WaterType,
+    TissueModelType,
+    DiveGasStatus,
+    DiveAlert,
+    DiveAlarmType,
+    DiveBacklightMode,
+    SleepLevel,
+    Spo2MeasurementType,
+    CcrSetpointSwitchMode,
+    DiveGasMode,
+    ProjectileType,
+    FaveroProduct,
+    SplitType,
+    ClimbProEvent,
+    GasConsumptionRateType,
+    TapSensitivity,
+    RadarThreatLevelType,
+    SleepDisruptionSeverity,
+    NapPeriodFeedback,
+    NapSource,
+    MaxMetSpeedSource,
+    MaxMetHeartRateSource,
+    HrvStatus,
+    NoFlyTimeMode,
+    Invalid,
 }

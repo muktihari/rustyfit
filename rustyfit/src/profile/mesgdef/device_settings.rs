@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -276,7 +276,7 @@ impl From<DeviceSettings> for Message {
         if m.active_time_zone != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.active_time_zone),
                 is_expanded: false,
             });
@@ -284,7 +284,7 @@ impl From<DeviceSettings> for Message {
         if m.utc_offset != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.utc_offset),
                 is_expanded: false,
             });
@@ -292,7 +292,7 @@ impl From<DeviceSettings> for Message {
         if !m.time_offset.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.time_offset),
                 is_expanded: false,
             });
@@ -300,7 +300,7 @@ impl From<DeviceSettings> for Message {
         if !m.time_mode.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::TIME_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::VecUint8({
                     let (ptr, len, capacity) = m.time_mode.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
@@ -311,7 +311,7 @@ impl From<DeviceSettings> for Message {
         if !m.time_zone_offset.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::VecInt8(m.time_zone_offset),
                 is_expanded: false,
             });
@@ -319,7 +319,7 @@ impl From<DeviceSettings> for Message {
         if m.backlight_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::BACKLIGHT_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.backlight_mode.0),
                 is_expanded: false,
             });
@@ -327,7 +327,7 @@ impl From<DeviceSettings> for Message {
         if m.activity_tracker_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 36,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.activity_tracker_enabled.0),
                 is_expanded: false,
             });
@@ -335,7 +335,7 @@ impl From<DeviceSettings> for Message {
         if m.clock_time.0 != u32::MAX {
             fields.push(Field {
                 num: 39,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.clock_time.0),
                 is_expanded: false,
             });
@@ -343,7 +343,7 @@ impl From<DeviceSettings> for Message {
         if !m.pages_enabled.is_empty() {
             fields.push(Field {
                 num: 40,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.pages_enabled),
                 is_expanded: false,
             });
@@ -351,7 +351,7 @@ impl From<DeviceSettings> for Message {
         if m.move_alert_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 46,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.move_alert_enabled.0),
                 is_expanded: false,
             });
@@ -359,7 +359,7 @@ impl From<DeviceSettings> for Message {
         if m.date_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 47,
-                profile_type: ProfileType::DATE_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.date_mode.0),
                 is_expanded: false,
             });
@@ -367,7 +367,7 @@ impl From<DeviceSettings> for Message {
         if m.display_orientation.0 != u8::MAX {
             fields.push(Field {
                 num: 55,
-                profile_type: ProfileType::DISPLAY_ORIENTATION,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.display_orientation.0),
                 is_expanded: false,
             });
@@ -375,7 +375,7 @@ impl From<DeviceSettings> for Message {
         if m.mounting_side.0 != u8::MAX {
             fields.push(Field {
                 num: 56,
-                profile_type: ProfileType::SIDE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.mounting_side.0),
                 is_expanded: false,
             });
@@ -383,7 +383,7 @@ impl From<DeviceSettings> for Message {
         if !m.default_page.is_empty() {
             fields.push(Field {
                 num: 57,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.default_page),
                 is_expanded: false,
             });
@@ -391,7 +391,7 @@ impl From<DeviceSettings> for Message {
         if m.autosync_min_steps != u16::MAX {
             fields.push(Field {
                 num: 58,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.autosync_min_steps),
                 is_expanded: false,
             });
@@ -399,7 +399,7 @@ impl From<DeviceSettings> for Message {
         if m.autosync_min_time != u16::MAX {
             fields.push(Field {
                 num: 59,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.autosync_min_time),
                 is_expanded: false,
             });
@@ -407,7 +407,7 @@ impl From<DeviceSettings> for Message {
         if m.lactate_threshold_autodetect_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 80,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.lactate_threshold_autodetect_enabled.0),
                 is_expanded: false,
             });
@@ -415,7 +415,7 @@ impl From<DeviceSettings> for Message {
         if m.ble_auto_upload_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 86,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.ble_auto_upload_enabled.0),
                 is_expanded: false,
             });
@@ -423,7 +423,7 @@ impl From<DeviceSettings> for Message {
         if m.auto_sync_frequency.0 != u8::MAX {
             fields.push(Field {
                 num: 89,
-                profile_type: ProfileType::AUTO_SYNC_FREQUENCY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.auto_sync_frequency.0),
                 is_expanded: false,
             });
@@ -431,7 +431,7 @@ impl From<DeviceSettings> for Message {
         if m.auto_activity_detect.0 != u32::MAX {
             fields.push(Field {
                 num: 90,
-                profile_type: ProfileType::AUTO_ACTIVITY_DETECT,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.auto_activity_detect.0),
                 is_expanded: false,
             });
@@ -439,7 +439,7 @@ impl From<DeviceSettings> for Message {
         if m.number_of_screens != u8::MAX {
             fields.push(Field {
                 num: 94,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.number_of_screens),
                 is_expanded: false,
             });
@@ -447,7 +447,7 @@ impl From<DeviceSettings> for Message {
         if m.smart_notification_display_orientation.0 != u8::MAX {
             fields.push(Field {
                 num: 95,
-                profile_type: ProfileType::DISPLAY_ORIENTATION,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.smart_notification_display_orientation.0),
                 is_expanded: false,
             });
@@ -455,7 +455,7 @@ impl From<DeviceSettings> for Message {
         if m.tap_interface.0 != u8::MAX {
             fields.push(Field {
                 num: 134,
-                profile_type: ProfileType::SWITCH,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.tap_interface.0),
                 is_expanded: false,
             });
@@ -463,7 +463,7 @@ impl From<DeviceSettings> for Message {
         if m.tap_sensitivity.0 != u8::MAX {
             fields.push(Field {
                 num: 174,
-                profile_type: ProfileType::TAP_SENSITIVITY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.tap_sensitivity.0),
                 is_expanded: false,
             });

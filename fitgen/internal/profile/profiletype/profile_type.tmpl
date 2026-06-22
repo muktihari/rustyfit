@@ -9,85 +9,18 @@
 
 {{ define "profile_type" }}
 {{ template "header" . }}
-use crate::profile::typedef::FitBaseType;
-use core::fmt;
-
 /// Current profile version.
 pub const PROFILE_VERSION: u16 = {{ .VersionData.Version }};
 
 /// ProfileType is an abstraction layer over primitive-types such as sint, uint, etc. 
 /// For example, if a Field has u32 value having ProfileType::DATE_TIME, that u32 value 
 /// should be interpreted as a timestamp relative to the FIT Epoch.
-#[derive(Clone, Copy, PartialEq)]
-pub struct ProfileType(pub u16);
-
-impl ProfileType {
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub enum ProfileType {
     {{ range .Constants -}}
-    /// {{ .BaseType }}
-    pub const {{ .Name }}: ProfileType = ProfileType({{ .Value }});
-    {{ end }}
-
-    const BASE_TYPES: [FitBaseType; 17] = [
-        FitBaseType::ENUM,
-        FitBaseType::SINT8,
-        FitBaseType::UINT8,
-        FitBaseType::SINT16,
-        FitBaseType::UINT16,
-        FitBaseType::SINT32,
-        FitBaseType::UINT32,
-        FitBaseType::STRING,
-        FitBaseType::FLOAT32,
-        FitBaseType::FLOAT64,
-        FitBaseType::UINT8Z,
-        FitBaseType::UINT16Z,
-        FitBaseType::UINT32Z,
-        FitBaseType::BYTE,
-        FitBaseType::SINT64,
-        FitBaseType::UINT64,
-        FitBaseType::UINT64Z,
-    ];
-
-    pub const fn base_type(self) -> FitBaseType {
-        let index = self.0 as usize & FitBaseType::NUM_MASK as usize;
-        if index < ProfileType::BASE_TYPES.len() {
-            return ProfileType::BASE_TYPES[index]
-        }
-        FitBaseType(u8::MAX)
-    }
-}
-
-impl Default for ProfileType {
-    fn default() -> Self {
-        Self(u16::MAX)
-    }
-}
-
-impl fmt::Display for ProfileType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            {{ range .Constants -}}
-            {{ .Value }} => write!(f, "{{ .String }}"),
-            {{ end -}}
-            _ => write!(f, "ProfileType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ProfileType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            {{ range .Constants -}}
-            {{ .Value }} => write!(f, "ProfileType::{{ .Name }}({{ .Value }})"),
-            {{ end -}}
-            _ => write!(f, "ProfileType({})", self.0),
-        }
-    }
-}
-
-impl From<FitBaseType> for ProfileType {
-    fn from(base_type: FitBaseType) -> ProfileType {
-        ProfileType((base_type.0 & FitBaseType::NUM_MASK) as u16)
-    }
+    {{ .Name }},
+    {{ end -}}
+    Invalid,
 }
 
 {{ end }}

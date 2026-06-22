@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -108,7 +108,7 @@ impl From<Capabilities> for Message {
         if !m.languages.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::VecUint8(m.languages),
                 is_expanded: false,
             });
@@ -116,7 +116,7 @@ impl From<Capabilities> for Message {
         if !m.sports.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SPORT_BITS_0,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::VecUint8({
                     let (ptr, len, capacity) = m.sports.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
@@ -127,7 +127,7 @@ impl From<Capabilities> for Message {
         if m.workouts_supported.0 != u32::MIN {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::WORKOUT_CAPABILITIES,
+                base_type: FitBaseType::UINT32Z,
                 value: Value::Uint32(m.workouts_supported.0),
                 is_expanded: false,
             });
@@ -135,7 +135,7 @@ impl From<Capabilities> for Message {
         if m.connectivity_supported.0 != u32::MIN {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::CONNECTIVITY_CAPABILITIES,
+                base_type: FitBaseType::UINT32Z,
                 value: Value::Uint32(m.connectivity_supported.0),
                 is_expanded: false,
             });

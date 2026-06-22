@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
@@ -270,7 +270,7 @@ impl From<SegmentPoint> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -278,7 +278,7 @@ impl From<SegmentPoint> for Message {
         if m.position_lat != i32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
             });
@@ -286,7 +286,7 @@ impl From<SegmentPoint> for Message {
         if m.position_long != i32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
             });
@@ -294,7 +294,7 @@ impl From<SegmentPoint> for Message {
         if m.distance != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
             });
@@ -302,7 +302,7 @@ impl From<SegmentPoint> for Message {
         if m.altitude != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.altitude),
                 is_expanded: false,
             });
@@ -310,7 +310,7 @@ impl From<SegmentPoint> for Message {
         if !m.leader_time.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.leader_time),
                 is_expanded: false,
             });
@@ -318,7 +318,7 @@ impl From<SegmentPoint> for Message {
         if m.enhanced_altitude != u32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_altitude),
                 is_expanded: is_expanded(&m.state, 6),
             });

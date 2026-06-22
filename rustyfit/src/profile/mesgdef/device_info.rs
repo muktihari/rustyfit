@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -235,7 +235,7 @@ impl From<DeviceInfo> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -243,7 +243,7 @@ impl From<DeviceInfo> for Message {
         if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::DEVICE_INDEX,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
             });
@@ -251,7 +251,7 @@ impl From<DeviceInfo> for Message {
         if m.device_type != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.device_type),
                 is_expanded: false,
             });
@@ -259,7 +259,7 @@ impl From<DeviceInfo> for Message {
         if m.manufacturer.0 != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::MANUFACTURER,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
             });
@@ -267,7 +267,7 @@ impl From<DeviceInfo> for Message {
         if m.serial_number != u32::MIN {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32Z,
+                base_type: FitBaseType::UINT32Z,
                 value: Value::Uint32(m.serial_number),
                 is_expanded: false,
             });
@@ -275,7 +275,7 @@ impl From<DeviceInfo> for Message {
         if m.product != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
             });
@@ -283,7 +283,7 @@ impl From<DeviceInfo> for Message {
         if m.software_version != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.software_version),
                 is_expanded: false,
             });
@@ -291,7 +291,7 @@ impl From<DeviceInfo> for Message {
         if m.hardware_version != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.hardware_version),
                 is_expanded: false,
             });
@@ -299,7 +299,7 @@ impl From<DeviceInfo> for Message {
         if m.cum_operating_time != u32::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.cum_operating_time),
                 is_expanded: false,
             });
@@ -307,7 +307,7 @@ impl From<DeviceInfo> for Message {
         if m.battery_voltage != u16::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.battery_voltage),
                 is_expanded: false,
             });
@@ -315,7 +315,7 @@ impl From<DeviceInfo> for Message {
         if m.battery_status.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::BATTERY_STATUS,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.battery_status.0),
                 is_expanded: false,
             });
@@ -323,7 +323,7 @@ impl From<DeviceInfo> for Message {
         if m.sensor_position.0 != u8::MAX {
             fields.push(Field {
                 num: 18,
-                profile_type: ProfileType::BODY_LOCATION,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sensor_position.0),
                 is_expanded: false,
             });
@@ -331,7 +331,7 @@ impl From<DeviceInfo> for Message {
         if !m.descriptor.is_empty() {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.descriptor),
                 is_expanded: false,
             });
@@ -339,7 +339,7 @@ impl From<DeviceInfo> for Message {
         if m.ant_transmission_type != u8::MIN {
             fields.push(Field {
                 num: 20,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.ant_transmission_type),
                 is_expanded: false,
             });
@@ -347,7 +347,7 @@ impl From<DeviceInfo> for Message {
         if m.ant_device_number != u16::MIN {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::UINT16Z,
+                base_type: FitBaseType::UINT16Z,
                 value: Value::Uint16(m.ant_device_number),
                 is_expanded: false,
             });
@@ -355,7 +355,7 @@ impl From<DeviceInfo> for Message {
         if m.ant_network.0 != u8::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::ANT_NETWORK,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.ant_network.0),
                 is_expanded: false,
             });
@@ -363,7 +363,7 @@ impl From<DeviceInfo> for Message {
         if m.source_type.0 != u8::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::SOURCE_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.source_type.0),
                 is_expanded: false,
             });
@@ -371,7 +371,7 @@ impl From<DeviceInfo> for Message {
         if !m.product_name.is_empty() {
             fields.push(Field {
                 num: 27,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.product_name),
                 is_expanded: false,
             });
@@ -379,7 +379,7 @@ impl From<DeviceInfo> for Message {
         if m.battery_level != u8::MAX {
             fields.push(Field {
                 num: 32,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.battery_level),
                 is_expanded: false,
             });

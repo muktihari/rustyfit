@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -167,7 +167,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -175,7 +175,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.sensor_type.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SENSOR_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sensor_type.0),
                 is_expanded: false,
             });
@@ -183,7 +183,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.calibration_factor != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.calibration_factor),
                 is_expanded: false,
             });
@@ -191,7 +191,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.calibration_divisor != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.calibration_divisor),
                 is_expanded: false,
             });
@@ -199,7 +199,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.level_shift != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.level_shift),
                 is_expanded: false,
             });
@@ -207,7 +207,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.offset_cal != [i32::MAX; 3] {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::VecInt32(Vec::from(&m.offset_cal)),
                 is_expanded: false,
             });
@@ -215,7 +215,7 @@ impl From<ThreeDSensorCalibration> for Message {
         if m.orientation_matrix != [i32::MAX; 9] {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::VecInt32(Vec::from(&m.orientation_matrix)),
                 is_expanded: false,
             });

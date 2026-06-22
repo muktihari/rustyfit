@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -219,7 +219,7 @@ impl From<Hr> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -227,7 +227,7 @@ impl From<Hr> for Message {
         if m.fractional_timestamp != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
                 is_expanded: is_expanded(&m.state, 0),
             });
@@ -235,7 +235,7 @@ impl From<Hr> for Message {
         if m.time256 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.time256),
                 is_expanded: false,
             });
@@ -243,7 +243,7 @@ impl From<Hr> for Message {
         if !m.filtered_bpm.is_empty() {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.filtered_bpm),
                 is_expanded: false,
             });
@@ -251,7 +251,7 @@ impl From<Hr> for Message {
         if !m.event_timestamp.is_empty() {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.event_timestamp),
                 is_expanded: is_expanded(&m.state, 9),
             });
@@ -259,7 +259,7 @@ impl From<Hr> for Message {
         if !m.event_timestamp_12.is_empty() {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(m.event_timestamp_12),
                 is_expanded: false,
             });

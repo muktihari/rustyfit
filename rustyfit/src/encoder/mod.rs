@@ -406,7 +406,7 @@ fn write_message_definition(buf: &mut [u8], mesg: &Message, arch: u8) -> usize {
     for field in &mesg.fields {
         buf[n] = field.num;
         buf[n + 1] = field.value.size() as u8;
-        buf[n + 2] = field.profile_type.base_type().0;
+        buf[n + 2] = field.base_type.0;
         n += 3;
     }
 

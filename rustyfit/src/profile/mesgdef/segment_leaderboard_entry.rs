@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -139,7 +139,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -147,7 +147,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });
@@ -155,7 +155,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
             });
@@ -163,7 +163,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.group_primary_key != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.group_primary_key),
                 is_expanded: false,
             });
@@ -171,7 +171,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.activity_id != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.activity_id),
                 is_expanded: false,
             });
@@ -179,7 +179,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if m.segment_time != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.segment_time),
                 is_expanded: false,
             });
@@ -187,7 +187,7 @@ impl From<SegmentLeaderboardEntry> for Message {
         if !m.activity_id_string.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.activity_id_string),
                 is_expanded: false,
             });

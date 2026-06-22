@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -101,7 +101,7 @@ impl From<SkinTempOvernight> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -109,7 +109,7 @@ impl From<SkinTempOvernight> for Message {
         if m.local_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::LOCAL_DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
             });
@@ -117,7 +117,7 @@ impl From<SkinTempOvernight> for Message {
         if m.average_deviation.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.average_deviation),
                 is_expanded: false,
             });
@@ -125,7 +125,7 @@ impl From<SkinTempOvernight> for Message {
         if m.average_7_day_deviation.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.average_7_day_deviation),
                 is_expanded: false,
             });
@@ -133,7 +133,7 @@ impl From<SkinTempOvernight> for Message {
         if m.nightly_value.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.nightly_value),
                 is_expanded: false,
             });

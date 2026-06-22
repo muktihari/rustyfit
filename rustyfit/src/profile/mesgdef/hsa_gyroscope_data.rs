@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -210,7 +210,7 @@ impl From<HsaGyroscopeData> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -218,7 +218,7 @@ impl From<HsaGyroscopeData> for Message {
         if m.timestamp_ms != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
             });
@@ -226,7 +226,7 @@ impl From<HsaGyroscopeData> for Message {
         if m.sampling_interval != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.sampling_interval),
                 is_expanded: false,
             });
@@ -234,7 +234,7 @@ impl From<HsaGyroscopeData> for Message {
         if !m.gyro_x.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.gyro_x),
                 is_expanded: false,
             });
@@ -242,7 +242,7 @@ impl From<HsaGyroscopeData> for Message {
         if !m.gyro_y.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.gyro_y),
                 is_expanded: false,
             });
@@ -250,7 +250,7 @@ impl From<HsaGyroscopeData> for Message {
         if !m.gyro_z.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.gyro_z),
                 is_expanded: false,
             });
@@ -258,7 +258,7 @@ impl From<HsaGyroscopeData> for Message {
         if m.timestamp_32k != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp_32k),
                 is_expanded: false,
             });

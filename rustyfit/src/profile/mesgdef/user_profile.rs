@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -352,7 +352,7 @@ impl From<UserProfile> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -360,7 +360,7 @@ impl From<UserProfile> for Message {
         if !m.friendly_name.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.friendly_name),
                 is_expanded: false,
             });
@@ -368,7 +368,7 @@ impl From<UserProfile> for Message {
         if m.gender.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::GENDER,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.gender.0),
                 is_expanded: false,
             });
@@ -376,7 +376,7 @@ impl From<UserProfile> for Message {
         if m.age != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.age),
                 is_expanded: false,
             });
@@ -384,7 +384,7 @@ impl From<UserProfile> for Message {
         if m.height != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.height),
                 is_expanded: false,
             });
@@ -392,7 +392,7 @@ impl From<UserProfile> for Message {
         if m.weight != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.weight),
                 is_expanded: false,
             });
@@ -400,7 +400,7 @@ impl From<UserProfile> for Message {
         if m.language.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::LANGUAGE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.language.0),
                 is_expanded: false,
             });
@@ -408,7 +408,7 @@ impl From<UserProfile> for Message {
         if m.elev_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.elev_setting.0),
                 is_expanded: false,
             });
@@ -416,7 +416,7 @@ impl From<UserProfile> for Message {
         if m.weight_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.weight_setting.0),
                 is_expanded: false,
             });
@@ -424,7 +424,7 @@ impl From<UserProfile> for Message {
         if m.resting_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.resting_heart_rate),
                 is_expanded: false,
             });
@@ -432,7 +432,7 @@ impl From<UserProfile> for Message {
         if m.default_max_running_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.default_max_running_heart_rate),
                 is_expanded: false,
             });
@@ -440,7 +440,7 @@ impl From<UserProfile> for Message {
         if m.default_max_biking_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.default_max_biking_heart_rate),
                 is_expanded: false,
             });
@@ -448,7 +448,7 @@ impl From<UserProfile> for Message {
         if m.default_max_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.default_max_heart_rate),
                 is_expanded: false,
             });
@@ -456,7 +456,7 @@ impl From<UserProfile> for Message {
         if m.hr_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::DISPLAY_HEART,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.hr_setting.0),
                 is_expanded: false,
             });
@@ -464,7 +464,7 @@ impl From<UserProfile> for Message {
         if m.speed_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.speed_setting.0),
                 is_expanded: false,
             });
@@ -472,7 +472,7 @@ impl From<UserProfile> for Message {
         if m.dist_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.dist_setting.0),
                 is_expanded: false,
             });
@@ -480,7 +480,7 @@ impl From<UserProfile> for Message {
         if m.power_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 16,
-                profile_type: ProfileType::DISPLAY_POWER,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.power_setting.0),
                 is_expanded: false,
             });
@@ -488,7 +488,7 @@ impl From<UserProfile> for Message {
         if m.activity_class.0 != u8::MAX {
             fields.push(Field {
                 num: 17,
-                profile_type: ProfileType::ACTIVITY_CLASS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.activity_class.0),
                 is_expanded: false,
             });
@@ -496,7 +496,7 @@ impl From<UserProfile> for Message {
         if m.position_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 18,
-                profile_type: ProfileType::DISPLAY_POSITION,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.position_setting.0),
                 is_expanded: false,
             });
@@ -504,7 +504,7 @@ impl From<UserProfile> for Message {
         if m.temperature_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.temperature_setting.0),
                 is_expanded: false,
             });
@@ -512,7 +512,7 @@ impl From<UserProfile> for Message {
         if m.local_id.0 != u16::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::USER_LOCAL_ID,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.local_id.0),
                 is_expanded: false,
             });
@@ -520,7 +520,7 @@ impl From<UserProfile> for Message {
         if m.global_id != [u8::MAX; 6] {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(Vec::from(&m.global_id)),
                 is_expanded: false,
             });
@@ -528,7 +528,7 @@ impl From<UserProfile> for Message {
         if m.wake_time.0 != u32::MAX {
             fields.push(Field {
                 num: 28,
-                profile_type: ProfileType::LOCALTIME_INTO_DAY,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.wake_time.0),
                 is_expanded: false,
             });
@@ -536,7 +536,7 @@ impl From<UserProfile> for Message {
         if m.sleep_time.0 != u32::MAX {
             fields.push(Field {
                 num: 29,
-                profile_type: ProfileType::LOCALTIME_INTO_DAY,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.sleep_time.0),
                 is_expanded: false,
             });
@@ -544,7 +544,7 @@ impl From<UserProfile> for Message {
         if m.height_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 30,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.height_setting.0),
                 is_expanded: false,
             });
@@ -552,7 +552,7 @@ impl From<UserProfile> for Message {
         if m.user_running_step_length != u16::MAX {
             fields.push(Field {
                 num: 31,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.user_running_step_length),
                 is_expanded: false,
             });
@@ -560,7 +560,7 @@ impl From<UserProfile> for Message {
         if m.user_walking_step_length != u16::MAX {
             fields.push(Field {
                 num: 32,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.user_walking_step_length),
                 is_expanded: false,
             });
@@ -568,7 +568,7 @@ impl From<UserProfile> for Message {
         if m.depth_setting.0 != u8::MAX {
             fields.push(Field {
                 num: 47,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.depth_setting.0),
                 is_expanded: false,
             });
@@ -576,7 +576,7 @@ impl From<UserProfile> for Message {
         if m.dive_count != u32::MAX {
             fields.push(Field {
                 num: 49,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.dive_count),
                 is_expanded: false,
             });

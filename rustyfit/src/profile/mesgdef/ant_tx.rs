@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -164,7 +164,7 @@ impl From<AntTx> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -172,7 +172,7 @@ impl From<AntTx> for Message {
         if m.fractional_timestamp != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.fractional_timestamp),
                 is_expanded: false,
             });
@@ -180,7 +180,7 @@ impl From<AntTx> for Message {
         if m.mesg_id != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::Uint8(m.mesg_id),
                 is_expanded: false,
             });
@@ -188,7 +188,7 @@ impl From<AntTx> for Message {
         if !m.mesg_data.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(m.mesg_data),
                 is_expanded: false,
             });
@@ -196,7 +196,7 @@ impl From<AntTx> for Message {
         if m.channel_number != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.channel_number),
                 is_expanded: is_expanded(&m.state, 3),
             });
@@ -204,7 +204,7 @@ impl From<AntTx> for Message {
         if !m.data.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(m.data),
                 is_expanded: is_expanded(&m.state, 4),
             });

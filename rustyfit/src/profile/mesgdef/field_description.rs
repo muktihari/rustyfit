@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -150,7 +150,7 @@ impl From<FieldDescription> for Message {
         if m.developer_data_index != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.developer_data_index),
                 is_expanded: false,
             });
@@ -158,7 +158,7 @@ impl From<FieldDescription> for Message {
         if m.field_definition_number != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.field_definition_number),
                 is_expanded: false,
             });
@@ -166,7 +166,7 @@ impl From<FieldDescription> for Message {
         if m.fit_base_type_id.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::FIT_BASE_TYPE,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.fit_base_type_id.0),
                 is_expanded: false,
             });
@@ -174,7 +174,7 @@ impl From<FieldDescription> for Message {
         if !m.field_name.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::VecString(m.field_name),
                 is_expanded: false,
             });
@@ -182,7 +182,7 @@ impl From<FieldDescription> for Message {
         if m.array != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.array),
                 is_expanded: false,
             });
@@ -190,7 +190,7 @@ impl From<FieldDescription> for Message {
         if !m.components.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.components),
                 is_expanded: false,
             });
@@ -198,7 +198,7 @@ impl From<FieldDescription> for Message {
         if m.scale != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.scale),
                 is_expanded: false,
             });
@@ -206,7 +206,7 @@ impl From<FieldDescription> for Message {
         if m.offset != i8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.offset),
                 is_expanded: false,
             });
@@ -214,7 +214,7 @@ impl From<FieldDescription> for Message {
         if !m.units.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::VecString(m.units),
                 is_expanded: false,
             });
@@ -222,7 +222,7 @@ impl From<FieldDescription> for Message {
         if !m.bits.is_empty() {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.bits),
                 is_expanded: false,
             });
@@ -230,7 +230,7 @@ impl From<FieldDescription> for Message {
         if !m.accumulate.is_empty() {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.accumulate),
                 is_expanded: false,
             });
@@ -238,7 +238,7 @@ impl From<FieldDescription> for Message {
         if m.fit_base_unit_id.0 != u16::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::FIT_BASE_UNIT,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.fit_base_unit_id.0),
                 is_expanded: false,
             });
@@ -246,7 +246,7 @@ impl From<FieldDescription> for Message {
         if m.native_mesg_num.0 != u16::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::MESG_NUM,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.native_mesg_num.0),
                 is_expanded: false,
             });
@@ -254,7 +254,7 @@ impl From<FieldDescription> for Message {
         if m.native_field_num != u8::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.native_field_num),
                 is_expanded: false,
             });

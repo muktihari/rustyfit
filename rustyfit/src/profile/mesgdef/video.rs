@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -89,7 +89,7 @@ impl From<Video> for Message {
         if !m.url.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.url),
                 is_expanded: false,
             });
@@ -97,7 +97,7 @@ impl From<Video> for Message {
         if !m.hosting_provider.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.hosting_provider),
                 is_expanded: false,
             });
@@ -105,7 +105,7 @@ impl From<Video> for Message {
         if m.duration != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
             });

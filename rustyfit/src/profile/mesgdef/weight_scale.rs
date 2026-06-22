@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -353,7 +353,7 @@ impl From<WeightScale> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -361,7 +361,7 @@ impl From<WeightScale> for Message {
         if m.weight.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::WEIGHT,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.weight.0),
                 is_expanded: false,
             });
@@ -369,7 +369,7 @@ impl From<WeightScale> for Message {
         if m.percent_fat != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.percent_fat),
                 is_expanded: false,
             });
@@ -377,7 +377,7 @@ impl From<WeightScale> for Message {
         if m.percent_hydration != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.percent_hydration),
                 is_expanded: false,
             });
@@ -385,7 +385,7 @@ impl From<WeightScale> for Message {
         if m.visceral_fat_mass != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.visceral_fat_mass),
                 is_expanded: false,
             });
@@ -393,7 +393,7 @@ impl From<WeightScale> for Message {
         if m.bone_mass != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.bone_mass),
                 is_expanded: false,
             });
@@ -401,7 +401,7 @@ impl From<WeightScale> for Message {
         if m.muscle_mass != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.muscle_mass),
                 is_expanded: false,
             });
@@ -409,7 +409,7 @@ impl From<WeightScale> for Message {
         if m.basal_met != u16::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.basal_met),
                 is_expanded: false,
             });
@@ -417,7 +417,7 @@ impl From<WeightScale> for Message {
         if m.physique_rating != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.physique_rating),
                 is_expanded: false,
             });
@@ -425,7 +425,7 @@ impl From<WeightScale> for Message {
         if m.active_met != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.active_met),
                 is_expanded: false,
             });
@@ -433,7 +433,7 @@ impl From<WeightScale> for Message {
         if m.metabolic_age != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.metabolic_age),
                 is_expanded: false,
             });
@@ -441,7 +441,7 @@ impl From<WeightScale> for Message {
         if m.visceral_fat_rating != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.visceral_fat_rating),
                 is_expanded: false,
             });
@@ -449,7 +449,7 @@ impl From<WeightScale> for Message {
         if m.user_profile_index.0 != u16::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.user_profile_index.0),
                 is_expanded: false,
             });
@@ -457,7 +457,7 @@ impl From<WeightScale> for Message {
         if m.bmi != u16::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.bmi),
                 is_expanded: false,
             });

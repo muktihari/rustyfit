@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -407,7 +407,7 @@ impl From<BikeProfile> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -415,7 +415,7 @@ impl From<BikeProfile> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });
@@ -423,7 +423,7 @@ impl From<BikeProfile> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -431,7 +431,7 @@ impl From<BikeProfile> for Message {
         if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
@@ -439,7 +439,7 @@ impl From<BikeProfile> for Message {
         if m.odometer != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.odometer),
                 is_expanded: false,
             });
@@ -447,7 +447,7 @@ impl From<BikeProfile> for Message {
         if m.bike_spd_ant_id != u16::MIN {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16Z,
+                base_type: FitBaseType::UINT16Z,
                 value: Value::Uint16(m.bike_spd_ant_id),
                 is_expanded: false,
             });
@@ -455,7 +455,7 @@ impl From<BikeProfile> for Message {
         if m.bike_cad_ant_id != u16::MIN {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16Z,
+                base_type: FitBaseType::UINT16Z,
                 value: Value::Uint16(m.bike_cad_ant_id),
                 is_expanded: false,
             });
@@ -463,7 +463,7 @@ impl From<BikeProfile> for Message {
         if m.bike_spdcad_ant_id != u16::MIN {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT16Z,
+                base_type: FitBaseType::UINT16Z,
                 value: Value::Uint16(m.bike_spdcad_ant_id),
                 is_expanded: false,
             });
@@ -471,7 +471,7 @@ impl From<BikeProfile> for Message {
         if m.bike_power_ant_id != u16::MIN {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT16Z,
+                base_type: FitBaseType::UINT16Z,
                 value: Value::Uint16(m.bike_power_ant_id),
                 is_expanded: false,
             });
@@ -479,7 +479,7 @@ impl From<BikeProfile> for Message {
         if m.custom_wheelsize != u16::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.custom_wheelsize),
                 is_expanded: false,
             });
@@ -487,7 +487,7 @@ impl From<BikeProfile> for Message {
         if m.auto_wheelsize != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.auto_wheelsize),
                 is_expanded: false,
             });
@@ -495,7 +495,7 @@ impl From<BikeProfile> for Message {
         if m.bike_weight != u16::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.bike_weight),
                 is_expanded: false,
             });
@@ -503,7 +503,7 @@ impl From<BikeProfile> for Message {
         if m.power_cal_factor != u16::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.power_cal_factor),
                 is_expanded: false,
             });
@@ -511,7 +511,7 @@ impl From<BikeProfile> for Message {
         if m.auto_wheel_cal.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.auto_wheel_cal.0),
                 is_expanded: false,
             });
@@ -519,7 +519,7 @@ impl From<BikeProfile> for Message {
         if m.auto_power_zero.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.auto_power_zero.0),
                 is_expanded: false,
             });
@@ -527,7 +527,7 @@ impl From<BikeProfile> for Message {
         if m.id != u8::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.id),
                 is_expanded: false,
             });
@@ -535,7 +535,7 @@ impl From<BikeProfile> for Message {
         if m.spd_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.spd_enabled.0),
                 is_expanded: false,
             });
@@ -543,7 +543,7 @@ impl From<BikeProfile> for Message {
         if m.cad_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 16,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.cad_enabled.0),
                 is_expanded: false,
             });
@@ -551,7 +551,7 @@ impl From<BikeProfile> for Message {
         if m.spdcad_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 17,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.spdcad_enabled.0),
                 is_expanded: false,
             });
@@ -559,7 +559,7 @@ impl From<BikeProfile> for Message {
         if m.power_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 18,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.power_enabled.0),
                 is_expanded: false,
             });
@@ -567,7 +567,7 @@ impl From<BikeProfile> for Message {
         if m.crank_length != u8::MAX {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.crank_length),
                 is_expanded: false,
             });
@@ -575,7 +575,7 @@ impl From<BikeProfile> for Message {
         if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 20,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
             });
@@ -583,7 +583,7 @@ impl From<BikeProfile> for Message {
         if m.bike_spd_ant_id_trans_type != u8::MIN {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.bike_spd_ant_id_trans_type),
                 is_expanded: false,
             });
@@ -591,7 +591,7 @@ impl From<BikeProfile> for Message {
         if m.bike_cad_ant_id_trans_type != u8::MIN {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.bike_cad_ant_id_trans_type),
                 is_expanded: false,
             });
@@ -599,7 +599,7 @@ impl From<BikeProfile> for Message {
         if m.bike_spdcad_ant_id_trans_type != u8::MIN {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.bike_spdcad_ant_id_trans_type),
                 is_expanded: false,
             });
@@ -607,7 +607,7 @@ impl From<BikeProfile> for Message {
         if m.bike_power_ant_id_trans_type != u8::MIN {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.bike_power_ant_id_trans_type),
                 is_expanded: false,
             });
@@ -615,7 +615,7 @@ impl From<BikeProfile> for Message {
         if m.odometer_rollover != u8::MAX {
             fields.push(Field {
                 num: 37,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.odometer_rollover),
                 is_expanded: false,
             });
@@ -623,7 +623,7 @@ impl From<BikeProfile> for Message {
         if m.front_gear_num != u8::MIN {
             fields.push(Field {
                 num: 38,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.front_gear_num),
                 is_expanded: false,
             });
@@ -631,7 +631,7 @@ impl From<BikeProfile> for Message {
         if !m.front_gear.is_empty() {
             fields.push(Field {
                 num: 39,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::VecUint8(m.front_gear),
                 is_expanded: false,
             });
@@ -639,7 +639,7 @@ impl From<BikeProfile> for Message {
         if m.rear_gear_num != u8::MIN {
             fields.push(Field {
                 num: 40,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.rear_gear_num),
                 is_expanded: false,
             });
@@ -647,7 +647,7 @@ impl From<BikeProfile> for Message {
         if !m.rear_gear.is_empty() {
             fields.push(Field {
                 num: 41,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::VecUint8(m.rear_gear),
                 is_expanded: false,
             });
@@ -655,7 +655,7 @@ impl From<BikeProfile> for Message {
         if m.shimano_di2_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 44,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.shimano_di2_enabled.0),
                 is_expanded: false,
             });

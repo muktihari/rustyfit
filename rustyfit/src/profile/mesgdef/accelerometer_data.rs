@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -152,7 +152,7 @@ impl From<AccelerometerData> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -160,7 +160,7 @@ impl From<AccelerometerData> for Message {
         if m.timestamp_ms != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
             });
@@ -168,7 +168,7 @@ impl From<AccelerometerData> for Message {
         if !m.sample_time_offset.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.sample_time_offset),
                 is_expanded: false,
             });
@@ -176,7 +176,7 @@ impl From<AccelerometerData> for Message {
         if !m.accel_x.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.accel_x),
                 is_expanded: false,
             });
@@ -184,7 +184,7 @@ impl From<AccelerometerData> for Message {
         if !m.accel_y.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.accel_y),
                 is_expanded: false,
             });
@@ -192,7 +192,7 @@ impl From<AccelerometerData> for Message {
         if !m.accel_z.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.accel_z),
                 is_expanded: false,
             });
@@ -200,7 +200,7 @@ impl From<AccelerometerData> for Message {
         if !m.calibrated_accel_x.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_accel_x),
                 is_expanded: false,
             });
@@ -208,7 +208,7 @@ impl From<AccelerometerData> for Message {
         if !m.calibrated_accel_y.is_empty() {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_accel_y),
                 is_expanded: false,
             });
@@ -216,7 +216,7 @@ impl From<AccelerometerData> for Message {
         if !m.calibrated_accel_z.is_empty() {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::VecFloat32(m.calibrated_accel_z),
                 is_expanded: false,
             });
@@ -224,7 +224,7 @@ impl From<AccelerometerData> for Message {
         if !m.compressed_calibrated_accel_x.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.compressed_calibrated_accel_x),
                 is_expanded: false,
             });
@@ -232,7 +232,7 @@ impl From<AccelerometerData> for Message {
         if !m.compressed_calibrated_accel_y.is_empty() {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.compressed_calibrated_accel_y),
                 is_expanded: false,
             });
@@ -240,7 +240,7 @@ impl From<AccelerometerData> for Message {
         if !m.compressed_calibrated_accel_z.is_empty() {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.compressed_calibrated_accel_z),
                 is_expanded: false,
             });

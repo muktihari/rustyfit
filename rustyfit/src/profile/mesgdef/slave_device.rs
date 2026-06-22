@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -79,7 +79,7 @@ impl From<SlaveDevice> for Message {
         if m.manufacturer.0 != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::MANUFACTURER,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.manufacturer.0),
                 is_expanded: false,
             });
@@ -87,7 +87,7 @@ impl From<SlaveDevice> for Message {
         if m.product != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.product),
                 is_expanded: false,
             });

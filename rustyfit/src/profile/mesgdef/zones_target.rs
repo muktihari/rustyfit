@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -98,7 +98,7 @@ impl From<ZonesTarget> for Message {
         if m.max_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
             });
@@ -106,7 +106,7 @@ impl From<ZonesTarget> for Message {
         if m.threshold_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.threshold_heart_rate),
                 is_expanded: false,
             });
@@ -114,7 +114,7 @@ impl From<ZonesTarget> for Message {
         if m.functional_threshold_power != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.functional_threshold_power),
                 is_expanded: false,
             });
@@ -122,7 +122,7 @@ impl From<ZonesTarget> for Message {
         if m.hr_calc_type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::HR_ZONE_CALC,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.hr_calc_type.0),
                 is_expanded: false,
             });
@@ -130,7 +130,7 @@ impl From<ZonesTarget> for Message {
         if m.pwr_calc_type.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::PWR_ZONE_CALC,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.pwr_calc_type.0),
                 is_expanded: false,
             });
