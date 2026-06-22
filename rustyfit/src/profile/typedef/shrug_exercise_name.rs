@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Shrug Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ShrugExerciseName(pub u16);
 
 impl ShrugExerciseName {
@@ -75,42 +75,6 @@ impl fmt::Display for ShrugExerciseName {
             22 => write!(f, "shrug_arm_mid_wheelchair"),
             23 => write!(f, "shrug_arm_up_wheelchair"),
             24 => write!(f, "upright_row"),
-            _ => write!(f, "ShrugExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ShrugExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ShrugExerciseName::BARBELL_JUMP_SHRUG(0)"),
-            1 => write!(f, "ShrugExerciseName::BARBELL_SHRUG(1)"),
-            2 => write!(f, "ShrugExerciseName::BARBELL_UPRIGHT_ROW(2)"),
-            3 => write!(
-                f,
-                "ShrugExerciseName::BEHIND_THE_BACK_SMITH_MACHINE_SHRUG(3)"
-            ),
-            4 => write!(f, "ShrugExerciseName::DUMBBELL_JUMP_SHRUG(4)"),
-            5 => write!(f, "ShrugExerciseName::DUMBBELL_SHRUG(5)"),
-            6 => write!(f, "ShrugExerciseName::DUMBBELL_UPRIGHT_ROW(6)"),
-            7 => write!(f, "ShrugExerciseName::INCLINE_DUMBBELL_SHRUG(7)"),
-            8 => write!(f, "ShrugExerciseName::OVERHEAD_BARBELL_SHRUG(8)"),
-            9 => write!(f, "ShrugExerciseName::OVERHEAD_DUMBBELL_SHRUG(9)"),
-            10 => write!(f, "ShrugExerciseName::SCAPTION_AND_SHRUG(10)"),
-            11 => write!(f, "ShrugExerciseName::SCAPULAR_RETRACTION(11)"),
-            12 => write!(f, "ShrugExerciseName::SERRATUS_CHAIR_SHRUG(12)"),
-            13 => write!(f, "ShrugExerciseName::WEIGHTED_SERRATUS_CHAIR_SHRUG(13)"),
-            14 => write!(f, "ShrugExerciseName::SERRATUS_SHRUG(14)"),
-            15 => write!(f, "ShrugExerciseName::WEIGHTED_SERRATUS_SHRUG(15)"),
-            16 => write!(f, "ShrugExerciseName::WIDE_GRIP_JUMP_SHRUG(16)"),
-            17 => write!(f, "ShrugExerciseName::WIDE_GRIP_BARBELL_SHRUG(17)"),
-            18 => write!(f, "ShrugExerciseName::BEHIND_THE_BACK_SHRUG(18)"),
-            19 => write!(f, "ShrugExerciseName::DUMBBELL_SHRUG_WHEELCHAIR(19)"),
-            20 => write!(f, "ShrugExerciseName::SHRUG_WHEELCHAIR(20)"),
-            21 => write!(f, "ShrugExerciseName::SHRUG_ARM_DOWN_WHEELCHAIR(21)"),
-            22 => write!(f, "ShrugExerciseName::SHRUG_ARM_MID_WHEELCHAIR(22)"),
-            23 => write!(f, "ShrugExerciseName::SHRUG_ARM_UP_WHEELCHAIR(23)"),
-            24 => write!(f, "ShrugExerciseName::UPRIGHT_ROW(24)"),
             _ => write!(f, "ShrugExerciseName({})", self.0),
         }
     }

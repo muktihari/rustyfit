@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Favero Product type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FaveroProduct(pub u16);
 
 impl FaveroProduct {
@@ -29,16 +29,6 @@ impl fmt::Display for FaveroProduct {
         match self.0 {
             10 => write!(f, "assioma_uno"),
             12 => write!(f, "assioma_duo"),
-            _ => write!(f, "FaveroProduct({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FaveroProduct {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            10 => write!(f, "FaveroProduct::ASSIOMA_UNO(10)"),
-            12 => write!(f, "FaveroProduct::ASSIOMA_DUO(12)"),
             _ => write!(f, "FaveroProduct({})", self.0),
         }
     }

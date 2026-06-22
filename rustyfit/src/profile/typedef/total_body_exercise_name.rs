@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Total Body Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TotalBodyExerciseName(pub u16);
 
 impl TotalBodyExerciseName {
@@ -67,40 +67,6 @@ impl fmt::Display for TotalBodyExerciseName {
             18 => write!(f, "total_body_burpee_over_bar"),
             19 => write!(f, "burpee_box_jump_over"),
             20 => write!(f, "burpee_wheelchair"),
-            _ => write!(f, "TotalBodyExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TotalBodyExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TotalBodyExerciseName::BURPEE(0)"),
-            1 => write!(f, "TotalBodyExerciseName::WEIGHTED_BURPEE(1)"),
-            2 => write!(f, "TotalBodyExerciseName::BURPEE_BOX_JUMP(2)"),
-            3 => write!(f, "TotalBodyExerciseName::WEIGHTED_BURPEE_BOX_JUMP(3)"),
-            4 => write!(f, "TotalBodyExerciseName::HIGH_PULL_BURPEE(4)"),
-            5 => write!(f, "TotalBodyExerciseName::MAN_MAKERS(5)"),
-            6 => write!(f, "TotalBodyExerciseName::ONE_ARM_BURPEE(6)"),
-            7 => write!(f, "TotalBodyExerciseName::SQUAT_THRUSTS(7)"),
-            8 => write!(f, "TotalBodyExerciseName::WEIGHTED_SQUAT_THRUSTS(8)"),
-            9 => write!(f, "TotalBodyExerciseName::SQUAT_PLANK_PUSH_UP(9)"),
-            10 => write!(f, "TotalBodyExerciseName::WEIGHTED_SQUAT_PLANK_PUSH_UP(10)"),
-            11 => write!(f, "TotalBodyExerciseName::STANDING_T_ROTATION_BALANCE(11)"),
-            12 => write!(
-                f,
-                "TotalBodyExerciseName::WEIGHTED_STANDING_T_ROTATION_BALANCE(12)"
-            ),
-            13 => write!(f, "TotalBodyExerciseName::BARBELL_BURPEE(13)"),
-            15 => write!(
-                f,
-                "TotalBodyExerciseName::BURPEE_BOX_JUMP_OVER_YES_LITERALLY_JUMPING_OVER_THE_BOX(15)"
-            ),
-            16 => write!(f, "TotalBodyExerciseName::BURPEE_BOX_JUMP_STEP_UP_OVER(16)"),
-            17 => write!(f, "TotalBodyExerciseName::LATERAL_BARBELL_BURPEE(17)"),
-            18 => write!(f, "TotalBodyExerciseName::TOTAL_BODY_BURPEE_OVER_BAR(18)"),
-            19 => write!(f, "TotalBodyExerciseName::BURPEE_BOX_JUMP_OVER(19)"),
-            20 => write!(f, "TotalBodyExerciseName::BURPEE_WHEELCHAIR(20)"),
             _ => write!(f, "TotalBodyExerciseName({})", self.0),
         }
     }

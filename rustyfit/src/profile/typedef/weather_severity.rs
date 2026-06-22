@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Weather Severity type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WeatherSeverity(pub u8);
 
 impl WeatherSeverity {
@@ -35,19 +35,6 @@ impl fmt::Display for WeatherSeverity {
             2 => write!(f, "watch"),
             3 => write!(f, "advisory"),
             4 => write!(f, "statement"),
-            _ => write!(f, "WeatherSeverity({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WeatherSeverity {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WeatherSeverity::UNKNOWN(0)"),
-            1 => write!(f, "WeatherSeverity::WARNING(1)"),
-            2 => write!(f, "WeatherSeverity::WATCH(2)"),
-            3 => write!(f, "WeatherSeverity::ADVISORY(3)"),
-            4 => write!(f, "WeatherSeverity::STATEMENT(4)"),
             _ => write!(f, "WeatherSeverity({})", self.0),
         }
     }

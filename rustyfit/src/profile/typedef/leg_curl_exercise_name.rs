@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Leg Curl Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LegCurlExerciseName(pub u16);
 
 impl LegCurlExerciseName {
@@ -53,31 +53,6 @@ impl fmt::Display for LegCurlExerciseName {
             11 => write!(f, "zercher_good_morning"),
             12 => write!(f, "band_good_morning"),
             13 => write!(f, "bar_good_morning"),
-            _ => write!(f, "LegCurlExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LegCurlExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "LegCurlExerciseName::LEG_CURL(0)"),
-            1 => write!(f, "LegCurlExerciseName::WEIGHTED_LEG_CURL(1)"),
-            2 => write!(f, "LegCurlExerciseName::GOOD_MORNING(2)"),
-            3 => write!(f, "LegCurlExerciseName::SEATED_BARBELL_GOOD_MORNING(3)"),
-            4 => write!(f, "LegCurlExerciseName::SINGLE_LEG_BARBELL_GOOD_MORNING(4)"),
-            5 => write!(f, "LegCurlExerciseName::SINGLE_LEG_SLIDING_LEG_CURL(5)"),
-            6 => write!(f, "LegCurlExerciseName::SLIDING_LEG_CURL(6)"),
-            7 => write!(f, "LegCurlExerciseName::SPLIT_BARBELL_GOOD_MORNING(7)"),
-            8 => write!(f, "LegCurlExerciseName::SPLIT_STANCE_EXTENSION(8)"),
-            9 => write!(f, "LegCurlExerciseName::STAGGERED_STANCE_GOOD_MORNING(9)"),
-            10 => write!(
-                f,
-                "LegCurlExerciseName::SWISS_BALL_HIP_RAISE_AND_LEG_CURL(10)"
-            ),
-            11 => write!(f, "LegCurlExerciseName::ZERCHER_GOOD_MORNING(11)"),
-            12 => write!(f, "LegCurlExerciseName::BAND_GOOD_MORNING(12)"),
-            13 => write!(f, "LegCurlExerciseName::BAR_GOOD_MORNING(13)"),
             _ => write!(f, "LegCurlExerciseName({})", self.0),
         }
     }

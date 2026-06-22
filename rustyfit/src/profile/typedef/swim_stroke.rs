@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Swim Stroke type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SwimStroke(pub u8);
 
 impl SwimStroke {
@@ -46,23 +46,6 @@ impl fmt::Display for SwimStroke {
             6 => write!(f, "im"),
             7 => write!(f, "im_by_round"),
             8 => write!(f, "rimo"),
-            _ => write!(f, "SwimStroke({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SwimStroke {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SwimStroke::FREESTYLE(0)"),
-            1 => write!(f, "SwimStroke::BACKSTROKE(1)"),
-            2 => write!(f, "SwimStroke::BREASTSTROKE(2)"),
-            3 => write!(f, "SwimStroke::BUTTERFLY(3)"),
-            4 => write!(f, "SwimStroke::DRILL(4)"),
-            5 => write!(f, "SwimStroke::MIXED(5)"),
-            6 => write!(f, "SwimStroke::IM(6)"),
-            7 => write!(f, "SwimStroke::IM_BY_ROUND(7)"),
-            8 => write!(f, "SwimStroke::RIMO(8)"),
             _ => write!(f, "SwimStroke({})", self.0),
         }
     }

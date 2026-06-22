@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Shoulder Stability Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ShoulderStabilityExerciseName(pub u16);
 
 impl ShoulderStabilityExerciseName {
@@ -120,119 +120,6 @@ impl fmt::Display for ShoulderStabilityExerciseName {
             33 => write!(f, "cable_internal_rotation"),
             34 => write!(f, "lying_internal_rotation"),
             35 => write!(f, "seated_dumbbell_internal_rotation"),
-            _ => write!(f, "ShoulderStabilityExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ShoulderStabilityExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(
-                f,
-                "ShoulderStabilityExerciseName::_90_DEGREE_CABLE_EXTERNAL_ROTATION(0)"
-            ),
-            1 => write!(
-                f,
-                "ShoulderStabilityExerciseName::BAND_EXTERNAL_ROTATION(1)"
-            ),
-            2 => write!(
-                f,
-                "ShoulderStabilityExerciseName::BAND_INTERNAL_ROTATION(2)"
-            ),
-            3 => write!(
-                f,
-                "ShoulderStabilityExerciseName::BENT_ARM_LATERAL_RAISE_AND_EXTERNAL_ROTATION(3)"
-            ),
-            4 => write!(
-                f,
-                "ShoulderStabilityExerciseName::CABLE_EXTERNAL_ROTATION(4)"
-            ),
-            5 => write!(
-                f,
-                "ShoulderStabilityExerciseName::DUMBBELL_FACE_PULL_WITH_EXTERNAL_ROTATION(5)"
-            ),
-            6 => write!(f, "ShoulderStabilityExerciseName::FLOOR_I_RAISE(6)"),
-            7 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_FLOOR_I_RAISE(7)"
-            ),
-            8 => write!(f, "ShoulderStabilityExerciseName::FLOOR_T_RAISE(8)"),
-            9 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_FLOOR_T_RAISE(9)"
-            ),
-            10 => write!(f, "ShoulderStabilityExerciseName::FLOOR_Y_RAISE(10)"),
-            11 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_FLOOR_Y_RAISE(11)"
-            ),
-            12 => write!(f, "ShoulderStabilityExerciseName::INCLINE_I_RAISE(12)"),
-            13 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_I_RAISE(13)"
-            ),
-            14 => write!(f, "ShoulderStabilityExerciseName::INCLINE_L_RAISE(14)"),
-            15 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_L_RAISE(15)"
-            ),
-            16 => write!(f, "ShoulderStabilityExerciseName::INCLINE_T_RAISE(16)"),
-            17 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_T_RAISE(17)"
-            ),
-            18 => write!(f, "ShoulderStabilityExerciseName::INCLINE_W_RAISE(18)"),
-            19 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_W_RAISE(19)"
-            ),
-            20 => write!(f, "ShoulderStabilityExerciseName::INCLINE_Y_RAISE(20)"),
-            21 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_INCLINE_Y_RAISE(21)"
-            ),
-            22 => write!(
-                f,
-                "ShoulderStabilityExerciseName::LYING_EXTERNAL_ROTATION(22)"
-            ),
-            23 => write!(
-                f,
-                "ShoulderStabilityExerciseName::SEATED_DUMBBELL_EXTERNAL_ROTATION(23)"
-            ),
-            24 => write!(f, "ShoulderStabilityExerciseName::STANDING_L_RAISE(24)"),
-            25 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_I_RAISE(25)"),
-            26 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_I_RAISE(26)"
-            ),
-            27 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_T_RAISE(27)"),
-            28 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_T_RAISE(28)"
-            ),
-            29 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_W_RAISE(29)"),
-            30 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_W_RAISE(30)"
-            ),
-            31 => write!(f, "ShoulderStabilityExerciseName::SWISS_BALL_Y_RAISE(31)"),
-            32 => write!(
-                f,
-                "ShoulderStabilityExerciseName::WEIGHTED_SWISS_BALL_Y_RAISE(32)"
-            ),
-            33 => write!(
-                f,
-                "ShoulderStabilityExerciseName::CABLE_INTERNAL_ROTATION(33)"
-            ),
-            34 => write!(
-                f,
-                "ShoulderStabilityExerciseName::LYING_INTERNAL_ROTATION(34)"
-            ),
-            35 => write!(
-                f,
-                "ShoulderStabilityExerciseName::SEATED_DUMBBELL_INTERNAL_ROTATION(35)"
-            ),
             _ => write!(f, "ShoulderStabilityExerciseName({})", self.0),
         }
     }

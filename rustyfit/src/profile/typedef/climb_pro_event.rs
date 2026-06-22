@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Climb Pro Event type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ClimbProEvent(pub u8);
 
 impl ClimbProEvent {
@@ -31,17 +31,6 @@ impl fmt::Display for ClimbProEvent {
             0 => write!(f, "approach"),
             1 => write!(f, "start"),
             2 => write!(f, "complete"),
-            _ => write!(f, "ClimbProEvent({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ClimbProEvent {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ClimbProEvent::APPROACH(0)"),
-            1 => write!(f, "ClimbProEvent::START(1)"),
-            2 => write!(f, "ClimbProEvent::COMPLETE(2)"),
             _ => write!(f, "ClimbProEvent({})", self.0),
         }
     }

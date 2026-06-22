@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Stair Stepper Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct StairStepperExerciseName(pub u16);
 
 impl StairStepperExerciseName {
@@ -27,15 +27,6 @@ impl fmt::Display for StairStepperExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "stair_stepper"),
-            _ => write!(f, "StairStepperExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for StairStepperExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "StairStepperExerciseName::STAIR_STEPPER(0)"),
             _ => write!(f, "StairStepperExerciseName({})", self.0),
         }
     }

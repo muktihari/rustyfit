@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Watchface Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WatchfaceMode(pub u8);
 
 impl WatchfaceMode {
@@ -33,18 +33,6 @@ impl fmt::Display for WatchfaceMode {
             1 => write!(f, "analog"),
             2 => write!(f, "connect_iq"),
             3 => write!(f, "disabled"),
-            _ => write!(f, "WatchfaceMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WatchfaceMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WatchfaceMode::DIGITAL(0)"),
-            1 => write!(f, "WatchfaceMode::ANALOG(1)"),
-            2 => write!(f, "WatchfaceMode::CONNECT_IQ(2)"),
-            3 => write!(f, "WatchfaceMode::DISABLED(3)"),
             _ => write!(f, "WatchfaceMode({})", self.0),
         }
     }

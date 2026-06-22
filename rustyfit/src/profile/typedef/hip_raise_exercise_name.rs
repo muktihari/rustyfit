@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hip Raise Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HipRaiseExerciseName(pub u16);
 
 impl HipRaiseExerciseName {
@@ -148,139 +148,6 @@ impl fmt::Display for HipRaiseExerciseName {
             47 => write!(f, "leg_circles"),
             48 => write!(f, "leg_lift"),
             49 => write!(f, "leg_lift_in_external_rotation"),
-            _ => write!(f, "HipRaiseExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HipRaiseExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "HipRaiseExerciseName::BARBELL_HIP_THRUST_ON_FLOOR(0)"),
-            1 => write!(f, "HipRaiseExerciseName::BARBELL_HIP_THRUST_WITH_BENCH(1)"),
-            2 => write!(
-                f,
-                "HipRaiseExerciseName::BENT_KNEE_SWISS_BALL_REVERSE_HIP_RAISE(2)"
-            ),
-            3 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_BENT_KNEE_SWISS_BALL_REVERSE_HIP_RAISE(3)"
-            ),
-            4 => write!(f, "HipRaiseExerciseName::BRIDGE_WITH_LEG_EXTENSION(4)"),
-            5 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_BRIDGE_WITH_LEG_EXTENSION(5)"
-            ),
-            6 => write!(f, "HipRaiseExerciseName::CLAM_BRIDGE(6)"),
-            7 => write!(f, "HipRaiseExerciseName::FRONT_KICK_TABLETOP(7)"),
-            8 => write!(f, "HipRaiseExerciseName::WEIGHTED_FRONT_KICK_TABLETOP(8)"),
-            9 => write!(f, "HipRaiseExerciseName::HIP_EXTENSION_AND_CROSS(9)"),
-            10 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_HIP_EXTENSION_AND_CROSS(10)"
-            ),
-            11 => write!(f, "HipRaiseExerciseName::HIP_RAISE(11)"),
-            12 => write!(f, "HipRaiseExerciseName::WEIGHTED_HIP_RAISE(12)"),
-            13 => write!(
-                f,
-                "HipRaiseExerciseName::HIP_RAISE_WITH_FEET_ON_SWISS_BALL(13)"
-            ),
-            14 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_FEET_ON_SWISS_BALL(14)"
-            ),
-            15 => write!(
-                f,
-                "HipRaiseExerciseName::HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(15)"
-            ),
-            16 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(16)"
-            ),
-            17 => write!(
-                f,
-                "HipRaiseExerciseName::HIP_RAISE_WITH_HEAD_ON_SWISS_BALL(17)"
-            ),
-            18 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_HEAD_ON_SWISS_BALL(18)"
-            ),
-            19 => write!(f, "HipRaiseExerciseName::HIP_RAISE_WITH_KNEE_SQUEEZE(19)"),
-            20 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_HIP_RAISE_WITH_KNEE_SQUEEZE(20)"
-            ),
-            21 => write!(f, "HipRaiseExerciseName::INCLINE_REAR_LEG_EXTENSION(21)"),
-            22 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_INCLINE_REAR_LEG_EXTENSION(22)"
-            ),
-            23 => write!(f, "HipRaiseExerciseName::KETTLEBELL_SWING(23)"),
-            24 => write!(f, "HipRaiseExerciseName::MARCHING_HIP_RAISE(24)"),
-            25 => write!(f, "HipRaiseExerciseName::WEIGHTED_MARCHING_HIP_RAISE(25)"),
-            26 => write!(
-                f,
-                "HipRaiseExerciseName::MARCHING_HIP_RAISE_WITH_FEET_ON_A_SWISS_BALL(26)"
-            ),
-            27 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_MARCHING_HIP_RAISE_WITH_FEET_ON_A_SWISS_BALL(27)"
-            ),
-            28 => write!(f, "HipRaiseExerciseName::REVERSE_HIP_RAISE(28)"),
-            29 => write!(f, "HipRaiseExerciseName::WEIGHTED_REVERSE_HIP_RAISE(29)"),
-            30 => write!(f, "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE(30)"),
-            31 => write!(f, "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE(31)"),
-            32 => write!(
-                f,
-                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BENCH(32)"
-            ),
-            33 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BENCH(33)"
-            ),
-            34 => write!(
-                f,
-                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BOSU_BALL(34)"
-            ),
-            35 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_BOSU_BALL(35)"
-            ),
-            36 => write!(
-                f,
-                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_FOAM_ROLLER(36)"
-            ),
-            37 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_FOAM_ROLLER(37)"
-            ),
-            38 => write!(
-                f,
-                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_MEDICINE_BALL(38)"
-            ),
-            39 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_FOOT_ON_MEDICINE_BALL(39)"
-            ),
-            40 => write!(
-                f,
-                "HipRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(40)"
-            ),
-            41 => write!(
-                f,
-                "HipRaiseExerciseName::WEIGHTED_SINGLE_LEG_HIP_RAISE_WITH_HEAD_ON_BOSU_BALL(41)"
-            ),
-            42 => write!(f, "HipRaiseExerciseName::WEIGHTED_CLAM_BRIDGE(42)"),
-            43 => write!(
-                f,
-                "HipRaiseExerciseName::SINGLE_LEG_SWISS_BALL_HIP_RAISE_AND_LEG_CURL(43)"
-            ),
-            44 => write!(f, "HipRaiseExerciseName::CLAMS(44)"),
-            45 => write!(f, "HipRaiseExerciseName::INNER_THIGH_CIRCLES(45)"),
-            46 => write!(f, "HipRaiseExerciseName::INNER_THIGH_SIDE_LIFT(46)"),
-            47 => write!(f, "HipRaiseExerciseName::LEG_CIRCLES(47)"),
-            48 => write!(f, "HipRaiseExerciseName::LEG_LIFT(48)"),
-            49 => write!(f, "HipRaiseExerciseName::LEG_LIFT_IN_EXTERNAL_ROTATION(49)"),
             _ => write!(f, "HipRaiseExerciseName({})", self.0),
         }
     }

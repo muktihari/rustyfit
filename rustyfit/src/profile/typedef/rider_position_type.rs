@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Rider Position Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RiderPositionType(pub u8);
 
 impl RiderPositionType {
@@ -33,18 +33,6 @@ impl fmt::Display for RiderPositionType {
             1 => write!(f, "standing"),
             2 => write!(f, "transition_to_seated"),
             3 => write!(f, "transition_to_standing"),
-            _ => write!(f, "RiderPositionType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for RiderPositionType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "RiderPositionType::SEATED(0)"),
-            1 => write!(f, "RiderPositionType::STANDING(1)"),
-            2 => write!(f, "RiderPositionType::TRANSITION_TO_SEATED(2)"),
-            3 => write!(f, "RiderPositionType::TRANSITION_TO_STANDING(3)"),
             _ => write!(f, "RiderPositionType({})", self.0),
         }
     }

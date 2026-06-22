@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hip Stability Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HipStabilityExerciseName(pub u16);
 
 impl HipStabilityExerciseName {
@@ -104,97 +104,6 @@ impl fmt::Display for HipStabilityExerciseName {
             32 => write!(f, "supine_hip_internal_rotation"),
             33 => write!(f, "weighted_supine_hip_internal_rotation"),
             34 => write!(f, "lying_abduction_stretch"),
-            _ => write!(f, "HipStabilityExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HipStabilityExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "HipStabilityExerciseName::BAND_SIDE_LYING_LEG_RAISE(0)"),
-            1 => write!(f, "HipStabilityExerciseName::DEAD_BUG(1)"),
-            2 => write!(f, "HipStabilityExerciseName::WEIGHTED_DEAD_BUG(2)"),
-            3 => write!(f, "HipStabilityExerciseName::EXTERNAL_HIP_RAISE(3)"),
-            4 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_EXTERNAL_HIP_RAISE(4)"
-            ),
-            5 => write!(f, "HipStabilityExerciseName::FIRE_HYDRANT_KICKS(5)"),
-            6 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_FIRE_HYDRANT_KICKS(6)"
-            ),
-            7 => write!(f, "HipStabilityExerciseName::HIP_CIRCLES(7)"),
-            8 => write!(f, "HipStabilityExerciseName::WEIGHTED_HIP_CIRCLES(8)"),
-            9 => write!(f, "HipStabilityExerciseName::INNER_THIGH_LIFT(9)"),
-            10 => write!(f, "HipStabilityExerciseName::WEIGHTED_INNER_THIGH_LIFT(10)"),
-            11 => write!(
-                f,
-                "HipStabilityExerciseName::LATERAL_WALKS_WITH_BAND_AT_ANKLES(11)"
-            ),
-            12 => write!(f, "HipStabilityExerciseName::PRETZEL_SIDE_KICK(12)"),
-            13 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_PRETZEL_SIDE_KICK(13)"
-            ),
-            14 => write!(
-                f,
-                "HipStabilityExerciseName::PRONE_HIP_INTERNAL_ROTATION(14)"
-            ),
-            15 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_PRONE_HIP_INTERNAL_ROTATION(15)"
-            ),
-            16 => write!(f, "HipStabilityExerciseName::QUADRUPED(16)"),
-            17 => write!(f, "HipStabilityExerciseName::QUADRUPED_HIP_EXTENSION(17)"),
-            18 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_QUADRUPED_HIP_EXTENSION(18)"
-            ),
-            19 => write!(f, "HipStabilityExerciseName::QUADRUPED_WITH_LEG_LIFT(19)"),
-            20 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_QUADRUPED_WITH_LEG_LIFT(20)"
-            ),
-            21 => write!(f, "HipStabilityExerciseName::SIDE_LYING_LEG_RAISE(21)"),
-            22 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_SIDE_LYING_LEG_RAISE(22)"
-            ),
-            23 => write!(f, "HipStabilityExerciseName::SLIDING_HIP_ADDUCTION(23)"),
-            24 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_SLIDING_HIP_ADDUCTION(24)"
-            ),
-            25 => write!(f, "HipStabilityExerciseName::STANDING_ADDUCTION(25)"),
-            26 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_STANDING_ADDUCTION(26)"
-            ),
-            27 => write!(
-                f,
-                "HipStabilityExerciseName::STANDING_CABLE_HIP_ABDUCTION(27)"
-            ),
-            28 => write!(f, "HipStabilityExerciseName::STANDING_HIP_ABDUCTION(28)"),
-            29 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_STANDING_HIP_ABDUCTION(29)"
-            ),
-            30 => write!(f, "HipStabilityExerciseName::STANDING_REAR_LEG_RAISE(30)"),
-            31 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_STANDING_REAR_LEG_RAISE(31)"
-            ),
-            32 => write!(
-                f,
-                "HipStabilityExerciseName::SUPINE_HIP_INTERNAL_ROTATION(32)"
-            ),
-            33 => write!(
-                f,
-                "HipStabilityExerciseName::WEIGHTED_SUPINE_HIP_INTERNAL_ROTATION(33)"
-            ),
-            34 => write!(f, "HipStabilityExerciseName::LYING_ABDUCTION_STRETCH(34)"),
             _ => write!(f, "HipStabilityExerciseName({})", self.0),
         }
     }

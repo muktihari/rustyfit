@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hr Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HrType(pub u8);
 
 impl HrType {
@@ -29,16 +29,6 @@ impl fmt::Display for HrType {
         match self.0 {
             0 => write!(f, "normal"),
             1 => write!(f, "irregular"),
-            _ => write!(f, "HrType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HrType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "HrType::NORMAL(0)"),
-            1 => write!(f, "HrType::IRREGULAR(1)"),
             _ => write!(f, "HrType({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Day Of Week type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DayOfWeek(pub u8);
 
 impl DayOfWeek {
@@ -39,21 +39,6 @@ impl fmt::Display for DayOfWeek {
             4 => write!(f, "thursday"),
             5 => write!(f, "friday"),
             6 => write!(f, "saturday"),
-            _ => write!(f, "DayOfWeek({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DayOfWeek {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DayOfWeek::SUNDAY(0)"),
-            1 => write!(f, "DayOfWeek::MONDAY(1)"),
-            2 => write!(f, "DayOfWeek::TUESDAY(2)"),
-            3 => write!(f, "DayOfWeek::WEDNESDAY(3)"),
-            4 => write!(f, "DayOfWeek::THURSDAY(4)"),
-            5 => write!(f, "DayOfWeek::FRIDAY(5)"),
-            6 => write!(f, "DayOfWeek::SATURDAY(6)"),
             _ => write!(f, "DayOfWeek({})", self.0),
         }
     }

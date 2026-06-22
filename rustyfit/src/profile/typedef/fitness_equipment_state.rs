@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Fitness Equipment State type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct FitnessEquipmentState(pub u8);
 
 impl FitnessEquipmentState {
@@ -34,18 +34,6 @@ impl fmt::Display for FitnessEquipmentState {
             1 => write!(f, "in_use"),
             2 => write!(f, "paused"),
             3 => write!(f, "unknown"),
-            _ => write!(f, "FitnessEquipmentState({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for FitnessEquipmentState {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "FitnessEquipmentState::READY(0)"),
-            1 => write!(f, "FitnessEquipmentState::IN_USE(1)"),
-            2 => write!(f, "FitnessEquipmentState::PAUSED(2)"),
-            3 => write!(f, "FitnessEquipmentState::UNKNOWN(3)"),
             _ => write!(f, "FitnessEquipmentState({})", self.0),
         }
     }

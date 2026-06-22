@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sport Event type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SportEvent(pub u8);
 
 impl SportEvent {
@@ -43,23 +43,6 @@ impl fmt::Display for SportEvent {
             6 => write!(f, "training"),
             7 => write!(f, "transportation"),
             8 => write!(f, "touring"),
-            _ => write!(f, "SportEvent({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SportEvent {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SportEvent::UNCATEGORIZED(0)"),
-            1 => write!(f, "SportEvent::GEOCACHING(1)"),
-            2 => write!(f, "SportEvent::FITNESS(2)"),
-            3 => write!(f, "SportEvent::RECREATION(3)"),
-            4 => write!(f, "SportEvent::RACE(4)"),
-            5 => write!(f, "SportEvent::SPECIAL_EVENT(5)"),
-            6 => write!(f, "SportEvent::TRAINING(6)"),
-            7 => write!(f, "SportEvent::TRANSPORTATION(7)"),
-            8 => write!(f, "SportEvent::TOURING(8)"),
             _ => write!(f, "SportEvent({})", self.0),
         }
     }

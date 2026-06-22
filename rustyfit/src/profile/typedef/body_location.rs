@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Body Location type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BodyLocation(pub u8);
 
 impl BodyLocation {
@@ -109,54 +109,6 @@ impl fmt::Display for BodyLocation {
             37 => write!(f, "waist_front"),
             38 => write!(f, "waist_left"),
             39 => write!(f, "waist_right"),
-            _ => write!(f, "BodyLocation({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BodyLocation {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BodyLocation::LEFT_LEG(0)"),
-            1 => write!(f, "BodyLocation::LEFT_CALF(1)"),
-            2 => write!(f, "BodyLocation::LEFT_SHIN(2)"),
-            3 => write!(f, "BodyLocation::LEFT_HAMSTRING(3)"),
-            4 => write!(f, "BodyLocation::LEFT_QUAD(4)"),
-            5 => write!(f, "BodyLocation::LEFT_GLUTE(5)"),
-            6 => write!(f, "BodyLocation::RIGHT_LEG(6)"),
-            7 => write!(f, "BodyLocation::RIGHT_CALF(7)"),
-            8 => write!(f, "BodyLocation::RIGHT_SHIN(8)"),
-            9 => write!(f, "BodyLocation::RIGHT_HAMSTRING(9)"),
-            10 => write!(f, "BodyLocation::RIGHT_QUAD(10)"),
-            11 => write!(f, "BodyLocation::RIGHT_GLUTE(11)"),
-            12 => write!(f, "BodyLocation::TORSO_BACK(12)"),
-            13 => write!(f, "BodyLocation::LEFT_LOWER_BACK(13)"),
-            14 => write!(f, "BodyLocation::LEFT_UPPER_BACK(14)"),
-            15 => write!(f, "BodyLocation::RIGHT_LOWER_BACK(15)"),
-            16 => write!(f, "BodyLocation::RIGHT_UPPER_BACK(16)"),
-            17 => write!(f, "BodyLocation::TORSO_FRONT(17)"),
-            18 => write!(f, "BodyLocation::LEFT_ABDOMEN(18)"),
-            19 => write!(f, "BodyLocation::LEFT_CHEST(19)"),
-            20 => write!(f, "BodyLocation::RIGHT_ABDOMEN(20)"),
-            21 => write!(f, "BodyLocation::RIGHT_CHEST(21)"),
-            22 => write!(f, "BodyLocation::LEFT_ARM(22)"),
-            23 => write!(f, "BodyLocation::LEFT_SHOULDER(23)"),
-            24 => write!(f, "BodyLocation::LEFT_BICEP(24)"),
-            25 => write!(f, "BodyLocation::LEFT_TRICEP(25)"),
-            26 => write!(f, "BodyLocation::LEFT_BRACHIORADIALIS(26)"),
-            27 => write!(f, "BodyLocation::LEFT_FOREARM_EXTENSORS(27)"),
-            28 => write!(f, "BodyLocation::RIGHT_ARM(28)"),
-            29 => write!(f, "BodyLocation::RIGHT_SHOULDER(29)"),
-            30 => write!(f, "BodyLocation::RIGHT_BICEP(30)"),
-            31 => write!(f, "BodyLocation::RIGHT_TRICEP(31)"),
-            32 => write!(f, "BodyLocation::RIGHT_BRACHIORADIALIS(32)"),
-            33 => write!(f, "BodyLocation::RIGHT_FOREARM_EXTENSORS(33)"),
-            34 => write!(f, "BodyLocation::NECK(34)"),
-            35 => write!(f, "BodyLocation::THROAT(35)"),
-            36 => write!(f, "BodyLocation::WAIST_MID_BACK(36)"),
-            37 => write!(f, "BodyLocation::WAIST_FRONT(37)"),
-            38 => write!(f, "BodyLocation::WAIST_LEFT(38)"),
-            39 => write!(f, "BodyLocation::WAIST_RIGHT(39)"),
             _ => write!(f, "BodyLocation({})", self.0),
         }
     }

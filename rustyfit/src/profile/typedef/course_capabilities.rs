@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Course Capabilities type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CourseCapabilities(pub u32);
 
 impl CourseCapabilities {
@@ -50,26 +50,6 @@ impl fmt::Display for CourseCapabilities {
             0x00000200 => write!(f, "navigation"),
             0x00000400 => write!(f, "bikeway"),
             0x00001000 => write!(f, "aviation"),
-            _ => write!(f, "CourseCapabilities({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CourseCapabilities {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x00000001 => write!(f, "CourseCapabilities::PROCESSED(0x00000001)"),
-            0x00000002 => write!(f, "CourseCapabilities::VALID(0x00000002)"),
-            0x00000004 => write!(f, "CourseCapabilities::TIME(0x00000004)"),
-            0x00000008 => write!(f, "CourseCapabilities::DISTANCE(0x00000008)"),
-            0x00000010 => write!(f, "CourseCapabilities::POSITION(0x00000010)"),
-            0x00000020 => write!(f, "CourseCapabilities::HEART_RATE(0x00000020)"),
-            0x00000040 => write!(f, "CourseCapabilities::POWER(0x00000040)"),
-            0x00000080 => write!(f, "CourseCapabilities::CADENCE(0x00000080)"),
-            0x00000100 => write!(f, "CourseCapabilities::TRAINING(0x00000100)"),
-            0x00000200 => write!(f, "CourseCapabilities::NAVIGATION(0x00000200)"),
-            0x00000400 => write!(f, "CourseCapabilities::BIKEWAY(0x00000400)"),
-            0x00001000 => write!(f, "CourseCapabilities::AVIATION(0x00001000)"),
             _ => write!(f, "CourseCapabilities({})", self.0),
         }
     }

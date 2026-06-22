@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sandbag Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SandbagExerciseName(pub u16);
 
 impl SandbagExerciseName {
@@ -65,34 +65,6 @@ impl fmt::Display for SandbagExerciseName {
             17 => write!(f, "side_lunge"),
             18 => write!(f, "sprint"),
             19 => write!(f, "zercher_squat"),
-            _ => write!(f, "SandbagExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SandbagExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SandbagExerciseName::AROUND_THE_WORLD(0)"),
-            1 => write!(f, "SandbagExerciseName::BACK_SQUAT(1)"),
-            2 => write!(f, "SandbagExerciseName::BEAR_CRAWL_PULL_THROUGH(2)"),
-            3 => write!(f, "SandbagExerciseName::BEAR_HUG_SQUAT(3)"),
-            4 => write!(f, "SandbagExerciseName::CLEAN(4)"),
-            5 => write!(f, "SandbagExerciseName::CLEAN_AND_PRESS(5)"),
-            6 => write!(f, "SandbagExerciseName::CURL(6)"),
-            7 => write!(f, "SandbagExerciseName::FRONT_CARRY(7)"),
-            8 => write!(f, "SandbagExerciseName::FRONT_SQUAT(8)"),
-            9 => write!(f, "SandbagExerciseName::LUNGE(9)"),
-            10 => write!(f, "SandbagExerciseName::OVERHEAD_PRESS(10)"),
-            11 => write!(f, "SandbagExerciseName::PLANK_PULL_THROUGH(11)"),
-            12 => write!(f, "SandbagExerciseName::ROTATIONAL_LUNGE(12)"),
-            13 => write!(f, "SandbagExerciseName::ROW(13)"),
-            14 => write!(f, "SandbagExerciseName::RUSSIAN_TWIST(14)"),
-            15 => write!(f, "SandbagExerciseName::SHOULDERING(15)"),
-            16 => write!(f, "SandbagExerciseName::SHOVELING(16)"),
-            17 => write!(f, "SandbagExerciseName::SIDE_LUNGE(17)"),
-            18 => write!(f, "SandbagExerciseName::SPRINT(18)"),
-            19 => write!(f, "SandbagExerciseName::ZERCHER_SQUAT(19)"),
             _ => write!(f, "SandbagExerciseName({})", self.0),
         }
     }

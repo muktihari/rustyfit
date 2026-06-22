@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Digital Watchface Layout type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DigitalWatchfaceLayout(pub u8);
 
 impl DigitalWatchfaceLayout {
@@ -31,17 +31,6 @@ impl fmt::Display for DigitalWatchfaceLayout {
             0 => write!(f, "traditional"),
             1 => write!(f, "modern"),
             2 => write!(f, "bold"),
-            _ => write!(f, "DigitalWatchfaceLayout({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DigitalWatchfaceLayout {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DigitalWatchfaceLayout::TRADITIONAL(0)"),
-            1 => write!(f, "DigitalWatchfaceLayout::MODERN(1)"),
-            2 => write!(f, "DigitalWatchfaceLayout::BOLD(2)"),
             _ => write!(f, "DigitalWatchfaceLayout({})", self.0),
         }
     }

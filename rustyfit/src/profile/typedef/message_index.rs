@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Message Index type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MessageIndex(pub u16);
 
 impl MessageIndex {
@@ -34,17 +34,6 @@ impl fmt::Display for MessageIndex {
             0x8000 => write!(f, "selected"),
             0x7000 => write!(f, "reserved"),
             0x0FFF => write!(f, "mask"),
-            _ => write!(f, "MessageIndex({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for MessageIndex {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x8000 => write!(f, "MessageIndex::SELECTED(0x8000)"),
-            0x7000 => write!(f, "MessageIndex::RESERVED(0x7000)"),
-            0x0FFF => write!(f, "MessageIndex::MASK(0x0FFF)"),
             _ => write!(f, "MessageIndex({})", self.0),
         }
     }

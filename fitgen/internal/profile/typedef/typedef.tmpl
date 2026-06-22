@@ -15,7 +15,7 @@ use core::fmt;
 
 /// {{ .Doc }}
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct {{ .TypeName }}(pub {{ .Base }});
 
 impl {{ .TypeName }} {
@@ -81,17 +81,6 @@ impl fmt::Display for {{ .TypeName }} {
         match self.0 {
             {{ range .Constants -}}
             {{ .Decorator }} {{ .Value }} => write!(f, "{{ .String }}"),
-            {{ end -}}
-            _ => write!(f, "{{ .TypeName }}({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for {{ .TypeName }} {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            {{ range .Constants -}}
-            {{ .Decorator }} {{ .Value }} => write!(f, "{{ $.TypeName }}::{{ .Name }}({{ .Value }})"),
             {{ end -}}
             _ => write!(f, "{{ .TypeName }}({})", self.0),
         }

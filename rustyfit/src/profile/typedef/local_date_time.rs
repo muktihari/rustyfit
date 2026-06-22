@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Local Date Time type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LocalDateTime(pub u32);
 
 impl LocalDateTime {
@@ -53,15 +53,6 @@ impl fmt::Display for LocalDateTime {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0x10000000 => write!(f, "min"),
-            _ => write!(f, "LocalDateTime({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LocalDateTime {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x10000000 => write!(f, "LocalDateTime::MIN(0x10000000)"),
             _ => write!(f, "LocalDateTime({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Left Right Balance type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LeftRightBalance(pub u8);
 
 impl LeftRightBalance {
@@ -31,16 +31,6 @@ impl fmt::Display for LeftRightBalance {
         match self.0 {
             0x7F => write!(f, "mask"),
             0x80 => write!(f, "right"),
-            _ => write!(f, "LeftRightBalance({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LeftRightBalance {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x7F => write!(f, "LeftRightBalance::MASK(0x7F)"),
-            0x80 => write!(f, "LeftRightBalance::RIGHT(0x80)"),
             _ => write!(f, "LeftRightBalance({})", self.0),
         }
     }

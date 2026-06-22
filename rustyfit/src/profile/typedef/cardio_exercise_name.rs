@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Cardio Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CardioExerciseName(pub u16);
 
 impl CardioExerciseName {
@@ -111,66 +111,6 @@ impl fmt::Display for CardioExerciseName {
             40 => write!(f, "pole_dd_ff_uu_wheelchair"),
             41 => write!(f, "butterfly_arms_wheelchair"),
             42 => write!(f, "punch"),
-            _ => write!(f, "CardioExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CardioExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CardioExerciseName::BOB_AND_WEAVE_CIRCLE(0)"),
-            1 => write!(f, "CardioExerciseName::WEIGHTED_BOB_AND_WEAVE_CIRCLE(1)"),
-            2 => write!(f, "CardioExerciseName::CARDIO_CORE_CRAWL(2)"),
-            3 => write!(f, "CardioExerciseName::WEIGHTED_CARDIO_CORE_CRAWL(3)"),
-            4 => write!(f, "CardioExerciseName::DOUBLE_UNDER(4)"),
-            5 => write!(f, "CardioExerciseName::WEIGHTED_DOUBLE_UNDER(5)"),
-            6 => write!(f, "CardioExerciseName::JUMP_ROPE(6)"),
-            7 => write!(f, "CardioExerciseName::WEIGHTED_JUMP_ROPE(7)"),
-            8 => write!(f, "CardioExerciseName::JUMP_ROPE_CROSSOVER(8)"),
-            9 => write!(f, "CardioExerciseName::WEIGHTED_JUMP_ROPE_CROSSOVER(9)"),
-            10 => write!(f, "CardioExerciseName::JUMP_ROPE_JOG(10)"),
-            11 => write!(f, "CardioExerciseName::WEIGHTED_JUMP_ROPE_JOG(11)"),
-            12 => write!(f, "CardioExerciseName::JUMPING_JACKS(12)"),
-            13 => write!(f, "CardioExerciseName::WEIGHTED_JUMPING_JACKS(13)"),
-            14 => write!(f, "CardioExerciseName::SKI_MOGULS(14)"),
-            15 => write!(f, "CardioExerciseName::WEIGHTED_SKI_MOGULS(15)"),
-            16 => write!(f, "CardioExerciseName::SPLIT_JACKS(16)"),
-            17 => write!(f, "CardioExerciseName::WEIGHTED_SPLIT_JACKS(17)"),
-            18 => write!(f, "CardioExerciseName::SQUAT_JACKS(18)"),
-            19 => write!(f, "CardioExerciseName::WEIGHTED_SQUAT_JACKS(19)"),
-            20 => write!(f, "CardioExerciseName::TRIPLE_UNDER(20)"),
-            21 => write!(f, "CardioExerciseName::WEIGHTED_TRIPLE_UNDER(21)"),
-            22 => write!(f, "CardioExerciseName::ELLIPTICAL(22)"),
-            23 => write!(f, "CardioExerciseName::SPINNING(23)"),
-            24 => write!(f, "CardioExerciseName::POLE_PADDLE_FORWARD_WHEELCHAIR(24)"),
-            25 => write!(f, "CardioExerciseName::POLE_PADDLE_BACKWARD_WHEELCHAIR(25)"),
-            26 => write!(
-                f,
-                "CardioExerciseName::POLE_HANDCYCLE_FORWARD_WHEELCHAIR(26)"
-            ),
-            27 => write!(
-                f,
-                "CardioExerciseName::POLE_HANDCYCLE_BACKWARD_WHEELCHAIR(27)"
-            ),
-            28 => write!(f, "CardioExerciseName::POLE_RAINBOW_WHEELCHAIR(28)"),
-            29 => write!(f, "CardioExerciseName::DOUBLE_PUNCH_FORWARD_WHEELCHAIR(29)"),
-            30 => write!(f, "CardioExerciseName::DOUBLE_PUNCH_DOWN_WHEELCHAIR(30)"),
-            31 => write!(
-                f,
-                "CardioExerciseName::DOUBLE_PUNCH_SIDEWAYS_WHEELCHAIR(31)"
-            ),
-            32 => write!(f, "CardioExerciseName::DOUBLE_PUNCH_UP_WHEELCHAIR(32)"),
-            33 => write!(f, "CardioExerciseName::SIT_SKI_WHEELCHAIR(33)"),
-            34 => write!(f, "CardioExerciseName::SITTING_JACKS_WHEELCHAIR(34)"),
-            35 => write!(f, "CardioExerciseName::PUNCH_FORWARD_WHEELCHAIR(35)"),
-            36 => write!(f, "CardioExerciseName::PUNCH_DOWN_WHEELCHAIR(36)"),
-            37 => write!(f, "CardioExerciseName::PUNCH_SIDEWAYS_WHEELCHAIR(37)"),
-            38 => write!(f, "CardioExerciseName::PUNCH_UP_WHEELCHAIR(38)"),
-            39 => write!(f, "CardioExerciseName::PUNCH_BAG_WHEELCHAIR(39)"),
-            40 => write!(f, "CardioExerciseName::POLE_DD_FF_UU_WHEELCHAIR(40)"),
-            41 => write!(f, "CardioExerciseName::BUTTERFLY_ARMS_WHEELCHAIR(41)"),
-            42 => write!(f, "CardioExerciseName::PUNCH(42)"),
             _ => write!(f, "CardioExerciseName({})", self.0),
         }
     }

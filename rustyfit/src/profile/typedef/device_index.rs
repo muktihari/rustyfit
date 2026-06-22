@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Device Index type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DeviceIndex(pub u8);
 
 impl DeviceIndex {
@@ -28,15 +28,6 @@ impl fmt::Display for DeviceIndex {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "creator"),
-            _ => write!(f, "DeviceIndex({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DeviceIndex {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DeviceIndex::CREATOR(0)"),
             _ => write!(f, "DeviceIndex({})", self.0),
         }
     }

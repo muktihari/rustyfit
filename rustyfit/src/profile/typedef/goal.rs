@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Goal type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Goal(pub u8);
 
 impl Goal {
@@ -39,21 +39,6 @@ impl fmt::Display for Goal {
             4 => write!(f, "steps"),
             5 => write!(f, "ascent"),
             6 => write!(f, "active_minutes"),
-            _ => write!(f, "Goal({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Goal {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Goal::TIME(0)"),
-            1 => write!(f, "Goal::DISTANCE(1)"),
-            2 => write!(f, "Goal::CALORIES(2)"),
-            3 => write!(f, "Goal::FREQUENCY(3)"),
-            4 => write!(f, "Goal::STEPS(4)"),
-            5 => write!(f, "Goal::ASCENT(5)"),
-            6 => write!(f, "Goal::ACTIVE_MINUTES(6)"),
             _ => write!(f, "Goal({})", self.0),
         }
     }

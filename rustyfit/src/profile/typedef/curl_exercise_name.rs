@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Curl Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CurlExerciseName(pub u16);
 
 impl CurlExerciseName {
@@ -129,95 +129,6 @@ impl fmt::Display for CurlExerciseName {
             48 => write!(f, "dumbbell_biceps_curl_wheelchair"),
             49 => write!(f, "bottle_curl"),
             50 => write!(f, "seated_bottle_curl"),
-            _ => write!(f, "CurlExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CurlExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CurlExerciseName::ALTERNATING_DUMBBELL_BICEPS_CURL(0)"),
-            1 => write!(
-                f,
-                "CurlExerciseName::ALTERNATING_DUMBBELL_BICEPS_CURL_ON_SWISS_BALL(1)"
-            ),
-            2 => write!(
-                f,
-                "CurlExerciseName::ALTERNATING_INCLINE_DUMBBELL_BICEPS_CURL(2)"
-            ),
-            3 => write!(f, "CurlExerciseName::BARBELL_BICEPS_CURL(3)"),
-            4 => write!(f, "CurlExerciseName::BARBELL_REVERSE_WRIST_CURL(4)"),
-            5 => write!(f, "CurlExerciseName::BARBELL_WRIST_CURL(5)"),
-            6 => write!(
-                f,
-                "CurlExerciseName::BEHIND_THE_BACK_BARBELL_REVERSE_WRIST_CURL(6)"
-            ),
-            7 => write!(f, "CurlExerciseName::BEHIND_THE_BACK_ONE_ARM_CABLE_CURL(7)"),
-            8 => write!(f, "CurlExerciseName::CABLE_BICEPS_CURL(8)"),
-            9 => write!(f, "CurlExerciseName::CABLE_HAMMER_CURL(9)"),
-            10 => write!(f, "CurlExerciseName::CHEATING_BARBELL_BICEPS_CURL(10)"),
-            11 => write!(f, "CurlExerciseName::CLOSE_GRIP_EZ_BAR_BICEPS_CURL(11)"),
-            12 => write!(f, "CurlExerciseName::CROSS_BODY_DUMBBELL_HAMMER_CURL(12)"),
-            13 => write!(f, "CurlExerciseName::DEAD_HANG_BICEPS_CURL(13)"),
-            14 => write!(f, "CurlExerciseName::DECLINE_HAMMER_CURL(14)"),
-            15 => write!(
-                f,
-                "CurlExerciseName::DUMBBELL_BICEPS_CURL_WITH_STATIC_HOLD(15)"
-            ),
-            16 => write!(f, "CurlExerciseName::DUMBBELL_HAMMER_CURL(16)"),
-            17 => write!(f, "CurlExerciseName::DUMBBELL_REVERSE_WRIST_CURL(17)"),
-            18 => write!(f, "CurlExerciseName::DUMBBELL_WRIST_CURL(18)"),
-            19 => write!(f, "CurlExerciseName::EZ_BAR_PREACHER_CURL(19)"),
-            20 => write!(f, "CurlExerciseName::FORWARD_BEND_BICEPS_CURL(20)"),
-            21 => write!(f, "CurlExerciseName::HAMMER_CURL_TO_PRESS(21)"),
-            22 => write!(f, "CurlExerciseName::INCLINE_DUMBBELL_BICEPS_CURL(22)"),
-            23 => write!(
-                f,
-                "CurlExerciseName::INCLINE_OFFSET_THUMB_DUMBBELL_CURL(23)"
-            ),
-            24 => write!(f, "CurlExerciseName::KETTLEBELL_BICEPS_CURL(24)"),
-            25 => write!(f, "CurlExerciseName::LYING_CONCENTRATION_CABLE_CURL(25)"),
-            26 => write!(f, "CurlExerciseName::ONE_ARM_PREACHER_CURL(26)"),
-            27 => write!(f, "CurlExerciseName::PLATE_PINCH_CURL(27)"),
-            28 => write!(f, "CurlExerciseName::PREACHER_CURL_WITH_CABLE(28)"),
-            29 => write!(f, "CurlExerciseName::REVERSE_EZ_BAR_CURL(29)"),
-            30 => write!(f, "CurlExerciseName::REVERSE_GRIP_WRIST_CURL(30)"),
-            31 => write!(f, "CurlExerciseName::REVERSE_GRIP_BARBELL_BICEPS_CURL(31)"),
-            32 => write!(
-                f,
-                "CurlExerciseName::SEATED_ALTERNATING_DUMBBELL_BICEPS_CURL(32)"
-            ),
-            33 => write!(f, "CurlExerciseName::SEATED_DUMBBELL_BICEPS_CURL(33)"),
-            34 => write!(f, "CurlExerciseName::SEATED_REVERSE_DUMBBELL_CURL(34)"),
-            35 => write!(
-                f,
-                "CurlExerciseName::SPLIT_STANCE_OFFSET_PINKY_DUMBBELL_CURL(35)"
-            ),
-            36 => write!(
-                f,
-                "CurlExerciseName::STANDING_ALTERNATING_DUMBBELL_CURLS(36)"
-            ),
-            37 => write!(f, "CurlExerciseName::STANDING_DUMBBELL_BICEPS_CURL(37)"),
-            38 => write!(f, "CurlExerciseName::STANDING_EZ_BAR_BICEPS_CURL(38)"),
-            39 => write!(f, "CurlExerciseName::STATIC_CURL(39)"),
-            40 => write!(
-                f,
-                "CurlExerciseName::SWISS_BALL_DUMBBELL_OVERHEAD_TRICEPS_EXTENSION(40)"
-            ),
-            41 => write!(f, "CurlExerciseName::SWISS_BALL_EZ_BAR_PREACHER_CURL(41)"),
-            42 => write!(
-                f,
-                "CurlExerciseName::TWISTING_STANDING_DUMBBELL_BICEPS_CURL(42)"
-            ),
-            43 => write!(f, "CurlExerciseName::WIDE_GRIP_EZ_BAR_BICEPS_CURL(43)"),
-            44 => write!(f, "CurlExerciseName::ONE_ARM_CONCENTRATION_CURL(44)"),
-            45 => write!(f, "CurlExerciseName::STANDING_ZOTTMAN_BICEPS_CURL(45)"),
-            46 => write!(f, "CurlExerciseName::DUMBBELL_BICEPS_CURL(46)"),
-            47 => write!(f, "CurlExerciseName::DRAG_CURL_WHEELCHAIR(47)"),
-            48 => write!(f, "CurlExerciseName::DUMBBELL_BICEPS_CURL_WHEELCHAIR(48)"),
-            49 => write!(f, "CurlExerciseName::BOTTLE_CURL(49)"),
-            50 => write!(f, "CurlExerciseName::SEATED_BOTTLE_CURL(50)"),
             _ => write!(f, "CurlExerciseName({})", self.0),
         }
     }

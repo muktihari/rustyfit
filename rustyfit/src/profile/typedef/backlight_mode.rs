@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Backlight Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BacklightMode(pub u8);
 
 impl BacklightMode {
@@ -39,24 +39,6 @@ impl fmt::Display for BacklightMode {
             4 => write!(f, "smart_notifications"),
             5 => write!(f, "key_and_messages_night"),
             6 => write!(f, "key_and_messages_and_smart_notifications"),
-            _ => write!(f, "BacklightMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BacklightMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BacklightMode::OFF(0)"),
-            1 => write!(f, "BacklightMode::MANUAL(1)"),
-            2 => write!(f, "BacklightMode::KEY_AND_MESSAGES(2)"),
-            3 => write!(f, "BacklightMode::AUTO_BRIGHTNESS(3)"),
-            4 => write!(f, "BacklightMode::SMART_NOTIFICATIONS(4)"),
-            5 => write!(f, "BacklightMode::KEY_AND_MESSAGES_NIGHT(5)"),
-            6 => write!(
-                f,
-                "BacklightMode::KEY_AND_MESSAGES_AND_SMART_NOTIFICATIONS(6)"
-            ),
             _ => write!(f, "BacklightMode({})", self.0),
         }
     }

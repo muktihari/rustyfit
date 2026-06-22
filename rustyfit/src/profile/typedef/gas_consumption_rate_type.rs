@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Gas Consumption Rate Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct GasConsumptionRateType(pub u8);
 
 impl GasConsumptionRateType {
@@ -34,17 +34,6 @@ impl fmt::Display for GasConsumptionRateType {
             0 => write!(f, "pressure_sac"),
             1 => write!(f, "volume_sac"),
             2 => write!(f, "rmv"),
-            _ => write!(f, "GasConsumptionRateType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for GasConsumptionRateType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "GasConsumptionRateType::PRESSURE_SAC(0)"),
-            1 => write!(f, "GasConsumptionRateType::VOLUME_SAC(1)"),
-            2 => write!(f, "GasConsumptionRateType::RMV(2)"),
             _ => write!(f, "GasConsumptionRateType({})", self.0),
         }
     }

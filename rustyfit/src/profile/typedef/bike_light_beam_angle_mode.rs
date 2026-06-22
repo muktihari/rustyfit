@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Bike Light Beam Angle Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BikeLightBeamAngleMode(pub u8);
 
 impl BikeLightBeamAngleMode {
@@ -29,16 +29,6 @@ impl fmt::Display for BikeLightBeamAngleMode {
         match self.0 {
             0 => write!(f, "manual"),
             1 => write!(f, "auto"),
-            _ => write!(f, "BikeLightBeamAngleMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BikeLightBeamAngleMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BikeLightBeamAngleMode::MANUAL(0)"),
-            1 => write!(f, "BikeLightBeamAngleMode::AUTO(1)"),
             _ => write!(f, "BikeLightBeamAngleMode({})", self.0),
         }
     }

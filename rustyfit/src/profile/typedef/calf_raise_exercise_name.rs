@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Calf Raise Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CalfRaiseExerciseName(pub u16);
 
 impl CalfRaiseExerciseName {
@@ -72,56 +72,6 @@ impl fmt::Display for CalfRaiseExerciseName {
             18 => write!(f, "standing_calf_raise"),
             19 => write!(f, "weighted_standing_calf_raise"),
             20 => write!(f, "standing_dumbbell_calf_raise"),
-            _ => write!(f, "CalfRaiseExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CalfRaiseExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CalfRaiseExerciseName::_3_WAY_CALF_RAISE(0)"),
-            1 => write!(f, "CalfRaiseExerciseName::_3_WAY_WEIGHTED_CALF_RAISE(1)"),
-            2 => write!(f, "CalfRaiseExerciseName::_3_WAY_SINGLE_LEG_CALF_RAISE(2)"),
-            3 => write!(
-                f,
-                "CalfRaiseExerciseName::_3_WAY_WEIGHTED_SINGLE_LEG_CALF_RAISE(3)"
-            ),
-            4 => write!(f, "CalfRaiseExerciseName::DONKEY_CALF_RAISE(4)"),
-            5 => write!(f, "CalfRaiseExerciseName::WEIGHTED_DONKEY_CALF_RAISE(5)"),
-            6 => write!(f, "CalfRaiseExerciseName::SEATED_CALF_RAISE(6)"),
-            7 => write!(f, "CalfRaiseExerciseName::WEIGHTED_SEATED_CALF_RAISE(7)"),
-            8 => write!(f, "CalfRaiseExerciseName::SEATED_DUMBBELL_TOE_RAISE(8)"),
-            9 => write!(
-                f,
-                "CalfRaiseExerciseName::SINGLE_LEG_BENT_KNEE_CALF_RAISE(9)"
-            ),
-            10 => write!(
-                f,
-                "CalfRaiseExerciseName::WEIGHTED_SINGLE_LEG_BENT_KNEE_CALF_RAISE(10)"
-            ),
-            11 => write!(f, "CalfRaiseExerciseName::SINGLE_LEG_DECLINE_PUSH_UP(11)"),
-            12 => write!(f, "CalfRaiseExerciseName::SINGLE_LEG_DONKEY_CALF_RAISE(12)"),
-            13 => write!(
-                f,
-                "CalfRaiseExerciseName::WEIGHTED_SINGLE_LEG_DONKEY_CALF_RAISE(13)"
-            ),
-            14 => write!(
-                f,
-                "CalfRaiseExerciseName::SINGLE_LEG_HIP_RAISE_WITH_KNEE_HOLD(14)"
-            ),
-            15 => write!(
-                f,
-                "CalfRaiseExerciseName::SINGLE_LEG_STANDING_CALF_RAISE(15)"
-            ),
-            16 => write!(
-                f,
-                "CalfRaiseExerciseName::SINGLE_LEG_STANDING_DUMBBELL_CALF_RAISE(16)"
-            ),
-            17 => write!(f, "CalfRaiseExerciseName::STANDING_BARBELL_CALF_RAISE(17)"),
-            18 => write!(f, "CalfRaiseExerciseName::STANDING_CALF_RAISE(18)"),
-            19 => write!(f, "CalfRaiseExerciseName::WEIGHTED_STANDING_CALF_RAISE(19)"),
-            20 => write!(f, "CalfRaiseExerciseName::STANDING_DUMBBELL_CALF_RAISE(20)"),
             _ => write!(f, "CalfRaiseExerciseName({})", self.0),
         }
     }

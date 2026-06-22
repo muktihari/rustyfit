@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Battle Rope Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BattleRopeExerciseName(pub u16);
 
 impl BattleRopeExerciseName {
@@ -83,51 +83,6 @@ impl fmt::Display for BattleRopeExerciseName {
             25 => write!(f, "stage_coach"),
             26 => write!(f, "ultimate_warrior"),
             27 => write!(f, "upper_cuts"),
-            _ => write!(f, "BattleRopeExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BattleRopeExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BattleRopeExerciseName::ALTERNATING_FIGURE_EIGHT(0)"),
-            1 => write!(f, "BattleRopeExerciseName::ALTERNATING_JUMP_WAVE(1)"),
-            2 => write!(
-                f,
-                "BattleRopeExerciseName::ALTERNATING_KNEELING_TO_STANDING_WAVE(2)"
-            ),
-            3 => write!(f, "BattleRopeExerciseName::ALTERNATING_LUNGE_WAVE(3)"),
-            4 => write!(f, "BattleRopeExerciseName::ALTERNATING_SQUAT_WAVE(4)"),
-            5 => write!(f, "BattleRopeExerciseName::ALTERNATING_WAVE(5)"),
-            6 => write!(
-                f,
-                "BattleRopeExerciseName::ALTERNATING_WAVE_WITH_LATERAL_SHUFFLE(6)"
-            ),
-            7 => write!(f, "BattleRopeExerciseName::CLAP_WAVE(7)"),
-            8 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_FIGURE_EIGHT(8)"),
-            9 => write!(
-                f,
-                "BattleRopeExerciseName::DOUBLE_ARM_SIDE_TO_SIDE_SNAKE(9)"
-            ),
-            10 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_SIDE_WAVE(10)"),
-            11 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_SLAM(11)"),
-            12 => write!(f, "BattleRopeExerciseName::DOUBLE_ARM_WAVE(12)"),
-            13 => write!(f, "BattleRopeExerciseName::GRAPPLER_TOSS(13)"),
-            14 => write!(f, "BattleRopeExerciseName::HIP_TOSS(14)"),
-            15 => write!(f, "BattleRopeExerciseName::IN_AND_OUT_WAVE(15)"),
-            16 => write!(f, "BattleRopeExerciseName::INSIDE_CIRCLE(16)"),
-            17 => write!(f, "BattleRopeExerciseName::JUMPING_JACKS(17)"),
-            18 => write!(f, "BattleRopeExerciseName::OUTSIDE_CIRCLE(18)"),
-            19 => write!(f, "BattleRopeExerciseName::RAINBOW(19)"),
-            20 => write!(f, "BattleRopeExerciseName::SIDE_PLANK_WAVE(20)"),
-            21 => write!(f, "BattleRopeExerciseName::SIDEWINDER(21)"),
-            22 => write!(f, "BattleRopeExerciseName::SITTING_RUSSIAN_TWIST(22)"),
-            23 => write!(f, "BattleRopeExerciseName::SNAKE_WAVE(23)"),
-            24 => write!(f, "BattleRopeExerciseName::SPLIT_JACK(24)"),
-            25 => write!(f, "BattleRopeExerciseName::STAGE_COACH(25)"),
-            26 => write!(f, "BattleRopeExerciseName::ULTIMATE_WARRIOR(26)"),
-            27 => write!(f, "BattleRopeExerciseName::UPPER_CUTS(27)"),
             _ => write!(f, "BattleRopeExerciseName({})", self.0),
         }
     }

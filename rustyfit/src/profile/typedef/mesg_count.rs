@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Mesg Count type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MesgCount(pub u8);
 
 impl MesgCount {
@@ -31,17 +31,6 @@ impl fmt::Display for MesgCount {
             0 => write!(f, "num_per_file"),
             1 => write!(f, "max_per_file"),
             2 => write!(f, "max_per_file_type"),
-            _ => write!(f, "MesgCount({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for MesgCount {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "MesgCount::NUM_PER_FILE(0)"),
-            1 => write!(f, "MesgCount::MAX_PER_FILE(1)"),
-            2 => write!(f, "MesgCount::MAX_PER_FILE_TYPE(2)"),
             _ => write!(f, "MesgCount({})", self.0),
         }
     }

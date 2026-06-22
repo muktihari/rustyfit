@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Activity Level type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ActivityLevel(pub u8);
 
 impl ActivityLevel {
@@ -31,17 +31,6 @@ impl fmt::Display for ActivityLevel {
             0 => write!(f, "low"),
             1 => write!(f, "medium"),
             2 => write!(f, "high"),
-            _ => write!(f, "ActivityLevel({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ActivityLevel {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ActivityLevel::LOW(0)"),
-            1 => write!(f, "ActivityLevel::MEDIUM(1)"),
-            2 => write!(f, "ActivityLevel::HIGH(2)"),
             _ => write!(f, "ActivityLevel({})", self.0),
         }
     }

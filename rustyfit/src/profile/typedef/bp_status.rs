@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Bp Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BpStatus(pub u8);
 
 impl BpStatus {
@@ -35,19 +35,6 @@ impl fmt::Display for BpStatus {
             2 => write!(f, "error_no_measurement"),
             3 => write!(f, "error_data_out_of_range"),
             4 => write!(f, "error_irregular_heart_rate"),
-            _ => write!(f, "BpStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BpStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BpStatus::NO_ERROR(0)"),
-            1 => write!(f, "BpStatus::ERROR_INCOMPLETE_DATA(1)"),
-            2 => write!(f, "BpStatus::ERROR_NO_MEASUREMENT(2)"),
-            3 => write!(f, "BpStatus::ERROR_DATA_OUT_OF_RANGE(3)"),
-            4 => write!(f, "BpStatus::ERROR_IRREGULAR_HEART_RATE(4)"),
             _ => write!(f, "BpStatus({})", self.0),
         }
     }

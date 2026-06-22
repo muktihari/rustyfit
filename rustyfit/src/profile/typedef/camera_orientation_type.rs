@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Camera Orientation Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CameraOrientationType(pub u8);
 
 impl CameraOrientationType {
@@ -33,18 +33,6 @@ impl fmt::Display for CameraOrientationType {
             1 => write!(f, "camera_orientation_90"),
             2 => write!(f, "camera_orientation_180"),
             3 => write!(f, "camera_orientation_270"),
-            _ => write!(f, "CameraOrientationType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CameraOrientationType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_0(0)"),
-            1 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_90(1)"),
-            2 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_180(2)"),
-            3 => write!(f, "CameraOrientationType::CAMERA_ORIENTATION_270(3)"),
             _ => write!(f, "CameraOrientationType({})", self.0),
         }
     }

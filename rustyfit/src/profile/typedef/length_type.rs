@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Length Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LengthType(pub u8);
 
 impl LengthType {
@@ -31,16 +31,6 @@ impl fmt::Display for LengthType {
         match self.0 {
             0 => write!(f, "idle"),
             1 => write!(f, "active"),
-            _ => write!(f, "LengthType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LengthType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "LengthType::IDLE(0)"),
-            1 => write!(f, "LengthType::ACTIVE(1)"),
             _ => write!(f, "LengthType({})", self.0),
         }
     }

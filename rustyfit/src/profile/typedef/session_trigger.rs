@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Session Trigger type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SessionTrigger(pub u8);
 
 impl SessionTrigger {
@@ -36,18 +36,6 @@ impl fmt::Display for SessionTrigger {
             1 => write!(f, "manual"),
             2 => write!(f, "auto_multi_sport"),
             3 => write!(f, "fitness_equipment"),
-            _ => write!(f, "SessionTrigger({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SessionTrigger {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SessionTrigger::ACTIVITY_END(0)"),
-            1 => write!(f, "SessionTrigger::MANUAL(1)"),
-            2 => write!(f, "SessionTrigger::AUTO_MULTI_SPORT(2)"),
-            3 => write!(f, "SessionTrigger::FITNESS_EQUIPMENT(3)"),
             _ => write!(f, "SessionTrigger({})", self.0),
         }
     }

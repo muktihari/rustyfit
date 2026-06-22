@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Intensity type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Intensity(pub u8);
 
 impl Intensity {
@@ -39,21 +39,6 @@ impl fmt::Display for Intensity {
             4 => write!(f, "recovery"),
             5 => write!(f, "interval"),
             6 => write!(f, "other"),
-            _ => write!(f, "Intensity({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Intensity {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Intensity::ACTIVE(0)"),
-            1 => write!(f, "Intensity::REST(1)"),
-            2 => write!(f, "Intensity::WARMUP(2)"),
-            3 => write!(f, "Intensity::COOLDOWN(3)"),
-            4 => write!(f, "Intensity::RECOVERY(4)"),
-            5 => write!(f, "Intensity::INTERVAL(5)"),
-            6 => write!(f, "Intensity::OTHER(6)"),
             _ => write!(f, "Intensity({})", self.0),
         }
     }

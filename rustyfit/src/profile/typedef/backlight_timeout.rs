@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Backlight Timeout type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BacklightTimeout(pub u8);
 
 impl BacklightTimeout {
@@ -28,15 +28,6 @@ impl fmt::Display for BacklightTimeout {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "infinite"),
-            _ => write!(f, "BacklightTimeout({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BacklightTimeout {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BacklightTimeout::INFINITE(0)"),
             _ => write!(f, "BacklightTimeout({})", self.0),
         }
     }

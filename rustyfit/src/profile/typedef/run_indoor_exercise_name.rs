@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Run Indoor Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct RunIndoorExerciseName(pub u16);
 
 impl RunIndoorExerciseName {
@@ -29,16 +29,6 @@ impl fmt::Display for RunIndoorExerciseName {
         match self.0 {
             0 => write!(f, "indoor_track_run"),
             1 => write!(f, "treadmill"),
-            _ => write!(f, "RunIndoorExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for RunIndoorExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "RunIndoorExerciseName::INDOOR_TRACK_RUN(0)"),
-            1 => write!(f, "RunIndoorExerciseName::TREADMILL(1)"),
             _ => write!(f, "RunIndoorExerciseName({})", self.0),
         }
     }

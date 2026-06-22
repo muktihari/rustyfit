@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Max Met Heart Rate Source type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MaxMetHeartRateSource(pub u8);
 
 impl MaxMetHeartRateSource {
@@ -31,16 +31,6 @@ impl fmt::Display for MaxMetHeartRateSource {
         match self.0 {
             0 => write!(f, "whr"),
             1 => write!(f, "hrm"),
-            _ => write!(f, "MaxMetHeartRateSource({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for MaxMetHeartRateSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "MaxMetHeartRateSource::WHR(0)"),
-            1 => write!(f, "MaxMetHeartRateSource::HRM(1)"),
             _ => write!(f, "MaxMetHeartRateSource({})", self.0),
         }
     }

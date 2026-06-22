@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hrv Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HrvStatus(pub u8);
 
 impl HrvStatus {
@@ -35,19 +35,6 @@ impl fmt::Display for HrvStatus {
             2 => write!(f, "low"),
             3 => write!(f, "unbalanced"),
             4 => write!(f, "balanced"),
-            _ => write!(f, "HrvStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HrvStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "HrvStatus::NONE(0)"),
-            1 => write!(f, "HrvStatus::POOR(1)"),
-            2 => write!(f, "HrvStatus::LOW(2)"),
-            3 => write!(f, "HrvStatus::UNBALANCED(3)"),
-            4 => write!(f, "HrvStatus::BALANCED(4)"),
             _ => write!(f, "HrvStatus({})", self.0),
         }
     }

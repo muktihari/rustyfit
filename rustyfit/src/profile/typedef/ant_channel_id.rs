@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Ant Channel Id type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AntChannelId(pub u32);
 
 impl AntChannelId {
@@ -33,24 +33,6 @@ impl fmt::Display for AntChannelId {
             0x0F000000 => write!(f, "ant_transmission_type_lower_nibble"),
             0x00FF0000 => write!(f, "ant_device_type"),
             0x0000FFFF => write!(f, "ant_device_number"),
-            _ => write!(f, "AntChannelId({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AntChannelId {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0xF0000000 => write!(
-                f,
-                "AntChannelId::ANT_EXTENDED_DEVICE_NUMBER_UPPER_NIBBLE(0xF0000000)"
-            ),
-            0x0F000000 => write!(
-                f,
-                "AntChannelId::ANT_TRANSMISSION_TYPE_LOWER_NIBBLE(0x0F000000)"
-            ),
-            0x00FF0000 => write!(f, "AntChannelId::ANT_DEVICE_TYPE(0x00FF0000)"),
-            0x0000FFFF => write!(f, "AntChannelId::ANT_DEVICE_NUMBER(0x0000FFFF)"),
             _ => write!(f, "AntChannelId({})", self.0),
         }
     }

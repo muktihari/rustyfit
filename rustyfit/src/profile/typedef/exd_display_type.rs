@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Exd Display Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ExdDisplayType(pub u8);
 
 impl ExdDisplayType {
@@ -47,25 +47,6 @@ impl fmt::Display for ExdDisplayType {
             8 => write!(f, "string"),
             9 => write!(f, "simple_dynamic_icon"),
             10 => write!(f, "gauge"),
-            _ => write!(f, "ExdDisplayType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ExdDisplayType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ExdDisplayType::NUMERICAL(0)"),
-            1 => write!(f, "ExdDisplayType::SIMPLE(1)"),
-            2 => write!(f, "ExdDisplayType::GRAPH(2)"),
-            3 => write!(f, "ExdDisplayType::BAR(3)"),
-            4 => write!(f, "ExdDisplayType::CIRCLE_GRAPH(4)"),
-            5 => write!(f, "ExdDisplayType::VIRTUAL_PARTNER(5)"),
-            6 => write!(f, "ExdDisplayType::BALANCE(6)"),
-            7 => write!(f, "ExdDisplayType::STRING_LIST(7)"),
-            8 => write!(f, "ExdDisplayType::STRING(8)"),
-            9 => write!(f, "ExdDisplayType::SIMPLE_DYNAMIC_ICON(9)"),
-            10 => write!(f, "ExdDisplayType::GAUGE(10)"),
             _ => write!(f, "ExdDisplayType({})", self.0),
         }
     }

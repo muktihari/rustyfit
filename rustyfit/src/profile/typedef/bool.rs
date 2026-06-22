@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Bool type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Bool(pub u8);
 
 impl Bool {
@@ -29,16 +29,6 @@ impl fmt::Display for Bool {
         match self.0 {
             0 => write!(f, "false"),
             1 => write!(f, "true"),
-            _ => write!(f, "Bool({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Bool {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Bool::FALSE(0)"),
-            1 => write!(f, "Bool::TRUE(1)"),
             _ => write!(f, "Bool({})", self.0),
         }
     }

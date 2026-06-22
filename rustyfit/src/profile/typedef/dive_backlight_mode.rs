@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Dive Backlight Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DiveBacklightMode(pub u8);
 
 impl DiveBacklightMode {
@@ -29,16 +29,6 @@ impl fmt::Display for DiveBacklightMode {
         match self.0 {
             0 => write!(f, "at_depth"),
             1 => write!(f, "always_on"),
-            _ => write!(f, "DiveBacklightMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DiveBacklightMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DiveBacklightMode::AT_DEPTH(0)"),
-            1 => write!(f, "DiveBacklightMode::ALWAYS_ON(1)"),
             _ => write!(f, "DiveBacklightMode({})", self.0),
         }
     }

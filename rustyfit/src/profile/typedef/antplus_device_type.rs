@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Antplus Device Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AntplusDeviceType(pub u8);
 
 impl AntplusDeviceType {
@@ -75,39 +75,6 @@ impl fmt::Display for AntplusDeviceType {
             122 => write!(f, "bike_cadence"),
             123 => write!(f, "bike_speed"),
             124 => write!(f, "stride_speed_distance"),
-            _ => write!(f, "AntplusDeviceType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AntplusDeviceType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "AntplusDeviceType::ANTFS(1)"),
-            11 => write!(f, "AntplusDeviceType::BIKE_POWER(11)"),
-            12 => write!(f, "AntplusDeviceType::ENVIRONMENT_SENSOR_LEGACY(12)"),
-            15 => write!(f, "AntplusDeviceType::MULTI_SPORT_SPEED_DISTANCE(15)"),
-            16 => write!(f, "AntplusDeviceType::CONTROL(16)"),
-            17 => write!(f, "AntplusDeviceType::FITNESS_EQUIPMENT(17)"),
-            18 => write!(f, "AntplusDeviceType::BLOOD_PRESSURE(18)"),
-            19 => write!(f, "AntplusDeviceType::GEOCACHE_NODE(19)"),
-            20 => write!(f, "AntplusDeviceType::LIGHT_ELECTRIC_VEHICLE(20)"),
-            25 => write!(f, "AntplusDeviceType::ENV_SENSOR(25)"),
-            26 => write!(f, "AntplusDeviceType::RACQUET(26)"),
-            27 => write!(f, "AntplusDeviceType::CONTROL_HUB(27)"),
-            31 => write!(f, "AntplusDeviceType::MUSCLE_OXYGEN(31)"),
-            34 => write!(f, "AntplusDeviceType::SHIFTING(34)"),
-            35 => write!(f, "AntplusDeviceType::BIKE_LIGHT_MAIN(35)"),
-            36 => write!(f, "AntplusDeviceType::BIKE_LIGHT_SHARED(36)"),
-            38 => write!(f, "AntplusDeviceType::EXD(38)"),
-            40 => write!(f, "AntplusDeviceType::BIKE_RADAR(40)"),
-            46 => write!(f, "AntplusDeviceType::BIKE_AERO(46)"),
-            119 => write!(f, "AntplusDeviceType::WEIGHT_SCALE(119)"),
-            120 => write!(f, "AntplusDeviceType::HEART_RATE(120)"),
-            121 => write!(f, "AntplusDeviceType::BIKE_SPEED_CADENCE(121)"),
-            122 => write!(f, "AntplusDeviceType::BIKE_CADENCE(122)"),
-            123 => write!(f, "AntplusDeviceType::BIKE_SPEED(123)"),
-            124 => write!(f, "AntplusDeviceType::STRIDE_SPEED_DISTANCE(124)"),
             _ => write!(f, "AntplusDeviceType({})", self.0),
         }
     }

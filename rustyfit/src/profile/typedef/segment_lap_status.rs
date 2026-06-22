@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Segment Lap Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SegmentLapStatus(pub u8);
 
 impl SegmentLapStatus {
@@ -29,16 +29,6 @@ impl fmt::Display for SegmentLapStatus {
         match self.0 {
             0 => write!(f, "end"),
             1 => write!(f, "fail"),
-            _ => write!(f, "SegmentLapStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SegmentLapStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SegmentLapStatus::END(0)"),
-            1 => write!(f, "SegmentLapStatus::FAIL(1)"),
             _ => write!(f, "SegmentLapStatus({})", self.0),
         }
     }

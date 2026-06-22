@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Nap Source type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct NapSource(pub u8);
 
 impl NapSource {
@@ -31,17 +31,6 @@ impl fmt::Display for NapSource {
             0 => write!(f, "automatic"),
             1 => write!(f, "manual_device"),
             2 => write!(f, "manual_gc"),
-            _ => write!(f, "NapSource({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for NapSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "NapSource::AUTOMATIC(0)"),
-            1 => write!(f, "NapSource::MANUAL_DEVICE(1)"),
-            2 => write!(f, "NapSource::MANUAL_GC(2)"),
             _ => write!(f, "NapSource({})", self.0),
         }
     }

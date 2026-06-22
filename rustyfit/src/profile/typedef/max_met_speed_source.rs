@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Max Met Speed Source type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MaxMetSpeedSource(pub u8);
 
 impl MaxMetSpeedSource {
@@ -31,17 +31,6 @@ impl fmt::Display for MaxMetSpeedSource {
             0 => write!(f, "onboard_gps"),
             1 => write!(f, "connected_gps"),
             2 => write!(f, "cadence"),
-            _ => write!(f, "MaxMetSpeedSource({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for MaxMetSpeedSource {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "MaxMetSpeedSource::ONBOARD_GPS(0)"),
-            1 => write!(f, "MaxMetSpeedSource::CONNECTED_GPS(1)"),
-            2 => write!(f, "MaxMetSpeedSource::CADENCE(2)"),
             _ => write!(f, "MaxMetSpeedSource({})", self.0),
         }
     }

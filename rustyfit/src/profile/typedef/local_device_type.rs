@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Local Device Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LocalDeviceType(pub u8);
 
 impl LocalDeviceType {
@@ -49,22 +49,6 @@ impl fmt::Display for LocalDeviceType {
             5 => write!(f, "temperature"),
             10 => write!(f, "whr"),
             12 => write!(f, "sensor_hub"),
-            _ => write!(f, "LocalDeviceType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LocalDeviceType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "LocalDeviceType::GPS(0)"),
-            1 => write!(f, "LocalDeviceType::GLONASS(1)"),
-            2 => write!(f, "LocalDeviceType::GPS_GLONASS(2)"),
-            3 => write!(f, "LocalDeviceType::ACCELEROMETER(3)"),
-            4 => write!(f, "LocalDeviceType::BAROMETER(4)"),
-            5 => write!(f, "LocalDeviceType::TEMPERATURE(5)"),
-            10 => write!(f, "LocalDeviceType::WHR(10)"),
-            12 => write!(f, "LocalDeviceType::SENSOR_HUB(12)"),
             _ => write!(f, "LocalDeviceType({})", self.0),
         }
     }

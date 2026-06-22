@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Dive Gas Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DiveGasMode(pub u8);
 
 impl DiveGasMode {
@@ -29,16 +29,6 @@ impl fmt::Display for DiveGasMode {
         match self.0 {
             0 => write!(f, "open_circuit"),
             1 => write!(f, "closed_circuit_diluent"),
-            _ => write!(f, "DiveGasMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DiveGasMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DiveGasMode::OPEN_CIRCUIT(0)"),
-            1 => write!(f, "DiveGasMode::CLOSED_CIRCUIT_DILUENT(1)"),
             _ => write!(f, "DiveGasMode({})", self.0),
         }
     }

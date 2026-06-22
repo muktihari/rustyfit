@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Workout Equipment type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WorkoutEquipment(pub u8);
 
 impl WorkoutEquipment {
@@ -37,20 +37,6 @@ impl fmt::Display for WorkoutEquipment {
             3 => write!(f, "swim_paddles"),
             4 => write!(f, "swim_pull_buoy"),
             5 => write!(f, "swim_snorkel"),
-            _ => write!(f, "WorkoutEquipment({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WorkoutEquipment {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WorkoutEquipment::NONE(0)"),
-            1 => write!(f, "WorkoutEquipment::SWIM_FINS(1)"),
-            2 => write!(f, "WorkoutEquipment::SWIM_KICKBOARD(2)"),
-            3 => write!(f, "WorkoutEquipment::SWIM_PADDLES(3)"),
-            4 => write!(f, "WorkoutEquipment::SWIM_PULL_BUOY(4)"),
-            5 => write!(f, "WorkoutEquipment::SWIM_SNORKEL(5)"),
             _ => write!(f, "WorkoutEquipment({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Plyo Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PlyoExerciseName(pub u16);
 
 impl PlyoExerciseName {
@@ -101,61 +101,6 @@ impl fmt::Display for PlyoExerciseName {
             35 => write!(f, "box_jump_overs_over_the_box"),
             36 => write!(f, "star_jump_squats"),
             37 => write!(f, "jump_squat"),
-            _ => write!(f, "PlyoExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for PlyoExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "PlyoExerciseName::ALTERNATING_JUMP_LUNGE(0)"),
-            1 => write!(f, "PlyoExerciseName::WEIGHTED_ALTERNATING_JUMP_LUNGE(1)"),
-            2 => write!(f, "PlyoExerciseName::BARBELL_JUMP_SQUAT(2)"),
-            3 => write!(f, "PlyoExerciseName::BODY_WEIGHT_JUMP_SQUAT(3)"),
-            4 => write!(f, "PlyoExerciseName::WEIGHTED_JUMP_SQUAT(4)"),
-            5 => write!(f, "PlyoExerciseName::CROSS_KNEE_STRIKE(5)"),
-            6 => write!(f, "PlyoExerciseName::WEIGHTED_CROSS_KNEE_STRIKE(6)"),
-            7 => write!(f, "PlyoExerciseName::DEPTH_JUMP(7)"),
-            8 => write!(f, "PlyoExerciseName::WEIGHTED_DEPTH_JUMP(8)"),
-            9 => write!(f, "PlyoExerciseName::DUMBBELL_JUMP_SQUAT(9)"),
-            10 => write!(f, "PlyoExerciseName::DUMBBELL_SPLIT_JUMP(10)"),
-            11 => write!(f, "PlyoExerciseName::FRONT_KNEE_STRIKE(11)"),
-            12 => write!(f, "PlyoExerciseName::WEIGHTED_FRONT_KNEE_STRIKE(12)"),
-            13 => write!(f, "PlyoExerciseName::HIGH_BOX_JUMP(13)"),
-            14 => write!(f, "PlyoExerciseName::WEIGHTED_HIGH_BOX_JUMP(14)"),
-            15 => write!(
-                f,
-                "PlyoExerciseName::ISOMETRIC_EXPLOSIVE_BODY_WEIGHT_JUMP_SQUAT(15)"
-            ),
-            16 => write!(
-                f,
-                "PlyoExerciseName::WEIGHTED_ISOMETRIC_EXPLOSIVE_JUMP_SQUAT(16)"
-            ),
-            17 => write!(f, "PlyoExerciseName::LATERAL_LEAP_AND_HOP(17)"),
-            18 => write!(f, "PlyoExerciseName::WEIGHTED_LATERAL_LEAP_AND_HOP(18)"),
-            19 => write!(f, "PlyoExerciseName::LATERAL_PLYO_SQUATS(19)"),
-            20 => write!(f, "PlyoExerciseName::WEIGHTED_LATERAL_PLYO_SQUATS(20)"),
-            21 => write!(f, "PlyoExerciseName::LATERAL_SLIDE(21)"),
-            22 => write!(f, "PlyoExerciseName::WEIGHTED_LATERAL_SLIDE(22)"),
-            23 => write!(f, "PlyoExerciseName::MEDICINE_BALL_OVERHEAD_THROWS(23)"),
-            24 => write!(f, "PlyoExerciseName::MEDICINE_BALL_SIDE_THROW(24)"),
-            25 => write!(f, "PlyoExerciseName::MEDICINE_BALL_SLAM(25)"),
-            26 => write!(f, "PlyoExerciseName::SIDE_TO_SIDE_MEDICINE_BALL_THROWS(26)"),
-            27 => write!(f, "PlyoExerciseName::SIDE_TO_SIDE_SHUFFLE_JUMP(27)"),
-            28 => write!(
-                f,
-                "PlyoExerciseName::WEIGHTED_SIDE_TO_SIDE_SHUFFLE_JUMP(28)"
-            ),
-            29 => write!(f, "PlyoExerciseName::SQUAT_JUMP_ONTO_BOX(29)"),
-            30 => write!(f, "PlyoExerciseName::WEIGHTED_SQUAT_JUMP_ONTO_BOX(30)"),
-            31 => write!(f, "PlyoExerciseName::SQUAT_JUMPS_IN_AND_OUT(31)"),
-            32 => write!(f, "PlyoExerciseName::WEIGHTED_SQUAT_JUMPS_IN_AND_OUT(32)"),
-            33 => write!(f, "PlyoExerciseName::BOX_JUMP(33)"),
-            34 => write!(f, "PlyoExerciseName::BOX_JUMP_OVERS(34)"),
-            35 => write!(f, "PlyoExerciseName::BOX_JUMP_OVERS_OVER_THE_BOX(35)"),
-            36 => write!(f, "PlyoExerciseName::STAR_JUMP_SQUATS(36)"),
-            37 => write!(f, "PlyoExerciseName::JUMP_SQUAT(37)"),
             _ => write!(f, "PlyoExerciseName({})", self.0),
         }
     }

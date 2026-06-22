@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Chop Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ChopExerciseName(pub u16);
 
 impl ChopExerciseName {
@@ -71,46 +71,6 @@ impl fmt::Display for ChopExerciseName {
             20 => write!(f, "standing_split_rotational_chop"),
             21 => write!(f, "standing_split_rotational_reverse_chop"),
             22 => write!(f, "standing_stability_reverse_chop"),
-            _ => write!(f, "ChopExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ChopExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ChopExerciseName::CABLE_PULL_THROUGH(0)"),
-            1 => write!(f, "ChopExerciseName::CABLE_ROTATIONAL_LIFT(1)"),
-            2 => write!(f, "ChopExerciseName::CABLE_WOODCHOP(2)"),
-            3 => write!(f, "ChopExerciseName::CROSS_CHOP_TO_KNEE(3)"),
-            4 => write!(f, "ChopExerciseName::WEIGHTED_CROSS_CHOP_TO_KNEE(4)"),
-            5 => write!(f, "ChopExerciseName::DUMBBELL_CHOP(5)"),
-            6 => write!(f, "ChopExerciseName::HALF_KNEELING_ROTATION(6)"),
-            7 => write!(f, "ChopExerciseName::WEIGHTED_HALF_KNEELING_ROTATION(7)"),
-            8 => write!(f, "ChopExerciseName::HALF_KNEELING_ROTATIONAL_CHOP(8)"),
-            9 => write!(
-                f,
-                "ChopExerciseName::HALF_KNEELING_ROTATIONAL_REVERSE_CHOP(9)"
-            ),
-            10 => write!(f, "ChopExerciseName::HALF_KNEELING_STABILITY_CHOP(10)"),
-            11 => write!(
-                f,
-                "ChopExerciseName::HALF_KNEELING_STABILITY_REVERSE_CHOP(11)"
-            ),
-            12 => write!(f, "ChopExerciseName::KNEELING_ROTATIONAL_CHOP(12)"),
-            13 => write!(f, "ChopExerciseName::KNEELING_ROTATIONAL_REVERSE_CHOP(13)"),
-            14 => write!(f, "ChopExerciseName::KNEELING_STABILITY_CHOP(14)"),
-            15 => write!(f, "ChopExerciseName::KNEELING_WOODCHOPPER(15)"),
-            16 => write!(f, "ChopExerciseName::MEDICINE_BALL_WOOD_CHOPS(16)"),
-            17 => write!(f, "ChopExerciseName::POWER_SQUAT_CHOPS(17)"),
-            18 => write!(f, "ChopExerciseName::WEIGHTED_POWER_SQUAT_CHOPS(18)"),
-            19 => write!(f, "ChopExerciseName::STANDING_ROTATIONAL_CHOP(19)"),
-            20 => write!(f, "ChopExerciseName::STANDING_SPLIT_ROTATIONAL_CHOP(20)"),
-            21 => write!(
-                f,
-                "ChopExerciseName::STANDING_SPLIT_ROTATIONAL_REVERSE_CHOP(21)"
-            ),
-            22 => write!(f, "ChopExerciseName::STANDING_STABILITY_REVERSE_CHOP(22)"),
             _ => write!(f, "ChopExerciseName({})", self.0),
         }
     }

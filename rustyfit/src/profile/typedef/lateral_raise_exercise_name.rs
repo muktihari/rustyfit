@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Lateral Raise Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LateralRaiseExerciseName(pub u16);
 
 impl LateralRaiseExerciseName {
@@ -116,85 +116,6 @@ impl fmt::Display for LateralRaiseExerciseName {
             39 => write!(f, "dumbbell_lateral_raise_wheelchair"),
             40 => write!(f, "pole_double_arm_overhead_and_forward_wheelchair"),
             41 => write!(f, "pole_straight_arm_overhead_wheelchair"),
-            _ => write!(f, "LateralRaiseExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LateralRaiseExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(
-                f,
-                "LateralRaiseExerciseName::_45_DEGREE_CABLE_EXTERNAL_ROTATION(0)"
-            ),
-            1 => write!(
-                f,
-                "LateralRaiseExerciseName::ALTERNATING_LATERAL_RAISE_WITH_STATIC_HOLD(1)"
-            ),
-            2 => write!(f, "LateralRaiseExerciseName::BAR_MUSCLE_UP(2)"),
-            3 => write!(f, "LateralRaiseExerciseName::BENT_OVER_LATERAL_RAISE(3)"),
-            4 => write!(f, "LateralRaiseExerciseName::CABLE_DIAGONAL_RAISE(4)"),
-            5 => write!(f, "LateralRaiseExerciseName::CABLE_FRONT_RAISE(5)"),
-            6 => write!(f, "LateralRaiseExerciseName::CALORIE_ROW(6)"),
-            7 => write!(f, "LateralRaiseExerciseName::COMBO_SHOULDER_RAISE(7)"),
-            8 => write!(f, "LateralRaiseExerciseName::DUMBBELL_DIAGONAL_RAISE(8)"),
-            9 => write!(f, "LateralRaiseExerciseName::DUMBBELL_V_RAISE(9)"),
-            10 => write!(f, "LateralRaiseExerciseName::FRONT_RAISE(10)"),
-            11 => write!(
-                f,
-                "LateralRaiseExerciseName::LEANING_DUMBBELL_LATERAL_RAISE(11)"
-            ),
-            12 => write!(f, "LateralRaiseExerciseName::LYING_DUMBBELL_RAISE(12)"),
-            13 => write!(f, "LateralRaiseExerciseName::MUSCLE_UP(13)"),
-            14 => write!(
-                f,
-                "LateralRaiseExerciseName::ONE_ARM_CABLE_LATERAL_RAISE(14)"
-            ),
-            15 => write!(
-                f,
-                "LateralRaiseExerciseName::OVERHAND_GRIP_REAR_LATERAL_RAISE(15)"
-            ),
-            16 => write!(f, "LateralRaiseExerciseName::PLATE_RAISES(16)"),
-            17 => write!(f, "LateralRaiseExerciseName::RING_DIP(17)"),
-            18 => write!(f, "LateralRaiseExerciseName::WEIGHTED_RING_DIP(18)"),
-            19 => write!(f, "LateralRaiseExerciseName::RING_MUSCLE_UP(19)"),
-            20 => write!(f, "LateralRaiseExerciseName::WEIGHTED_RING_MUSCLE_UP(20)"),
-            21 => write!(f, "LateralRaiseExerciseName::ROPE_CLIMB(21)"),
-            22 => write!(f, "LateralRaiseExerciseName::WEIGHTED_ROPE_CLIMB(22)"),
-            23 => write!(f, "LateralRaiseExerciseName::SCAPTION(23)"),
-            24 => write!(f, "LateralRaiseExerciseName::SEATED_LATERAL_RAISE(24)"),
-            25 => write!(f, "LateralRaiseExerciseName::SEATED_REAR_LATERAL_RAISE(25)"),
-            26 => write!(f, "LateralRaiseExerciseName::SIDE_LYING_LATERAL_RAISE(26)"),
-            27 => write!(f, "LateralRaiseExerciseName::STANDING_LIFT(27)"),
-            28 => write!(f, "LateralRaiseExerciseName::SUSPENDED_ROW(28)"),
-            29 => write!(
-                f,
-                "LateralRaiseExerciseName::UNDERHAND_GRIP_REAR_LATERAL_RAISE(29)"
-            ),
-            30 => write!(f, "LateralRaiseExerciseName::WALL_SLIDE(30)"),
-            31 => write!(f, "LateralRaiseExerciseName::WEIGHTED_WALL_SLIDE(31)"),
-            32 => write!(f, "LateralRaiseExerciseName::ARM_CIRCLES(32)"),
-            33 => write!(f, "LateralRaiseExerciseName::SHAVING_THE_HEAD(33)"),
-            34 => write!(f, "LateralRaiseExerciseName::DUMBBELL_LATERAL_RAISE(34)"),
-            36 => write!(f, "LateralRaiseExerciseName::RING_DIP_KIPPING(36)"),
-            37 => write!(f, "LateralRaiseExerciseName::WALL_WALK(37)"),
-            38 => write!(
-                f,
-                "LateralRaiseExerciseName::DUMBBELL_FRONT_RAISE_WHEELCHAIR(38)"
-            ),
-            39 => write!(
-                f,
-                "LateralRaiseExerciseName::DUMBBELL_LATERAL_RAISE_WHEELCHAIR(39)"
-            ),
-            40 => write!(
-                f,
-                "LateralRaiseExerciseName::POLE_DOUBLE_ARM_OVERHEAD_AND_FORWARD_WHEELCHAIR(40)"
-            ),
-            41 => write!(
-                f,
-                "LateralRaiseExerciseName::POLE_STRAIGHT_ARM_OVERHEAD_WHEELCHAIR(41)"
-            ),
             _ => write!(f, "LateralRaiseExerciseName({})", self.0),
         }
     }

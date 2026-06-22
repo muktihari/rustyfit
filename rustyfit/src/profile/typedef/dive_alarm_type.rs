@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Dive Alarm Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DiveAlarmType(pub u8);
 
 impl DiveAlarmType {
@@ -34,17 +34,6 @@ impl fmt::Display for DiveAlarmType {
             0 => write!(f, "depth"),
             1 => write!(f, "time"),
             2 => write!(f, "speed"),
-            _ => write!(f, "DiveAlarmType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DiveAlarmType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DiveAlarmType::DEPTH(0)"),
-            1 => write!(f, "DiveAlarmType::TIME(1)"),
-            2 => write!(f, "DiveAlarmType::SPEED(2)"),
             _ => write!(f, "DiveAlarmType({})", self.0),
         }
     }

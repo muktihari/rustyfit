@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Tire Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct TireExerciseName(pub u16);
 
 impl TireExerciseName {
@@ -27,15 +27,6 @@ impl fmt::Display for TireExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "flip"),
-            _ => write!(f, "TireExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for TireExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "TireExerciseName::FLIP(0)"),
             _ => write!(f, "TireExerciseName({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Ble Device Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BleDeviceType(pub u8);
 
 impl BleDeviceType {
@@ -43,22 +43,6 @@ impl fmt::Display for BleDeviceType {
             5 => write!(f, "bike_cadence"),
             6 => write!(f, "footpod"),
             7 => write!(f, "bike_trainer"),
-            _ => write!(f, "BleDeviceType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BleDeviceType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BleDeviceType::CONNECTED_GPS(0)"),
-            1 => write!(f, "BleDeviceType::HEART_RATE(1)"),
-            2 => write!(f, "BleDeviceType::BIKE_POWER(2)"),
-            3 => write!(f, "BleDeviceType::BIKE_SPEED_CADENCE(3)"),
-            4 => write!(f, "BleDeviceType::BIKE_SPEED(4)"),
-            5 => write!(f, "BleDeviceType::BIKE_CADENCE(5)"),
-            6 => write!(f, "BleDeviceType::FOOTPOD(6)"),
-            7 => write!(f, "BleDeviceType::BIKE_TRAINER(7)"),
             _ => write!(f, "BleDeviceType({})", self.0),
         }
     }

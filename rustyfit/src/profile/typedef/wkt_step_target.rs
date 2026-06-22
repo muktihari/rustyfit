@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Wkt Step Target type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct WktStepTarget(pub u8);
 
 impl WktStepTarget {
@@ -53,28 +53,6 @@ impl fmt::Display for WktStepTarget {
             11 => write!(f, "swim_stroke"),
             12 => write!(f, "speed_lap"),
             13 => write!(f, "heart_rate_lap"),
-            _ => write!(f, "WktStepTarget({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for WktStepTarget {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "WktStepTarget::SPEED(0)"),
-            1 => write!(f, "WktStepTarget::HEART_RATE(1)"),
-            2 => write!(f, "WktStepTarget::OPEN(2)"),
-            3 => write!(f, "WktStepTarget::CADENCE(3)"),
-            4 => write!(f, "WktStepTarget::POWER(4)"),
-            5 => write!(f, "WktStepTarget::GRADE(5)"),
-            6 => write!(f, "WktStepTarget::RESISTANCE(6)"),
-            7 => write!(f, "WktStepTarget::POWER_3S(7)"),
-            8 => write!(f, "WktStepTarget::POWER_10S(8)"),
-            9 => write!(f, "WktStepTarget::POWER_30S(9)"),
-            10 => write!(f, "WktStepTarget::POWER_LAP(10)"),
-            11 => write!(f, "WktStepTarget::SWIM_STROKE(11)"),
-            12 => write!(f, "WktStepTarget::SPEED_LAP(12)"),
-            13 => write!(f, "WktStepTarget::HEART_RATE_LAP(13)"),
             _ => write!(f, "WktStepTarget({})", self.0),
         }
     }

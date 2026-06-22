@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Hr Zone Calc type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct HrZoneCalc(pub u8);
 
 impl HrZoneCalc {
@@ -33,18 +33,6 @@ impl fmt::Display for HrZoneCalc {
             1 => write!(f, "percent_max_hr"),
             2 => write!(f, "percent_hrr"),
             3 => write!(f, "percent_lthr"),
-            _ => write!(f, "HrZoneCalc({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for HrZoneCalc {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "HrZoneCalc::CUSTOM(0)"),
-            1 => write!(f, "HrZoneCalc::PERCENT_MAX_HR(1)"),
-            2 => write!(f, "HrZoneCalc::PERCENT_HRR(2)"),
-            3 => write!(f, "HrZoneCalc::PERCENT_LTHR(3)"),
             _ => write!(f, "HrZoneCalc({})", self.0),
         }
     }

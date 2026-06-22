@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Set Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SetType(pub u8);
 
 impl SetType {
@@ -29,16 +29,6 @@ impl fmt::Display for SetType {
         match self.0 {
             0 => write!(f, "rest"),
             1 => write!(f, "active"),
-            _ => write!(f, "SetType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SetType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SetType::REST(0)"),
-            1 => write!(f, "SetType::ACTIVE(1)"),
             _ => write!(f, "SetType({})", self.0),
         }
     }

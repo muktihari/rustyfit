@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Lap Trigger type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LapTrigger(pub u8);
 
 impl LapTrigger {
@@ -43,23 +43,6 @@ impl fmt::Display for LapTrigger {
             6 => write!(f, "position_marked"),
             7 => write!(f, "session_end"),
             8 => write!(f, "fitness_equipment"),
-            _ => write!(f, "LapTrigger({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LapTrigger {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "LapTrigger::MANUAL(0)"),
-            1 => write!(f, "LapTrigger::TIME(1)"),
-            2 => write!(f, "LapTrigger::DISTANCE(2)"),
-            3 => write!(f, "LapTrigger::POSITION_START(3)"),
-            4 => write!(f, "LapTrigger::POSITION_LAP(4)"),
-            5 => write!(f, "LapTrigger::POSITION_WAYPOINT(5)"),
-            6 => write!(f, "LapTrigger::POSITION_MARKED(6)"),
-            7 => write!(f, "LapTrigger::SESSION_END(7)"),
-            8 => write!(f, "LapTrigger::FITNESS_EQUIPMENT(8)"),
             _ => write!(f, "LapTrigger({})", self.0),
         }
     }

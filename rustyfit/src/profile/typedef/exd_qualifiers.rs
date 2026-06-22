@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Exd Qualifiers type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ExdQualifiers(pub u8);
 
 impl ExdQualifiers {
@@ -113,58 +113,6 @@ impl fmt::Display for ExdQualifiers {
             248 => write!(f, "zone_3"),
             249 => write!(f, "zone_2"),
             250 => write!(f, "zone_1"),
-            _ => write!(f, "ExdQualifiers({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ExdQualifiers {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ExdQualifiers::NO_QUALIFIER(0)"),
-            1 => write!(f, "ExdQualifiers::INSTANTANEOUS(1)"),
-            2 => write!(f, "ExdQualifiers::AVERAGE(2)"),
-            3 => write!(f, "ExdQualifiers::LAP(3)"),
-            4 => write!(f, "ExdQualifiers::MAXIMUM(4)"),
-            5 => write!(f, "ExdQualifiers::MAXIMUM_AVERAGE(5)"),
-            6 => write!(f, "ExdQualifiers::MAXIMUM_LAP(6)"),
-            7 => write!(f, "ExdQualifiers::LAST_LAP(7)"),
-            8 => write!(f, "ExdQualifiers::AVERAGE_LAP(8)"),
-            9 => write!(f, "ExdQualifiers::TO_DESTINATION(9)"),
-            10 => write!(f, "ExdQualifiers::TO_GO(10)"),
-            11 => write!(f, "ExdQualifiers::TO_NEXT(11)"),
-            12 => write!(f, "ExdQualifiers::NEXT_COURSE_POINT(12)"),
-            13 => write!(f, "ExdQualifiers::TOTAL(13)"),
-            14 => write!(f, "ExdQualifiers::THREE_SECOND_AVERAGE(14)"),
-            15 => write!(f, "ExdQualifiers::TEN_SECOND_AVERAGE(15)"),
-            16 => write!(f, "ExdQualifiers::THIRTY_SECOND_AVERAGE(16)"),
-            17 => write!(f, "ExdQualifiers::PERCENT_MAXIMUM(17)"),
-            18 => write!(f, "ExdQualifiers::PERCENT_MAXIMUM_AVERAGE(18)"),
-            19 => write!(f, "ExdQualifiers::LAP_PERCENT_MAXIMUM(19)"),
-            20 => write!(f, "ExdQualifiers::ELAPSED(20)"),
-            21 => write!(f, "ExdQualifiers::SUNRISE(21)"),
-            22 => write!(f, "ExdQualifiers::SUNSET(22)"),
-            23 => write!(f, "ExdQualifiers::COMPARED_TO_VIRTUAL_PARTNER(23)"),
-            24 => write!(f, "ExdQualifiers::MAXIMUM_24H(24)"),
-            25 => write!(f, "ExdQualifiers::MINIMUM_24H(25)"),
-            26 => write!(f, "ExdQualifiers::MINIMUM(26)"),
-            27 => write!(f, "ExdQualifiers::FIRST(27)"),
-            28 => write!(f, "ExdQualifiers::SECOND(28)"),
-            29 => write!(f, "ExdQualifiers::THIRD(29)"),
-            30 => write!(f, "ExdQualifiers::SHIFTER(30)"),
-            31 => write!(f, "ExdQualifiers::LAST_SPORT(31)"),
-            32 => write!(f, "ExdQualifiers::MOVING(32)"),
-            33 => write!(f, "ExdQualifiers::STOPPED(33)"),
-            34 => write!(f, "ExdQualifiers::ESTIMATED_TOTAL(34)"),
-            242 => write!(f, "ExdQualifiers::ZONE_9(242)"),
-            243 => write!(f, "ExdQualifiers::ZONE_8(243)"),
-            244 => write!(f, "ExdQualifiers::ZONE_7(244)"),
-            245 => write!(f, "ExdQualifiers::ZONE_6(245)"),
-            246 => write!(f, "ExdQualifiers::ZONE_5(246)"),
-            247 => write!(f, "ExdQualifiers::ZONE_4(247)"),
-            248 => write!(f, "ExdQualifiers::ZONE_3(248)"),
-            249 => write!(f, "ExdQualifiers::ZONE_2(249)"),
-            250 => write!(f, "ExdQualifiers::ZONE_1(250)"),
             _ => write!(f, "ExdQualifiers({})", self.0),
         }
     }

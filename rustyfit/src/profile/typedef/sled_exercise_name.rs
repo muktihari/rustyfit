@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sled Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SledExerciseName(pub u16);
 
 impl SledExerciseName {
@@ -37,20 +37,6 @@ impl fmt::Display for SledExerciseName {
             3 => write!(f, "low_push"),
             4 => write!(f, "push"),
             5 => write!(f, "row"),
-            _ => write!(f, "SledExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SledExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SledExerciseName::BACKWARD_DRAG(0)"),
-            1 => write!(f, "SledExerciseName::CHEST_PRESS(1)"),
-            2 => write!(f, "SledExerciseName::FORWARD_DRAG(2)"),
-            3 => write!(f, "SledExerciseName::LOW_PUSH(3)"),
-            4 => write!(f, "SledExerciseName::PUSH(4)"),
-            5 => write!(f, "SledExerciseName::ROW(5)"),
             _ => write!(f, "SledExerciseName({})", self.0),
         }
     }

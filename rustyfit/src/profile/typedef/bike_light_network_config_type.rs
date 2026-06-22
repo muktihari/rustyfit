@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Bike Light Network Config Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BikeLightNetworkConfigType(pub u8);
 
 impl BikeLightNetworkConfigType {
@@ -33,18 +33,6 @@ impl fmt::Display for BikeLightNetworkConfigType {
             4 => write!(f, "individual"),
             5 => write!(f, "high_visibility"),
             6 => write!(f, "trail"),
-            _ => write!(f, "BikeLightNetworkConfigType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BikeLightNetworkConfigType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BikeLightNetworkConfigType::AUTO(0)"),
-            4 => write!(f, "BikeLightNetworkConfigType::INDIVIDUAL(4)"),
-            5 => write!(f, "BikeLightNetworkConfigType::HIGH_VISIBILITY(5)"),
-            6 => write!(f, "BikeLightNetworkConfigType::TRAIL(6)"),
             _ => write!(f, "BikeLightNetworkConfigType({})", self.0),
         }
     }

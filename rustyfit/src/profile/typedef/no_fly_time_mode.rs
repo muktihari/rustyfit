@@ -10,7 +10,7 @@ use core::fmt;
 
 /// No Fly Time Mode type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct NoFlyTimeMode(pub u8);
 
 impl NoFlyTimeMode {
@@ -31,16 +31,6 @@ impl fmt::Display for NoFlyTimeMode {
         match self.0 {
             0 => write!(f, "standard"),
             1 => write!(f, "flat_24_hours"),
-            _ => write!(f, "NoFlyTimeMode({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for NoFlyTimeMode {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "NoFlyTimeMode::STANDARD(0)"),
-            1 => write!(f, "NoFlyTimeMode::FLAT_24_HOURS(1)"),
             _ => write!(f, "NoFlyTimeMode({})", self.0),
         }
     }

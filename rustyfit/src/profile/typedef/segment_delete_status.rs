@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Segment Delete Status type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SegmentDeleteStatus(pub u8);
 
 impl SegmentDeleteStatus {
@@ -31,17 +31,6 @@ impl fmt::Display for SegmentDeleteStatus {
             0 => write!(f, "do_not_delete"),
             1 => write!(f, "delete_one"),
             2 => write!(f, "delete_all"),
-            _ => write!(f, "SegmentDeleteStatus({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SegmentDeleteStatus {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SegmentDeleteStatus::DO_NOT_DELETE(0)"),
-            1 => write!(f, "SegmentDeleteStatus::DELETE_ONE(1)"),
-            2 => write!(f, "SegmentDeleteStatus::DELETE_ALL(2)"),
             _ => write!(f, "SegmentDeleteStatus({})", self.0),
         }
     }

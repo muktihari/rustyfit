@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Course Point type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct CoursePoint(pub u8);
 
 impl CoursePoint {
@@ -132,67 +132,6 @@ impl fmt::Display for CoursePoint {
             51 => write!(f, "transport"),
             52 => write!(f, "alert"),
             53 => write!(f, "info"),
-            _ => write!(f, "CoursePoint({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for CoursePoint {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "CoursePoint::GENERIC(0)"),
-            1 => write!(f, "CoursePoint::SUMMIT(1)"),
-            2 => write!(f, "CoursePoint::VALLEY(2)"),
-            3 => write!(f, "CoursePoint::WATER(3)"),
-            4 => write!(f, "CoursePoint::FOOD(4)"),
-            5 => write!(f, "CoursePoint::DANGER(5)"),
-            6 => write!(f, "CoursePoint::LEFT(6)"),
-            7 => write!(f, "CoursePoint::RIGHT(7)"),
-            8 => write!(f, "CoursePoint::STRAIGHT(8)"),
-            9 => write!(f, "CoursePoint::FIRST_AID(9)"),
-            10 => write!(f, "CoursePoint::FOURTH_CATEGORY(10)"),
-            11 => write!(f, "CoursePoint::THIRD_CATEGORY(11)"),
-            12 => write!(f, "CoursePoint::SECOND_CATEGORY(12)"),
-            13 => write!(f, "CoursePoint::FIRST_CATEGORY(13)"),
-            14 => write!(f, "CoursePoint::HORS_CATEGORY(14)"),
-            15 => write!(f, "CoursePoint::SPRINT(15)"),
-            16 => write!(f, "CoursePoint::LEFT_FORK(16)"),
-            17 => write!(f, "CoursePoint::RIGHT_FORK(17)"),
-            18 => write!(f, "CoursePoint::MIDDLE_FORK(18)"),
-            19 => write!(f, "CoursePoint::SLIGHT_LEFT(19)"),
-            20 => write!(f, "CoursePoint::SHARP_LEFT(20)"),
-            21 => write!(f, "CoursePoint::SLIGHT_RIGHT(21)"),
-            22 => write!(f, "CoursePoint::SHARP_RIGHT(22)"),
-            23 => write!(f, "CoursePoint::U_TURN(23)"),
-            24 => write!(f, "CoursePoint::SEGMENT_START(24)"),
-            25 => write!(f, "CoursePoint::SEGMENT_END(25)"),
-            27 => write!(f, "CoursePoint::CAMPSITE(27)"),
-            28 => write!(f, "CoursePoint::AID_STATION(28)"),
-            29 => write!(f, "CoursePoint::REST_AREA(29)"),
-            30 => write!(f, "CoursePoint::GENERAL_DISTANCE(30)"),
-            31 => write!(f, "CoursePoint::SERVICE(31)"),
-            32 => write!(f, "CoursePoint::ENERGY_GEL(32)"),
-            33 => write!(f, "CoursePoint::SPORTS_DRINK(33)"),
-            34 => write!(f, "CoursePoint::MILE_MARKER(34)"),
-            35 => write!(f, "CoursePoint::CHECKPOINT(35)"),
-            36 => write!(f, "CoursePoint::SHELTER(36)"),
-            37 => write!(f, "CoursePoint::MEETING_SPOT(37)"),
-            38 => write!(f, "CoursePoint::OVERLOOK(38)"),
-            39 => write!(f, "CoursePoint::TOILET(39)"),
-            40 => write!(f, "CoursePoint::SHOWER(40)"),
-            41 => write!(f, "CoursePoint::GEAR(41)"),
-            42 => write!(f, "CoursePoint::SHARP_CURVE(42)"),
-            43 => write!(f, "CoursePoint::STEEP_INCLINE(43)"),
-            44 => write!(f, "CoursePoint::TUNNEL(44)"),
-            45 => write!(f, "CoursePoint::BRIDGE(45)"),
-            46 => write!(f, "CoursePoint::OBSTACLE(46)"),
-            47 => write!(f, "CoursePoint::CROSSING(47)"),
-            48 => write!(f, "CoursePoint::STORE(48)"),
-            49 => write!(f, "CoursePoint::TRANSITION(49)"),
-            50 => write!(f, "CoursePoint::NAVAID(50)"),
-            51 => write!(f, "CoursePoint::TRANSPORT(51)"),
-            52 => write!(f, "CoursePoint::ALERT(52)"),
-            53 => write!(f, "CoursePoint::INFO(53)"),
             _ => write!(f, "CoursePoint({})", self.0),
         }
     }

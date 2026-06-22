@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Gender type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Gender(pub u8);
 
 impl Gender {
@@ -29,16 +29,6 @@ impl fmt::Display for Gender {
         match self.0 {
             0 => write!(f, "female"),
             1 => write!(f, "male"),
-            _ => write!(f, "Gender({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Gender {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Gender::FEMALE(0)"),
-            1 => write!(f, "Gender::MALE(1)"),
             _ => write!(f, "Gender({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Segment Leaderboard Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SegmentLeaderboardType(pub u8);
 
 impl SegmentLeaderboardType {
@@ -55,29 +55,6 @@ impl fmt::Display for SegmentLeaderboardType {
             12 => write!(f, "last"),
             13 => write!(f, "recent_best"),
             14 => write!(f, "course_record"),
-            _ => write!(f, "SegmentLeaderboardType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SegmentLeaderboardType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SegmentLeaderboardType::OVERALL(0)"),
-            1 => write!(f, "SegmentLeaderboardType::PERSONAL_BEST(1)"),
-            2 => write!(f, "SegmentLeaderboardType::CONNECTIONS(2)"),
-            3 => write!(f, "SegmentLeaderboardType::GROUP(3)"),
-            4 => write!(f, "SegmentLeaderboardType::CHALLENGER(4)"),
-            5 => write!(f, "SegmentLeaderboardType::KOM(5)"),
-            6 => write!(f, "SegmentLeaderboardType::QOM(6)"),
-            7 => write!(f, "SegmentLeaderboardType::PR(7)"),
-            8 => write!(f, "SegmentLeaderboardType::GOAL(8)"),
-            9 => write!(f, "SegmentLeaderboardType::CARROT(9)"),
-            10 => write!(f, "SegmentLeaderboardType::CLUB_LEADER(10)"),
-            11 => write!(f, "SegmentLeaderboardType::RIVAL(11)"),
-            12 => write!(f, "SegmentLeaderboardType::LAST(12)"),
-            13 => write!(f, "SegmentLeaderboardType::RECENT_BEST(13)"),
-            14 => write!(f, "SegmentLeaderboardType::COURSE_RECORD(14)"),
             _ => write!(f, "SegmentLeaderboardType({})", self.0),
         }
     }

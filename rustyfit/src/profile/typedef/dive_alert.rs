@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Dive Alert type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct DiveAlert(pub u8);
 
 impl DiveAlert {
@@ -110,53 +110,6 @@ impl fmt::Display for DiveAlert {
             37 => write!(f, "apnea_surface"),
             38 => write!(f, "apnea_high_speed"),
             39 => write!(f, "apnea_low_speed"),
-            _ => write!(f, "DiveAlert({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for DiveAlert {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "DiveAlert::NDL_REACHED(0)"),
-            1 => write!(f, "DiveAlert::GAS_SWITCH_PROMPTED(1)"),
-            2 => write!(f, "DiveAlert::NEAR_SURFACE(2)"),
-            3 => write!(f, "DiveAlert::APPROACHING_NDL(3)"),
-            4 => write!(f, "DiveAlert::PO2_WARN(4)"),
-            5 => write!(f, "DiveAlert::PO2_CRIT_HIGH(5)"),
-            6 => write!(f, "DiveAlert::PO2_CRIT_LOW(6)"),
-            7 => write!(f, "DiveAlert::TIME_ALERT(7)"),
-            8 => write!(f, "DiveAlert::DEPTH_ALERT(8)"),
-            9 => write!(f, "DiveAlert::DECO_CEILING_BROKEN(9)"),
-            10 => write!(f, "DiveAlert::DECO_COMPLETE(10)"),
-            11 => write!(f, "DiveAlert::SAFETY_STOP_BROKEN(11)"),
-            12 => write!(f, "DiveAlert::SAFETY_STOP_COMPLETE(12)"),
-            13 => write!(f, "DiveAlert::CNS_WARNING(13)"),
-            14 => write!(f, "DiveAlert::CNS_CRITICAL(14)"),
-            15 => write!(f, "DiveAlert::OTU_WARNING(15)"),
-            16 => write!(f, "DiveAlert::OTU_CRITICAL(16)"),
-            17 => write!(f, "DiveAlert::ASCENT_CRITICAL(17)"),
-            18 => write!(f, "DiveAlert::ALERT_DISMISSED_BY_KEY(18)"),
-            19 => write!(f, "DiveAlert::ALERT_DISMISSED_BY_TIMEOUT(19)"),
-            20 => write!(f, "DiveAlert::BATTERY_LOW(20)"),
-            21 => write!(f, "DiveAlert::BATTERY_CRITICAL(21)"),
-            22 => write!(f, "DiveAlert::SAFETY_STOP_STARTED(22)"),
-            23 => write!(f, "DiveAlert::APPROACHING_FIRST_DECO_STOP(23)"),
-            24 => write!(f, "DiveAlert::SETPOINT_SWITCH_AUTO_LOW(24)"),
-            25 => write!(f, "DiveAlert::SETPOINT_SWITCH_AUTO_HIGH(25)"),
-            26 => write!(f, "DiveAlert::SETPOINT_SWITCH_MANUAL_LOW(26)"),
-            27 => write!(f, "DiveAlert::SETPOINT_SWITCH_MANUAL_HIGH(27)"),
-            28 => write!(f, "DiveAlert::AUTO_SETPOINT_SWITCH_IGNORED(28)"),
-            29 => write!(f, "DiveAlert::SWITCHED_TO_OPEN_CIRCUIT(29)"),
-            30 => write!(f, "DiveAlert::SWITCHED_TO_CLOSED_CIRCUIT(30)"),
-            32 => write!(f, "DiveAlert::TANK_BATTERY_LOW(32)"),
-            33 => write!(f, "DiveAlert::PO2_CCR_DIL_LOW(33)"),
-            34 => write!(f, "DiveAlert::DECO_STOP_CLEARED(34)"),
-            35 => write!(f, "DiveAlert::APNEA_NEUTRAL_BUOYANCY(35)"),
-            36 => write!(f, "DiveAlert::APNEA_TARGET_DEPTH(36)"),
-            37 => write!(f, "DiveAlert::APNEA_SURFACE(37)"),
-            38 => write!(f, "DiveAlert::APNEA_HIGH_SPEED(38)"),
-            39 => write!(f, "DiveAlert::APNEA_LOW_SPEED(39)"),
             _ => write!(f, "DiveAlert({})", self.0),
         }
     }

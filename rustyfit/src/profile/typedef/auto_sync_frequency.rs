@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Auto Sync Frequency type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AutoSyncFrequency(pub u8);
 
 impl AutoSyncFrequency {
@@ -35,19 +35,6 @@ impl fmt::Display for AutoSyncFrequency {
             2 => write!(f, "frequent"),
             3 => write!(f, "once_a_day"),
             4 => write!(f, "remote"),
-            _ => write!(f, "AutoSyncFrequency({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AutoSyncFrequency {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "AutoSyncFrequency::NEVER(0)"),
-            1 => write!(f, "AutoSyncFrequency::OCCASIONALLY(1)"),
-            2 => write!(f, "AutoSyncFrequency::FREQUENT(2)"),
-            3 => write!(f, "AutoSyncFrequency::ONCE_A_DAY(3)"),
-            4 => write!(f, "AutoSyncFrequency::REMOTE(4)"),
             _ => write!(f, "AutoSyncFrequency({})", self.0),
         }
     }

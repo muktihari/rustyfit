@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Language type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Language(pub u8);
 
 impl Language {
@@ -103,53 +103,6 @@ impl fmt::Display for Language {
             36 => write!(f, "burmese"),
             37 => write!(f, "mongolian"),
             254 => write!(f, "custom"),
-            _ => write!(f, "Language({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Language {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "Language::ENGLISH(0)"),
-            1 => write!(f, "Language::FRENCH(1)"),
-            2 => write!(f, "Language::ITALIAN(2)"),
-            3 => write!(f, "Language::GERMAN(3)"),
-            4 => write!(f, "Language::SPANISH(4)"),
-            5 => write!(f, "Language::CROATIAN(5)"),
-            6 => write!(f, "Language::CZECH(6)"),
-            7 => write!(f, "Language::DANISH(7)"),
-            8 => write!(f, "Language::DUTCH(8)"),
-            9 => write!(f, "Language::FINNISH(9)"),
-            10 => write!(f, "Language::GREEK(10)"),
-            11 => write!(f, "Language::HUNGARIAN(11)"),
-            12 => write!(f, "Language::NORWEGIAN(12)"),
-            13 => write!(f, "Language::POLISH(13)"),
-            14 => write!(f, "Language::PORTUGUESE(14)"),
-            15 => write!(f, "Language::SLOVAKIAN(15)"),
-            16 => write!(f, "Language::SLOVENIAN(16)"),
-            17 => write!(f, "Language::SWEDISH(17)"),
-            18 => write!(f, "Language::RUSSIAN(18)"),
-            19 => write!(f, "Language::TURKISH(19)"),
-            20 => write!(f, "Language::LATVIAN(20)"),
-            21 => write!(f, "Language::UKRAINIAN(21)"),
-            22 => write!(f, "Language::ARABIC(22)"),
-            23 => write!(f, "Language::FARSI(23)"),
-            24 => write!(f, "Language::BULGARIAN(24)"),
-            25 => write!(f, "Language::ROMANIAN(25)"),
-            26 => write!(f, "Language::CHINESE(26)"),
-            27 => write!(f, "Language::JAPANESE(27)"),
-            28 => write!(f, "Language::KOREAN(28)"),
-            29 => write!(f, "Language::TAIWANESE(29)"),
-            30 => write!(f, "Language::THAI(30)"),
-            31 => write!(f, "Language::HEBREW(31)"),
-            32 => write!(f, "Language::BRAZILIAN_PORTUGUESE(32)"),
-            33 => write!(f, "Language::INDONESIAN(33)"),
-            34 => write!(f, "Language::MALAYSIAN(34)"),
-            35 => write!(f, "Language::VIETNAMESE(35)"),
-            36 => write!(f, "Language::BURMESE(36)"),
-            37 => write!(f, "Language::MONGOLIAN(37)"),
-            254 => write!(f, "Language::CUSTOM(254)"),
             _ => write!(f, "Language({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Segment Selection Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SegmentSelectionType(pub u8);
 
 impl SegmentSelectionType {
@@ -29,16 +29,6 @@ impl fmt::Display for SegmentSelectionType {
         match self.0 {
             0 => write!(f, "starred"),
             1 => write!(f, "suggested"),
-            _ => write!(f, "SegmentSelectionType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SegmentSelectionType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SegmentSelectionType::STARRED(0)"),
-            1 => write!(f, "SegmentSelectionType::SUGGESTED(1)"),
             _ => write!(f, "SegmentSelectionType({})", self.0),
         }
     }

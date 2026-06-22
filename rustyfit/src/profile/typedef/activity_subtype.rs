@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Activity Subtype type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct ActivitySubtype(pub u8);
 
 impl ActivitySubtype {
@@ -83,34 +83,6 @@ impl fmt::Display for ActivitySubtype {
             17 => write!(f, "lap_swimming"),
             18 => write!(f, "open_water"),
             254 => write!(f, "all"),
-            _ => write!(f, "ActivitySubtype({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for ActivitySubtype {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ActivitySubtype::GENERIC(0)"),
-            1 => write!(f, "ActivitySubtype::TREADMILL(1)"),
-            2 => write!(f, "ActivitySubtype::STREET(2)"),
-            3 => write!(f, "ActivitySubtype::TRAIL(3)"),
-            4 => write!(f, "ActivitySubtype::TRACK(4)"),
-            5 => write!(f, "ActivitySubtype::SPIN(5)"),
-            6 => write!(f, "ActivitySubtype::INDOOR_CYCLING(6)"),
-            7 => write!(f, "ActivitySubtype::ROAD(7)"),
-            8 => write!(f, "ActivitySubtype::MOUNTAIN(8)"),
-            9 => write!(f, "ActivitySubtype::DOWNHILL(9)"),
-            10 => write!(f, "ActivitySubtype::RECUMBENT(10)"),
-            11 => write!(f, "ActivitySubtype::CYCLOCROSS(11)"),
-            12 => write!(f, "ActivitySubtype::HAND_CYCLING(12)"),
-            13 => write!(f, "ActivitySubtype::TRACK_CYCLING(13)"),
-            14 => write!(f, "ActivitySubtype::INDOOR_ROWING(14)"),
-            15 => write!(f, "ActivitySubtype::ELLIPTICAL(15)"),
-            16 => write!(f, "ActivitySubtype::STAIR_CLIMBING(16)"),
-            17 => write!(f, "ActivitySubtype::LAP_SWIMMING(17)"),
-            18 => write!(f, "ActivitySubtype::OPEN_WATER(18)"),
-            254 => write!(f, "ActivitySubtype::ALL(254)"),
             _ => write!(f, "ActivitySubtype({})", self.0),
         }
     }

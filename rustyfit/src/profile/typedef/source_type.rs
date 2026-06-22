@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Source Type type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SourceType(pub u8);
 
 impl SourceType {
@@ -43,20 +43,6 @@ impl fmt::Display for SourceType {
             3 => write!(f, "bluetooth_low_energy"),
             4 => write!(f, "wifi"),
             5 => write!(f, "local"),
-            _ => write!(f, "SourceType({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SourceType {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SourceType::ANT(0)"),
-            1 => write!(f, "SourceType::ANTPLUS(1)"),
-            2 => write!(f, "SourceType::BLUETOOTH(2)"),
-            3 => write!(f, "SourceType::BLUETOOTH_LOW_ENERGY(3)"),
-            4 => write!(f, "SourceType::WIFI(4)"),
-            5 => write!(f, "SourceType::LOCAL(5)"),
             _ => write!(f, "SourceType({})", self.0),
         }
     }

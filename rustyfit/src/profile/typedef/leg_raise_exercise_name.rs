@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Leg Raise Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct LegRaiseExerciseName(pub u16);
 
 impl LegRaiseExerciseName {
@@ -70,51 +70,6 @@ impl fmt::Display for LegRaiseExerciseName {
             19 => write!(f, "weighted_hanging_knee_raise"),
             20 => write!(f, "lateral_stepover"),
             21 => write!(f, "weighted_lateral_stepover"),
-            _ => write!(f, "LegRaiseExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for LegRaiseExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "LegRaiseExerciseName::HANGING_KNEE_RAISE(0)"),
-            1 => write!(f, "LegRaiseExerciseName::HANGING_LEG_RAISE(1)"),
-            2 => write!(f, "LegRaiseExerciseName::WEIGHTED_HANGING_LEG_RAISE(2)"),
-            3 => write!(f, "LegRaiseExerciseName::HANGING_SINGLE_LEG_RAISE(3)"),
-            4 => write!(
-                f,
-                "LegRaiseExerciseName::WEIGHTED_HANGING_SINGLE_LEG_RAISE(4)"
-            ),
-            5 => write!(f, "LegRaiseExerciseName::KETTLEBELL_LEG_RAISES(5)"),
-            6 => write!(f, "LegRaiseExerciseName::LEG_LOWERING_DRILL(6)"),
-            7 => write!(f, "LegRaiseExerciseName::WEIGHTED_LEG_LOWERING_DRILL(7)"),
-            8 => write!(f, "LegRaiseExerciseName::LYING_STRAIGHT_LEG_RAISE(8)"),
-            9 => write!(
-                f,
-                "LegRaiseExerciseName::WEIGHTED_LYING_STRAIGHT_LEG_RAISE(9)"
-            ),
-            10 => write!(f, "LegRaiseExerciseName::MEDICINE_BALL_LEG_DROPS(10)"),
-            11 => write!(f, "LegRaiseExerciseName::QUADRUPED_LEG_RAISE(11)"),
-            12 => write!(f, "LegRaiseExerciseName::WEIGHTED_QUADRUPED_LEG_RAISE(12)"),
-            13 => write!(f, "LegRaiseExerciseName::REVERSE_LEG_RAISE(13)"),
-            14 => write!(f, "LegRaiseExerciseName::WEIGHTED_REVERSE_LEG_RAISE(14)"),
-            15 => write!(
-                f,
-                "LegRaiseExerciseName::REVERSE_LEG_RAISE_ON_SWISS_BALL(15)"
-            ),
-            16 => write!(
-                f,
-                "LegRaiseExerciseName::WEIGHTED_REVERSE_LEG_RAISE_ON_SWISS_BALL(16)"
-            ),
-            17 => write!(f, "LegRaiseExerciseName::SINGLE_LEG_LOWERING_DRILL(17)"),
-            18 => write!(
-                f,
-                "LegRaiseExerciseName::WEIGHTED_SINGLE_LEG_LOWERING_DRILL(18)"
-            ),
-            19 => write!(f, "LegRaiseExerciseName::WEIGHTED_HANGING_KNEE_RAISE(19)"),
-            20 => write!(f, "LegRaiseExerciseName::LATERAL_STEPOVER(20)"),
-            21 => write!(f, "LegRaiseExerciseName::WEIGHTED_LATERAL_STEPOVER(21)"),
             _ => write!(f, "LegRaiseExerciseName({})", self.0),
         }
     }

@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Attitude Validity type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct AttitudeValidity(pub u16);
 
 impl AttitudeValidity {
@@ -51,27 +51,6 @@ impl fmt::Display for AttitudeValidity {
             0x0400 => write!(f, "solution_coasting"),
             0x0800 => write!(f, "true_track_angle"),
             0x1000 => write!(f, "magnetic_heading"),
-            _ => write!(f, "AttitudeValidity({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for AttitudeValidity {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x0001 => write!(f, "AttitudeValidity::TRACK_ANGLE_HEADING_VALID(0x0001)"),
-            0x0002 => write!(f, "AttitudeValidity::PITCH_VALID(0x0002)"),
-            0x0004 => write!(f, "AttitudeValidity::ROLL_VALID(0x0004)"),
-            0x0008 => write!(f, "AttitudeValidity::LATERAL_BODY_ACCEL_VALID(0x0008)"),
-            0x0010 => write!(f, "AttitudeValidity::NORMAL_BODY_ACCEL_VALID(0x0010)"),
-            0x0020 => write!(f, "AttitudeValidity::TURN_RATE_VALID(0x0020)"),
-            0x0040 => write!(f, "AttitudeValidity::HW_FAIL(0x0040)"),
-            0x0080 => write!(f, "AttitudeValidity::MAG_INVALID(0x0080)"),
-            0x0100 => write!(f, "AttitudeValidity::NO_GPS(0x0100)"),
-            0x0200 => write!(f, "AttitudeValidity::GPS_INVALID(0x0200)"),
-            0x0400 => write!(f, "AttitudeValidity::SOLUTION_COASTING(0x0400)"),
-            0x0800 => write!(f, "AttitudeValidity::TRUE_TRACK_ANGLE(0x0800)"),
-            0x1000 => write!(f, "AttitudeValidity::MAGNETIC_HEADING(0x1000)"),
             _ => write!(f, "AttitudeValidity({})", self.0),
         }
     }

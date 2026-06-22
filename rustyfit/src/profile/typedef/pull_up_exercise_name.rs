@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Pull Up Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct PullUpExerciseName(pub u16);
 
 impl PullUpExerciseName {
@@ -117,63 +117,6 @@ impl fmt::Display for PullUpExerciseName {
             43 => write!(f, "neutral_grip_pull_up"),
             44 => write!(f, "weighted_neutral_grip_chin_up"),
             45 => write!(f, "weighted_neutral_grip_pull_up"),
-            _ => write!(f, "PullUpExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for PullUpExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "PullUpExerciseName::BANDED_PULL_UPS(0)"),
-            1 => write!(f, "PullUpExerciseName::_30_DEGREE_LAT_PULLDOWN(1)"),
-            2 => write!(f, "PullUpExerciseName::BAND_ASSISTED_CHIN_UP(2)"),
-            3 => write!(f, "PullUpExerciseName::CLOSE_GRIP_CHIN_UP(3)"),
-            4 => write!(f, "PullUpExerciseName::WEIGHTED_CLOSE_GRIP_CHIN_UP(4)"),
-            5 => write!(f, "PullUpExerciseName::CLOSE_GRIP_LAT_PULLDOWN(5)"),
-            6 => write!(f, "PullUpExerciseName::CROSSOVER_CHIN_UP(6)"),
-            7 => write!(f, "PullUpExerciseName::WEIGHTED_CROSSOVER_CHIN_UP(7)"),
-            8 => write!(f, "PullUpExerciseName::EZ_BAR_PULLOVER(8)"),
-            9 => write!(f, "PullUpExerciseName::HANGING_HURDLE(9)"),
-            10 => write!(f, "PullUpExerciseName::WEIGHTED_HANGING_HURDLE(10)"),
-            11 => write!(f, "PullUpExerciseName::KNEELING_LAT_PULLDOWN(11)"),
-            12 => write!(
-                f,
-                "PullUpExerciseName::KNEELING_UNDERHAND_GRIP_LAT_PULLDOWN(12)"
-            ),
-            13 => write!(f, "PullUpExerciseName::LAT_PULLDOWN(13)"),
-            14 => write!(f, "PullUpExerciseName::MIXED_GRIP_CHIN_UP(14)"),
-            15 => write!(f, "PullUpExerciseName::WEIGHTED_MIXED_GRIP_CHIN_UP(15)"),
-            16 => write!(f, "PullUpExerciseName::MIXED_GRIP_PULL_UP(16)"),
-            17 => write!(f, "PullUpExerciseName::WEIGHTED_MIXED_GRIP_PULL_UP(17)"),
-            18 => write!(f, "PullUpExerciseName::REVERSE_GRIP_PULLDOWN(18)"),
-            19 => write!(f, "PullUpExerciseName::STANDING_CABLE_PULLOVER(19)"),
-            20 => write!(f, "PullUpExerciseName::STRAIGHT_ARM_PULLDOWN(20)"),
-            21 => write!(f, "PullUpExerciseName::SWISS_BALL_EZ_BAR_PULLOVER(21)"),
-            22 => write!(f, "PullUpExerciseName::TOWEL_PULL_UP(22)"),
-            23 => write!(f, "PullUpExerciseName::WEIGHTED_TOWEL_PULL_UP(23)"),
-            24 => write!(f, "PullUpExerciseName::WEIGHTED_PULL_UP(24)"),
-            25 => write!(f, "PullUpExerciseName::WIDE_GRIP_LAT_PULLDOWN(25)"),
-            26 => write!(f, "PullUpExerciseName::WIDE_GRIP_PULL_UP(26)"),
-            27 => write!(f, "PullUpExerciseName::WEIGHTED_WIDE_GRIP_PULL_UP(27)"),
-            28 => write!(f, "PullUpExerciseName::BURPEE_PULL_UP(28)"),
-            29 => write!(f, "PullUpExerciseName::WEIGHTED_BURPEE_PULL_UP(29)"),
-            30 => write!(f, "PullUpExerciseName::JUMPING_PULL_UPS(30)"),
-            31 => write!(f, "PullUpExerciseName::WEIGHTED_JUMPING_PULL_UPS(31)"),
-            32 => write!(f, "PullUpExerciseName::KIPPING_PULL_UP(32)"),
-            33 => write!(f, "PullUpExerciseName::WEIGHTED_KIPPING_PULL_UP(33)"),
-            34 => write!(f, "PullUpExerciseName::L_PULL_UP(34)"),
-            35 => write!(f, "PullUpExerciseName::WEIGHTED_L_PULL_UP(35)"),
-            36 => write!(f, "PullUpExerciseName::SUSPENDED_CHIN_UP(36)"),
-            37 => write!(f, "PullUpExerciseName::WEIGHTED_SUSPENDED_CHIN_UP(37)"),
-            38 => write!(f, "PullUpExerciseName::PULL_UP(38)"),
-            39 => write!(f, "PullUpExerciseName::CHIN_UP(39)"),
-            40 => write!(f, "PullUpExerciseName::NEUTRAL_GRIP_CHIN_UP(40)"),
-            41 => write!(f, "PullUpExerciseName::WEIGHTED_CHIN_UP(41)"),
-            42 => write!(f, "PullUpExerciseName::BAND_ASSISTED_PULL_UP(42)"),
-            43 => write!(f, "PullUpExerciseName::NEUTRAL_GRIP_PULL_UP(43)"),
-            44 => write!(f, "PullUpExerciseName::WEIGHTED_NEUTRAL_GRIP_CHIN_UP(44)"),
-            45 => write!(f, "PullUpExerciseName::WEIGHTED_NEUTRAL_GRIP_PULL_UP(45)"),
             _ => write!(f, "PullUpExerciseName({})", self.0),
         }
     }

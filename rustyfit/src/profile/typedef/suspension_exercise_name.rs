@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Suspension Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SuspensionExerciseName(pub u16);
 
 impl SuspensionExerciseName {
@@ -95,49 +95,6 @@ impl fmt::Display for SuspensionExerciseName {
             32 => write!(f, "squat_jump"),
             33 => write!(f, "tricep_press"),
             34 => write!(f, "y_fly"),
-            _ => write!(f, "SuspensionExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SuspensionExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SuspensionExerciseName::CHEST_FLY(0)"),
-            1 => write!(f, "SuspensionExerciseName::CHEST_PRESS(1)"),
-            2 => write!(f, "SuspensionExerciseName::CRUNCH(2)"),
-            3 => write!(f, "SuspensionExerciseName::CURL(3)"),
-            4 => write!(f, "SuspensionExerciseName::DIP(4)"),
-            5 => write!(f, "SuspensionExerciseName::FACE_PULL(5)"),
-            6 => write!(f, "SuspensionExerciseName::GLUTE_BRIDGE(6)"),
-            7 => write!(f, "SuspensionExerciseName::HAMSTRING_CURL(7)"),
-            8 => write!(f, "SuspensionExerciseName::HIP_DROP(8)"),
-            9 => write!(f, "SuspensionExerciseName::INVERTED_ROW(9)"),
-            10 => write!(f, "SuspensionExerciseName::KNEE_DRIVE_JUMP(10)"),
-            11 => write!(f, "SuspensionExerciseName::KNEE_TO_CHEST(11)"),
-            12 => write!(f, "SuspensionExerciseName::LAT_PULLOVER(12)"),
-            13 => write!(f, "SuspensionExerciseName::LUNGE(13)"),
-            14 => write!(f, "SuspensionExerciseName::MOUNTAIN_CLIMBER(14)"),
-            15 => write!(f, "SuspensionExerciseName::PENDULUM(15)"),
-            16 => write!(f, "SuspensionExerciseName::PIKE(16)"),
-            17 => write!(f, "SuspensionExerciseName::PLANK(17)"),
-            18 => write!(f, "SuspensionExerciseName::POWER_PULL(18)"),
-            19 => write!(f, "SuspensionExerciseName::PULL_UP(19)"),
-            20 => write!(f, "SuspensionExerciseName::PUSH_UP(20)"),
-            21 => write!(f, "SuspensionExerciseName::REVERSE_MOUNTAIN_CLIMBER(21)"),
-            22 => write!(f, "SuspensionExerciseName::REVERSE_PLANK(22)"),
-            23 => write!(f, "SuspensionExerciseName::ROLLOUT(23)"),
-            24 => write!(f, "SuspensionExerciseName::ROW(24)"),
-            25 => write!(f, "SuspensionExerciseName::SIDE_LUNGE(25)"),
-            26 => write!(f, "SuspensionExerciseName::SIDE_PLANK(26)"),
-            27 => write!(f, "SuspensionExerciseName::SINGLE_LEG_DEADLIFT(27)"),
-            28 => write!(f, "SuspensionExerciseName::SINGLE_LEG_SQUAT(28)"),
-            29 => write!(f, "SuspensionExerciseName::SIT_UP(29)"),
-            30 => write!(f, "SuspensionExerciseName::SPLIT(30)"),
-            31 => write!(f, "SuspensionExerciseName::SQUAT(31)"),
-            32 => write!(f, "SuspensionExerciseName::SQUAT_JUMP(32)"),
-            33 => write!(f, "SuspensionExerciseName::TRICEP_PRESS(33)"),
-            34 => write!(f, "SuspensionExerciseName::Y_FLY(34)"),
             _ => write!(f, "SuspensionExerciseName({})", self.0),
         }
     }

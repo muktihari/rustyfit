@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Weight type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Weight(pub u16);
 
 impl Weight {
@@ -27,15 +27,6 @@ impl fmt::Display for Weight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0xFFFE => write!(f, "calculating"),
-            _ => write!(f, "Weight({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for Weight {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0xFFFE => write!(f, "Weight::CALCULATING(0xFFFE)"),
             _ => write!(f, "Weight({})", self.0),
         }
     }

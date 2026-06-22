@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Bike Outdoor Exercise Name type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct BikeOutdoorExerciseName(pub u16);
 
 impl BikeOutdoorExerciseName {
@@ -27,15 +27,6 @@ impl fmt::Display for BikeOutdoorExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self.0 {
             0 => write!(f, "bike"),
-            _ => write!(f, "BikeOutdoorExerciseName({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for BikeOutdoorExerciseName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "BikeOutdoorExerciseName::BIKE(0)"),
             _ => write!(f, "BikeOutdoorExerciseName({})", self.0),
         }
     }

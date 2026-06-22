@@ -10,7 +10,7 @@ use core::fmt;
 
 /// Sleep Disruption Severity type.
 #[repr(transparent)]
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SleepDisruptionSeverity(pub u8);
 
 impl SleepDisruptionSeverity {
@@ -33,18 +33,6 @@ impl fmt::Display for SleepDisruptionSeverity {
             1 => write!(f, "low"),
             2 => write!(f, "medium"),
             3 => write!(f, "high"),
-            _ => write!(f, "SleepDisruptionSeverity({})", self.0),
-        }
-    }
-}
-
-impl fmt::Debug for SleepDisruptionSeverity {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "SleepDisruptionSeverity::NONE(0)"),
-            1 => write!(f, "SleepDisruptionSeverity::LOW(1)"),
-            2 => write!(f, "SleepDisruptionSeverity::MEDIUM(2)"),
-            3 => write!(f, "SleepDisruptionSeverity::HIGH(3)"),
             _ => write!(f, "SleepDisruptionSeverity({})", self.0),
         }
     }
