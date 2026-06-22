@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -94,7 +94,7 @@ impl From<DeveloperDataId> for Message {
         if !m.developer_id.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(m.developer_id),
                 is_expanded: false,
             });
@@ -102,7 +102,7 @@ impl From<DeveloperDataId> for Message {
         if !m.application_id.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(m.application_id),
                 is_expanded: false,
             });
@@ -110,7 +110,7 @@ impl From<DeveloperDataId> for Message {
         if m.manufacturer_id.0 != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::MANUFACTURER,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.manufacturer_id.0),
                 is_expanded: false,
             });
@@ -118,7 +118,7 @@ impl From<DeveloperDataId> for Message {
         if m.developer_data_index != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.developer_data_index),
                 is_expanded: false,
             });
@@ -126,7 +126,7 @@ impl From<DeveloperDataId> for Message {
         if m.application_version != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.application_version),
                 is_expanded: false,
             });

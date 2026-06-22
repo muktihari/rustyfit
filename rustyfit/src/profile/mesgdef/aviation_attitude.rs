@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -354,7 +354,7 @@ impl From<AviationAttitude> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -362,7 +362,7 @@ impl From<AviationAttitude> for Message {
         if m.timestamp_ms != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
             });
@@ -370,7 +370,7 @@ impl From<AviationAttitude> for Message {
         if !m.system_time.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.system_time),
                 is_expanded: false,
             });
@@ -378,7 +378,7 @@ impl From<AviationAttitude> for Message {
         if !m.pitch.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.pitch),
                 is_expanded: false,
             });
@@ -386,7 +386,7 @@ impl From<AviationAttitude> for Message {
         if !m.roll.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.roll),
                 is_expanded: false,
             });
@@ -394,7 +394,7 @@ impl From<AviationAttitude> for Message {
         if !m.accel_lateral.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.accel_lateral),
                 is_expanded: false,
             });
@@ -402,7 +402,7 @@ impl From<AviationAttitude> for Message {
         if !m.accel_normal.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.accel_normal),
                 is_expanded: false,
             });
@@ -410,7 +410,7 @@ impl From<AviationAttitude> for Message {
         if !m.turn_rate.is_empty() {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::VecInt16(m.turn_rate),
                 is_expanded: false,
             });
@@ -418,7 +418,7 @@ impl From<AviationAttitude> for Message {
         if !m.stage.is_empty() {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::ATTITUDE_STAGE,
+                base_type: FitBaseType::ENUM,
                 value: Value::VecUint8({
                     let (ptr, len, capacity) = m.stage.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
@@ -429,7 +429,7 @@ impl From<AviationAttitude> for Message {
         if !m.attitude_stage_complete.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.attitude_stage_complete),
                 is_expanded: false,
             });
@@ -437,7 +437,7 @@ impl From<AviationAttitude> for Message {
         if !m.track.is_empty() {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.track),
                 is_expanded: false,
             });
@@ -445,7 +445,7 @@ impl From<AviationAttitude> for Message {
         if !m.validity.is_empty() {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::ATTITUDE_VALIDITY,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16({
                     let (ptr, len, capacity) = m.validity.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }

@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -474,7 +474,7 @@ impl From<DiveSettings> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -482,7 +482,7 @@ impl From<DiveSettings> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -490,7 +490,7 @@ impl From<DiveSettings> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });
@@ -498,7 +498,7 @@ impl From<DiveSettings> for Message {
         if m.model.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::TISSUE_MODEL_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.model.0),
                 is_expanded: false,
             });
@@ -506,7 +506,7 @@ impl From<DiveSettings> for Message {
         if m.gf_low != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.gf_low),
                 is_expanded: false,
             });
@@ -514,7 +514,7 @@ impl From<DiveSettings> for Message {
         if m.gf_high != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.gf_high),
                 is_expanded: false,
             });
@@ -522,7 +522,7 @@ impl From<DiveSettings> for Message {
         if m.water_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::WATER_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.water_type.0),
                 is_expanded: false,
             });
@@ -530,7 +530,7 @@ impl From<DiveSettings> for Message {
         if m.water_density.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.water_density),
                 is_expanded: false,
             });
@@ -538,7 +538,7 @@ impl From<DiveSettings> for Message {
         if m.po2_warn != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.po2_warn),
                 is_expanded: false,
             });
@@ -546,7 +546,7 @@ impl From<DiveSettings> for Message {
         if m.po2_critical != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.po2_critical),
                 is_expanded: false,
             });
@@ -554,7 +554,7 @@ impl From<DiveSettings> for Message {
         if m.po2_deco != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.po2_deco),
                 is_expanded: false,
             });
@@ -562,7 +562,7 @@ impl From<DiveSettings> for Message {
         if m.safety_stop_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.safety_stop_enabled.0),
                 is_expanded: false,
             });
@@ -570,7 +570,7 @@ impl From<DiveSettings> for Message {
         if m.bottom_depth.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.bottom_depth),
                 is_expanded: false,
             });
@@ -578,7 +578,7 @@ impl From<DiveSettings> for Message {
         if m.bottom_time != u32::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.bottom_time),
                 is_expanded: false,
             });
@@ -586,7 +586,7 @@ impl From<DiveSettings> for Message {
         if m.apnea_countdown_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.apnea_countdown_enabled.0),
                 is_expanded: false,
             });
@@ -594,7 +594,7 @@ impl From<DiveSettings> for Message {
         if m.apnea_countdown_time != u32::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.apnea_countdown_time),
                 is_expanded: false,
             });
@@ -602,7 +602,7 @@ impl From<DiveSettings> for Message {
         if m.backlight_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::DIVE_BACKLIGHT_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.backlight_mode.0),
                 is_expanded: false,
             });
@@ -610,7 +610,7 @@ impl From<DiveSettings> for Message {
         if m.backlight_brightness != u8::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.backlight_brightness),
                 is_expanded: false,
             });
@@ -618,7 +618,7 @@ impl From<DiveSettings> for Message {
         if m.backlight_timeout.0 != u8::MAX {
             fields.push(Field {
                 num: 16,
-                profile_type: ProfileType::BACKLIGHT_TIMEOUT,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.backlight_timeout.0),
                 is_expanded: false,
             });
@@ -626,7 +626,7 @@ impl From<DiveSettings> for Message {
         if m.repeat_dive_interval != u16::MAX {
             fields.push(Field {
                 num: 17,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.repeat_dive_interval),
                 is_expanded: false,
             });
@@ -634,7 +634,7 @@ impl From<DiveSettings> for Message {
         if m.safety_stop_time != u16::MAX {
             fields.push(Field {
                 num: 18,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.safety_stop_time),
                 is_expanded: false,
             });
@@ -642,7 +642,7 @@ impl From<DiveSettings> for Message {
         if m.heart_rate_source_type.0 != u8::MAX {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::SOURCE_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.heart_rate_source_type.0),
                 is_expanded: false,
             });
@@ -650,7 +650,7 @@ impl From<DiveSettings> for Message {
         if m.heart_rate_source != u8::MAX {
             fields.push(Field {
                 num: 20,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.heart_rate_source),
                 is_expanded: false,
             });
@@ -658,7 +658,7 @@ impl From<DiveSettings> for Message {
         if m.travel_gas.0 != u16::MAX {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.travel_gas.0),
                 is_expanded: false,
             });
@@ -666,7 +666,7 @@ impl From<DiveSettings> for Message {
         if m.ccr_low_setpoint_switch_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.ccr_low_setpoint_switch_mode.0),
                 is_expanded: false,
             });
@@ -674,7 +674,7 @@ impl From<DiveSettings> for Message {
         if m.ccr_low_setpoint != u8::MAX {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.ccr_low_setpoint),
                 is_expanded: false,
             });
@@ -682,7 +682,7 @@ impl From<DiveSettings> for Message {
         if m.ccr_low_setpoint_depth != u32::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.ccr_low_setpoint_depth),
                 is_expanded: false,
             });
@@ -690,7 +690,7 @@ impl From<DiveSettings> for Message {
         if m.ccr_high_setpoint_switch_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::CCR_SETPOINT_SWITCH_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.ccr_high_setpoint_switch_mode.0),
                 is_expanded: false,
             });
@@ -698,7 +698,7 @@ impl From<DiveSettings> for Message {
         if m.ccr_high_setpoint != u8::MAX {
             fields.push(Field {
                 num: 26,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.ccr_high_setpoint),
                 is_expanded: false,
             });
@@ -706,7 +706,7 @@ impl From<DiveSettings> for Message {
         if m.ccr_high_setpoint_depth != u32::MAX {
             fields.push(Field {
                 num: 27,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.ccr_high_setpoint_depth),
                 is_expanded: false,
             });
@@ -714,7 +714,7 @@ impl From<DiveSettings> for Message {
         if m.gas_consumption_display.0 != u8::MAX {
             fields.push(Field {
                 num: 29,
-                profile_type: ProfileType::GAS_CONSUMPTION_RATE_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.gas_consumption_display.0),
                 is_expanded: false,
             });
@@ -722,7 +722,7 @@ impl From<DiveSettings> for Message {
         if m.up_key_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 30,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.up_key_enabled.0),
                 is_expanded: false,
             });
@@ -730,7 +730,7 @@ impl From<DiveSettings> for Message {
         if m.dive_sounds.0 != u8::MAX {
             fields.push(Field {
                 num: 35,
-                profile_type: ProfileType::TONE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.dive_sounds.0),
                 is_expanded: false,
             });
@@ -738,7 +738,7 @@ impl From<DiveSettings> for Message {
         if m.last_stop_multiple != u8::MAX {
             fields.push(Field {
                 num: 36,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.last_stop_multiple),
                 is_expanded: false,
             });
@@ -746,7 +746,7 @@ impl From<DiveSettings> for Message {
         if m.no_fly_time_mode.0 != u8::MAX {
             fields.push(Field {
                 num: 37,
-                profile_type: ProfileType::NO_FLY_TIME_MODE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.no_fly_time_mode.0),
                 is_expanded: false,
             });

@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -139,7 +139,7 @@ impl From<Activity> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -147,7 +147,7 @@ impl From<Activity> for Message {
         if m.total_timer_time != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
             });
@@ -155,7 +155,7 @@ impl From<Activity> for Message {
         if m.num_sessions != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.num_sessions),
                 is_expanded: false,
             });
@@ -163,7 +163,7 @@ impl From<Activity> for Message {
         if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::ACTIVITY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
             });
@@ -171,7 +171,7 @@ impl From<Activity> for Message {
         if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::EVENT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
             });
@@ -179,7 +179,7 @@ impl From<Activity> for Message {
         if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::EVENT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
             });
@@ -187,7 +187,7 @@ impl From<Activity> for Message {
         if m.local_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::LOCAL_DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
             });
@@ -195,7 +195,7 @@ impl From<Activity> for Message {
         if m.event_group != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
             });

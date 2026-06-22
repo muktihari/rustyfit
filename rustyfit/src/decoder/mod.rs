@@ -7,7 +7,7 @@ use crate::{
     crc16::Crc16,
     decoder::{accumulator::Accumulator, bits::Bits},
     profile::{
-        ProfileType, lookup,
+        lookup,
         typedef::{FitBaseType, MesgNum},
     },
     proto::*,
@@ -352,7 +352,7 @@ impl Decoder {
 
             mesg.fields.push(Field {
                 num: Field::TIMESTAMP,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 is_expanded: false,
                 value: Value::Uint32(self.timestamp),
             });
@@ -375,7 +375,7 @@ impl Decoder {
         // Now that all fields has been decoded, we need to expand all components and accumulate the accumulable values.
         for i in 0..mesg.fields.len() {
             let field = &mesg.fields[i];
-            if !field.value.is_valid(field.profile_type.base_type()) {
+            if !field.value.is_valid(field.base_type) {
                 continue;
             }
             let Some(field_ref) = lookup::field_reference(mesg.num, field.num) else {
@@ -411,20 +411,17 @@ impl Decoder {
 
             let num = field_def.num;
             let base_type: FitBaseType;
-            let profile_type: ProfileType;
             let accumulate: bool;
             let array: bool;
 
             match lookup::field_reference(mesg_def.mesg_num, num) {
                 Some(field_ref) => {
                     base_type = field_ref.base_type;
-                    profile_type = field_ref.profile_type;
                     accumulate = field_ref.accumulate;
                     array = field_ref.array;
                 }
                 None => {
                     base_type = field_def.base_type;
-                    profile_type = ProfileType::from(field_def.base_type);
                     accumulate = false;
                     array = match base_type {
                         FitBaseType::STRING => Value::strcount(buf) > 1,
@@ -460,7 +457,7 @@ impl Decoder {
 
             mesg.fields.push(Field {
                 num,
-                profile_type,
+                base_type,
                 is_expanded: false,
                 value,
             });
@@ -501,7 +498,7 @@ impl Decoder {
                 None => {
                     mesg.fields.push(Field {
                         num: field_num,
-                        profile_type: field_ref.profile_type,
+                        base_type: field_ref.base_type,
                         is_expanded: true,
                         value: if field_ref.array {
                             let mut vec_value = Value::Invalid;

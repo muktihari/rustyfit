@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -276,7 +276,7 @@ impl From<Event> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -284,7 +284,7 @@ impl From<Event> for Message {
         if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::EVENT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
             });
@@ -292,7 +292,7 @@ impl From<Event> for Message {
         if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::EVENT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
             });
@@ -300,7 +300,7 @@ impl From<Event> for Message {
         if m.data16 != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.data16),
                 is_expanded: false,
             });
@@ -308,7 +308,7 @@ impl From<Event> for Message {
         if m.data != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.data),
                 is_expanded: is_expanded(&m.state, 3),
             });
@@ -316,7 +316,7 @@ impl From<Event> for Message {
         if m.event_group != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
             });
@@ -324,7 +324,7 @@ impl From<Event> for Message {
         if m.score != u16::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.score),
                 is_expanded: is_expanded(&m.state, 7),
             });
@@ -332,7 +332,7 @@ impl From<Event> for Message {
         if m.opponent_score != u16::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: is_expanded(&m.state, 8),
             });
@@ -340,7 +340,7 @@ impl From<Event> for Message {
         if m.front_gear_num != u8::MIN {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.front_gear_num),
                 is_expanded: is_expanded(&m.state, 9),
             });
@@ -348,7 +348,7 @@ impl From<Event> for Message {
         if m.front_gear != u8::MIN {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.front_gear),
                 is_expanded: is_expanded(&m.state, 10),
             });
@@ -356,7 +356,7 @@ impl From<Event> for Message {
         if m.rear_gear_num != u8::MIN {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.rear_gear_num),
                 is_expanded: is_expanded(&m.state, 11),
             });
@@ -364,7 +364,7 @@ impl From<Event> for Message {
         if m.rear_gear != u8::MIN {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::UINT8Z,
+                base_type: FitBaseType::UINT8Z,
                 value: Value::Uint8(m.rear_gear),
                 is_expanded: is_expanded(&m.state, 12),
             });
@@ -372,7 +372,7 @@ impl From<Event> for Message {
         if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::DEVICE_INDEX,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
             });
@@ -380,7 +380,7 @@ impl From<Event> for Message {
         if m.activity_type.0 != u8::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::ACTIVITY_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: false,
             });
@@ -388,7 +388,7 @@ impl From<Event> for Message {
         if m.start_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
             });
@@ -396,7 +396,7 @@ impl From<Event> for Message {
         if m.radar_threat_level_max.0 != u8::MAX {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::RADAR_THREAT_LEVEL_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.radar_threat_level_max.0),
                 is_expanded: is_expanded(&m.state, 21),
             });
@@ -404,7 +404,7 @@ impl From<Event> for Message {
         if m.radar_threat_count != u8::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.radar_threat_count),
                 is_expanded: is_expanded(&m.state, 22),
             });
@@ -412,7 +412,7 @@ impl From<Event> for Message {
         if m.radar_threat_avg_approach_speed != u8::MAX {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.radar_threat_avg_approach_speed),
                 is_expanded: is_expanded(&m.state, 23),
             });
@@ -420,7 +420,7 @@ impl From<Event> for Message {
         if m.radar_threat_max_approach_speed != u8::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.radar_threat_max_approach_speed),
                 is_expanded: is_expanded(&m.state, 24),
             });

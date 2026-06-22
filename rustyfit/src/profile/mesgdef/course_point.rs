@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::borrow::ToOwned;
@@ -165,7 +165,7 @@ impl From<CoursePoint> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -173,7 +173,7 @@ impl From<CoursePoint> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -181,7 +181,7 @@ impl From<CoursePoint> for Message {
         if m.position_lat != i32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
             });
@@ -189,7 +189,7 @@ impl From<CoursePoint> for Message {
         if m.position_long != i32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
             });
@@ -197,7 +197,7 @@ impl From<CoursePoint> for Message {
         if m.distance != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
             });
@@ -205,7 +205,7 @@ impl From<CoursePoint> for Message {
         if m.r#type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::COURSE_POINT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.r#type.0),
                 is_expanded: false,
             });
@@ -213,7 +213,7 @@ impl From<CoursePoint> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });
@@ -221,7 +221,7 @@ impl From<CoursePoint> for Message {
         if m.favorite.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.favorite.0),
                 is_expanded: false,
             });

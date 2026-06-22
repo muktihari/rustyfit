@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -206,7 +206,7 @@ impl From<WorkoutStep> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -214,7 +214,7 @@ impl From<WorkoutStep> for Message {
         if !m.wkt_step_name.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.wkt_step_name),
                 is_expanded: false,
             });
@@ -222,7 +222,7 @@ impl From<WorkoutStep> for Message {
         if m.duration_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::WKT_STEP_DURATION,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.duration_type.0),
                 is_expanded: false,
             });
@@ -230,7 +230,7 @@ impl From<WorkoutStep> for Message {
         if m.duration_value != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.duration_value),
                 is_expanded: false,
             });
@@ -238,7 +238,7 @@ impl From<WorkoutStep> for Message {
         if m.target_type.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::WKT_STEP_TARGET,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.target_type.0),
                 is_expanded: false,
             });
@@ -246,7 +246,7 @@ impl From<WorkoutStep> for Message {
         if m.target_value != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.target_value),
                 is_expanded: false,
             });
@@ -254,7 +254,7 @@ impl From<WorkoutStep> for Message {
         if m.custom_target_value_low != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.custom_target_value_low),
                 is_expanded: false,
             });
@@ -262,7 +262,7 @@ impl From<WorkoutStep> for Message {
         if m.custom_target_value_high != u32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.custom_target_value_high),
                 is_expanded: false,
             });
@@ -270,7 +270,7 @@ impl From<WorkoutStep> for Message {
         if m.intensity.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::INTENSITY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.intensity.0),
                 is_expanded: false,
             });
@@ -278,7 +278,7 @@ impl From<WorkoutStep> for Message {
         if !m.notes.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.notes),
                 is_expanded: false,
             });
@@ -286,7 +286,7 @@ impl From<WorkoutStep> for Message {
         if m.equipment.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::WORKOUT_EQUIPMENT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.equipment.0),
                 is_expanded: false,
             });
@@ -294,7 +294,7 @@ impl From<WorkoutStep> for Message {
         if m.exercise_category.0 != u16::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::EXERCISE_CATEGORY,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.exercise_category.0),
                 is_expanded: false,
             });
@@ -302,7 +302,7 @@ impl From<WorkoutStep> for Message {
         if m.exercise_name != u16::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.exercise_name),
                 is_expanded: false,
             });
@@ -310,7 +310,7 @@ impl From<WorkoutStep> for Message {
         if m.exercise_weight != u16::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.exercise_weight),
                 is_expanded: false,
             });
@@ -318,7 +318,7 @@ impl From<WorkoutStep> for Message {
         if m.weight_display_unit.0 != u16::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::FIT_BASE_UNIT,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.weight_display_unit.0),
                 is_expanded: false,
             });
@@ -326,7 +326,7 @@ impl From<WorkoutStep> for Message {
         if m.secondary_target_type.0 != u8::MAX {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::WKT_STEP_TARGET,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.secondary_target_type.0),
                 is_expanded: false,
             });
@@ -334,7 +334,7 @@ impl From<WorkoutStep> for Message {
         if m.secondary_target_value != u32::MAX {
             fields.push(Field {
                 num: 20,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.secondary_target_value),
                 is_expanded: false,
             });
@@ -342,7 +342,7 @@ impl From<WorkoutStep> for Message {
         if m.secondary_custom_target_value_low != u32::MAX {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.secondary_custom_target_value_low),
                 is_expanded: false,
             });
@@ -350,7 +350,7 @@ impl From<WorkoutStep> for Message {
         if m.secondary_custom_target_value_high != u32::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.secondary_custom_target_value_high),
                 is_expanded: false,
             });

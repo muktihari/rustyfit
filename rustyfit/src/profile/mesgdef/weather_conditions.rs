@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::borrow::ToOwned;
@@ -223,7 +223,7 @@ impl From<WeatherConditions> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -231,7 +231,7 @@ impl From<WeatherConditions> for Message {
         if m.weather_report.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::WEATHER_REPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.weather_report.0),
                 is_expanded: false,
             });
@@ -239,7 +239,7 @@ impl From<WeatherConditions> for Message {
         if m.temperature != i8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.temperature),
                 is_expanded: false,
             });
@@ -247,7 +247,7 @@ impl From<WeatherConditions> for Message {
         if m.condition.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::WEATHER_STATUS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.condition.0),
                 is_expanded: false,
             });
@@ -255,7 +255,7 @@ impl From<WeatherConditions> for Message {
         if m.wind_direction != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.wind_direction),
                 is_expanded: false,
             });
@@ -263,7 +263,7 @@ impl From<WeatherConditions> for Message {
         if m.wind_speed != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.wind_speed),
                 is_expanded: false,
             });
@@ -271,7 +271,7 @@ impl From<WeatherConditions> for Message {
         if m.precipitation_probability != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.precipitation_probability),
                 is_expanded: false,
             });
@@ -279,7 +279,7 @@ impl From<WeatherConditions> for Message {
         if m.temperature_feels_like != i8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.temperature_feels_like),
                 is_expanded: false,
             });
@@ -287,7 +287,7 @@ impl From<WeatherConditions> for Message {
         if m.relative_humidity != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.relative_humidity),
                 is_expanded: false,
             });
@@ -295,7 +295,7 @@ impl From<WeatherConditions> for Message {
         if !m.location.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.location),
                 is_expanded: false,
             });
@@ -303,7 +303,7 @@ impl From<WeatherConditions> for Message {
         if m.observed_at_time.0 != u32::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.observed_at_time.0),
                 is_expanded: false,
             });
@@ -311,7 +311,7 @@ impl From<WeatherConditions> for Message {
         if m.observed_location_lat != i32::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.observed_location_lat),
                 is_expanded: false,
             });
@@ -319,7 +319,7 @@ impl From<WeatherConditions> for Message {
         if m.observed_location_long != i32::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.observed_location_long),
                 is_expanded: false,
             });
@@ -327,7 +327,7 @@ impl From<WeatherConditions> for Message {
         if m.day_of_week.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::DAY_OF_WEEK,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.day_of_week.0),
                 is_expanded: false,
             });
@@ -335,7 +335,7 @@ impl From<WeatherConditions> for Message {
         if m.high_temperature != i8::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.high_temperature),
                 is_expanded: false,
             });
@@ -343,7 +343,7 @@ impl From<WeatherConditions> for Message {
         if m.low_temperature != i8::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.low_temperature),
                 is_expanded: false,
             });

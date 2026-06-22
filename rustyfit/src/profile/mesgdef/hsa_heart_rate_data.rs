@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -96,7 +96,7 @@ impl From<HsaHeartRateData> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -104,7 +104,7 @@ impl From<HsaHeartRateData> for Message {
         if m.processing_interval != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.processing_interval),
                 is_expanded: false,
             });
@@ -112,7 +112,7 @@ impl From<HsaHeartRateData> for Message {
         if m.status != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.status),
                 is_expanded: false,
             });
@@ -120,7 +120,7 @@ impl From<HsaHeartRateData> for Message {
         if !m.heart_rate.is_empty() {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.heart_rate),
                 is_expanded: false,
             });

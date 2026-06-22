@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -81,7 +81,7 @@ impl From<StressLevel> for Message {
         if m.stress_level_value != i16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.stress_level_value),
                 is_expanded: false,
             });
@@ -89,7 +89,7 @@ impl From<StressLevel> for Message {
         if m.stress_level_time.0 != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.stress_level_time.0),
                 is_expanded: false,
             });

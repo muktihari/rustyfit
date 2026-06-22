@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -155,7 +155,7 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.screen_index != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.screen_index),
                 is_expanded: false,
             });
@@ -163,7 +163,7 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.concept_field != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::Uint8(m.concept_field),
                 is_expanded: false,
             });
@@ -171,7 +171,7 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.field_id != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.field_id),
                 is_expanded: is_expanded(&m.state, 2),
             });
@@ -179,7 +179,7 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.concept_count != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.concept_count),
                 is_expanded: is_expanded(&m.state, 3),
             });
@@ -187,7 +187,7 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.display_type.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::EXD_DISPLAY_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.display_type.0),
                 is_expanded: false,
             });
@@ -195,7 +195,7 @@ impl From<ExdDataFieldConfiguration> for Message {
         if m.title != [const { String::new() }; 32] {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::VecString(Vec::from(&m.title)),
                 is_expanded: false,
             });

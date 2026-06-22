@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -151,7 +151,7 @@ impl From<Connectivity> for Message {
         if m.bluetooth_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.bluetooth_enabled.0),
                 is_expanded: false,
             });
@@ -159,7 +159,7 @@ impl From<Connectivity> for Message {
         if m.bluetooth_le_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.bluetooth_le_enabled.0),
                 is_expanded: false,
             });
@@ -167,7 +167,7 @@ impl From<Connectivity> for Message {
         if m.ant_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.ant_enabled.0),
                 is_expanded: false,
             });
@@ -175,7 +175,7 @@ impl From<Connectivity> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });
@@ -183,7 +183,7 @@ impl From<Connectivity> for Message {
         if m.live_tracking_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.live_tracking_enabled.0),
                 is_expanded: false,
             });
@@ -191,7 +191,7 @@ impl From<Connectivity> for Message {
         if m.weather_conditions_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.weather_conditions_enabled.0),
                 is_expanded: false,
             });
@@ -199,7 +199,7 @@ impl From<Connectivity> for Message {
         if m.weather_alerts_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.weather_alerts_enabled.0),
                 is_expanded: false,
             });
@@ -207,7 +207,7 @@ impl From<Connectivity> for Message {
         if m.auto_activity_upload_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.auto_activity_upload_enabled.0),
                 is_expanded: false,
             });
@@ -215,7 +215,7 @@ impl From<Connectivity> for Message {
         if m.course_download_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.course_download_enabled.0),
                 is_expanded: false,
             });
@@ -223,7 +223,7 @@ impl From<Connectivity> for Message {
         if m.workout_download_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.workout_download_enabled.0),
                 is_expanded: false,
             });
@@ -231,7 +231,7 @@ impl From<Connectivity> for Message {
         if m.gps_ephemeris_download_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.gps_ephemeris_download_enabled.0),
                 is_expanded: false,
             });
@@ -239,7 +239,7 @@ impl From<Connectivity> for Message {
         if m.incident_detection_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.incident_detection_enabled.0),
                 is_expanded: false,
             });
@@ -247,7 +247,7 @@ impl From<Connectivity> for Message {
         if m.grouptrack_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.grouptrack_enabled.0),
                 is_expanded: false,
             });

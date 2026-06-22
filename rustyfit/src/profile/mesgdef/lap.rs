@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
@@ -2509,7 +2509,7 @@ impl From<Lap> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -2517,7 +2517,7 @@ impl From<Lap> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -2525,7 +2525,7 @@ impl From<Lap> for Message {
         if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::EVENT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
             });
@@ -2533,7 +2533,7 @@ impl From<Lap> for Message {
         if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::EVENT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
             });
@@ -2541,7 +2541,7 @@ impl From<Lap> for Message {
         if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
             });
@@ -2549,7 +2549,7 @@ impl From<Lap> for Message {
         if m.start_position_lat != i32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.start_position_lat),
                 is_expanded: false,
             });
@@ -2557,7 +2557,7 @@ impl From<Lap> for Message {
         if m.start_position_long != i32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.start_position_long),
                 is_expanded: false,
             });
@@ -2565,7 +2565,7 @@ impl From<Lap> for Message {
         if m.end_position_lat != i32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.end_position_lat),
                 is_expanded: false,
             });
@@ -2573,7 +2573,7 @@ impl From<Lap> for Message {
         if m.end_position_long != i32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.end_position_long),
                 is_expanded: false,
             });
@@ -2581,7 +2581,7 @@ impl From<Lap> for Message {
         if m.total_elapsed_time != u32::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_elapsed_time),
                 is_expanded: false,
             });
@@ -2589,7 +2589,7 @@ impl From<Lap> for Message {
         if m.total_timer_time != u32::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
             });
@@ -2597,7 +2597,7 @@ impl From<Lap> for Message {
         if m.total_distance != u32::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_distance),
                 is_expanded: false,
             });
@@ -2605,7 +2605,7 @@ impl From<Lap> for Message {
         if m.total_cycles != u32::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_cycles),
                 is_expanded: false,
             });
@@ -2613,7 +2613,7 @@ impl From<Lap> for Message {
         if m.total_calories != u16::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_calories),
                 is_expanded: false,
             });
@@ -2621,7 +2621,7 @@ impl From<Lap> for Message {
         if m.total_fat_calories != u16::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_fat_calories),
                 is_expanded: false,
             });
@@ -2629,7 +2629,7 @@ impl From<Lap> for Message {
         if m.avg_speed != u16::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_speed),
                 is_expanded: false,
             });
@@ -2637,7 +2637,7 @@ impl From<Lap> for Message {
         if m.max_speed != u16::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.max_speed),
                 is_expanded: false,
             });
@@ -2645,7 +2645,7 @@ impl From<Lap> for Message {
         if m.avg_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_heart_rate),
                 is_expanded: false,
             });
@@ -2653,7 +2653,7 @@ impl From<Lap> for Message {
         if m.max_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 16,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.max_heart_rate),
                 is_expanded: false,
             });
@@ -2661,7 +2661,7 @@ impl From<Lap> for Message {
         if m.avg_cadence != u8::MAX {
             fields.push(Field {
                 num: 17,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_cadence),
                 is_expanded: false,
             });
@@ -2669,7 +2669,7 @@ impl From<Lap> for Message {
         if m.max_cadence != u8::MAX {
             fields.push(Field {
                 num: 18,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.max_cadence),
                 is_expanded: false,
             });
@@ -2677,7 +2677,7 @@ impl From<Lap> for Message {
         if m.avg_power != u16::MAX {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_power),
                 is_expanded: false,
             });
@@ -2685,7 +2685,7 @@ impl From<Lap> for Message {
         if m.max_power != u16::MAX {
             fields.push(Field {
                 num: 20,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.max_power),
                 is_expanded: false,
             });
@@ -2693,7 +2693,7 @@ impl From<Lap> for Message {
         if m.total_ascent != u16::MAX {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_ascent),
                 is_expanded: false,
             });
@@ -2701,7 +2701,7 @@ impl From<Lap> for Message {
         if m.total_descent != u16::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_descent),
                 is_expanded: false,
             });
@@ -2709,7 +2709,7 @@ impl From<Lap> for Message {
         if m.intensity.0 != u8::MAX {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::INTENSITY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.intensity.0),
                 is_expanded: false,
             });
@@ -2717,7 +2717,7 @@ impl From<Lap> for Message {
         if m.lap_trigger.0 != u8::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::LAP_TRIGGER,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.lap_trigger.0),
                 is_expanded: false,
             });
@@ -2725,7 +2725,7 @@ impl From<Lap> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -2733,7 +2733,7 @@ impl From<Lap> for Message {
         if m.event_group != u8::MAX {
             fields.push(Field {
                 num: 26,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
             });
@@ -2741,7 +2741,7 @@ impl From<Lap> for Message {
         if m.num_lengths != u16::MAX {
             fields.push(Field {
                 num: 32,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.num_lengths),
                 is_expanded: false,
             });
@@ -2749,7 +2749,7 @@ impl From<Lap> for Message {
         if m.normalized_power != u16::MAX {
             fields.push(Field {
                 num: 33,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.normalized_power),
                 is_expanded: false,
             });
@@ -2757,7 +2757,7 @@ impl From<Lap> for Message {
         if m.left_right_balance.0 != u16::MAX {
             fields.push(Field {
                 num: 34,
-                profile_type: ProfileType::LEFT_RIGHT_BALANCE_100,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.left_right_balance.0),
                 is_expanded: false,
             });
@@ -2765,7 +2765,7 @@ impl From<Lap> for Message {
         if m.first_length_index != u16::MAX {
             fields.push(Field {
                 num: 35,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.first_length_index),
                 is_expanded: false,
             });
@@ -2773,7 +2773,7 @@ impl From<Lap> for Message {
         if m.avg_stroke_distance != u16::MAX {
             fields.push(Field {
                 num: 37,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_stroke_distance),
                 is_expanded: false,
             });
@@ -2781,7 +2781,7 @@ impl From<Lap> for Message {
         if m.swim_stroke.0 != u8::MAX {
             fields.push(Field {
                 num: 38,
-                profile_type: ProfileType::SWIM_STROKE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.swim_stroke.0),
                 is_expanded: false,
             });
@@ -2789,7 +2789,7 @@ impl From<Lap> for Message {
         if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 39,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
@@ -2797,7 +2797,7 @@ impl From<Lap> for Message {
         if m.num_active_lengths != u16::MAX {
             fields.push(Field {
                 num: 40,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.num_active_lengths),
                 is_expanded: false,
             });
@@ -2805,7 +2805,7 @@ impl From<Lap> for Message {
         if m.total_work != u32::MAX {
             fields.push(Field {
                 num: 41,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_work),
                 is_expanded: false,
             });
@@ -2813,7 +2813,7 @@ impl From<Lap> for Message {
         if m.avg_altitude != u16::MAX {
             fields.push(Field {
                 num: 42,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_altitude),
                 is_expanded: false,
             });
@@ -2821,7 +2821,7 @@ impl From<Lap> for Message {
         if m.max_altitude != u16::MAX {
             fields.push(Field {
                 num: 43,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.max_altitude),
                 is_expanded: false,
             });
@@ -2829,7 +2829,7 @@ impl From<Lap> for Message {
         if m.gps_accuracy != u8::MAX {
             fields.push(Field {
                 num: 44,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.gps_accuracy),
                 is_expanded: false,
             });
@@ -2837,7 +2837,7 @@ impl From<Lap> for Message {
         if m.avg_grade != i16::MAX {
             fields.push(Field {
                 num: 45,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.avg_grade),
                 is_expanded: false,
             });
@@ -2845,7 +2845,7 @@ impl From<Lap> for Message {
         if m.avg_pos_grade != i16::MAX {
             fields.push(Field {
                 num: 46,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.avg_pos_grade),
                 is_expanded: false,
             });
@@ -2853,7 +2853,7 @@ impl From<Lap> for Message {
         if m.avg_neg_grade != i16::MAX {
             fields.push(Field {
                 num: 47,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.avg_neg_grade),
                 is_expanded: false,
             });
@@ -2861,7 +2861,7 @@ impl From<Lap> for Message {
         if m.max_pos_grade != i16::MAX {
             fields.push(Field {
                 num: 48,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.max_pos_grade),
                 is_expanded: false,
             });
@@ -2869,7 +2869,7 @@ impl From<Lap> for Message {
         if m.max_neg_grade != i16::MAX {
             fields.push(Field {
                 num: 49,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.max_neg_grade),
                 is_expanded: false,
             });
@@ -2877,7 +2877,7 @@ impl From<Lap> for Message {
         if m.avg_temperature != i8::MAX {
             fields.push(Field {
                 num: 50,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.avg_temperature),
                 is_expanded: false,
             });
@@ -2885,7 +2885,7 @@ impl From<Lap> for Message {
         if m.max_temperature != i8::MAX {
             fields.push(Field {
                 num: 51,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.max_temperature),
                 is_expanded: false,
             });
@@ -2893,7 +2893,7 @@ impl From<Lap> for Message {
         if m.total_moving_time != u32::MAX {
             fields.push(Field {
                 num: 52,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_moving_time),
                 is_expanded: false,
             });
@@ -2901,7 +2901,7 @@ impl From<Lap> for Message {
         if m.avg_pos_vertical_speed != i16::MAX {
             fields.push(Field {
                 num: 53,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.avg_pos_vertical_speed),
                 is_expanded: false,
             });
@@ -2909,7 +2909,7 @@ impl From<Lap> for Message {
         if m.avg_neg_vertical_speed != i16::MAX {
             fields.push(Field {
                 num: 54,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.avg_neg_vertical_speed),
                 is_expanded: false,
             });
@@ -2917,7 +2917,7 @@ impl From<Lap> for Message {
         if m.max_pos_vertical_speed != i16::MAX {
             fields.push(Field {
                 num: 55,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.max_pos_vertical_speed),
                 is_expanded: false,
             });
@@ -2925,7 +2925,7 @@ impl From<Lap> for Message {
         if m.max_neg_vertical_speed != i16::MAX {
             fields.push(Field {
                 num: 56,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.max_neg_vertical_speed),
                 is_expanded: false,
             });
@@ -2933,7 +2933,7 @@ impl From<Lap> for Message {
         if !m.time_in_hr_zone.is_empty() {
             fields.push(Field {
                 num: 57,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.time_in_hr_zone),
                 is_expanded: false,
             });
@@ -2941,7 +2941,7 @@ impl From<Lap> for Message {
         if !m.time_in_speed_zone.is_empty() {
             fields.push(Field {
                 num: 58,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.time_in_speed_zone),
                 is_expanded: false,
             });
@@ -2949,7 +2949,7 @@ impl From<Lap> for Message {
         if !m.time_in_cadence_zone.is_empty() {
             fields.push(Field {
                 num: 59,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.time_in_cadence_zone),
                 is_expanded: false,
             });
@@ -2957,7 +2957,7 @@ impl From<Lap> for Message {
         if !m.time_in_power_zone.is_empty() {
             fields.push(Field {
                 num: 60,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.time_in_power_zone),
                 is_expanded: false,
             });
@@ -2965,7 +2965,7 @@ impl From<Lap> for Message {
         if m.repetition_num != u16::MAX {
             fields.push(Field {
                 num: 61,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.repetition_num),
                 is_expanded: false,
             });
@@ -2973,7 +2973,7 @@ impl From<Lap> for Message {
         if m.min_altitude != u16::MAX {
             fields.push(Field {
                 num: 62,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.min_altitude),
                 is_expanded: false,
             });
@@ -2981,7 +2981,7 @@ impl From<Lap> for Message {
         if m.min_heart_rate != u8::MAX {
             fields.push(Field {
                 num: 63,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.min_heart_rate),
                 is_expanded: false,
             });
@@ -2989,7 +2989,7 @@ impl From<Lap> for Message {
         if m.active_time != u32::MAX {
             fields.push(Field {
                 num: 70,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
             });
@@ -2997,7 +2997,7 @@ impl From<Lap> for Message {
         if m.wkt_step_index.0 != u16::MAX {
             fields.push(Field {
                 num: 71,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.wkt_step_index.0),
                 is_expanded: false,
             });
@@ -3005,7 +3005,7 @@ impl From<Lap> for Message {
         if m.opponent_score != u16::MAX {
             fields.push(Field {
                 num: 74,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: false,
             });
@@ -3013,7 +3013,7 @@ impl From<Lap> for Message {
         if !m.stroke_count.is_empty() {
             fields.push(Field {
                 num: 75,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.stroke_count),
                 is_expanded: false,
             });
@@ -3021,7 +3021,7 @@ impl From<Lap> for Message {
         if !m.zone_count.is_empty() {
             fields.push(Field {
                 num: 76,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.zone_count),
                 is_expanded: false,
             });
@@ -3029,7 +3029,7 @@ impl From<Lap> for Message {
         if m.avg_vertical_oscillation != u16::MAX {
             fields.push(Field {
                 num: 77,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_vertical_oscillation),
                 is_expanded: false,
             });
@@ -3037,7 +3037,7 @@ impl From<Lap> for Message {
         if m.avg_stance_time_percent != u16::MAX {
             fields.push(Field {
                 num: 78,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_stance_time_percent),
                 is_expanded: false,
             });
@@ -3045,7 +3045,7 @@ impl From<Lap> for Message {
         if m.avg_stance_time != u16::MAX {
             fields.push(Field {
                 num: 79,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_stance_time),
                 is_expanded: false,
             });
@@ -3053,7 +3053,7 @@ impl From<Lap> for Message {
         if m.avg_fractional_cadence != u8::MAX {
             fields.push(Field {
                 num: 80,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_fractional_cadence),
                 is_expanded: false,
             });
@@ -3061,7 +3061,7 @@ impl From<Lap> for Message {
         if m.max_fractional_cadence != u8::MAX {
             fields.push(Field {
                 num: 81,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.max_fractional_cadence),
                 is_expanded: false,
             });
@@ -3069,7 +3069,7 @@ impl From<Lap> for Message {
         if m.total_fractional_cycles != u8::MAX {
             fields.push(Field {
                 num: 82,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.total_fractional_cycles),
                 is_expanded: false,
             });
@@ -3077,7 +3077,7 @@ impl From<Lap> for Message {
         if m.player_score != u16::MAX {
             fields.push(Field {
                 num: 83,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.player_score),
                 is_expanded: false,
             });
@@ -3085,7 +3085,7 @@ impl From<Lap> for Message {
         if !m.avg_total_hemoglobin_conc.is_empty() {
             fields.push(Field {
                 num: 84,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.avg_total_hemoglobin_conc),
                 is_expanded: false,
             });
@@ -3093,7 +3093,7 @@ impl From<Lap> for Message {
         if !m.min_total_hemoglobin_conc.is_empty() {
             fields.push(Field {
                 num: 85,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.min_total_hemoglobin_conc),
                 is_expanded: false,
             });
@@ -3101,7 +3101,7 @@ impl From<Lap> for Message {
         if !m.max_total_hemoglobin_conc.is_empty() {
             fields.push(Field {
                 num: 86,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.max_total_hemoglobin_conc),
                 is_expanded: false,
             });
@@ -3109,7 +3109,7 @@ impl From<Lap> for Message {
         if !m.avg_saturated_hemoglobin_percent.is_empty() {
             fields.push(Field {
                 num: 87,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.avg_saturated_hemoglobin_percent),
                 is_expanded: false,
             });
@@ -3117,7 +3117,7 @@ impl From<Lap> for Message {
         if !m.min_saturated_hemoglobin_percent.is_empty() {
             fields.push(Field {
                 num: 88,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.min_saturated_hemoglobin_percent),
                 is_expanded: false,
             });
@@ -3125,7 +3125,7 @@ impl From<Lap> for Message {
         if !m.max_saturated_hemoglobin_percent.is_empty() {
             fields.push(Field {
                 num: 89,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.max_saturated_hemoglobin_percent),
                 is_expanded: false,
             });
@@ -3133,7 +3133,7 @@ impl From<Lap> for Message {
         if m.avg_left_torque_effectiveness != u8::MAX {
             fields.push(Field {
                 num: 91,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_left_torque_effectiveness),
                 is_expanded: false,
             });
@@ -3141,7 +3141,7 @@ impl From<Lap> for Message {
         if m.avg_right_torque_effectiveness != u8::MAX {
             fields.push(Field {
                 num: 92,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_right_torque_effectiveness),
                 is_expanded: false,
             });
@@ -3149,7 +3149,7 @@ impl From<Lap> for Message {
         if m.avg_left_pedal_smoothness != u8::MAX {
             fields.push(Field {
                 num: 93,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_left_pedal_smoothness),
                 is_expanded: false,
             });
@@ -3157,7 +3157,7 @@ impl From<Lap> for Message {
         if m.avg_right_pedal_smoothness != u8::MAX {
             fields.push(Field {
                 num: 94,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_right_pedal_smoothness),
                 is_expanded: false,
             });
@@ -3165,7 +3165,7 @@ impl From<Lap> for Message {
         if m.avg_combined_pedal_smoothness != u8::MAX {
             fields.push(Field {
                 num: 95,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_combined_pedal_smoothness),
                 is_expanded: false,
             });
@@ -3173,7 +3173,7 @@ impl From<Lap> for Message {
         if m.time_standing != u32::MAX {
             fields.push(Field {
                 num: 98,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.time_standing),
                 is_expanded: false,
             });
@@ -3181,7 +3181,7 @@ impl From<Lap> for Message {
         if m.stand_count != u16::MAX {
             fields.push(Field {
                 num: 99,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.stand_count),
                 is_expanded: false,
             });
@@ -3189,7 +3189,7 @@ impl From<Lap> for Message {
         if m.avg_left_pco != i8::MAX {
             fields.push(Field {
                 num: 100,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.avg_left_pco),
                 is_expanded: false,
             });
@@ -3197,7 +3197,7 @@ impl From<Lap> for Message {
         if m.avg_right_pco != i8::MAX {
             fields.push(Field {
                 num: 101,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.avg_right_pco),
                 is_expanded: false,
             });
@@ -3205,7 +3205,7 @@ impl From<Lap> for Message {
         if !m.avg_left_power_phase.is_empty() {
             fields.push(Field {
                 num: 102,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.avg_left_power_phase),
                 is_expanded: false,
             });
@@ -3213,7 +3213,7 @@ impl From<Lap> for Message {
         if !m.avg_left_power_phase_peak.is_empty() {
             fields.push(Field {
                 num: 103,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.avg_left_power_phase_peak),
                 is_expanded: false,
             });
@@ -3221,7 +3221,7 @@ impl From<Lap> for Message {
         if !m.avg_right_power_phase.is_empty() {
             fields.push(Field {
                 num: 104,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.avg_right_power_phase),
                 is_expanded: false,
             });
@@ -3229,7 +3229,7 @@ impl From<Lap> for Message {
         if !m.avg_right_power_phase_peak.is_empty() {
             fields.push(Field {
                 num: 105,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.avg_right_power_phase_peak),
                 is_expanded: false,
             });
@@ -3237,7 +3237,7 @@ impl From<Lap> for Message {
         if !m.avg_power_position.is_empty() {
             fields.push(Field {
                 num: 106,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.avg_power_position),
                 is_expanded: false,
             });
@@ -3245,7 +3245,7 @@ impl From<Lap> for Message {
         if !m.max_power_position.is_empty() {
             fields.push(Field {
                 num: 107,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.max_power_position),
                 is_expanded: false,
             });
@@ -3253,7 +3253,7 @@ impl From<Lap> for Message {
         if !m.avg_cadence_position.is_empty() {
             fields.push(Field {
                 num: 108,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.avg_cadence_position),
                 is_expanded: false,
             });
@@ -3261,7 +3261,7 @@ impl From<Lap> for Message {
         if !m.max_cadence_position.is_empty() {
             fields.push(Field {
                 num: 109,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.max_cadence_position),
                 is_expanded: false,
             });
@@ -3269,7 +3269,7 @@ impl From<Lap> for Message {
         if m.enhanced_avg_speed != u32::MAX {
             fields.push(Field {
                 num: 110,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_avg_speed),
                 is_expanded: is_expanded(&m.state, 110),
             });
@@ -3277,7 +3277,7 @@ impl From<Lap> for Message {
         if m.enhanced_max_speed != u32::MAX {
             fields.push(Field {
                 num: 111,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_max_speed),
                 is_expanded: is_expanded(&m.state, 111),
             });
@@ -3285,7 +3285,7 @@ impl From<Lap> for Message {
         if m.enhanced_avg_altitude != u32::MAX {
             fields.push(Field {
                 num: 112,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_avg_altitude),
                 is_expanded: is_expanded(&m.state, 112),
             });
@@ -3293,7 +3293,7 @@ impl From<Lap> for Message {
         if m.enhanced_min_altitude != u32::MAX {
             fields.push(Field {
                 num: 113,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_min_altitude),
                 is_expanded: is_expanded(&m.state, 113),
             });
@@ -3301,7 +3301,7 @@ impl From<Lap> for Message {
         if m.enhanced_max_altitude != u32::MAX {
             fields.push(Field {
                 num: 114,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_max_altitude),
                 is_expanded: is_expanded(&m.state, 114),
             });
@@ -3309,7 +3309,7 @@ impl From<Lap> for Message {
         if m.avg_lev_motor_power != u16::MAX {
             fields.push(Field {
                 num: 115,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_lev_motor_power),
                 is_expanded: false,
             });
@@ -3317,7 +3317,7 @@ impl From<Lap> for Message {
         if m.max_lev_motor_power != u16::MAX {
             fields.push(Field {
                 num: 116,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.max_lev_motor_power),
                 is_expanded: false,
             });
@@ -3325,7 +3325,7 @@ impl From<Lap> for Message {
         if m.lev_battery_consumption != u8::MAX {
             fields.push(Field {
                 num: 117,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.lev_battery_consumption),
                 is_expanded: false,
             });
@@ -3333,7 +3333,7 @@ impl From<Lap> for Message {
         if m.avg_vertical_ratio != u16::MAX {
             fields.push(Field {
                 num: 118,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_vertical_ratio),
                 is_expanded: false,
             });
@@ -3341,7 +3341,7 @@ impl From<Lap> for Message {
         if m.avg_stance_time_balance != u16::MAX {
             fields.push(Field {
                 num: 119,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_stance_time_balance),
                 is_expanded: false,
             });
@@ -3349,7 +3349,7 @@ impl From<Lap> for Message {
         if m.avg_step_length != u16::MAX {
             fields.push(Field {
                 num: 120,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_step_length),
                 is_expanded: false,
             });
@@ -3357,7 +3357,7 @@ impl From<Lap> for Message {
         if m.avg_vam != u16::MAX {
             fields.push(Field {
                 num: 121,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_vam),
                 is_expanded: false,
             });
@@ -3365,7 +3365,7 @@ impl From<Lap> for Message {
         if m.avg_depth != u32::MAX {
             fields.push(Field {
                 num: 122,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.avg_depth),
                 is_expanded: false,
             });
@@ -3373,7 +3373,7 @@ impl From<Lap> for Message {
         if m.max_depth != u32::MAX {
             fields.push(Field {
                 num: 123,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.max_depth),
                 is_expanded: false,
             });
@@ -3381,7 +3381,7 @@ impl From<Lap> for Message {
         if m.min_temperature != i8::MAX {
             fields.push(Field {
                 num: 124,
-                profile_type: ProfileType::SINT8,
+                base_type: FitBaseType::SINT8,
                 value: Value::Int8(m.min_temperature),
                 is_expanded: false,
             });
@@ -3389,7 +3389,7 @@ impl From<Lap> for Message {
         if m.enhanced_avg_respiration_rate != u16::MAX {
             fields.push(Field {
                 num: 136,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.enhanced_avg_respiration_rate),
                 is_expanded: is_expanded(&m.state, 136),
             });
@@ -3397,7 +3397,7 @@ impl From<Lap> for Message {
         if m.enhanced_max_respiration_rate != u16::MAX {
             fields.push(Field {
                 num: 137,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.enhanced_max_respiration_rate),
                 is_expanded: is_expanded(&m.state, 137),
             });
@@ -3405,7 +3405,7 @@ impl From<Lap> for Message {
         if m.avg_respiration_rate != u8::MAX {
             fields.push(Field {
                 num: 147,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_respiration_rate),
                 is_expanded: false,
             });
@@ -3413,7 +3413,7 @@ impl From<Lap> for Message {
         if m.max_respiration_rate != u8::MAX {
             fields.push(Field {
                 num: 148,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.max_respiration_rate),
                 is_expanded: false,
             });
@@ -3421,7 +3421,7 @@ impl From<Lap> for Message {
         if m.total_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 149,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.total_grit),
                 is_expanded: false,
             });
@@ -3429,7 +3429,7 @@ impl From<Lap> for Message {
         if m.total_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 150,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.total_flow),
                 is_expanded: false,
             });
@@ -3437,7 +3437,7 @@ impl From<Lap> for Message {
         if m.jump_count != u16::MAX {
             fields.push(Field {
                 num: 151,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.jump_count),
                 is_expanded: false,
             });
@@ -3445,7 +3445,7 @@ impl From<Lap> for Message {
         if m.avg_grit.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 153,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.avg_grit),
                 is_expanded: false,
             });
@@ -3453,7 +3453,7 @@ impl From<Lap> for Message {
         if m.avg_flow.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 154,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.avg_flow),
                 is_expanded: false,
             });
@@ -3461,7 +3461,7 @@ impl From<Lap> for Message {
         if m.total_fractional_ascent != u8::MAX {
             fields.push(Field {
                 num: 156,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.total_fractional_ascent),
                 is_expanded: false,
             });
@@ -3469,7 +3469,7 @@ impl From<Lap> for Message {
         if m.total_fractional_descent != u8::MAX {
             fields.push(Field {
                 num: 157,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.total_fractional_descent),
                 is_expanded: false,
             });
@@ -3477,7 +3477,7 @@ impl From<Lap> for Message {
         if m.avg_core_temperature != u16::MAX {
             fields.push(Field {
                 num: 158,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_core_temperature),
                 is_expanded: false,
             });
@@ -3485,7 +3485,7 @@ impl From<Lap> for Message {
         if m.min_core_temperature != u16::MAX {
             fields.push(Field {
                 num: 159,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.min_core_temperature),
                 is_expanded: false,
             });
@@ -3493,7 +3493,7 @@ impl From<Lap> for Message {
         if m.max_core_temperature != u16::MAX {
             fields.push(Field {
                 num: 160,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.max_core_temperature),
                 is_expanded: false,
             });

@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -180,7 +180,7 @@ impl From<MonitoringInfo> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -188,7 +188,7 @@ impl From<MonitoringInfo> for Message {
         if m.local_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::LOCAL_DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
             });
@@ -196,7 +196,7 @@ impl From<MonitoringInfo> for Message {
         if !m.activity_type.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::ACTIVITY_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::VecUint8({
                     let (ptr, len, capacity) = m.activity_type.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
@@ -207,7 +207,7 @@ impl From<MonitoringInfo> for Message {
         if !m.cycles_to_distance.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.cycles_to_distance),
                 is_expanded: false,
             });
@@ -215,7 +215,7 @@ impl From<MonitoringInfo> for Message {
         if !m.cycles_to_calories.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.cycles_to_calories),
                 is_expanded: false,
             });
@@ -223,7 +223,7 @@ impl From<MonitoringInfo> for Message {
         if m.resting_metabolic_rate != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.resting_metabolic_rate),
                 is_expanded: false,
             });

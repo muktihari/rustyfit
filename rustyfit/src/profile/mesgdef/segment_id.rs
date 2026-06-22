@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -133,7 +133,7 @@ impl From<SegmentId> for Message {
         if !m.name.is_empty() {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.name),
                 is_expanded: false,
             });
@@ -141,7 +141,7 @@ impl From<SegmentId> for Message {
         if !m.uuid.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.uuid),
                 is_expanded: false,
             });
@@ -149,7 +149,7 @@ impl From<SegmentId> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -157,7 +157,7 @@ impl From<SegmentId> for Message {
         if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
             });
@@ -165,7 +165,7 @@ impl From<SegmentId> for Message {
         if m.user_profile_primary_key != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.user_profile_primary_key),
                 is_expanded: false,
             });
@@ -173,7 +173,7 @@ impl From<SegmentId> for Message {
         if m.device_id != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.device_id),
                 is_expanded: false,
             });
@@ -181,7 +181,7 @@ impl From<SegmentId> for Message {
         if m.default_race_leader != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.default_race_leader),
                 is_expanded: false,
             });
@@ -189,7 +189,7 @@ impl From<SegmentId> for Message {
         if m.delete_status.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::SEGMENT_DELETE_STATUS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.delete_status.0),
                 is_expanded: false,
             });
@@ -197,7 +197,7 @@ impl From<SegmentId> for Message {
         if m.selection_type.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::SEGMENT_SELECTION_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.selection_type.0),
                 is_expanded: false,
             });

@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -191,7 +191,7 @@ impl From<Set> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -199,7 +199,7 @@ impl From<Set> for Message {
         if m.duration != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
             });
@@ -207,7 +207,7 @@ impl From<Set> for Message {
         if m.repetitions != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.repetitions),
                 is_expanded: false,
             });
@@ -215,7 +215,7 @@ impl From<Set> for Message {
         if m.weight != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.weight),
                 is_expanded: false,
             });
@@ -223,7 +223,7 @@ impl From<Set> for Message {
         if m.set_type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SET_TYPE,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.set_type.0),
                 is_expanded: false,
             });
@@ -231,7 +231,7 @@ impl From<Set> for Message {
         if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
             });
@@ -239,7 +239,7 @@ impl From<Set> for Message {
         if !m.category.is_empty() {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::EXERCISE_CATEGORY,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16({
                     let (ptr, len, capacity) = m.category.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
@@ -250,7 +250,7 @@ impl From<Set> for Message {
         if !m.category_subtype.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.category_subtype),
                 is_expanded: false,
             });
@@ -258,7 +258,7 @@ impl From<Set> for Message {
         if m.weight_display_unit.0 != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::FIT_BASE_UNIT,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.weight_display_unit.0),
                 is_expanded: false,
             });
@@ -266,7 +266,7 @@ impl From<Set> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -274,7 +274,7 @@ impl From<Set> for Message {
         if m.wkt_step_index.0 != u16::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.wkt_step_index.0),
                 is_expanded: false,
             });

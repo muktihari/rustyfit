@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -86,7 +86,7 @@ impl From<SleepDisruptionSeverityPeriod> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -94,7 +94,7 @@ impl From<SleepDisruptionSeverityPeriod> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -102,7 +102,7 @@ impl From<SleepDisruptionSeverityPeriod> for Message {
         if m.severity.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SLEEP_DISRUPTION_SEVERITY,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.severity.0),
                 is_expanded: false,
             });

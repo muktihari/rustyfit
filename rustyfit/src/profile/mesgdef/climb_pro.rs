@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
@@ -137,7 +137,7 @@ impl From<ClimbPro> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -145,7 +145,7 @@ impl From<ClimbPro> for Message {
         if m.position_lat != i32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
             });
@@ -153,7 +153,7 @@ impl From<ClimbPro> for Message {
         if m.position_long != i32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
             });
@@ -161,7 +161,7 @@ impl From<ClimbPro> for Message {
         if m.climb_pro_event.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::CLIMB_PRO_EVENT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.climb_pro_event.0),
                 is_expanded: false,
             });
@@ -169,7 +169,7 @@ impl From<ClimbPro> for Message {
         if m.climb_number != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.climb_number),
                 is_expanded: false,
             });
@@ -177,7 +177,7 @@ impl From<ClimbPro> for Message {
         if m.climb_category != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.climb_category),
                 is_expanded: false,
             });
@@ -185,7 +185,7 @@ impl From<ClimbPro> for Message {
         if m.current_dist.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.current_dist),
                 is_expanded: false,
             });

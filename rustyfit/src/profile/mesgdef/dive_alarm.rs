@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -210,7 +210,7 @@ impl From<DiveAlarm> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -218,7 +218,7 @@ impl From<DiveAlarm> for Message {
         if m.depth != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.depth),
                 is_expanded: false,
             });
@@ -226,7 +226,7 @@ impl From<DiveAlarm> for Message {
         if m.time != i32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.time),
                 is_expanded: false,
             });
@@ -234,7 +234,7 @@ impl From<DiveAlarm> for Message {
         if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
             });
@@ -242,7 +242,7 @@ impl From<DiveAlarm> for Message {
         if m.alarm_type.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::DIVE_ALARM_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.alarm_type.0),
                 is_expanded: false,
             });
@@ -250,7 +250,7 @@ impl From<DiveAlarm> for Message {
         if m.sound.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::TONE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sound.0),
                 is_expanded: false,
             });
@@ -258,7 +258,7 @@ impl From<DiveAlarm> for Message {
         if !m.dive_types.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::VecUint8({
                     let (ptr, len, capacity) = m.dive_types.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
@@ -269,7 +269,7 @@ impl From<DiveAlarm> for Message {
         if m.id != u32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.id),
                 is_expanded: false,
             });
@@ -277,7 +277,7 @@ impl From<DiveAlarm> for Message {
         if m.popup_enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.popup_enabled.0),
                 is_expanded: false,
             });
@@ -285,7 +285,7 @@ impl From<DiveAlarm> for Message {
         if m.trigger_on_descent.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.trigger_on_descent.0),
                 is_expanded: false,
             });
@@ -293,7 +293,7 @@ impl From<DiveAlarm> for Message {
         if m.trigger_on_ascent.0 != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.trigger_on_ascent.0),
                 is_expanded: false,
             });
@@ -301,7 +301,7 @@ impl From<DiveAlarm> for Message {
         if m.repeating.0 != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.repeating.0),
                 is_expanded: false,
             });
@@ -309,7 +309,7 @@ impl From<DiveAlarm> for Message {
         if m.speed != i32::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.speed),
                 is_expanded: false,
             });

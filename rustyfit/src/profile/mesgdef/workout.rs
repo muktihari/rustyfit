@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -149,7 +149,7 @@ impl From<Workout> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -157,7 +157,7 @@ impl From<Workout> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -165,7 +165,7 @@ impl From<Workout> for Message {
         if m.capabilities.0 != u32::MIN {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::WORKOUT_CAPABILITIES,
+                base_type: FitBaseType::UINT32Z,
                 value: Value::Uint32(m.capabilities.0),
                 is_expanded: false,
             });
@@ -173,7 +173,7 @@ impl From<Workout> for Message {
         if m.num_valid_steps != u16::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.num_valid_steps),
                 is_expanded: false,
             });
@@ -181,7 +181,7 @@ impl From<Workout> for Message {
         if !m.wkt_name.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.wkt_name),
                 is_expanded: false,
             });
@@ -189,7 +189,7 @@ impl From<Workout> for Message {
         if m.sub_sport.0 != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::SUB_SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
@@ -197,7 +197,7 @@ impl From<Workout> for Message {
         if m.pool_length != u16::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.pool_length),
                 is_expanded: false,
             });
@@ -205,7 +205,7 @@ impl From<Workout> for Message {
         if m.pool_length_unit.0 != u8::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::DISPLAY_MEASURE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.pool_length_unit.0),
                 is_expanded: false,
             });
@@ -213,7 +213,7 @@ impl From<Workout> for Message {
         if !m.wkt_description.is_empty() {
             fields.push(Field {
                 num: 17,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.wkt_description),
                 is_expanded: false,
             });

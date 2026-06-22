@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -143,7 +143,7 @@ impl From<BloodPressure> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -151,7 +151,7 @@ impl From<BloodPressure> for Message {
         if m.systolic_pressure != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.systolic_pressure),
                 is_expanded: false,
             });
@@ -159,7 +159,7 @@ impl From<BloodPressure> for Message {
         if m.diastolic_pressure != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.diastolic_pressure),
                 is_expanded: false,
             });
@@ -167,7 +167,7 @@ impl From<BloodPressure> for Message {
         if m.mean_arterial_pressure != u16::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.mean_arterial_pressure),
                 is_expanded: false,
             });
@@ -175,7 +175,7 @@ impl From<BloodPressure> for Message {
         if m.map_3_sample_mean != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.map_3_sample_mean),
                 is_expanded: false,
             });
@@ -183,7 +183,7 @@ impl From<BloodPressure> for Message {
         if m.map_morning_values != u16::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.map_morning_values),
                 is_expanded: false,
             });
@@ -191,7 +191,7 @@ impl From<BloodPressure> for Message {
         if m.map_evening_values != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.map_evening_values),
                 is_expanded: false,
             });
@@ -199,7 +199,7 @@ impl From<BloodPressure> for Message {
         if m.heart_rate != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
             });
@@ -207,7 +207,7 @@ impl From<BloodPressure> for Message {
         if m.heart_rate_type.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::HR_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.heart_rate_type.0),
                 is_expanded: false,
             });
@@ -215,7 +215,7 @@ impl From<BloodPressure> for Message {
         if m.status.0 != u8::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::BP_STATUS,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.status.0),
                 is_expanded: false,
             });
@@ -223,7 +223,7 @@ impl From<BloodPressure> for Message {
         if m.user_profile_index.0 != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.user_profile_index.0),
                 is_expanded: false,
             });

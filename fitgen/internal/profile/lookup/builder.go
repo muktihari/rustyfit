@@ -16,6 +16,7 @@ import (
 	"github.com/muktihari/rustyfit/fitgen/internal/generator"
 	"github.com/muktihari/rustyfit/fitgen/internal/lookup"
 	"github.com/muktihari/rustyfit/fitgen/internal/parser"
+	"github.com/muktihari/rustyfit/fitgen/internal/pkg/strutil"
 )
 
 type ( // type aliasing for better code reading.
@@ -135,7 +136,7 @@ func (b *Builder) makeFieldRefs(message parser.Message) string {
 			field.Name,
 			field.Num,
 			strings.ToUpper(b.lookup.BaseType(field.Type).String()),
-			strings.ToUpper(field.Type),
+			strutil.ToTitle(field.Type),
 		)
 
 		if field.Array != "" {
@@ -229,7 +230,8 @@ func (b *Builder) makeSubFields(field parser.Field, messageName string) string {
 	for _, subField := range field.SubFields {
 		fmt.Fprintf(buf, "\n%19s SubField { ", "")
 		fmt.Fprintf(buf, "name: %q, ", subField.Name)
-		fmt.Fprintf(buf, "profile_type: ProfileType::%s, ", strings.ToUpper(subField.Type))
+		fmt.Fprintf(buf, "base_type: FitBaseType::%s, ", strings.ToUpper(b.lookup.BaseType(field.Type).String()))
+		fmt.Fprintf(buf, "profile_type: ProfileType::%s, ", strutil.ToTitle(subField.Type))
 
 		scale := scaleOrDefault(subField.Scales, 0) // first index or default
 		if scale != 1 {

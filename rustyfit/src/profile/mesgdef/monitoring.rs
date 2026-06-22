@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -503,7 +503,7 @@ impl From<Monitoring> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -511,7 +511,7 @@ impl From<Monitoring> for Message {
         if m.device_index.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::DEVICE_INDEX,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.device_index.0),
                 is_expanded: false,
             });
@@ -519,7 +519,7 @@ impl From<Monitoring> for Message {
         if m.calories != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.calories),
                 is_expanded: false,
             });
@@ -527,7 +527,7 @@ impl From<Monitoring> for Message {
         if m.distance != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
             });
@@ -535,7 +535,7 @@ impl From<Monitoring> for Message {
         if m.cycles != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.cycles),
                 is_expanded: false,
             });
@@ -543,7 +543,7 @@ impl From<Monitoring> for Message {
         if m.active_time != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
             });
@@ -551,7 +551,7 @@ impl From<Monitoring> for Message {
         if m.activity_type.0 != u8::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::ACTIVITY_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.activity_type.0),
                 is_expanded: is_expanded(&m.state, 5),
             });
@@ -559,7 +559,7 @@ impl From<Monitoring> for Message {
         if m.activity_subtype.0 != u8::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::ACTIVITY_SUBTYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.activity_subtype.0),
                 is_expanded: false,
             });
@@ -567,7 +567,7 @@ impl From<Monitoring> for Message {
         if m.activity_level.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::ACTIVITY_LEVEL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.activity_level.0),
                 is_expanded: false,
             });
@@ -575,7 +575,7 @@ impl From<Monitoring> for Message {
         if m.distance_16 != u16::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.distance_16),
                 is_expanded: false,
             });
@@ -583,7 +583,7 @@ impl From<Monitoring> for Message {
         if m.cycles_16 != u16::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.cycles_16),
                 is_expanded: false,
             });
@@ -591,7 +591,7 @@ impl From<Monitoring> for Message {
         if m.active_time_16 != u16::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.active_time_16),
                 is_expanded: false,
             });
@@ -599,7 +599,7 @@ impl From<Monitoring> for Message {
         if m.local_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::LOCAL_DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.local_timestamp.0),
                 is_expanded: false,
             });
@@ -607,7 +607,7 @@ impl From<Monitoring> for Message {
         if m.temperature != i16::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.temperature),
                 is_expanded: false,
             });
@@ -615,7 +615,7 @@ impl From<Monitoring> for Message {
         if m.temperature_min != i16::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.temperature_min),
                 is_expanded: false,
             });
@@ -623,7 +623,7 @@ impl From<Monitoring> for Message {
         if m.temperature_max != i16::MAX {
             fields.push(Field {
                 num: 15,
-                profile_type: ProfileType::SINT16,
+                base_type: FitBaseType::SINT16,
                 value: Value::Int16(m.temperature_max),
                 is_expanded: false,
             });
@@ -631,7 +631,7 @@ impl From<Monitoring> for Message {
         if m.activity_time != [u16::MAX; 8] {
             fields.push(Field {
                 num: 16,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(Vec::from(&m.activity_time)),
                 is_expanded: false,
             });
@@ -639,7 +639,7 @@ impl From<Monitoring> for Message {
         if m.active_calories != u16::MAX {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.active_calories),
                 is_expanded: false,
             });
@@ -647,7 +647,7 @@ impl From<Monitoring> for Message {
         if m.current_activity_type_intensity != u8::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::Uint8(m.current_activity_type_intensity),
                 is_expanded: false,
             });
@@ -655,7 +655,7 @@ impl From<Monitoring> for Message {
         if m.timestamp_min_8 != u8::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.timestamp_min_8),
                 is_expanded: false,
             });
@@ -663,7 +663,7 @@ impl From<Monitoring> for Message {
         if m.timestamp_16 != u16::MAX {
             fields.push(Field {
                 num: 26,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.timestamp_16),
                 is_expanded: false,
             });
@@ -671,7 +671,7 @@ impl From<Monitoring> for Message {
         if m.heart_rate != u8::MAX {
             fields.push(Field {
                 num: 27,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.heart_rate),
                 is_expanded: false,
             });
@@ -679,7 +679,7 @@ impl From<Monitoring> for Message {
         if m.intensity != u8::MAX {
             fields.push(Field {
                 num: 28,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.intensity),
                 is_expanded: is_expanded(&m.state, 28),
             });
@@ -687,7 +687,7 @@ impl From<Monitoring> for Message {
         if m.duration_min != u16::MAX {
             fields.push(Field {
                 num: 29,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.duration_min),
                 is_expanded: false,
             });
@@ -695,7 +695,7 @@ impl From<Monitoring> for Message {
         if m.duration != u32::MAX {
             fields.push(Field {
                 num: 30,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.duration),
                 is_expanded: false,
             });
@@ -703,7 +703,7 @@ impl From<Monitoring> for Message {
         if m.ascent != u32::MAX {
             fields.push(Field {
                 num: 31,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.ascent),
                 is_expanded: false,
             });
@@ -711,7 +711,7 @@ impl From<Monitoring> for Message {
         if m.descent != u32::MAX {
             fields.push(Field {
                 num: 32,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.descent),
                 is_expanded: false,
             });
@@ -719,7 +719,7 @@ impl From<Monitoring> for Message {
         if m.moderate_activity_minutes != u16::MAX {
             fields.push(Field {
                 num: 33,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.moderate_activity_minutes),
                 is_expanded: false,
             });
@@ -727,7 +727,7 @@ impl From<Monitoring> for Message {
         if m.vigorous_activity_minutes != u16::MAX {
             fields.push(Field {
                 num: 34,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.vigorous_activity_minutes),
                 is_expanded: false,
             });

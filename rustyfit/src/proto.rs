@@ -150,8 +150,8 @@ pub struct Field {
     /// Defined in the Global FIT profile for the specified FIT message, otherwise
     /// its a manufaturer specific number (defined by manufacturer). (255 == invalid)
     pub num: u8,
-    /// BaseType is the base of the ProfileType. E.g. ProfileType::DateTime -> FitBaseType::Uint32.
-    pub profile_type: ProfileType,
+    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
+    pub base_type: FitBaseType,
     /// Value
     pub value: Value,
     /// A flag to detect whether this field is generated through component expansion.
@@ -173,11 +173,9 @@ pub struct FieldReference<'a> {
     /// Defined in the Global FIT profile for the specified FIT message, otherwise
     /// its a manufaturer specific name (defined by manufacturer).
     pub name: &'a str,
-    /// Type is defined type that serves as an abstraction layer above base types (primitive-types),
-    /// e.g. DateTime is a time representation in uint32.
+    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
     pub base_type: FitBaseType,
-    /// ProfileType represents more than just a type of Value. E.g. ProfileType::DateTime -> FitBaseType::Uint32.
-    /// When an u32 value having ProfileType::DateTime as type, the value represents time.
+    /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
     pub profile_type: ProfileType,
     /// Flag whether the value of this field is an array
     pub array: bool,
@@ -237,7 +235,9 @@ pub struct Component {
 pub struct SubField<'a> {
     /// Name
     pub name: &'a str,
-    /// ProfileType
+    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
+    pub base_type: FitBaseType,
+    /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
     pub profile_type: ProfileType,
     /// Scale
     pub scale: f64,

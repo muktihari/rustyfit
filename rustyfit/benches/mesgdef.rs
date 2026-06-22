@@ -1,6 +1,9 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use rustyfit::{
-    profile::{ProfileType, mesgdef::Record, typedef::MesgNum},
+    profile::{
+        mesgdef::Record,
+        typedef::{FitBaseType, MesgNum},
+    },
     proto::{Field, Message, Value},
 };
 use std::hint::black_box;
@@ -8,7 +11,7 @@ use std::hint::black_box;
 pub fn bench_from(c: &mut Criterion) {
     const FIELD: Field = Field {
         num: 0,
-        profile_type: ProfileType(0),
+        base_type: FitBaseType(u8::MAX),
         value: Value::Invalid,
         is_expanded: false,
     };
@@ -18,7 +21,7 @@ pub fn bench_from(c: &mut Criterion) {
         fields: vec![
             Field {
                 num: Record::DISTANCE,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(1000),
                 is_expanded: false,
             },

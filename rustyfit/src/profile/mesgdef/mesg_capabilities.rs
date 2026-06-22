@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -98,7 +98,7 @@ impl From<MesgCapabilities> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -106,7 +106,7 @@ impl From<MesgCapabilities> for Message {
         if m.file.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::FILE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.file.0),
                 is_expanded: false,
             });
@@ -114,7 +114,7 @@ impl From<MesgCapabilities> for Message {
         if m.mesg_num.0 != u16::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::MESG_NUM,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.mesg_num.0),
                 is_expanded: false,
             });
@@ -122,7 +122,7 @@ impl From<MesgCapabilities> for Message {
         if m.count_type.0 != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::MESG_COUNT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.count_type.0),
                 is_expanded: false,
             });
@@ -130,7 +130,7 @@ impl From<MesgCapabilities> for Message {
         if m.count != u16::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.count),
                 is_expanded: false,
             });

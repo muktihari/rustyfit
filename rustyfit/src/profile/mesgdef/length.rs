@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -353,7 +353,7 @@ impl From<Length> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -361,7 +361,7 @@ impl From<Length> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -369,7 +369,7 @@ impl From<Length> for Message {
         if m.event.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::EVENT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event.0),
                 is_expanded: false,
             });
@@ -377,7 +377,7 @@ impl From<Length> for Message {
         if m.event_type.0 != u8::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::EVENT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.event_type.0),
                 is_expanded: false,
             });
@@ -385,7 +385,7 @@ impl From<Length> for Message {
         if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
             });
@@ -393,7 +393,7 @@ impl From<Length> for Message {
         if m.total_elapsed_time != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_elapsed_time),
                 is_expanded: false,
             });
@@ -401,7 +401,7 @@ impl From<Length> for Message {
         if m.total_timer_time != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
             });
@@ -409,7 +409,7 @@ impl From<Length> for Message {
         if m.total_strokes != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_strokes),
                 is_expanded: false,
             });
@@ -417,7 +417,7 @@ impl From<Length> for Message {
         if m.avg_speed != u16::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.avg_speed),
                 is_expanded: false,
             });
@@ -425,7 +425,7 @@ impl From<Length> for Message {
         if m.swim_stroke.0 != u8::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::SWIM_STROKE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.swim_stroke.0),
                 is_expanded: false,
             });
@@ -433,7 +433,7 @@ impl From<Length> for Message {
         if m.avg_swimming_cadence != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_swimming_cadence),
                 is_expanded: false,
             });
@@ -441,7 +441,7 @@ impl From<Length> for Message {
         if m.event_group != u8::MAX {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.event_group),
                 is_expanded: false,
             });
@@ -449,7 +449,7 @@ impl From<Length> for Message {
         if m.total_calories != u16::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_calories),
                 is_expanded: false,
             });
@@ -457,7 +457,7 @@ impl From<Length> for Message {
         if m.length_type.0 != u8::MAX {
             fields.push(Field {
                 num: 12,
-                profile_type: ProfileType::LENGTH_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.length_type.0),
                 is_expanded: false,
             });
@@ -465,7 +465,7 @@ impl From<Length> for Message {
         if m.player_score != u16::MAX {
             fields.push(Field {
                 num: 18,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.player_score),
                 is_expanded: false,
             });
@@ -473,7 +473,7 @@ impl From<Length> for Message {
         if m.opponent_score != u16::MAX {
             fields.push(Field {
                 num: 19,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.opponent_score),
                 is_expanded: false,
             });
@@ -481,7 +481,7 @@ impl From<Length> for Message {
         if !m.stroke_count.is_empty() {
             fields.push(Field {
                 num: 20,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.stroke_count),
                 is_expanded: false,
             });
@@ -489,7 +489,7 @@ impl From<Length> for Message {
         if !m.zone_count.is_empty() {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.zone_count),
                 is_expanded: false,
             });
@@ -497,7 +497,7 @@ impl From<Length> for Message {
         if m.enhanced_avg_respiration_rate != u16::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.enhanced_avg_respiration_rate),
                 is_expanded: is_expanded(&m.state, 22),
             });
@@ -505,7 +505,7 @@ impl From<Length> for Message {
         if m.enhanced_max_respiration_rate != u16::MAX {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.enhanced_max_respiration_rate),
                 is_expanded: is_expanded(&m.state, 23),
             });
@@ -513,7 +513,7 @@ impl From<Length> for Message {
         if m.avg_respiration_rate != u8::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_respiration_rate),
                 is_expanded: false,
             });
@@ -521,7 +521,7 @@ impl From<Length> for Message {
         if m.max_respiration_rate != u8::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.max_respiration_rate),
                 is_expanded: false,
             });

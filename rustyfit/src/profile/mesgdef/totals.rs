@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -134,7 +134,7 @@ impl From<Totals> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -142,7 +142,7 @@ impl From<Totals> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -150,7 +150,7 @@ impl From<Totals> for Message {
         if m.timer_time != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timer_time),
                 is_expanded: false,
             });
@@ -158,7 +158,7 @@ impl From<Totals> for Message {
         if m.distance != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.distance),
                 is_expanded: false,
             });
@@ -166,7 +166,7 @@ impl From<Totals> for Message {
         if m.calories != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.calories),
                 is_expanded: false,
             });
@@ -174,7 +174,7 @@ impl From<Totals> for Message {
         if m.sport.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::SPORT,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.sport.0),
                 is_expanded: false,
             });
@@ -182,7 +182,7 @@ impl From<Totals> for Message {
         if m.elapsed_time != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.elapsed_time),
                 is_expanded: false,
             });
@@ -190,7 +190,7 @@ impl From<Totals> for Message {
         if m.sessions != u16::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.sessions),
                 is_expanded: false,
             });
@@ -198,7 +198,7 @@ impl From<Totals> for Message {
         if m.active_time != u32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
             });
@@ -206,7 +206,7 @@ impl From<Totals> for Message {
         if m.sport_index != u8::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.sport_index),
                 is_expanded: false,
             });

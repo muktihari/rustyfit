@@ -6,7 +6,7 @@
 
 #![allow(clippy::manual_range_patterns)]
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
@@ -239,7 +239,7 @@ impl From<Jump> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -247,7 +247,7 @@ impl From<Jump> for Message {
         if m.distance.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.distance),
                 is_expanded: false,
             });
@@ -255,7 +255,7 @@ impl From<Jump> for Message {
         if m.height.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.height),
                 is_expanded: false,
             });
@@ -263,7 +263,7 @@ impl From<Jump> for Message {
         if m.rotations != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.rotations),
                 is_expanded: false,
             });
@@ -271,7 +271,7 @@ impl From<Jump> for Message {
         if m.hang_time.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.hang_time),
                 is_expanded: false,
             });
@@ -279,7 +279,7 @@ impl From<Jump> for Message {
         if m.score.to_bits() != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::FLOAT32,
+                base_type: FitBaseType::FLOAT32,
                 value: Value::Float32(m.score),
                 is_expanded: false,
             });
@@ -287,7 +287,7 @@ impl From<Jump> for Message {
         if m.position_lat != i32::MAX {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_lat),
                 is_expanded: false,
             });
@@ -295,7 +295,7 @@ impl From<Jump> for Message {
         if m.position_long != i32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.position_long),
                 is_expanded: false,
             });
@@ -303,7 +303,7 @@ impl From<Jump> for Message {
         if m.speed != u16::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.speed),
                 is_expanded: false,
             });
@@ -311,7 +311,7 @@ impl From<Jump> for Message {
         if m.enhanced_speed != u32::MAX {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.enhanced_speed),
                 is_expanded: is_expanded(&m.state, 8),
             });

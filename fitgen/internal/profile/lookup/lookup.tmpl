@@ -24,8 +24,8 @@ pub(crate) const MAX_COMPONENT_BITS: usize = {{ .MaxComponentBits }};
 {{ .TotalAccumulateList -}}
 pub(crate) const TOTAL_ACCUMULATE: usize = {{ .TotalAccumulate }};
 
-const FR_DEF: FieldReference = FieldReference { num: 0, name: "", base_type: FitBaseType(u8::MAX), profile_type: ProfileType(u16::MAX), array: false, accumulate: false, scale: 1.0, offset: 0.0, units: "", components: &[], sub_fields: &[] };
-const SF_DEF: SubField = SubField { name: "", profile_type: ProfileType(u16::MAX), scale: 1.0, offset: 0.0, units: "", components: &[], maps: &[] };
+const FR_DEF: FieldReference = FieldReference { num: 0, name: "", base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, array: false, accumulate: false, scale: 1.0, offset: 0.0, units: "", components: &[], sub_fields: &[] };
+const SF_DEF: SubField = SubField { name: "", base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: "", components: &[], maps: &[] };
 
 /// Find FieldReference defined in the Global Profile (Profile.xlsx).
 pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<FieldReference<'a>> {

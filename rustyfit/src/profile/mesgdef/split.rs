@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
@@ -438,7 +438,7 @@ impl From<Split> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -446,7 +446,7 @@ impl From<Split> for Message {
         if m.split_type.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::SPLIT_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.split_type.0),
                 is_expanded: false,
             });
@@ -454,7 +454,7 @@ impl From<Split> for Message {
         if m.total_elapsed_time != u32::MAX {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_elapsed_time),
                 is_expanded: false,
             });
@@ -462,7 +462,7 @@ impl From<Split> for Message {
         if m.total_timer_time != u32::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_timer_time),
                 is_expanded: false,
             });
@@ -470,7 +470,7 @@ impl From<Split> for Message {
         if m.total_distance != u32::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_distance),
                 is_expanded: false,
             });
@@ -478,7 +478,7 @@ impl From<Split> for Message {
         if m.avg_speed != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.avg_speed),
                 is_expanded: false,
             });
@@ -486,7 +486,7 @@ impl From<Split> for Message {
         if m.start_time.0 != u32::MAX {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_time.0),
                 is_expanded: false,
             });
@@ -494,7 +494,7 @@ impl From<Split> for Message {
         if m.total_ascent != u16::MAX {
             fields.push(Field {
                 num: 13,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_ascent),
                 is_expanded: false,
             });
@@ -502,7 +502,7 @@ impl From<Split> for Message {
         if m.total_descent != u16::MAX {
             fields.push(Field {
                 num: 14,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.total_descent),
                 is_expanded: false,
             });
@@ -510,7 +510,7 @@ impl From<Split> for Message {
         if m.start_position_lat != i32::MAX {
             fields.push(Field {
                 num: 21,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.start_position_lat),
                 is_expanded: false,
             });
@@ -518,7 +518,7 @@ impl From<Split> for Message {
         if m.start_position_long != i32::MAX {
             fields.push(Field {
                 num: 22,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.start_position_long),
                 is_expanded: false,
             });
@@ -526,7 +526,7 @@ impl From<Split> for Message {
         if m.end_position_lat != i32::MAX {
             fields.push(Field {
                 num: 23,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.end_position_lat),
                 is_expanded: false,
             });
@@ -534,7 +534,7 @@ impl From<Split> for Message {
         if m.end_position_long != i32::MAX {
             fields.push(Field {
                 num: 24,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.end_position_long),
                 is_expanded: false,
             });
@@ -542,7 +542,7 @@ impl From<Split> for Message {
         if m.max_speed != u32::MAX {
             fields.push(Field {
                 num: 25,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.max_speed),
                 is_expanded: false,
             });
@@ -550,7 +550,7 @@ impl From<Split> for Message {
         if m.avg_vert_speed != i32::MAX {
             fields.push(Field {
                 num: 26,
-                profile_type: ProfileType::SINT32,
+                base_type: FitBaseType::SINT32,
                 value: Value::Int32(m.avg_vert_speed),
                 is_expanded: false,
             });
@@ -558,7 +558,7 @@ impl From<Split> for Message {
         if m.end_time.0 != u32::MAX {
             fields.push(Field {
                 num: 27,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.end_time.0),
                 is_expanded: false,
             });
@@ -566,7 +566,7 @@ impl From<Split> for Message {
         if m.total_calories != u32::MAX {
             fields.push(Field {
                 num: 28,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_calories),
                 is_expanded: false,
             });
@@ -574,7 +574,7 @@ impl From<Split> for Message {
         if m.start_elevation != u32::MAX {
             fields.push(Field {
                 num: 74,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_elevation),
                 is_expanded: false,
             });
@@ -582,7 +582,7 @@ impl From<Split> for Message {
         if m.active_time != u32::MAX {
             fields.push(Field {
                 num: 78,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.active_time),
                 is_expanded: false,
             });
@@ -590,7 +590,7 @@ impl From<Split> for Message {
         if m.total_moving_time != u32::MAX {
             fields.push(Field {
                 num: 110,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_moving_time),
                 is_expanded: false,
             });

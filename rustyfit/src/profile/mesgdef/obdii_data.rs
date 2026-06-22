@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
 
@@ -131,7 +131,7 @@ impl From<ObdiiData> for Message {
         if m.timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 253,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.timestamp.0),
                 is_expanded: false,
             });
@@ -139,7 +139,7 @@ impl From<ObdiiData> for Message {
         if m.timestamp_ms != u16::MAX {
             fields.push(Field {
                 num: 0,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.timestamp_ms),
                 is_expanded: false,
             });
@@ -147,7 +147,7 @@ impl From<ObdiiData> for Message {
         if !m.time_offset.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::VecUint16(m.time_offset),
                 is_expanded: false,
             });
@@ -155,7 +155,7 @@ impl From<ObdiiData> for Message {
         if m.pid != u8::MAX {
             fields.push(Field {
                 num: 2,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::Uint8(m.pid),
                 is_expanded: false,
             });
@@ -163,7 +163,7 @@ impl From<ObdiiData> for Message {
         if !m.raw_data.is_empty() {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::BYTE,
+                base_type: FitBaseType::BYTE,
                 value: Value::VecUint8(m.raw_data),
                 is_expanded: false,
             });
@@ -171,7 +171,7 @@ impl From<ObdiiData> for Message {
         if !m.pid_data_size.is_empty() {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::VecUint8(m.pid_data_size),
                 is_expanded: false,
             });
@@ -179,7 +179,7 @@ impl From<ObdiiData> for Message {
         if !m.system_time.is_empty() {
             fields.push(Field {
                 num: 5,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.system_time),
                 is_expanded: false,
             });
@@ -187,7 +187,7 @@ impl From<ObdiiData> for Message {
         if m.start_timestamp.0 != u32::MAX {
             fields.push(Field {
                 num: 6,
-                profile_type: ProfileType::DATE_TIME,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.start_timestamp.0),
                 is_expanded: false,
             });
@@ -195,7 +195,7 @@ impl From<ObdiiData> for Message {
         if m.start_timestamp_ms != u16::MAX {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::UINT16,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.start_timestamp_ms),
                 is_expanded: false,
             });

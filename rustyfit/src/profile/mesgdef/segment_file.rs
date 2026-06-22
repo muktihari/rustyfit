@@ -4,7 +4,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-use crate::profile::{ProfileType, typedef};
+use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
@@ -141,7 +141,7 @@ impl From<SegmentFile> for Message {
         if m.message_index.0 != u16::MAX {
             fields.push(Field {
                 num: 254,
-                profile_type: ProfileType::MESSAGE_INDEX,
+                base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.message_index.0),
                 is_expanded: false,
             });
@@ -149,7 +149,7 @@ impl From<SegmentFile> for Message {
         if !m.file_uuid.is_empty() {
             fields.push(Field {
                 num: 1,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::String(m.file_uuid),
                 is_expanded: false,
             });
@@ -157,7 +157,7 @@ impl From<SegmentFile> for Message {
         if m.enabled.0 != u8::MAX {
             fields.push(Field {
                 num: 3,
-                profile_type: ProfileType::BOOL,
+                base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.enabled.0),
                 is_expanded: false,
             });
@@ -165,7 +165,7 @@ impl From<SegmentFile> for Message {
         if m.user_profile_primary_key != u32::MAX {
             fields.push(Field {
                 num: 4,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.user_profile_primary_key),
                 is_expanded: false,
             });
@@ -173,7 +173,7 @@ impl From<SegmentFile> for Message {
         if !m.leader_type.is_empty() {
             fields.push(Field {
                 num: 7,
-                profile_type: ProfileType::SEGMENT_LEADERBOARD_TYPE,
+                base_type: FitBaseType::ENUM,
                 value: Value::VecUint8({
                     let (ptr, len, capacity) = m.leader_type.into_raw_parts();
                     unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
@@ -184,7 +184,7 @@ impl From<SegmentFile> for Message {
         if !m.leader_group_primary_key.is_empty() {
             fields.push(Field {
                 num: 8,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.leader_group_primary_key),
                 is_expanded: false,
             });
@@ -192,7 +192,7 @@ impl From<SegmentFile> for Message {
         if !m.leader_activity_id.is_empty() {
             fields.push(Field {
                 num: 9,
-                profile_type: ProfileType::UINT32,
+                base_type: FitBaseType::UINT32,
                 value: Value::VecUint32(m.leader_activity_id),
                 is_expanded: false,
             });
@@ -200,7 +200,7 @@ impl From<SegmentFile> for Message {
         if !m.leader_activity_id_string.is_empty() {
             fields.push(Field {
                 num: 10,
-                profile_type: ProfileType::STRING,
+                base_type: FitBaseType::STRING,
                 value: Value::VecString(m.leader_activity_id_string),
                 is_expanded: false,
             });
@@ -208,7 +208,7 @@ impl From<SegmentFile> for Message {
         if m.default_race_leader != u8::MAX {
             fields.push(Field {
                 num: 11,
-                profile_type: ProfileType::UINT8,
+                base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.default_race_leader),
                 is_expanded: false,
             });
