@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Sub Sport type.
 #[repr(transparent)]
@@ -225,6 +225,124 @@ impl SubSport {
     /// Cycling
     pub const E_BIKE_ENDURO: SubSport = SubSport(127);
     pub const ALL: SubSport = SubSport(254);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("generic"),
+            1 => Some("treadmill"),
+            2 => Some("street"),
+            3 => Some("trail"),
+            4 => Some("track"),
+            5 => Some("spin"),
+            6 => Some("indoor_cycling"),
+            7 => Some("road"),
+            8 => Some("mountain"),
+            9 => Some("downhill"),
+            10 => Some("recumbent"),
+            11 => Some("cyclocross"),
+            12 => Some("hand_cycling"),
+            13 => Some("track_cycling"),
+            14 => Some("indoor_rowing"),
+            15 => Some("elliptical"),
+            16 => Some("stair_climbing"),
+            17 => Some("lap_swimming"),
+            18 => Some("open_water"),
+            19 => Some("flexibility_training"),
+            20 => Some("strength_training"),
+            21 => Some("warm_up"),
+            22 => Some("match"),
+            23 => Some("exercise"),
+            24 => Some("challenge"),
+            25 => Some("indoor_skiing"),
+            26 => Some("cardio_training"),
+            27 => Some("indoor_walking"),
+            28 => Some("e_bike_fitness"),
+            29 => Some("bmx"),
+            30 => Some("casual_walking"),
+            31 => Some("speed_walking"),
+            32 => Some("bike_to_run_transition"),
+            33 => Some("run_to_bike_transition"),
+            34 => Some("swim_to_bike_transition"),
+            35 => Some("atv"),
+            36 => Some("motocross"),
+            37 => Some("backcountry"),
+            38 => Some("resort"),
+            39 => Some("rc_drone"),
+            40 => Some("wingsuit"),
+            41 => Some("whitewater"),
+            42 => Some("skate_skiing"),
+            43 => Some("yoga"),
+            44 => Some("pilates"),
+            45 => Some("indoor_running"),
+            46 => Some("gravel_cycling"),
+            47 => Some("e_bike_mountain"),
+            48 => Some("commuting"),
+            49 => Some("mixed_surface"),
+            50 => Some("navigate"),
+            51 => Some("track_me"),
+            52 => Some("map"),
+            53 => Some("single_gas_diving"),
+            54 => Some("multi_gas_diving"),
+            55 => Some("gauge_diving"),
+            56 => Some("apnea_diving"),
+            57 => Some("apnea_hunting"),
+            58 => Some("virtual_activity"),
+            59 => Some("obstacle"),
+            62 => Some("breathing"),
+            63 => Some("ccr_diving"),
+            65 => Some("sail_race"),
+            66 => Some("expedition"),
+            67 => Some("ultra"),
+            68 => Some("indoor_climbing"),
+            69 => Some("bouldering"),
+            70 => Some("hiit"),
+            71 => Some("indoor_grinding"),
+            72 => Some("hunting_with_dogs"),
+            73 => Some("amrap"),
+            74 => Some("emom"),
+            75 => Some("tabata"),
+            77 => Some("esport"),
+            78 => Some("triathlon"),
+            79 => Some("duathlon"),
+            80 => Some("brick"),
+            81 => Some("swim_run"),
+            82 => Some("adventure_race"),
+            83 => Some("trucker_workout"),
+            84 => Some("pickleball"),
+            85 => Some("padel"),
+            86 => Some("indoor_wheelchair_walk"),
+            87 => Some("indoor_wheelchair_run"),
+            88 => Some("indoor_hand_cycling"),
+            90 => Some("field"),
+            91 => Some("ice"),
+            92 => Some("ultimate"),
+            93 => Some("platform"),
+            94 => Some("squash"),
+            95 => Some("badminton"),
+            96 => Some("racquetball"),
+            97 => Some("table_tennis"),
+            98 => Some("overland"),
+            99 => Some("trolling_motor"),
+            110 => Some("fly_canopy"),
+            111 => Some("fly_paraglide"),
+            112 => Some("fly_paramotor"),
+            113 => Some("fly_pressurized"),
+            114 => Some("fly_navigate"),
+            115 => Some("fly_timer"),
+            116 => Some("fly_altimeter"),
+            117 => Some("fly_wx"),
+            118 => Some("fly_vfr"),
+            119 => Some("fly_ifr"),
+            121 => Some("dynamic_apnea"),
+            123 => Some("enduro"),
+            124 => Some("rucking"),
+            125 => Some("rally"),
+            126 => Some("pool_triathlon"),
+            127 => Some("e_bike_enduro"),
+            254 => Some("all"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SubSport {
@@ -235,120 +353,50 @@ impl Default for SubSport {
 
 impl fmt::Display for SubSport {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "generic"),
-            1 => write!(f, "treadmill"),
-            2 => write!(f, "street"),
-            3 => write!(f, "trail"),
-            4 => write!(f, "track"),
-            5 => write!(f, "spin"),
-            6 => write!(f, "indoor_cycling"),
-            7 => write!(f, "road"),
-            8 => write!(f, "mountain"),
-            9 => write!(f, "downhill"),
-            10 => write!(f, "recumbent"),
-            11 => write!(f, "cyclocross"),
-            12 => write!(f, "hand_cycling"),
-            13 => write!(f, "track_cycling"),
-            14 => write!(f, "indoor_rowing"),
-            15 => write!(f, "elliptical"),
-            16 => write!(f, "stair_climbing"),
-            17 => write!(f, "lap_swimming"),
-            18 => write!(f, "open_water"),
-            19 => write!(f, "flexibility_training"),
-            20 => write!(f, "strength_training"),
-            21 => write!(f, "warm_up"),
-            22 => write!(f, "match"),
-            23 => write!(f, "exercise"),
-            24 => write!(f, "challenge"),
-            25 => write!(f, "indoor_skiing"),
-            26 => write!(f, "cardio_training"),
-            27 => write!(f, "indoor_walking"),
-            28 => write!(f, "e_bike_fitness"),
-            29 => write!(f, "bmx"),
-            30 => write!(f, "casual_walking"),
-            31 => write!(f, "speed_walking"),
-            32 => write!(f, "bike_to_run_transition"),
-            33 => write!(f, "run_to_bike_transition"),
-            34 => write!(f, "swim_to_bike_transition"),
-            35 => write!(f, "atv"),
-            36 => write!(f, "motocross"),
-            37 => write!(f, "backcountry"),
-            38 => write!(f, "resort"),
-            39 => write!(f, "rc_drone"),
-            40 => write!(f, "wingsuit"),
-            41 => write!(f, "whitewater"),
-            42 => write!(f, "skate_skiing"),
-            43 => write!(f, "yoga"),
-            44 => write!(f, "pilates"),
-            45 => write!(f, "indoor_running"),
-            46 => write!(f, "gravel_cycling"),
-            47 => write!(f, "e_bike_mountain"),
-            48 => write!(f, "commuting"),
-            49 => write!(f, "mixed_surface"),
-            50 => write!(f, "navigate"),
-            51 => write!(f, "track_me"),
-            52 => write!(f, "map"),
-            53 => write!(f, "single_gas_diving"),
-            54 => write!(f, "multi_gas_diving"),
-            55 => write!(f, "gauge_diving"),
-            56 => write!(f, "apnea_diving"),
-            57 => write!(f, "apnea_hunting"),
-            58 => write!(f, "virtual_activity"),
-            59 => write!(f, "obstacle"),
-            62 => write!(f, "breathing"),
-            63 => write!(f, "ccr_diving"),
-            65 => write!(f, "sail_race"),
-            66 => write!(f, "expedition"),
-            67 => write!(f, "ultra"),
-            68 => write!(f, "indoor_climbing"),
-            69 => write!(f, "bouldering"),
-            70 => write!(f, "hiit"),
-            71 => write!(f, "indoor_grinding"),
-            72 => write!(f, "hunting_with_dogs"),
-            73 => write!(f, "amrap"),
-            74 => write!(f, "emom"),
-            75 => write!(f, "tabata"),
-            77 => write!(f, "esport"),
-            78 => write!(f, "triathlon"),
-            79 => write!(f, "duathlon"),
-            80 => write!(f, "brick"),
-            81 => write!(f, "swim_run"),
-            82 => write!(f, "adventure_race"),
-            83 => write!(f, "trucker_workout"),
-            84 => write!(f, "pickleball"),
-            85 => write!(f, "padel"),
-            86 => write!(f, "indoor_wheelchair_walk"),
-            87 => write!(f, "indoor_wheelchair_run"),
-            88 => write!(f, "indoor_hand_cycling"),
-            90 => write!(f, "field"),
-            91 => write!(f, "ice"),
-            92 => write!(f, "ultimate"),
-            93 => write!(f, "platform"),
-            94 => write!(f, "squash"),
-            95 => write!(f, "badminton"),
-            96 => write!(f, "racquetball"),
-            97 => write!(f, "table_tennis"),
-            98 => write!(f, "overland"),
-            99 => write!(f, "trolling_motor"),
-            110 => write!(f, "fly_canopy"),
-            111 => write!(f, "fly_paraglide"),
-            112 => write!(f, "fly_paramotor"),
-            113 => write!(f, "fly_pressurized"),
-            114 => write!(f, "fly_navigate"),
-            115 => write!(f, "fly_timer"),
-            116 => write!(f, "fly_altimeter"),
-            117 => write!(f, "fly_wx"),
-            118 => write!(f, "fly_vfr"),
-            119 => write!(f, "fly_ifr"),
-            121 => write!(f, "dynamic_apnea"),
-            123 => write!(f, "enduro"),
-            124 => write!(f, "rucking"),
-            125 => write!(f, "rally"),
-            126 => write!(f, "pool_triathlon"),
-            127 => write!(f, "e_bike_enduro"),
-            254 => write!(f, "all"),
-            _ => write!(f, "SubSport({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SubSport({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SubSport {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SubSport", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SubSport {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

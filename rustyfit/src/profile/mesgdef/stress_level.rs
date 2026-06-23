@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Stress Level message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct StressLevel {
     pub stress_level_value: i16,
@@ -21,9 +24,9 @@ pub struct StressLevel {
 }
 
 impl StressLevel {
-    /// Value's type: `i16`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16
     pub const STRESS_LEVEL_VALUE: u8 = 0;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const STRESS_LEVEL_TIME: u8 = 1;
 
     /// Create new StressLevel with all fields being set to its corresponding invalid value.
@@ -102,6 +105,66 @@ impl From<StressLevel> for Message {
             num: typedef::MesgNum::STRESS_LEVEL,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for StressLevel {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("StressLevel", n)?;
+        if self.stress_level_value != i16::MAX {
+            state.serialize_field("stress_level_value", &self.stress_level_value)?;
+        }
+        if let Some(v) = self.stress_level_time.unix_timestamp() {
+            state.serialize_field("stress_level_time", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    stress_level_value: i16,
+    stress_level_time: Option<i64>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for StressLevel {
+    fn from(m: De) -> Self {
+        Self {
+            stress_level_value: m.stress_level_value,
+            stress_level_time: m.stress_level_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            stress_level_value: i16::MAX,
+            stress_level_time: None,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

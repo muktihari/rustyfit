@@ -9,6 +9,8 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -18,6 +20,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Hr message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Hr {
     pub timestamp: typedef::DateTime,
@@ -39,17 +42,17 @@ pub struct Hr {
 }
 
 impl Hr {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `32768`; Units: `s`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `u8`; Scale: `256`; Units: `s`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `256`; Units: `s`
     pub const TIME256: u8 = 1;
-    /// Value's type: `Vec<u8>`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const FILTERED_BPM: u8 = 6;
-    /// Value's type: `Vec<u32>`; Scale: `1024`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1024`; Units: `s`
     pub const EVENT_TIMESTAMP: u8 = 9;
-    /// Value's type: `Vec<u8>`; Units: `s`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte; Units: `s`
     pub const EVENT_TIMESTAMP_12: u8 = 10;
 
     /// Create new Hr with all fields being set to its corresponding invalid value.
@@ -272,6 +275,121 @@ impl From<Hr> for Message {
             num: typedef::MesgNum::HR,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Hr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Hr", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.fractional_timestamp_scaled() {
+            state.serialize_field("fractional_timestamp", &v)?;
+        }
+        if let Some(v) = self.time256_scaled() {
+            state.serialize_field("time256", &v)?;
+        }
+        if !self.filtered_bpm.is_empty() {
+            state.serialize_field("filtered_bpm", &self.filtered_bpm)?;
+        }
+        if let Some(v) = self.event_timestamp_scaled() {
+            state.serialize_field("event_timestamp", &v)?;
+        }
+        if !self.event_timestamp_12.is_empty() {
+            state.serialize_field("event_timestamp_12", &self.event_timestamp_12)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    fractional_timestamp: f64,
+    time256: f64,
+    filtered_bpm: Vec<u8>,
+    event_timestamp: Vec<f64>,
+    event_timestamp_12: Vec<u8>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Hr {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            fractional_timestamp: {
+                let unscaled = (m.fractional_timestamp + 0.0) * 32768.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            time256: {
+                let unscaled = (m.time256 + 0.0) * 256.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            filtered_bpm: m.filtered_bpm,
+            event_timestamp: {
+                if m.event_timestamp.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.event_timestamp.len());
+                    for &x in m.event_timestamp.iter() {
+                        let unscaled = (x + 0.0) * 1024.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            event_timestamp_12: m.event_timestamp_12,
+            state: [0u8; 2],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            fractional_timestamp: f64::from_bits(u64::MAX),
+            time256: f64::from_bits(u64::MAX),
+            filtered_bpm: Vec::new(),
+            event_timestamp: Vec::new(),
+            event_timestamp_12: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

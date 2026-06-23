@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Exd Descriptors type.
 #[repr(transparent)]
@@ -112,6 +112,109 @@ impl ExdDescriptors {
     pub const AMBIENT_PRESSURE: ExdDescriptors = ExdDescriptors(94);
     pub const PRESSURE: ExdDescriptors = ExdDescriptors(95);
     pub const VAM: ExdDescriptors = ExdDescriptors(96);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bike_light_battery_status"),
+            1 => Some("beam_angle_status"),
+            2 => Some("batery_level"),
+            3 => Some("light_network_mode"),
+            4 => Some("number_lights_connected"),
+            5 => Some("cadence"),
+            6 => Some("distance"),
+            7 => Some("estimated_time_of_arrival"),
+            8 => Some("heading"),
+            9 => Some("time"),
+            10 => Some("battery_level"),
+            11 => Some("trainer_resistance"),
+            12 => Some("trainer_target_power"),
+            13 => Some("time_seated"),
+            14 => Some("time_standing"),
+            15 => Some("elevation"),
+            16 => Some("grade"),
+            17 => Some("ascent"),
+            18 => Some("descent"),
+            19 => Some("vertical_speed"),
+            20 => Some("di2_battery_level"),
+            21 => Some("front_gear"),
+            22 => Some("rear_gear"),
+            23 => Some("gear_ratio"),
+            24 => Some("heart_rate"),
+            25 => Some("heart_rate_zone"),
+            26 => Some("time_in_heart_rate_zone"),
+            27 => Some("heart_rate_reserve"),
+            28 => Some("calories"),
+            29 => Some("gps_accuracy"),
+            30 => Some("gps_signal_strength"),
+            31 => Some("temperature"),
+            32 => Some("time_of_day"),
+            33 => Some("balance"),
+            34 => Some("pedal_smoothness"),
+            35 => Some("power"),
+            36 => Some("functional_threshold_power"),
+            37 => Some("intensity_factor"),
+            38 => Some("work"),
+            39 => Some("power_ratio"),
+            40 => Some("normalized_power"),
+            41 => Some("training_stress_Score"),
+            42 => Some("time_on_zone"),
+            43 => Some("speed"),
+            44 => Some("laps"),
+            45 => Some("reps"),
+            46 => Some("workout_step"),
+            47 => Some("course_distance"),
+            48 => Some("navigation_distance"),
+            49 => Some("course_estimated_time_of_arrival"),
+            50 => Some("navigation_estimated_time_of_arrival"),
+            51 => Some("course_time"),
+            52 => Some("navigation_time"),
+            53 => Some("course_heading"),
+            54 => Some("navigation_heading"),
+            55 => Some("power_zone"),
+            56 => Some("torque_effectiveness"),
+            57 => Some("timer_time"),
+            58 => Some("power_weight_ratio"),
+            59 => Some("left_platform_center_offset"),
+            60 => Some("right_platform_center_offset"),
+            61 => Some("left_power_phase_start_angle"),
+            62 => Some("right_power_phase_start_angle"),
+            63 => Some("left_power_phase_finish_angle"),
+            64 => Some("right_power_phase_finish_angle"),
+            65 => Some("gears"),
+            66 => Some("pace"),
+            67 => Some("training_effect"),
+            68 => Some("vertical_oscillation"),
+            69 => Some("vertical_ratio"),
+            70 => Some("ground_contact_time"),
+            71 => Some("left_ground_contact_time_balance"),
+            72 => Some("right_ground_contact_time_balance"),
+            73 => Some("stride_length"),
+            74 => Some("running_cadence"),
+            75 => Some("performance_condition"),
+            76 => Some("course_type"),
+            77 => Some("time_in_power_zone"),
+            78 => Some("navigation_turn"),
+            79 => Some("course_location"),
+            80 => Some("navigation_location"),
+            81 => Some("compass"),
+            82 => Some("gear_combo"),
+            83 => Some("muscle_oxygen"),
+            84 => Some("icon"),
+            85 => Some("compass_heading"),
+            86 => Some("gps_heading"),
+            87 => Some("gps_elevation"),
+            88 => Some("anaerobic_training_effect"),
+            89 => Some("course"),
+            90 => Some("off_course"),
+            91 => Some("glide_ratio"),
+            92 => Some("vertical_distance"),
+            93 => Some("vmg"),
+            94 => Some("ambient_pressure"),
+            95 => Some("pressure"),
+            96 => Some("vam"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ExdDescriptors {
@@ -122,105 +225,50 @@ impl Default for ExdDescriptors {
 
 impl fmt::Display for ExdDescriptors {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bike_light_battery_status"),
-            1 => write!(f, "beam_angle_status"),
-            2 => write!(f, "batery_level"),
-            3 => write!(f, "light_network_mode"),
-            4 => write!(f, "number_lights_connected"),
-            5 => write!(f, "cadence"),
-            6 => write!(f, "distance"),
-            7 => write!(f, "estimated_time_of_arrival"),
-            8 => write!(f, "heading"),
-            9 => write!(f, "time"),
-            10 => write!(f, "battery_level"),
-            11 => write!(f, "trainer_resistance"),
-            12 => write!(f, "trainer_target_power"),
-            13 => write!(f, "time_seated"),
-            14 => write!(f, "time_standing"),
-            15 => write!(f, "elevation"),
-            16 => write!(f, "grade"),
-            17 => write!(f, "ascent"),
-            18 => write!(f, "descent"),
-            19 => write!(f, "vertical_speed"),
-            20 => write!(f, "di2_battery_level"),
-            21 => write!(f, "front_gear"),
-            22 => write!(f, "rear_gear"),
-            23 => write!(f, "gear_ratio"),
-            24 => write!(f, "heart_rate"),
-            25 => write!(f, "heart_rate_zone"),
-            26 => write!(f, "time_in_heart_rate_zone"),
-            27 => write!(f, "heart_rate_reserve"),
-            28 => write!(f, "calories"),
-            29 => write!(f, "gps_accuracy"),
-            30 => write!(f, "gps_signal_strength"),
-            31 => write!(f, "temperature"),
-            32 => write!(f, "time_of_day"),
-            33 => write!(f, "balance"),
-            34 => write!(f, "pedal_smoothness"),
-            35 => write!(f, "power"),
-            36 => write!(f, "functional_threshold_power"),
-            37 => write!(f, "intensity_factor"),
-            38 => write!(f, "work"),
-            39 => write!(f, "power_ratio"),
-            40 => write!(f, "normalized_power"),
-            41 => write!(f, "training_stress_Score"),
-            42 => write!(f, "time_on_zone"),
-            43 => write!(f, "speed"),
-            44 => write!(f, "laps"),
-            45 => write!(f, "reps"),
-            46 => write!(f, "workout_step"),
-            47 => write!(f, "course_distance"),
-            48 => write!(f, "navigation_distance"),
-            49 => write!(f, "course_estimated_time_of_arrival"),
-            50 => write!(f, "navigation_estimated_time_of_arrival"),
-            51 => write!(f, "course_time"),
-            52 => write!(f, "navigation_time"),
-            53 => write!(f, "course_heading"),
-            54 => write!(f, "navigation_heading"),
-            55 => write!(f, "power_zone"),
-            56 => write!(f, "torque_effectiveness"),
-            57 => write!(f, "timer_time"),
-            58 => write!(f, "power_weight_ratio"),
-            59 => write!(f, "left_platform_center_offset"),
-            60 => write!(f, "right_platform_center_offset"),
-            61 => write!(f, "left_power_phase_start_angle"),
-            62 => write!(f, "right_power_phase_start_angle"),
-            63 => write!(f, "left_power_phase_finish_angle"),
-            64 => write!(f, "right_power_phase_finish_angle"),
-            65 => write!(f, "gears"),
-            66 => write!(f, "pace"),
-            67 => write!(f, "training_effect"),
-            68 => write!(f, "vertical_oscillation"),
-            69 => write!(f, "vertical_ratio"),
-            70 => write!(f, "ground_contact_time"),
-            71 => write!(f, "left_ground_contact_time_balance"),
-            72 => write!(f, "right_ground_contact_time_balance"),
-            73 => write!(f, "stride_length"),
-            74 => write!(f, "running_cadence"),
-            75 => write!(f, "performance_condition"),
-            76 => write!(f, "course_type"),
-            77 => write!(f, "time_in_power_zone"),
-            78 => write!(f, "navigation_turn"),
-            79 => write!(f, "course_location"),
-            80 => write!(f, "navigation_location"),
-            81 => write!(f, "compass"),
-            82 => write!(f, "gear_combo"),
-            83 => write!(f, "muscle_oxygen"),
-            84 => write!(f, "icon"),
-            85 => write!(f, "compass_heading"),
-            86 => write!(f, "gps_heading"),
-            87 => write!(f, "gps_elevation"),
-            88 => write!(f, "anaerobic_training_effect"),
-            89 => write!(f, "course"),
-            90 => write!(f, "off_course"),
-            91 => write!(f, "glide_ratio"),
-            92 => write!(f, "vertical_distance"),
-            93 => write!(f, "vmg"),
-            94 => write!(f, "ambient_pressure"),
-            95 => write!(f, "pressure"),
-            96 => write!(f, "vam"),
-            _ => write!(f, "ExdDescriptors({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ExdDescriptors({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdDescriptors {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ExdDescriptors", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExdDescriptors {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

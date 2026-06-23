@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// User Local Id type.
 #[repr(transparent)]
@@ -20,6 +20,18 @@ impl UserLocalId {
     pub const STATIONARY_MAX: UserLocalId = UserLocalId(0x00FF);
     pub const PORTABLE_MIN: UserLocalId = UserLocalId(0x0100);
     pub const PORTABLE_MAX: UserLocalId = UserLocalId(0xFFFE);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x0000 => Some("local_min"),
+            0x000F => Some("local_max"),
+            0x0010 => Some("stationary_min"),
+            0x00FF => Some("stationary_max"),
+            0x0100 => Some("portable_min"),
+            0xFFFE => Some("portable_max"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for UserLocalId {
@@ -30,14 +42,50 @@ impl Default for UserLocalId {
 
 impl fmt::Display for UserLocalId {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x0000 => write!(f, "local_min"),
-            0x000F => write!(f, "local_max"),
-            0x0010 => write!(f, "stationary_min"),
-            0x00FF => write!(f, "stationary_max"),
-            0x0100 => write!(f, "portable_min"),
-            0xFFFE => write!(f, "portable_max"),
-            _ => write!(f, "UserLocalId({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "UserLocalId({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for UserLocalId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("UserLocalId", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for UserLocalId {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

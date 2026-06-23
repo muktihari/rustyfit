@@ -9,6 +9,8 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -18,6 +20,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Ant Rx message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct AntRx {
     /// Units: s
@@ -36,17 +39,17 @@ pub struct AntRx {
 }
 
 impl AntRx {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `32768`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `32768`; Units: `s`
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `u8`; FitBaseType::BYTE; ProfileType::Byte
     pub const MESG_ID: u8 = 1;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
     pub const MESG_DATA: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CHANNEL_NUMBER: u8 = 3;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
     pub const DATA: u8 = 4;
 
     /// Create new AntRx with all fields being set to its corresponding invalid value.
@@ -217,6 +220,98 @@ impl From<AntRx> for Message {
             num: typedef::MesgNum::ANT_RX,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AntRx {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("AntRx", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.fractional_timestamp_scaled() {
+            state.serialize_field("fractional_timestamp", &v)?;
+        }
+        if self.mesg_id != u8::MAX {
+            state.serialize_field("mesg_id", &self.mesg_id)?;
+        }
+        if !self.mesg_data.is_empty() {
+            state.serialize_field("mesg_data", &self.mesg_data)?;
+        }
+        if self.channel_number != u8::MAX {
+            state.serialize_field("channel_number", &self.channel_number)?;
+        }
+        if !self.data.is_empty() {
+            state.serialize_field("data", &self.data)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    fractional_timestamp: f64,
+    mesg_id: u8,
+    mesg_data: Vec<u8>,
+    channel_number: u8,
+    data: Vec<u8>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for AntRx {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            fractional_timestamp: {
+                let unscaled = (m.fractional_timestamp + 0.0) * 32768.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            mesg_id: m.mesg_id,
+            mesg_data: m.mesg_data,
+            channel_number: m.channel_number,
+            data: m.data,
+            state: [0u8; 1],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            fractional_timestamp: f64::from_bits(u64::MAX),
+            mesg_id: u8::MAX,
+            mesg_data: Vec::new(),
+            channel_number: u8::MAX,
+            data: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

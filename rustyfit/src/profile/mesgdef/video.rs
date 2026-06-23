@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Video message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Video {
     pub url: String,
@@ -24,11 +27,11 @@ pub struct Video {
 }
 
 impl Video {
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const URL: u8 = 0;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const HOSTING_PROVIDER: u8 = 1;
-    /// Value's type: `u32`; Units: `ms`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
     pub const DURATION: u8 = 2;
 
     /// Create new Video with all fields being set to its corresponding invalid value.
@@ -118,6 +121,69 @@ impl From<Video> for Message {
             num: typedef::MesgNum::VIDEO,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Video {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Video", n)?;
+        if !self.url.is_empty() {
+            state.serialize_field("url", &self.url)?;
+        }
+        if !self.hosting_provider.is_empty() {
+            state.serialize_field("hosting_provider", &self.hosting_provider)?;
+        }
+        if self.duration != u32::MAX {
+            state.serialize_field("duration", &self.duration)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    url: String,
+    hosting_provider: String,
+    duration: u32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Video {
+    fn from(m: De) -> Self {
+        Self {
+            url: m.url,
+            hosting_provider: m.hosting_provider,
+            duration: m.duration,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            url: String::new(),
+            hosting_provider: String::new(),
+            duration: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

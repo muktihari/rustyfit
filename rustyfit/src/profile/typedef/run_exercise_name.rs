@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Run Exercise Name type.
 #[repr(transparent)]
@@ -21,6 +21,19 @@ impl RunExerciseName {
     pub const RUN_OR_WALK: RunExerciseName = RunExerciseName(4);
     pub const SPEED_WALK: RunExerciseName = RunExerciseName(5);
     pub const WARM_UP: RunExerciseName = RunExerciseName(6);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("run"),
+            1 => Some("walk"),
+            2 => Some("jog"),
+            3 => Some("sprint"),
+            4 => Some("run_or_walk"),
+            5 => Some("speed_walk"),
+            6 => Some("warm_up"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for RunExerciseName {
@@ -31,15 +44,50 @@ impl Default for RunExerciseName {
 
 impl fmt::Display for RunExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "run"),
-            1 => write!(f, "walk"),
-            2 => write!(f, "jog"),
-            3 => write!(f, "sprint"),
-            4 => write!(f, "run_or_walk"),
-            5 => write!(f, "speed_walk"),
-            6 => write!(f, "warm_up"),
-            _ => write!(f, "RunExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "RunExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for RunExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("RunExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for RunExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

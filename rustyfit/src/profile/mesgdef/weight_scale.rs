@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Weight Scale message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct WeightScale {
     /// Units: s
@@ -44,33 +47,33 @@ pub struct WeightScale {
 }
 
 impl WeightScale {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::WEIGHT`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Weight; Scale: `100`; Units: `kg`
     pub const WEIGHT: u8 = 0;
-    /// Value's type: `u16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `%`
     pub const PERCENT_FAT: u8 = 1;
-    /// Value's type: `u16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `%`
     pub const PERCENT_HYDRATION: u8 = 2;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `kg`
     pub const VISCERAL_FAT_MASS: u8 = 3;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `kg`
     pub const BONE_MASS: u8 = 4;
-    /// Value's type: `u16`; Scale: `100`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `kg`
     pub const MUSCLE_MASS: u8 = 5;
-    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `4`; Units: `kcal/day`
     pub const BASAL_MET: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const PHYSIQUE_RATING: u8 = 8;
-    /// Value's type: `u16`; Scale: `4`; Units: `kcal/day`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `4`; Units: `kcal/day`
     pub const ACTIVE_MET: u8 = 9;
-    /// Value's type: `u8`; Units: `years`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `years`
     pub const METABOLIC_AGE: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const VISCERAL_FAT_RATING: u8 = 11;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const USER_PROFILE_INDEX: u8 = 12;
-    /// Value's type: `u16`; Scale: `10`; Units: `kg/m^2`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `kg/m^2`
     pub const BMI: u8 = 13;
 
     /// Create new WeightScale with all fields being set to its corresponding invalid value.
@@ -470,6 +473,201 @@ impl From<WeightScale> for Message {
             num: typedef::MesgNum::WEIGHT_SCALE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WeightScale {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("WeightScale", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.weight_scaled() {
+            state.serialize_field("weight", &v)?;
+        }
+        if let Some(v) = self.percent_fat_scaled() {
+            state.serialize_field("percent_fat", &v)?;
+        }
+        if let Some(v) = self.percent_hydration_scaled() {
+            state.serialize_field("percent_hydration", &v)?;
+        }
+        if let Some(v) = self.visceral_fat_mass_scaled() {
+            state.serialize_field("visceral_fat_mass", &v)?;
+        }
+        if let Some(v) = self.bone_mass_scaled() {
+            state.serialize_field("bone_mass", &v)?;
+        }
+        if let Some(v) = self.muscle_mass_scaled() {
+            state.serialize_field("muscle_mass", &v)?;
+        }
+        if let Some(v) = self.basal_met_scaled() {
+            state.serialize_field("basal_met", &v)?;
+        }
+        if self.physique_rating != u8::MAX {
+            state.serialize_field("physique_rating", &self.physique_rating)?;
+        }
+        if let Some(v) = self.active_met_scaled() {
+            state.serialize_field("active_met", &v)?;
+        }
+        if self.metabolic_age != u8::MAX {
+            state.serialize_field("metabolic_age", &self.metabolic_age)?;
+        }
+        if self.visceral_fat_rating != u8::MAX {
+            state.serialize_field("visceral_fat_rating", &self.visceral_fat_rating)?;
+        }
+        if self.user_profile_index.0 != u16::MAX {
+            state.serialize_field("user_profile_index", &self.user_profile_index)?;
+        }
+        if let Some(v) = self.bmi_scaled() {
+            state.serialize_field("bmi", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    weight: f64,
+    percent_fat: f64,
+    percent_hydration: f64,
+    visceral_fat_mass: f64,
+    bone_mass: f64,
+    muscle_mass: f64,
+    basal_met: f64,
+    physique_rating: u8,
+    active_met: f64,
+    metabolic_age: u8,
+    visceral_fat_rating: u8,
+    user_profile_index: typedef::MessageIndex,
+    bmi: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for WeightScale {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            weight: {
+                let unscaled = (m.weight + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    typedef::Weight(u16::MAX)
+                } else {
+                    typedef::Weight(unscaled as u16)
+                }
+            },
+            percent_fat: {
+                let unscaled = (m.percent_fat + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            percent_hydration: {
+                let unscaled = (m.percent_hydration + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            visceral_fat_mass: {
+                let unscaled = (m.visceral_fat_mass + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            bone_mass: {
+                let unscaled = (m.bone_mass + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            muscle_mass: {
+                let unscaled = (m.muscle_mass + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            basal_met: {
+                let unscaled = (m.basal_met + 0.0) * 4.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            physique_rating: m.physique_rating,
+            active_met: {
+                let unscaled = (m.active_met + 0.0) * 4.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            metabolic_age: m.metabolic_age,
+            visceral_fat_rating: m.visceral_fat_rating,
+            user_profile_index: m.user_profile_index,
+            bmi: {
+                let unscaled = (m.bmi + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            weight: f64::from_bits(u64::MAX),
+            percent_fat: f64::from_bits(u64::MAX),
+            percent_hydration: f64::from_bits(u64::MAX),
+            visceral_fat_mass: f64::from_bits(u64::MAX),
+            bone_mass: f64::from_bits(u64::MAX),
+            muscle_mass: f64::from_bits(u64::MAX),
+            basal_met: f64::from_bits(u64::MAX),
+            physique_rating: u8::MAX,
+            active_met: f64::from_bits(u64::MAX),
+            metabolic_age: u8::MAX,
+            visceral_fat_rating: u8::MAX,
+            user_profile_index: typedef::MessageIndex(u16::MAX),
+            bmi: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Chop Exercise Name type.
 #[repr(transparent)]
@@ -37,6 +37,35 @@ impl ChopExerciseName {
     pub const STANDING_SPLIT_ROTATIONAL_CHOP: ChopExerciseName = ChopExerciseName(20);
     pub const STANDING_SPLIT_ROTATIONAL_REVERSE_CHOP: ChopExerciseName = ChopExerciseName(21);
     pub const STANDING_STABILITY_REVERSE_CHOP: ChopExerciseName = ChopExerciseName(22);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("cable_pull_through"),
+            1 => Some("cable_rotational_lift"),
+            2 => Some("cable_woodchop"),
+            3 => Some("cross_chop_to_knee"),
+            4 => Some("weighted_cross_chop_to_knee"),
+            5 => Some("dumbbell_chop"),
+            6 => Some("half_kneeling_rotation"),
+            7 => Some("weighted_half_kneeling_rotation"),
+            8 => Some("half_kneeling_rotational_chop"),
+            9 => Some("half_kneeling_rotational_reverse_chop"),
+            10 => Some("half_kneeling_stability_chop"),
+            11 => Some("half_kneeling_stability_reverse_chop"),
+            12 => Some("kneeling_rotational_chop"),
+            13 => Some("kneeling_rotational_reverse_chop"),
+            14 => Some("kneeling_stability_chop"),
+            15 => Some("kneeling_woodchopper"),
+            16 => Some("medicine_ball_wood_chops"),
+            17 => Some("power_squat_chops"),
+            18 => Some("weighted_power_squat_chops"),
+            19 => Some("standing_rotational_chop"),
+            20 => Some("standing_split_rotational_chop"),
+            21 => Some("standing_split_rotational_reverse_chop"),
+            22 => Some("standing_stability_reverse_chop"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ChopExerciseName {
@@ -47,31 +76,50 @@ impl Default for ChopExerciseName {
 
 impl fmt::Display for ChopExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "cable_pull_through"),
-            1 => write!(f, "cable_rotational_lift"),
-            2 => write!(f, "cable_woodchop"),
-            3 => write!(f, "cross_chop_to_knee"),
-            4 => write!(f, "weighted_cross_chop_to_knee"),
-            5 => write!(f, "dumbbell_chop"),
-            6 => write!(f, "half_kneeling_rotation"),
-            7 => write!(f, "weighted_half_kneeling_rotation"),
-            8 => write!(f, "half_kneeling_rotational_chop"),
-            9 => write!(f, "half_kneeling_rotational_reverse_chop"),
-            10 => write!(f, "half_kneeling_stability_chop"),
-            11 => write!(f, "half_kneeling_stability_reverse_chop"),
-            12 => write!(f, "kneeling_rotational_chop"),
-            13 => write!(f, "kneeling_rotational_reverse_chop"),
-            14 => write!(f, "kneeling_stability_chop"),
-            15 => write!(f, "kneeling_woodchopper"),
-            16 => write!(f, "medicine_ball_wood_chops"),
-            17 => write!(f, "power_squat_chops"),
-            18 => write!(f, "weighted_power_squat_chops"),
-            19 => write!(f, "standing_rotational_chop"),
-            20 => write!(f, "standing_split_rotational_chop"),
-            21 => write!(f, "standing_split_rotational_reverse_chop"),
-            22 => write!(f, "standing_stability_reverse_chop"),
-            _ => write!(f, "ChopExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ChopExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ChopExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ChopExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ChopExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

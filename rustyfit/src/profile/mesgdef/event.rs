@@ -9,6 +9,8 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -20,6 +22,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Event message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Event {
     /// Units: s
@@ -62,43 +65,43 @@ pub struct Event {
 }
 
 impl Event {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Event
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::EventType
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const DATA16: u8 = 2;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const DATA: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const EVENT_GROUP: u8 = 4;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const SCORE: u8 = 7;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const OPPONENT_SCORE: u8 = 8;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const FRONT_GEAR_NUM: u8 = 9;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const FRONT_GEAR: u8 = 10;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const REAR_GEAR_NUM: u8 = 11;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const REAR_GEAR: u8 = 12;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::DeviceIndex
     pub const DEVICE_INDEX: u8 = 13;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ActivityType
     pub const ACTIVITY_TYPE: u8 = 14;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const START_TIMESTAMP: u8 = 15;
-    /// Value's type: `u8`; ProfileType: `ProfileType::RADAR_THREAT_LEVEL_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::RadarThreatLevelType
     pub const RADAR_THREAT_LEVEL_MAX: u8 = 21;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const RADAR_THREAT_COUNT: u8 = 22;
-    /// Value's type: `u8`; Scale: `10`; Units: `m/s`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `10`; Units: `m/s`
     pub const RADAR_THREAT_AVG_APPROACH_SPEED: u8 = 23;
-    /// Value's type: `u8`; Scale: `10`; Units: `m/s`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `10`; Units: `m/s`
     pub const RADAR_THREAT_MAX_APPROACH_SPEED: u8 = 24;
 
     /// Create new Event with all fields being set to its corresponding invalid value.
@@ -433,6 +436,186 @@ impl From<Event> for Message {
             num: typedef::MesgNum::EVENT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Event {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Event", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.event.0 != u8::MAX {
+            state.serialize_field("event", &self.event)?;
+        }
+        if self.event_type.0 != u8::MAX {
+            state.serialize_field("event_type", &self.event_type)?;
+        }
+        if self.data16 != u16::MAX {
+            state.serialize_field("data16", &self.data16)?;
+        }
+        if self.data != u32::MAX {
+            state.serialize_field("data", &self.data)?;
+        }
+        if self.event_group != u8::MAX {
+            state.serialize_field("event_group", &self.event_group)?;
+        }
+        if self.score != u16::MAX {
+            state.serialize_field("score", &self.score)?;
+        }
+        if self.opponent_score != u16::MAX {
+            state.serialize_field("opponent_score", &self.opponent_score)?;
+        }
+        if self.front_gear_num != u8::MIN {
+            state.serialize_field("front_gear_num", &self.front_gear_num)?;
+        }
+        if self.front_gear != u8::MIN {
+            state.serialize_field("front_gear", &self.front_gear)?;
+        }
+        if self.rear_gear_num != u8::MIN {
+            state.serialize_field("rear_gear_num", &self.rear_gear_num)?;
+        }
+        if self.rear_gear != u8::MIN {
+            state.serialize_field("rear_gear", &self.rear_gear)?;
+        }
+        if self.device_index.0 != u8::MAX {
+            state.serialize_field("device_index", &self.device_index)?;
+        }
+        if self.activity_type.0 != u8::MAX {
+            state.serialize_field("activity_type", &self.activity_type)?;
+        }
+        if let Some(v) = self.start_timestamp.unix_timestamp() {
+            state.serialize_field("start_timestamp", &v)?;
+        }
+        if self.radar_threat_level_max.0 != u8::MAX {
+            state.serialize_field("radar_threat_level_max", &self.radar_threat_level_max)?;
+        }
+        if self.radar_threat_count != u8::MAX {
+            state.serialize_field("radar_threat_count", &self.radar_threat_count)?;
+        }
+        if let Some(v) = self.radar_threat_avg_approach_speed_scaled() {
+            state.serialize_field("radar_threat_avg_approach_speed", &v)?;
+        }
+        if let Some(v) = self.radar_threat_max_approach_speed_scaled() {
+            state.serialize_field("radar_threat_max_approach_speed", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    event: typedef::Event,
+    event_type: typedef::EventType,
+    data16: u16,
+    data: u32,
+    event_group: u8,
+    score: u16,
+    opponent_score: u16,
+    front_gear_num: u8,
+    front_gear: u8,
+    rear_gear_num: u8,
+    rear_gear: u8,
+    device_index: typedef::DeviceIndex,
+    activity_type: typedef::ActivityType,
+    start_timestamp: Option<i64>,
+    radar_threat_level_max: typedef::RadarThreatLevelType,
+    radar_threat_count: u8,
+    radar_threat_avg_approach_speed: f64,
+    radar_threat_max_approach_speed: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Event {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            event: m.event,
+            event_type: m.event_type,
+            data16: m.data16,
+            data: m.data,
+            event_group: m.event_group,
+            score: m.score,
+            opponent_score: m.opponent_score,
+            front_gear_num: m.front_gear_num,
+            front_gear: m.front_gear,
+            rear_gear_num: m.rear_gear_num,
+            rear_gear: m.rear_gear,
+            device_index: m.device_index,
+            activity_type: m.activity_type,
+            start_timestamp: m.start_timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            radar_threat_level_max: m.radar_threat_level_max,
+            radar_threat_count: m.radar_threat_count,
+            radar_threat_avg_approach_speed: {
+                let unscaled = (m.radar_threat_avg_approach_speed + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            radar_threat_max_approach_speed: {
+                let unscaled = (m.radar_threat_max_approach_speed + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            state: [0u8; 4],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            event: typedef::Event(u8::MAX),
+            event_type: typedef::EventType(u8::MAX),
+            data16: u16::MAX,
+            data: u32::MAX,
+            event_group: u8::MAX,
+            score: u16::MAX,
+            opponent_score: u16::MAX,
+            front_gear_num: u8::MIN,
+            front_gear: u8::MIN,
+            rear_gear_num: u8::MIN,
+            rear_gear: u8::MIN,
+            device_index: typedef::DeviceIndex(u8::MAX),
+            activity_type: typedef::ActivityType(u8::MAX),
+            start_timestamp: None,
+            radar_threat_level_max: typedef::RadarThreatLevelType(u8::MAX),
+            radar_threat_count: u8::MAX,
+            radar_threat_avg_approach_speed: f64::from_bits(u64::MAX),
+            radar_threat_max_approach_speed: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

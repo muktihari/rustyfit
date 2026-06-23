@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Split Summary message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SplitSummary {
     pub message_index: typedef::MessageIndex,
@@ -45,35 +48,35 @@ pub struct SplitSummary {
 }
 
 impl SplitSummary {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPLIT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SplitType
     pub const SPLIT_TYPE: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUM_SPLITS: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 4;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const TOTAL_DISTANCE: u8 = 5;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 6;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 7;
-    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
     pub const TOTAL_ASCENT: u8 = 8;
-    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
     pub const TOTAL_DESCENT: u8 = 9;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const AVG_HEART_RATE: u8 = 10;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const MAX_HEART_RATE: u8 = 11;
-    /// Value's type: `i32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Scale: `1000`; Units: `m/s`
     pub const AVG_VERT_SPEED: u8 = 12;
-    /// Value's type: `u32`; Units: `kcal`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 13;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 65;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 77;
 
     /// Create new SplitSummary with all fields being set to its corresponding invalid value.
@@ -442,6 +445,190 @@ impl From<SplitSummary> for Message {
             num: typedef::MesgNum::SPLIT_SUMMARY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SplitSummary {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SplitSummary", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.split_type.0 != u8::MAX {
+            state.serialize_field("split_type", &self.split_type)?;
+        }
+        if self.num_splits != u16::MAX {
+            state.serialize_field("num_splits", &self.num_splits)?;
+        }
+        if let Some(v) = self.total_timer_time_scaled() {
+            state.serialize_field("total_timer_time", &v)?;
+        }
+        if let Some(v) = self.total_distance_scaled() {
+            state.serialize_field("total_distance", &v)?;
+        }
+        if let Some(v) = self.avg_speed_scaled() {
+            state.serialize_field("avg_speed", &v)?;
+        }
+        if let Some(v) = self.max_speed_scaled() {
+            state.serialize_field("max_speed", &v)?;
+        }
+        if self.total_ascent != u16::MAX {
+            state.serialize_field("total_ascent", &self.total_ascent)?;
+        }
+        if self.total_descent != u16::MAX {
+            state.serialize_field("total_descent", &self.total_descent)?;
+        }
+        if self.avg_heart_rate != u8::MAX {
+            state.serialize_field("avg_heart_rate", &self.avg_heart_rate)?;
+        }
+        if self.max_heart_rate != u8::MAX {
+            state.serialize_field("max_heart_rate", &self.max_heart_rate)?;
+        }
+        if let Some(v) = self.avg_vert_speed_scaled() {
+            state.serialize_field("avg_vert_speed", &v)?;
+        }
+        if self.total_calories != u32::MAX {
+            state.serialize_field("total_calories", &self.total_calories)?;
+        }
+        if let Some(v) = self.active_time_scaled() {
+            state.serialize_field("active_time", &v)?;
+        }
+        if let Some(v) = self.total_moving_time_scaled() {
+            state.serialize_field("total_moving_time", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    split_type: typedef::SplitType,
+    num_splits: u16,
+    total_timer_time: f64,
+    total_distance: f64,
+    avg_speed: f64,
+    max_speed: f64,
+    total_ascent: u16,
+    total_descent: u16,
+    avg_heart_rate: u8,
+    max_heart_rate: u8,
+    avg_vert_speed: f64,
+    total_calories: u32,
+    active_time: f64,
+    total_moving_time: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SplitSummary {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            split_type: m.split_type,
+            num_splits: m.num_splits,
+            total_timer_time: {
+                let unscaled = (m.total_timer_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_distance: {
+                let unscaled = (m.total_distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_speed: {
+                let unscaled = (m.avg_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            max_speed: {
+                let unscaled = (m.max_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_ascent: m.total_ascent,
+            total_descent: m.total_descent,
+            avg_heart_rate: m.avg_heart_rate,
+            max_heart_rate: m.max_heart_rate,
+            avg_vert_speed: {
+                let unscaled = (m.avg_vert_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
+                    i32::MAX
+                } else {
+                    unscaled as i32
+                }
+            },
+            total_calories: m.total_calories,
+            active_time: {
+                let unscaled = (m.active_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_moving_time: {
+                let unscaled = (m.total_moving_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            split_type: typedef::SplitType(u8::MAX),
+            num_splits: u16::MAX,
+            total_timer_time: f64::from_bits(u64::MAX),
+            total_distance: f64::from_bits(u64::MAX),
+            avg_speed: f64::from_bits(u64::MAX),
+            max_speed: f64::from_bits(u64::MAX),
+            total_ascent: u16::MAX,
+            total_descent: u16::MAX,
+            avg_heart_rate: u8::MAX,
+            max_heart_rate: u8::MAX,
+            avg_vert_speed: f64::from_bits(u64::MAX),
+            total_calories: u32::MAX,
+            active_time: f64::from_bits(u64::MAX),
+            total_moving_time: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

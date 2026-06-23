@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Memo Glob message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct MemoGlob {
     /// Sequence number of memo blocks
@@ -30,17 +33,17 @@ pub struct MemoGlob {
 }
 
 impl MemoGlob {
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const PART_INDEX: u8 = 250;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
     pub const MEMO: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MesgNum
     pub const MESG_NUM: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const PARENT_INDEX: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_NUM: u8 = 3;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const DATA: u8 = 4;
 
     /// Create new MemoGlob with all fields being set to its corresponding invalid value.
@@ -163,6 +166,87 @@ impl From<MemoGlob> for Message {
             num: typedef::MesgNum::MEMO_GLOB,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MemoGlob {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("MemoGlob", n)?;
+        if self.part_index != u32::MAX {
+            state.serialize_field("part_index", &self.part_index)?;
+        }
+        if !self.memo.is_empty() {
+            state.serialize_field("memo", &self.memo)?;
+        }
+        if self.mesg_num.0 != u16::MAX {
+            state.serialize_field("mesg_num", &self.mesg_num)?;
+        }
+        if self.parent_index.0 != u16::MAX {
+            state.serialize_field("parent_index", &self.parent_index)?;
+        }
+        if self.field_num != u8::MAX {
+            state.serialize_field("field_num", &self.field_num)?;
+        }
+        if !self.data.is_empty() {
+            state.serialize_field("data", &self.data)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    part_index: u32,
+    memo: Vec<u8>,
+    mesg_num: typedef::MesgNum,
+    parent_index: typedef::MessageIndex,
+    field_num: u8,
+    data: Vec<u8>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for MemoGlob {
+    fn from(m: De) -> Self {
+        Self {
+            part_index: m.part_index,
+            memo: m.memo,
+            mesg_num: m.mesg_num,
+            parent_index: m.parent_index,
+            field_num: m.field_num,
+            data: m.data,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            part_index: u32::MAX,
+            memo: Vec::new(),
+            mesg_num: typedef::MesgNum(u16::MAX),
+            parent_index: typedef::MessageIndex(u16::MAX),
+            field_num: u8::MAX,
+            data: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

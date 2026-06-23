@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Segment File message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SegmentFile {
     pub message_index: typedef::MessageIndex,
@@ -37,23 +40,23 @@ pub struct SegmentFile {
 }
 
 impl SegmentFile {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const FILE_UUID: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 3;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const USER_PROFILE_PRIMARY_KEY: u8 = 4;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::SEGMENT_LEADERBOARD_TYPE`
+    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::SegmentLeaderboardType
     pub const LEADER_TYPE: u8 = 7;
-    /// Value's type: `Vec<u32>`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32
     pub const LEADER_GROUP_PRIMARY_KEY: u8 = 8;
-    /// Value's type: `Vec<u32>`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32
     pub const LEADER_ACTIVITY_ID: u8 = 9;
-    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
     pub const LEADER_ACTIVITY_ID_STRING: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEFAULT_RACE_LEADER: u8 = 11;
 
     /// Create new SegmentFile with all fields being set to its corresponding invalid value.
@@ -221,6 +224,105 @@ impl From<SegmentFile> for Message {
             num: typedef::MesgNum::SEGMENT_FILE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SegmentFile {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SegmentFile", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if !self.file_uuid.is_empty() {
+            state.serialize_field("file_uuid", &self.file_uuid)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.user_profile_primary_key != u32::MAX {
+            state.serialize_field("user_profile_primary_key", &self.user_profile_primary_key)?;
+        }
+        if !self.leader_type.is_empty() {
+            state.serialize_field("leader_type", &self.leader_type)?;
+        }
+        if !self.leader_group_primary_key.is_empty() {
+            state.serialize_field("leader_group_primary_key", &self.leader_group_primary_key)?;
+        }
+        if !self.leader_activity_id.is_empty() {
+            state.serialize_field("leader_activity_id", &self.leader_activity_id)?;
+        }
+        if !self.leader_activity_id_string.is_empty() {
+            state.serialize_field("leader_activity_id_string", &self.leader_activity_id_string)?;
+        }
+        if self.default_race_leader != u8::MAX {
+            state.serialize_field("default_race_leader", &self.default_race_leader)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    file_uuid: String,
+    enabled: typedef::Bool,
+    user_profile_primary_key: u32,
+    leader_type: Vec<typedef::SegmentLeaderboardType>,
+    leader_group_primary_key: Vec<u32>,
+    leader_activity_id: Vec<u32>,
+    leader_activity_id_string: Vec<String>,
+    default_race_leader: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SegmentFile {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            file_uuid: m.file_uuid,
+            enabled: m.enabled,
+            user_profile_primary_key: m.user_profile_primary_key,
+            leader_type: m.leader_type,
+            leader_group_primary_key: m.leader_group_primary_key,
+            leader_activity_id: m.leader_activity_id,
+            leader_activity_id_string: m.leader_activity_id_string,
+            default_race_leader: m.default_race_leader,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            file_uuid: String::new(),
+            enabled: typedef::Bool(u8::MAX),
+            user_profile_primary_key: u32::MAX,
+            leader_type: Vec::new(),
+            leader_group_primary_key: Vec::new(),
+            leader_activity_id: Vec::new(),
+            leader_activity_id_string: Vec::new(),
+            default_race_leader: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

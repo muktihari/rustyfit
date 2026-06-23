@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Aad Accel Features message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct AadAccelFeatures {
     pub timestamp: typedef::DateTime,
@@ -29,17 +32,17 @@ pub struct AadAccelFeatures {
 }
 
 impl AadAccelFeatures {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const TIME: u8 = 0;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const ENERGY_TOTAL: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const ZERO_CROSS_CNT: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const INSTANCE: u8 = 3;
-    /// Value's type: `u16`; Scale: `25`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `25`; Units: `s`
     pub const TIME_ABOVE_THRESHOLD: u8 = 4;
 
     /// Create new AadAccelFeatures with all fields being set to its corresponding invalid value.
@@ -183,6 +186,97 @@ impl From<AadAccelFeatures> for Message {
             num: typedef::MesgNum::AAD_ACCEL_FEATURES,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AadAccelFeatures {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("AadAccelFeatures", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.time != u16::MAX {
+            state.serialize_field("time", &self.time)?;
+        }
+        if self.energy_total != u32::MAX {
+            state.serialize_field("energy_total", &self.energy_total)?;
+        }
+        if self.zero_cross_cnt != u16::MAX {
+            state.serialize_field("zero_cross_cnt", &self.zero_cross_cnt)?;
+        }
+        if self.instance != u8::MAX {
+            state.serialize_field("instance", &self.instance)?;
+        }
+        if let Some(v) = self.time_above_threshold_scaled() {
+            state.serialize_field("time_above_threshold", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    time: u16,
+    energy_total: u32,
+    zero_cross_cnt: u16,
+    instance: u8,
+    time_above_threshold: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for AadAccelFeatures {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            time: m.time,
+            energy_total: m.energy_total,
+            zero_cross_cnt: m.zero_cross_cnt,
+            instance: m.instance,
+            time_above_threshold: {
+                let unscaled = (m.time_above_threshold + 0.0) * 25.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            time: u16::MAX,
+            energy_total: u32::MAX,
+            zero_cross_cnt: u16::MAX,
+            instance: u8::MAX,
+            time_above_threshold: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

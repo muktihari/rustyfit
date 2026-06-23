@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Dive Settings message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DiveSettings {
     pub timestamp: typedef::DateTime,
@@ -75,75 +78,75 @@ pub struct DiveSettings {
 }
 
 impl DiveSettings {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::TISSUE_MODEL_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::TissueModelType
     pub const MODEL: u8 = 1;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const GF_LOW: u8 = 2;
-    /// Value's type: `u8`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const GF_HIGH: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WATER_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WaterType
     pub const WATER_TYPE: u8 = 4;
-    /// Value's type: `f32`; Units: `kg/m^3`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `kg/m^3`
     pub const WATER_DENSITY: u8 = 5;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `percent`
     pub const PO2_WARN: u8 = 6;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `percent`
     pub const PO2_CRITICAL: u8 = 7;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `percent`
     pub const PO2_DECO: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SAFETY_STOP_ENABLED: u8 = 9;
-    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32
     pub const BOTTOM_DEPTH: u8 = 10;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const BOTTOM_TIME: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const APNEA_COUNTDOWN_ENABLED: u8 = 12;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const APNEA_COUNTDOWN_TIME: u8 = 13;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_BACKLIGHT_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DiveBacklightMode
     pub const BACKLIGHT_MODE: u8 = 14;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const BACKLIGHT_BRIGHTNESS: u8 = 15;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BACKLIGHT_TIMEOUT`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::BacklightTimeout
     pub const BACKLIGHT_TIMEOUT: u8 = 16;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const REPEAT_DIVE_INTERVAL: u8 = 17;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const SAFETY_STOP_TIME: u8 = 18;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SOURCE_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SourceType
     pub const HEART_RATE_SOURCE_TYPE: u8 = 19;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const HEART_RATE_SOURCE: u8 = 20;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const TRAVEL_GAS: u8 = 21;
-    /// Value's type: `u8`; ProfileType: `ProfileType::CCR_SETPOINT_SWITCH_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CcrSetpointSwitchMode
     pub const CCR_LOW_SETPOINT_SWITCH_MODE: u8 = 22;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `percent`
     pub const CCR_LOW_SETPOINT: u8 = 23;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const CCR_LOW_SETPOINT_DEPTH: u8 = 24;
-    /// Value's type: `u8`; ProfileType: `ProfileType::CCR_SETPOINT_SWITCH_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CcrSetpointSwitchMode
     pub const CCR_HIGH_SETPOINT_SWITCH_MODE: u8 = 25;
-    /// Value's type: `u8`; Scale: `100`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `percent`
     pub const CCR_HIGH_SETPOINT: u8 = 26;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const CCR_HIGH_SETPOINT_DEPTH: u8 = 27;
-    /// Value's type: `u8`; ProfileType: `ProfileType::GAS_CONSUMPTION_RATE_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::GasConsumptionRateType
     pub const GAS_CONSUMPTION_DISPLAY: u8 = 29;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const UP_KEY_ENABLED: u8 = 30;
-    /// Value's type: `u8`; ProfileType: `ProfileType::TONE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Tone
     pub const DIVE_SOUNDS: u8 = 35;
-    /// Value's type: `u8`; Scale: `10`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `10`
     pub const LAST_STOP_MULTIPLE: u8 = 36;
-    /// Value's type: `u8`; ProfileType: `ProfileType::NO_FLY_TIME_MODE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::NoFlyTimeMode
     pub const NO_FLY_TIME_MODE: u8 = 37;
 
     /// Create new DiveSettings with all fields being set to its corresponding invalid value.
@@ -759,6 +762,326 @@ impl From<DiveSettings> for Message {
             num: typedef::MesgNum::DIVE_SETTINGS,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DiveSettings {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DiveSettings", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.model.0 != u8::MAX {
+            state.serialize_field("model", &self.model)?;
+        }
+        if self.gf_low != u8::MAX {
+            state.serialize_field("gf_low", &self.gf_low)?;
+        }
+        if self.gf_high != u8::MAX {
+            state.serialize_field("gf_high", &self.gf_high)?;
+        }
+        if self.water_type.0 != u8::MAX {
+            state.serialize_field("water_type", &self.water_type)?;
+        }
+        if self.water_density.to_bits() != u32::MAX {
+            state.serialize_field("water_density", &self.water_density)?;
+        }
+        if let Some(v) = self.po2_warn_scaled() {
+            state.serialize_field("po2_warn", &v)?;
+        }
+        if let Some(v) = self.po2_critical_scaled() {
+            state.serialize_field("po2_critical", &v)?;
+        }
+        if let Some(v) = self.po2_deco_scaled() {
+            state.serialize_field("po2_deco", &v)?;
+        }
+        if self.safety_stop_enabled.0 != u8::MAX {
+            state.serialize_field("safety_stop_enabled", &self.safety_stop_enabled)?;
+        }
+        if self.bottom_depth.to_bits() != u32::MAX {
+            state.serialize_field("bottom_depth", &self.bottom_depth)?;
+        }
+        if self.bottom_time != u32::MAX {
+            state.serialize_field("bottom_time", &self.bottom_time)?;
+        }
+        if self.apnea_countdown_enabled.0 != u8::MAX {
+            state.serialize_field("apnea_countdown_enabled", &self.apnea_countdown_enabled)?;
+        }
+        if self.apnea_countdown_time != u32::MAX {
+            state.serialize_field("apnea_countdown_time", &self.apnea_countdown_time)?;
+        }
+        if self.backlight_mode.0 != u8::MAX {
+            state.serialize_field("backlight_mode", &self.backlight_mode)?;
+        }
+        if self.backlight_brightness != u8::MAX {
+            state.serialize_field("backlight_brightness", &self.backlight_brightness)?;
+        }
+        if self.backlight_timeout.0 != u8::MAX {
+            state.serialize_field("backlight_timeout", &self.backlight_timeout)?;
+        }
+        if self.repeat_dive_interval != u16::MAX {
+            state.serialize_field("repeat_dive_interval", &self.repeat_dive_interval)?;
+        }
+        if self.safety_stop_time != u16::MAX {
+            state.serialize_field("safety_stop_time", &self.safety_stop_time)?;
+        }
+        if self.heart_rate_source_type.0 != u8::MAX {
+            state.serialize_field("heart_rate_source_type", &self.heart_rate_source_type)?;
+        }
+        if self.heart_rate_source != u8::MAX {
+            state.serialize_field("heart_rate_source", &self.heart_rate_source)?;
+        }
+        if self.travel_gas.0 != u16::MAX {
+            state.serialize_field("travel_gas", &self.travel_gas)?;
+        }
+        if self.ccr_low_setpoint_switch_mode.0 != u8::MAX {
+            state.serialize_field(
+                "ccr_low_setpoint_switch_mode",
+                &self.ccr_low_setpoint_switch_mode,
+            )?;
+        }
+        if let Some(v) = self.ccr_low_setpoint_scaled() {
+            state.serialize_field("ccr_low_setpoint", &v)?;
+        }
+        if let Some(v) = self.ccr_low_setpoint_depth_scaled() {
+            state.serialize_field("ccr_low_setpoint_depth", &v)?;
+        }
+        if self.ccr_high_setpoint_switch_mode.0 != u8::MAX {
+            state.serialize_field(
+                "ccr_high_setpoint_switch_mode",
+                &self.ccr_high_setpoint_switch_mode,
+            )?;
+        }
+        if let Some(v) = self.ccr_high_setpoint_scaled() {
+            state.serialize_field("ccr_high_setpoint", &v)?;
+        }
+        if let Some(v) = self.ccr_high_setpoint_depth_scaled() {
+            state.serialize_field("ccr_high_setpoint_depth", &v)?;
+        }
+        if self.gas_consumption_display.0 != u8::MAX {
+            state.serialize_field("gas_consumption_display", &self.gas_consumption_display)?;
+        }
+        if self.up_key_enabled.0 != u8::MAX {
+            state.serialize_field("up_key_enabled", &self.up_key_enabled)?;
+        }
+        if self.dive_sounds.0 != u8::MAX {
+            state.serialize_field("dive_sounds", &self.dive_sounds)?;
+        }
+        if let Some(v) = self.last_stop_multiple_scaled() {
+            state.serialize_field("last_stop_multiple", &v)?;
+        }
+        if self.no_fly_time_mode.0 != u8::MAX {
+            state.serialize_field("no_fly_time_mode", &self.no_fly_time_mode)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    message_index: typedef::MessageIndex,
+    name: String,
+    model: typedef::TissueModelType,
+    gf_low: u8,
+    gf_high: u8,
+    water_type: typedef::WaterType,
+    water_density: f32,
+    po2_warn: f64,
+    po2_critical: f64,
+    po2_deco: f64,
+    safety_stop_enabled: typedef::Bool,
+    bottom_depth: f32,
+    bottom_time: u32,
+    apnea_countdown_enabled: typedef::Bool,
+    apnea_countdown_time: u32,
+    backlight_mode: typedef::DiveBacklightMode,
+    backlight_brightness: u8,
+    backlight_timeout: typedef::BacklightTimeout,
+    repeat_dive_interval: u16,
+    safety_stop_time: u16,
+    heart_rate_source_type: typedef::SourceType,
+    heart_rate_source: u8,
+    travel_gas: typedef::MessageIndex,
+    ccr_low_setpoint_switch_mode: typedef::CcrSetpointSwitchMode,
+    ccr_low_setpoint: f64,
+    ccr_low_setpoint_depth: f64,
+    ccr_high_setpoint_switch_mode: typedef::CcrSetpointSwitchMode,
+    ccr_high_setpoint: f64,
+    ccr_high_setpoint_depth: f64,
+    gas_consumption_display: typedef::GasConsumptionRateType,
+    up_key_enabled: typedef::Bool,
+    dive_sounds: typedef::Tone,
+    last_stop_multiple: f64,
+    no_fly_time_mode: typedef::NoFlyTimeMode,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DiveSettings {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            message_index: m.message_index,
+            name: m.name,
+            model: m.model,
+            gf_low: m.gf_low,
+            gf_high: m.gf_high,
+            water_type: m.water_type,
+            water_density: m.water_density,
+            po2_warn: {
+                let unscaled = (m.po2_warn + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            po2_critical: {
+                let unscaled = (m.po2_critical + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            po2_deco: {
+                let unscaled = (m.po2_deco + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            safety_stop_enabled: m.safety_stop_enabled,
+            bottom_depth: m.bottom_depth,
+            bottom_time: m.bottom_time,
+            apnea_countdown_enabled: m.apnea_countdown_enabled,
+            apnea_countdown_time: m.apnea_countdown_time,
+            backlight_mode: m.backlight_mode,
+            backlight_brightness: m.backlight_brightness,
+            backlight_timeout: m.backlight_timeout,
+            repeat_dive_interval: m.repeat_dive_interval,
+            safety_stop_time: m.safety_stop_time,
+            heart_rate_source_type: m.heart_rate_source_type,
+            heart_rate_source: m.heart_rate_source,
+            travel_gas: m.travel_gas,
+            ccr_low_setpoint_switch_mode: m.ccr_low_setpoint_switch_mode,
+            ccr_low_setpoint: {
+                let unscaled = (m.ccr_low_setpoint + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            ccr_low_setpoint_depth: {
+                let unscaled = (m.ccr_low_setpoint_depth + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            ccr_high_setpoint_switch_mode: m.ccr_high_setpoint_switch_mode,
+            ccr_high_setpoint: {
+                let unscaled = (m.ccr_high_setpoint + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            ccr_high_setpoint_depth: {
+                let unscaled = (m.ccr_high_setpoint_depth + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            gas_consumption_display: m.gas_consumption_display,
+            up_key_enabled: m.up_key_enabled,
+            dive_sounds: m.dive_sounds,
+            last_stop_multiple: {
+                let unscaled = (m.last_stop_multiple + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            no_fly_time_mode: m.no_fly_time_mode,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            message_index: typedef::MessageIndex(u16::MAX),
+            name: String::new(),
+            model: typedef::TissueModelType(u8::MAX),
+            gf_low: u8::MAX,
+            gf_high: u8::MAX,
+            water_type: typedef::WaterType(u8::MAX),
+            water_density: f32::from_bits(u32::MAX),
+            po2_warn: f64::from_bits(u64::MAX),
+            po2_critical: f64::from_bits(u64::MAX),
+            po2_deco: f64::from_bits(u64::MAX),
+            safety_stop_enabled: typedef::Bool(u8::MAX),
+            bottom_depth: f32::from_bits(u32::MAX),
+            bottom_time: u32::MAX,
+            apnea_countdown_enabled: typedef::Bool(u8::MAX),
+            apnea_countdown_time: u32::MAX,
+            backlight_mode: typedef::DiveBacklightMode(u8::MAX),
+            backlight_brightness: u8::MAX,
+            backlight_timeout: typedef::BacklightTimeout(u8::MAX),
+            repeat_dive_interval: u16::MAX,
+            safety_stop_time: u16::MAX,
+            heart_rate_source_type: typedef::SourceType(u8::MAX),
+            heart_rate_source: u8::MAX,
+            travel_gas: typedef::MessageIndex(u16::MAX),
+            ccr_low_setpoint_switch_mode: typedef::CcrSetpointSwitchMode(u8::MAX),
+            ccr_low_setpoint: f64::from_bits(u64::MAX),
+            ccr_low_setpoint_depth: f64::from_bits(u64::MAX),
+            ccr_high_setpoint_switch_mode: typedef::CcrSetpointSwitchMode(u8::MAX),
+            ccr_high_setpoint: f64::from_bits(u64::MAX),
+            ccr_high_setpoint_depth: f64::from_bits(u64::MAX),
+            gas_consumption_display: typedef::GasConsumptionRateType(u8::MAX),
+            up_key_enabled: typedef::Bool(u8::MAX),
+            dive_sounds: typedef::Tone(u8::MAX),
+            last_stop_multiple: f64::from_bits(u64::MAX),
+            no_fly_time_mode: typedef::NoFlyTimeMode(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

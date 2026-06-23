@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Lateral Raise Exercise Name type.
 #[repr(transparent)]
@@ -64,6 +64,53 @@ impl LateralRaiseExerciseName {
         LateralRaiseExerciseName(40);
     pub const POLE_STRAIGHT_ARM_OVERHEAD_WHEELCHAIR: LateralRaiseExerciseName =
         LateralRaiseExerciseName(41);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("45_degree_cable_external_rotation"),
+            1 => Some("alternating_lateral_raise_with_static_hold"),
+            2 => Some("bar_muscle_up"),
+            3 => Some("bent_over_lateral_raise"),
+            4 => Some("cable_diagonal_raise"),
+            5 => Some("cable_front_raise"),
+            6 => Some("calorie_row"),
+            7 => Some("combo_shoulder_raise"),
+            8 => Some("dumbbell_diagonal_raise"),
+            9 => Some("dumbbell_v_raise"),
+            10 => Some("front_raise"),
+            11 => Some("leaning_dumbbell_lateral_raise"),
+            12 => Some("lying_dumbbell_raise"),
+            13 => Some("muscle_up"),
+            14 => Some("one_arm_cable_lateral_raise"),
+            15 => Some("overhand_grip_rear_lateral_raise"),
+            16 => Some("plate_raises"),
+            17 => Some("ring_dip"),
+            18 => Some("weighted_ring_dip"),
+            19 => Some("ring_muscle_up"),
+            20 => Some("weighted_ring_muscle_up"),
+            21 => Some("rope_climb"),
+            22 => Some("weighted_rope_climb"),
+            23 => Some("scaption"),
+            24 => Some("seated_lateral_raise"),
+            25 => Some("seated_rear_lateral_raise"),
+            26 => Some("side_lying_lateral_raise"),
+            27 => Some("standing_lift"),
+            28 => Some("suspended_row"),
+            29 => Some("underhand_grip_rear_lateral_raise"),
+            30 => Some("wall_slide"),
+            31 => Some("weighted_wall_slide"),
+            32 => Some("arm_circles"),
+            33 => Some("shaving_the_head"),
+            34 => Some("dumbbell_lateral_raise"),
+            36 => Some("ring_dip_kipping"),
+            37 => Some("wall_walk"),
+            38 => Some("dumbbell_front_raise_wheelchair"),
+            39 => Some("dumbbell_lateral_raise_wheelchair"),
+            40 => Some("pole_double_arm_overhead_and_forward_wheelchair"),
+            41 => Some("pole_straight_arm_overhead_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for LateralRaiseExerciseName {
@@ -74,49 +121,50 @@ impl Default for LateralRaiseExerciseName {
 
 impl fmt::Display for LateralRaiseExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "45_degree_cable_external_rotation"),
-            1 => write!(f, "alternating_lateral_raise_with_static_hold"),
-            2 => write!(f, "bar_muscle_up"),
-            3 => write!(f, "bent_over_lateral_raise"),
-            4 => write!(f, "cable_diagonal_raise"),
-            5 => write!(f, "cable_front_raise"),
-            6 => write!(f, "calorie_row"),
-            7 => write!(f, "combo_shoulder_raise"),
-            8 => write!(f, "dumbbell_diagonal_raise"),
-            9 => write!(f, "dumbbell_v_raise"),
-            10 => write!(f, "front_raise"),
-            11 => write!(f, "leaning_dumbbell_lateral_raise"),
-            12 => write!(f, "lying_dumbbell_raise"),
-            13 => write!(f, "muscle_up"),
-            14 => write!(f, "one_arm_cable_lateral_raise"),
-            15 => write!(f, "overhand_grip_rear_lateral_raise"),
-            16 => write!(f, "plate_raises"),
-            17 => write!(f, "ring_dip"),
-            18 => write!(f, "weighted_ring_dip"),
-            19 => write!(f, "ring_muscle_up"),
-            20 => write!(f, "weighted_ring_muscle_up"),
-            21 => write!(f, "rope_climb"),
-            22 => write!(f, "weighted_rope_climb"),
-            23 => write!(f, "scaption"),
-            24 => write!(f, "seated_lateral_raise"),
-            25 => write!(f, "seated_rear_lateral_raise"),
-            26 => write!(f, "side_lying_lateral_raise"),
-            27 => write!(f, "standing_lift"),
-            28 => write!(f, "suspended_row"),
-            29 => write!(f, "underhand_grip_rear_lateral_raise"),
-            30 => write!(f, "wall_slide"),
-            31 => write!(f, "weighted_wall_slide"),
-            32 => write!(f, "arm_circles"),
-            33 => write!(f, "shaving_the_head"),
-            34 => write!(f, "dumbbell_lateral_raise"),
-            36 => write!(f, "ring_dip_kipping"),
-            37 => write!(f, "wall_walk"),
-            38 => write!(f, "dumbbell_front_raise_wheelchair"),
-            39 => write!(f, "dumbbell_lateral_raise_wheelchair"),
-            40 => write!(f, "pole_double_arm_overhead_and_forward_wheelchair"),
-            41 => write!(f, "pole_straight_arm_overhead_wheelchair"),
-            _ => write!(f, "LateralRaiseExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "LateralRaiseExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for LateralRaiseExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("LateralRaiseExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for LateralRaiseExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

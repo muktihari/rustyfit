@@ -30,6 +30,7 @@ type Field struct {
 	Num                   byte
 	Name                  string
 	Name0                 string // Name but with .0 if it's typedef
+	NameRaw               string // Original Name retrieved from `Profile.xlsx`
 	NameUpperCase         string
 	String                string
 	ProfileType           string

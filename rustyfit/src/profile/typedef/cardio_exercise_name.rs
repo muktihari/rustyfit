@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Cardio Exercise Name type.
 #[repr(transparent)]
@@ -57,6 +57,55 @@ impl CardioExerciseName {
     pub const POLE_DD_FF_UU_WHEELCHAIR: CardioExerciseName = CardioExerciseName(40);
     pub const BUTTERFLY_ARMS_WHEELCHAIR: CardioExerciseName = CardioExerciseName(41);
     pub const PUNCH: CardioExerciseName = CardioExerciseName(42);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bob_and_weave_circle"),
+            1 => Some("weighted_bob_and_weave_circle"),
+            2 => Some("cardio_core_crawl"),
+            3 => Some("weighted_cardio_core_crawl"),
+            4 => Some("double_under"),
+            5 => Some("weighted_double_under"),
+            6 => Some("jump_rope"),
+            7 => Some("weighted_jump_rope"),
+            8 => Some("jump_rope_crossover"),
+            9 => Some("weighted_jump_rope_crossover"),
+            10 => Some("jump_rope_jog"),
+            11 => Some("weighted_jump_rope_jog"),
+            12 => Some("jumping_jacks"),
+            13 => Some("weighted_jumping_jacks"),
+            14 => Some("ski_moguls"),
+            15 => Some("weighted_ski_moguls"),
+            16 => Some("split_jacks"),
+            17 => Some("weighted_split_jacks"),
+            18 => Some("squat_jacks"),
+            19 => Some("weighted_squat_jacks"),
+            20 => Some("triple_under"),
+            21 => Some("weighted_triple_under"),
+            22 => Some("elliptical"),
+            23 => Some("spinning"),
+            24 => Some("pole_paddle_forward_wheelchair"),
+            25 => Some("pole_paddle_backward_wheelchair"),
+            26 => Some("pole_handcycle_forward_wheelchair"),
+            27 => Some("pole_handcycle_backward_wheelchair"),
+            28 => Some("pole_rainbow_wheelchair"),
+            29 => Some("double_punch_forward_wheelchair"),
+            30 => Some("double_punch_down_wheelchair"),
+            31 => Some("double_punch_sideways_wheelchair"),
+            32 => Some("double_punch_up_wheelchair"),
+            33 => Some("sit_ski_wheelchair"),
+            34 => Some("sitting_jacks_wheelchair"),
+            35 => Some("punch_forward_wheelchair"),
+            36 => Some("punch_down_wheelchair"),
+            37 => Some("punch_sideways_wheelchair"),
+            38 => Some("punch_up_wheelchair"),
+            39 => Some("punch_bag_wheelchair"),
+            40 => Some("pole_dd_ff_uu_wheelchair"),
+            41 => Some("butterfly_arms_wheelchair"),
+            42 => Some("punch"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CardioExerciseName {
@@ -67,51 +116,50 @@ impl Default for CardioExerciseName {
 
 impl fmt::Display for CardioExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bob_and_weave_circle"),
-            1 => write!(f, "weighted_bob_and_weave_circle"),
-            2 => write!(f, "cardio_core_crawl"),
-            3 => write!(f, "weighted_cardio_core_crawl"),
-            4 => write!(f, "double_under"),
-            5 => write!(f, "weighted_double_under"),
-            6 => write!(f, "jump_rope"),
-            7 => write!(f, "weighted_jump_rope"),
-            8 => write!(f, "jump_rope_crossover"),
-            9 => write!(f, "weighted_jump_rope_crossover"),
-            10 => write!(f, "jump_rope_jog"),
-            11 => write!(f, "weighted_jump_rope_jog"),
-            12 => write!(f, "jumping_jacks"),
-            13 => write!(f, "weighted_jumping_jacks"),
-            14 => write!(f, "ski_moguls"),
-            15 => write!(f, "weighted_ski_moguls"),
-            16 => write!(f, "split_jacks"),
-            17 => write!(f, "weighted_split_jacks"),
-            18 => write!(f, "squat_jacks"),
-            19 => write!(f, "weighted_squat_jacks"),
-            20 => write!(f, "triple_under"),
-            21 => write!(f, "weighted_triple_under"),
-            22 => write!(f, "elliptical"),
-            23 => write!(f, "spinning"),
-            24 => write!(f, "pole_paddle_forward_wheelchair"),
-            25 => write!(f, "pole_paddle_backward_wheelchair"),
-            26 => write!(f, "pole_handcycle_forward_wheelchair"),
-            27 => write!(f, "pole_handcycle_backward_wheelchair"),
-            28 => write!(f, "pole_rainbow_wheelchair"),
-            29 => write!(f, "double_punch_forward_wheelchair"),
-            30 => write!(f, "double_punch_down_wheelchair"),
-            31 => write!(f, "double_punch_sideways_wheelchair"),
-            32 => write!(f, "double_punch_up_wheelchair"),
-            33 => write!(f, "sit_ski_wheelchair"),
-            34 => write!(f, "sitting_jacks_wheelchair"),
-            35 => write!(f, "punch_forward_wheelchair"),
-            36 => write!(f, "punch_down_wheelchair"),
-            37 => write!(f, "punch_sideways_wheelchair"),
-            38 => write!(f, "punch_up_wheelchair"),
-            39 => write!(f, "punch_bag_wheelchair"),
-            40 => write!(f, "pole_dd_ff_uu_wheelchair"),
-            41 => write!(f, "butterfly_arms_wheelchair"),
-            42 => write!(f, "punch"),
-            _ => write!(f, "CardioExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CardioExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CardioExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CardioExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CardioExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

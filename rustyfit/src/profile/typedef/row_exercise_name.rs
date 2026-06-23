@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Row Exercise Name type.
 #[repr(transparent)]
@@ -68,6 +68,65 @@ impl RowExerciseName {
     pub const WEIGHTED_INVERTED_ROW: RowExerciseName = RowExerciseName(50);
     pub const WEIGHTED_TRX_INVERTED_ROW: RowExerciseName = RowExerciseName(51);
     pub const DUMBBELL_ROW_WHEELCHAIR: RowExerciseName = RowExerciseName(52);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("barbell_straight_leg_deadlift_to_row"),
+            1 => Some("cable_row_standing"),
+            2 => Some("dumbbell_row"),
+            3 => Some("elevated_feet_inverted_row"),
+            4 => Some("weighted_elevated_feet_inverted_row"),
+            5 => Some("face_pull"),
+            6 => Some("face_pull_with_external_rotation"),
+            7 => Some("inverted_row_with_feet_on_swiss_ball"),
+            8 => Some("weighted_inverted_row_with_feet_on_swiss_ball"),
+            9 => Some("kettlebell_row"),
+            10 => Some("modified_inverted_row"),
+            11 => Some("weighted_modified_inverted_row"),
+            12 => Some("neutral_grip_alternating_dumbbell_row"),
+            13 => Some("one_arm_bent_over_row"),
+            14 => Some("one_legged_dumbbell_row"),
+            15 => Some("renegade_row"),
+            16 => Some("reverse_grip_barbell_row"),
+            17 => Some("rope_handle_cable_row"),
+            18 => Some("seated_cable_row"),
+            19 => Some("seated_dumbbell_row"),
+            20 => Some("single_arm_cable_row"),
+            21 => Some("single_arm_cable_row_and_rotation"),
+            22 => Some("single_arm_inverted_row"),
+            23 => Some("weighted_single_arm_inverted_row"),
+            24 => Some("single_arm_neutral_grip_dumbbell_row"),
+            25 => Some("single_arm_neutral_grip_dumbbell_row_and_rotation"),
+            26 => Some("suspended_inverted_row"),
+            27 => Some("weighted_suspended_inverted_row"),
+            28 => Some("t_bar_row"),
+            29 => Some("towel_grip_inverted_row"),
+            30 => Some("weighted_towel_grip_inverted_row"),
+            31 => Some("underhand_grip_cable_row"),
+            32 => Some("v_grip_cable_row"),
+            33 => Some("wide_grip_seated_cable_row"),
+            34 => Some("alternating_dumbbell_row"),
+            35 => Some("inverted_row"),
+            36 => Some("row"),
+            37 => Some("weighted_row"),
+            38 => Some("indoor_row"),
+            39 => Some("banded_face_pulls"),
+            40 => Some("chest_supported_dumbbell_row"),
+            41 => Some("decline_ring_row"),
+            42 => Some("elevated_ring_row"),
+            43 => Some("rdl_bent_over_row_with_barbell_dumbbell"),
+            44 => Some("ring_row"),
+            45 => Some("barbell_row"),
+            46 => Some("bent_over_row_with_barbell"),
+            47 => Some("bent_over_row_with_dumbell"),
+            48 => Some("seated_underhand_grip_cable_row"),
+            49 => Some("trx_inverted_row"),
+            50 => Some("weighted_inverted_row"),
+            51 => Some("weighted_trx_inverted_row"),
+            52 => Some("dumbbell_row_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for RowExerciseName {
@@ -78,61 +137,50 @@ impl Default for RowExerciseName {
 
 impl fmt::Display for RowExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "barbell_straight_leg_deadlift_to_row"),
-            1 => write!(f, "cable_row_standing"),
-            2 => write!(f, "dumbbell_row"),
-            3 => write!(f, "elevated_feet_inverted_row"),
-            4 => write!(f, "weighted_elevated_feet_inverted_row"),
-            5 => write!(f, "face_pull"),
-            6 => write!(f, "face_pull_with_external_rotation"),
-            7 => write!(f, "inverted_row_with_feet_on_swiss_ball"),
-            8 => write!(f, "weighted_inverted_row_with_feet_on_swiss_ball"),
-            9 => write!(f, "kettlebell_row"),
-            10 => write!(f, "modified_inverted_row"),
-            11 => write!(f, "weighted_modified_inverted_row"),
-            12 => write!(f, "neutral_grip_alternating_dumbbell_row"),
-            13 => write!(f, "one_arm_bent_over_row"),
-            14 => write!(f, "one_legged_dumbbell_row"),
-            15 => write!(f, "renegade_row"),
-            16 => write!(f, "reverse_grip_barbell_row"),
-            17 => write!(f, "rope_handle_cable_row"),
-            18 => write!(f, "seated_cable_row"),
-            19 => write!(f, "seated_dumbbell_row"),
-            20 => write!(f, "single_arm_cable_row"),
-            21 => write!(f, "single_arm_cable_row_and_rotation"),
-            22 => write!(f, "single_arm_inverted_row"),
-            23 => write!(f, "weighted_single_arm_inverted_row"),
-            24 => write!(f, "single_arm_neutral_grip_dumbbell_row"),
-            25 => write!(f, "single_arm_neutral_grip_dumbbell_row_and_rotation"),
-            26 => write!(f, "suspended_inverted_row"),
-            27 => write!(f, "weighted_suspended_inverted_row"),
-            28 => write!(f, "t_bar_row"),
-            29 => write!(f, "towel_grip_inverted_row"),
-            30 => write!(f, "weighted_towel_grip_inverted_row"),
-            31 => write!(f, "underhand_grip_cable_row"),
-            32 => write!(f, "v_grip_cable_row"),
-            33 => write!(f, "wide_grip_seated_cable_row"),
-            34 => write!(f, "alternating_dumbbell_row"),
-            35 => write!(f, "inverted_row"),
-            36 => write!(f, "row"),
-            37 => write!(f, "weighted_row"),
-            38 => write!(f, "indoor_row"),
-            39 => write!(f, "banded_face_pulls"),
-            40 => write!(f, "chest_supported_dumbbell_row"),
-            41 => write!(f, "decline_ring_row"),
-            42 => write!(f, "elevated_ring_row"),
-            43 => write!(f, "rdl_bent_over_row_with_barbell_dumbbell"),
-            44 => write!(f, "ring_row"),
-            45 => write!(f, "barbell_row"),
-            46 => write!(f, "bent_over_row_with_barbell"),
-            47 => write!(f, "bent_over_row_with_dumbell"),
-            48 => write!(f, "seated_underhand_grip_cable_row"),
-            49 => write!(f, "trx_inverted_row"),
-            50 => write!(f, "weighted_inverted_row"),
-            51 => write!(f, "weighted_trx_inverted_row"),
-            52 => write!(f, "dumbbell_row_wheelchair"),
-            _ => write!(f, "RowExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "RowExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for RowExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("RowExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for RowExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -12,7 +12,8 @@ type ProfileData struct {
 
 // Constant represent declared constants within proto.
 type Constant struct {
-	Name string
+	Name   string
+	String string
 }
 
 // VersionData is data representative of version.tmpl

@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Banded Exercises Exercise Name type.
 #[repr(transparent)]
@@ -86,6 +86,72 @@ impl BandedExercisesExerciseName {
     pub const SIDE_CURL_WHEELCHAIR: BandedExercisesExerciseName = BandedExercisesExerciseName(60);
     pub const OVERHEAD_PRESS_WHEELCHAIR: BandedExercisesExerciseName =
         BandedExercisesExerciseName(61);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            1 => Some("ab_twist"),
+            2 => Some("back_extension"),
+            3 => Some("bicycle_crunch"),
+            4 => Some("calf_raises"),
+            5 => Some("chest_press"),
+            6 => Some("clam_shells"),
+            7 => Some("curl"),
+            8 => Some("deadbug"),
+            9 => Some("deadlift"),
+            10 => Some("donkey_kick"),
+            11 => Some("external_rotation"),
+            12 => Some("external_rotation_at_90_degree_abduction"),
+            13 => Some("face_pull"),
+            14 => Some("fire_hydrant"),
+            15 => Some("fly"),
+            16 => Some("front_raise"),
+            17 => Some("glute_bridge"),
+            18 => Some("hamstring_curls"),
+            19 => Some("high_plank_leg_lifts"),
+            20 => Some("hip_extension"),
+            21 => Some("internal_rotation"),
+            22 => Some("jumping_jack"),
+            23 => Some("kneeling_crunch"),
+            24 => Some("lateral_band_walks"),
+            25 => Some("lateral_raise"),
+            26 => Some("latpull"),
+            27 => Some("leg_abduction"),
+            28 => Some("leg_adduction"),
+            29 => Some("leg_extension"),
+            30 => Some("lunge"),
+            31 => Some("plank"),
+            32 => Some("pull_apart"),
+            33 => Some("push_ups"),
+            34 => Some("reverse_crunch"),
+            35 => Some("row"),
+            36 => Some("shoulder_abduction"),
+            37 => Some("shoulder_extension"),
+            38 => Some("shoulder_external_rotation"),
+            39 => Some("shoulder_flexion_to_90_degrees"),
+            40 => Some("side_plank_leg_lifts"),
+            41 => Some("side_raise"),
+            42 => Some("squat"),
+            43 => Some("squat_to_press"),
+            44 => Some("tricep_extension"),
+            45 => Some("tricep_kickback"),
+            46 => Some("upright_row"),
+            47 => Some("wall_crawl_with_external_rotation"),
+            49 => Some("lateral_raise_wheelchair"),
+            50 => Some("triceps_extension_wheelchair"),
+            51 => Some("chest_fly_incline_wheelchair"),
+            52 => Some("chest_fly_decline_wheelchair"),
+            53 => Some("pull_down_wheelchair"),
+            54 => Some("straight_arm_pull_down_wheelchair"),
+            55 => Some("curl_wheelchair"),
+            56 => Some("overhead_curl_wheelchair"),
+            57 => Some("face_pull_wheelchair"),
+            58 => Some("around_the_world_wheelchair"),
+            59 => Some("pull_apart_wheelchair"),
+            60 => Some("side_curl_wheelchair"),
+            61 => Some("overhead_press_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BandedExercisesExerciseName {
@@ -96,68 +162,50 @@ impl Default for BandedExercisesExerciseName {
 
 impl fmt::Display for BandedExercisesExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "ab_twist"),
-            2 => write!(f, "back_extension"),
-            3 => write!(f, "bicycle_crunch"),
-            4 => write!(f, "calf_raises"),
-            5 => write!(f, "chest_press"),
-            6 => write!(f, "clam_shells"),
-            7 => write!(f, "curl"),
-            8 => write!(f, "deadbug"),
-            9 => write!(f, "deadlift"),
-            10 => write!(f, "donkey_kick"),
-            11 => write!(f, "external_rotation"),
-            12 => write!(f, "external_rotation_at_90_degree_abduction"),
-            13 => write!(f, "face_pull"),
-            14 => write!(f, "fire_hydrant"),
-            15 => write!(f, "fly"),
-            16 => write!(f, "front_raise"),
-            17 => write!(f, "glute_bridge"),
-            18 => write!(f, "hamstring_curls"),
-            19 => write!(f, "high_plank_leg_lifts"),
-            20 => write!(f, "hip_extension"),
-            21 => write!(f, "internal_rotation"),
-            22 => write!(f, "jumping_jack"),
-            23 => write!(f, "kneeling_crunch"),
-            24 => write!(f, "lateral_band_walks"),
-            25 => write!(f, "lateral_raise"),
-            26 => write!(f, "latpull"),
-            27 => write!(f, "leg_abduction"),
-            28 => write!(f, "leg_adduction"),
-            29 => write!(f, "leg_extension"),
-            30 => write!(f, "lunge"),
-            31 => write!(f, "plank"),
-            32 => write!(f, "pull_apart"),
-            33 => write!(f, "push_ups"),
-            34 => write!(f, "reverse_crunch"),
-            35 => write!(f, "row"),
-            36 => write!(f, "shoulder_abduction"),
-            37 => write!(f, "shoulder_extension"),
-            38 => write!(f, "shoulder_external_rotation"),
-            39 => write!(f, "shoulder_flexion_to_90_degrees"),
-            40 => write!(f, "side_plank_leg_lifts"),
-            41 => write!(f, "side_raise"),
-            42 => write!(f, "squat"),
-            43 => write!(f, "squat_to_press"),
-            44 => write!(f, "tricep_extension"),
-            45 => write!(f, "tricep_kickback"),
-            46 => write!(f, "upright_row"),
-            47 => write!(f, "wall_crawl_with_external_rotation"),
-            49 => write!(f, "lateral_raise_wheelchair"),
-            50 => write!(f, "triceps_extension_wheelchair"),
-            51 => write!(f, "chest_fly_incline_wheelchair"),
-            52 => write!(f, "chest_fly_decline_wheelchair"),
-            53 => write!(f, "pull_down_wheelchair"),
-            54 => write!(f, "straight_arm_pull_down_wheelchair"),
-            55 => write!(f, "curl_wheelchair"),
-            56 => write!(f, "overhead_curl_wheelchair"),
-            57 => write!(f, "face_pull_wheelchair"),
-            58 => write!(f, "around_the_world_wheelchair"),
-            59 => write!(f, "pull_apart_wheelchair"),
-            60 => write!(f, "side_curl_wheelchair"),
-            61 => write!(f, "overhead_press_wheelchair"),
-            _ => write!(f, "BandedExercisesExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BandedExercisesExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BandedExercisesExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BandedExercisesExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BandedExercisesExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

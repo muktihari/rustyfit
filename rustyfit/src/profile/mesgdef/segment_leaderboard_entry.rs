@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Segment Leaderboard Entry message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SegmentLeaderboardEntry {
     pub message_index: typedef::MessageIndex,
@@ -33,19 +36,19 @@ pub struct SegmentLeaderboardEntry {
 }
 
 impl SegmentLeaderboardEntry {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_LEADERBOARD_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SegmentLeaderboardType
     pub const TYPE: u8 = 1;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const GROUP_PRIMARY_KEY: u8 = 2;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const ACTIVITY_ID: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const SEGMENT_TIME: u8 = 4;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const ACTIVITY_ID_STRING: u8 = 5;
 
     /// Create new SegmentLeaderboardEntry with all fields being set to its corresponding invalid value.
@@ -200,6 +203,100 @@ impl From<SegmentLeaderboardEntry> for Message {
             num: typedef::MesgNum::SEGMENT_LEADERBOARD_ENTRY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SegmentLeaderboardEntry {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SegmentLeaderboardEntry", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if self.group_primary_key != u32::MAX {
+            state.serialize_field("group_primary_key", &self.group_primary_key)?;
+        }
+        if self.activity_id != u32::MAX {
+            state.serialize_field("activity_id", &self.activity_id)?;
+        }
+        if let Some(v) = self.segment_time_scaled() {
+            state.serialize_field("segment_time", &v)?;
+        }
+        if !self.activity_id_string.is_empty() {
+            state.serialize_field("activity_id_string", &self.activity_id_string)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    name: String,
+    r#type: typedef::SegmentLeaderboardType,
+    group_primary_key: u32,
+    activity_id: u32,
+    segment_time: f64,
+    activity_id_string: String,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SegmentLeaderboardEntry {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            name: m.name,
+            r#type: m.r#type,
+            group_primary_key: m.group_primary_key,
+            activity_id: m.activity_id,
+            segment_time: {
+                let unscaled = (m.segment_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            activity_id_string: m.activity_id_string,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            name: String::new(),
+            r#type: typedef::SegmentLeaderboardType(u8::MAX),
+            group_primary_key: u32::MAX,
+            activity_id: u32::MAX,
+            segment_time: f64::from_bits(u64::MAX),
+            activity_id_string: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

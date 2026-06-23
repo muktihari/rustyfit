@@ -28,10 +28,15 @@ keywords = [
 
 [dependencies]
 embedded-io = { version = "0.7.1" }
+serde = { version = "1.0.228", default-features = false, features = ["derive", "alloc"], optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.8.2" }
 embedded-io-adapters = { version = "0.7.0", features = ["std"] }
+serde_json = { version = "1.0.150", default-features = false, features = ["alloc"] }
+
+[features]
+serde = ["dep:serde"]
 
 [[bench]]
 name = "bench_main"

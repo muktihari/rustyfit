@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Aviation Attitude message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct AviationAttitude {
     /// Units: s; Timestamp message was output
@@ -40,29 +43,29 @@ pub struct AviationAttitude {
 }
 
 impl AviationAttitude {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u32>`; Units: `ms`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
     pub const SYSTEM_TIME: u8 = 1;
-    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `10430.38`; Units: `radians`
     pub const PITCH: u8 = 2;
-    /// Value's type: `Vec<i16>`; Scale: `10430.38`; Units: `radians`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `10430.38`; Units: `radians`
     pub const ROLL: u8 = 3;
-    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s^2`
     pub const ACCEL_LATERAL: u8 = 4;
-    /// Value's type: `Vec<i16>`; Scale: `100`; Units: `m/s^2`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s^2`
     pub const ACCEL_NORMAL: u8 = 5;
-    /// Value's type: `Vec<i16>`; Scale: `1024`; Units: `radians/second`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1024`; Units: `radians/second`
     pub const TURN_RATE: u8 = 6;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::ATTITUDE_STAGE`
+    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::AttitudeStage
     pub const STAGE: u8 = 7;
-    /// Value's type: `Vec<u8>`; Units: `%`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `%`
     pub const ATTITUDE_STAGE_COMPLETE: u8 = 8;
-    /// Value's type: `Vec<u16>`; Scale: `10430.38`; Units: `radians`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10430.38`; Units: `radians`
     pub const TRACK: u8 = 9;
-    /// Value's type: `Vec<u16>`; ProfileType: `ProfileType::ATTITUDE_VALIDITY`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::AttitudeValidity
     pub const VALIDITY: u8 = 10;
 
     /// Create new AviationAttitude with all fields being set to its corresponding invalid value.
@@ -461,6 +464,222 @@ impl From<AviationAttitude> for Message {
             num: typedef::MesgNum::AVIATION_ATTITUDE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AviationAttitude {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("AviationAttitude", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if !self.system_time.is_empty() {
+            state.serialize_field("system_time", &self.system_time)?;
+        }
+        if let Some(v) = self.pitch_scaled() {
+            state.serialize_field("pitch", &v)?;
+        }
+        if let Some(v) = self.roll_scaled() {
+            state.serialize_field("roll", &v)?;
+        }
+        if let Some(v) = self.accel_lateral_scaled() {
+            state.serialize_field("accel_lateral", &v)?;
+        }
+        if let Some(v) = self.accel_normal_scaled() {
+            state.serialize_field("accel_normal", &v)?;
+        }
+        if let Some(v) = self.turn_rate_scaled() {
+            state.serialize_field("turn_rate", &v)?;
+        }
+        if !self.stage.is_empty() {
+            state.serialize_field("stage", &self.stage)?;
+        }
+        if !self.attitude_stage_complete.is_empty() {
+            state.serialize_field("attitude_stage_complete", &self.attitude_stage_complete)?;
+        }
+        if let Some(v) = self.track_scaled() {
+            state.serialize_field("track", &v)?;
+        }
+        if !self.validity.is_empty() {
+            state.serialize_field("validity", &self.validity)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    system_time: Vec<u32>,
+    pitch: Vec<f64>,
+    roll: Vec<f64>,
+    accel_lateral: Vec<f64>,
+    accel_normal: Vec<f64>,
+    turn_rate: Vec<f64>,
+    stage: Vec<typedef::AttitudeStage>,
+    attitude_stage_complete: Vec<u8>,
+    track: Vec<f64>,
+    validity: Vec<typedef::AttitudeValidity>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for AviationAttitude {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            system_time: m.system_time,
+            pitch: {
+                if m.pitch.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.pitch.len());
+                    for &x in m.pitch.iter() {
+                        let unscaled = (x + 0.0) * 10430.38;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            roll: {
+                if m.roll.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.roll.len());
+                    for &x in m.roll.iter() {
+                        let unscaled = (x + 0.0) * 10430.38;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            accel_lateral: {
+                if m.accel_lateral.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.accel_lateral.len());
+                    for &x in m.accel_lateral.iter() {
+                        let unscaled = (x + 0.0) * 100.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            accel_normal: {
+                if m.accel_normal.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.accel_normal.len());
+                    for &x in m.accel_normal.iter() {
+                        let unscaled = (x + 0.0) * 100.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            turn_rate: {
+                if m.turn_rate.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.turn_rate.len());
+                    for &x in m.turn_rate.iter() {
+                        let unscaled = (x + 0.0) * 1024.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64
+                        {
+                            vals.push(i16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as i16);
+                    }
+                    vals
+                }
+            },
+            stage: m.stage,
+            attitude_stage_complete: m.attitude_stage_complete,
+            track: {
+                if m.track.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.track.len());
+                    for &x in m.track.iter() {
+                        let unscaled = (x + 0.0) * 10430.38;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64
+                        {
+                            vals.push(u16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u16);
+                    }
+                    vals
+                }
+            },
+            validity: m.validity,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            system_time: Vec::new(),
+            pitch: Vec::new(),
+            roll: Vec::new(),
+            accel_lateral: Vec::new(),
+            accel_normal: Vec::new(),
+            turn_rate: Vec::new(),
+            stage: Vec::new(),
+            attitude_stage_complete: Vec::new(),
+            track: Vec::new(),
+            validity: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

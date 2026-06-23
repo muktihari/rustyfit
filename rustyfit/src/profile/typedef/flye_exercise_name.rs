@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Flye Exercise Name type.
 #[repr(transparent)]
@@ -27,6 +27,25 @@ impl FlyeExerciseName {
     pub const FACE_DOWN_INCLINE_REVERSE_FLYE: FlyeExerciseName = FlyeExerciseName(10);
     pub const INCLINE_REVERSE_FLYE: FlyeExerciseName = FlyeExerciseName(11);
     pub const REAR_DELT_FLY_WHEELCHAIR: FlyeExerciseName = FlyeExerciseName(12);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("cable_crossover"),
+            1 => Some("decline_dumbbell_flye"),
+            2 => Some("dumbbell_flye"),
+            3 => Some("incline_dumbbell_flye"),
+            4 => Some("kettlebell_flye"),
+            5 => Some("kneeling_rear_flye"),
+            6 => Some("single_arm_standing_cable_reverse_flye"),
+            7 => Some("swiss_ball_dumbbell_flye"),
+            8 => Some("arm_rotations"),
+            9 => Some("hug_a_tree"),
+            10 => Some("face_down_incline_reverse_flye"),
+            11 => Some("incline_reverse_flye"),
+            12 => Some("rear_delt_fly_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for FlyeExerciseName {
@@ -37,21 +56,50 @@ impl Default for FlyeExerciseName {
 
 impl fmt::Display for FlyeExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "cable_crossover"),
-            1 => write!(f, "decline_dumbbell_flye"),
-            2 => write!(f, "dumbbell_flye"),
-            3 => write!(f, "incline_dumbbell_flye"),
-            4 => write!(f, "kettlebell_flye"),
-            5 => write!(f, "kneeling_rear_flye"),
-            6 => write!(f, "single_arm_standing_cable_reverse_flye"),
-            7 => write!(f, "swiss_ball_dumbbell_flye"),
-            8 => write!(f, "arm_rotations"),
-            9 => write!(f, "hug_a_tree"),
-            10 => write!(f, "face_down_incline_reverse_flye"),
-            11 => write!(f, "incline_reverse_flye"),
-            12 => write!(f, "rear_delt_fly_wheelchair"),
-            _ => write!(f, "FlyeExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "FlyeExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FlyeExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("FlyeExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for FlyeExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

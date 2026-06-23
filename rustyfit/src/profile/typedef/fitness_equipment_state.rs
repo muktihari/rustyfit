@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Fitness Equipment State type.
 #[repr(transparent)]
@@ -19,6 +19,16 @@ impl FitnessEquipmentState {
     pub const PAUSED: FitnessEquipmentState = FitnessEquipmentState(2);
     /// lost connection to fitness equipment
     pub const UNKNOWN: FitnessEquipmentState = FitnessEquipmentState(3);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("ready"),
+            1 => Some("in_use"),
+            2 => Some("paused"),
+            3 => Some("unknown"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for FitnessEquipmentState {
@@ -29,12 +39,50 @@ impl Default for FitnessEquipmentState {
 
 impl fmt::Display for FitnessEquipmentState {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "ready"),
-            1 => write!(f, "in_use"),
-            2 => write!(f, "paused"),
-            3 => write!(f, "unknown"),
-            _ => write!(f, "FitnessEquipmentState({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "FitnessEquipmentState({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FitnessEquipmentState {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("FitnessEquipmentState", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for FitnessEquipmentState {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

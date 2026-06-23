@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Segment Id message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SegmentId {
     /// Friendly name assigned to segment
@@ -38,23 +41,23 @@ pub struct SegmentId {
 }
 
 impl SegmentId {
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const UUID: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 3;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const USER_PROFILE_PRIMARY_KEY: u8 = 4;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const DEVICE_ID: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEFAULT_RACE_LEADER: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_DELETE_STATUS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SegmentDeleteStatus
     pub const DELETE_STATUS: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_SELECTION_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SegmentSelectionType
     pub const SELECTION_TYPE: u8 = 8;
 
     /// Create new SegmentId with all fields being set to its corresponding invalid value.
@@ -210,6 +213,105 @@ impl From<SegmentId> for Message {
             num: typedef::MesgNum::SEGMENT_ID,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SegmentId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SegmentId", n)?;
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if !self.uuid.is_empty() {
+            state.serialize_field("uuid", &self.uuid)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.user_profile_primary_key != u32::MAX {
+            state.serialize_field("user_profile_primary_key", &self.user_profile_primary_key)?;
+        }
+        if self.device_id != u32::MAX {
+            state.serialize_field("device_id", &self.device_id)?;
+        }
+        if self.default_race_leader != u8::MAX {
+            state.serialize_field("default_race_leader", &self.default_race_leader)?;
+        }
+        if self.delete_status.0 != u8::MAX {
+            state.serialize_field("delete_status", &self.delete_status)?;
+        }
+        if self.selection_type.0 != u8::MAX {
+            state.serialize_field("selection_type", &self.selection_type)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    name: String,
+    uuid: String,
+    sport: typedef::Sport,
+    enabled: typedef::Bool,
+    user_profile_primary_key: u32,
+    device_id: u32,
+    default_race_leader: u8,
+    delete_status: typedef::SegmentDeleteStatus,
+    selection_type: typedef::SegmentSelectionType,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SegmentId {
+    fn from(m: De) -> Self {
+        Self {
+            name: m.name,
+            uuid: m.uuid,
+            sport: m.sport,
+            enabled: m.enabled,
+            user_profile_primary_key: m.user_profile_primary_key,
+            device_id: m.device_id,
+            default_race_leader: m.default_race_leader,
+            delete_status: m.delete_status,
+            selection_type: m.selection_type,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            uuid: String::new(),
+            sport: typedef::Sport(u8::MAX),
+            enabled: typedef::Bool(u8::MAX),
+            user_profile_primary_key: u32::MAX,
+            device_id: u32::MAX,
+            default_race_leader: u8::MAX,
+            delete_status: typedef::SegmentDeleteStatus(u8::MAX),
+            selection_type: typedef::SegmentSelectionType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

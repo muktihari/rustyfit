@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Suspension Exercise Name type.
 #[repr(transparent)]
@@ -49,6 +49,47 @@ impl SuspensionExerciseName {
     pub const SQUAT_JUMP: SuspensionExerciseName = SuspensionExerciseName(32);
     pub const TRICEP_PRESS: SuspensionExerciseName = SuspensionExerciseName(33);
     pub const Y_FLY: SuspensionExerciseName = SuspensionExerciseName(34);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("chest_fly"),
+            1 => Some("chest_press"),
+            2 => Some("crunch"),
+            3 => Some("curl"),
+            4 => Some("dip"),
+            5 => Some("face_pull"),
+            6 => Some("glute_bridge"),
+            7 => Some("hamstring_curl"),
+            8 => Some("hip_drop"),
+            9 => Some("inverted_row"),
+            10 => Some("knee_drive_jump"),
+            11 => Some("knee_to_chest"),
+            12 => Some("lat_pullover"),
+            13 => Some("lunge"),
+            14 => Some("mountain_climber"),
+            15 => Some("pendulum"),
+            16 => Some("pike"),
+            17 => Some("plank"),
+            18 => Some("power_pull"),
+            19 => Some("pull_up"),
+            20 => Some("push_up"),
+            21 => Some("reverse_mountain_climber"),
+            22 => Some("reverse_plank"),
+            23 => Some("rollout"),
+            24 => Some("row"),
+            25 => Some("side_lunge"),
+            26 => Some("side_plank"),
+            27 => Some("single_leg_deadlift"),
+            28 => Some("single_leg_squat"),
+            29 => Some("sit_up"),
+            30 => Some("split"),
+            31 => Some("squat"),
+            32 => Some("squat_jump"),
+            33 => Some("tricep_press"),
+            34 => Some("y_fly"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SuspensionExerciseName {
@@ -59,43 +100,50 @@ impl Default for SuspensionExerciseName {
 
 impl fmt::Display for SuspensionExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "chest_fly"),
-            1 => write!(f, "chest_press"),
-            2 => write!(f, "crunch"),
-            3 => write!(f, "curl"),
-            4 => write!(f, "dip"),
-            5 => write!(f, "face_pull"),
-            6 => write!(f, "glute_bridge"),
-            7 => write!(f, "hamstring_curl"),
-            8 => write!(f, "hip_drop"),
-            9 => write!(f, "inverted_row"),
-            10 => write!(f, "knee_drive_jump"),
-            11 => write!(f, "knee_to_chest"),
-            12 => write!(f, "lat_pullover"),
-            13 => write!(f, "lunge"),
-            14 => write!(f, "mountain_climber"),
-            15 => write!(f, "pendulum"),
-            16 => write!(f, "pike"),
-            17 => write!(f, "plank"),
-            18 => write!(f, "power_pull"),
-            19 => write!(f, "pull_up"),
-            20 => write!(f, "push_up"),
-            21 => write!(f, "reverse_mountain_climber"),
-            22 => write!(f, "reverse_plank"),
-            23 => write!(f, "rollout"),
-            24 => write!(f, "row"),
-            25 => write!(f, "side_lunge"),
-            26 => write!(f, "side_plank"),
-            27 => write!(f, "single_leg_deadlift"),
-            28 => write!(f, "single_leg_squat"),
-            29 => write!(f, "sit_up"),
-            30 => write!(f, "split"),
-            31 => write!(f, "squat"),
-            32 => write!(f, "squat_jump"),
-            33 => write!(f, "tricep_press"),
-            34 => write!(f, "y_fly"),
-            _ => write!(f, "SuspensionExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SuspensionExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SuspensionExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SuspensionExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SuspensionExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

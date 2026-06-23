@@ -9,6 +9,8 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -18,6 +20,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Length message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Length {
     pub message_index: typedef::MessageIndex,
@@ -61,49 +64,49 @@ pub struct Length {
 }
 
 impl Length {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Event
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::EventType
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIME: u8 = 2;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_ELAPSED_TIME: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 4;
-    /// Value's type: `u16`; Units: `strokes`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `strokes`
     pub const TOTAL_STROKES: u8 = 5;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 6;
-    /// Value's type: `u8`; Units: `swim_stroke`; ProfileType: `ProfileType::SWIM_STROKE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SwimStroke; Units: `swim_stroke`
     pub const SWIM_STROKE: u8 = 7;
-    /// Value's type: `u8`; Units: `strokes/min`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `strokes/min`
     pub const AVG_SWIMMING_CADENCE: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const EVENT_GROUP: u8 = 10;
-    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::LENGTH_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::LengthType
     pub const LENGTH_TYPE: u8 = 12;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PLAYER_SCORE: u8 = 18;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const OPPONENT_SCORE: u8 = 19;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const STROKE_COUNT: u8 = 20;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ZONE_COUNT: u8 = 21;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_AVG_RESPIRATION_RATE: u8 = 22;
-    /// Value's type: `u16`; Scale: `100`; Units: `Breaths/min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_MAX_RESPIRATION_RATE: u8 = 23;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const AVG_RESPIRATION_RATE: u8 = 24;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const MAX_RESPIRATION_RATE: u8 = 25;
 
     /// Create new Length with all fields being set to its corresponding invalid value.
@@ -534,6 +537,225 @@ impl From<Length> for Message {
             num: typedef::MesgNum::LENGTH,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Length {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Length", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.event.0 != u8::MAX {
+            state.serialize_field("event", &self.event)?;
+        }
+        if self.event_type.0 != u8::MAX {
+            state.serialize_field("event_type", &self.event_type)?;
+        }
+        if let Some(v) = self.start_time.unix_timestamp() {
+            state.serialize_field("start_time", &v)?;
+        }
+        if let Some(v) = self.total_elapsed_time_scaled() {
+            state.serialize_field("total_elapsed_time", &v)?;
+        }
+        if let Some(v) = self.total_timer_time_scaled() {
+            state.serialize_field("total_timer_time", &v)?;
+        }
+        if self.total_strokes != u16::MAX {
+            state.serialize_field("total_strokes", &self.total_strokes)?;
+        }
+        if let Some(v) = self.avg_speed_scaled() {
+            state.serialize_field("avg_speed", &v)?;
+        }
+        if self.swim_stroke.0 != u8::MAX {
+            state.serialize_field("swim_stroke", &self.swim_stroke)?;
+        }
+        if self.avg_swimming_cadence != u8::MAX {
+            state.serialize_field("avg_swimming_cadence", &self.avg_swimming_cadence)?;
+        }
+        if self.event_group != u8::MAX {
+            state.serialize_field("event_group", &self.event_group)?;
+        }
+        if self.total_calories != u16::MAX {
+            state.serialize_field("total_calories", &self.total_calories)?;
+        }
+        if self.length_type.0 != u8::MAX {
+            state.serialize_field("length_type", &self.length_type)?;
+        }
+        if self.player_score != u16::MAX {
+            state.serialize_field("player_score", &self.player_score)?;
+        }
+        if self.opponent_score != u16::MAX {
+            state.serialize_field("opponent_score", &self.opponent_score)?;
+        }
+        if !self.stroke_count.is_empty() {
+            state.serialize_field("stroke_count", &self.stroke_count)?;
+        }
+        if !self.zone_count.is_empty() {
+            state.serialize_field("zone_count", &self.zone_count)?;
+        }
+        if let Some(v) = self.enhanced_avg_respiration_rate_scaled() {
+            state.serialize_field("enhanced_avg_respiration_rate", &v)?;
+        }
+        if let Some(v) = self.enhanced_max_respiration_rate_scaled() {
+            state.serialize_field("enhanced_max_respiration_rate", &v)?;
+        }
+        if self.avg_respiration_rate != u8::MAX {
+            state.serialize_field("avg_respiration_rate", &self.avg_respiration_rate)?;
+        }
+        if self.max_respiration_rate != u8::MAX {
+            state.serialize_field("max_respiration_rate", &self.max_respiration_rate)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    timestamp: Option<i64>,
+    event: typedef::Event,
+    event_type: typedef::EventType,
+    start_time: Option<i64>,
+    total_elapsed_time: f64,
+    total_timer_time: f64,
+    total_strokes: u16,
+    avg_speed: f64,
+    swim_stroke: typedef::SwimStroke,
+    avg_swimming_cadence: u8,
+    event_group: u8,
+    total_calories: u16,
+    length_type: typedef::LengthType,
+    player_score: u16,
+    opponent_score: u16,
+    stroke_count: Vec<u16>,
+    zone_count: Vec<u16>,
+    enhanced_avg_respiration_rate: f64,
+    enhanced_max_respiration_rate: f64,
+    avg_respiration_rate: u8,
+    max_respiration_rate: u8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Length {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            event: m.event,
+            event_type: m.event_type,
+            start_time: m.start_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            total_elapsed_time: {
+                let unscaled = (m.total_elapsed_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_timer_time: {
+                let unscaled = (m.total_timer_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_strokes: m.total_strokes,
+            avg_speed: {
+                let unscaled = (m.avg_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            swim_stroke: m.swim_stroke,
+            avg_swimming_cadence: m.avg_swimming_cadence,
+            event_group: m.event_group,
+            total_calories: m.total_calories,
+            length_type: m.length_type,
+            player_score: m.player_score,
+            opponent_score: m.opponent_score,
+            stroke_count: m.stroke_count,
+            zone_count: m.zone_count,
+            enhanced_avg_respiration_rate: {
+                let unscaled = (m.enhanced_avg_respiration_rate + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            enhanced_max_respiration_rate: {
+                let unscaled = (m.enhanced_max_respiration_rate + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_respiration_rate: m.avg_respiration_rate,
+            max_respiration_rate: m.max_respiration_rate,
+            state: [0u8; 3],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: None,
+            event: typedef::Event(u8::MAX),
+            event_type: typedef::EventType(u8::MAX),
+            start_time: None,
+            total_elapsed_time: f64::from_bits(u64::MAX),
+            total_timer_time: f64::from_bits(u64::MAX),
+            total_strokes: u16::MAX,
+            avg_speed: f64::from_bits(u64::MAX),
+            swim_stroke: typedef::SwimStroke(u8::MAX),
+            avg_swimming_cadence: u8::MAX,
+            event_group: u8::MAX,
+            total_calories: u16::MAX,
+            length_type: typedef::LengthType(u8::MAX),
+            player_score: u16::MAX,
+            opponent_score: u16::MAX,
+            stroke_count: Vec::new(),
+            zone_count: Vec::new(),
+            enhanced_avg_respiration_rate: f64::from_bits(u64::MAX),
+            enhanced_max_respiration_rate: f64::from_bits(u64::MAX),
+            avg_respiration_rate: u8::MAX,
+            max_respiration_rate: u8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

@@ -8,8 +8,11 @@ use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Gps Metadata message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct GpsMetadata {
     /// Units: s; Whole second part of the timestamp.
@@ -37,23 +40,23 @@ pub struct GpsMetadata {
 }
 
 impl GpsMetadata {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LAT: u8 = 1;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LONG: u8 = 2;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 3;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_SPEED: u8 = 4;
-    /// Value's type: `u16`; Scale: `100`; Units: `degrees`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `degrees`
     pub const HEADING: u8 = 5;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const UTC_TIMESTAMP: u8 = 6;
-    /// Value's type: `[i16; 3]`; Scale: `100`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `[i16; 3]`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s`
     pub const VELOCITY: u8 = 7;
 
     /// Create new GpsMetadata with all fields being set to its corresponding invalid value.
@@ -335,6 +338,144 @@ impl From<GpsMetadata> for Message {
             num: typedef::MesgNum::GPS_METADATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for GpsMetadata {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("GpsMetadata", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if let Some(v) = self.position_lat_degrees() {
+            state.serialize_field("position_lat", &v)?;
+        }
+        if let Some(v) = self.position_long_degrees() {
+            state.serialize_field("position_long", &v)?;
+        }
+        if let Some(v) = self.enhanced_altitude_scaled() {
+            state.serialize_field("enhanced_altitude", &v)?;
+        }
+        if let Some(v) = self.enhanced_speed_scaled() {
+            state.serialize_field("enhanced_speed", &v)?;
+        }
+        if let Some(v) = self.heading_scaled() {
+            state.serialize_field("heading", &v)?;
+        }
+        if let Some(v) = self.utc_timestamp.unix_timestamp() {
+            state.serialize_field("utc_timestamp", &v)?;
+        }
+        if let Some(v) = self.velocity_scaled() {
+            state.serialize_field("velocity", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    /// Degrees.
+    position_lat: f64,
+    /// Degrees.
+    position_long: f64,
+    enhanced_altitude: f64,
+    enhanced_speed: f64,
+    heading: f64,
+    utc_timestamp: Option<i64>,
+    velocity: [f64; 3],
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for GpsMetadata {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            position_lat: semconv::to_semicircles(m.position_lat).unwrap_or(i32::MAX),
+            position_long: semconv::to_semicircles(m.position_long).unwrap_or(i32::MAX),
+            enhanced_altitude: {
+                let unscaled = (m.enhanced_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            enhanced_speed: {
+                let unscaled = (m.enhanced_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            heading: {
+                let unscaled = (m.heading + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            utc_timestamp: m.utc_timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            velocity: {
+                let mut vals = [i16::MAX; 3];
+                for (i, &x) in m.velocity.iter().enumerate() {
+                    let unscaled = (x + 0.0) * 100.0;
+                    if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                        continue;
+                    }
+                    vals[i] = unscaled as i16;
+                }
+                vals
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            position_lat: f64::from_bits(u64::MAX),
+            position_long: f64::from_bits(u64::MAX),
+            enhanced_altitude: f64::from_bits(u64::MAX),
+            enhanced_speed: f64::from_bits(u64::MAX),
+            heading: f64::from_bits(u64::MAX),
+            utc_timestamp: None,
+            velocity: [const { f64::from_bits(u64::MAX) }; 3],
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

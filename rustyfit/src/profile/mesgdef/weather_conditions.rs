@@ -10,8 +10,11 @@ use crate::semconv;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Weather Conditions message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct WeatherConditions {
     /// time of update for current conditions, else forecast time
@@ -50,37 +53,37 @@ pub struct WeatherConditions {
 }
 
 impl WeatherConditions {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_REPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WeatherReport
     pub const WEATHER_REPORT: u8 = 0;
-    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const TEMPERATURE: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_STATUS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WeatherStatus
     pub const CONDITION: u8 = 2;
-    /// Value's type: `u16`; Units: `degrees`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `degrees`
     pub const WIND_DIRECTION: u8 = 3;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const WIND_SPEED: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const PRECIPITATION_PROBABILITY: u8 = 5;
-    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const TEMPERATURE_FEELS_LIKE: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const RELATIVE_HUMIDITY: u8 = 7;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const LOCATION: u8 = 8;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const OBSERVED_AT_TIME: u8 = 9;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const OBSERVED_LOCATION_LAT: u8 = 10;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const OBSERVED_LOCATION_LONG: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DAY_OF_WEEK`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DayOfWeek
     pub const DAY_OF_WEEK: u8 = 12;
-    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const HIGH_TEMPERATURE: u8 = 13;
-    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const LOW_TEMPERATURE: u8 = 14;
 
     /// Create new WeatherConditions with all fields being set to its corresponding invalid value.
@@ -356,6 +359,164 @@ impl From<WeatherConditions> for Message {
             num: typedef::MesgNum::WEATHER_CONDITIONS,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WeatherConditions {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("WeatherConditions", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.weather_report.0 != u8::MAX {
+            state.serialize_field("weather_report", &self.weather_report)?;
+        }
+        if self.temperature != i8::MAX {
+            state.serialize_field("temperature", &self.temperature)?;
+        }
+        if self.condition.0 != u8::MAX {
+            state.serialize_field("condition", &self.condition)?;
+        }
+        if self.wind_direction != u16::MAX {
+            state.serialize_field("wind_direction", &self.wind_direction)?;
+        }
+        if let Some(v) = self.wind_speed_scaled() {
+            state.serialize_field("wind_speed", &v)?;
+        }
+        if self.precipitation_probability != u8::MAX {
+            state.serialize_field("precipitation_probability", &self.precipitation_probability)?;
+        }
+        if self.temperature_feels_like != i8::MAX {
+            state.serialize_field("temperature_feels_like", &self.temperature_feels_like)?;
+        }
+        if self.relative_humidity != u8::MAX {
+            state.serialize_field("relative_humidity", &self.relative_humidity)?;
+        }
+        if !self.location.is_empty() {
+            state.serialize_field("location", &self.location)?;
+        }
+        if let Some(v) = self.observed_at_time.unix_timestamp() {
+            state.serialize_field("observed_at_time", &v)?;
+        }
+        if let Some(v) = self.observed_location_lat_degrees() {
+            state.serialize_field("observed_location_lat", &v)?;
+        }
+        if let Some(v) = self.observed_location_long_degrees() {
+            state.serialize_field("observed_location_long", &v)?;
+        }
+        if self.day_of_week.0 != u8::MAX {
+            state.serialize_field("day_of_week", &self.day_of_week)?;
+        }
+        if self.high_temperature != i8::MAX {
+            state.serialize_field("high_temperature", &self.high_temperature)?;
+        }
+        if self.low_temperature != i8::MAX {
+            state.serialize_field("low_temperature", &self.low_temperature)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    weather_report: typedef::WeatherReport,
+    temperature: i8,
+    condition: typedef::WeatherStatus,
+    wind_direction: u16,
+    wind_speed: f64,
+    precipitation_probability: u8,
+    temperature_feels_like: i8,
+    relative_humidity: u8,
+    location: String,
+    observed_at_time: Option<i64>,
+    /// Degrees.
+    observed_location_lat: f64,
+    /// Degrees.
+    observed_location_long: f64,
+    day_of_week: typedef::DayOfWeek,
+    high_temperature: i8,
+    low_temperature: i8,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for WeatherConditions {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            weather_report: m.weather_report,
+            temperature: m.temperature,
+            condition: m.condition,
+            wind_direction: m.wind_direction,
+            wind_speed: {
+                let unscaled = (m.wind_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            precipitation_probability: m.precipitation_probability,
+            temperature_feels_like: m.temperature_feels_like,
+            relative_humidity: m.relative_humidity,
+            location: m.location,
+            observed_at_time: m.observed_at_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            observed_location_lat: semconv::to_semicircles(m.observed_location_lat)
+                .unwrap_or(i32::MAX),
+            observed_location_long: semconv::to_semicircles(m.observed_location_long)
+                .unwrap_or(i32::MAX),
+            day_of_week: m.day_of_week,
+            high_temperature: m.high_temperature,
+            low_temperature: m.low_temperature,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            weather_report: typedef::WeatherReport(u8::MAX),
+            temperature: i8::MAX,
+            condition: typedef::WeatherStatus(u8::MAX),
+            wind_direction: u16::MAX,
+            wind_speed: f64::from_bits(u64::MAX),
+            precipitation_probability: u8::MAX,
+            temperature_feels_like: i8::MAX,
+            relative_humidity: u8::MAX,
+            location: String::new(),
+            observed_at_time: None,
+            observed_location_lat: f64::from_bits(u64::MAX),
+            observed_location_long: f64::from_bits(u64::MAX),
+            day_of_week: typedef::DayOfWeek(u8::MAX),
+            high_temperature: i8::MAX,
+            low_temperature: i8::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

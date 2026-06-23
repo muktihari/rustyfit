@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Schedule message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Schedule {
     /// Corresponds to file_id of scheduled workout / course.
@@ -30,19 +33,19 @@ pub struct Schedule {
 }
 
 impl Schedule {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PRODUCT: u8 = 1;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::UINT32Z`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::Uint32z
     pub const SERIAL_NUMBER: u8 = 2;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIME_CREATED: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const COMPLETED: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SCHEDULE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Schedule
     pub const TYPE: u8 = 5;
-    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocalDateTime
     pub const SCHEDULED_TIME: u8 = 6;
 
     /// Create new Schedule with all fields being set to its corresponding invalid value.
@@ -176,6 +179,99 @@ impl From<Schedule> for Message {
             num: typedef::MesgNum::SCHEDULE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Schedule {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Schedule", n)?;
+        if self.manufacturer.0 != u16::MAX {
+            state.serialize_field("manufacturer", &self.manufacturer)?;
+        }
+        if self.product != u16::MAX {
+            state.serialize_field("product", &self.product)?;
+        }
+        if self.serial_number != u32::MIN {
+            state.serialize_field("serial_number", &self.serial_number)?;
+        }
+        if let Some(v) = self.time_created.unix_timestamp() {
+            state.serialize_field("time_created", &v)?;
+        }
+        if self.completed.0 != u8::MAX {
+            state.serialize_field("completed", &self.completed)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if let Some(v) = self.scheduled_time.unix_timestamp() {
+            state.serialize_field("scheduled_time", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    manufacturer: typedef::Manufacturer,
+    product: u16,
+    serial_number: u32,
+    time_created: Option<i64>,
+    completed: typedef::Bool,
+    r#type: typedef::Schedule,
+    scheduled_time: Option<i64>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Schedule {
+    fn from(m: De) -> Self {
+        Self {
+            manufacturer: m.manufacturer,
+            product: m.product,
+            serial_number: m.serial_number,
+            time_created: m.time_created.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            completed: m.completed,
+            r#type: m.r#type,
+            scheduled_time: m.scheduled_time.map_or_else(
+                || typedef::LocalDateTime(u32::MAX),
+                typedef::LocalDateTime::from_unix_timestamp,
+            ),
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            product: u16::MAX,
+            serial_number: u32::MIN,
+            time_created: None,
+            completed: typedef::Bool(u8::MAX),
+            r#type: typedef::Schedule(u8::MAX),
+            scheduled_time: None,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

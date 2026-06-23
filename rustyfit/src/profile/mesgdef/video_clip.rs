@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Video Clip message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct VideoClip {
     pub clip_number: u16,
@@ -27,19 +30,19 @@ pub struct VideoClip {
 }
 
 impl VideoClip {
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const CLIP_NUMBER: u8 = 0;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIMESTAMP: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const START_TIMESTAMP_MS: u8 = 2;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const END_TIMESTAMP: u8 = 3;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const END_TIMESTAMP_MS: u8 = 4;
-    /// Value's type: `u32`; Units: `ms`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
     pub const CLIP_START: u8 = 6;
-    /// Value's type: `u32`; Units: `ms`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
     pub const CLIP_END: u8 = 7;
 
     /// Create new VideoClip with all fields being set to its corresponding invalid value.
@@ -173,6 +176,99 @@ impl From<VideoClip> for Message {
             num: typedef::MesgNum::VIDEO_CLIP,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for VideoClip {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("VideoClip", n)?;
+        if self.clip_number != u16::MAX {
+            state.serialize_field("clip_number", &self.clip_number)?;
+        }
+        if let Some(v) = self.start_timestamp.unix_timestamp() {
+            state.serialize_field("start_timestamp", &v)?;
+        }
+        if self.start_timestamp_ms != u16::MAX {
+            state.serialize_field("start_timestamp_ms", &self.start_timestamp_ms)?;
+        }
+        if let Some(v) = self.end_timestamp.unix_timestamp() {
+            state.serialize_field("end_timestamp", &v)?;
+        }
+        if self.end_timestamp_ms != u16::MAX {
+            state.serialize_field("end_timestamp_ms", &self.end_timestamp_ms)?;
+        }
+        if self.clip_start != u32::MAX {
+            state.serialize_field("clip_start", &self.clip_start)?;
+        }
+        if self.clip_end != u32::MAX {
+            state.serialize_field("clip_end", &self.clip_end)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    clip_number: u16,
+    start_timestamp: Option<i64>,
+    start_timestamp_ms: u16,
+    end_timestamp: Option<i64>,
+    end_timestamp_ms: u16,
+    clip_start: u32,
+    clip_end: u32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for VideoClip {
+    fn from(m: De) -> Self {
+        Self {
+            clip_number: m.clip_number,
+            start_timestamp: m.start_timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            start_timestamp_ms: m.start_timestamp_ms,
+            end_timestamp: m.end_timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            end_timestamp_ms: m.end_timestamp_ms,
+            clip_start: m.clip_start,
+            clip_end: m.clip_end,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            clip_number: u16::MAX,
+            start_timestamp: None,
+            start_timestamp_ms: u16::MAX,
+            end_timestamp: None,
+            end_timestamp_ms: u16::MAX,
+            clip_start: u32::MAX,
+            clip_end: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

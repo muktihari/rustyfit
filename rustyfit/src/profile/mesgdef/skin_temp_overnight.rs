@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Skin Temp Overnight message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SkinTempOvernight {
     pub timestamp: typedef::DateTime,
@@ -26,15 +29,15 @@ pub struct SkinTempOvernight {
 }
 
 impl SkinTempOvernight {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; ProfileType: `ProfileType::LOCAL_DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocalDateTime
     pub const LOCAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32
     pub const AVERAGE_DEVIATION: u8 = 1;
-    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32
     pub const AVERAGE_7_DAY_DEVIATION: u8 = 2;
-    /// Value's type: `f32`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32
     pub const NIGHTLY_VALUE: u8 = 4;
 
     /// Create new SkinTempOvernight with all fields being set to its corresponding invalid value.
@@ -146,6 +149,87 @@ impl From<SkinTempOvernight> for Message {
             num: typedef::MesgNum::SKIN_TEMP_OVERNIGHT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SkinTempOvernight {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SkinTempOvernight", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.local_timestamp.unix_timestamp() {
+            state.serialize_field("local_timestamp", &v)?;
+        }
+        if self.average_deviation.to_bits() != u32::MAX {
+            state.serialize_field("average_deviation", &self.average_deviation)?;
+        }
+        if self.average_7_day_deviation.to_bits() != u32::MAX {
+            state.serialize_field("average_7_day_deviation", &self.average_7_day_deviation)?;
+        }
+        if self.nightly_value.to_bits() != u32::MAX {
+            state.serialize_field("nightly_value", &self.nightly_value)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    local_timestamp: Option<i64>,
+    average_deviation: f32,
+    average_7_day_deviation: f32,
+    nightly_value: f32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SkinTempOvernight {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            local_timestamp: m.local_timestamp.map_or_else(
+                || typedef::LocalDateTime(u32::MAX),
+                typedef::LocalDateTime::from_unix_timestamp,
+            ),
+            average_deviation: m.average_deviation,
+            average_7_day_deviation: m.average_7_day_deviation,
+            nightly_value: m.nightly_value,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            local_timestamp: None,
+            average_deviation: f32::from_bits(u32::MAX),
+            average_7_day_deviation: f32::from_bits(u32::MAX),
+            nightly_value: f32::from_bits(u32::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

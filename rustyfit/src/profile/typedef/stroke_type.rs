@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Stroke Type type.
 #[repr(transparent)]
@@ -21,6 +21,18 @@ impl StrokeType {
     pub const FOREHAND: StrokeType = StrokeType(3);
     pub const BACKHAND: StrokeType = StrokeType(4);
     pub const SMASH: StrokeType = StrokeType(5);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("no_event"),
+            1 => Some("other"),
+            2 => Some("serve"),
+            3 => Some("forehand"),
+            4 => Some("backhand"),
+            5 => Some("smash"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for StrokeType {
@@ -31,14 +43,50 @@ impl Default for StrokeType {
 
 impl fmt::Display for StrokeType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "no_event"),
-            1 => write!(f, "other"),
-            2 => write!(f, "serve"),
-            3 => write!(f, "forehand"),
-            4 => write!(f, "backhand"),
-            5 => write!(f, "smash"),
-            _ => write!(f, "StrokeType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "StrokeType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for StrokeType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("StrokeType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for StrokeType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

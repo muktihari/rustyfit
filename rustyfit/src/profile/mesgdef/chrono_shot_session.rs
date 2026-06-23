@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Chrono Shot Session message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct ChronoShotSession {
     pub timestamp: typedef::DateTime,
@@ -31,21 +34,21 @@ pub struct ChronoShotSession {
 }
 
 impl ChronoShotSession {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const MIN_SPEED: u8 = 0;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 1;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 2;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const SHOT_COUNT: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::PROJECTILE_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ProjectileType
     pub const PROJECTILE_TYPE: u8 = 4;
-    /// Value's type: `u32`; Scale: `10`; Units: `gr`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `10`; Units: `gr`
     pub const GRAIN_WEIGHT: u8 = 5;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const STANDARD_DEVIATION: u8 = 6;
 
     /// Create new ChronoShotSession with all fields being set to its corresponding invalid value.
@@ -295,6 +298,137 @@ impl From<ChronoShotSession> for Message {
             num: typedef::MesgNum::CHRONO_SHOT_SESSION,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ChronoShotSession {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("ChronoShotSession", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.min_speed_scaled() {
+            state.serialize_field("min_speed", &v)?;
+        }
+        if let Some(v) = self.max_speed_scaled() {
+            state.serialize_field("max_speed", &v)?;
+        }
+        if let Some(v) = self.avg_speed_scaled() {
+            state.serialize_field("avg_speed", &v)?;
+        }
+        if self.shot_count != u16::MAX {
+            state.serialize_field("shot_count", &self.shot_count)?;
+        }
+        if self.projectile_type.0 != u8::MAX {
+            state.serialize_field("projectile_type", &self.projectile_type)?;
+        }
+        if let Some(v) = self.grain_weight_scaled() {
+            state.serialize_field("grain_weight", &v)?;
+        }
+        if let Some(v) = self.standard_deviation_scaled() {
+            state.serialize_field("standard_deviation", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    min_speed: f64,
+    max_speed: f64,
+    avg_speed: f64,
+    shot_count: u16,
+    projectile_type: typedef::ProjectileType,
+    grain_weight: f64,
+    standard_deviation: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for ChronoShotSession {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            min_speed: {
+                let unscaled = (m.min_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            max_speed: {
+                let unscaled = (m.max_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_speed: {
+                let unscaled = (m.avg_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            shot_count: m.shot_count,
+            projectile_type: m.projectile_type,
+            grain_weight: {
+                let unscaled = (m.grain_weight + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            standard_deviation: {
+                let unscaled = (m.standard_deviation + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            min_speed: f64::from_bits(u64::MAX),
+            max_speed: f64::from_bits(u64::MAX),
+            avg_speed: f64::from_bits(u64::MAX),
+            shot_count: u16::MAX,
+            projectile_type: typedef::ProjectileType(u8::MAX),
+            grain_weight: f64::from_bits(u64::MAX),
+            standard_deviation: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

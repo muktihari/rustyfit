@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Time Zone type.
 #[repr(transparent)]
@@ -120,6 +120,118 @@ impl TimeZone {
     pub const SANTIAGO: TimeZone = TimeZone(103);
     pub const MANUAL: TimeZone = TimeZone(253);
     pub const AUTOMATIC: TimeZone = TimeZone(254);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("almaty"),
+            1 => Some("bangkok"),
+            2 => Some("bombay"),
+            3 => Some("brasilia"),
+            4 => Some("cairo"),
+            5 => Some("cape_verde_is"),
+            6 => Some("darwin"),
+            7 => Some("eniwetok"),
+            8 => Some("fiji"),
+            9 => Some("hong_kong"),
+            10 => Some("islamabad"),
+            11 => Some("kabul"),
+            12 => Some("magadan"),
+            13 => Some("mid_atlantic"),
+            14 => Some("moscow"),
+            15 => Some("muscat"),
+            16 => Some("newfoundland"),
+            17 => Some("samoa"),
+            18 => Some("sydney"),
+            19 => Some("tehran"),
+            20 => Some("tokyo"),
+            21 => Some("us_alaska"),
+            22 => Some("us_atlantic"),
+            23 => Some("us_central"),
+            24 => Some("us_eastern"),
+            25 => Some("us_hawaii"),
+            26 => Some("us_mountain"),
+            27 => Some("us_pacific"),
+            28 => Some("other"),
+            29 => Some("auckland"),
+            30 => Some("kathmandu"),
+            31 => Some("europe_western_wet"),
+            32 => Some("europe_central_cet"),
+            33 => Some("europe_eastern_eet"),
+            34 => Some("jakarta"),
+            35 => Some("perth"),
+            36 => Some("adelaide"),
+            37 => Some("brisbane"),
+            38 => Some("tasmania"),
+            39 => Some("iceland"),
+            40 => Some("amsterdam"),
+            41 => Some("athens"),
+            42 => Some("barcelona"),
+            43 => Some("berlin"),
+            44 => Some("brussels"),
+            45 => Some("budapest"),
+            46 => Some("copenhagen"),
+            47 => Some("dublin"),
+            48 => Some("helsinki"),
+            49 => Some("lisbon"),
+            50 => Some("london"),
+            51 => Some("madrid"),
+            52 => Some("munich"),
+            53 => Some("oslo"),
+            54 => Some("paris"),
+            55 => Some("prague"),
+            56 => Some("reykjavik"),
+            57 => Some("rome"),
+            58 => Some("stockholm"),
+            59 => Some("vienna"),
+            60 => Some("warsaw"),
+            61 => Some("zurich"),
+            62 => Some("quebec"),
+            63 => Some("ontario"),
+            64 => Some("manitoba"),
+            65 => Some("saskatchewan"),
+            66 => Some("alberta"),
+            67 => Some("british_columbia"),
+            68 => Some("boise"),
+            69 => Some("boston"),
+            70 => Some("chicago"),
+            71 => Some("dallas"),
+            72 => Some("denver"),
+            73 => Some("kansas_city"),
+            74 => Some("las_vegas"),
+            75 => Some("los_angeles"),
+            76 => Some("miami"),
+            77 => Some("minneapolis"),
+            78 => Some("new_york"),
+            79 => Some("new_orleans"),
+            80 => Some("phoenix"),
+            81 => Some("santa_fe"),
+            82 => Some("seattle"),
+            83 => Some("washington_dc"),
+            84 => Some("us_arizona"),
+            85 => Some("chita"),
+            86 => Some("ekaterinburg"),
+            87 => Some("irkutsk"),
+            88 => Some("kaliningrad"),
+            89 => Some("krasnoyarsk"),
+            90 => Some("novosibirsk"),
+            91 => Some("petropavlovsk_kamchatskiy"),
+            92 => Some("samara"),
+            93 => Some("vladivostok"),
+            94 => Some("mexico_central"),
+            95 => Some("mexico_mountain"),
+            96 => Some("mexico_pacific"),
+            97 => Some("cape_town"),
+            98 => Some("winkhoek"),
+            99 => Some("lagos"),
+            100 => Some("riyahd"),
+            101 => Some("venezuela"),
+            102 => Some("australia_lh"),
+            103 => Some("santiago"),
+            253 => Some("manual"),
+            254 => Some("automatic"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for TimeZone {
@@ -130,114 +242,50 @@ impl Default for TimeZone {
 
 impl fmt::Display for TimeZone {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "almaty"),
-            1 => write!(f, "bangkok"),
-            2 => write!(f, "bombay"),
-            3 => write!(f, "brasilia"),
-            4 => write!(f, "cairo"),
-            5 => write!(f, "cape_verde_is"),
-            6 => write!(f, "darwin"),
-            7 => write!(f, "eniwetok"),
-            8 => write!(f, "fiji"),
-            9 => write!(f, "hong_kong"),
-            10 => write!(f, "islamabad"),
-            11 => write!(f, "kabul"),
-            12 => write!(f, "magadan"),
-            13 => write!(f, "mid_atlantic"),
-            14 => write!(f, "moscow"),
-            15 => write!(f, "muscat"),
-            16 => write!(f, "newfoundland"),
-            17 => write!(f, "samoa"),
-            18 => write!(f, "sydney"),
-            19 => write!(f, "tehran"),
-            20 => write!(f, "tokyo"),
-            21 => write!(f, "us_alaska"),
-            22 => write!(f, "us_atlantic"),
-            23 => write!(f, "us_central"),
-            24 => write!(f, "us_eastern"),
-            25 => write!(f, "us_hawaii"),
-            26 => write!(f, "us_mountain"),
-            27 => write!(f, "us_pacific"),
-            28 => write!(f, "other"),
-            29 => write!(f, "auckland"),
-            30 => write!(f, "kathmandu"),
-            31 => write!(f, "europe_western_wet"),
-            32 => write!(f, "europe_central_cet"),
-            33 => write!(f, "europe_eastern_eet"),
-            34 => write!(f, "jakarta"),
-            35 => write!(f, "perth"),
-            36 => write!(f, "adelaide"),
-            37 => write!(f, "brisbane"),
-            38 => write!(f, "tasmania"),
-            39 => write!(f, "iceland"),
-            40 => write!(f, "amsterdam"),
-            41 => write!(f, "athens"),
-            42 => write!(f, "barcelona"),
-            43 => write!(f, "berlin"),
-            44 => write!(f, "brussels"),
-            45 => write!(f, "budapest"),
-            46 => write!(f, "copenhagen"),
-            47 => write!(f, "dublin"),
-            48 => write!(f, "helsinki"),
-            49 => write!(f, "lisbon"),
-            50 => write!(f, "london"),
-            51 => write!(f, "madrid"),
-            52 => write!(f, "munich"),
-            53 => write!(f, "oslo"),
-            54 => write!(f, "paris"),
-            55 => write!(f, "prague"),
-            56 => write!(f, "reykjavik"),
-            57 => write!(f, "rome"),
-            58 => write!(f, "stockholm"),
-            59 => write!(f, "vienna"),
-            60 => write!(f, "warsaw"),
-            61 => write!(f, "zurich"),
-            62 => write!(f, "quebec"),
-            63 => write!(f, "ontario"),
-            64 => write!(f, "manitoba"),
-            65 => write!(f, "saskatchewan"),
-            66 => write!(f, "alberta"),
-            67 => write!(f, "british_columbia"),
-            68 => write!(f, "boise"),
-            69 => write!(f, "boston"),
-            70 => write!(f, "chicago"),
-            71 => write!(f, "dallas"),
-            72 => write!(f, "denver"),
-            73 => write!(f, "kansas_city"),
-            74 => write!(f, "las_vegas"),
-            75 => write!(f, "los_angeles"),
-            76 => write!(f, "miami"),
-            77 => write!(f, "minneapolis"),
-            78 => write!(f, "new_york"),
-            79 => write!(f, "new_orleans"),
-            80 => write!(f, "phoenix"),
-            81 => write!(f, "santa_fe"),
-            82 => write!(f, "seattle"),
-            83 => write!(f, "washington_dc"),
-            84 => write!(f, "us_arizona"),
-            85 => write!(f, "chita"),
-            86 => write!(f, "ekaterinburg"),
-            87 => write!(f, "irkutsk"),
-            88 => write!(f, "kaliningrad"),
-            89 => write!(f, "krasnoyarsk"),
-            90 => write!(f, "novosibirsk"),
-            91 => write!(f, "petropavlovsk_kamchatskiy"),
-            92 => write!(f, "samara"),
-            93 => write!(f, "vladivostok"),
-            94 => write!(f, "mexico_central"),
-            95 => write!(f, "mexico_mountain"),
-            96 => write!(f, "mexico_pacific"),
-            97 => write!(f, "cape_town"),
-            98 => write!(f, "winkhoek"),
-            99 => write!(f, "lagos"),
-            100 => write!(f, "riyahd"),
-            101 => write!(f, "venezuela"),
-            102 => write!(f, "australia_lh"),
-            103 => write!(f, "santiago"),
-            253 => write!(f, "manual"),
-            254 => write!(f, "automatic"),
-            _ => write!(f, "TimeZone({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "TimeZone({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TimeZone {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("TimeZone", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TimeZone {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

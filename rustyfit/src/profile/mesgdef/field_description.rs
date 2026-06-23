@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Field Description message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct FieldDescription {
     pub developer_data_index: u8,
@@ -32,33 +35,33 @@ pub struct FieldDescription {
 }
 
 impl FieldDescription {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEVELOPER_DATA_INDEX: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_DEFINITION_NUMBER: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::FIT_BASE_TYPE`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::FitBaseType
     pub const FIT_BASE_TYPE_ID: u8 = 2;
-    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
     pub const FIELD_NAME: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const ARRAY: u8 = 4;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const COMPONENTS: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SCALE: u8 = 6;
-    /// Value's type: `i8`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8
     pub const OFFSET: u8 = 7;
-    /// Value's type: `Vec<String>`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
     pub const UNITS: u8 = 8;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const BITS: u8 = 9;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const ACCUMULATE: u8 = 10;
-    /// Value's type: `u16`; ProfileType: `ProfileType::FIT_BASE_UNIT`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::FitBaseUnit
     pub const FIT_BASE_UNIT_ID: u8 = 13;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MesgNum
     pub const NATIVE_MESG_NUM: u8 = 14;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const NATIVE_FIELD_NUM: u8 = 15;
 
     /// Create new FieldDescription with all fields being set to its corresponding invalid value.
@@ -267,6 +270,129 @@ impl From<FieldDescription> for Message {
             num: typedef::MesgNum::FIELD_DESCRIPTION,
             fields,
             developer_fields: Vec::new(),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FieldDescription {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("FieldDescription", n)?;
+        if self.developer_data_index != u8::MAX {
+            state.serialize_field("developer_data_index", &self.developer_data_index)?;
+        }
+        if self.field_definition_number != u8::MAX {
+            state.serialize_field("field_definition_number", &self.field_definition_number)?;
+        }
+        if self.fit_base_type_id.0 != u8::MAX {
+            state.serialize_field("fit_base_type_id", &self.fit_base_type_id)?;
+        }
+        if !self.field_name.is_empty() {
+            state.serialize_field("field_name", &self.field_name)?;
+        }
+        if self.array != u8::MAX {
+            state.serialize_field("array", &self.array)?;
+        }
+        if !self.components.is_empty() {
+            state.serialize_field("components", &self.components)?;
+        }
+        if self.scale != u8::MAX {
+            state.serialize_field("scale", &self.scale)?;
+        }
+        if self.offset != i8::MAX {
+            state.serialize_field("offset", &self.offset)?;
+        }
+        if !self.units.is_empty() {
+            state.serialize_field("units", &self.units)?;
+        }
+        if !self.bits.is_empty() {
+            state.serialize_field("bits", &self.bits)?;
+        }
+        if !self.accumulate.is_empty() {
+            state.serialize_field("accumulate", &self.accumulate)?;
+        }
+        if self.fit_base_unit_id.0 != u16::MAX {
+            state.serialize_field("fit_base_unit_id", &self.fit_base_unit_id)?;
+        }
+        if self.native_mesg_num.0 != u16::MAX {
+            state.serialize_field("native_mesg_num", &self.native_mesg_num)?;
+        }
+        if self.native_field_num != u8::MAX {
+            state.serialize_field("native_field_num", &self.native_field_num)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    developer_data_index: u8,
+    field_definition_number: u8,
+    fit_base_type_id: typedef::FitBaseType,
+    field_name: Vec<String>,
+    array: u8,
+    components: String,
+    scale: u8,
+    offset: i8,
+    units: Vec<String>,
+    bits: String,
+    accumulate: String,
+    fit_base_unit_id: typedef::FitBaseUnit,
+    native_mesg_num: typedef::MesgNum,
+    native_field_num: u8,
+    unknown_fields: Vec<Field>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for FieldDescription {
+    fn from(m: De) -> Self {
+        Self {
+            developer_data_index: m.developer_data_index,
+            field_definition_number: m.field_definition_number,
+            fit_base_type_id: m.fit_base_type_id,
+            field_name: m.field_name,
+            array: m.array,
+            components: m.components,
+            scale: m.scale,
+            offset: m.offset,
+            units: m.units,
+            bits: m.bits,
+            accumulate: m.accumulate,
+            fit_base_unit_id: m.fit_base_unit_id,
+            native_mesg_num: m.native_mesg_num,
+            native_field_num: m.native_field_num,
+            unknown_fields: m.unknown_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            developer_data_index: u8::MAX,
+            field_definition_number: u8::MAX,
+            fit_base_type_id: typedef::FitBaseType(u8::MAX),
+            field_name: Vec::new(),
+            array: u8::MAX,
+            components: String::new(),
+            scale: u8::MAX,
+            offset: i8::MAX,
+            units: Vec::new(),
+            bits: String::new(),
+            accumulate: String::new(),
+            fit_base_unit_id: typedef::FitBaseUnit(u16::MAX),
+            native_mesg_num: typedef::MesgNum(u16::MAX),
+            native_field_num: u8::MAX,
+            unknown_fields: Vec::new(),
         }
     }
 }

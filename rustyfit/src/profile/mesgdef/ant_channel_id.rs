@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Ant Channel Id message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct AntChannelId {
     pub channel_number: u8,
@@ -26,15 +29,15 @@ pub struct AntChannelId {
 }
 
 impl AntChannelId {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CHANNEL_NUMBER: u8 = 0;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const DEVICE_TYPE: u8 = 1;
-    /// Value's type: `u16`; Base: UINT16Z; ProfileType: `ProfileType::UINT16Z`
+    /// Value's type: `u16`; FitBaseType::UINT16Z; ProfileType::Uint16z
     pub const DEVICE_NUMBER: u8 = 2;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const TRANSMISSION_TYPE: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DEVICE_INDEX`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::DeviceIndex
     pub const DEVICE_INDEX: u8 = 4;
 
     /// Create new AntChannelId with all fields being set to its corresponding invalid value.
@@ -146,6 +149,81 @@ impl From<AntChannelId> for Message {
             num: typedef::MesgNum::ANT_CHANNEL_ID,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AntChannelId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("AntChannelId", n)?;
+        if self.channel_number != u8::MAX {
+            state.serialize_field("channel_number", &self.channel_number)?;
+        }
+        if self.device_type != u8::MIN {
+            state.serialize_field("device_type", &self.device_type)?;
+        }
+        if self.device_number != u16::MIN {
+            state.serialize_field("device_number", &self.device_number)?;
+        }
+        if self.transmission_type != u8::MIN {
+            state.serialize_field("transmission_type", &self.transmission_type)?;
+        }
+        if self.device_index.0 != u8::MAX {
+            state.serialize_field("device_index", &self.device_index)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    channel_number: u8,
+    device_type: u8,
+    device_number: u16,
+    transmission_type: u8,
+    device_index: typedef::DeviceIndex,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for AntChannelId {
+    fn from(m: De) -> Self {
+        Self {
+            channel_number: m.channel_number,
+            device_type: m.device_type,
+            device_number: m.device_number,
+            transmission_type: m.transmission_type,
+            device_index: m.device_index,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            channel_number: u8::MAX,
+            device_type: u8::MIN,
+            device_number: u16::MIN,
+            transmission_type: u8::MIN,
+            device_index: typedef::DeviceIndex(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

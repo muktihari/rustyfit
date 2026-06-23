@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Wkt Step Duration type.
 #[repr(transparent)]
@@ -45,6 +45,43 @@ impl WktStepDuration {
     pub const REPETITION_TIME: WktStepDuration = WktStepDuration(28);
     pub const REPS: WktStepDuration = WktStepDuration(29);
     pub const TIME_ONLY: WktStepDuration = WktStepDuration(31);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("time"),
+            1 => Some("distance"),
+            2 => Some("hr_less_than"),
+            3 => Some("hr_greater_than"),
+            4 => Some("calories"),
+            5 => Some("open"),
+            6 => Some("repeat_until_steps_cmplt"),
+            7 => Some("repeat_until_time"),
+            8 => Some("repeat_until_distance"),
+            9 => Some("repeat_until_calories"),
+            10 => Some("repeat_until_hr_less_than"),
+            11 => Some("repeat_until_hr_greater_than"),
+            12 => Some("repeat_until_power_less_than"),
+            13 => Some("repeat_until_power_greater_than"),
+            14 => Some("power_less_than"),
+            15 => Some("power_greater_than"),
+            16 => Some("training_peaks_tss"),
+            17 => Some("repeat_until_power_last_lap_less_than"),
+            18 => Some("repeat_until_max_power_last_lap_less_than"),
+            19 => Some("power_3s_less_than"),
+            20 => Some("power_10s_less_than"),
+            21 => Some("power_30s_less_than"),
+            22 => Some("power_3s_greater_than"),
+            23 => Some("power_10s_greater_than"),
+            24 => Some("power_30s_greater_than"),
+            25 => Some("power_lap_less_than"),
+            26 => Some("power_lap_greater_than"),
+            27 => Some("repeat_until_training_peaks_tss"),
+            28 => Some("repetition_time"),
+            29 => Some("reps"),
+            31 => Some("time_only"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for WktStepDuration {
@@ -55,39 +92,50 @@ impl Default for WktStepDuration {
 
 impl fmt::Display for WktStepDuration {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "time"),
-            1 => write!(f, "distance"),
-            2 => write!(f, "hr_less_than"),
-            3 => write!(f, "hr_greater_than"),
-            4 => write!(f, "calories"),
-            5 => write!(f, "open"),
-            6 => write!(f, "repeat_until_steps_cmplt"),
-            7 => write!(f, "repeat_until_time"),
-            8 => write!(f, "repeat_until_distance"),
-            9 => write!(f, "repeat_until_calories"),
-            10 => write!(f, "repeat_until_hr_less_than"),
-            11 => write!(f, "repeat_until_hr_greater_than"),
-            12 => write!(f, "repeat_until_power_less_than"),
-            13 => write!(f, "repeat_until_power_greater_than"),
-            14 => write!(f, "power_less_than"),
-            15 => write!(f, "power_greater_than"),
-            16 => write!(f, "training_peaks_tss"),
-            17 => write!(f, "repeat_until_power_last_lap_less_than"),
-            18 => write!(f, "repeat_until_max_power_last_lap_less_than"),
-            19 => write!(f, "power_3s_less_than"),
-            20 => write!(f, "power_10s_less_than"),
-            21 => write!(f, "power_30s_less_than"),
-            22 => write!(f, "power_3s_greater_than"),
-            23 => write!(f, "power_10s_greater_than"),
-            24 => write!(f, "power_30s_greater_than"),
-            25 => write!(f, "power_lap_less_than"),
-            26 => write!(f, "power_lap_greater_than"),
-            27 => write!(f, "repeat_until_training_peaks_tss"),
-            28 => write!(f, "repetition_time"),
-            29 => write!(f, "reps"),
-            31 => write!(f, "time_only"),
-            _ => write!(f, "WktStepDuration({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "WktStepDuration({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WktStepDuration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("WktStepDuration", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for WktStepDuration {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

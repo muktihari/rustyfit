@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Split Type type.
 #[repr(transparent)]
@@ -39,6 +39,33 @@ impl SplitType {
     pub const TRANSITION: SplitType = SplitType(23);
     pub const SKI_LIFT_SPLIT: SplitType = SplitType(28);
     pub const SKI_RUN_SPLIT: SplitType = SplitType(29);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            1 => Some("ascent_split"),
+            2 => Some("descent_split"),
+            3 => Some("interval_active"),
+            4 => Some("interval_rest"),
+            5 => Some("interval_warmup"),
+            6 => Some("interval_cooldown"),
+            7 => Some("interval_recovery"),
+            8 => Some("interval_other"),
+            9 => Some("climb_active"),
+            10 => Some("climb_rest"),
+            11 => Some("surf_active"),
+            12 => Some("run_active"),
+            13 => Some("run_rest"),
+            14 => Some("workout_round"),
+            17 => Some("rwd_run"),
+            18 => Some("rwd_walk"),
+            21 => Some("windsurf_active"),
+            22 => Some("rwd_stand"),
+            23 => Some("transition"),
+            28 => Some("ski_lift_split"),
+            29 => Some("ski_run_split"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SplitType {
@@ -49,29 +76,50 @@ impl Default for SplitType {
 
 impl fmt::Display for SplitType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "ascent_split"),
-            2 => write!(f, "descent_split"),
-            3 => write!(f, "interval_active"),
-            4 => write!(f, "interval_rest"),
-            5 => write!(f, "interval_warmup"),
-            6 => write!(f, "interval_cooldown"),
-            7 => write!(f, "interval_recovery"),
-            8 => write!(f, "interval_other"),
-            9 => write!(f, "climb_active"),
-            10 => write!(f, "climb_rest"),
-            11 => write!(f, "surf_active"),
-            12 => write!(f, "run_active"),
-            13 => write!(f, "run_rest"),
-            14 => write!(f, "workout_round"),
-            17 => write!(f, "rwd_run"),
-            18 => write!(f, "rwd_walk"),
-            21 => write!(f, "windsurf_active"),
-            22 => write!(f, "rwd_stand"),
-            23 => write!(f, "transition"),
-            28 => write!(f, "ski_lift_split"),
-            29 => write!(f, "ski_run_split"),
-            _ => write!(f, "SplitType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SplitType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SplitType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SplitType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SplitType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

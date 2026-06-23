@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Zones Target message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct ZonesTarget {
     pub max_heart_rate: u8,
@@ -23,15 +26,15 @@ pub struct ZonesTarget {
 }
 
 impl ZonesTarget {
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const MAX_HEART_RATE: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const THRESHOLD_HEART_RATE: u8 = 2;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const FUNCTIONAL_THRESHOLD_POWER: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::HR_ZONE_CALC`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::HrZoneCalc
     pub const HR_CALC_TYPE: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::PWR_ZONE_CALC`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::PwrZoneCalc
     pub const PWR_CALC_TYPE: u8 = 7;
 
     /// Create new ZonesTarget with all fields being set to its corresponding invalid value.
@@ -143,6 +146,84 @@ impl From<ZonesTarget> for Message {
             num: typedef::MesgNum::ZONES_TARGET,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ZonesTarget {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("ZonesTarget", n)?;
+        if self.max_heart_rate != u8::MAX {
+            state.serialize_field("max_heart_rate", &self.max_heart_rate)?;
+        }
+        if self.threshold_heart_rate != u8::MAX {
+            state.serialize_field("threshold_heart_rate", &self.threshold_heart_rate)?;
+        }
+        if self.functional_threshold_power != u16::MAX {
+            state.serialize_field(
+                "functional_threshold_power",
+                &self.functional_threshold_power,
+            )?;
+        }
+        if self.hr_calc_type.0 != u8::MAX {
+            state.serialize_field("hr_calc_type", &self.hr_calc_type)?;
+        }
+        if self.pwr_calc_type.0 != u8::MAX {
+            state.serialize_field("pwr_calc_type", &self.pwr_calc_type)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    max_heart_rate: u8,
+    threshold_heart_rate: u8,
+    functional_threshold_power: u16,
+    hr_calc_type: typedef::HrZoneCalc,
+    pwr_calc_type: typedef::PwrZoneCalc,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for ZonesTarget {
+    fn from(m: De) -> Self {
+        Self {
+            max_heart_rate: m.max_heart_rate,
+            threshold_heart_rate: m.threshold_heart_rate,
+            functional_threshold_power: m.functional_threshold_power,
+            hr_calc_type: m.hr_calc_type,
+            pwr_calc_type: m.pwr_calc_type,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            max_heart_rate: u8::MAX,
+            threshold_heart_rate: u8::MAX,
+            functional_threshold_power: u16::MAX,
+            hr_calc_type: typedef::HrZoneCalc(u8::MAX),
+            pwr_calc_type: typedef::PwrZoneCalc(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hsa Body Battery Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HsaBodyBatteryData {
     /// Units: s
@@ -28,15 +31,15 @@ pub struct HsaBodyBatteryData {
 }
 
 impl HsaBodyBatteryData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i8>`; Units: `percent`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `Vec<i8>`; FitBaseType::SINT8; ProfileType::Sint8; Units: `percent`
     pub const LEVEL: u8 = 1;
-    /// Value's type: `Vec<i16>`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16
     pub const CHARGED: u8 = 2;
-    /// Value's type: `Vec<i16>`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16
     pub const UNCHARGED: u8 = 3;
 
     /// Create new HsaBodyBatteryData with all fields being set to its corresponding invalid value.
@@ -148,6 +151,84 @@ impl From<HsaBodyBatteryData> for Message {
             num: typedef::MesgNum::HSA_BODY_BATTERY_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HsaBodyBatteryData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HsaBodyBatteryData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.processing_interval != u16::MAX {
+            state.serialize_field("processing_interval", &self.processing_interval)?;
+        }
+        if !self.level.is_empty() {
+            state.serialize_field("level", &self.level)?;
+        }
+        if !self.charged.is_empty() {
+            state.serialize_field("charged", &self.charged)?;
+        }
+        if !self.uncharged.is_empty() {
+            state.serialize_field("uncharged", &self.uncharged)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    processing_interval: u16,
+    level: Vec<i8>,
+    charged: Vec<i16>,
+    uncharged: Vec<i16>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HsaBodyBatteryData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            processing_interval: m.processing_interval,
+            level: m.level,
+            charged: m.charged,
+            uncharged: m.uncharged,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            processing_interval: u16::MAX,
+            level: Vec::new(),
+            charged: Vec::new(),
+            uncharged: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

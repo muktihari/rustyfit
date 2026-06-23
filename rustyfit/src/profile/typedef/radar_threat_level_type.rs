@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Radar Threat Level Type type.
 #[repr(transparent)]
@@ -18,6 +18,16 @@ impl RadarThreatLevelType {
     pub const THREAT_NONE: RadarThreatLevelType = RadarThreatLevelType(1);
     pub const THREAT_APPROACHING: RadarThreatLevelType = RadarThreatLevelType(2);
     pub const THREAT_APPROACHING_FAST: RadarThreatLevelType = RadarThreatLevelType(3);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("threat_unknown"),
+            1 => Some("threat_none"),
+            2 => Some("threat_approaching"),
+            3 => Some("threat_approaching_fast"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for RadarThreatLevelType {
@@ -28,12 +38,50 @@ impl Default for RadarThreatLevelType {
 
 impl fmt::Display for RadarThreatLevelType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "threat_unknown"),
-            1 => write!(f, "threat_none"),
-            2 => write!(f, "threat_approaching"),
-            3 => write!(f, "threat_approaching_fast"),
-            _ => write!(f, "RadarThreatLevelType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "RadarThreatLevelType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for RadarThreatLevelType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("RadarThreatLevelType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for RadarThreatLevelType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

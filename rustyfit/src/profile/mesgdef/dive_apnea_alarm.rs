@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Dive Apnea Alarm message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DiveApneaAlarm {
     /// Index of the alarm
@@ -44,31 +47,31 @@ pub struct DiveApneaAlarm {
 }
 
 impl DiveApneaAlarm {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m`
     pub const DEPTH: u8 = 0;
-    /// Value's type: `i32`; Units: `s`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `s`
     pub const TIME: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DIVE_ALARM_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DiveAlarmType
     pub const ALARM_TYPE: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::TONE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Tone
     pub const SOUND: u8 = 4;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::SubSport
     pub const DIVE_TYPES: u8 = 5;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const ID: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const POPUP_ENABLED: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const TRIGGER_ON_DESCENT: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const TRIGGER_ON_ASCENT: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const REPEATING: u8 = 10;
-    /// Value's type: `i32`; Scale: `1000`; Units: `mps`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Scale: `1000`; Units: `mps`
     pub const SPEED: u8 = 11;
 
     /// Create new DiveApneaAlarm with all fields being set to its corresponding invalid value.
@@ -322,6 +325,143 @@ impl From<DiveApneaAlarm> for Message {
             num: typedef::MesgNum::DIVE_APNEA_ALARM,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DiveApneaAlarm {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DiveApneaAlarm", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.depth_scaled() {
+            state.serialize_field("depth", &v)?;
+        }
+        if self.time != i32::MAX {
+            state.serialize_field("time", &self.time)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.alarm_type.0 != u8::MAX {
+            state.serialize_field("alarm_type", &self.alarm_type)?;
+        }
+        if self.sound.0 != u8::MAX {
+            state.serialize_field("sound", &self.sound)?;
+        }
+        if !self.dive_types.is_empty() {
+            state.serialize_field("dive_types", &self.dive_types)?;
+        }
+        if self.id != u32::MAX {
+            state.serialize_field("id", &self.id)?;
+        }
+        if self.popup_enabled.0 != u8::MAX {
+            state.serialize_field("popup_enabled", &self.popup_enabled)?;
+        }
+        if self.trigger_on_descent.0 != u8::MAX {
+            state.serialize_field("trigger_on_descent", &self.trigger_on_descent)?;
+        }
+        if self.trigger_on_ascent.0 != u8::MAX {
+            state.serialize_field("trigger_on_ascent", &self.trigger_on_ascent)?;
+        }
+        if self.repeating.0 != u8::MAX {
+            state.serialize_field("repeating", &self.repeating)?;
+        }
+        if let Some(v) = self.speed_scaled() {
+            state.serialize_field("speed", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    depth: f64,
+    time: i32,
+    enabled: typedef::Bool,
+    alarm_type: typedef::DiveAlarmType,
+    sound: typedef::Tone,
+    dive_types: Vec<typedef::SubSport>,
+    id: u32,
+    popup_enabled: typedef::Bool,
+    trigger_on_descent: typedef::Bool,
+    trigger_on_ascent: typedef::Bool,
+    repeating: typedef::Bool,
+    speed: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DiveApneaAlarm {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            depth: {
+                let unscaled = (m.depth + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            time: m.time,
+            enabled: m.enabled,
+            alarm_type: m.alarm_type,
+            sound: m.sound,
+            dive_types: m.dive_types,
+            id: m.id,
+            popup_enabled: m.popup_enabled,
+            trigger_on_descent: m.trigger_on_descent,
+            trigger_on_ascent: m.trigger_on_ascent,
+            repeating: m.repeating,
+            speed: {
+                let unscaled = (m.speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i32::MAX as f64 {
+                    i32::MAX
+                } else {
+                    unscaled as i32
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            depth: f64::from_bits(u64::MAX),
+            time: i32::MAX,
+            enabled: typedef::Bool(u8::MAX),
+            alarm_type: typedef::DiveAlarmType(u8::MAX),
+            sound: typedef::Tone(u8::MAX),
+            dive_types: Vec::new(),
+            id: u32::MAX,
+            popup_enabled: typedef::Bool(u8::MAX),
+            trigger_on_descent: typedef::Bool(u8::MAX),
+            trigger_on_ascent: typedef::Bool(u8::MAX),
+            repeating: typedef::Bool(u8::MAX),
+            speed: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

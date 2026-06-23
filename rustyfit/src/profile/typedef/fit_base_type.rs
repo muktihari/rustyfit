@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Fit Base Type type.
 #[repr(transparent)]
@@ -44,6 +44,28 @@ impl FitBaseType {
         }
         0
     }
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("enum"),
+            1 => Some("sint8"),
+            2 => Some("uint8"),
+            131 => Some("sint16"),
+            132 => Some("uint16"),
+            133 => Some("sint32"),
+            134 => Some("uint32"),
+            7 => Some("string"),
+            136 => Some("float32"),
+            137 => Some("float64"),
+            10 => Some("uint8z"),
+            139 => Some("uint16z"),
+            140 => Some("uint32z"),
+            13 => Some("byte"),
+            142 => Some("sint64"),
+            143 => Some("uint64"),
+            144 => Some("uint64z"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for FitBaseType {
@@ -54,25 +76,50 @@ impl Default for FitBaseType {
 
 impl fmt::Display for FitBaseType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "enum"),
-            1 => write!(f, "sint8"),
-            2 => write!(f, "uint8"),
-            131 => write!(f, "sint16"),
-            132 => write!(f, "uint16"),
-            133 => write!(f, "sint32"),
-            134 => write!(f, "uint32"),
-            7 => write!(f, "string"),
-            136 => write!(f, "float32"),
-            137 => write!(f, "float64"),
-            10 => write!(f, "uint8z"),
-            139 => write!(f, "uint16z"),
-            140 => write!(f, "uint32z"),
-            13 => write!(f, "byte"),
-            142 => write!(f, "sint64"),
-            143 => write!(f, "uint64"),
-            144 => write!(f, "uint64z"),
-            _ => write!(f, "FitBaseType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "FitBaseType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FitBaseType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("FitBaseType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for FitBaseType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

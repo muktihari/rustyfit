@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Met Zone message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct MetZone {
     pub message_index: typedef::MessageIndex,
@@ -24,13 +27,13 @@ pub struct MetZone {
 }
 
 impl MetZone {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const HIGH_BPM: u8 = 1;
-    /// Value's type: `u16`; Scale: `10`; Units: `kcal / min`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `kcal / min`
     pub const CALORIES: u8 = 2;
-    /// Value's type: `u8`; Scale: `10`; Units: `kcal / min`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `10`; Units: `kcal / min`
     pub const FAT_CALORIES: u8 = 3;
 
     /// Create new MetZone with all fields being set to its corresponding invalid value.
@@ -173,6 +176,89 @@ impl From<MetZone> for Message {
             num: typedef::MesgNum::MET_ZONE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MetZone {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("MetZone", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.high_bpm != u8::MAX {
+            state.serialize_field("high_bpm", &self.high_bpm)?;
+        }
+        if let Some(v) = self.calories_scaled() {
+            state.serialize_field("calories", &v)?;
+        }
+        if let Some(v) = self.fat_calories_scaled() {
+            state.serialize_field("fat_calories", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    high_bpm: u8,
+    calories: f64,
+    fat_calories: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for MetZone {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            high_bpm: m.high_bpm,
+            calories: {
+                let unscaled = (m.calories + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            fat_calories: {
+                let unscaled = (m.fat_calories + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            high_bpm: u8::MAX,
+            calories: f64::from_bits(u64::MAX),
+            fat_calories: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

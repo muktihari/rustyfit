@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Curl Exercise Name type.
 #[repr(transparent)]
@@ -67,6 +67,63 @@ impl CurlExerciseName {
     pub const DUMBBELL_BICEPS_CURL_WHEELCHAIR: CurlExerciseName = CurlExerciseName(48);
     pub const BOTTLE_CURL: CurlExerciseName = CurlExerciseName(49);
     pub const SEATED_BOTTLE_CURL: CurlExerciseName = CurlExerciseName(50);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("alternating_dumbbell_biceps_curl"),
+            1 => Some("alternating_dumbbell_biceps_curl_on_swiss_ball"),
+            2 => Some("alternating_incline_dumbbell_biceps_curl"),
+            3 => Some("barbell_biceps_curl"),
+            4 => Some("barbell_reverse_wrist_curl"),
+            5 => Some("barbell_wrist_curl"),
+            6 => Some("behind_the_back_barbell_reverse_wrist_curl"),
+            7 => Some("behind_the_back_one_arm_cable_curl"),
+            8 => Some("cable_biceps_curl"),
+            9 => Some("cable_hammer_curl"),
+            10 => Some("cheating_barbell_biceps_curl"),
+            11 => Some("close_grip_ez_bar_biceps_curl"),
+            12 => Some("cross_body_dumbbell_hammer_curl"),
+            13 => Some("dead_hang_biceps_curl"),
+            14 => Some("decline_hammer_curl"),
+            15 => Some("dumbbell_biceps_curl_with_static_hold"),
+            16 => Some("dumbbell_hammer_curl"),
+            17 => Some("dumbbell_reverse_wrist_curl"),
+            18 => Some("dumbbell_wrist_curl"),
+            19 => Some("ez_bar_preacher_curl"),
+            20 => Some("forward_bend_biceps_curl"),
+            21 => Some("hammer_curl_to_press"),
+            22 => Some("incline_dumbbell_biceps_curl"),
+            23 => Some("incline_offset_thumb_dumbbell_curl"),
+            24 => Some("kettlebell_biceps_curl"),
+            25 => Some("lying_concentration_cable_curl"),
+            26 => Some("one_arm_preacher_curl"),
+            27 => Some("plate_pinch_curl"),
+            28 => Some("preacher_curl_with_cable"),
+            29 => Some("reverse_ez_bar_curl"),
+            30 => Some("reverse_grip_wrist_curl"),
+            31 => Some("reverse_grip_barbell_biceps_curl"),
+            32 => Some("seated_alternating_dumbbell_biceps_curl"),
+            33 => Some("seated_dumbbell_biceps_curl"),
+            34 => Some("seated_reverse_dumbbell_curl"),
+            35 => Some("split_stance_offset_pinky_dumbbell_curl"),
+            36 => Some("standing_alternating_dumbbell_curls"),
+            37 => Some("standing_dumbbell_biceps_curl"),
+            38 => Some("standing_ez_bar_biceps_curl"),
+            39 => Some("static_curl"),
+            40 => Some("swiss_ball_dumbbell_overhead_triceps_extension"),
+            41 => Some("swiss_ball_ez_bar_preacher_curl"),
+            42 => Some("twisting_standing_dumbbell_biceps_curl"),
+            43 => Some("wide_grip_ez_bar_biceps_curl"),
+            44 => Some("one_arm_concentration_curl"),
+            45 => Some("standing_zottman_biceps_curl"),
+            46 => Some("dumbbell_biceps_curl"),
+            47 => Some("drag_curl_wheelchair"),
+            48 => Some("dumbbell_biceps_curl_wheelchair"),
+            49 => Some("bottle_curl"),
+            50 => Some("seated_bottle_curl"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CurlExerciseName {
@@ -77,59 +134,50 @@ impl Default for CurlExerciseName {
 
 impl fmt::Display for CurlExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "alternating_dumbbell_biceps_curl"),
-            1 => write!(f, "alternating_dumbbell_biceps_curl_on_swiss_ball"),
-            2 => write!(f, "alternating_incline_dumbbell_biceps_curl"),
-            3 => write!(f, "barbell_biceps_curl"),
-            4 => write!(f, "barbell_reverse_wrist_curl"),
-            5 => write!(f, "barbell_wrist_curl"),
-            6 => write!(f, "behind_the_back_barbell_reverse_wrist_curl"),
-            7 => write!(f, "behind_the_back_one_arm_cable_curl"),
-            8 => write!(f, "cable_biceps_curl"),
-            9 => write!(f, "cable_hammer_curl"),
-            10 => write!(f, "cheating_barbell_biceps_curl"),
-            11 => write!(f, "close_grip_ez_bar_biceps_curl"),
-            12 => write!(f, "cross_body_dumbbell_hammer_curl"),
-            13 => write!(f, "dead_hang_biceps_curl"),
-            14 => write!(f, "decline_hammer_curl"),
-            15 => write!(f, "dumbbell_biceps_curl_with_static_hold"),
-            16 => write!(f, "dumbbell_hammer_curl"),
-            17 => write!(f, "dumbbell_reverse_wrist_curl"),
-            18 => write!(f, "dumbbell_wrist_curl"),
-            19 => write!(f, "ez_bar_preacher_curl"),
-            20 => write!(f, "forward_bend_biceps_curl"),
-            21 => write!(f, "hammer_curl_to_press"),
-            22 => write!(f, "incline_dumbbell_biceps_curl"),
-            23 => write!(f, "incline_offset_thumb_dumbbell_curl"),
-            24 => write!(f, "kettlebell_biceps_curl"),
-            25 => write!(f, "lying_concentration_cable_curl"),
-            26 => write!(f, "one_arm_preacher_curl"),
-            27 => write!(f, "plate_pinch_curl"),
-            28 => write!(f, "preacher_curl_with_cable"),
-            29 => write!(f, "reverse_ez_bar_curl"),
-            30 => write!(f, "reverse_grip_wrist_curl"),
-            31 => write!(f, "reverse_grip_barbell_biceps_curl"),
-            32 => write!(f, "seated_alternating_dumbbell_biceps_curl"),
-            33 => write!(f, "seated_dumbbell_biceps_curl"),
-            34 => write!(f, "seated_reverse_dumbbell_curl"),
-            35 => write!(f, "split_stance_offset_pinky_dumbbell_curl"),
-            36 => write!(f, "standing_alternating_dumbbell_curls"),
-            37 => write!(f, "standing_dumbbell_biceps_curl"),
-            38 => write!(f, "standing_ez_bar_biceps_curl"),
-            39 => write!(f, "static_curl"),
-            40 => write!(f, "swiss_ball_dumbbell_overhead_triceps_extension"),
-            41 => write!(f, "swiss_ball_ez_bar_preacher_curl"),
-            42 => write!(f, "twisting_standing_dumbbell_biceps_curl"),
-            43 => write!(f, "wide_grip_ez_bar_biceps_curl"),
-            44 => write!(f, "one_arm_concentration_curl"),
-            45 => write!(f, "standing_zottman_biceps_curl"),
-            46 => write!(f, "dumbbell_biceps_curl"),
-            47 => write!(f, "drag_curl_wheelchair"),
-            48 => write!(f, "dumbbell_biceps_curl_wheelchair"),
-            49 => write!(f, "bottle_curl"),
-            50 => write!(f, "seated_bottle_curl"),
-            _ => write!(f, "CurlExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CurlExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CurlExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CurlExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CurlExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

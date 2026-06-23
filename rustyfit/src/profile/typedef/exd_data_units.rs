@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Exd Data Units type.
 #[repr(transparent)]
@@ -64,6 +64,62 @@ impl ExdDataUnits {
     pub const METERS_PER_MIN: ExdDataUnits = ExdDataUnits(47);
     pub const METERS_PER_SEC: ExdDataUnits = ExdDataUnits(48);
     pub const EIGHT_CARDINAL: ExdDataUnits = ExdDataUnits(49);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("no_units"),
+            1 => Some("laps"),
+            2 => Some("miles_per_hour"),
+            3 => Some("kilometers_per_hour"),
+            4 => Some("feet_per_hour"),
+            5 => Some("meters_per_hour"),
+            6 => Some("degrees_celsius"),
+            7 => Some("degrees_fahrenheit"),
+            8 => Some("zone"),
+            9 => Some("gear"),
+            10 => Some("rpm"),
+            11 => Some("bpm"),
+            12 => Some("degrees"),
+            13 => Some("millimeters"),
+            14 => Some("meters"),
+            15 => Some("kilometers"),
+            16 => Some("feet"),
+            17 => Some("yards"),
+            18 => Some("kilofeet"),
+            19 => Some("miles"),
+            20 => Some("time"),
+            21 => Some("enum_turn_type"),
+            22 => Some("percent"),
+            23 => Some("watts"),
+            24 => Some("watts_per_kilogram"),
+            25 => Some("enum_battery_status"),
+            26 => Some("enum_bike_light_beam_angle_mode"),
+            27 => Some("enum_bike_light_battery_status"),
+            28 => Some("enum_bike_light_network_config_type"),
+            29 => Some("lights"),
+            30 => Some("seconds"),
+            31 => Some("minutes"),
+            32 => Some("hours"),
+            33 => Some("calories"),
+            34 => Some("kilojoules"),
+            35 => Some("milliseconds"),
+            36 => Some("second_per_mile"),
+            37 => Some("second_per_kilometer"),
+            38 => Some("centimeter"),
+            39 => Some("enum_course_point"),
+            40 => Some("bradians"),
+            41 => Some("enum_sport"),
+            42 => Some("inches_hg"),
+            43 => Some("mm_hg"),
+            44 => Some("mbars"),
+            45 => Some("hecto_pascals"),
+            46 => Some("feet_per_min"),
+            47 => Some("meters_per_min"),
+            48 => Some("meters_per_sec"),
+            49 => Some("eight_cardinal"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for ExdDataUnits {
@@ -74,58 +130,50 @@ impl Default for ExdDataUnits {
 
 impl fmt::Display for ExdDataUnits {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "no_units"),
-            1 => write!(f, "laps"),
-            2 => write!(f, "miles_per_hour"),
-            3 => write!(f, "kilometers_per_hour"),
-            4 => write!(f, "feet_per_hour"),
-            5 => write!(f, "meters_per_hour"),
-            6 => write!(f, "degrees_celsius"),
-            7 => write!(f, "degrees_fahrenheit"),
-            8 => write!(f, "zone"),
-            9 => write!(f, "gear"),
-            10 => write!(f, "rpm"),
-            11 => write!(f, "bpm"),
-            12 => write!(f, "degrees"),
-            13 => write!(f, "millimeters"),
-            14 => write!(f, "meters"),
-            15 => write!(f, "kilometers"),
-            16 => write!(f, "feet"),
-            17 => write!(f, "yards"),
-            18 => write!(f, "kilofeet"),
-            19 => write!(f, "miles"),
-            20 => write!(f, "time"),
-            21 => write!(f, "enum_turn_type"),
-            22 => write!(f, "percent"),
-            23 => write!(f, "watts"),
-            24 => write!(f, "watts_per_kilogram"),
-            25 => write!(f, "enum_battery_status"),
-            26 => write!(f, "enum_bike_light_beam_angle_mode"),
-            27 => write!(f, "enum_bike_light_battery_status"),
-            28 => write!(f, "enum_bike_light_network_config_type"),
-            29 => write!(f, "lights"),
-            30 => write!(f, "seconds"),
-            31 => write!(f, "minutes"),
-            32 => write!(f, "hours"),
-            33 => write!(f, "calories"),
-            34 => write!(f, "kilojoules"),
-            35 => write!(f, "milliseconds"),
-            36 => write!(f, "second_per_mile"),
-            37 => write!(f, "second_per_kilometer"),
-            38 => write!(f, "centimeter"),
-            39 => write!(f, "enum_course_point"),
-            40 => write!(f, "bradians"),
-            41 => write!(f, "enum_sport"),
-            42 => write!(f, "inches_hg"),
-            43 => write!(f, "mm_hg"),
-            44 => write!(f, "mbars"),
-            45 => write!(f, "hecto_pascals"),
-            46 => write!(f, "feet_per_min"),
-            47 => write!(f, "meters_per_min"),
-            48 => write!(f, "meters_per_sec"),
-            49 => write!(f, "eight_cardinal"),
-            _ => write!(f, "ExdDataUnits({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "ExdDataUnits({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for ExdDataUnits {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("ExdDataUnits", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for ExdDataUnits {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Workout message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Workout {
     pub message_index: typedef::MessageIndex,
@@ -33,23 +36,23 @@ pub struct Workout {
 }
 
 impl Workout {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 4;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::WORKOUT_CAPABILITIES`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::WorkoutCapabilities
     pub const CAPABILITIES: u8 = 5;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUM_VALID_STEPS: u8 = 6;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const WKT_NAME: u8 = 8;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 11;
-    /// Value's type: `u16`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `m`
     pub const POOL_LENGTH: u8 = 14;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const POOL_LENGTH_UNIT: u8 = 15;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const WKT_DESCRIPTION: u8 = 17;
 
     /// Create new Workout with all fields being set to its corresponding invalid value.
@@ -226,6 +229,112 @@ impl From<Workout> for Message {
             num: typedef::MesgNum::WORKOUT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Workout {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Workout", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.capabilities.0 != u32::MIN {
+            state.serialize_field("capabilities", &self.capabilities)?;
+        }
+        if self.num_valid_steps != u16::MAX {
+            state.serialize_field("num_valid_steps", &self.num_valid_steps)?;
+        }
+        if !self.wkt_name.is_empty() {
+            state.serialize_field("wkt_name", &self.wkt_name)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if let Some(v) = self.pool_length_scaled() {
+            state.serialize_field("pool_length", &v)?;
+        }
+        if self.pool_length_unit.0 != u8::MAX {
+            state.serialize_field("pool_length_unit", &self.pool_length_unit)?;
+        }
+        if !self.wkt_description.is_empty() {
+            state.serialize_field("wkt_description", &self.wkt_description)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    sport: typedef::Sport,
+    capabilities: typedef::WorkoutCapabilities,
+    num_valid_steps: u16,
+    wkt_name: String,
+    sub_sport: typedef::SubSport,
+    pool_length: f64,
+    pool_length_unit: typedef::DisplayMeasure,
+    wkt_description: String,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Workout {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            sport: m.sport,
+            capabilities: m.capabilities,
+            num_valid_steps: m.num_valid_steps,
+            wkt_name: m.wkt_name,
+            sub_sport: m.sub_sport,
+            pool_length: {
+                let unscaled = (m.pool_length + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            pool_length_unit: m.pool_length_unit,
+            wkt_description: m.wkt_description,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            sport: typedef::Sport(u8::MAX),
+            capabilities: typedef::WorkoutCapabilities(u32::MIN),
+            num_valid_steps: u16::MAX,
+            wkt_name: String::new(),
+            sub_sport: typedef::SubSport(u8::MAX),
+            pool_length: f64::from_bits(u64::MAX),
+            pool_length_unit: typedef::DisplayMeasure(u8::MAX),
+            wkt_description: String::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

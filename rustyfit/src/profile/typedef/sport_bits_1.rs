@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Sport Bits 1 type.
 #[repr(transparent)]
@@ -22,6 +22,20 @@ impl SportBits1 {
     pub const ALPINE_SKIING: SportBits1 = SportBits1(0x20);
     pub const SNOWBOARDING: SportBits1 = SportBits1(0x40);
     pub const ROWING: SportBits1 = SportBits1(0x80);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x01 => Some("tennis"),
+            0x02 => Some("american_football"),
+            0x04 => Some("training"),
+            0x08 => Some("walking"),
+            0x10 => Some("cross_country_skiing"),
+            0x20 => Some("alpine_skiing"),
+            0x40 => Some("snowboarding"),
+            0x80 => Some("rowing"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SportBits1 {
@@ -32,16 +46,50 @@ impl Default for SportBits1 {
 
 impl fmt::Display for SportBits1 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x01 => write!(f, "tennis"),
-            0x02 => write!(f, "american_football"),
-            0x04 => write!(f, "training"),
-            0x08 => write!(f, "walking"),
-            0x10 => write!(f, "cross_country_skiing"),
-            0x20 => write!(f, "alpine_skiing"),
-            0x40 => write!(f, "snowboarding"),
-            0x80 => write!(f, "rowing"),
-            _ => write!(f, "SportBits1({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SportBits1({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SportBits1 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SportBits1", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SportBits1 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

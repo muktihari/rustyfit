@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Developer Data Id message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DeveloperDataId {
     pub developer_id: Vec<u8>,
@@ -21,15 +24,15 @@ pub struct DeveloperDataId {
 }
 
 impl DeveloperDataId {
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
     pub const DEVELOPER_ID: u8 = 0;
-    /// Value's type: `Vec<u8>`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
     pub const APPLICATION_ID: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER_ID: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEVELOPER_DATA_INDEX: u8 = 3;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const APPLICATION_VERSION: u8 = 4;
 
     /// Create new DeveloperDataId with all fields being set to its corresponding invalid value.
@@ -139,6 +142,75 @@ impl From<DeveloperDataId> for Message {
             num: typedef::MesgNum::DEVELOPER_DATA_ID,
             fields,
             developer_fields: Vec::new(),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DeveloperDataId {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("DeveloperDataId", n)?;
+        if !self.developer_id.is_empty() {
+            state.serialize_field("developer_id", &self.developer_id)?;
+        }
+        if !self.application_id.is_empty() {
+            state.serialize_field("application_id", &self.application_id)?;
+        }
+        if self.manufacturer_id.0 != u16::MAX {
+            state.serialize_field("manufacturer_id", &self.manufacturer_id)?;
+        }
+        if self.developer_data_index != u8::MAX {
+            state.serialize_field("developer_data_index", &self.developer_data_index)?;
+        }
+        if self.application_version != u32::MAX {
+            state.serialize_field("application_version", &self.application_version)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    developer_id: Vec<u8>,
+    application_id: Vec<u8>,
+    manufacturer_id: typedef::Manufacturer,
+    developer_data_index: u8,
+    application_version: u32,
+    unknown_fields: Vec<Field>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for DeveloperDataId {
+    fn from(m: De) -> Self {
+        Self {
+            developer_id: m.developer_id,
+            application_id: m.application_id,
+            manufacturer_id: m.manufacturer_id,
+            developer_data_index: m.developer_data_index,
+            application_version: m.application_version,
+            unknown_fields: m.unknown_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            developer_id: Vec::new(),
+            application_id: Vec::new(),
+            manufacturer_id: typedef::Manufacturer(u16::MAX),
+            developer_data_index: u8::MAX,
+            application_version: u32::MAX,
+            unknown_fields: Vec::new(),
         }
     }
 }

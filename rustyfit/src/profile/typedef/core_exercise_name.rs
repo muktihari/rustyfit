@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Core Exercise Name type.
 #[repr(transparent)]
@@ -111,6 +111,106 @@ impl CoreExerciseName {
     pub const SIDE_BEND_MID_WHEELCHAIR: CoreExerciseName = CoreExerciseName(94);
     pub const SIDE_BEND_HIGH_WHEELCHAIR: CoreExerciseName = CoreExerciseName(95);
     pub const SEATED_SIDE_BEND: CoreExerciseName = CoreExerciseName(96);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("abs_jabs"),
+            1 => Some("weighted_abs_jabs"),
+            2 => Some("alternating_plate_reach"),
+            3 => Some("barbell_rollout"),
+            4 => Some("weighted_barbell_rollout"),
+            5 => Some("body_bar_oblique_twist"),
+            6 => Some("cable_core_press"),
+            7 => Some("cable_side_bend"),
+            8 => Some("side_bend"),
+            9 => Some("weighted_side_bend"),
+            10 => Some("crescent_circle"),
+            11 => Some("weighted_crescent_circle"),
+            12 => Some("cycling_russian_twist"),
+            13 => Some("weighted_cycling_russian_twist"),
+            14 => Some("elevated_feet_russian_twist"),
+            15 => Some("weighted_elevated_feet_russian_twist"),
+            16 => Some("half_turkish_get_up"),
+            17 => Some("kettlebell_windmill"),
+            18 => Some("kneeling_ab_wheel"),
+            19 => Some("weighted_kneeling_ab_wheel"),
+            20 => Some("modified_front_lever"),
+            21 => Some("open_knee_tucks"),
+            22 => Some("weighted_open_knee_tucks"),
+            23 => Some("side_abs_leg_lift"),
+            24 => Some("weighted_side_abs_leg_lift"),
+            25 => Some("swiss_ball_jackknife"),
+            26 => Some("weighted_swiss_ball_jackknife"),
+            27 => Some("swiss_ball_pike"),
+            28 => Some("weighted_swiss_ball_pike"),
+            29 => Some("swiss_ball_rollout"),
+            30 => Some("weighted_swiss_ball_rollout"),
+            31 => Some("triangle_hip_press"),
+            32 => Some("weighted_triangle_hip_press"),
+            33 => Some("trx_suspended_jackknife"),
+            34 => Some("weighted_trx_suspended_jackknife"),
+            35 => Some("u_boat"),
+            36 => Some("weighted_u_boat"),
+            37 => Some("windmill_switches"),
+            38 => Some("weighted_windmill_switches"),
+            39 => Some("alternating_slide_out"),
+            40 => Some("weighted_alternating_slide_out"),
+            41 => Some("ghd_back_extensions"),
+            42 => Some("weighted_ghd_back_extensions"),
+            43 => Some("overhead_walk"),
+            44 => Some("inchworm"),
+            45 => Some("weighted_modified_front_lever"),
+            46 => Some("russian_twist"),
+            47 => Some("abdominal_leg_rotations"),
+            48 => Some("arm_and_leg_extension_on_knees"),
+            49 => Some("bicycle"),
+            50 => Some("bicep_curl_with_leg_extension"),
+            51 => Some("cat_cow"),
+            52 => Some("corkscrew"),
+            53 => Some("criss_cross"),
+            54 => Some("criss_cross_with_ball"),
+            55 => Some("double_leg_stretch"),
+            56 => Some("knee_folds"),
+            57 => Some("lower_lift"),
+            58 => Some("neck_pull"),
+            59 => Some("pelvic_clocks"),
+            60 => Some("roll_over"),
+            61 => Some("roll_up"),
+            62 => Some("rolling"),
+            63 => Some("rowing_1"),
+            64 => Some("rowing_2"),
+            65 => Some("scissors"),
+            66 => Some("single_leg_circles"),
+            67 => Some("single_leg_stretch"),
+            68 => Some("snake_twist_1_and_2"),
+            69 => Some("swan"),
+            70 => Some("swimming"),
+            71 => Some("teaser"),
+            72 => Some("the_hundred"),
+            73 => Some("bicep_curl_with_leg_extension_with_weights"),
+            75 => Some("hanging_l_sit"),
+            77 => Some("lower_lift_with_weights"),
+            79 => Some("ring_l_sit"),
+            80 => Some("rowing_1_with_weights"),
+            81 => Some("rowing_2_with_weights"),
+            82 => Some("scissors_with_weights"),
+            83 => Some("single_leg_stretch_with_weights"),
+            84 => Some("toes_to_elbows"),
+            85 => Some("weighted_criss_cross"),
+            86 => Some("weighted_double_leg_stretch"),
+            87 => Some("weighted_the_hundred"),
+            88 => Some("l_sit"),
+            89 => Some("turkish_get_up"),
+            90 => Some("weighted_ring_l_sit"),
+            91 => Some("weighted_hanging_l_sit"),
+            92 => Some("weighted_l_sit"),
+            93 => Some("side_bend_low_wheelchair"),
+            94 => Some("side_bend_mid_wheelchair"),
+            95 => Some("side_bend_high_wheelchair"),
+            96 => Some("seated_side_bend"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CoreExerciseName {
@@ -121,102 +221,50 @@ impl Default for CoreExerciseName {
 
 impl fmt::Display for CoreExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "abs_jabs"),
-            1 => write!(f, "weighted_abs_jabs"),
-            2 => write!(f, "alternating_plate_reach"),
-            3 => write!(f, "barbell_rollout"),
-            4 => write!(f, "weighted_barbell_rollout"),
-            5 => write!(f, "body_bar_oblique_twist"),
-            6 => write!(f, "cable_core_press"),
-            7 => write!(f, "cable_side_bend"),
-            8 => write!(f, "side_bend"),
-            9 => write!(f, "weighted_side_bend"),
-            10 => write!(f, "crescent_circle"),
-            11 => write!(f, "weighted_crescent_circle"),
-            12 => write!(f, "cycling_russian_twist"),
-            13 => write!(f, "weighted_cycling_russian_twist"),
-            14 => write!(f, "elevated_feet_russian_twist"),
-            15 => write!(f, "weighted_elevated_feet_russian_twist"),
-            16 => write!(f, "half_turkish_get_up"),
-            17 => write!(f, "kettlebell_windmill"),
-            18 => write!(f, "kneeling_ab_wheel"),
-            19 => write!(f, "weighted_kneeling_ab_wheel"),
-            20 => write!(f, "modified_front_lever"),
-            21 => write!(f, "open_knee_tucks"),
-            22 => write!(f, "weighted_open_knee_tucks"),
-            23 => write!(f, "side_abs_leg_lift"),
-            24 => write!(f, "weighted_side_abs_leg_lift"),
-            25 => write!(f, "swiss_ball_jackknife"),
-            26 => write!(f, "weighted_swiss_ball_jackknife"),
-            27 => write!(f, "swiss_ball_pike"),
-            28 => write!(f, "weighted_swiss_ball_pike"),
-            29 => write!(f, "swiss_ball_rollout"),
-            30 => write!(f, "weighted_swiss_ball_rollout"),
-            31 => write!(f, "triangle_hip_press"),
-            32 => write!(f, "weighted_triangle_hip_press"),
-            33 => write!(f, "trx_suspended_jackknife"),
-            34 => write!(f, "weighted_trx_suspended_jackknife"),
-            35 => write!(f, "u_boat"),
-            36 => write!(f, "weighted_u_boat"),
-            37 => write!(f, "windmill_switches"),
-            38 => write!(f, "weighted_windmill_switches"),
-            39 => write!(f, "alternating_slide_out"),
-            40 => write!(f, "weighted_alternating_slide_out"),
-            41 => write!(f, "ghd_back_extensions"),
-            42 => write!(f, "weighted_ghd_back_extensions"),
-            43 => write!(f, "overhead_walk"),
-            44 => write!(f, "inchworm"),
-            45 => write!(f, "weighted_modified_front_lever"),
-            46 => write!(f, "russian_twist"),
-            47 => write!(f, "abdominal_leg_rotations"),
-            48 => write!(f, "arm_and_leg_extension_on_knees"),
-            49 => write!(f, "bicycle"),
-            50 => write!(f, "bicep_curl_with_leg_extension"),
-            51 => write!(f, "cat_cow"),
-            52 => write!(f, "corkscrew"),
-            53 => write!(f, "criss_cross"),
-            54 => write!(f, "criss_cross_with_ball"),
-            55 => write!(f, "double_leg_stretch"),
-            56 => write!(f, "knee_folds"),
-            57 => write!(f, "lower_lift"),
-            58 => write!(f, "neck_pull"),
-            59 => write!(f, "pelvic_clocks"),
-            60 => write!(f, "roll_over"),
-            61 => write!(f, "roll_up"),
-            62 => write!(f, "rolling"),
-            63 => write!(f, "rowing_1"),
-            64 => write!(f, "rowing_2"),
-            65 => write!(f, "scissors"),
-            66 => write!(f, "single_leg_circles"),
-            67 => write!(f, "single_leg_stretch"),
-            68 => write!(f, "snake_twist_1_and_2"),
-            69 => write!(f, "swan"),
-            70 => write!(f, "swimming"),
-            71 => write!(f, "teaser"),
-            72 => write!(f, "the_hundred"),
-            73 => write!(f, "bicep_curl_with_leg_extension_with_weights"),
-            75 => write!(f, "hanging_l_sit"),
-            77 => write!(f, "lower_lift_with_weights"),
-            79 => write!(f, "ring_l_sit"),
-            80 => write!(f, "rowing_1_with_weights"),
-            81 => write!(f, "rowing_2_with_weights"),
-            82 => write!(f, "scissors_with_weights"),
-            83 => write!(f, "single_leg_stretch_with_weights"),
-            84 => write!(f, "toes_to_elbows"),
-            85 => write!(f, "weighted_criss_cross"),
-            86 => write!(f, "weighted_double_leg_stretch"),
-            87 => write!(f, "weighted_the_hundred"),
-            88 => write!(f, "l_sit"),
-            89 => write!(f, "turkish_get_up"),
-            90 => write!(f, "weighted_ring_l_sit"),
-            91 => write!(f, "weighted_hanging_l_sit"),
-            92 => write!(f, "weighted_l_sit"),
-            93 => write!(f, "side_bend_low_wheelchair"),
-            94 => write!(f, "side_bend_mid_wheelchair"),
-            95 => write!(f, "side_bend_high_wheelchair"),
-            96 => write!(f, "seated_side_bend"),
-            _ => write!(f, "CoreExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CoreExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CoreExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CoreExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CoreExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -12,6 +12,8 @@ use crate::semconv;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 fn is_expanded(state: &[u8], num: u8) -> bool {
     match num {
@@ -21,6 +23,7 @@ fn is_expanded(state: &[u8], num: u8) -> bool {
 }
 
 /// Segment Lap message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct SegmentLap {
     pub message_index: typedef::MessageIndex,
@@ -205,195 +208,195 @@ pub struct SegmentLap {
 }
 
 impl SegmentLap {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Event
     pub const EVENT: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::EVENT_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::EventType
     pub const EVENT_TYPE: u8 = 1;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIME: u8 = 2;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const START_POSITION_LAT: u8 = 3;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const START_POSITION_LONG: u8 = 4;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const END_POSITION_LAT: u8 = 5;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const END_POSITION_LONG: u8 = 6;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_ELAPSED_TIME: u8 = 7;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_TIMER_TIME: u8 = 8;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const TOTAL_DISTANCE: u8 = 9;
-    /// Value's type: `u32`; Units: `cycles`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `cycles`
     pub const TOTAL_CYCLES: u8 = 10;
-    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 11;
-    /// Value's type: `u16`; Units: `kcal`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
     pub const TOTAL_FAT_CALORIES: u8 = 12;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const AVG_SPEED: u8 = 13;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const MAX_SPEED: u8 = 14;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const AVG_HEART_RATE: u8 = 15;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const MAX_HEART_RATE: u8 = 16;
-    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const AVG_CADENCE: u8 = 17;
-    /// Value's type: `u8`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const MAX_CADENCE: u8 = 18;
-    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const AVG_POWER: u8 = 19;
-    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const MAX_POWER: u8 = 20;
-    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
     pub const TOTAL_ASCENT: u8 = 21;
-    /// Value's type: `u16`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
     pub const TOTAL_DESCENT: u8 = 22;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 23;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const EVENT_GROUP: u8 = 24;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const NEC_LAT: u8 = 25;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const NEC_LONG: u8 = 26;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const SWC_LAT: u8 = 27;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const SWC_LONG: u8 = 28;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 29;
-    /// Value's type: `u16`; Units: `watts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const NORMALIZED_POWER: u8 = 30;
-    /// Value's type: `u16`; ProfileType: `ProfileType::LEFT_RIGHT_BALANCE_100`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::LeftRightBalance100
     pub const LEFT_RIGHT_BALANCE: u8 = 31;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 32;
-    /// Value's type: `u32`; Units: `J`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `J`
     pub const TOTAL_WORK: u8 = 33;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5`; Offset: `500`; Units: `m`
     pub const AVG_ALTITUDE: u8 = 34;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5`; Offset: `500`; Units: `m`
     pub const MAX_ALTITUDE: u8 = 35;
-    /// Value's type: `u8`; Units: `m`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `m`
     pub const GPS_ACCURACY: u8 = 36;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `%`
     pub const AVG_GRADE: u8 = 37;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `%`
     pub const AVG_POS_GRADE: u8 = 38;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `%`
     pub const AVG_NEG_GRADE: u8 = 39;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `%`
     pub const MAX_POS_GRADE: u8 = 40;
-    /// Value's type: `i16`; Scale: `100`; Units: `%`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `%`
     pub const MAX_NEG_GRADE: u8 = 41;
-    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const AVG_TEMPERATURE: u8 = 42;
-    /// Value's type: `i8`; Units: `C`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const MAX_TEMPERATURE: u8 = 43;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 44;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1000`; Units: `m/s`
     pub const AVG_POS_VERTICAL_SPEED: u8 = 45;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1000`; Units: `m/s`
     pub const AVG_NEG_VERTICAL_SPEED: u8 = 46;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1000`; Units: `m/s`
     pub const MAX_POS_VERTICAL_SPEED: u8 = 47;
-    /// Value's type: `i16`; Scale: `1000`; Units: `m/s`; ProfileType: `ProfileType::SINT16`
+    /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1000`; Units: `m/s`
     pub const MAX_NEG_VERTICAL_SPEED: u8 = 48;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 49;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 50;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 51;
-    /// Value's type: `Vec<u32>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 52;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const REPETITION_NUM: u8 = 53;
-    /// Value's type: `u16`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5`; Offset: `500`; Units: `m`
     pub const MIN_ALTITUDE: u8 = 54;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const MIN_HEART_RATE: u8 = 55;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 56;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const WKT_STEP_INDEX: u8 = 57;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT_EVENT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SportEvent
     pub const SPORT_EVENT: u8 = 58;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 59;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_RIGHT_TORQUE_EFFECTIVENESS: u8 = 60;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_LEFT_PEDAL_SMOOTHNESS: u8 = 61;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 62;
-    /// Value's type: `u8`; Scale: `2`; Units: `percent`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 63;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SEGMENT_LAP_STATUS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SegmentLapStatus
     pub const STATUS: u8 = 64;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const UUID: u8 = 65;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `128`; Units: `rpm`
     pub const AVG_FRACTIONAL_CADENCE: u8 = 66;
-    /// Value's type: `u8`; Scale: `128`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `128`; Units: `rpm`
     pub const MAX_FRACTIONAL_CADENCE: u8 = 67;
-    /// Value's type: `u8`; Scale: `128`; Units: `cycles`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `128`; Units: `cycles`
     pub const TOTAL_FRACTIONAL_CYCLES: u8 = 68;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const FRONT_GEAR_SHIFT_COUNT: u8 = 69;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const REAR_GEAR_SHIFT_COUNT: u8 = 70;
-    /// Value's type: `u32`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_STANDING: u8 = 71;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const STAND_COUNT: u8 = 72;
-    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
     pub const AVG_LEFT_PCO: u8 = 73;
-    /// Value's type: `i8`; Units: `mm`; ProfileType: `ProfileType::SINT8`
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
     pub const AVG_RIGHT_PCO: u8 = 74;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE: u8 = 75;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 76;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 77;
-    /// Value's type: `Vec<u8>`; Scale: `0.7111111`; Units: `degrees`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 78;
-    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const AVG_POWER_POSITION: u8 = 79;
-    /// Value's type: `Vec<u16>`; Units: `watts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const MAX_POWER_POSITION: u8 = 80;
-    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const AVG_CADENCE_POSITION: u8 = 81;
-    /// Value's type: `Vec<u8>`; Units: `rpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const MAX_CADENCE_POSITION: u8 = 82;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER: u8 = 83;
-    /// Value's type: `f32`; Units: `kGrit`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `kGrit`
     pub const TOTAL_GRIT: u8 = 84;
-    /// Value's type: `f32`; Units: `Flow`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `Flow`
     pub const TOTAL_FLOW: u8 = 85;
-    /// Value's type: `f32`; Units: `kGrit`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `kGrit`
     pub const AVG_GRIT: u8 = 86;
-    /// Value's type: `f32`; Units: `Flow`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `Flow`
     pub const AVG_FLOW: u8 = 87;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
     pub const TOTAL_FRACTIONAL_ASCENT: u8 = 89;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
     pub const TOTAL_FRACTIONAL_DESCENT: u8 = 90;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_AVG_ALTITUDE: u8 = 91;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_MAX_ALTITUDE: u8 = 92;
-    /// Value's type: `u32`; Scale: `5`; Offset: `500`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_MIN_ALTITUDE: u8 = 93;
 
     /// Create new SegmentLap with all fields being set to its corresponding invalid value.
@@ -2551,6 +2554,995 @@ impl From<SegmentLap> for Message {
             num: typedef::MesgNum::SEGMENT_LAP,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SegmentLap {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("SegmentLap", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.event.0 != u8::MAX {
+            state.serialize_field("event", &self.event)?;
+        }
+        if self.event_type.0 != u8::MAX {
+            state.serialize_field("event_type", &self.event_type)?;
+        }
+        if let Some(v) = self.start_time.unix_timestamp() {
+            state.serialize_field("start_time", &v)?;
+        }
+        if let Some(v) = self.start_position_lat_degrees() {
+            state.serialize_field("start_position_lat", &v)?;
+        }
+        if let Some(v) = self.start_position_long_degrees() {
+            state.serialize_field("start_position_long", &v)?;
+        }
+        if let Some(v) = self.end_position_lat_degrees() {
+            state.serialize_field("end_position_lat", &v)?;
+        }
+        if let Some(v) = self.end_position_long_degrees() {
+            state.serialize_field("end_position_long", &v)?;
+        }
+        if let Some(v) = self.total_elapsed_time_scaled() {
+            state.serialize_field("total_elapsed_time", &v)?;
+        }
+        if let Some(v) = self.total_timer_time_scaled() {
+            state.serialize_field("total_timer_time", &v)?;
+        }
+        if let Some(v) = self.total_distance_scaled() {
+            state.serialize_field("total_distance", &v)?;
+        }
+        if self.total_cycles != u32::MAX {
+            state.serialize_field("total_cycles", &self.total_cycles)?;
+        }
+        if self.total_calories != u16::MAX {
+            state.serialize_field("total_calories", &self.total_calories)?;
+        }
+        if self.total_fat_calories != u16::MAX {
+            state.serialize_field("total_fat_calories", &self.total_fat_calories)?;
+        }
+        if let Some(v) = self.avg_speed_scaled() {
+            state.serialize_field("avg_speed", &v)?;
+        }
+        if let Some(v) = self.max_speed_scaled() {
+            state.serialize_field("max_speed", &v)?;
+        }
+        if self.avg_heart_rate != u8::MAX {
+            state.serialize_field("avg_heart_rate", &self.avg_heart_rate)?;
+        }
+        if self.max_heart_rate != u8::MAX {
+            state.serialize_field("max_heart_rate", &self.max_heart_rate)?;
+        }
+        if self.avg_cadence != u8::MAX {
+            state.serialize_field("avg_cadence", &self.avg_cadence)?;
+        }
+        if self.max_cadence != u8::MAX {
+            state.serialize_field("max_cadence", &self.max_cadence)?;
+        }
+        if self.avg_power != u16::MAX {
+            state.serialize_field("avg_power", &self.avg_power)?;
+        }
+        if self.max_power != u16::MAX {
+            state.serialize_field("max_power", &self.max_power)?;
+        }
+        if self.total_ascent != u16::MAX {
+            state.serialize_field("total_ascent", &self.total_ascent)?;
+        }
+        if self.total_descent != u16::MAX {
+            state.serialize_field("total_descent", &self.total_descent)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.event_group != u8::MAX {
+            state.serialize_field("event_group", &self.event_group)?;
+        }
+        if let Some(v) = self.nec_lat_degrees() {
+            state.serialize_field("nec_lat", &v)?;
+        }
+        if let Some(v) = self.nec_long_degrees() {
+            state.serialize_field("nec_long", &v)?;
+        }
+        if let Some(v) = self.swc_lat_degrees() {
+            state.serialize_field("swc_lat", &v)?;
+        }
+        if let Some(v) = self.swc_long_degrees() {
+            state.serialize_field("swc_long", &v)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.normalized_power != u16::MAX {
+            state.serialize_field("normalized_power", &self.normalized_power)?;
+        }
+        if self.left_right_balance.0 != u16::MAX {
+            state.serialize_field("left_right_balance", &self.left_right_balance)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if self.total_work != u32::MAX {
+            state.serialize_field("total_work", &self.total_work)?;
+        }
+        if let Some(v) = self.avg_altitude_scaled() {
+            state.serialize_field("avg_altitude", &v)?;
+        }
+        if let Some(v) = self.max_altitude_scaled() {
+            state.serialize_field("max_altitude", &v)?;
+        }
+        if self.gps_accuracy != u8::MAX {
+            state.serialize_field("gps_accuracy", &self.gps_accuracy)?;
+        }
+        if let Some(v) = self.avg_grade_scaled() {
+            state.serialize_field("avg_grade", &v)?;
+        }
+        if let Some(v) = self.avg_pos_grade_scaled() {
+            state.serialize_field("avg_pos_grade", &v)?;
+        }
+        if let Some(v) = self.avg_neg_grade_scaled() {
+            state.serialize_field("avg_neg_grade", &v)?;
+        }
+        if let Some(v) = self.max_pos_grade_scaled() {
+            state.serialize_field("max_pos_grade", &v)?;
+        }
+        if let Some(v) = self.max_neg_grade_scaled() {
+            state.serialize_field("max_neg_grade", &v)?;
+        }
+        if self.avg_temperature != i8::MAX {
+            state.serialize_field("avg_temperature", &self.avg_temperature)?;
+        }
+        if self.max_temperature != i8::MAX {
+            state.serialize_field("max_temperature", &self.max_temperature)?;
+        }
+        if let Some(v) = self.total_moving_time_scaled() {
+            state.serialize_field("total_moving_time", &v)?;
+        }
+        if let Some(v) = self.avg_pos_vertical_speed_scaled() {
+            state.serialize_field("avg_pos_vertical_speed", &v)?;
+        }
+        if let Some(v) = self.avg_neg_vertical_speed_scaled() {
+            state.serialize_field("avg_neg_vertical_speed", &v)?;
+        }
+        if let Some(v) = self.max_pos_vertical_speed_scaled() {
+            state.serialize_field("max_pos_vertical_speed", &v)?;
+        }
+        if let Some(v) = self.max_neg_vertical_speed_scaled() {
+            state.serialize_field("max_neg_vertical_speed", &v)?;
+        }
+        if let Some(v) = self.time_in_hr_zone_scaled() {
+            state.serialize_field("time_in_hr_zone", &v)?;
+        }
+        if let Some(v) = self.time_in_speed_zone_scaled() {
+            state.serialize_field("time_in_speed_zone", &v)?;
+        }
+        if let Some(v) = self.time_in_cadence_zone_scaled() {
+            state.serialize_field("time_in_cadence_zone", &v)?;
+        }
+        if let Some(v) = self.time_in_power_zone_scaled() {
+            state.serialize_field("time_in_power_zone", &v)?;
+        }
+        if self.repetition_num != u16::MAX {
+            state.serialize_field("repetition_num", &self.repetition_num)?;
+        }
+        if let Some(v) = self.min_altitude_scaled() {
+            state.serialize_field("min_altitude", &v)?;
+        }
+        if self.min_heart_rate != u8::MAX {
+            state.serialize_field("min_heart_rate", &self.min_heart_rate)?;
+        }
+        if let Some(v) = self.active_time_scaled() {
+            state.serialize_field("active_time", &v)?;
+        }
+        if self.wkt_step_index.0 != u16::MAX {
+            state.serialize_field("wkt_step_index", &self.wkt_step_index)?;
+        }
+        if self.sport_event.0 != u8::MAX {
+            state.serialize_field("sport_event", &self.sport_event)?;
+        }
+        if let Some(v) = self.avg_left_torque_effectiveness_scaled() {
+            state.serialize_field("avg_left_torque_effectiveness", &v)?;
+        }
+        if let Some(v) = self.avg_right_torque_effectiveness_scaled() {
+            state.serialize_field("avg_right_torque_effectiveness", &v)?;
+        }
+        if let Some(v) = self.avg_left_pedal_smoothness_scaled() {
+            state.serialize_field("avg_left_pedal_smoothness", &v)?;
+        }
+        if let Some(v) = self.avg_right_pedal_smoothness_scaled() {
+            state.serialize_field("avg_right_pedal_smoothness", &v)?;
+        }
+        if let Some(v) = self.avg_combined_pedal_smoothness_scaled() {
+            state.serialize_field("avg_combined_pedal_smoothness", &v)?;
+        }
+        if self.status.0 != u8::MAX {
+            state.serialize_field("status", &self.status)?;
+        }
+        if !self.uuid.is_empty() {
+            state.serialize_field("uuid", &self.uuid)?;
+        }
+        if let Some(v) = self.avg_fractional_cadence_scaled() {
+            state.serialize_field("avg_fractional_cadence", &v)?;
+        }
+        if let Some(v) = self.max_fractional_cadence_scaled() {
+            state.serialize_field("max_fractional_cadence", &v)?;
+        }
+        if let Some(v) = self.total_fractional_cycles_scaled() {
+            state.serialize_field("total_fractional_cycles", &v)?;
+        }
+        if self.front_gear_shift_count != u16::MAX {
+            state.serialize_field("front_gear_shift_count", &self.front_gear_shift_count)?;
+        }
+        if self.rear_gear_shift_count != u16::MAX {
+            state.serialize_field("rear_gear_shift_count", &self.rear_gear_shift_count)?;
+        }
+        if let Some(v) = self.time_standing_scaled() {
+            state.serialize_field("time_standing", &v)?;
+        }
+        if self.stand_count != u16::MAX {
+            state.serialize_field("stand_count", &self.stand_count)?;
+        }
+        if self.avg_left_pco != i8::MAX {
+            state.serialize_field("avg_left_pco", &self.avg_left_pco)?;
+        }
+        if self.avg_right_pco != i8::MAX {
+            state.serialize_field("avg_right_pco", &self.avg_right_pco)?;
+        }
+        if let Some(v) = self.avg_left_power_phase_scaled() {
+            state.serialize_field("avg_left_power_phase", &v)?;
+        }
+        if let Some(v) = self.avg_left_power_phase_peak_scaled() {
+            state.serialize_field("avg_left_power_phase_peak", &v)?;
+        }
+        if let Some(v) = self.avg_right_power_phase_scaled() {
+            state.serialize_field("avg_right_power_phase", &v)?;
+        }
+        if let Some(v) = self.avg_right_power_phase_peak_scaled() {
+            state.serialize_field("avg_right_power_phase_peak", &v)?;
+        }
+        if !self.avg_power_position.is_empty() {
+            state.serialize_field("avg_power_position", &self.avg_power_position)?;
+        }
+        if !self.max_power_position.is_empty() {
+            state.serialize_field("max_power_position", &self.max_power_position)?;
+        }
+        if !self.avg_cadence_position.is_empty() {
+            state.serialize_field("avg_cadence_position", &self.avg_cadence_position)?;
+        }
+        if !self.max_cadence_position.is_empty() {
+            state.serialize_field("max_cadence_position", &self.max_cadence_position)?;
+        }
+        if self.manufacturer.0 != u16::MAX {
+            state.serialize_field("manufacturer", &self.manufacturer)?;
+        }
+        if self.total_grit.to_bits() != u32::MAX {
+            state.serialize_field("total_grit", &self.total_grit)?;
+        }
+        if self.total_flow.to_bits() != u32::MAX {
+            state.serialize_field("total_flow", &self.total_flow)?;
+        }
+        if self.avg_grit.to_bits() != u32::MAX {
+            state.serialize_field("avg_grit", &self.avg_grit)?;
+        }
+        if self.avg_flow.to_bits() != u32::MAX {
+            state.serialize_field("avg_flow", &self.avg_flow)?;
+        }
+        if let Some(v) = self.total_fractional_ascent_scaled() {
+            state.serialize_field("total_fractional_ascent", &v)?;
+        }
+        if let Some(v) = self.total_fractional_descent_scaled() {
+            state.serialize_field("total_fractional_descent", &v)?;
+        }
+        if let Some(v) = self.enhanced_avg_altitude_scaled() {
+            state.serialize_field("enhanced_avg_altitude", &v)?;
+        }
+        if let Some(v) = self.enhanced_max_altitude_scaled() {
+            state.serialize_field("enhanced_max_altitude", &v)?;
+        }
+        if let Some(v) = self.enhanced_min_altitude_scaled() {
+            state.serialize_field("enhanced_min_altitude", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    timestamp: Option<i64>,
+    event: typedef::Event,
+    event_type: typedef::EventType,
+    start_time: Option<i64>,
+    /// Degrees.
+    start_position_lat: f64,
+    /// Degrees.
+    start_position_long: f64,
+    /// Degrees.
+    end_position_lat: f64,
+    /// Degrees.
+    end_position_long: f64,
+    total_elapsed_time: f64,
+    total_timer_time: f64,
+    total_distance: f64,
+    total_cycles: u32,
+    total_calories: u16,
+    total_fat_calories: u16,
+    avg_speed: f64,
+    max_speed: f64,
+    avg_heart_rate: u8,
+    max_heart_rate: u8,
+    avg_cadence: u8,
+    max_cadence: u8,
+    avg_power: u16,
+    max_power: u16,
+    total_ascent: u16,
+    total_descent: u16,
+    sport: typedef::Sport,
+    event_group: u8,
+    /// Degrees.
+    nec_lat: f64,
+    /// Degrees.
+    nec_long: f64,
+    /// Degrees.
+    swc_lat: f64,
+    /// Degrees.
+    swc_long: f64,
+    name: String,
+    normalized_power: u16,
+    left_right_balance: typedef::LeftRightBalance100,
+    sub_sport: typedef::SubSport,
+    total_work: u32,
+    avg_altitude: f64,
+    max_altitude: f64,
+    gps_accuracy: u8,
+    avg_grade: f64,
+    avg_pos_grade: f64,
+    avg_neg_grade: f64,
+    max_pos_grade: f64,
+    max_neg_grade: f64,
+    avg_temperature: i8,
+    max_temperature: i8,
+    total_moving_time: f64,
+    avg_pos_vertical_speed: f64,
+    avg_neg_vertical_speed: f64,
+    max_pos_vertical_speed: f64,
+    max_neg_vertical_speed: f64,
+    time_in_hr_zone: Vec<f64>,
+    time_in_speed_zone: Vec<f64>,
+    time_in_cadence_zone: Vec<f64>,
+    time_in_power_zone: Vec<f64>,
+    repetition_num: u16,
+    min_altitude: f64,
+    min_heart_rate: u8,
+    active_time: f64,
+    wkt_step_index: typedef::MessageIndex,
+    sport_event: typedef::SportEvent,
+    avg_left_torque_effectiveness: f64,
+    avg_right_torque_effectiveness: f64,
+    avg_left_pedal_smoothness: f64,
+    avg_right_pedal_smoothness: f64,
+    avg_combined_pedal_smoothness: f64,
+    status: typedef::SegmentLapStatus,
+    uuid: String,
+    avg_fractional_cadence: f64,
+    max_fractional_cadence: f64,
+    total_fractional_cycles: f64,
+    front_gear_shift_count: u16,
+    rear_gear_shift_count: u16,
+    time_standing: f64,
+    stand_count: u16,
+    avg_left_pco: i8,
+    avg_right_pco: i8,
+    avg_left_power_phase: Vec<f64>,
+    avg_left_power_phase_peak: Vec<f64>,
+    avg_right_power_phase: Vec<f64>,
+    avg_right_power_phase_peak: Vec<f64>,
+    avg_power_position: Vec<u16>,
+    max_power_position: Vec<u16>,
+    avg_cadence_position: Vec<u8>,
+    max_cadence_position: Vec<u8>,
+    manufacturer: typedef::Manufacturer,
+    total_grit: f32,
+    total_flow: f32,
+    avg_grit: f32,
+    avg_flow: f32,
+    total_fractional_ascent: f64,
+    total_fractional_descent: f64,
+    enhanced_avg_altitude: f64,
+    enhanced_max_altitude: f64,
+    enhanced_min_altitude: f64,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for SegmentLap {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            event: m.event,
+            event_type: m.event_type,
+            start_time: m.start_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            start_position_lat: semconv::to_semicircles(m.start_position_lat).unwrap_or(i32::MAX),
+            start_position_long: semconv::to_semicircles(m.start_position_long).unwrap_or(i32::MAX),
+            end_position_lat: semconv::to_semicircles(m.end_position_lat).unwrap_or(i32::MAX),
+            end_position_long: semconv::to_semicircles(m.end_position_long).unwrap_or(i32::MAX),
+            total_elapsed_time: {
+                let unscaled = (m.total_elapsed_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_timer_time: {
+                let unscaled = (m.total_timer_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_distance: {
+                let unscaled = (m.total_distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            total_cycles: m.total_cycles,
+            total_calories: m.total_calories,
+            total_fat_calories: m.total_fat_calories,
+            avg_speed: {
+                let unscaled = (m.avg_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            max_speed: {
+                let unscaled = (m.max_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_heart_rate: m.avg_heart_rate,
+            max_heart_rate: m.max_heart_rate,
+            avg_cadence: m.avg_cadence,
+            max_cadence: m.max_cadence,
+            avg_power: m.avg_power,
+            max_power: m.max_power,
+            total_ascent: m.total_ascent,
+            total_descent: m.total_descent,
+            sport: m.sport,
+            event_group: m.event_group,
+            nec_lat: semconv::to_semicircles(m.nec_lat).unwrap_or(i32::MAX),
+            nec_long: semconv::to_semicircles(m.nec_long).unwrap_or(i32::MAX),
+            swc_lat: semconv::to_semicircles(m.swc_lat).unwrap_or(i32::MAX),
+            swc_long: semconv::to_semicircles(m.swc_long).unwrap_or(i32::MAX),
+            name: m.name,
+            normalized_power: m.normalized_power,
+            left_right_balance: m.left_right_balance,
+            sub_sport: m.sub_sport,
+            total_work: m.total_work,
+            avg_altitude: {
+                let unscaled = (m.avg_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            max_altitude: {
+                let unscaled = (m.max_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            gps_accuracy: m.gps_accuracy,
+            avg_grade: {
+                let unscaled = (m.avg_grade + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            avg_pos_grade: {
+                let unscaled = (m.avg_pos_grade + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            avg_neg_grade: {
+                let unscaled = (m.avg_neg_grade + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            max_pos_grade: {
+                let unscaled = (m.max_pos_grade + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            max_neg_grade: {
+                let unscaled = (m.max_neg_grade + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            avg_temperature: m.avg_temperature,
+            max_temperature: m.max_temperature,
+            total_moving_time: {
+                let unscaled = (m.total_moving_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_pos_vertical_speed: {
+                let unscaled = (m.avg_pos_vertical_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            avg_neg_vertical_speed: {
+                let unscaled = (m.avg_neg_vertical_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            max_pos_vertical_speed: {
+                let unscaled = (m.max_pos_vertical_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            max_neg_vertical_speed: {
+                let unscaled = (m.max_neg_vertical_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
+                    i16::MAX
+                } else {
+                    unscaled as i16
+                }
+            },
+            time_in_hr_zone: {
+                if m.time_in_hr_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_hr_zone.len());
+                    for &x in m.time_in_hr_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            time_in_speed_zone: {
+                if m.time_in_speed_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_speed_zone.len());
+                    for &x in m.time_in_speed_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            time_in_cadence_zone: {
+                if m.time_in_cadence_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_cadence_zone.len());
+                    for &x in m.time_in_cadence_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            time_in_power_zone: {
+                if m.time_in_power_zone.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time_in_power_zone.len());
+                    for &x in m.time_in_power_zone.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
+            repetition_num: m.repetition_num,
+            min_altitude: {
+                let unscaled = (m.min_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            min_heart_rate: m.min_heart_rate,
+            active_time: {
+                let unscaled = (m.active_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            wkt_step_index: m.wkt_step_index,
+            sport_event: m.sport_event,
+            avg_left_torque_effectiveness: {
+                let unscaled = (m.avg_left_torque_effectiveness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_right_torque_effectiveness: {
+                let unscaled = (m.avg_right_torque_effectiveness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_left_pedal_smoothness: {
+                let unscaled = (m.avg_left_pedal_smoothness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_right_pedal_smoothness: {
+                let unscaled = (m.avg_right_pedal_smoothness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_combined_pedal_smoothness: {
+                let unscaled = (m.avg_combined_pedal_smoothness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            status: m.status,
+            uuid: m.uuid,
+            avg_fractional_cadence: {
+                let unscaled = (m.avg_fractional_cadence + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            max_fractional_cadence: {
+                let unscaled = (m.max_fractional_cadence + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            total_fractional_cycles: {
+                let unscaled = (m.total_fractional_cycles + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            front_gear_shift_count: m.front_gear_shift_count,
+            rear_gear_shift_count: m.rear_gear_shift_count,
+            time_standing: {
+                let unscaled = (m.time_standing + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            stand_count: m.stand_count,
+            avg_left_pco: m.avg_left_pco,
+            avg_right_pco: m.avg_right_pco,
+            avg_left_power_phase: {
+                if m.avg_left_power_phase.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_left_power_phase.len());
+                    for &x in m.avg_left_power_phase.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_left_power_phase_peak: {
+                if m.avg_left_power_phase_peak.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_left_power_phase_peak.len());
+                    for &x in m.avg_left_power_phase_peak.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_right_power_phase: {
+                if m.avg_right_power_phase.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_right_power_phase.len());
+                    for &x in m.avg_right_power_phase.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_right_power_phase_peak: {
+                if m.avg_right_power_phase_peak.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_right_power_phase_peak.len());
+                    for &x in m.avg_right_power_phase_peak.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_power_position: m.avg_power_position,
+            max_power_position: m.max_power_position,
+            avg_cadence_position: m.avg_cadence_position,
+            max_cadence_position: m.max_cadence_position,
+            manufacturer: m.manufacturer,
+            total_grit: m.total_grit,
+            total_flow: m.total_flow,
+            avg_grit: m.avg_grit,
+            avg_flow: m.avg_flow,
+            total_fractional_ascent: {
+                let unscaled = (m.total_fractional_ascent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            total_fractional_descent: {
+                let unscaled = (m.total_fractional_descent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            enhanced_avg_altitude: {
+                let unscaled = (m.enhanced_avg_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            enhanced_max_altitude: {
+                let unscaled = (m.enhanced_max_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            enhanced_min_altitude: {
+                let unscaled = (m.enhanced_min_altitude + 500.0) * 5.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            state: [0u8; 12],
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: None,
+            event: typedef::Event(u8::MAX),
+            event_type: typedef::EventType(u8::MAX),
+            start_time: None,
+            start_position_lat: f64::from_bits(u64::MAX),
+            start_position_long: f64::from_bits(u64::MAX),
+            end_position_lat: f64::from_bits(u64::MAX),
+            end_position_long: f64::from_bits(u64::MAX),
+            total_elapsed_time: f64::from_bits(u64::MAX),
+            total_timer_time: f64::from_bits(u64::MAX),
+            total_distance: f64::from_bits(u64::MAX),
+            total_cycles: u32::MAX,
+            total_calories: u16::MAX,
+            total_fat_calories: u16::MAX,
+            avg_speed: f64::from_bits(u64::MAX),
+            max_speed: f64::from_bits(u64::MAX),
+            avg_heart_rate: u8::MAX,
+            max_heart_rate: u8::MAX,
+            avg_cadence: u8::MAX,
+            max_cadence: u8::MAX,
+            avg_power: u16::MAX,
+            max_power: u16::MAX,
+            total_ascent: u16::MAX,
+            total_descent: u16::MAX,
+            sport: typedef::Sport(u8::MAX),
+            event_group: u8::MAX,
+            nec_lat: f64::from_bits(u64::MAX),
+            nec_long: f64::from_bits(u64::MAX),
+            swc_lat: f64::from_bits(u64::MAX),
+            swc_long: f64::from_bits(u64::MAX),
+            name: String::new(),
+            normalized_power: u16::MAX,
+            left_right_balance: typedef::LeftRightBalance100(u16::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            total_work: u32::MAX,
+            avg_altitude: f64::from_bits(u64::MAX),
+            max_altitude: f64::from_bits(u64::MAX),
+            gps_accuracy: u8::MAX,
+            avg_grade: f64::from_bits(u64::MAX),
+            avg_pos_grade: f64::from_bits(u64::MAX),
+            avg_neg_grade: f64::from_bits(u64::MAX),
+            max_pos_grade: f64::from_bits(u64::MAX),
+            max_neg_grade: f64::from_bits(u64::MAX),
+            avg_temperature: i8::MAX,
+            max_temperature: i8::MAX,
+            total_moving_time: f64::from_bits(u64::MAX),
+            avg_pos_vertical_speed: f64::from_bits(u64::MAX),
+            avg_neg_vertical_speed: f64::from_bits(u64::MAX),
+            max_pos_vertical_speed: f64::from_bits(u64::MAX),
+            max_neg_vertical_speed: f64::from_bits(u64::MAX),
+            time_in_hr_zone: Vec::new(),
+            time_in_speed_zone: Vec::new(),
+            time_in_cadence_zone: Vec::new(),
+            time_in_power_zone: Vec::new(),
+            repetition_num: u16::MAX,
+            min_altitude: f64::from_bits(u64::MAX),
+            min_heart_rate: u8::MAX,
+            active_time: f64::from_bits(u64::MAX),
+            wkt_step_index: typedef::MessageIndex(u16::MAX),
+            sport_event: typedef::SportEvent(u8::MAX),
+            avg_left_torque_effectiveness: f64::from_bits(u64::MAX),
+            avg_right_torque_effectiveness: f64::from_bits(u64::MAX),
+            avg_left_pedal_smoothness: f64::from_bits(u64::MAX),
+            avg_right_pedal_smoothness: f64::from_bits(u64::MAX),
+            avg_combined_pedal_smoothness: f64::from_bits(u64::MAX),
+            status: typedef::SegmentLapStatus(u8::MAX),
+            uuid: String::new(),
+            avg_fractional_cadence: f64::from_bits(u64::MAX),
+            max_fractional_cadence: f64::from_bits(u64::MAX),
+            total_fractional_cycles: f64::from_bits(u64::MAX),
+            front_gear_shift_count: u16::MAX,
+            rear_gear_shift_count: u16::MAX,
+            time_standing: f64::from_bits(u64::MAX),
+            stand_count: u16::MAX,
+            avg_left_pco: i8::MAX,
+            avg_right_pco: i8::MAX,
+            avg_left_power_phase: Vec::new(),
+            avg_left_power_phase_peak: Vec::new(),
+            avg_right_power_phase: Vec::new(),
+            avg_right_power_phase_peak: Vec::new(),
+            avg_power_position: Vec::new(),
+            max_power_position: Vec::new(),
+            avg_cadence_position: Vec::new(),
+            max_cadence_position: Vec::new(),
+            manufacturer: typedef::Manufacturer(u16::MAX),
+            total_grit: f32::from_bits(u32::MAX),
+            total_flow: f32::from_bits(u32::MAX),
+            avg_grit: f32::from_bits(u32::MAX),
+            avg_flow: f32::from_bits(u32::MAX),
+            total_fractional_ascent: f64::from_bits(u64::MAX),
+            total_fractional_descent: f64::from_bits(u64::MAX),
+            enhanced_avg_altitude: f64::from_bits(u64::MAX),
+            enhanced_max_altitude: f64::from_bits(u64::MAX),
+            enhanced_min_altitude: f64::from_bits(u64::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

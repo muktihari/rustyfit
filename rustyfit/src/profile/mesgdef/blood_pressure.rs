@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Blood Pressure message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct BloodPressure {
     /// Units: s
@@ -38,27 +41,27 @@ pub struct BloodPressure {
 }
 
 impl BloodPressure {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `mmHg`
     pub const SYSTOLIC_PRESSURE: u8 = 0;
-    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `mmHg`
     pub const DIASTOLIC_PRESSURE: u8 = 1;
-    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `mmHg`
     pub const MEAN_ARTERIAL_PRESSURE: u8 = 2;
-    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `mmHg`
     pub const MAP_3_SAMPLE_MEAN: u8 = 3;
-    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `mmHg`
     pub const MAP_MORNING_VALUES: u8 = 4;
-    /// Value's type: `u16`; Units: `mmHg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `mmHg`
     pub const MAP_EVENING_VALUES: u8 = 5;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HEART_RATE: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::HR_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::HrType
     pub const HEART_RATE_TYPE: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BP_STATUS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::BpStatus
     pub const STATUS: u8 = 8;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const USER_PROFILE_INDEX: u8 = 9;
 
     /// Create new BloodPressure with all fields being set to its corresponding invalid value.
@@ -236,6 +239,120 @@ impl From<BloodPressure> for Message {
             num: typedef::MesgNum::BLOOD_PRESSURE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BloodPressure {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("BloodPressure", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.systolic_pressure != u16::MAX {
+            state.serialize_field("systolic_pressure", &self.systolic_pressure)?;
+        }
+        if self.diastolic_pressure != u16::MAX {
+            state.serialize_field("diastolic_pressure", &self.diastolic_pressure)?;
+        }
+        if self.mean_arterial_pressure != u16::MAX {
+            state.serialize_field("mean_arterial_pressure", &self.mean_arterial_pressure)?;
+        }
+        if self.map_3_sample_mean != u16::MAX {
+            state.serialize_field("map_3_sample_mean", &self.map_3_sample_mean)?;
+        }
+        if self.map_morning_values != u16::MAX {
+            state.serialize_field("map_morning_values", &self.map_morning_values)?;
+        }
+        if self.map_evening_values != u16::MAX {
+            state.serialize_field("map_evening_values", &self.map_evening_values)?;
+        }
+        if self.heart_rate != u8::MAX {
+            state.serialize_field("heart_rate", &self.heart_rate)?;
+        }
+        if self.heart_rate_type.0 != u8::MAX {
+            state.serialize_field("heart_rate_type", &self.heart_rate_type)?;
+        }
+        if self.status.0 != u8::MAX {
+            state.serialize_field("status", &self.status)?;
+        }
+        if self.user_profile_index.0 != u16::MAX {
+            state.serialize_field("user_profile_index", &self.user_profile_index)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    systolic_pressure: u16,
+    diastolic_pressure: u16,
+    mean_arterial_pressure: u16,
+    map_3_sample_mean: u16,
+    map_morning_values: u16,
+    map_evening_values: u16,
+    heart_rate: u8,
+    heart_rate_type: typedef::HrType,
+    status: typedef::BpStatus,
+    user_profile_index: typedef::MessageIndex,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for BloodPressure {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            systolic_pressure: m.systolic_pressure,
+            diastolic_pressure: m.diastolic_pressure,
+            mean_arterial_pressure: m.mean_arterial_pressure,
+            map_3_sample_mean: m.map_3_sample_mean,
+            map_morning_values: m.map_morning_values,
+            map_evening_values: m.map_evening_values,
+            heart_rate: m.heart_rate,
+            heart_rate_type: m.heart_rate_type,
+            status: m.status,
+            user_profile_index: m.user_profile_index,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            systolic_pressure: u16::MAX,
+            diastolic_pressure: u16::MAX,
+            mean_arterial_pressure: u16::MAX,
+            map_3_sample_mean: u16::MAX,
+            map_morning_values: u16::MAX,
+            map_evening_values: u16::MAX,
+            heart_rate: u8::MAX,
+            heart_rate_type: typedef::HrType(u8::MAX),
+            status: typedef::BpStatus(u8::MAX),
+            user_profile_index: typedef::MessageIndex(u16::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

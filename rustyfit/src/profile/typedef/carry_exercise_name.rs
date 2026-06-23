@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Carry Exercise Name type.
 #[repr(transparent)]
@@ -23,6 +23,21 @@ impl CarryExerciseName {
     pub const FARMERS_CARRY_WALK_LUNGE: CarryExerciseName = CarryExerciseName(6);
     pub const FARMERS_CARRY: CarryExerciseName = CarryExerciseName(7);
     pub const FARMERS_CARRY_ON_TOES: CarryExerciseName = CarryExerciseName(8);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("bar_holds"),
+            1 => Some("farmers_walk"),
+            2 => Some("farmers_walk_on_toes"),
+            3 => Some("hex_dumbbell_hold"),
+            4 => Some("overhead_carry"),
+            5 => Some("dumbbell_waiter_carry"),
+            6 => Some("farmers_carry_walk_lunge"),
+            7 => Some("farmers_carry"),
+            8 => Some("farmers_carry_on_toes"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for CarryExerciseName {
@@ -33,17 +48,50 @@ impl Default for CarryExerciseName {
 
 impl fmt::Display for CarryExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "bar_holds"),
-            1 => write!(f, "farmers_walk"),
-            2 => write!(f, "farmers_walk_on_toes"),
-            3 => write!(f, "hex_dumbbell_hold"),
-            4 => write!(f, "overhead_carry"),
-            5 => write!(f, "dumbbell_waiter_carry"),
-            6 => write!(f, "farmers_carry_walk_lunge"),
-            7 => write!(f, "farmers_carry"),
-            8 => write!(f, "farmers_carry_on_toes"),
-            _ => write!(f, "CarryExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "CarryExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CarryExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("CarryExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for CarryExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

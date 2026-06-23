@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Time Mode type.
 #[repr(transparent)]
@@ -22,6 +22,18 @@ impl TimeMode {
     pub const HOUR_12_WITH_SECONDS: TimeMode = TimeMode(3);
     pub const HOUR_24_WITH_SECONDS: TimeMode = TimeMode(4);
     pub const UTC: TimeMode = TimeMode(5);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("hour12"),
+            1 => Some("hour24"),
+            2 => Some("military"),
+            3 => Some("hour_12_with_seconds"),
+            4 => Some("hour_24_with_seconds"),
+            5 => Some("utc"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for TimeMode {
@@ -32,14 +44,50 @@ impl Default for TimeMode {
 
 impl fmt::Display for TimeMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "hour12"),
-            1 => write!(f, "hour24"),
-            2 => write!(f, "military"),
-            3 => write!(f, "hour_12_with_seconds"),
-            4 => write!(f, "hour_24_with_seconds"),
-            5 => write!(f, "utc"),
-            _ => write!(f, "TimeMode({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "TimeMode({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for TimeMode {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("TimeMode", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for TimeMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

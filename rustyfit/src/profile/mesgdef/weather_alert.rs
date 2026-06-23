@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Weather Alert message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct WeatherAlert {
     pub timestamp: typedef::DateTime,
@@ -31,17 +34,17 @@ pub struct WeatherAlert {
 }
 
 impl WeatherAlert {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const REPORT_ID: u8 = 0;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const ISSUE_TIME: u8 = 1;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const EXPIRE_TIME: u8 = 2;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_SEVERITY`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WeatherSeverity
     pub const SEVERITY: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::WEATHER_SEVERE_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WeatherSevereType
     pub const TYPE: u8 = 4;
 
     /// Create new WeatherAlert with all fields being set to its corresponding invalid value.
@@ -164,6 +167,96 @@ impl From<WeatherAlert> for Message {
             num: typedef::MesgNum::WEATHER_ALERT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WeatherAlert {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("WeatherAlert", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if !self.report_id.is_empty() {
+            state.serialize_field("report_id", &self.report_id)?;
+        }
+        if let Some(v) = self.issue_time.unix_timestamp() {
+            state.serialize_field("issue_time", &v)?;
+        }
+        if let Some(v) = self.expire_time.unix_timestamp() {
+            state.serialize_field("expire_time", &v)?;
+        }
+        if self.severity.0 != u8::MAX {
+            state.serialize_field("severity", &self.severity)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    report_id: String,
+    issue_time: Option<i64>,
+    expire_time: Option<i64>,
+    severity: typedef::WeatherSeverity,
+    r#type: typedef::WeatherSevereType,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for WeatherAlert {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            report_id: m.report_id,
+            issue_time: m.issue_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            expire_time: m.expire_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            severity: m.severity,
+            r#type: m.r#type,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            report_id: String::new(),
+            issue_time: None,
+            expire_time: None,
+            severity: typedef::WeatherSeverity(u8::MAX),
+            r#type: typedef::WeatherSevereType(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

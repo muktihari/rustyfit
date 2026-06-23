@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Language Bits 1 type.
 #[repr(transparent)]
@@ -22,6 +22,20 @@ impl LanguageBits1 {
     pub const POLISH: LanguageBits1 = LanguageBits1(0x20);
     pub const PORTUGUESE: LanguageBits1 = LanguageBits1(0x40);
     pub const SLOVAKIAN: LanguageBits1 = LanguageBits1(0x80);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x01 => Some("dutch"),
+            0x02 => Some("finnish"),
+            0x04 => Some("greek"),
+            0x08 => Some("hungarian"),
+            0x10 => Some("norwegian"),
+            0x20 => Some("polish"),
+            0x40 => Some("portuguese"),
+            0x80 => Some("slovakian"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for LanguageBits1 {
@@ -32,16 +46,50 @@ impl Default for LanguageBits1 {
 
 impl fmt::Display for LanguageBits1 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x01 => write!(f, "dutch"),
-            0x02 => write!(f, "finnish"),
-            0x04 => write!(f, "greek"),
-            0x08 => write!(f, "hungarian"),
-            0x10 => write!(f, "norwegian"),
-            0x20 => write!(f, "polish"),
-            0x40 => write!(f, "portuguese"),
-            0x80 => write!(f, "slovakian"),
-            _ => write!(f, "LanguageBits1({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "LanguageBits1({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for LanguageBits1 {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("LanguageBits1", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for LanguageBits1 {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

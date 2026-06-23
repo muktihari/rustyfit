@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Goal message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Goal {
     pub message_index: typedef::MessageIndex,
@@ -31,31 +34,31 @@ pub struct Goal {
 }
 
 impl Goal {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_DATE: u8 = 2;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const END_DATE: u8 = 3;
-    /// Value's type: `u8`; ProfileType: `ProfileType::GOAL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Goal
     pub const TYPE: u8 = 4;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const VALUE: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const REPEAT: u8 = 6;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const TARGET_VALUE: u8 = 7;
-    /// Value's type: `u8`; ProfileType: `ProfileType::GOAL_RECURRENCE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::GoalRecurrence
     pub const RECURRENCE: u8 = 8;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const RECURRENCE_VALUE: u8 = 9;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 10;
-    /// Value's type: `u8`; ProfileType: `ProfileType::GOAL_SOURCE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::GoalSource
     pub const SOURCE: u8 = 11;
 
     /// Create new Goal with all fields being set to its corresponding invalid value.
@@ -255,6 +258,135 @@ impl From<Goal> for Message {
             num: typedef::MesgNum::GOAL,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Goal {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Goal", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if let Some(v) = self.start_date.unix_timestamp() {
+            state.serialize_field("start_date", &v)?;
+        }
+        if let Some(v) = self.end_date.unix_timestamp() {
+            state.serialize_field("end_date", &v)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if self.value != u32::MAX {
+            state.serialize_field("value", &self.value)?;
+        }
+        if self.repeat.0 != u8::MAX {
+            state.serialize_field("repeat", &self.repeat)?;
+        }
+        if self.target_value != u32::MAX {
+            state.serialize_field("target_value", &self.target_value)?;
+        }
+        if self.recurrence.0 != u8::MAX {
+            state.serialize_field("recurrence", &self.recurrence)?;
+        }
+        if self.recurrence_value != u16::MAX {
+            state.serialize_field("recurrence_value", &self.recurrence_value)?;
+        }
+        if self.enabled.0 != u8::MAX {
+            state.serialize_field("enabled", &self.enabled)?;
+        }
+        if self.source.0 != u8::MAX {
+            state.serialize_field("source", &self.source)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    sport: typedef::Sport,
+    sub_sport: typedef::SubSport,
+    start_date: Option<i64>,
+    end_date: Option<i64>,
+    r#type: typedef::Goal,
+    value: u32,
+    repeat: typedef::Bool,
+    target_value: u32,
+    recurrence: typedef::GoalRecurrence,
+    recurrence_value: u16,
+    enabled: typedef::Bool,
+    source: typedef::GoalSource,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Goal {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            sport: m.sport,
+            sub_sport: m.sub_sport,
+            start_date: m.start_date.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            end_date: m.end_date.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            r#type: m.r#type,
+            value: m.value,
+            repeat: m.repeat,
+            target_value: m.target_value,
+            recurrence: m.recurrence,
+            recurrence_value: m.recurrence_value,
+            enabled: m.enabled,
+            source: m.source,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            start_date: None,
+            end_date: None,
+            r#type: typedef::Goal(u8::MAX),
+            value: u32::MAX,
+            repeat: typedef::Bool(u8::MAX),
+            target_value: u32::MAX,
+            recurrence: typedef::GoalRecurrence(u8::MAX),
+            recurrence_value: u16::MAX,
+            enabled: typedef::Bool(u8::MAX),
+            source: typedef::GoalSource(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

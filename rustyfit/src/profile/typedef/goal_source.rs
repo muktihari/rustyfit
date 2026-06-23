@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Goal Source type.
 #[repr(transparent)]
@@ -20,6 +20,15 @@ impl GoalSource {
     pub const COMMUNITY: GoalSource = GoalSource(1);
     /// Manually generated
     pub const USER: GoalSource = GoalSource(2);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("auto"),
+            1 => Some("community"),
+            2 => Some("user"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for GoalSource {
@@ -30,11 +39,50 @@ impl Default for GoalSource {
 
 impl fmt::Display for GoalSource {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "auto"),
-            1 => write!(f, "community"),
-            2 => write!(f, "user"),
-            _ => write!(f, "GoalSource({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "GoalSource({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for GoalSource {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("GoalSource", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for GoalSource {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

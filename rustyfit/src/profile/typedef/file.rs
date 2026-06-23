@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// File type.
 #[repr(transparent)]
@@ -53,6 +53,32 @@ impl File {
     pub const MFG_RANGE_MIN: File = File(0xF7);
     /// 0xF7 - 0xFE reserved for manufacturer specific file types
     pub const MFG_RANGE_MAX: File = File(0xFE);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            1 => Some("device"),
+            2 => Some("settings"),
+            3 => Some("sport"),
+            4 => Some("activity"),
+            5 => Some("workout"),
+            6 => Some("course"),
+            7 => Some("schedules"),
+            9 => Some("weight"),
+            10 => Some("totals"),
+            11 => Some("goals"),
+            14 => Some("blood_pressure"),
+            15 => Some("monitoring_a"),
+            20 => Some("activity_summary"),
+            28 => Some("monitoring_daily"),
+            32 => Some("monitoring_b"),
+            34 => Some("segment"),
+            35 => Some("segment_list"),
+            40 => Some("exd_configuration"),
+            0xF7 => Some("mfg_range_min"),
+            0xFE => Some("mfg_range_max"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for File {
@@ -63,28 +89,50 @@ impl Default for File {
 
 impl fmt::Display for File {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            1 => write!(f, "device"),
-            2 => write!(f, "settings"),
-            3 => write!(f, "sport"),
-            4 => write!(f, "activity"),
-            5 => write!(f, "workout"),
-            6 => write!(f, "course"),
-            7 => write!(f, "schedules"),
-            9 => write!(f, "weight"),
-            10 => write!(f, "totals"),
-            11 => write!(f, "goals"),
-            14 => write!(f, "blood_pressure"),
-            15 => write!(f, "monitoring_a"),
-            20 => write!(f, "activity_summary"),
-            28 => write!(f, "monitoring_daily"),
-            32 => write!(f, "monitoring_b"),
-            34 => write!(f, "segment"),
-            35 => write!(f, "segment_list"),
-            40 => write!(f, "exd_configuration"),
-            0xF7 => write!(f, "mfg_range_min"),
-            0xFE => write!(f, "mfg_range_max"),
-            _ => write!(f, "File({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "File({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for File {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("File", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for File {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

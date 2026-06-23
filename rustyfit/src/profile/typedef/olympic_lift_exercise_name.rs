@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Olympic Lift Exercise Name type.
 #[repr(transparent)]
@@ -45,6 +45,41 @@ impl OlympicLiftExerciseName {
     pub const MEDICINE_BALL_CLEAN: OlympicLiftExerciseName = OlympicLiftExerciseName(26);
     pub const CLEAN_AND_PRESS: OlympicLiftExerciseName = OlympicLiftExerciseName(27);
     pub const SNATCH: OlympicLiftExerciseName = OlympicLiftExerciseName(28);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("barbell_hang_power_clean"),
+            1 => Some("barbell_hang_squat_clean"),
+            2 => Some("barbell_power_clean"),
+            3 => Some("barbell_power_snatch"),
+            4 => Some("barbell_squat_clean"),
+            5 => Some("clean_and_jerk"),
+            6 => Some("barbell_hang_power_snatch"),
+            7 => Some("barbell_hang_pull"),
+            8 => Some("barbell_high_pull"),
+            9 => Some("barbell_snatch"),
+            10 => Some("barbell_split_jerk"),
+            11 => Some("clean"),
+            12 => Some("dumbbell_clean"),
+            13 => Some("dumbbell_hang_pull"),
+            14 => Some("one_hand_dumbbell_split_snatch"),
+            15 => Some("push_jerk"),
+            16 => Some("single_arm_dumbbell_snatch"),
+            17 => Some("single_arm_hang_snatch"),
+            18 => Some("single_arm_kettlebell_snatch"),
+            19 => Some("split_jerk"),
+            20 => Some("squat_clean_and_jerk"),
+            21 => Some("dumbbell_hang_snatch"),
+            22 => Some("dumbbell_power_clean_and_jerk"),
+            23 => Some("dumbbell_power_clean_and_push_press"),
+            24 => Some("dumbbell_power_clean_and_strict_press"),
+            25 => Some("dumbbell_snatch"),
+            26 => Some("medicine_ball_clean"),
+            27 => Some("clean_and_press"),
+            28 => Some("snatch"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for OlympicLiftExerciseName {
@@ -55,37 +90,50 @@ impl Default for OlympicLiftExerciseName {
 
 impl fmt::Display for OlympicLiftExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "barbell_hang_power_clean"),
-            1 => write!(f, "barbell_hang_squat_clean"),
-            2 => write!(f, "barbell_power_clean"),
-            3 => write!(f, "barbell_power_snatch"),
-            4 => write!(f, "barbell_squat_clean"),
-            5 => write!(f, "clean_and_jerk"),
-            6 => write!(f, "barbell_hang_power_snatch"),
-            7 => write!(f, "barbell_hang_pull"),
-            8 => write!(f, "barbell_high_pull"),
-            9 => write!(f, "barbell_snatch"),
-            10 => write!(f, "barbell_split_jerk"),
-            11 => write!(f, "clean"),
-            12 => write!(f, "dumbbell_clean"),
-            13 => write!(f, "dumbbell_hang_pull"),
-            14 => write!(f, "one_hand_dumbbell_split_snatch"),
-            15 => write!(f, "push_jerk"),
-            16 => write!(f, "single_arm_dumbbell_snatch"),
-            17 => write!(f, "single_arm_hang_snatch"),
-            18 => write!(f, "single_arm_kettlebell_snatch"),
-            19 => write!(f, "split_jerk"),
-            20 => write!(f, "squat_clean_and_jerk"),
-            21 => write!(f, "dumbbell_hang_snatch"),
-            22 => write!(f, "dumbbell_power_clean_and_jerk"),
-            23 => write!(f, "dumbbell_power_clean_and_push_press"),
-            24 => write!(f, "dumbbell_power_clean_and_strict_press"),
-            25 => write!(f, "dumbbell_snatch"),
-            26 => write!(f, "medicine_ball_clean"),
-            27 => write!(f, "clean_and_press"),
-            28 => write!(f, "snatch"),
-            _ => write!(f, "OlympicLiftExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "OlympicLiftExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for OlympicLiftExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("OlympicLiftExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for OlympicLiftExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

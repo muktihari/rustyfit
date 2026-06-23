@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Hip Swing Exercise Name type.
 #[repr(transparent)]
@@ -18,6 +18,16 @@ impl HipSwingExerciseName {
     pub const SINGLE_ARM_DUMBBELL_SWING: HipSwingExerciseName = HipSwingExerciseName(1);
     pub const STEP_OUT_SWING: HipSwingExerciseName = HipSwingExerciseName(2);
     pub const ONE_ARM_SWING: HipSwingExerciseName = HipSwingExerciseName(3);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("single_arm_kettlebell_swing"),
+            1 => Some("single_arm_dumbbell_swing"),
+            2 => Some("step_out_swing"),
+            3 => Some("one_arm_swing"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for HipSwingExerciseName {
@@ -28,12 +38,50 @@ impl Default for HipSwingExerciseName {
 
 impl fmt::Display for HipSwingExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "single_arm_kettlebell_swing"),
-            1 => write!(f, "single_arm_dumbbell_swing"),
-            2 => write!(f, "step_out_swing"),
-            3 => write!(f, "one_arm_swing"),
-            _ => write!(f, "HipSwingExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "HipSwingExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HipSwingExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("HipSwingExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for HipSwingExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Gyroscope Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct GyroscopeData {
     /// Units: s; Whole second part of the timestamp
@@ -36,23 +39,23 @@ pub struct GyroscopeData {
 }
 
 impl GyroscopeData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const GYRO_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const GYRO_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const GYRO_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; Units: `deg/s`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
     pub const CALIBRATED_GYRO_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; Units: `deg/s`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
     pub const CALIBRATED_GYRO_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; Units: `deg/s`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
     pub const CALIBRATED_GYRO_Z: u8 = 7;
 
     /// Create new GyroscopeData with all fields being set to its corresponding invalid value.
@@ -208,6 +211,108 @@ impl From<GyroscopeData> for Message {
             num: typedef::MesgNum::GYROSCOPE_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for GyroscopeData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("GyroscopeData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if !self.sample_time_offset.is_empty() {
+            state.serialize_field("sample_time_offset", &self.sample_time_offset)?;
+        }
+        if !self.gyro_x.is_empty() {
+            state.serialize_field("gyro_x", &self.gyro_x)?;
+        }
+        if !self.gyro_y.is_empty() {
+            state.serialize_field("gyro_y", &self.gyro_y)?;
+        }
+        if !self.gyro_z.is_empty() {
+            state.serialize_field("gyro_z", &self.gyro_z)?;
+        }
+        if !self.calibrated_gyro_x.is_empty() {
+            state.serialize_field("calibrated_gyro_x", &self.calibrated_gyro_x)?;
+        }
+        if !self.calibrated_gyro_y.is_empty() {
+            state.serialize_field("calibrated_gyro_y", &self.calibrated_gyro_y)?;
+        }
+        if !self.calibrated_gyro_z.is_empty() {
+            state.serialize_field("calibrated_gyro_z", &self.calibrated_gyro_z)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    sample_time_offset: Vec<u16>,
+    gyro_x: Vec<u16>,
+    gyro_y: Vec<u16>,
+    gyro_z: Vec<u16>,
+    calibrated_gyro_x: Vec<f32>,
+    calibrated_gyro_y: Vec<f32>,
+    calibrated_gyro_z: Vec<f32>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for GyroscopeData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            sample_time_offset: m.sample_time_offset,
+            gyro_x: m.gyro_x,
+            gyro_y: m.gyro_y,
+            gyro_z: m.gyro_z,
+            calibrated_gyro_x: m.calibrated_gyro_x,
+            calibrated_gyro_y: m.calibrated_gyro_y,
+            calibrated_gyro_z: m.calibrated_gyro_z,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            sample_time_offset: Vec::new(),
+            gyro_x: Vec::new(),
+            gyro_y: Vec::new(),
+            gyro_z: Vec::new(),
+            calibrated_gyro_x: Vec::new(),
+            calibrated_gyro_y: Vec::new(),
+            calibrated_gyro_z: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

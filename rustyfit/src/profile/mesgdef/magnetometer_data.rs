@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Magnetometer Data message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct MagnetometerData {
     /// Units: s; Whole second part of the timestamp
@@ -36,23 +39,23 @@ pub struct MagnetometerData {
 }
 
 impl MagnetometerData {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const MAG_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const MAG_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; Units: `counts`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const MAG_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; Units: `G`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `G`
     pub const CALIBRATED_MAG_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; Units: `G`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `G`
     pub const CALIBRATED_MAG_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; Units: `G`; ProfileType: `ProfileType::FLOAT32`
+    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `G`
     pub const CALIBRATED_MAG_Z: u8 = 7;
 
     /// Create new MagnetometerData with all fields being set to its corresponding invalid value.
@@ -208,6 +211,108 @@ impl From<MagnetometerData> for Message {
             num: typedef::MesgNum::MAGNETOMETER_DATA,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MagnetometerData {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("MagnetometerData", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.timestamp_ms != u16::MAX {
+            state.serialize_field("timestamp_ms", &self.timestamp_ms)?;
+        }
+        if !self.sample_time_offset.is_empty() {
+            state.serialize_field("sample_time_offset", &self.sample_time_offset)?;
+        }
+        if !self.mag_x.is_empty() {
+            state.serialize_field("mag_x", &self.mag_x)?;
+        }
+        if !self.mag_y.is_empty() {
+            state.serialize_field("mag_y", &self.mag_y)?;
+        }
+        if !self.mag_z.is_empty() {
+            state.serialize_field("mag_z", &self.mag_z)?;
+        }
+        if !self.calibrated_mag_x.is_empty() {
+            state.serialize_field("calibrated_mag_x", &self.calibrated_mag_x)?;
+        }
+        if !self.calibrated_mag_y.is_empty() {
+            state.serialize_field("calibrated_mag_y", &self.calibrated_mag_y)?;
+        }
+        if !self.calibrated_mag_z.is_empty() {
+            state.serialize_field("calibrated_mag_z", &self.calibrated_mag_z)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    timestamp_ms: u16,
+    sample_time_offset: Vec<u16>,
+    mag_x: Vec<u16>,
+    mag_y: Vec<u16>,
+    mag_z: Vec<u16>,
+    calibrated_mag_x: Vec<f32>,
+    calibrated_mag_y: Vec<f32>,
+    calibrated_mag_z: Vec<f32>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for MagnetometerData {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            timestamp_ms: m.timestamp_ms,
+            sample_time_offset: m.sample_time_offset,
+            mag_x: m.mag_x,
+            mag_y: m.mag_y,
+            mag_z: m.mag_z,
+            calibrated_mag_x: m.calibrated_mag_x,
+            calibrated_mag_y: m.calibrated_mag_y,
+            calibrated_mag_z: m.calibrated_mag_z,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            timestamp_ms: u16::MAX,
+            sample_time_offset: Vec::new(),
+            mag_x: Vec::new(),
+            mag_y: Vec::new(),
+            mag_z: Vec::new(),
+            calibrated_mag_x: Vec::new(),
+            calibrated_mag_y: Vec::new(),
+            calibrated_mag_z: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

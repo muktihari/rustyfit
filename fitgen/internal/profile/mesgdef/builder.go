@@ -104,6 +104,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 					}
 					return fmt.Sprintf("%s.0", name)
 				}(),
+				NameRaw:       parserField.Name,
 				NameUpperCase: strings.ToUpper(parserField.Name),
 				String:        parserField.Name,
 				BaseType:      strings.ToUpper(baseType.String()),
@@ -114,7 +115,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 					}
 					return fmt.Sprintf("%s::MAX", rustType)
 				}(),
-				ProfileType: fmt.Sprintf("ProfileType::%s", strings.ToUpper(parserField.Type)),
+				ProfileType: fmt.Sprintf("ProfileType::%s", strutil.ToTitle(parserField.Type)),
 				MaxValue: func() string {
 					if rustType == "String" {
 						return ""
@@ -151,15 +152,18 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			field.IfSelfEqualInvalid = fmt.Sprintf("self.%s == %s", field.Name0, field.InvalidValue0)
 			field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s != %s", field.Name0, field.InvalidValue0)
 			field.IfNotEqualInvalid = fmt.Sprintf("m.%s != %s", field.Name0, field.InvalidValue0)
+			field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s != %s", field.Name0, field.InvalidValue0)
 			if field.BaseType0 == "f32" || field.BaseType0 == "f64" {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.to_bits() == u%s::MAX", field.Name0, field.BaseType0[1:])
 				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
 				field.IfNotEqualInvalid = fmt.Sprintf("m.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
+				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
 			}
 			if parserField.Array == "[N]" || (field.BaseType == "STRING" && parserField.Array == "") {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
 				field.IfSelfNotEqualInvalid = fmt.Sprintf("!self.%s.is_empty()", field.Name)
 				field.IfNotEqualInvalid = fmt.Sprintf("!m.%s.is_empty()", field.Name)
+				field.IfSelfNotEqualInvalid = fmt.Sprintf("!self.%s.is_empty()", field.Name)
 			}
 
 			// Scale and offset do not apply for field that has more than one components

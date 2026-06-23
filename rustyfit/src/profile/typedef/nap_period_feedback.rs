@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Nap Period Feedback type.
 #[repr(transparent)]
@@ -32,6 +32,30 @@ impl NapPeriodFeedback {
     pub const IDEAL_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(15);
     pub const LONG_DURATION_LOW_NEED: NapPeriodFeedback = NapPeriodFeedback(16);
     pub const LONG_DURATION_HIGH_NEED: NapPeriodFeedback = NapPeriodFeedback(17);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("none"),
+            1 => Some("multiple_naps_during_day"),
+            2 => Some("jetlag_ideal_timing_ideal_duration"),
+            3 => Some("jetlag_ideal_timing_long_duration"),
+            4 => Some("jetlag_late_timing_ideal_duration"),
+            5 => Some("jetlag_late_timing_long_duration"),
+            6 => Some("ideal_timing_ideal_duration_low_need"),
+            7 => Some("ideal_timing_ideal_duration_high_need"),
+            8 => Some("ideal_timing_long_duration_low_need"),
+            9 => Some("ideal_timing_long_duration_high_need"),
+            10 => Some("late_timing_ideal_duration_low_need"),
+            11 => Some("late_timing_ideal_duration_high_need"),
+            12 => Some("late_timing_long_duration_low_need"),
+            13 => Some("late_timing_long_duration_high_need"),
+            14 => Some("ideal_duration_low_need"),
+            15 => Some("ideal_duration_high_need"),
+            16 => Some("long_duration_low_need"),
+            17 => Some("long_duration_high_need"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for NapPeriodFeedback {
@@ -42,26 +66,50 @@ impl Default for NapPeriodFeedback {
 
 impl fmt::Display for NapPeriodFeedback {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "none"),
-            1 => write!(f, "multiple_naps_during_day"),
-            2 => write!(f, "jetlag_ideal_timing_ideal_duration"),
-            3 => write!(f, "jetlag_ideal_timing_long_duration"),
-            4 => write!(f, "jetlag_late_timing_ideal_duration"),
-            5 => write!(f, "jetlag_late_timing_long_duration"),
-            6 => write!(f, "ideal_timing_ideal_duration_low_need"),
-            7 => write!(f, "ideal_timing_ideal_duration_high_need"),
-            8 => write!(f, "ideal_timing_long_duration_low_need"),
-            9 => write!(f, "ideal_timing_long_duration_high_need"),
-            10 => write!(f, "late_timing_ideal_duration_low_need"),
-            11 => write!(f, "late_timing_ideal_duration_high_need"),
-            12 => write!(f, "late_timing_long_duration_low_need"),
-            13 => write!(f, "late_timing_long_duration_high_need"),
-            14 => write!(f, "ideal_duration_low_need"),
-            15 => write!(f, "ideal_duration_high_need"),
-            16 => write!(f, "long_duration_low_need"),
-            17 => write!(f, "long_duration_high_need"),
-            _ => write!(f, "NapPeriodFeedback({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "NapPeriodFeedback({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for NapPeriodFeedback {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("NapPeriodFeedback", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for NapPeriodFeedback {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

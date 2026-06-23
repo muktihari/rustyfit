@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Deadlift Exercise Name type.
 #[repr(transparent)]
@@ -41,6 +41,36 @@ impl DeadliftExerciseName {
     pub const ROMANIAN_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(23);
     pub const SINGLE_LEG_ROMANIAN_DEADLIFT_CIRCUIT: DeadliftExerciseName = DeadliftExerciseName(24);
     pub const STRAIGHT_LEG_DEADLIFT: DeadliftExerciseName = DeadliftExerciseName(25);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("barbell_deadlift"),
+            1 => Some("barbell_straight_leg_deadlift"),
+            2 => Some("dumbbell_deadlift"),
+            3 => Some("dumbbell_single_leg_deadlift_to_row"),
+            4 => Some("dumbbell_straight_leg_deadlift"),
+            5 => Some("kettlebell_floor_to_shelf"),
+            6 => Some("one_arm_one_leg_deadlift"),
+            7 => Some("rack_pull"),
+            8 => Some("rotational_dumbbell_straight_leg_deadlift"),
+            9 => Some("single_arm_deadlift"),
+            10 => Some("single_leg_barbell_deadlift"),
+            11 => Some("single_leg_barbell_straight_leg_deadlift"),
+            12 => Some("single_leg_deadlift_with_barbell"),
+            13 => Some("single_leg_rdl_circuit"),
+            14 => Some("single_leg_romanian_deadlift_with_dumbbell"),
+            15 => Some("sumo_deadlift"),
+            16 => Some("sumo_deadlift_high_pull"),
+            17 => Some("trap_bar_deadlift"),
+            18 => Some("wide_grip_barbell_deadlift"),
+            20 => Some("kettlebell_deadlift"),
+            21 => Some("kettlebell_sumo_deadlift"),
+            23 => Some("romanian_deadlift"),
+            24 => Some("single_leg_romanian_deadlift_circuit"),
+            25 => Some("straight_leg_deadlift"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DeadliftExerciseName {
@@ -51,32 +81,50 @@ impl Default for DeadliftExerciseName {
 
 impl fmt::Display for DeadliftExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "barbell_deadlift"),
-            1 => write!(f, "barbell_straight_leg_deadlift"),
-            2 => write!(f, "dumbbell_deadlift"),
-            3 => write!(f, "dumbbell_single_leg_deadlift_to_row"),
-            4 => write!(f, "dumbbell_straight_leg_deadlift"),
-            5 => write!(f, "kettlebell_floor_to_shelf"),
-            6 => write!(f, "one_arm_one_leg_deadlift"),
-            7 => write!(f, "rack_pull"),
-            8 => write!(f, "rotational_dumbbell_straight_leg_deadlift"),
-            9 => write!(f, "single_arm_deadlift"),
-            10 => write!(f, "single_leg_barbell_deadlift"),
-            11 => write!(f, "single_leg_barbell_straight_leg_deadlift"),
-            12 => write!(f, "single_leg_deadlift_with_barbell"),
-            13 => write!(f, "single_leg_rdl_circuit"),
-            14 => write!(f, "single_leg_romanian_deadlift_with_dumbbell"),
-            15 => write!(f, "sumo_deadlift"),
-            16 => write!(f, "sumo_deadlift_high_pull"),
-            17 => write!(f, "trap_bar_deadlift"),
-            18 => write!(f, "wide_grip_barbell_deadlift"),
-            20 => write!(f, "kettlebell_deadlift"),
-            21 => write!(f, "kettlebell_sumo_deadlift"),
-            23 => write!(f, "romanian_deadlift"),
-            24 => write!(f, "single_leg_romanian_deadlift_circuit"),
-            25 => write!(f, "straight_leg_deadlift"),
-            _ => write!(f, "DeadliftExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DeadliftExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DeadliftExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DeadliftExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DeadliftExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

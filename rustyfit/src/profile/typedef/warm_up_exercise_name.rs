@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Warm Up Exercise Name type.
 #[repr(transparent)]
@@ -107,6 +107,103 @@ impl WarmUpExerciseName {
     pub const MARCHING_IN_PLACE: WarmUpExerciseName = WarmUpExerciseName(88);
     pub const TRICEPS_STRETCH_WHEELCHAIR: WarmUpExerciseName = WarmUpExerciseName(89);
     pub const UPPER_BACK_STRETCH_WHEELCHAIR: WarmUpExerciseName = WarmUpExerciseName(90);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("quadruped_rocking"),
+            1 => Some("neck_tilts"),
+            2 => Some("ankle_circles"),
+            3 => Some("ankle_dorsiflexion_with_band"),
+            4 => Some("ankle_internal_rotation"),
+            5 => Some("arm_circles"),
+            6 => Some("bent_over_reach_to_sky"),
+            7 => Some("cat_camel"),
+            8 => Some("elbow_to_foot_lunge"),
+            9 => Some("forward_and_backward_leg_swings"),
+            10 => Some("groiners"),
+            11 => Some("inverted_hamstring_stretch"),
+            12 => Some("lateral_duck_under"),
+            13 => Some("neck_rotations"),
+            14 => Some("opposite_arm_and_leg_balance"),
+            15 => Some("reach_roll_and_lift"),
+            16 => Some("scorpion"),
+            17 => Some("shoulder_circles"),
+            18 => Some("side_to_side_leg_swings"),
+            19 => Some("sleeper_stretch"),
+            20 => Some("slide_out"),
+            21 => Some("swiss_ball_hip_crossover"),
+            22 => Some("swiss_ball_reach_roll_and_lift"),
+            23 => Some("swiss_ball_windshield_wipers"),
+            24 => Some("thoracic_rotation"),
+            25 => Some("walking_high_kicks"),
+            26 => Some("walking_high_knees"),
+            27 => Some("walking_knee_hugs"),
+            28 => Some("walking_leg_cradles"),
+            29 => Some("walkout"),
+            30 => Some("walkout_from_push_up_position"),
+            31 => Some("biceps_stretch"),
+            32 => Some("glutes_stretch"),
+            33 => Some("standing_hamstring_stretch"),
+            34 => Some("stretch_90_90"),
+            35 => Some("stretch_abs"),
+            36 => Some("stretch_butterfly"),
+            37 => Some("stretch_calf"),
+            38 => Some("stretch_cat_cow"),
+            39 => Some("stretch_childs_pose"),
+            40 => Some("stretch_cobra"),
+            41 => Some("stretch_forearms"),
+            42 => Some("stretch_forward_glutes"),
+            43 => Some("stretch_front_split"),
+            44 => Some("stretch_hamstring"),
+            45 => Some("stretch_hip_flexor_and_quad"),
+            46 => Some("stretch_lat"),
+            47 => Some("stretch_levator_scapulae"),
+            48 => Some("stretch_lunge_with_spinal_twist"),
+            49 => Some("stretch_lunging_hip_flexor"),
+            50 => Some("stretch_lying_abduction"),
+            51 => Some("stretch_lying_it_band"),
+            52 => Some("stretch_lying_knee_to_chest"),
+            53 => Some("stretch_lying_piriformis"),
+            54 => Some("stretch_lying_spinal_twist"),
+            55 => Some("stretch_neck"),
+            56 => Some("stretch_obliques"),
+            57 => Some("stretch_over_under_shoulder"),
+            58 => Some("stretch_pectoral"),
+            59 => Some("stretch_pigeon_pose"),
+            60 => Some("stretch_piriformis"),
+            61 => Some("stretch_quad"),
+            62 => Some("stretch_scorpion"),
+            63 => Some("stretch_shoulder"),
+            64 => Some("stretch_side"),
+            65 => Some("stretch_side_lunge"),
+            66 => Some("stretch_side_split"),
+            67 => Some("stretch_standing_it_band"),
+            68 => Some("stretch_straddle"),
+            69 => Some("stretch_triceps"),
+            70 => Some("stretch_wall_chest_and_shoulder"),
+            71 => Some("neck_rotations_wheelchair"),
+            72 => Some("half_kneeling_arm_rotation"),
+            73 => Some("three_way_ankle_mobilization"),
+            74 => Some("ninety_ninety_hip_switch"),
+            75 => Some("active_frog"),
+            76 => Some("shoulder_sweeps"),
+            77 => Some("ankle_lunges"),
+            78 => Some("back_roll_foam_roller"),
+            79 => Some("bear_crawl"),
+            80 => Some("latissimus_dorsi_foam_roll"),
+            81 => Some("reverse_t_hip_opener"),
+            82 => Some("shoulder_rolls"),
+            83 => Some("chest_openers"),
+            84 => Some("triceps_stretch"),
+            85 => Some("upper_back_stretch"),
+            86 => Some("hip_circles"),
+            87 => Some("ankle_stretch"),
+            88 => Some("marching_in_place"),
+            89 => Some("triceps_stretch_wheelchair"),
+            90 => Some("upper_back_stretch_wheelchair"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for WarmUpExerciseName {
@@ -117,99 +214,50 @@ impl Default for WarmUpExerciseName {
 
 impl fmt::Display for WarmUpExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "quadruped_rocking"),
-            1 => write!(f, "neck_tilts"),
-            2 => write!(f, "ankle_circles"),
-            3 => write!(f, "ankle_dorsiflexion_with_band"),
-            4 => write!(f, "ankle_internal_rotation"),
-            5 => write!(f, "arm_circles"),
-            6 => write!(f, "bent_over_reach_to_sky"),
-            7 => write!(f, "cat_camel"),
-            8 => write!(f, "elbow_to_foot_lunge"),
-            9 => write!(f, "forward_and_backward_leg_swings"),
-            10 => write!(f, "groiners"),
-            11 => write!(f, "inverted_hamstring_stretch"),
-            12 => write!(f, "lateral_duck_under"),
-            13 => write!(f, "neck_rotations"),
-            14 => write!(f, "opposite_arm_and_leg_balance"),
-            15 => write!(f, "reach_roll_and_lift"),
-            16 => write!(f, "scorpion"),
-            17 => write!(f, "shoulder_circles"),
-            18 => write!(f, "side_to_side_leg_swings"),
-            19 => write!(f, "sleeper_stretch"),
-            20 => write!(f, "slide_out"),
-            21 => write!(f, "swiss_ball_hip_crossover"),
-            22 => write!(f, "swiss_ball_reach_roll_and_lift"),
-            23 => write!(f, "swiss_ball_windshield_wipers"),
-            24 => write!(f, "thoracic_rotation"),
-            25 => write!(f, "walking_high_kicks"),
-            26 => write!(f, "walking_high_knees"),
-            27 => write!(f, "walking_knee_hugs"),
-            28 => write!(f, "walking_leg_cradles"),
-            29 => write!(f, "walkout"),
-            30 => write!(f, "walkout_from_push_up_position"),
-            31 => write!(f, "biceps_stretch"),
-            32 => write!(f, "glutes_stretch"),
-            33 => write!(f, "standing_hamstring_stretch"),
-            34 => write!(f, "stretch_90_90"),
-            35 => write!(f, "stretch_abs"),
-            36 => write!(f, "stretch_butterfly"),
-            37 => write!(f, "stretch_calf"),
-            38 => write!(f, "stretch_cat_cow"),
-            39 => write!(f, "stretch_childs_pose"),
-            40 => write!(f, "stretch_cobra"),
-            41 => write!(f, "stretch_forearms"),
-            42 => write!(f, "stretch_forward_glutes"),
-            43 => write!(f, "stretch_front_split"),
-            44 => write!(f, "stretch_hamstring"),
-            45 => write!(f, "stretch_hip_flexor_and_quad"),
-            46 => write!(f, "stretch_lat"),
-            47 => write!(f, "stretch_levator_scapulae"),
-            48 => write!(f, "stretch_lunge_with_spinal_twist"),
-            49 => write!(f, "stretch_lunging_hip_flexor"),
-            50 => write!(f, "stretch_lying_abduction"),
-            51 => write!(f, "stretch_lying_it_band"),
-            52 => write!(f, "stretch_lying_knee_to_chest"),
-            53 => write!(f, "stretch_lying_piriformis"),
-            54 => write!(f, "stretch_lying_spinal_twist"),
-            55 => write!(f, "stretch_neck"),
-            56 => write!(f, "stretch_obliques"),
-            57 => write!(f, "stretch_over_under_shoulder"),
-            58 => write!(f, "stretch_pectoral"),
-            59 => write!(f, "stretch_pigeon_pose"),
-            60 => write!(f, "stretch_piriformis"),
-            61 => write!(f, "stretch_quad"),
-            62 => write!(f, "stretch_scorpion"),
-            63 => write!(f, "stretch_shoulder"),
-            64 => write!(f, "stretch_side"),
-            65 => write!(f, "stretch_side_lunge"),
-            66 => write!(f, "stretch_side_split"),
-            67 => write!(f, "stretch_standing_it_band"),
-            68 => write!(f, "stretch_straddle"),
-            69 => write!(f, "stretch_triceps"),
-            70 => write!(f, "stretch_wall_chest_and_shoulder"),
-            71 => write!(f, "neck_rotations_wheelchair"),
-            72 => write!(f, "half_kneeling_arm_rotation"),
-            73 => write!(f, "three_way_ankle_mobilization"),
-            74 => write!(f, "ninety_ninety_hip_switch"),
-            75 => write!(f, "active_frog"),
-            76 => write!(f, "shoulder_sweeps"),
-            77 => write!(f, "ankle_lunges"),
-            78 => write!(f, "back_roll_foam_roller"),
-            79 => write!(f, "bear_crawl"),
-            80 => write!(f, "latissimus_dorsi_foam_roll"),
-            81 => write!(f, "reverse_t_hip_opener"),
-            82 => write!(f, "shoulder_rolls"),
-            83 => write!(f, "chest_openers"),
-            84 => write!(f, "triceps_stretch"),
-            85 => write!(f, "upper_back_stretch"),
-            86 => write!(f, "hip_circles"),
-            87 => write!(f, "ankle_stretch"),
-            88 => write!(f, "marching_in_place"),
-            89 => write!(f, "triceps_stretch_wheelchair"),
-            90 => write!(f, "upper_back_stretch_wheelchair"),
-            _ => write!(f, "WarmUpExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "WarmUpExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WarmUpExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("WarmUpExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for WarmUpExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

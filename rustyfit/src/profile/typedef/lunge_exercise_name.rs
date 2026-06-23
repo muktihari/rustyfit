@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Lunge Exercise Name type.
 #[repr(transparent)]
@@ -108,6 +108,103 @@ impl LungeExerciseName {
     pub const WEIGHTED_SHIFTING_SIDE_LUNGE: LungeExerciseName = LungeExerciseName(88);
     pub const WEIGHTED_SIDE_LUNGE_AND_PRESS: LungeExerciseName = LungeExerciseName(89);
     pub const WEIGHTED_SIDE_LUNGE_JUMP_OFF: LungeExerciseName = LungeExerciseName(90);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("overhead_lunge"),
+            1 => Some("lunge_matrix"),
+            2 => Some("weighted_lunge_matrix"),
+            3 => Some("alternating_barbell_forward_lunge"),
+            4 => Some("alternating_dumbbell_lunge_with_reach"),
+            5 => Some("back_foot_elevated_dumbbell_split_squat"),
+            6 => Some("barbell_box_lunge"),
+            7 => Some("barbell_bulgarian_split_squat"),
+            8 => Some("barbell_crossover_lunge"),
+            9 => Some("barbell_front_split_squat"),
+            10 => Some("barbell_lunge"),
+            11 => Some("barbell_reverse_lunge"),
+            12 => Some("barbell_side_lunge"),
+            13 => Some("barbell_split_squat"),
+            14 => Some("core_control_rear_lunge"),
+            15 => Some("diagonal_lunge"),
+            16 => Some("drop_lunge"),
+            17 => Some("dumbbell_box_lunge"),
+            18 => Some("dumbbell_bulgarian_split_squat"),
+            19 => Some("dumbbell_crossover_lunge"),
+            20 => Some("dumbbell_diagonal_lunge"),
+            21 => Some("dumbbell_lunge"),
+            22 => Some("dumbbell_lunge_and_rotation"),
+            23 => Some("dumbbell_overhead_bulgarian_split_squat"),
+            24 => Some("dumbbell_reverse_lunge_to_high_knee_and_press"),
+            25 => Some("dumbbell_side_lunge"),
+            26 => Some("elevated_front_foot_barbell_split_squat"),
+            27 => Some("front_foot_elevated_dumbbell_split_squat"),
+            28 => Some("gunslinger_lunge"),
+            29 => Some("lawnmower_lunge"),
+            30 => Some("low_lunge_with_isometric_adduction"),
+            31 => Some("low_side_to_side_lunge"),
+            32 => Some("lunge"),
+            33 => Some("weighted_lunge"),
+            34 => Some("lunge_with_arm_reach"),
+            35 => Some("lunge_with_diagonal_reach"),
+            36 => Some("lunge_with_side_bend"),
+            37 => Some("offset_dumbbell_lunge"),
+            38 => Some("offset_dumbbell_reverse_lunge"),
+            39 => Some("overhead_bulgarian_split_squat"),
+            40 => Some("overhead_dumbbell_reverse_lunge"),
+            41 => Some("overhead_dumbbell_split_squat"),
+            42 => Some("overhead_lunge_with_rotation"),
+            43 => Some("reverse_barbell_box_lunge"),
+            44 => Some("reverse_box_lunge"),
+            45 => Some("reverse_dumbbell_box_lunge"),
+            46 => Some("reverse_dumbbell_crossover_lunge"),
+            47 => Some("reverse_dumbbell_diagonal_lunge"),
+            48 => Some("reverse_lunge_with_reach_back"),
+            49 => Some("weighted_reverse_lunge_with_reach_back"),
+            50 => Some("reverse_lunge_with_twist_and_overhead_reach"),
+            51 => Some("weighted_reverse_lunge_with_twist_and_overhead_reach"),
+            52 => Some("reverse_sliding_box_lunge"),
+            53 => Some("weighted_reverse_sliding_box_lunge"),
+            54 => Some("reverse_sliding_lunge"),
+            55 => Some("weighted_reverse_sliding_lunge"),
+            56 => Some("runners_lunge_to_balance"),
+            57 => Some("weighted_runners_lunge_to_balance"),
+            58 => Some("shifting_side_lunge"),
+            59 => Some("side_and_crossover_lunge"),
+            60 => Some("weighted_side_and_crossover_lunge"),
+            61 => Some("side_lunge"),
+            62 => Some("weighted_side_lunge"),
+            63 => Some("side_lunge_and_press"),
+            64 => Some("side_lunge_jump_off"),
+            65 => Some("side_lunge_sweep"),
+            66 => Some("weighted_side_lunge_sweep"),
+            67 => Some("side_lunge_to_crossover_tap"),
+            68 => Some("weighted_side_lunge_to_crossover_tap"),
+            69 => Some("side_to_side_lunge_chops"),
+            70 => Some("weighted_side_to_side_lunge_chops"),
+            71 => Some("siff_jump_lunge"),
+            72 => Some("weighted_siff_jump_lunge"),
+            73 => Some("single_arm_reverse_lunge_and_press"),
+            74 => Some("sliding_lateral_lunge"),
+            75 => Some("weighted_sliding_lateral_lunge"),
+            76 => Some("walking_barbell_lunge"),
+            77 => Some("walking_dumbbell_lunge"),
+            78 => Some("walking_lunge"),
+            79 => Some("weighted_walking_lunge"),
+            80 => Some("wide_grip_overhead_barbell_split_squat"),
+            81 => Some("alternating_dumbbell_lunge"),
+            82 => Some("dumbbell_reverse_lunge"),
+            83 => Some("overhead_dumbbell_lunge"),
+            84 => Some("scissor_power_switch"),
+            85 => Some("dumbbell_overhead_walking_lunge"),
+            86 => Some("curtsy_lunge"),
+            87 => Some("weighted_curtsy_lunge"),
+            88 => Some("weighted_shifting_side_lunge"),
+            89 => Some("weighted_side_lunge_and_press"),
+            90 => Some("weighted_side_lunge_jump_off"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for LungeExerciseName {
@@ -118,99 +215,50 @@ impl Default for LungeExerciseName {
 
 impl fmt::Display for LungeExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "overhead_lunge"),
-            1 => write!(f, "lunge_matrix"),
-            2 => write!(f, "weighted_lunge_matrix"),
-            3 => write!(f, "alternating_barbell_forward_lunge"),
-            4 => write!(f, "alternating_dumbbell_lunge_with_reach"),
-            5 => write!(f, "back_foot_elevated_dumbbell_split_squat"),
-            6 => write!(f, "barbell_box_lunge"),
-            7 => write!(f, "barbell_bulgarian_split_squat"),
-            8 => write!(f, "barbell_crossover_lunge"),
-            9 => write!(f, "barbell_front_split_squat"),
-            10 => write!(f, "barbell_lunge"),
-            11 => write!(f, "barbell_reverse_lunge"),
-            12 => write!(f, "barbell_side_lunge"),
-            13 => write!(f, "barbell_split_squat"),
-            14 => write!(f, "core_control_rear_lunge"),
-            15 => write!(f, "diagonal_lunge"),
-            16 => write!(f, "drop_lunge"),
-            17 => write!(f, "dumbbell_box_lunge"),
-            18 => write!(f, "dumbbell_bulgarian_split_squat"),
-            19 => write!(f, "dumbbell_crossover_lunge"),
-            20 => write!(f, "dumbbell_diagonal_lunge"),
-            21 => write!(f, "dumbbell_lunge"),
-            22 => write!(f, "dumbbell_lunge_and_rotation"),
-            23 => write!(f, "dumbbell_overhead_bulgarian_split_squat"),
-            24 => write!(f, "dumbbell_reverse_lunge_to_high_knee_and_press"),
-            25 => write!(f, "dumbbell_side_lunge"),
-            26 => write!(f, "elevated_front_foot_barbell_split_squat"),
-            27 => write!(f, "front_foot_elevated_dumbbell_split_squat"),
-            28 => write!(f, "gunslinger_lunge"),
-            29 => write!(f, "lawnmower_lunge"),
-            30 => write!(f, "low_lunge_with_isometric_adduction"),
-            31 => write!(f, "low_side_to_side_lunge"),
-            32 => write!(f, "lunge"),
-            33 => write!(f, "weighted_lunge"),
-            34 => write!(f, "lunge_with_arm_reach"),
-            35 => write!(f, "lunge_with_diagonal_reach"),
-            36 => write!(f, "lunge_with_side_bend"),
-            37 => write!(f, "offset_dumbbell_lunge"),
-            38 => write!(f, "offset_dumbbell_reverse_lunge"),
-            39 => write!(f, "overhead_bulgarian_split_squat"),
-            40 => write!(f, "overhead_dumbbell_reverse_lunge"),
-            41 => write!(f, "overhead_dumbbell_split_squat"),
-            42 => write!(f, "overhead_lunge_with_rotation"),
-            43 => write!(f, "reverse_barbell_box_lunge"),
-            44 => write!(f, "reverse_box_lunge"),
-            45 => write!(f, "reverse_dumbbell_box_lunge"),
-            46 => write!(f, "reverse_dumbbell_crossover_lunge"),
-            47 => write!(f, "reverse_dumbbell_diagonal_lunge"),
-            48 => write!(f, "reverse_lunge_with_reach_back"),
-            49 => write!(f, "weighted_reverse_lunge_with_reach_back"),
-            50 => write!(f, "reverse_lunge_with_twist_and_overhead_reach"),
-            51 => write!(f, "weighted_reverse_lunge_with_twist_and_overhead_reach"),
-            52 => write!(f, "reverse_sliding_box_lunge"),
-            53 => write!(f, "weighted_reverse_sliding_box_lunge"),
-            54 => write!(f, "reverse_sliding_lunge"),
-            55 => write!(f, "weighted_reverse_sliding_lunge"),
-            56 => write!(f, "runners_lunge_to_balance"),
-            57 => write!(f, "weighted_runners_lunge_to_balance"),
-            58 => write!(f, "shifting_side_lunge"),
-            59 => write!(f, "side_and_crossover_lunge"),
-            60 => write!(f, "weighted_side_and_crossover_lunge"),
-            61 => write!(f, "side_lunge"),
-            62 => write!(f, "weighted_side_lunge"),
-            63 => write!(f, "side_lunge_and_press"),
-            64 => write!(f, "side_lunge_jump_off"),
-            65 => write!(f, "side_lunge_sweep"),
-            66 => write!(f, "weighted_side_lunge_sweep"),
-            67 => write!(f, "side_lunge_to_crossover_tap"),
-            68 => write!(f, "weighted_side_lunge_to_crossover_tap"),
-            69 => write!(f, "side_to_side_lunge_chops"),
-            70 => write!(f, "weighted_side_to_side_lunge_chops"),
-            71 => write!(f, "siff_jump_lunge"),
-            72 => write!(f, "weighted_siff_jump_lunge"),
-            73 => write!(f, "single_arm_reverse_lunge_and_press"),
-            74 => write!(f, "sliding_lateral_lunge"),
-            75 => write!(f, "weighted_sliding_lateral_lunge"),
-            76 => write!(f, "walking_barbell_lunge"),
-            77 => write!(f, "walking_dumbbell_lunge"),
-            78 => write!(f, "walking_lunge"),
-            79 => write!(f, "weighted_walking_lunge"),
-            80 => write!(f, "wide_grip_overhead_barbell_split_squat"),
-            81 => write!(f, "alternating_dumbbell_lunge"),
-            82 => write!(f, "dumbbell_reverse_lunge"),
-            83 => write!(f, "overhead_dumbbell_lunge"),
-            84 => write!(f, "scissor_power_switch"),
-            85 => write!(f, "dumbbell_overhead_walking_lunge"),
-            86 => write!(f, "curtsy_lunge"),
-            87 => write!(f, "weighted_curtsy_lunge"),
-            88 => write!(f, "weighted_shifting_side_lunge"),
-            89 => write!(f, "weighted_side_lunge_and_press"),
-            90 => write!(f, "weighted_side_lunge_jump_off"),
-            _ => write!(f, "LungeExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "LungeExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for LungeExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("LungeExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for LungeExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

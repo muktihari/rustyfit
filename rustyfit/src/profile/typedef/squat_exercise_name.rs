@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Squat Exercise Name type.
 #[repr(transparent)]
@@ -118,6 +118,113 @@ impl SquatExerciseName {
     pub const AIR_SQUAT: SquatExerciseName = SquatExerciseName(100);
     pub const DUMBBELL_THRUSTERS: SquatExerciseName = SquatExerciseName(101);
     pub const OVERHEAD_BARBELL_SQUAT: SquatExerciseName = SquatExerciseName(102);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("leg_press"),
+            1 => Some("back_squat_with_body_bar"),
+            2 => Some("back_squats"),
+            3 => Some("weighted_back_squats"),
+            4 => Some("balancing_squat"),
+            5 => Some("weighted_balancing_squat"),
+            6 => Some("barbell_back_squat"),
+            7 => Some("barbell_box_squat"),
+            8 => Some("barbell_front_squat"),
+            9 => Some("barbell_hack_squat"),
+            10 => Some("barbell_hang_squat_snatch"),
+            11 => Some("barbell_lateral_step_up"),
+            12 => Some("barbell_quarter_squat"),
+            13 => Some("barbell_siff_squat"),
+            14 => Some("barbell_squat_snatch"),
+            15 => Some("barbell_squat_with_heels_raised"),
+            16 => Some("barbell_stepover"),
+            17 => Some("barbell_step_up"),
+            18 => Some("bench_squat_with_rotational_chop"),
+            19 => Some("weighted_bench_squat_with_rotational_chop"),
+            20 => Some("body_weight_wall_squat"),
+            21 => Some("weighted_wall_squat"),
+            22 => Some("box_step_squat"),
+            23 => Some("weighted_box_step_squat"),
+            24 => Some("braced_squat"),
+            25 => Some("crossed_arm_barbell_front_squat"),
+            26 => Some("crossover_dumbbell_step_up"),
+            27 => Some("dumbbell_front_squat"),
+            28 => Some("dumbbell_split_squat"),
+            29 => Some("dumbbell_squat"),
+            30 => Some("dumbbell_squat_clean"),
+            31 => Some("dumbbell_stepover"),
+            32 => Some("dumbbell_step_up"),
+            33 => Some("elevated_single_leg_squat"),
+            34 => Some("weighted_elevated_single_leg_squat"),
+            35 => Some("figure_four_squats"),
+            36 => Some("weighted_figure_four_squats"),
+            37 => Some("goblet_squat"),
+            38 => Some("kettlebell_squat"),
+            39 => Some("kettlebell_swing_overhead"),
+            40 => Some("kettlebell_swing_with_flip_to_squat"),
+            41 => Some("lateral_dumbbell_step_up"),
+            42 => Some("one_legged_squat"),
+            43 => Some("overhead_dumbbell_squat"),
+            44 => Some("overhead_squat"),
+            45 => Some("partial_single_leg_squat"),
+            46 => Some("weighted_partial_single_leg_squat"),
+            47 => Some("pistol_squat"),
+            48 => Some("weighted_pistol_squat"),
+            49 => Some("plie_slides"),
+            50 => Some("weighted_plie_slides"),
+            51 => Some("plie_squat"),
+            52 => Some("weighted_plie_squat"),
+            53 => Some("prisoner_squat"),
+            54 => Some("weighted_prisoner_squat"),
+            55 => Some("single_leg_bench_get_up"),
+            56 => Some("weighted_single_leg_bench_get_up"),
+            57 => Some("single_leg_bench_squat"),
+            58 => Some("weighted_single_leg_bench_squat"),
+            59 => Some("single_leg_squat_on_swiss_ball"),
+            60 => Some("weighted_single_leg_squat_on_swiss_ball"),
+            61 => Some("squat"),
+            62 => Some("weighted_squat"),
+            63 => Some("squats_with_band"),
+            64 => Some("staggered_squat"),
+            65 => Some("weighted_staggered_squat"),
+            66 => Some("step_up"),
+            67 => Some("weighted_step_up"),
+            68 => Some("suitcase_squats"),
+            69 => Some("sumo_squat"),
+            70 => Some("sumo_squat_slide_in"),
+            71 => Some("weighted_sumo_squat_slide_in"),
+            72 => Some("sumo_squat_to_high_pull"),
+            73 => Some("sumo_squat_to_stand"),
+            74 => Some("weighted_sumo_squat_to_stand"),
+            75 => Some("sumo_squat_with_rotation"),
+            76 => Some("weighted_sumo_squat_with_rotation"),
+            77 => Some("swiss_ball_body_weight_wall_squat"),
+            78 => Some("weighted_swiss_ball_wall_squat"),
+            79 => Some("thrusters"),
+            80 => Some("uneven_squat"),
+            81 => Some("weighted_uneven_squat"),
+            82 => Some("waist_slimming_squat"),
+            83 => Some("wall_ball"),
+            84 => Some("wide_stance_barbell_squat"),
+            85 => Some("wide_stance_goblet_squat"),
+            86 => Some("zercher_squat"),
+            87 => Some("kbs_overhead"),
+            88 => Some("squat_and_side_kick"),
+            89 => Some("squat_jumps_in_n_out"),
+            90 => Some("pilates_plie_squats_parallel_turned_out_flat_and_heels"),
+            91 => Some("releve_straight_leg_and_knee_bent_with_one_leg_variation"),
+            92 => Some("alternating_box_dumbbell_step_ups"),
+            93 => Some("dumbbell_overhead_squat_single_arm"),
+            94 => Some("dumbbell_squat_snatch"),
+            95 => Some("medicine_ball_squat"),
+            97 => Some("wall_ball_squat_and_press"),
+            98 => Some("squat_american_swing"),
+            100 => Some("air_squat"),
+            101 => Some("dumbbell_thrusters"),
+            102 => Some("overhead_barbell_squat"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SquatExerciseName {
@@ -128,112 +235,50 @@ impl Default for SquatExerciseName {
 
 impl fmt::Display for SquatExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "leg_press"),
-            1 => write!(f, "back_squat_with_body_bar"),
-            2 => write!(f, "back_squats"),
-            3 => write!(f, "weighted_back_squats"),
-            4 => write!(f, "balancing_squat"),
-            5 => write!(f, "weighted_balancing_squat"),
-            6 => write!(f, "barbell_back_squat"),
-            7 => write!(f, "barbell_box_squat"),
-            8 => write!(f, "barbell_front_squat"),
-            9 => write!(f, "barbell_hack_squat"),
-            10 => write!(f, "barbell_hang_squat_snatch"),
-            11 => write!(f, "barbell_lateral_step_up"),
-            12 => write!(f, "barbell_quarter_squat"),
-            13 => write!(f, "barbell_siff_squat"),
-            14 => write!(f, "barbell_squat_snatch"),
-            15 => write!(f, "barbell_squat_with_heels_raised"),
-            16 => write!(f, "barbell_stepover"),
-            17 => write!(f, "barbell_step_up"),
-            18 => write!(f, "bench_squat_with_rotational_chop"),
-            19 => write!(f, "weighted_bench_squat_with_rotational_chop"),
-            20 => write!(f, "body_weight_wall_squat"),
-            21 => write!(f, "weighted_wall_squat"),
-            22 => write!(f, "box_step_squat"),
-            23 => write!(f, "weighted_box_step_squat"),
-            24 => write!(f, "braced_squat"),
-            25 => write!(f, "crossed_arm_barbell_front_squat"),
-            26 => write!(f, "crossover_dumbbell_step_up"),
-            27 => write!(f, "dumbbell_front_squat"),
-            28 => write!(f, "dumbbell_split_squat"),
-            29 => write!(f, "dumbbell_squat"),
-            30 => write!(f, "dumbbell_squat_clean"),
-            31 => write!(f, "dumbbell_stepover"),
-            32 => write!(f, "dumbbell_step_up"),
-            33 => write!(f, "elevated_single_leg_squat"),
-            34 => write!(f, "weighted_elevated_single_leg_squat"),
-            35 => write!(f, "figure_four_squats"),
-            36 => write!(f, "weighted_figure_four_squats"),
-            37 => write!(f, "goblet_squat"),
-            38 => write!(f, "kettlebell_squat"),
-            39 => write!(f, "kettlebell_swing_overhead"),
-            40 => write!(f, "kettlebell_swing_with_flip_to_squat"),
-            41 => write!(f, "lateral_dumbbell_step_up"),
-            42 => write!(f, "one_legged_squat"),
-            43 => write!(f, "overhead_dumbbell_squat"),
-            44 => write!(f, "overhead_squat"),
-            45 => write!(f, "partial_single_leg_squat"),
-            46 => write!(f, "weighted_partial_single_leg_squat"),
-            47 => write!(f, "pistol_squat"),
-            48 => write!(f, "weighted_pistol_squat"),
-            49 => write!(f, "plie_slides"),
-            50 => write!(f, "weighted_plie_slides"),
-            51 => write!(f, "plie_squat"),
-            52 => write!(f, "weighted_plie_squat"),
-            53 => write!(f, "prisoner_squat"),
-            54 => write!(f, "weighted_prisoner_squat"),
-            55 => write!(f, "single_leg_bench_get_up"),
-            56 => write!(f, "weighted_single_leg_bench_get_up"),
-            57 => write!(f, "single_leg_bench_squat"),
-            58 => write!(f, "weighted_single_leg_bench_squat"),
-            59 => write!(f, "single_leg_squat_on_swiss_ball"),
-            60 => write!(f, "weighted_single_leg_squat_on_swiss_ball"),
-            61 => write!(f, "squat"),
-            62 => write!(f, "weighted_squat"),
-            63 => write!(f, "squats_with_band"),
-            64 => write!(f, "staggered_squat"),
-            65 => write!(f, "weighted_staggered_squat"),
-            66 => write!(f, "step_up"),
-            67 => write!(f, "weighted_step_up"),
-            68 => write!(f, "suitcase_squats"),
-            69 => write!(f, "sumo_squat"),
-            70 => write!(f, "sumo_squat_slide_in"),
-            71 => write!(f, "weighted_sumo_squat_slide_in"),
-            72 => write!(f, "sumo_squat_to_high_pull"),
-            73 => write!(f, "sumo_squat_to_stand"),
-            74 => write!(f, "weighted_sumo_squat_to_stand"),
-            75 => write!(f, "sumo_squat_with_rotation"),
-            76 => write!(f, "weighted_sumo_squat_with_rotation"),
-            77 => write!(f, "swiss_ball_body_weight_wall_squat"),
-            78 => write!(f, "weighted_swiss_ball_wall_squat"),
-            79 => write!(f, "thrusters"),
-            80 => write!(f, "uneven_squat"),
-            81 => write!(f, "weighted_uneven_squat"),
-            82 => write!(f, "waist_slimming_squat"),
-            83 => write!(f, "wall_ball"),
-            84 => write!(f, "wide_stance_barbell_squat"),
-            85 => write!(f, "wide_stance_goblet_squat"),
-            86 => write!(f, "zercher_squat"),
-            87 => write!(f, "kbs_overhead"),
-            88 => write!(f, "squat_and_side_kick"),
-            89 => write!(f, "squat_jumps_in_n_out"),
-            90 => write!(f, "pilates_plie_squats_parallel_turned_out_flat_and_heels"),
-            91 => write!(
-                f,
-                "releve_straight_leg_and_knee_bent_with_one_leg_variation"
-            ),
-            92 => write!(f, "alternating_box_dumbbell_step_ups"),
-            93 => write!(f, "dumbbell_overhead_squat_single_arm"),
-            94 => write!(f, "dumbbell_squat_snatch"),
-            95 => write!(f, "medicine_ball_squat"),
-            97 => write!(f, "wall_ball_squat_and_press"),
-            98 => write!(f, "squat_american_swing"),
-            100 => write!(f, "air_squat"),
-            101 => write!(f, "dumbbell_thrusters"),
-            102 => write!(f, "overhead_barbell_squat"),
-            _ => write!(f, "SquatExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SquatExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SquatExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SquatExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SquatExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

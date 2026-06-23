@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// One D Sensor Calibration message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct OneDSensorCalibration {
     /// Units: s; Whole second part of the timestamp
@@ -30,17 +33,17 @@ pub struct OneDSensorCalibration {
 }
 
 impl OneDSensorCalibration {
-    /// Value's type: `u32`; Units: `s`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SENSOR_TYPE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SensorType
     pub const SENSOR_TYPE: u8 = 0;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const CALIBRATION_FACTOR: u8 = 1;
-    /// Value's type: `u32`; Units: `counts`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `counts`
     pub const CALIBRATION_DIVISOR: u8 = 2;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const LEVEL_SHIFT: u8 = 3;
-    /// Value's type: `i32`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32
     pub const OFFSET_CAL: u8 = 4;
 
     /// Create new OneDSensorCalibration with all fields being set to its corresponding invalid value.
@@ -163,6 +166,90 @@ impl From<OneDSensorCalibration> for Message {
             num: typedef::MesgNum::ONE_D_SENSOR_CALIBRATION,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for OneDSensorCalibration {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("OneDSensorCalibration", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if self.sensor_type.0 != u8::MAX {
+            state.serialize_field("sensor_type", &self.sensor_type)?;
+        }
+        if self.calibration_factor != u32::MAX {
+            state.serialize_field("calibration_factor", &self.calibration_factor)?;
+        }
+        if self.calibration_divisor != u32::MAX {
+            state.serialize_field("calibration_divisor", &self.calibration_divisor)?;
+        }
+        if self.level_shift != u32::MAX {
+            state.serialize_field("level_shift", &self.level_shift)?;
+        }
+        if self.offset_cal != i32::MAX {
+            state.serialize_field("offset_cal", &self.offset_cal)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    sensor_type: typedef::SensorType,
+    calibration_factor: u32,
+    calibration_divisor: u32,
+    level_shift: u32,
+    offset_cal: i32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for OneDSensorCalibration {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            sensor_type: m.sensor_type,
+            calibration_factor: m.calibration_factor,
+            calibration_divisor: m.calibration_divisor,
+            level_shift: m.level_shift,
+            offset_cal: m.offset_cal,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            sensor_type: typedef::SensorType(u8::MAX),
+            calibration_factor: u32::MAX,
+            calibration_divisor: u32::MAX,
+            level_shift: u32::MAX,
+            offset_cal: i32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

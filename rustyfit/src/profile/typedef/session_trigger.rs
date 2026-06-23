@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Session Trigger type.
 #[repr(transparent)]
@@ -21,6 +21,16 @@ impl SessionTrigger {
     pub const AUTO_MULTI_SPORT: SessionTrigger = SessionTrigger(2);
     /// Auto sport change caused by user linking to fitness equipment.
     pub const FITNESS_EQUIPMENT: SessionTrigger = SessionTrigger(3);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("activity_end"),
+            1 => Some("manual"),
+            2 => Some("auto_multi_sport"),
+            3 => Some("fitness_equipment"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SessionTrigger {
@@ -31,12 +41,50 @@ impl Default for SessionTrigger {
 
 impl fmt::Display for SessionTrigger {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "activity_end"),
-            1 => write!(f, "manual"),
-            2 => write!(f, "auto_multi_sport"),
-            3 => write!(f, "fitness_equipment"),
-            _ => write!(f, "SessionTrigger({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SessionTrigger({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SessionTrigger {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SessionTrigger", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SessionTrigger {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

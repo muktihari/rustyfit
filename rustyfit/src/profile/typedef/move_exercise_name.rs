@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Move Exercise Name type.
 #[repr(transparent)]
@@ -102,6 +102,97 @@ impl MoveExerciseName {
     pub const TRUNK_ROTATIONS: MoveExerciseName = MoveExerciseName(82);
     pub const SEATED_TRUNK_ROTATIONS: MoveExerciseName = MoveExerciseName(83);
     pub const TOE_TOUCH: MoveExerciseName = MoveExerciseName(84);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("arch_and_curl"),
+            1 => Some("arm_circles_with_ball_band_and_weight"),
+            2 => Some("arm_stretch"),
+            3 => Some("back_massage"),
+            4 => Some("belly_breathing"),
+            5 => Some("bridge_with_ball"),
+            6 => Some("diamond_leg_crunch"),
+            7 => Some("diamond_leg_lift"),
+            8 => Some("eight_point_shoulder_opener"),
+            9 => Some("foot_rolling"),
+            10 => Some("footwork"),
+            11 => Some("footwork_on_disc"),
+            12 => Some("forward_fold"),
+            13 => Some("frog_with_band"),
+            14 => Some("half_roll_up"),
+            15 => Some("hamstring_curl"),
+            16 => Some("hamstring_stretch"),
+            17 => Some("hip_stretch"),
+            18 => Some("hug_a_tree_with_ball_band_and_weight"),
+            19 => Some("knee_circles"),
+            20 => Some("knee_folds_on_disc"),
+            21 => Some("lateral_flexion"),
+            22 => Some("leg_stretch_with_band"),
+            23 => Some("leg_stretch_with_leg_circles"),
+            24 => Some("lower_lift_on_disc"),
+            25 => Some("lunge_squat"),
+            26 => Some("lunges_with_knee_lift"),
+            27 => Some("mermaid_stretch"),
+            28 => Some("neutral_pelvic_position"),
+            29 => Some("pelvic_clocks_on_disc"),
+            30 => Some("pilates_plie_squats_parallel_turned_out_flat_and_heels_with_chair"),
+            31 => Some("piriformis_stretch"),
+            32 => Some("plank_knee_crosses"),
+            33 => Some("plank_knee_pulls"),
+            34 => Some("plank_up_downs"),
+            35 => Some("prayer_mudra"),
+            36 => Some("psoas_lunge_stretch"),
+            37 => Some("ribcage_breathing"),
+            38 => Some("roll_down"),
+            39 => Some("roll_up_with_weight_and_band"),
+            40 => Some("saw"),
+            41 => Some("scapular_stabilization"),
+            42 => Some("scissors_on_disc"),
+            43 => Some("seated_hip_stretchup"),
+            44 => Some("seated_twist"),
+            45 => Some("shaving_the_head_with_ball_band_and_weight"),
+            46 => Some("spinal_twist"),
+            47 => Some("spinal_twist_stretch"),
+            48 => Some("spine_stretch_forward"),
+            49 => Some("squat_open_arm_twist_pose"),
+            50 => Some("squats_with_ball"),
+            51 => Some("stand_and_hang"),
+            52 => Some("standing_side_stretch"),
+            53 => Some("standing_single_leg_forward_bend_with_it_band_opener"),
+            54 => Some("straight_leg_crunch_with_leg_lift"),
+            55 => Some("straight_leg_crunch_with_leg_lift_with_ball"),
+            56 => Some("straight_leg_crunch_with_legs_crossed"),
+            57 => Some("straight_leg_crunch_with_legs_crossed_with_ball"),
+            58 => Some("straight_leg_diagonal_crunch"),
+            59 => Some("straight_leg_diagonal_crunch_with_ball"),
+            60 => Some("tailbone_curl"),
+            61 => Some("throat_lock"),
+            62 => Some("tick_tock_side_roll"),
+            63 => Some("twist"),
+            64 => Some("v_leg_crunches"),
+            65 => Some("v_sit"),
+            66 => Some("forward_fold_wheelchair"),
+            67 => Some("forward_fold_plus_wheelchair"),
+            68 => Some("arm_circles_low_forward_wheelchair"),
+            69 => Some("arm_circles_mid_forward_wheelchair"),
+            70 => Some("arm_circles_high_forward_wheelchair"),
+            71 => Some("arm_circles_low_backward_wheelchair"),
+            72 => Some("arm_circles_mid_backward_wheelchair"),
+            73 => Some("arm_circles_high_backward_wheelchair"),
+            74 => Some("core_twists_wheelchair"),
+            75 => Some("arm_raise_wheelchair"),
+            76 => Some("chest_expand_wheelchair"),
+            77 => Some("arm_extend_wheelchair"),
+            78 => Some("forward_bend_wheelchair"),
+            79 => Some("toe_touch_wheelchair"),
+            80 => Some("extended_toe_touch_wheelchair"),
+            81 => Some("seated_arm_circles"),
+            82 => Some("trunk_rotations"),
+            83 => Some("seated_trunk_rotations"),
+            84 => Some("toe_touch"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for MoveExerciseName {
@@ -112,96 +203,50 @@ impl Default for MoveExerciseName {
 
 impl fmt::Display for MoveExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "arch_and_curl"),
-            1 => write!(f, "arm_circles_with_ball_band_and_weight"),
-            2 => write!(f, "arm_stretch"),
-            3 => write!(f, "back_massage"),
-            4 => write!(f, "belly_breathing"),
-            5 => write!(f, "bridge_with_ball"),
-            6 => write!(f, "diamond_leg_crunch"),
-            7 => write!(f, "diamond_leg_lift"),
-            8 => write!(f, "eight_point_shoulder_opener"),
-            9 => write!(f, "foot_rolling"),
-            10 => write!(f, "footwork"),
-            11 => write!(f, "footwork_on_disc"),
-            12 => write!(f, "forward_fold"),
-            13 => write!(f, "frog_with_band"),
-            14 => write!(f, "half_roll_up"),
-            15 => write!(f, "hamstring_curl"),
-            16 => write!(f, "hamstring_stretch"),
-            17 => write!(f, "hip_stretch"),
-            18 => write!(f, "hug_a_tree_with_ball_band_and_weight"),
-            19 => write!(f, "knee_circles"),
-            20 => write!(f, "knee_folds_on_disc"),
-            21 => write!(f, "lateral_flexion"),
-            22 => write!(f, "leg_stretch_with_band"),
-            23 => write!(f, "leg_stretch_with_leg_circles"),
-            24 => write!(f, "lower_lift_on_disc"),
-            25 => write!(f, "lunge_squat"),
-            26 => write!(f, "lunges_with_knee_lift"),
-            27 => write!(f, "mermaid_stretch"),
-            28 => write!(f, "neutral_pelvic_position"),
-            29 => write!(f, "pelvic_clocks_on_disc"),
-            30 => write!(
-                f,
-                "pilates_plie_squats_parallel_turned_out_flat_and_heels_with_chair"
-            ),
-            31 => write!(f, "piriformis_stretch"),
-            32 => write!(f, "plank_knee_crosses"),
-            33 => write!(f, "plank_knee_pulls"),
-            34 => write!(f, "plank_up_downs"),
-            35 => write!(f, "prayer_mudra"),
-            36 => write!(f, "psoas_lunge_stretch"),
-            37 => write!(f, "ribcage_breathing"),
-            38 => write!(f, "roll_down"),
-            39 => write!(f, "roll_up_with_weight_and_band"),
-            40 => write!(f, "saw"),
-            41 => write!(f, "scapular_stabilization"),
-            42 => write!(f, "scissors_on_disc"),
-            43 => write!(f, "seated_hip_stretchup"),
-            44 => write!(f, "seated_twist"),
-            45 => write!(f, "shaving_the_head_with_ball_band_and_weight"),
-            46 => write!(f, "spinal_twist"),
-            47 => write!(f, "spinal_twist_stretch"),
-            48 => write!(f, "spine_stretch_forward"),
-            49 => write!(f, "squat_open_arm_twist_pose"),
-            50 => write!(f, "squats_with_ball"),
-            51 => write!(f, "stand_and_hang"),
-            52 => write!(f, "standing_side_stretch"),
-            53 => write!(f, "standing_single_leg_forward_bend_with_it_band_opener"),
-            54 => write!(f, "straight_leg_crunch_with_leg_lift"),
-            55 => write!(f, "straight_leg_crunch_with_leg_lift_with_ball"),
-            56 => write!(f, "straight_leg_crunch_with_legs_crossed"),
-            57 => write!(f, "straight_leg_crunch_with_legs_crossed_with_ball"),
-            58 => write!(f, "straight_leg_diagonal_crunch"),
-            59 => write!(f, "straight_leg_diagonal_crunch_with_ball"),
-            60 => write!(f, "tailbone_curl"),
-            61 => write!(f, "throat_lock"),
-            62 => write!(f, "tick_tock_side_roll"),
-            63 => write!(f, "twist"),
-            64 => write!(f, "v_leg_crunches"),
-            65 => write!(f, "v_sit"),
-            66 => write!(f, "forward_fold_wheelchair"),
-            67 => write!(f, "forward_fold_plus_wheelchair"),
-            68 => write!(f, "arm_circles_low_forward_wheelchair"),
-            69 => write!(f, "arm_circles_mid_forward_wheelchair"),
-            70 => write!(f, "arm_circles_high_forward_wheelchair"),
-            71 => write!(f, "arm_circles_low_backward_wheelchair"),
-            72 => write!(f, "arm_circles_mid_backward_wheelchair"),
-            73 => write!(f, "arm_circles_high_backward_wheelchair"),
-            74 => write!(f, "core_twists_wheelchair"),
-            75 => write!(f, "arm_raise_wheelchair"),
-            76 => write!(f, "chest_expand_wheelchair"),
-            77 => write!(f, "arm_extend_wheelchair"),
-            78 => write!(f, "forward_bend_wheelchair"),
-            79 => write!(f, "toe_touch_wheelchair"),
-            80 => write!(f, "extended_toe_touch_wheelchair"),
-            81 => write!(f, "seated_arm_circles"),
-            82 => write!(f, "trunk_rotations"),
-            83 => write!(f, "seated_trunk_rotations"),
-            84 => write!(f, "toe_touch"),
-            _ => write!(f, "MoveExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "MoveExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for MoveExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("MoveExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for MoveExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

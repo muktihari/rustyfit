@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hrv Status Summary message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct HrvStatusSummary {
     pub timestamp: typedef::DateTime,
@@ -32,21 +35,21 @@ pub struct HrvStatusSummary {
 }
 
 impl HrvStatusSummary {
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `ms`
     pub const WEEKLY_AVERAGE: u8 = 0;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `ms`
     pub const LAST_NIGHT_AVERAGE: u8 = 1;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `ms`
     pub const LAST_NIGHT_5_MIN_HIGH: u8 = 2;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `ms`
     pub const BASELINE_LOW_UPPER: u8 = 3;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `ms`
     pub const BASELINE_BALANCED_LOWER: u8 = 4;
-    /// Value's type: `u16`; Scale: `128`; Units: `ms`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `ms`
     pub const BASELINE_BALANCED_UPPER: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::HRV_STATUS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::HrvStatus
     pub const STATUS: u8 = 6;
 
     /// Create new HrvStatusSummary with all fields being set to its corresponding invalid value.
@@ -317,6 +320,144 @@ impl From<HrvStatusSummary> for Message {
             num: typedef::MesgNum::HRV_STATUS_SUMMARY,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for HrvStatusSummary {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("HrvStatusSummary", n)?;
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.weekly_average_scaled() {
+            state.serialize_field("weekly_average", &v)?;
+        }
+        if let Some(v) = self.last_night_average_scaled() {
+            state.serialize_field("last_night_average", &v)?;
+        }
+        if let Some(v) = self.last_night_5_min_high_scaled() {
+            state.serialize_field("last_night_5_min_high", &v)?;
+        }
+        if let Some(v) = self.baseline_low_upper_scaled() {
+            state.serialize_field("baseline_low_upper", &v)?;
+        }
+        if let Some(v) = self.baseline_balanced_lower_scaled() {
+            state.serialize_field("baseline_balanced_lower", &v)?;
+        }
+        if let Some(v) = self.baseline_balanced_upper_scaled() {
+            state.serialize_field("baseline_balanced_upper", &v)?;
+        }
+        if self.status.0 != u8::MAX {
+            state.serialize_field("status", &self.status)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    timestamp: Option<i64>,
+    weekly_average: f64,
+    last_night_average: f64,
+    last_night_5_min_high: f64,
+    baseline_low_upper: f64,
+    baseline_balanced_lower: f64,
+    baseline_balanced_upper: f64,
+    status: typedef::HrvStatus,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for HrvStatusSummary {
+    fn from(m: De) -> Self {
+        Self {
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            weekly_average: {
+                let unscaled = (m.weekly_average + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            last_night_average: {
+                let unscaled = (m.last_night_average + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            last_night_5_min_high: {
+                let unscaled = (m.last_night_5_min_high + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            baseline_low_upper: {
+                let unscaled = (m.baseline_low_upper + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            baseline_balanced_lower: {
+                let unscaled = (m.baseline_balanced_lower + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            baseline_balanced_upper: {
+                let unscaled = (m.baseline_balanced_upper + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            status: m.status,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            timestamp: None,
+            weekly_average: f64::from_bits(u64::MAX),
+            last_night_average: f64::from_bits(u64::MAX),
+            last_night_5_min_high: f64::from_bits(u64::MAX),
+            baseline_low_upper: f64::from_bits(u64::MAX),
+            baseline_balanced_lower: f64::from_bits(u64::MAX),
+            baseline_balanced_upper: f64::from_bits(u64::MAX),
+            status: typedef::HrvStatus(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

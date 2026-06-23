@@ -10,8 +10,11 @@ use crate::semconv;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Course Point message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct CoursePoint {
     pub message_index: typedef::MessageIndex,
@@ -32,21 +35,21 @@ pub struct CoursePoint {
 }
 
 impl CoursePoint {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u32`; ProfileType: `ProfileType::DATE_TIME`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 1;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LAT: u8 = 2;
-    /// Value's type: `i32`; Units: `semicircles`; ProfileType: `ProfileType::SINT32`
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const POSITION_LONG: u8 = 3;
-    /// Value's type: `u32`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
     pub const DISTANCE: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::COURSE_POINT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CoursePoint
     pub const TYPE: u8 = 5;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::BOOL`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const FAVORITE: u8 = 8;
 
     /// Create new CoursePoint with all fields being set to its corresponding invalid value.
@@ -234,6 +237,111 @@ impl From<CoursePoint> for Message {
             num: typedef::MesgNum::COURSE_POINT,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for CoursePoint {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("CoursePoint", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
+        if let Some(v) = self.position_lat_degrees() {
+            state.serialize_field("position_lat", &v)?;
+        }
+        if let Some(v) = self.position_long_degrees() {
+            state.serialize_field("position_long", &v)?;
+        }
+        if let Some(v) = self.distance_scaled() {
+            state.serialize_field("distance", &v)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if !self.name.is_empty() {
+            state.serialize_field("name", &self.name)?;
+        }
+        if self.favorite.0 != u8::MAX {
+            state.serialize_field("favorite", &self.favorite)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    timestamp: Option<i64>,
+    /// Degrees.
+    position_lat: f64,
+    /// Degrees.
+    position_long: f64,
+    distance: f64,
+    r#type: typedef::CoursePoint,
+    name: String,
+    favorite: typedef::Bool,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for CoursePoint {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            position_lat: semconv::to_semicircles(m.position_lat).unwrap_or(i32::MAX),
+            position_long: semconv::to_semicircles(m.position_long).unwrap_or(i32::MAX),
+            distance: {
+                let unscaled = (m.distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            r#type: m.r#type,
+            name: m.name,
+            favorite: m.favorite,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: None,
+            position_lat: f64::from_bits(u64::MAX),
+            position_long: f64::from_bits(u64::MAX),
+            distance: f64::from_bits(u64::MAX),
+            r#type: typedef::CoursePoint(u8::MAX),
+            name: String::new(),
+            favorite: typedef::Bool(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

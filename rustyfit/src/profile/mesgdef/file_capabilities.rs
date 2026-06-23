@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// File Capabilities message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct FileCapabilities {
     pub message_index: typedef::MessageIndex,
@@ -28,17 +31,17 @@ pub struct FileCapabilities {
 }
 
 impl FileCapabilities {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::File
     pub const TYPE: u8 = 0;
-    /// Value's type: `u8`; Base: UINT8Z; ProfileType: `ProfileType::FILE_FLAGS`
+    /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::FileFlags
     pub const FLAGS: u8 = 1;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const DIRECTORY: u8 = 2;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const MAX_COUNT: u8 = 3;
-    /// Value's type: `u32`; Units: `bytes`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `bytes`
     pub const MAX_SIZE: u8 = 4;
 
     /// Create new FileCapabilities with all fields being set to its corresponding invalid value.
@@ -161,6 +164,87 @@ impl From<FileCapabilities> for Message {
             num: typedef::MesgNum::FILE_CAPABILITIES,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FileCapabilities {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("FileCapabilities", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.r#type.0 != u8::MAX {
+            state.serialize_field("type", &self.r#type)?;
+        }
+        if self.flags.0 != u8::MIN {
+            state.serialize_field("flags", &self.flags)?;
+        }
+        if !self.directory.is_empty() {
+            state.serialize_field("directory", &self.directory)?;
+        }
+        if self.max_count != u16::MAX {
+            state.serialize_field("max_count", &self.max_count)?;
+        }
+        if self.max_size != u32::MAX {
+            state.serialize_field("max_size", &self.max_size)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    r#type: typedef::File,
+    flags: typedef::FileFlags,
+    directory: String,
+    max_count: u16,
+    max_size: u32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for FileCapabilities {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            r#type: m.r#type,
+            flags: m.flags,
+            directory: m.directory,
+            max_count: m.max_count,
+            max_size: m.max_size,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            r#type: typedef::File(u8::MAX),
+            flags: typedef::FileFlags(u8::MIN),
+            directory: String::new(),
+            max_count: u16::MAX,
+            max_size: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Hrv message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Hrv {
     /// Scale: 1000; Units: s; Time between beats
@@ -20,7 +23,7 @@ pub struct Hrv {
 }
 
 impl Hrv {
-    /// Value's type: `Vec<u16>`; Scale: `1000`; Units: `s`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `s`
     pub const TIME: u8 = 0;
 
     /// Create new Hrv with all fields being set to its corresponding invalid value.
@@ -119,6 +122,74 @@ impl From<Hrv> for Message {
             num: typedef::MesgNum::HRV,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Hrv {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Hrv", n)?;
+        if let Some(v) = self.time_scaled() {
+            state.serialize_field("time", &v)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    time: Vec<f64>,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Hrv {
+    fn from(m: De) -> Self {
+        Self {
+            time: {
+                if m.time.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.time.len());
+                    for &x in m.time.iter() {
+                        let unscaled = (x + 0.0) * 1000.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64
+                        {
+                            vals.push(u16::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u16);
+                    }
+                    vals
+                }
+            },
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+#[allow(clippy::derivable_impls)]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            time: Vec::new(),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

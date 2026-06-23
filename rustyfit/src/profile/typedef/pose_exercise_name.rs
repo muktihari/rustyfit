@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Pose Exercise Name type.
 #[repr(transparent)]
@@ -133,6 +133,128 @@ impl PoseExerciseName {
     pub const REVERSE_WARRIOR_WHEELCHAIR: PoseExerciseName = PoseExerciseName(113);
     pub const DOWNWARD_FACING_DOG_TO_COBRA: PoseExerciseName = PoseExerciseName(114);
     pub const SEATED_CAT_COW: PoseExerciseName = PoseExerciseName(115);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("all_fours"),
+            1 => Some("ankle_to_knee"),
+            2 => Some("baby_cobra"),
+            3 => Some("boat"),
+            4 => Some("bound_angle"),
+            5 => Some("bound_seated_single_leg_forward_bend"),
+            6 => Some("bow"),
+            7 => Some("bowed_half_moon"),
+            8 => Some("bridge"),
+            9 => Some("cat"),
+            10 => Some("chair"),
+            11 => Some("childs"),
+            12 => Some("corpse"),
+            13 => Some("cow_face"),
+            14 => Some("cow"),
+            15 => Some("devotional_warrior"),
+            16 => Some("dolphin_plank"),
+            17 => Some("dolphin"),
+            18 => Some("down_dog_knee_to_nose"),
+            19 => Some("down_dog_split"),
+            20 => Some("down_dog_split_open_hip_bent_knee"),
+            21 => Some("downward_facing_dog"),
+            22 => Some("eagle"),
+            23 => Some("easy_seated"),
+            24 => Some("extended_puppy"),
+            25 => Some("extended_side_angle"),
+            26 => Some("fish"),
+            27 => Some("four_limbed_staff"),
+            28 => Some("full_split"),
+            29 => Some("gate"),
+            30 => Some("half_chair_half_ankle_to_knee"),
+            31 => Some("half_moon"),
+            32 => Some("head_to_knee"),
+            33 => Some("heron"),
+            34 => Some("heros"),
+            35 => Some("high_lunge"),
+            36 => Some("knees_chest_chin"),
+            37 => Some("lizard"),
+            38 => Some("locust"),
+            39 => Some("low_lunge"),
+            40 => Some("low_lunge_twist"),
+            41 => Some("low_lunge_with_knee_down"),
+            42 => Some("mermaid"),
+            43 => Some("mountain"),
+            44 => Some("one_legged_downward_facing_pose_open_hip_bent_knee"),
+            45 => Some("one_legged_pigeon"),
+            46 => Some("peaceful_warrior"),
+            47 => Some("plank"),
+            48 => Some("plow"),
+            49 => Some("reclined_hand_to_foot"),
+            50 => Some("revolved_half_moon"),
+            51 => Some("revolved_head_to_knee"),
+            52 => Some("revolved_triangle"),
+            53 => Some("runners_lunge"),
+            54 => Some("seated_easy_side_bend"),
+            55 => Some("seated_easy_twist"),
+            56 => Some("seated_long_leg_forward_bend"),
+            57 => Some("seated_wide_leg_forward_bend"),
+            58 => Some("shoulder_stand"),
+            59 => Some("side_boat"),
+            60 => Some("side_plank"),
+            61 => Some("sphinx"),
+            62 => Some("squat_open_arm_twist"),
+            63 => Some("squat_palm_press"),
+            64 => Some("staff"),
+            65 => Some("standing_arms_up"),
+            66 => Some("standing_forward_bend_halfway_up"),
+            67 => Some("standing_forward_bend"),
+            68 => Some("standing_side_opener"),
+            69 => Some("standing_single_leg_forward_bend"),
+            70 => Some("standing_split"),
+            71 => Some("standing_wide_leg_forward_bend"),
+            72 => Some("standing_wide_leg_forward_bend_with_twist"),
+            73 => Some("supine_spinal_twist"),
+            74 => Some("table_top"),
+            75 => Some("thread_the_needle"),
+            76 => Some("thunderbolt"),
+            77 => Some("thunderbolt_pose_both_sides_arm_stretch"),
+            78 => Some("tree"),
+            79 => Some("triangle"),
+            80 => Some("up_dog"),
+            81 => Some("upward_facing_plank"),
+            82 => Some("warrior_one"),
+            83 => Some("warrior_three"),
+            84 => Some("warrior_two"),
+            85 => Some("wheel"),
+            86 => Some("wide_side_lunge"),
+            87 => Some("deep_breathing_wheelchair"),
+            88 => Some("deep_breathing_low_wheelchair"),
+            89 => Some("deep_breathing_mid_wheelchair"),
+            90 => Some("deep_breathing_high_wheelchair"),
+            91 => Some("prayer_wheelchair"),
+            92 => Some("overhead_prayer_wheelchair"),
+            93 => Some("cactus_wheelchair"),
+            94 => Some("breathing_punches_wheelchair"),
+            95 => Some("breathing_punches_extended_wheelchair"),
+            96 => Some("breathing_punches_overhead_wheelchair"),
+            97 => Some("breathing_punches_overhead_and_down_wheelchair"),
+            98 => Some("breathing_punches_side_wheelchair"),
+            99 => Some("breathing_punches_extended_side_wheelchair"),
+            100 => Some("breathing_punches_overhead_side_wheelchair"),
+            101 => Some("breathing_punches_overhead_and_down_side_wheelchair"),
+            102 => Some("left_hand_back_wheelchair"),
+            103 => Some("triangle_wheelchair"),
+            104 => Some("thread_the_needle_wheelchair"),
+            105 => Some("neck_flexion_and_extension_wheelchair"),
+            106 => Some("neck_lateral_flexion_wheelchair"),
+            107 => Some("spine_flexion_and_extension_wheelchair"),
+            108 => Some("spine_rotation_wheelchair"),
+            109 => Some("spine_lateral_flexion_wheelchair"),
+            110 => Some("alternative_skiing_wheelchair"),
+            111 => Some("reach_forward_wheelchair"),
+            112 => Some("warrior_wheelchair"),
+            113 => Some("reverse_warrior_wheelchair"),
+            114 => Some("downward_facing_dog_to_cobra"),
+            115 => Some("seated_cat_cow"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for PoseExerciseName {
@@ -143,124 +265,50 @@ impl Default for PoseExerciseName {
 
 impl fmt::Display for PoseExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "all_fours"),
-            1 => write!(f, "ankle_to_knee"),
-            2 => write!(f, "baby_cobra"),
-            3 => write!(f, "boat"),
-            4 => write!(f, "bound_angle"),
-            5 => write!(f, "bound_seated_single_leg_forward_bend"),
-            6 => write!(f, "bow"),
-            7 => write!(f, "bowed_half_moon"),
-            8 => write!(f, "bridge"),
-            9 => write!(f, "cat"),
-            10 => write!(f, "chair"),
-            11 => write!(f, "childs"),
-            12 => write!(f, "corpse"),
-            13 => write!(f, "cow_face"),
-            14 => write!(f, "cow"),
-            15 => write!(f, "devotional_warrior"),
-            16 => write!(f, "dolphin_plank"),
-            17 => write!(f, "dolphin"),
-            18 => write!(f, "down_dog_knee_to_nose"),
-            19 => write!(f, "down_dog_split"),
-            20 => write!(f, "down_dog_split_open_hip_bent_knee"),
-            21 => write!(f, "downward_facing_dog"),
-            22 => write!(f, "eagle"),
-            23 => write!(f, "easy_seated"),
-            24 => write!(f, "extended_puppy"),
-            25 => write!(f, "extended_side_angle"),
-            26 => write!(f, "fish"),
-            27 => write!(f, "four_limbed_staff"),
-            28 => write!(f, "full_split"),
-            29 => write!(f, "gate"),
-            30 => write!(f, "half_chair_half_ankle_to_knee"),
-            31 => write!(f, "half_moon"),
-            32 => write!(f, "head_to_knee"),
-            33 => write!(f, "heron"),
-            34 => write!(f, "heros"),
-            35 => write!(f, "high_lunge"),
-            36 => write!(f, "knees_chest_chin"),
-            37 => write!(f, "lizard"),
-            38 => write!(f, "locust"),
-            39 => write!(f, "low_lunge"),
-            40 => write!(f, "low_lunge_twist"),
-            41 => write!(f, "low_lunge_with_knee_down"),
-            42 => write!(f, "mermaid"),
-            43 => write!(f, "mountain"),
-            44 => write!(f, "one_legged_downward_facing_pose_open_hip_bent_knee"),
-            45 => write!(f, "one_legged_pigeon"),
-            46 => write!(f, "peaceful_warrior"),
-            47 => write!(f, "plank"),
-            48 => write!(f, "plow"),
-            49 => write!(f, "reclined_hand_to_foot"),
-            50 => write!(f, "revolved_half_moon"),
-            51 => write!(f, "revolved_head_to_knee"),
-            52 => write!(f, "revolved_triangle"),
-            53 => write!(f, "runners_lunge"),
-            54 => write!(f, "seated_easy_side_bend"),
-            55 => write!(f, "seated_easy_twist"),
-            56 => write!(f, "seated_long_leg_forward_bend"),
-            57 => write!(f, "seated_wide_leg_forward_bend"),
-            58 => write!(f, "shoulder_stand"),
-            59 => write!(f, "side_boat"),
-            60 => write!(f, "side_plank"),
-            61 => write!(f, "sphinx"),
-            62 => write!(f, "squat_open_arm_twist"),
-            63 => write!(f, "squat_palm_press"),
-            64 => write!(f, "staff"),
-            65 => write!(f, "standing_arms_up"),
-            66 => write!(f, "standing_forward_bend_halfway_up"),
-            67 => write!(f, "standing_forward_bend"),
-            68 => write!(f, "standing_side_opener"),
-            69 => write!(f, "standing_single_leg_forward_bend"),
-            70 => write!(f, "standing_split"),
-            71 => write!(f, "standing_wide_leg_forward_bend"),
-            72 => write!(f, "standing_wide_leg_forward_bend_with_twist"),
-            73 => write!(f, "supine_spinal_twist"),
-            74 => write!(f, "table_top"),
-            75 => write!(f, "thread_the_needle"),
-            76 => write!(f, "thunderbolt"),
-            77 => write!(f, "thunderbolt_pose_both_sides_arm_stretch"),
-            78 => write!(f, "tree"),
-            79 => write!(f, "triangle"),
-            80 => write!(f, "up_dog"),
-            81 => write!(f, "upward_facing_plank"),
-            82 => write!(f, "warrior_one"),
-            83 => write!(f, "warrior_three"),
-            84 => write!(f, "warrior_two"),
-            85 => write!(f, "wheel"),
-            86 => write!(f, "wide_side_lunge"),
-            87 => write!(f, "deep_breathing_wheelchair"),
-            88 => write!(f, "deep_breathing_low_wheelchair"),
-            89 => write!(f, "deep_breathing_mid_wheelchair"),
-            90 => write!(f, "deep_breathing_high_wheelchair"),
-            91 => write!(f, "prayer_wheelchair"),
-            92 => write!(f, "overhead_prayer_wheelchair"),
-            93 => write!(f, "cactus_wheelchair"),
-            94 => write!(f, "breathing_punches_wheelchair"),
-            95 => write!(f, "breathing_punches_extended_wheelchair"),
-            96 => write!(f, "breathing_punches_overhead_wheelchair"),
-            97 => write!(f, "breathing_punches_overhead_and_down_wheelchair"),
-            98 => write!(f, "breathing_punches_side_wheelchair"),
-            99 => write!(f, "breathing_punches_extended_side_wheelchair"),
-            100 => write!(f, "breathing_punches_overhead_side_wheelchair"),
-            101 => write!(f, "breathing_punches_overhead_and_down_side_wheelchair"),
-            102 => write!(f, "left_hand_back_wheelchair"),
-            103 => write!(f, "triangle_wheelchair"),
-            104 => write!(f, "thread_the_needle_wheelchair"),
-            105 => write!(f, "neck_flexion_and_extension_wheelchair"),
-            106 => write!(f, "neck_lateral_flexion_wheelchair"),
-            107 => write!(f, "spine_flexion_and_extension_wheelchair"),
-            108 => write!(f, "spine_rotation_wheelchair"),
-            109 => write!(f, "spine_lateral_flexion_wheelchair"),
-            110 => write!(f, "alternative_skiing_wheelchair"),
-            111 => write!(f, "reach_forward_wheelchair"),
-            112 => write!(f, "warrior_wheelchair"),
-            113 => write!(f, "reverse_warrior_wheelchair"),
-            114 => write!(f, "downward_facing_dog_to_cobra"),
-            115 => write!(f, "seated_cat_cow"),
-            _ => write!(f, "PoseExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "PoseExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for PoseExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("PoseExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for PoseExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

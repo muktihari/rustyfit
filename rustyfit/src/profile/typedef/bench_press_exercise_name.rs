@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Bench Press Exercise Name type.
 #[repr(transparent)]
@@ -45,6 +45,39 @@ impl BenchPressExerciseName {
     pub const TRIPLE_STOP_BARBELL_BENCH_PRESS: BenchPressExerciseName = BenchPressExerciseName(24);
     pub const WIDE_GRIP_BARBELL_BENCH_PRESS: BenchPressExerciseName = BenchPressExerciseName(25);
     pub const ALTERNATING_DUMBBELL_CHEST_PRESS: BenchPressExerciseName = BenchPressExerciseName(26);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("alternating_dumbbell_chest_press_on_swiss_ball"),
+            1 => Some("barbell_bench_press"),
+            2 => Some("barbell_board_bench_press"),
+            3 => Some("barbell_floor_press"),
+            4 => Some("close_grip_barbell_bench_press"),
+            5 => Some("decline_dumbbell_bench_press"),
+            6 => Some("dumbbell_bench_press"),
+            7 => Some("dumbbell_floor_press"),
+            8 => Some("incline_barbell_bench_press"),
+            9 => Some("incline_dumbbell_bench_press"),
+            10 => Some("incline_smith_machine_bench_press"),
+            11 => Some("isometric_barbell_bench_press"),
+            12 => Some("kettlebell_chest_press"),
+            13 => Some("neutral_grip_dumbbell_bench_press"),
+            14 => Some("neutral_grip_dumbbell_incline_bench_press"),
+            15 => Some("one_arm_floor_press"),
+            16 => Some("weighted_one_arm_floor_press"),
+            17 => Some("partial_lockout"),
+            18 => Some("reverse_grip_barbell_bench_press"),
+            19 => Some("reverse_grip_incline_bench_press"),
+            20 => Some("single_arm_cable_chest_press"),
+            21 => Some("single_arm_dumbbell_bench_press"),
+            22 => Some("smith_machine_bench_press"),
+            23 => Some("swiss_ball_dumbbell_chest_press"),
+            24 => Some("triple_stop_barbell_bench_press"),
+            25 => Some("wide_grip_barbell_bench_press"),
+            26 => Some("alternating_dumbbell_chest_press"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BenchPressExerciseName {
@@ -55,35 +88,50 @@ impl Default for BenchPressExerciseName {
 
 impl fmt::Display for BenchPressExerciseName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "alternating_dumbbell_chest_press_on_swiss_ball"),
-            1 => write!(f, "barbell_bench_press"),
-            2 => write!(f, "barbell_board_bench_press"),
-            3 => write!(f, "barbell_floor_press"),
-            4 => write!(f, "close_grip_barbell_bench_press"),
-            5 => write!(f, "decline_dumbbell_bench_press"),
-            6 => write!(f, "dumbbell_bench_press"),
-            7 => write!(f, "dumbbell_floor_press"),
-            8 => write!(f, "incline_barbell_bench_press"),
-            9 => write!(f, "incline_dumbbell_bench_press"),
-            10 => write!(f, "incline_smith_machine_bench_press"),
-            11 => write!(f, "isometric_barbell_bench_press"),
-            12 => write!(f, "kettlebell_chest_press"),
-            13 => write!(f, "neutral_grip_dumbbell_bench_press"),
-            14 => write!(f, "neutral_grip_dumbbell_incline_bench_press"),
-            15 => write!(f, "one_arm_floor_press"),
-            16 => write!(f, "weighted_one_arm_floor_press"),
-            17 => write!(f, "partial_lockout"),
-            18 => write!(f, "reverse_grip_barbell_bench_press"),
-            19 => write!(f, "reverse_grip_incline_bench_press"),
-            20 => write!(f, "single_arm_cable_chest_press"),
-            21 => write!(f, "single_arm_dumbbell_bench_press"),
-            22 => write!(f, "smith_machine_bench_press"),
-            23 => write!(f, "swiss_ball_dumbbell_chest_press"),
-            24 => write!(f, "triple_stop_barbell_bench_press"),
-            25 => write!(f, "wide_grip_barbell_bench_press"),
-            26 => write!(f, "alternating_dumbbell_chest_press"),
-            _ => write!(f, "BenchPressExerciseName({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BenchPressExerciseName({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BenchPressExerciseName {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BenchPressExerciseName", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BenchPressExerciseName {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

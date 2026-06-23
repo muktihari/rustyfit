@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Display Orientation type.
 #[repr(transparent)]
@@ -22,6 +22,17 @@ impl DisplayOrientation {
     pub const PORTRAIT_FLIPPED: DisplayOrientation = DisplayOrientation(3);
     /// landscape mode but rotated 180 degrees
     pub const LANDSCAPE_FLIPPED: DisplayOrientation = DisplayOrientation(4);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("auto"),
+            1 => Some("portrait"),
+            2 => Some("landscape"),
+            3 => Some("portrait_flipped"),
+            4 => Some("landscape_flipped"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for DisplayOrientation {
@@ -32,13 +43,50 @@ impl Default for DisplayOrientation {
 
 impl fmt::Display for DisplayOrientation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "auto"),
-            1 => write!(f, "portrait"),
-            2 => write!(f, "landscape"),
-            3 => write!(f, "portrait_flipped"),
-            4 => write!(f, "landscape_flipped"),
-            _ => write!(f, "DisplayOrientation({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "DisplayOrientation({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for DisplayOrientation {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("DisplayOrientation", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for DisplayOrientation {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

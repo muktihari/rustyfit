@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Backlight Mode type.
 #[repr(transparent)]
@@ -21,6 +21,19 @@ impl BacklightMode {
     pub const SMART_NOTIFICATIONS: BacklightMode = BacklightMode(4);
     pub const KEY_AND_MESSAGES_NIGHT: BacklightMode = BacklightMode(5);
     pub const KEY_AND_MESSAGES_AND_SMART_NOTIFICATIONS: BacklightMode = BacklightMode(6);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("off"),
+            1 => Some("manual"),
+            2 => Some("key_and_messages"),
+            3 => Some("auto_brightness"),
+            4 => Some("smart_notifications"),
+            5 => Some("key_and_messages_night"),
+            6 => Some("key_and_messages_and_smart_notifications"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BacklightMode {
@@ -31,15 +44,50 @@ impl Default for BacklightMode {
 
 impl fmt::Display for BacklightMode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "off"),
-            1 => write!(f, "manual"),
-            2 => write!(f, "key_and_messages"),
-            3 => write!(f, "auto_brightness"),
-            4 => write!(f, "smart_notifications"),
-            5 => write!(f, "key_and_messages_night"),
-            6 => write!(f, "key_and_messages_and_smart_notifications"),
-            _ => write!(f, "BacklightMode({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BacklightMode({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BacklightMode {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BacklightMode", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BacklightMode {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

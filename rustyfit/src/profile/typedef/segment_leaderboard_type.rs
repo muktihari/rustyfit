@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Segment Leaderboard Type type.
 #[repr(transparent)]
@@ -29,6 +29,27 @@ impl SegmentLeaderboardType {
     pub const LAST: SegmentLeaderboardType = SegmentLeaderboardType(12);
     pub const RECENT_BEST: SegmentLeaderboardType = SegmentLeaderboardType(13);
     pub const COURSE_RECORD: SegmentLeaderboardType = SegmentLeaderboardType(14);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("overall"),
+            1 => Some("personal_best"),
+            2 => Some("connections"),
+            3 => Some("group"),
+            4 => Some("challenger"),
+            5 => Some("kom"),
+            6 => Some("qom"),
+            7 => Some("pr"),
+            8 => Some("goal"),
+            9 => Some("carrot"),
+            10 => Some("club_leader"),
+            11 => Some("rival"),
+            12 => Some("last"),
+            13 => Some("recent_best"),
+            14 => Some("course_record"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for SegmentLeaderboardType {
@@ -39,23 +60,50 @@ impl Default for SegmentLeaderboardType {
 
 impl fmt::Display for SegmentLeaderboardType {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "overall"),
-            1 => write!(f, "personal_best"),
-            2 => write!(f, "connections"),
-            3 => write!(f, "group"),
-            4 => write!(f, "challenger"),
-            5 => write!(f, "kom"),
-            6 => write!(f, "qom"),
-            7 => write!(f, "pr"),
-            8 => write!(f, "goal"),
-            9 => write!(f, "carrot"),
-            10 => write!(f, "club_leader"),
-            11 => write!(f, "rival"),
-            12 => write!(f, "last"),
-            13 => write!(f, "recent_best"),
-            14 => write!(f, "course_record"),
-            _ => write!(f, "SegmentLeaderboardType({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "SegmentLeaderboardType({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for SegmentLeaderboardType {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("SegmentLeaderboardType", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for SegmentLeaderboardType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

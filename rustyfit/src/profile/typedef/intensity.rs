@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Intensity type.
 #[repr(transparent)]
@@ -21,6 +21,19 @@ impl Intensity {
     pub const RECOVERY: Intensity = Intensity(4);
     pub const INTERVAL: Intensity = Intensity(5);
     pub const OTHER: Intensity = Intensity(6);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("active"),
+            1 => Some("rest"),
+            2 => Some("warmup"),
+            3 => Some("cooldown"),
+            4 => Some("recovery"),
+            5 => Some("interval"),
+            6 => Some("other"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for Intensity {
@@ -31,15 +44,50 @@ impl Default for Intensity {
 
 impl fmt::Display for Intensity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "active"),
-            1 => write!(f, "rest"),
-            2 => write!(f, "warmup"),
-            3 => write!(f, "cooldown"),
-            4 => write!(f, "recovery"),
-            5 => write!(f, "interval"),
-            6 => write!(f, "other"),
-            _ => write!(f, "Intensity({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "Intensity({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Intensity {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Intensity", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Intensity {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

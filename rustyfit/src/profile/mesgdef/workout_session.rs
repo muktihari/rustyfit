@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Workout Session message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct WorkoutSession {
     pub message_index: typedef::MessageIndex,
@@ -26,19 +29,19 @@ pub struct WorkoutSession {
 }
 
 impl WorkoutSession {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::SUB_SPORT`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUM_VALID_STEPS: u8 = 2;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const FIRST_STEP_INDEX: u8 = 3;
-    /// Value's type: `u16`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `m`
     pub const POOL_LENGTH: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const POOL_LENGTH_UNIT: u8 = 5;
 
     /// Create new WorkoutSession with all fields being set to its corresponding invalid value.
@@ -193,6 +196,100 @@ impl From<WorkoutSession> for Message {
             num: typedef::MesgNum::WORKOUT_SESSION,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WorkoutSession {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("WorkoutSession", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
+        }
+        if self.num_valid_steps != u16::MAX {
+            state.serialize_field("num_valid_steps", &self.num_valid_steps)?;
+        }
+        if self.first_step_index != u16::MAX {
+            state.serialize_field("first_step_index", &self.first_step_index)?;
+        }
+        if let Some(v) = self.pool_length_scaled() {
+            state.serialize_field("pool_length", &v)?;
+        }
+        if self.pool_length_unit.0 != u8::MAX {
+            state.serialize_field("pool_length_unit", &self.pool_length_unit)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    sport: typedef::Sport,
+    sub_sport: typedef::SubSport,
+    num_valid_steps: u16,
+    first_step_index: u16,
+    pool_length: f64,
+    pool_length_unit: typedef::DisplayMeasure,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for WorkoutSession {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            sport: m.sport,
+            sub_sport: m.sub_sport,
+            num_valid_steps: m.num_valid_steps,
+            first_step_index: m.first_step_index,
+            pool_length: {
+                let unscaled = (m.pool_length + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            pool_length_unit: m.pool_length_unit,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
+            num_valid_steps: u16::MAX,
+            first_step_index: u16::MAX,
+            pool_length: f64::from_bits(u64::MAX),
+            pool_length_unit: typedef::DisplayMeasure(u8::MAX),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

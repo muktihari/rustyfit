@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Weather Report type.
 #[repr(transparent)]
@@ -18,6 +18,16 @@ impl WeatherReport {
     // Deprecated use hourly_forecast instead: pub const FORECAST: WeatherReport = WeatherReport(1);
     pub const HOURLY_FORECAST: WeatherReport = WeatherReport(1);
     pub const DAILY_FORECAST: WeatherReport = WeatherReport(2);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("current"),
+            // Deprecated use hourly_forecast instead: 1 => Some("forecast"),
+            1 => Some("hourly_forecast"),
+            2 => Some("daily_forecast"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for WeatherReport {
@@ -28,12 +38,50 @@ impl Default for WeatherReport {
 
 impl fmt::Display for WeatherReport {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "current"),
-            // Deprecated use hourly_forecast instead: 1 => write!(f, "forecast"),
-            1 => write!(f, "hourly_forecast"),
-            2 => write!(f, "daily_forecast"),
-            _ => write!(f, "WeatherReport({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "WeatherReport({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for WeatherReport {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("WeatherReport", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for WeatherReport {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

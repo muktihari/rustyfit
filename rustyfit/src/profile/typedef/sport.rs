@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Sport type.
 #[repr(transparent)]
@@ -100,6 +100,94 @@ impl Sport {
     pub const CANOEING: Sport = Sport(88);
     /// All is for goals only to include all sports.
     pub const ALL: Sport = Sport(254);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("generic"),
+            1 => Some("running"),
+            2 => Some("cycling"),
+            3 => Some("transition"),
+            4 => Some("fitness_equipment"),
+            5 => Some("swimming"),
+            6 => Some("basketball"),
+            7 => Some("soccer"),
+            8 => Some("tennis"),
+            9 => Some("american_football"),
+            10 => Some("training"),
+            11 => Some("walking"),
+            12 => Some("cross_country_skiing"),
+            13 => Some("alpine_skiing"),
+            14 => Some("snowboarding"),
+            15 => Some("rowing"),
+            16 => Some("mountaineering"),
+            17 => Some("hiking"),
+            18 => Some("multisport"),
+            19 => Some("paddling"),
+            20 => Some("flying"),
+            21 => Some("e_biking"),
+            22 => Some("motorcycling"),
+            23 => Some("boating"),
+            24 => Some("driving"),
+            25 => Some("golf"),
+            26 => Some("hang_gliding"),
+            27 => Some("horseback_riding"),
+            28 => Some("hunting"),
+            29 => Some("fishing"),
+            30 => Some("inline_skating"),
+            31 => Some("rock_climbing"),
+            32 => Some("sailing"),
+            33 => Some("ice_skating"),
+            34 => Some("sky_diving"),
+            35 => Some("snowshoeing"),
+            36 => Some("snowmobiling"),
+            37 => Some("stand_up_paddleboarding"),
+            38 => Some("surfing"),
+            39 => Some("wakeboarding"),
+            40 => Some("water_skiing"),
+            41 => Some("kayaking"),
+            42 => Some("rafting"),
+            43 => Some("windsurfing"),
+            44 => Some("kitesurfing"),
+            45 => Some("tactical"),
+            46 => Some("jumpmaster"),
+            47 => Some("boxing"),
+            48 => Some("floor_climbing"),
+            49 => Some("baseball"),
+            53 => Some("diving"),
+            56 => Some("shooting"),
+            58 => Some("winter_sport"),
+            59 => Some("grinding"),
+            62 => Some("hiit"),
+            63 => Some("video_gaming"),
+            64 => Some("racket"),
+            65 => Some("wheelchair_push_walk"),
+            66 => Some("wheelchair_push_run"),
+            67 => Some("meditation"),
+            68 => Some("para_sport"),
+            69 => Some("disc_golf"),
+            70 => Some("team_sport"),
+            71 => Some("cricket"),
+            72 => Some("rugby"),
+            73 => Some("hockey"),
+            74 => Some("lacrosse"),
+            75 => Some("volleyball"),
+            76 => Some("water_tubing"),
+            77 => Some("wakesurfing"),
+            78 => Some("water_sport"),
+            79 => Some("archery"),
+            80 => Some("mixed_martial_arts"),
+            81 => Some("motor_sports"),
+            82 => Some("snorkeling"),
+            83 => Some("dance"),
+            84 => Some("jump_rope"),
+            85 => Some("pool_apnea"),
+            86 => Some("mobility"),
+            87 => Some("geocaching"),
+            88 => Some("canoeing"),
+            254 => Some("all"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for Sport {
@@ -110,90 +198,50 @@ impl Default for Sport {
 
 impl fmt::Display for Sport {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "generic"),
-            1 => write!(f, "running"),
-            2 => write!(f, "cycling"),
-            3 => write!(f, "transition"),
-            4 => write!(f, "fitness_equipment"),
-            5 => write!(f, "swimming"),
-            6 => write!(f, "basketball"),
-            7 => write!(f, "soccer"),
-            8 => write!(f, "tennis"),
-            9 => write!(f, "american_football"),
-            10 => write!(f, "training"),
-            11 => write!(f, "walking"),
-            12 => write!(f, "cross_country_skiing"),
-            13 => write!(f, "alpine_skiing"),
-            14 => write!(f, "snowboarding"),
-            15 => write!(f, "rowing"),
-            16 => write!(f, "mountaineering"),
-            17 => write!(f, "hiking"),
-            18 => write!(f, "multisport"),
-            19 => write!(f, "paddling"),
-            20 => write!(f, "flying"),
-            21 => write!(f, "e_biking"),
-            22 => write!(f, "motorcycling"),
-            23 => write!(f, "boating"),
-            24 => write!(f, "driving"),
-            25 => write!(f, "golf"),
-            26 => write!(f, "hang_gliding"),
-            27 => write!(f, "horseback_riding"),
-            28 => write!(f, "hunting"),
-            29 => write!(f, "fishing"),
-            30 => write!(f, "inline_skating"),
-            31 => write!(f, "rock_climbing"),
-            32 => write!(f, "sailing"),
-            33 => write!(f, "ice_skating"),
-            34 => write!(f, "sky_diving"),
-            35 => write!(f, "snowshoeing"),
-            36 => write!(f, "snowmobiling"),
-            37 => write!(f, "stand_up_paddleboarding"),
-            38 => write!(f, "surfing"),
-            39 => write!(f, "wakeboarding"),
-            40 => write!(f, "water_skiing"),
-            41 => write!(f, "kayaking"),
-            42 => write!(f, "rafting"),
-            43 => write!(f, "windsurfing"),
-            44 => write!(f, "kitesurfing"),
-            45 => write!(f, "tactical"),
-            46 => write!(f, "jumpmaster"),
-            47 => write!(f, "boxing"),
-            48 => write!(f, "floor_climbing"),
-            49 => write!(f, "baseball"),
-            53 => write!(f, "diving"),
-            56 => write!(f, "shooting"),
-            58 => write!(f, "winter_sport"),
-            59 => write!(f, "grinding"),
-            62 => write!(f, "hiit"),
-            63 => write!(f, "video_gaming"),
-            64 => write!(f, "racket"),
-            65 => write!(f, "wheelchair_push_walk"),
-            66 => write!(f, "wheelchair_push_run"),
-            67 => write!(f, "meditation"),
-            68 => write!(f, "para_sport"),
-            69 => write!(f, "disc_golf"),
-            70 => write!(f, "team_sport"),
-            71 => write!(f, "cricket"),
-            72 => write!(f, "rugby"),
-            73 => write!(f, "hockey"),
-            74 => write!(f, "lacrosse"),
-            75 => write!(f, "volleyball"),
-            76 => write!(f, "water_tubing"),
-            77 => write!(f, "wakesurfing"),
-            78 => write!(f, "water_sport"),
-            79 => write!(f, "archery"),
-            80 => write!(f, "mixed_martial_arts"),
-            81 => write!(f, "motor_sports"),
-            82 => write!(f, "snorkeling"),
-            83 => write!(f, "dance"),
-            84 => write!(f, "jump_rope"),
-            85 => write!(f, "pool_apnea"),
-            86 => write!(f, "mobility"),
-            87 => write!(f, "geocaching"),
-            88 => write!(f, "canoeing"),
-            254 => write!(f, "all"),
-            _ => write!(f, "Sport({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "Sport({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Sport {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("Sport", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Sport {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

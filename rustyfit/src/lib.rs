@@ -6,8 +6,13 @@
 //! and health devices. Activities recorded using devices such as smartwatch and cycling computer
 //! are now mostly in a FIT file format (\*.fit).
 //!
-//! This library is a rewrite of [FIT SDK for Go](https://github.com/muktihari/fit) and is designed to run on
-//! baremetal Rust, where performance and memory efficiency is carefully considered.
+//! This library is a rewrite of the Go implementation, [https://github.com/muktihari/fit](https://github.com/muktihari/fit),
+//! and is designed to run on bare-metal Rust, where performance and memory efficiency are carefully considered.
+//! By being `#![no_std]`, a wide range of environments is supported, including bare-metal systems, WebAssembly,
+//! desktop applications, and servers.
+//!
+//! This library now supports [serde](https://crates.io/crates/serde), allowing users to serialize data into
+//! other formats, such as JSON, and deserialize it back by enabling the `serde` feature.
 //!
 //! # Usage
 //!
@@ -19,6 +24,11 @@
 //! [Read](https://doc.rust-lang.org/std/io/trait.Read.html) or
 //! [Write](https://doc.rust-lang.org/std/io/trait.Write.html) with
 //! [embedded_io_adapters::std:FromStd](https://docs.rs/embedded-io-adapters/0.7.0/embedded_io_adapters/std/struct.FromStd.html).
+//!
+//! ```sh
+//! cargo add rustyfit
+//! cargo add embedded-io-adapters --features std # only for std
+//! ```
 //!
 //! We will provide examples in `std` for simplicity and a wider audience, since `#![no_std]` is platform-dependent.
 //! For additional examples, including `#![no_std]` use cases, please refer to the
@@ -45,32 +55,51 @@
 //!
 //!     let mut dec = Decoder::new();
 //!
-//!     let fit = match dec.decode(&mut reader)? {
-//!         Some(fit) => fit,
-//!         None => {
-//!             // First decode call to reader should be `Ok` or `Err`.
-//!             // Except, reader is already empty to begin with.
-//!             return Err(Box::from("empty reader"));
-//!         }
+//!     let Some(fit) = dec.decode(&mut reader)? else {
+//!         return Ok(()); // reader is empty from the start, skip.
 //!     };
 //!
 //!     println!("file_header's data_size: {}", fit.file_header.data_size);
 //!     println!("messages count: {}", fit.messages.len());
-//!     for field in &fit.messages[0].fields {
-//!         // first message: file_id
-//!         if field.num == mesgdef::FileId::TYPE
-//!             && let Value::Uint8(v) = field.value
-//!         {
-//!             println!("file type: {}", typedef::File(v));
+//!
+//!     for mesg in &fit.messages {
+//!         match mesg.num {
+//!             typedef::MesgNum::FILE_ID => {
+//!                 // We can manually iterate over fields
+//!                 for field in &mesg.fields {
+//!                     if field.num == mesgdef::FileId::TYPE
+//!                         && let Value::Uint8(v) = field.value
+//!                     {
+//!                         println!("file_id:\n file_type: {}", typedef::File(v));
+//!                     }
+//!                 }
+//!             }
+//!             typedef::MesgNum::SESSION => {
+//!                 // But it's more convenience to convert mesg into mesgdef's struct.
+//!                 let ses = mesgdef::Session::from(mesg);
+//!                 println!(
+//!                     "session:\n start_time: {:?}\n sport: {}\n num_laps: {}",
+//!                     ses.start_time.unix_timestamp(),
+//!                     ses.sport,
+//!                     ses.num_laps
+//!                 );
+//!             }
+//!             _ => {}
 //!         }
 //!     }
-//!
+//!    
 //!     Ok(())
 //!
 //!     // # Output:
+//!     //
 //!     // file_header's data_size: 94080
 //!     // messages count: 3611
-//!     // file type: activity
+//!     // file_id:
+//!     //  file_type: activity
+//!     // session:
+//!     //  start_time: Some(1626815480)
+//!     //  sport: stand_up_paddleboarding
+//!     //  num_laps: 1
 //! }
 //!
 //! ```
@@ -192,11 +221,11 @@
 //! }
 //!
 //! impl FileId {
-//!     /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
+//!     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::File
 //!     pub const TYPE: u8 = 0;
-//!     /// Value's type: `u16`; ProfileType: `ProfileType::MANUFACTURER`
+//!     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
 //!     pub const MANUFACTURER: u8 = 1;
-//!     /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+//!     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
 //!     pub const PRODUCT: u8 = 2;
 //!     /* ... */
 //! }
@@ -221,7 +250,7 @@
 //!                 fields: vec![
 //!                     Field {
 //!                         num: mesgdef::FileId::TYPE,
-//!                         base_type: FitBaseType::UINT8,
+//!                         base_type: FitBaseType::ENUM,
 //!                         value: Value::Uint8(typedef::File::ACTIVITY.0),
 //!                         is_expanded: false,
 //!                     },
@@ -285,7 +314,7 @@
 //! ## Encode with mesgdef
 //!
 //! For the most convenient approach, users can encode messages using the [mesgdef](crate::profile::mesgdef) module which
-//! can be converted into low-level structures, `Message`.
+//! can be converted into low-level structures, `Message`. Same output, but more concise code.
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
@@ -306,7 +335,7 @@
 //!                 let mut record = mesgdef::Record::new();
 //!                 record.distance = 100 * 100; // 100 m
 //!                 record.heart_rate = 70; // 70 bpm
-//!                 record.speed = 2 * 1000; // 2 m/s
+//!                 record.set_speed_scaled(2.0); // 2 m/s (helper methods provided)
 //!                 Message::from(record)
 //!             },
 //!         ],
@@ -390,6 +419,207 @@
 //!
 //! These associated functions and methods are `const fn`, so we can use it to declare a static variable
 //! as long as we wrap it with a lock, e.g. `Mutex`. This is useful on microcrontrollers where RAM is only hundred KBs.
+//!
+//! # Features
+//!
+//! No feature is enabled by default.
+//!
+//! ## Serde
+//!
+//! Enable this feature for converting from/into other formats e.g. JSON. Units may be converted, see [issue#77](https://github.com/muktihari/rustyfit/issues/77) for details.
+//!
+//! ```sh
+//! cargo add rustyfit --features serde
+//! ```
+//!
+//! Example:
+//!
+//! ```
+//! # #[cfg(not(feature = "serde"))]
+//! fn main() {}
+//!
+//! # #[cfg(feature = "serde")]
+//! use rustyfit::{profile::{mesgdef, typedef::{self, FitBaseType}}, proto::{Field, Message, Value}};
+//!
+//! # #[cfg(feature = "serde")]
+//! fn main() {
+//!     let mut record = mesgdef::Record::new();
+//!     record.timestamp = typedef::DateTime::from_unix_timestamp(1781838455);
+//!     record.position_lat = 424480360;
+//!     record.position_long = -940295581;
+//!     record.heart_rate = 70;
+//!     record.distance = 50 * 100;
+//!     record.activity_type = typedef::ActivityType::CYCLING; // typedef::ActivityType(2)
+//!     record.unknown_fields = [Field {
+//!         num: 254,
+//!         base_type: FitBaseType::UINT8,
+//!         value: Value::Uint8(10),
+//!         is_expanded: false,
+//!     }].into();
+//!
+//!     let s = serde_json::to_string_pretty(&record).unwrap();
+//!     println!("# Serialize from mesgdef::Record:\n{}\n", s);
+//!
+//!     let mesg = Message::from(record);
+//!     let s = serde_json::to_string_pretty(&mesg).unwrap();
+//!     println!("# Serialize from proto::Message:\n{}\n", s);
+//! }
+//! ```
+//!
+//! Result:
+//!
+//! ```sh
+//! # Serialize from mesgdef::Record:
+//! {
+//!   "timestamp": 1781838455,
+//!   "position_lat": 35.579532757401466,
+//!   "position_long": -78.81466512568295,
+//!   "heart_rate": 70,
+//!   "distance": 50.0,
+//!   "activity_type": {
+//!     "t": "cycling",
+//!     "c": 2
+//!   },
+//!   "unknown_fields": [
+//!     {
+//!       "num": 254,
+//!       "base_type": {
+//!         "t": "uint8",
+//!         "c": 2,
+//!       },
+//!       "value": {
+//!         "t": "uint8",
+//!         "c": 10
+//!       },
+//!       "is_expanded": false
+//!     }
+//!   ]
+//! }
+//!
+//! # Serialize from proto::Message
+//! {
+//!   "num": {
+//!     "t": "record",
+//!     "c": 20
+//!   },
+//!   "fields": [
+//!     {
+//!       "num": 253,
+//!       "name": "timestamp",
+//!       "base_type": {
+//!         "t": "uint32",
+//!         "c": 134
+//!       },
+//!       "profile_type": "date_time",
+//!       "value": {
+//!         "t": "uint32",
+//!         "c": 1150772855
+//!       },
+//!       "scale": 1.0,
+//!       "offset": 0.0,
+//!       "units": "s",
+//!       "is_expanded": false
+//!     },
+//!     {
+//!       "num": 0,
+//!       "name": "position_lat",
+//!       "base_type": {
+//!         "t": "sint32",
+//!         "c": 133
+//!       },
+//!       "profile_type": "sint32",
+//!       "value": {
+//!         "t": "int32",
+//!         "c": 424480360
+//!       },
+//!       "scale": 1.0,
+//!       "offset": 0.0,
+//!       "units": "semicircles",
+//!       "is_expanded": false
+//!     },
+//!     {
+//!       "num": 1,
+//!       "name": "position_long",
+//!       "base_type": {
+//!         "t": "sint32",
+//!         "c": 133
+//!       },
+//!       "profile_type": "sint32",
+//!       "value": {
+//!         "t": "int32",
+//!         "c": -940295581
+//!       },
+//!       "scale": 1.0,
+//!       "offset": 0.0,
+//!       "units": "semicircles",
+//!       "is_expanded": false
+//!     },
+//!     {
+//!       "num": 3,
+//!       "name": "heart_rate",
+//!       "base_type": {
+//!         "t": "uint8",
+//!         "c": 2
+//!       },
+//!       "profile_type": "uint8",
+//!       "value": {
+//!         "t": "uint8",
+//!         "c": 70
+//!       },
+//!       "scale": 1.0,
+//!       "offset": 0.0,
+//!       "units": "bpm",
+//!       "is_expanded": false
+//!     },
+//!     {
+//!       "num": 5,
+//!       "name": "distance",
+//!       "base_type": {
+//!         "t": "uint32",
+//!         "c": 134
+//!       },
+//!       "profile_type": "uint32",
+//!       "value": {
+//!         "t": "uint32",
+//!         "c": 5000
+//!       },
+//!       "scale": 100.0,
+//!       "offset": 0.0,
+//!       "units": "m",
+//!       "is_expanded": false
+//!     },
+//!     {
+//!       "num": 42,
+//!       "name": "activity_type",
+//!       "base_type": {
+//!         "t": "enum",
+//!         "c": 0
+//!       },
+//!       "profile_type": "activity_type",
+//!       "value": {
+//!         "t": "uint8",
+//!         "c": 2
+//!       },
+//!       "scale": 1.0,
+//!       "offset": 0.0,
+//!       "is_expanded": false
+//!     },
+//!     {
+//!       "num": 254,
+//!       "base_type": {
+//!         "t": "uint8",
+//!         "c": 2
+//!       },
+//!       "value": {
+//!         "t": "uint8",
+//!         "c": 10
+//!       },
+//!       "is_expanded": false
+//!     }
+//!   ],
+//! }
+//!
+//! ```
 
 #![cfg_attr(not(test), no_std)]
 

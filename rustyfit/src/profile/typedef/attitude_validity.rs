@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Attitude Validity type.
 #[repr(transparent)]
@@ -27,6 +27,25 @@ impl AttitudeValidity {
     pub const SOLUTION_COASTING: AttitudeValidity = AttitudeValidity(0x0400);
     pub const TRUE_TRACK_ANGLE: AttitudeValidity = AttitudeValidity(0x0800);
     pub const MAGNETIC_HEADING: AttitudeValidity = AttitudeValidity(0x1000);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0x0001 => Some("track_angle_heading_valid"),
+            0x0002 => Some("pitch_valid"),
+            0x0004 => Some("roll_valid"),
+            0x0008 => Some("lateral_body_accel_valid"),
+            0x0010 => Some("normal_body_accel_valid"),
+            0x0020 => Some("turn_rate_valid"),
+            0x0040 => Some("hw_fail"),
+            0x0080 => Some("mag_invalid"),
+            0x0100 => Some("no_gps"),
+            0x0200 => Some("gps_invalid"),
+            0x0400 => Some("solution_coasting"),
+            0x0800 => Some("true_track_angle"),
+            0x1000 => Some("magnetic_heading"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for AttitudeValidity {
@@ -37,21 +56,50 @@ impl Default for AttitudeValidity {
 
 impl fmt::Display for AttitudeValidity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0x0001 => write!(f, "track_angle_heading_valid"),
-            0x0002 => write!(f, "pitch_valid"),
-            0x0004 => write!(f, "roll_valid"),
-            0x0008 => write!(f, "lateral_body_accel_valid"),
-            0x0010 => write!(f, "normal_body_accel_valid"),
-            0x0020 => write!(f, "turn_rate_valid"),
-            0x0040 => write!(f, "hw_fail"),
-            0x0080 => write!(f, "mag_invalid"),
-            0x0100 => write!(f, "no_gps"),
-            0x0200 => write!(f, "gps_invalid"),
-            0x0400 => write!(f, "solution_coasting"),
-            0x0800 => write!(f, "true_track_angle"),
-            0x1000 => write!(f, "magnetic_heading"),
-            _ => write!(f, "AttitudeValidity({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "AttitudeValidity({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for AttitudeValidity {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("AttitudeValidity", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u16,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for AttitudeValidity {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

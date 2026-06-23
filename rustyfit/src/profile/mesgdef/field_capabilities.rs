@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Field Capabilities message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct FieldCapabilities {
     pub message_index: typedef::MessageIndex,
@@ -23,15 +26,15 @@ pub struct FieldCapabilities {
 }
 
 impl FieldCapabilities {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `u8`; ProfileType: `ProfileType::FILE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::File
     pub const FILE: u8 = 0;
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESG_NUM`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MesgNum
     pub const MESG_NUM: u8 = 1;
-    /// Value's type: `u8`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_NUM: u8 = 2;
-    /// Value's type: `u16`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const COUNT: u8 = 3;
 
     /// Create new FieldCapabilities with all fields being set to its corresponding invalid value.
@@ -143,6 +146,81 @@ impl From<FieldCapabilities> for Message {
             num: typedef::MesgNum::FIELD_CAPABILITIES,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for FieldCapabilities {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("FieldCapabilities", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if self.file.0 != u8::MAX {
+            state.serialize_field("file", &self.file)?;
+        }
+        if self.mesg_num.0 != u16::MAX {
+            state.serialize_field("mesg_num", &self.mesg_num)?;
+        }
+        if self.field_num != u8::MAX {
+            state.serialize_field("field_num", &self.field_num)?;
+        }
+        if self.count != u16::MAX {
+            state.serialize_field("count", &self.count)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    file: typedef::File,
+    mesg_num: typedef::MesgNum,
+    field_num: u8,
+    count: u16,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for FieldCapabilities {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            file: m.file,
+            mesg_num: m.mesg_num,
+            field_num: m.field_num,
+            count: m.count,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            file: typedef::File(u8::MAX),
+            mesg_num: typedef::MesgNum(u16::MAX),
+            field_num: u8::MAX,
+            count: u16::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

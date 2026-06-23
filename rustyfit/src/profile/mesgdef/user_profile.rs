@@ -9,8 +9,11 @@ use crate::proto::*;
 use alloc::borrow::ToOwned;
 use alloc::string::String;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// User Profile message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct UserProfile {
     pub message_index: typedef::MessageIndex,
@@ -62,63 +65,63 @@ pub struct UserProfile {
 }
 
 impl UserProfile {
-    /// Value's type: `u16`; ProfileType: `ProfileType::MESSAGE_INDEX`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; ProfileType: `ProfileType::STRING`
+    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const FRIENDLY_NAME: u8 = 0;
-    /// Value's type: `u8`; ProfileType: `ProfileType::GENDER`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Gender
     pub const GENDER: u8 = 1;
-    /// Value's type: `u8`; Units: `years`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `years`
     pub const AGE: u8 = 2;
-    /// Value's type: `u8`; Scale: `100`; Units: `m`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
     pub const HEIGHT: u8 = 3;
-    /// Value's type: `u16`; Scale: `10`; Units: `kg`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `kg`
     pub const WEIGHT: u8 = 4;
-    /// Value's type: `u8`; ProfileType: `ProfileType::LANGUAGE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Language
     pub const LANGUAGE: u8 = 5;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const ELEV_SETTING: u8 = 6;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const WEIGHT_SETTING: u8 = 7;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const RESTING_HEART_RATE: u8 = 8;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const DEFAULT_MAX_RUNNING_HEART_RATE: u8 = 9;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const DEFAULT_MAX_BIKING_HEART_RATE: u8 = 10;
-    /// Value's type: `u8`; Units: `bpm`; ProfileType: `ProfileType::UINT8`
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const DEFAULT_MAX_HEART_RATE: u8 = 11;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_HEART`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayHeart
     pub const HR_SETTING: u8 = 12;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const SPEED_SETTING: u8 = 13;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const DIST_SETTING: u8 = 14;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_POWER`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayPower
     pub const POWER_SETTING: u8 = 16;
-    /// Value's type: `u8`; ProfileType: `ProfileType::ACTIVITY_CLASS`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ActivityClass
     pub const ACTIVITY_CLASS: u8 = 17;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_POSITION`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayPosition
     pub const POSITION_SETTING: u8 = 18;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const TEMPERATURE_SETTING: u8 = 21;
-    /// Value's type: `u16`; ProfileType: `ProfileType::USER_LOCAL_ID`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::UserLocalId
     pub const LOCAL_ID: u8 = 22;
-    /// Value's type: `[u8; 6]`; ProfileType: `ProfileType::BYTE`
+    /// Value's type: `[u8; 6]`; FitBaseType::BYTE; ProfileType::Byte
     pub const GLOBAL_ID: u8 = 23;
-    /// Value's type: `u32`; ProfileType: `ProfileType::LOCALTIME_INTO_DAY`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocaltimeIntoDay
     pub const WAKE_TIME: u8 = 28;
-    /// Value's type: `u32`; ProfileType: `ProfileType::LOCALTIME_INTO_DAY`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocaltimeIntoDay
     pub const SLEEP_TIME: u8 = 29;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const HEIGHT_SETTING: u8 = 30;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m`
     pub const USER_RUNNING_STEP_LENGTH: u8 = 31;
-    /// Value's type: `u16`; Scale: `1000`; Units: `m`; ProfileType: `ProfileType::UINT16`
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m`
     pub const USER_WALKING_STEP_LENGTH: u8 = 32;
-    /// Value's type: `u8`; ProfileType: `ProfileType::DISPLAY_MEASURE`
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const DEPTH_SETTING: u8 = 47;
-    /// Value's type: `u32`; ProfileType: `ProfileType::UINT32`
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const DIVE_COUNT: u8 = 49;
 
     /// Create new UserProfile with all fields being set to its corresponding invalid value.
@@ -589,6 +592,259 @@ impl From<UserProfile> for Message {
             num: typedef::MesgNum::USER_PROFILE,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for UserProfile {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("UserProfile", n)?;
+        if self.message_index.0 != u16::MAX {
+            state.serialize_field("message_index", &self.message_index)?;
+        }
+        if !self.friendly_name.is_empty() {
+            state.serialize_field("friendly_name", &self.friendly_name)?;
+        }
+        if self.gender.0 != u8::MAX {
+            state.serialize_field("gender", &self.gender)?;
+        }
+        if self.age != u8::MAX {
+            state.serialize_field("age", &self.age)?;
+        }
+        if let Some(v) = self.height_scaled() {
+            state.serialize_field("height", &v)?;
+        }
+        if let Some(v) = self.weight_scaled() {
+            state.serialize_field("weight", &v)?;
+        }
+        if self.language.0 != u8::MAX {
+            state.serialize_field("language", &self.language)?;
+        }
+        if self.elev_setting.0 != u8::MAX {
+            state.serialize_field("elev_setting", &self.elev_setting)?;
+        }
+        if self.weight_setting.0 != u8::MAX {
+            state.serialize_field("weight_setting", &self.weight_setting)?;
+        }
+        if self.resting_heart_rate != u8::MAX {
+            state.serialize_field("resting_heart_rate", &self.resting_heart_rate)?;
+        }
+        if self.default_max_running_heart_rate != u8::MAX {
+            state.serialize_field(
+                "default_max_running_heart_rate",
+                &self.default_max_running_heart_rate,
+            )?;
+        }
+        if self.default_max_biking_heart_rate != u8::MAX {
+            state.serialize_field(
+                "default_max_biking_heart_rate",
+                &self.default_max_biking_heart_rate,
+            )?;
+        }
+        if self.default_max_heart_rate != u8::MAX {
+            state.serialize_field("default_max_heart_rate", &self.default_max_heart_rate)?;
+        }
+        if self.hr_setting.0 != u8::MAX {
+            state.serialize_field("hr_setting", &self.hr_setting)?;
+        }
+        if self.speed_setting.0 != u8::MAX {
+            state.serialize_field("speed_setting", &self.speed_setting)?;
+        }
+        if self.dist_setting.0 != u8::MAX {
+            state.serialize_field("dist_setting", &self.dist_setting)?;
+        }
+        if self.power_setting.0 != u8::MAX {
+            state.serialize_field("power_setting", &self.power_setting)?;
+        }
+        if self.activity_class.0 != u8::MAX {
+            state.serialize_field("activity_class", &self.activity_class)?;
+        }
+        if self.position_setting.0 != u8::MAX {
+            state.serialize_field("position_setting", &self.position_setting)?;
+        }
+        if self.temperature_setting.0 != u8::MAX {
+            state.serialize_field("temperature_setting", &self.temperature_setting)?;
+        }
+        if self.local_id.0 != u16::MAX {
+            state.serialize_field("local_id", &self.local_id)?;
+        }
+        if self.global_id != [u8::MAX; 6] {
+            state.serialize_field("global_id", &self.global_id)?;
+        }
+        if self.wake_time.0 != u32::MAX {
+            state.serialize_field("wake_time", &self.wake_time)?;
+        }
+        if self.sleep_time.0 != u32::MAX {
+            state.serialize_field("sleep_time", &self.sleep_time)?;
+        }
+        if self.height_setting.0 != u8::MAX {
+            state.serialize_field("height_setting", &self.height_setting)?;
+        }
+        if let Some(v) = self.user_running_step_length_scaled() {
+            state.serialize_field("user_running_step_length", &v)?;
+        }
+        if let Some(v) = self.user_walking_step_length_scaled() {
+            state.serialize_field("user_walking_step_length", &v)?;
+        }
+        if self.depth_setting.0 != u8::MAX {
+            state.serialize_field("depth_setting", &self.depth_setting)?;
+        }
+        if self.dive_count != u32::MAX {
+            state.serialize_field("dive_count", &self.dive_count)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    message_index: typedef::MessageIndex,
+    friendly_name: String,
+    gender: typedef::Gender,
+    age: u8,
+    height: f64,
+    weight: f64,
+    language: typedef::Language,
+    elev_setting: typedef::DisplayMeasure,
+    weight_setting: typedef::DisplayMeasure,
+    resting_heart_rate: u8,
+    default_max_running_heart_rate: u8,
+    default_max_biking_heart_rate: u8,
+    default_max_heart_rate: u8,
+    hr_setting: typedef::DisplayHeart,
+    speed_setting: typedef::DisplayMeasure,
+    dist_setting: typedef::DisplayMeasure,
+    power_setting: typedef::DisplayPower,
+    activity_class: typedef::ActivityClass,
+    position_setting: typedef::DisplayPosition,
+    temperature_setting: typedef::DisplayMeasure,
+    local_id: typedef::UserLocalId,
+    global_id: [u8; 6],
+    wake_time: typedef::LocaltimeIntoDay,
+    sleep_time: typedef::LocaltimeIntoDay,
+    height_setting: typedef::DisplayMeasure,
+    user_running_step_length: f64,
+    user_walking_step_length: f64,
+    depth_setting: typedef::DisplayMeasure,
+    dive_count: u32,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for UserProfile {
+    fn from(m: De) -> Self {
+        Self {
+            message_index: m.message_index,
+            friendly_name: m.friendly_name,
+            gender: m.gender,
+            age: m.age,
+            height: {
+                let unscaled = (m.height + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            weight: {
+                let unscaled = (m.weight + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            language: m.language,
+            elev_setting: m.elev_setting,
+            weight_setting: m.weight_setting,
+            resting_heart_rate: m.resting_heart_rate,
+            default_max_running_heart_rate: m.default_max_running_heart_rate,
+            default_max_biking_heart_rate: m.default_max_biking_heart_rate,
+            default_max_heart_rate: m.default_max_heart_rate,
+            hr_setting: m.hr_setting,
+            speed_setting: m.speed_setting,
+            dist_setting: m.dist_setting,
+            power_setting: m.power_setting,
+            activity_class: m.activity_class,
+            position_setting: m.position_setting,
+            temperature_setting: m.temperature_setting,
+            local_id: m.local_id,
+            global_id: m.global_id,
+            wake_time: m.wake_time,
+            sleep_time: m.sleep_time,
+            height_setting: m.height_setting,
+            user_running_step_length: {
+                let unscaled = (m.user_running_step_length + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            user_walking_step_length: {
+                let unscaled = (m.user_walking_step_length + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            depth_setting: m.depth_setting,
+            dive_count: m.dive_count,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            message_index: typedef::MessageIndex(u16::MAX),
+            friendly_name: String::new(),
+            gender: typedef::Gender(u8::MAX),
+            age: u8::MAX,
+            height: f64::from_bits(u64::MAX),
+            weight: f64::from_bits(u64::MAX),
+            language: typedef::Language(u8::MAX),
+            elev_setting: typedef::DisplayMeasure(u8::MAX),
+            weight_setting: typedef::DisplayMeasure(u8::MAX),
+            resting_heart_rate: u8::MAX,
+            default_max_running_heart_rate: u8::MAX,
+            default_max_biking_heart_rate: u8::MAX,
+            default_max_heart_rate: u8::MAX,
+            hr_setting: typedef::DisplayHeart(u8::MAX),
+            speed_setting: typedef::DisplayMeasure(u8::MAX),
+            dist_setting: typedef::DisplayMeasure(u8::MAX),
+            power_setting: typedef::DisplayPower(u8::MAX),
+            activity_class: typedef::ActivityClass(u8::MAX),
+            position_setting: typedef::DisplayPosition(u8::MAX),
+            temperature_setting: typedef::DisplayMeasure(u8::MAX),
+            local_id: typedef::UserLocalId(u16::MAX),
+            global_id: [u8::MAX; 6],
+            wake_time: typedef::LocaltimeIntoDay(u32::MAX),
+            sleep_time: typedef::LocaltimeIntoDay(u32::MAX),
+            height_setting: typedef::DisplayMeasure(u8::MAX),
+            user_running_step_length: f64::from_bits(u64::MAX),
+            user_walking_step_length: f64::from_bits(u64::MAX),
+            depth_setting: typedef::DisplayMeasure(u8::MAX),
+            dive_count: u32::MAX,
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }

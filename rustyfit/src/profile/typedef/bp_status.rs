@@ -4,9 +4,9 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-#![allow(unused, clippy::match_single_binding)]
-
 use core::fmt;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Deserializer, Serialize, Serializer, de, ser::SerializeStruct};
 
 /// Bp Status type.
 #[repr(transparent)]
@@ -19,6 +19,17 @@ impl BpStatus {
     pub const ERROR_NO_MEASUREMENT: BpStatus = BpStatus(2);
     pub const ERROR_DATA_OUT_OF_RANGE: BpStatus = BpStatus(3);
     pub const ERROR_IRREGULAR_HEART_RATE: BpStatus = BpStatus(4);
+
+    fn as_str(self) -> Option<&'static str> {
+        match self.0 {
+            0 => Some("no_error"),
+            1 => Some("error_incomplete_data"),
+            2 => Some("error_no_measurement"),
+            3 => Some("error_data_out_of_range"),
+            4 => Some("error_irregular_heart_rate"),
+            _ => None,
+        }
+    }
 }
 
 impl Default for BpStatus {
@@ -29,13 +40,50 @@ impl Default for BpStatus {
 
 impl fmt::Display for BpStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self.0 {
-            0 => write!(f, "no_error"),
-            1 => write!(f, "error_incomplete_data"),
-            2 => write!(f, "error_no_measurement"),
-            3 => write!(f, "error_data_out_of_range"),
-            4 => write!(f, "error_irregular_heart_rate"),
-            _ => write!(f, "BpStatus({})", self.0),
+        match self.as_str() {
+            Some(s) => write!(f, "{}", s),
+            None => write!(f, "BpStatus({})", self.0),
         }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for BpStatus {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let mut state = serializer.serialize_struct("BpStatus", 2)?;
+        if let Some(s) = self.as_str() {
+            state.serialize_field("t", s)?;
+        }
+        state.serialize_field("c", &self.0)?;
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize))]
+struct De<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    t: Option<&'a str>,
+    c: u8,
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for BpStatus {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let repr = De::deserialize(deserializer)?;
+        let v = Self(repr.c);
+        if let Some(t) = repr.t
+            && let Some(s) = v.as_str()
+            && t != s
+        {
+            return Err(de::Error::custom("tag and content mismatch"));
+        }
+        Ok(v)
     }
 }

@@ -7,8 +7,11 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use alloc::vec::Vec;
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 
 /// Capabilities message.
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Capabilities {
     /// Base: UINT8Z; Use language_bits_x types where x is index of array.
@@ -26,13 +29,13 @@ pub struct Capabilities {
 }
 
 impl Capabilities {
-    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::UINT8Z`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const LANGUAGES: u8 = 0;
-    /// Value's type: `Vec<u8>`; Base: UINT8Z; ProfileType: `ProfileType::SPORT_BITS_0`
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::SportBits0
     pub const SPORTS: u8 = 1;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::WORKOUT_CAPABILITIES`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::WorkoutCapabilities
     pub const WORKOUTS_SUPPORTED: u8 = 21;
-    /// Value's type: `u32`; Base: UINT32Z; ProfileType: `ProfileType::CONNECTIVITY_CAPABILITIES`
+    /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::ConnectivityCapabilities
     pub const CONNECTIVITY_SUPPORTED: u8 = 23;
 
     /// Create new Capabilities with all fields being set to its corresponding invalid value.
@@ -148,6 +151,75 @@ impl From<Capabilities> for Message {
             num: typedef::MesgNum::CAPABILITIES,
             fields,
             developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Capabilities {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        let n = self.count_valid_fields() + 2;
+        let mut state = serializer.serialize_struct("Capabilities", n)?;
+        if !self.languages.is_empty() {
+            state.serialize_field("languages", &self.languages)?;
+        }
+        if !self.sports.is_empty() {
+            state.serialize_field("sports", &self.sports)?;
+        }
+        if self.workouts_supported.0 != u32::MIN {
+            state.serialize_field("workouts_supported", &self.workouts_supported)?;
+        }
+        if self.connectivity_supported.0 != u32::MIN {
+            state.serialize_field("connectivity_supported", &self.connectivity_supported)?;
+        }
+        if !self.unknown_fields.is_empty() {
+            state.serialize_field("unknown_fields", &self.unknown_fields)?;
+        }
+        if !self.developer_fields.is_empty() {
+            state.serialize_field("developer_fields", &self.developer_fields)?;
+        }
+        state.end()
+    }
+}
+
+#[cfg(feature = "serde")]
+#[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
+struct De {
+    languages: Vec<u8>,
+    sports: Vec<typedef::SportBits0>,
+    workouts_supported: typedef::WorkoutCapabilities,
+    connectivity_supported: typedef::ConnectivityCapabilities,
+    unknown_fields: Vec<Field>,
+    developer_fields: Vec<DeveloperField>,
+}
+
+#[cfg(feature = "serde")]
+impl From<De> for Capabilities {
+    fn from(m: De) -> Self {
+        Self {
+            languages: m.languages,
+            sports: m.sports,
+            workouts_supported: m.workouts_supported,
+            connectivity_supported: m.connectivity_supported,
+            unknown_fields: m.unknown_fields,
+            developer_fields: m.developer_fields,
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Default for De {
+    fn default() -> Self {
+        Self {
+            languages: Vec::new(),
+            sports: Vec::new(),
+            workouts_supported: typedef::WorkoutCapabilities(u32::MIN),
+            connectivity_supported: typedef::ConnectivityCapabilities(u32::MIN),
+            unknown_fields: Vec::new(),
+            developer_fields: Vec::new(),
         }
     }
 }
