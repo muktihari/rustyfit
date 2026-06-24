@@ -389,7 +389,7 @@ impl Decoder {
                 continue;
             }
             if let Some(bits) = &mut Bits::new(&field.value) {
-                self.expand_components(mesg, bits, components);
+                Decoder::expand_components(&mut self.accumulator, mesg, bits, components);
             };
         }
 
@@ -466,7 +466,12 @@ impl Decoder {
         Ok(())
     }
 
-    fn expand_components(&mut self, mesg: &mut Message, bits: &mut Bits, components: &[Component]) {
+    fn expand_components(
+        accumulator: &mut Accumulator,
+        mesg: &mut Message,
+        bits: &mut Bits,
+        components: &[Component],
+    ) {
         for component in components {
             let Some(mut val) = bits.pull(component.bits) else {
                 break;
@@ -474,9 +479,7 @@ impl Decoder {
 
             let field_num = component.field_num;
             if component.accumulate {
-                val = self
-                    .accumulator
-                    .accumulate(mesg.num, field_num, val, component.bits);
+                val = accumulator.accumulate(mesg.num, field_num, val, component.bits);
             }
 
             let Some(field_ref) = lookup::field_reference(mesg.num, field_num) else {
@@ -526,7 +529,7 @@ impl Decoder {
             }
 
             if let Some(bits) = &mut Bits::new(&value) {
-                self.expand_components(mesg, bits, components);
+                Decoder::expand_components(accumulator, mesg, bits, components);
             };
         }
     }
