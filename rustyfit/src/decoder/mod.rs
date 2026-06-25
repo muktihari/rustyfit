@@ -13,7 +13,6 @@ use crate::{
     proto::*,
 };
 use alloc::{vec, vec::Vec};
-use core::mem;
 use embedded_io::{Read, ReadExactError};
 
 /// Decoder Error
@@ -155,42 +154,22 @@ impl Decoder {
         };
 
         let mut messages = Vec::new();
-
         while self.cur < file_header.data_size {
-            self.read_exact_inc(&mut reader, 1)?;
+            let buf = &mut self.buf[..1];
+            reader.read_exact(buf)?;
+            self.cur += 1;
 
-            let header = self.buf[0];
+            if self.options.checksum {
+                self.crc16.write(buf);
+            }
 
+            let header = buf[0];
             if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
-                let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
-                let mut mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
-
-                mesg_def.header = header;
-
-                let result = self.decode_message_definition(&mut reader, &mut mesg_def);
-                self.mesg_definitions[local_mesg_num] = mesg_def;
-                result?;
-
+                self.decode_message_definition(&mut reader, header)?;
                 continue;
             }
 
-            let local_mesg_num = local_mesg_num_from_mesg_header(header);
-            if self.mesg_definitions[local_mesg_num].header == 0 {
-                return Err(Error::MissingMessageDefinition {
-                    local_mesg_num: local_mesg_num as u8,
-                });
-            }
-
-            let mesg_def = mem::take(&mut self.mesg_definitions[local_mesg_num]);
-            let mut mesg = mem::take(&mut self.mesg);
-
-            mesg.header = header;
-
-            let result = self.decode_message_data(&mut reader, &mut mesg, &mesg_def);
-            self.mesg_definitions[local_mesg_num] = mesg_def;
-            self.mesg = mesg;
-            result?;
-
+            self.decode_message_data(&mut reader, header)?;
             messages.push(self.mesg.clone());
         }
 
@@ -235,11 +214,10 @@ impl Decoder {
 
         if size == 14 && crc != 0 {
             self.crc16.write(&self.buf[..12]);
-            if self.options.checksum && crc != self.crc16.sum16() {
-                return Err(Error::ChecksumMismatch {
-                    found: crc,
-                    calculated: self.crc16.sum16(),
-                });
+            let found = crc;
+            let calculated = self.crc16.sum16();
+            if self.options.checksum && found != calculated {
+                return Err(Error::ChecksumMismatch { found, calculated });
             }
             self.crc16.reset();
         }
@@ -253,49 +231,53 @@ impl Decoder {
         }))
     }
 
-    /// Reads the exact number of bytes required to fill buf, increment n read bytes and calculate checksum.
-    fn read_exact_inc<R>(&mut self, reader: &mut R, n: usize) -> Result<(), Error<R::Error>>
-    where
-        R: Read,
-    {
-        reader.read_exact(&mut self.buf[..n])?;
-        self.cur += n as u32;
-        if self.options.checksum {
-            self.crc16.write(&self.buf[..n]);
-        }
-        Ok(())
-    }
-
     fn decode_message_definition<R>(
         &mut self,
         reader: &mut R,
-        mesg_def: &mut MessageDefinition,
+        header: u8,
     ) -> Result<(), Error<R::Error>>
     where
         R: Read,
     {
-        self.read_exact_inc(reader, 5)?;
+        let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
+        let mesg_def = &mut self.mesg_definitions[local_mesg_num];
+        mesg_def.header = header;
 
-        mesg_def.reserved = self.buf[0];
-        mesg_def.arch = self.buf[1];
+        let buf = &mut self.buf[..5];
+        reader.read_exact(buf)?;
+        self.cur += 5;
+
+        if self.options.checksum {
+            self.crc16.write(buf);
+        }
+
+        mesg_def.reserved = buf[0];
+        mesg_def.arch = buf[1];
         mesg_def.mesg_num = MesgNum(match mesg_def.arch {
-            0 => u16::from_le_bytes([self.buf[2], self.buf[3]]),
-            _ => u16::from_be_bytes([self.buf[2], self.buf[3]]),
+            0 => u16::from_le_bytes([buf[2], buf[3]]),
+            _ => u16::from_be_bytes([buf[2], buf[3]]),
         });
         mesg_def.field_definitions.clear();
         mesg_def.developer_field_definitions.clear();
 
         mesg_def.field_definitions.reserve_exact(255);
 
-        let mut n = self.buf[4] as usize * 3;
+        let mut n = buf[4] as usize * 3;
         while n > 0 {
             let chunk = n.min(255);
-            self.read_exact_inc(reader, chunk)?;
             n -= chunk;
+
+            let buf = &mut self.buf[..chunk];
+            reader.read_exact(buf)?;
+            self.cur += chunk as u32;
+
+            if self.options.checksum {
+                self.crc16.write(buf);
+            }
 
             mesg_def
                 .field_definitions
-                .extend(self.buf[..chunk].chunks_exact(3).map(|b| FieldDefinition {
+                .extend(buf.chunks_exact(3).map(|b| FieldDefinition {
                     num: b[0],
                     size: b[1],
                     base_type: FitBaseType(b[2]),
@@ -303,47 +285,67 @@ impl Decoder {
         }
 
         if mesg_def.header & Message::DEV_DATA_MASK == Message::DEV_DATA_MASK {
-            self.read_exact_inc(reader, 1)?;
+            let buf = &mut self.buf[..1];
+            reader.read_exact(buf)?;
+            self.cur += 1;
+
+            if self.options.checksum {
+                self.crc16.write(buf);
+            }
 
             mesg_def.developer_field_definitions.reserve_exact(255);
 
-            let mut n = self.buf[0] as usize * 3;
+            let mut n = buf[0] as usize * 3;
             while n > 0 {
                 let chunk = n.min(255);
-                self.read_exact_inc(reader, chunk)?;
                 n -= chunk;
+
+                let buf = &mut self.buf[..chunk];
+                reader.read_exact(buf)?;
+                self.cur += chunk as u32;
+
+                if self.options.checksum {
+                    self.crc16.write(buf);
+                }
 
                 mesg_def
                     .developer_field_definitions
-                    .extend(
-                        self.buf[..chunk]
-                            .chunks_exact(3)
-                            .map(|b| DeveloperFieldDefinition {
-                                num: b[0],
-                                size: b[1],
-                                developer_data_index: b[2],
-                            }),
-                    );
+                    .extend(buf.chunks_exact(3).map(|b| DeveloperFieldDefinition {
+                        num: b[0],
+                        size: b[1],
+                        developer_data_index: b[2],
+                    }));
             }
         }
 
         Ok(())
     }
 
-    fn decode_message_data<R>(
-        &mut self,
-        reader: &mut R,
-        mesg: &mut Message,
-        mesg_def: &MessageDefinition,
-    ) -> Result<(), Error<R::Error>>
+    fn decode_message_data<R>(&mut self, reader: &mut R, header: u8) -> Result<(), Error<R::Error>>
     where
         R: Read,
     {
+        let compressed_timestamp_header =
+            header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK;
+
+        let local_mesg_num = if compressed_timestamp_header {
+            (header & Message::COMPRESSED_LOCAL_NUM_MASK) >> Message::COMPRESSED_BIT_SHIFT
+        } else {
+            header & Message::LOCAL_NUM_MASK
+        };
+
+        let mesg_def = &self.mesg_definitions[local_mesg_num as usize];
+        if mesg_def.header == 0 {
+            return Err(Error::MissingMessageDefinition { local_mesg_num });
+        }
+
+        let mesg = &mut self.mesg;
+        mesg.header = header;
         mesg.num = mesg_def.mesg_num;
         mesg.fields.clear();
         mesg.developer_fields.clear();
 
-        if mesg.header & Message::COMPRESSED_HEADER_MASK == Message::COMPRESSED_HEADER_MASK {
+        if compressed_timestamp_header {
             let last_time_offset = (self.timestamp & Message::COMPRESSED_TIME_MASK as u32) as u8;
             let time_offset = mesg.header & Message::COMPRESSED_TIME_MASK;
             self.timestamp = self.timestamp.wrapping_add(
@@ -358,9 +360,109 @@ impl Decoder {
             });
         }
 
-        self.decode_fields(reader, mesg, mesg_def)?;
+        // Decode fields
+        for field_def in &mesg_def.field_definitions {
+            let size = field_def.size;
+            let mut buf = &mut self.buf[..size as usize];
+            reader.read_exact(buf)?;
+            self.cur += size as u32;
 
-        self.decode_developer_fields(reader, mesg, mesg_def)?;
+            if self.options.checksum {
+                self.crc16.write(buf);
+            }
+
+            let num = field_def.num;
+            let base_type: FitBaseType;
+            let accumulate: bool;
+            let array: bool;
+
+            match lookup::field_reference(mesg_def.mesg_num, num) {
+                Some(field_ref) => {
+                    base_type = field_ref.base_type;
+                    accumulate = field_ref.accumulate;
+                    array = field_ref.array;
+                }
+                None => {
+                    base_type = field_def.base_type;
+                    accumulate = false;
+                    array = match base_type {
+                        FitBaseType::STRING => Value::strcount(buf) > 1,
+                        _ => size > base_type.size() && size % base_type.size() == 0,
+                    }
+                }
+            };
+
+            if size < base_type.size() {
+                buf = reslice_buffer(
+                    &mut self.buf,
+                    mesg_def.arch,
+                    size as usize,
+                    base_type.size() as usize,
+                );
+            }
+
+            let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
+
+            if num == Field::TIMESTAMP
+                && base_type == FitBaseType::UINT32
+                && let Value::Uint32(v) = value
+            {
+                self.timestamp = v;
+            }
+
+            if accumulate {
+                self.accumulator.collect(mesg.num, num, &value);
+            }
+
+            mesg.fields.push(Field {
+                num,
+                base_type,
+                value,
+                is_expanded: false,
+            });
+        }
+
+        // Decode developer fields
+        for dev_field_def in &mesg_def.developer_field_definitions {
+            let size = dev_field_def.size;
+            let mut buf = &mut self.buf[..size as usize];
+            reader.read_exact(buf)?;
+            self.cur += size as u32;
+
+            if self.options.checksum {
+                self.crc16.write(buf);
+            }
+
+            let Some(field_desc) = self.field_descriptions.iter().find(|v| {
+                v.developer_data_index == dev_field_def.developer_data_index
+                    && v.field_definition_number == dev_field_def.num
+            }) else {
+                continue; // Currently we ignore missing field_description
+            };
+
+            let base_type = field_desc.fit_base_type_id;
+            if size < base_type.size() {
+                buf = reslice_buffer(
+                    &mut self.buf,
+                    mesg_def.arch,
+                    size as usize,
+                    base_type.size() as usize,
+                );
+            }
+
+            let array = match base_type {
+                FitBaseType::STRING => Value::strcount(buf) > 1,
+                _ => size > base_type.size() && size % base_type.size() == 0,
+            };
+
+            let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
+
+            mesg.developer_fields.push(DeveloperField {
+                num: dev_field_def.num,
+                developer_data_index: dev_field_def.developer_data_index,
+                value,
+            });
+        }
 
         // Developer Data Lookup, currently we allow missing developer_data_id
         if mesg.num == MesgNum::FIELD_DESCRIPTION {
@@ -391,76 +493,6 @@ impl Decoder {
             if let Some(bits) = &mut Bits::new(&field.value) {
                 Decoder::expand_components(&mut self.accumulator, mesg, bits, components);
             };
-        }
-
-        Ok(())
-    }
-
-    fn decode_fields<R>(
-        &mut self,
-        reader: &mut R,
-        mesg: &mut Message,
-        mesg_def: &MessageDefinition,
-    ) -> Result<(), Error<R::Error>>
-    where
-        R: Read,
-    {
-        for field_def in &mesg_def.field_definitions {
-            self.read_exact_inc(reader, field_def.size as usize)?;
-            let mut buf = &self.buf[..field_def.size as usize];
-
-            let num = field_def.num;
-            let base_type: FitBaseType;
-            let accumulate: bool;
-            let array: bool;
-
-            match lookup::field_reference(mesg_def.mesg_num, num) {
-                Some(field_ref) => {
-                    base_type = field_ref.base_type;
-                    accumulate = field_ref.accumulate;
-                    array = field_ref.array;
-                }
-                None => {
-                    base_type = field_def.base_type;
-                    accumulate = false;
-                    array = match base_type {
-                        FitBaseType::STRING => Value::strcount(buf) > 1,
-                        _ => {
-                            field_def.size > base_type.size()
-                                && field_def.size % base_type.size() == 0
-                        }
-                    }
-                }
-            };
-
-            if field_def.size < base_type.size() {
-                buf = slice_buffer_to_match_type_size(
-                    &mut self.buf,
-                    mesg_def.arch,
-                    field_def.size as usize,
-                    base_type.size() as usize,
-                );
-            }
-
-            let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
-
-            if num == Field::TIMESTAMP
-                && base_type == FitBaseType::UINT32
-                && let Value::Uint32(v) = value
-            {
-                self.timestamp = v;
-            }
-
-            if accumulate {
-                self.accumulator.collect(mesg.num, num, &value);
-            }
-
-            mesg.fields.push(Field {
-                num,
-                base_type,
-                is_expanded: false,
-                value,
-            });
         }
 
         Ok(())
@@ -534,54 +566,6 @@ impl Decoder {
         }
     }
 
-    fn decode_developer_fields<R>(
-        &mut self,
-        reader: &mut R,
-        mesg: &mut Message,
-        mesg_def: &MessageDefinition,
-    ) -> Result<(), Error<R::Error>>
-    where
-        R: Read,
-    {
-        for dev_field_def in &mesg_def.developer_field_definitions {
-            self.read_exact_inc(reader, dev_field_def.size as usize)?;
-            let mut buf = &self.buf[..dev_field_def.size as usize];
-
-            let Some(field_desc) = self.field_descriptions.iter().find(|v| {
-                v.developer_data_index == dev_field_def.developer_data_index
-                    && v.field_definition_number == dev_field_def.num
-            }) else {
-                continue; // Currently we ignore missing field_description
-            };
-
-            let base_type = field_desc.fit_base_type_id;
-            if dev_field_def.size < base_type.size() {
-                buf = slice_buffer_to_match_type_size(
-                    &mut self.buf,
-                    mesg_def.arch,
-                    dev_field_def.size as usize,
-                    base_type.size() as usize,
-                );
-            }
-
-            let size = dev_field_def.size;
-            let array = match base_type {
-                FitBaseType::STRING => Value::strcount(buf) > 1,
-                _ => size > base_type.size() && size % base_type.size() == 0,
-            };
-
-            let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
-
-            mesg.developer_fields.push(DeveloperField {
-                num: dev_field_def.num,
-                developer_data_index: dev_field_def.developer_data_index,
-                value,
-            });
-        }
-
-        Ok(())
-    }
-
     fn decode_crc<R>(&mut self, reader: &mut R) -> Result<u16, Error<R::Error>>
     where
         R: Read,
@@ -625,29 +609,15 @@ impl Default for Decoder {
     }
 }
 
-fn local_mesg_num_from_mesg_header(header: u8) -> usize {
-    (match header & Message::COMPRESSED_HEADER_MASK {
-        Message::COMPRESSED_HEADER_MASK => {
-            (header & Message::COMPRESSED_LOCAL_NUM_MASK) >> Message::COMPRESSED_BIT_SHIFT
-        }
-        _ => header,
-    } & Message::LOCAL_NUM_MASK) as usize
-}
-
-fn slice_buffer_to_match_type_size(
-    arr: &mut [u8],
-    arch: u8,
-    current_len: usize,
-    target_len: usize,
-) -> &[u8] {
+fn reslice_buffer(buf: &mut [u8], arch: u8, len: usize, new_len: usize) -> &mut [u8] {
+    debug_assert!(len < new_len);
     if arch == 0 {
-        arr[current_len..target_len].fill(0);
-        &arr[..target_len]
+        buf[len..new_len].fill(0);
     } else {
-        arr.copy_within(..current_len, target_len - current_len);
-        arr[..target_len - current_len].fill(0);
-        &arr[..target_len]
+        buf.copy_within(..len, new_len - len);
+        buf[..new_len - len].fill(0);
     }
+    &mut buf[..new_len]
 }
 
 fn convert_u64_to_value(val: u64, base_type: FitBaseType) -> Value {
@@ -883,54 +853,31 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
                 Some(Ok(Event::FileHeader(file_header)))
             }
             State::Message => {
-                if let Err(err) = self.decoder.read_exact_inc(&mut self.reader, 1) {
-                    return Some(Err(err));
+                let buf = &mut self.decoder.buf[..1];
+                if let Err(err) = self.reader.read_exact(buf) {
+                    return Some(Err(err.into()));
+                }
+                self.decoder.cur += 1;
+
+                if self.decoder.options.checksum {
+                    self.decoder.crc16.write(buf);
                 }
 
-                let header = self.decoder.buf[0];
-
+                let header = buf[0];
                 if header & Message::HEADER_MASK == Message::DEFINITION_MASK {
-                    let local_mesg_num = (header & Message::LOCAL_NUM_MASK) as usize;
-                    let mut mesg_def =
-                        mem::take(&mut self.decoder.mesg_definitions[local_mesg_num]);
-
-                    mesg_def.header = header;
-
-                    let result = self
+                    if let Err(err) = self
                         .decoder
-                        .decode_message_definition(&mut self.reader, &mut mesg_def);
-
-                    self.decoder.mesg_definitions[local_mesg_num] = mesg_def;
-
-                    if let Err(err) = result {
+                        .decode_message_definition(&mut self.reader, header)
+                    {
                         return Some(Err(err));
                     }
 
                     return Some(Ok(Event::MessageDefinition(
-                        &self.decoder.mesg_definitions[local_mesg_num],
+                        &self.decoder.mesg_definitions[(header & Message::LOCAL_NUM_MASK) as usize],
                     )));
                 }
 
-                let local_mesg_num = local_mesg_num_from_mesg_header(header);
-                if self.decoder.mesg_definitions[local_mesg_num].header == 0 {
-                    return Some(Err(Error::MissingMessageDefinition {
-                        local_mesg_num: local_mesg_num as u8,
-                    }));
-                }
-
-                let mesg_def = mem::take(&mut self.decoder.mesg_definitions[local_mesg_num]);
-                let mut mesg = mem::take(&mut self.decoder.mesg);
-
-                mesg.header = header;
-
-                let result =
-                    self.decoder
-                        .decode_message_data(&mut self.reader, &mut mesg, &mesg_def);
-
-                self.decoder.mesg_definitions[local_mesg_num] = mesg_def;
-                self.decoder.mesg = mesg;
-
-                if let Err(err) = result {
+                if let Err(err) = self.decoder.decode_message_data(&mut self.reader, header) {
                     return Some(Err(err));
                 }
 
@@ -964,7 +911,7 @@ mod tests {
         Decoder, StreamingIterator,
         decoder::convert_u64_to_value,
         profile::{PROFILE_VERSION, typedef::FitBaseType},
-        proto::{FileHeader, Message, MessageDefinition, ProtocolVersion, Value},
+        proto::{FileHeader, Message, ProtocolVersion, Value},
     };
     use embedded_io_adapters::std::FromStd;
 
@@ -999,27 +946,22 @@ mod tests {
         let mut dec = Decoder::new();
         let timestamp = 1000;
         dec.timestamp = timestamp;
-        let mesg_def = MessageDefinition::default();
 
         let time_offset = ((timestamp + 1) & Message::COMPRESSED_TIME_MASK as u32) as u8;
-        let mut mesg = Message {
-            header: Message::COMPRESSED_HEADER_MASK | time_offset,
-            ..Default::default()
-        };
+        let header = Message::COMPRESSED_HEADER_MASK | time_offset;
+        let local_mesg_num = (time_offset & Message::COMPRESSED_LOCAL_NUM_MASK) as usize;
+        dec.mesg_definitions[local_mesg_num].header = Message::DEFINITION_MASK;
 
         let mut empty = FromStd::new(empty());
-        dec.decode_message_data(&mut empty, &mut mesg, &mesg_def)
-            .unwrap();
+        dec.decode_message_data(&mut empty, header).unwrap();
         assert_eq!(dec.timestamp, timestamp + 1, "time_offset {}", time_offset);
 
         let time_offset = ((timestamp + 10) & Message::COMPRESSED_TIME_MASK as u32) as u8;
-        let mut mesg = Message {
-            header: Message::COMPRESSED_HEADER_MASK | time_offset,
-            ..Default::default()
-        };
+        let header = Message::COMPRESSED_HEADER_MASK | time_offset;
+        let local_mesg_num = (time_offset & Message::COMPRESSED_LOCAL_NUM_MASK) as usize;
+        dec.mesg_definitions[local_mesg_num].header = Message::DEFINITION_MASK;
 
-        dec.decode_message_data(&mut empty, &mut mesg, &mesg_def)
-            .unwrap();
+        dec.decode_message_data(&mut empty, header).unwrap();
         assert_eq!(dec.timestamp, timestamp + 10, "time_offset {}", time_offset);
     }
 
