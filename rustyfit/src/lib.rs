@@ -235,11 +235,7 @@
 //!
 //! ```
 //! use embedded_io_adapters::std::FromStd;
-//! use rustyfit::{
-//!     Encoder,
-//!     profile::{mesgdef, typedef::{self, FitBaseType}},
-//!     proto::{FIT, Field, Message, Value},
-//! };
+//! use rustyfit::{Encoder, profile::{mesgdef, typedef}, proto::{FIT, Field, Message, Value}};
 //! use std::{error::Error, fs::File, io::{BufWriter, Write}};
 //!
 //! fn main() -> Result<(), Box<dyn Error>> {
@@ -250,19 +246,19 @@
 //!                 fields: vec![
 //!                     Field {
 //!                         num: mesgdef::FileId::TYPE,
-//!                         base_type: FitBaseType::ENUM,
+//!                         base_type: typedef::FitBaseType::ENUM,
 //!                         value: Value::Uint8(typedef::File::ACTIVITY.0),
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::FileId::MANUFACTURER,
-//!                         base_type: FitBaseType::UINT16,
+//!                         base_type: typedef::FitBaseType::UINT16,
 //!                         value: Value::Uint16(typedef::Manufacturer::GARMIN.0),
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::FileId::PRODUCT,
-//!                         base_type: FitBaseType::UINT16,
+//!                         base_type: typedef::FitBaseType::UINT16,
 //!                         value: Value::Uint16(typedef::GarminProduct::FENIX8_SOLAR.0),
 //!                         is_expanded: false,
 //!                     },
@@ -274,19 +270,19 @@
 //!                 fields: vec![
 //!                     Field {
 //!                         num: mesgdef::Record::DISTANCE,
-//!                         base_type: FitBaseType::UINT32,
+//!                         base_type: typedef::FitBaseType::UINT32,
 //!                         value: Value::Uint32(100 * 100), // 100 m
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::Record::HEART_RATE,
-//!                         base_type: FitBaseType::UINT8,
+//!                         base_type: typedef::FitBaseType::UINT8,
 //!                         value: Value::Uint8(70), // 70 bpm
 //!                         is_expanded: false,
 //!                     },
 //!                     Field {
 //!                         num: mesgdef::Record::SPEED,
-//!                         base_type: FitBaseType::UINT16,
+//!                         base_type: typedef::FitBaseType::UINT16,
 //!                         value: Value::Uint16(2 * 1000), // 2 m/s
 //!                         is_expanded: false,
 //!                     },
@@ -305,7 +301,6 @@
 //!     let mut enc = Encoder::new();
 //!     enc.encode(&mut writer, &mut fit)?;
 //!     bw.flush()?;
-//!     # let _ = std::fs::remove_file(fout_name);
 //!
 //!     Ok(())
 //! }
@@ -436,10 +431,9 @@
 //!
 //! ```
 //! # #[cfg(not(feature = "serde"))]
-//! fn main() {}
-//!
+//! # fn main() {}
 //! # #[cfg(feature = "serde")]
-//! use rustyfit::{profile::{mesgdef, typedef::{self, FitBaseType}}, proto::{Field, Message, Value}};
+//! use rustyfit::{profile::{mesgdef, typedef}, proto::{Field, Message, Value}};
 //!
 //! # #[cfg(feature = "serde")]
 //! fn main() {
@@ -452,24 +446,24 @@
 //!     record.activity_type = typedef::ActivityType::CYCLING; // typedef::ActivityType(2)
 //!     record.unknown_fields = [Field {
 //!         num: 254,
-//!         base_type: FitBaseType::UINT8,
+//!         base_type: typedef::FitBaseType::UINT8,
 //!         value: Value::Uint8(10),
 //!         is_expanded: false,
 //!     }].into();
 //!
 //!     let s = serde_json::to_string_pretty(&record).unwrap();
-//!     println!("# Serialize from mesgdef::Record:\n{}\n", s);
+//!     println!("# Serialized from mesgdef::Record:\n{}\n", s);
 //!
 //!     let mesg = Message::from(record);
 //!     let s = serde_json::to_string_pretty(&mesg).unwrap();
-//!     println!("# Serialize from proto::Message:\n{}\n", s);
+//!     println!("# Serialized from proto::Message:\n{}\n", s);
 //! }
 //! ```
 //!
 //! Result:
 //!
 //! ```sh
-//! # Serialize from mesgdef::Record:
+//! # Serialized from mesgdef::Record:
 //! {
 //!   "timestamp": 1781838455,
 //!   "position_lat": 35.579532757401466,
@@ -496,7 +490,7 @@
 //!   ]
 //! }
 //!
-//! # Serialize from proto::Message
+//! # Serialized from proto::Message
 //! {
 //!   "num": {
 //!     "t": "record",
