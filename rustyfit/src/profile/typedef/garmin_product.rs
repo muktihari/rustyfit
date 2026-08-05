@@ -498,6 +498,7 @@ impl GarminProduct {
     pub const INSTINCT3_AMOLED_45MM: GarminProduct = GarminProduct(4586);
     pub const INSTINCT3_AMOLED_50MM: GarminProduct = GarminProduct(4587);
     pub const DESCENT_G2: GarminProduct = GarminProduct(4588);
+    pub const FENIX7_PRO_SOLAR_NO_WIFI: GarminProduct = GarminProduct(4595);
     pub const VENU_X1: GarminProduct = GarminProduct(4603);
     pub const HRM_200: GarminProduct = GarminProduct(4606);
     pub const VIVOACTIVE6: GarminProduct = GarminProduct(4625);
@@ -521,6 +522,7 @@ impl GarminProduct {
     pub const FR70_2026: GarminProduct = GarminProduct(4916);
     pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
     pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
+    pub const CIRQA_SMART_BAND: GarminProduct = GarminProduct(5019);
     pub const D2_MACH2_PRO: GarminProduct = GarminProduct(5056);
     /// SDM4 footpod
     pub const SDM4: GarminProduct = GarminProduct(10007);
@@ -982,6 +984,7 @@ impl GarminProduct {
             4586 => Some("instinct3_amoled_45mm"),
             4587 => Some("instinct3_amoled_50mm"),
             4588 => Some("descent_g2"),
+            4595 => Some("fenix7_pro_solar_no_wifi"),
             4603 => Some("venu_x1"),
             4606 => Some("hrm_200"),
             4625 => Some("vivoactive6"),
@@ -1005,6 +1008,7 @@ impl GarminProduct {
             4916 => Some("fr70_2026"),
             4678 => Some("instinct_crossover_amoled"),
             4944 => Some("d2_air_x15"),
+            5019 => Some("cirqa_smart_band"),
             5056 => Some("d2_mach2_pro"),
             10007 => Some("sdm4"),
             10014 => Some("edge_remote"),

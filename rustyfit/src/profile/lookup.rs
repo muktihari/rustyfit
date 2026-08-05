@@ -550,6 +550,10 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
+                        SubFieldMap { ref_field_num: 6 /* sub_sport */, ref_field_value: 20 /* strength_training */ },
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 62 /* hiit */ },
+                    ], ..SF_DEF },
                     SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 11 /* walking */ },
@@ -559,6 +563,10 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             11 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
@@ -1975,6 +1983,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             32 => Some(FieldReference { name: Name::Descent, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
             33 => Some(FieldReference { name: Name::ModerateActivityMinutes, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Minute, ..FR_DEF }),
             34 => Some(FieldReference { name: Name::VigorousActivityMinutes, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Minute, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::Pushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::MONITORING_HR_DATA => { match field_num {
@@ -3544,6 +3553,8 @@ pub enum Name {
     ProductName,
     /// "projectile_type"
     ProjectileType,
+    /// "pushes"
+    Pushes,
     /// "pwr_calc_type"
     PwrCalcType,
     /// "qualifier"
@@ -3978,6 +3989,10 @@ pub enum Name {
     TotalHemoglobinConcMin,
     /// "total_moving_time"
     TotalMovingTime,
+    /// "total_pushes"
+    TotalPushes,
+    /// "total_reps"
+    TotalReps,
     /// "total_strides"
     TotalStrides,
     /// "total_strokes"
@@ -4681,6 +4696,7 @@ impl Name {
             Self::Product => "product",
             Self::ProductName => "product_name",
             Self::ProjectileType => "projectile_type",
+            Self::Pushes => "pushes",
             Self::PwrCalcType => "pwr_calc_type",
             Self::Qualifier => "qualifier",
             Self::Quality => "quality",
@@ -4898,6 +4914,8 @@ impl Name {
             Self::TotalHemoglobinConcMax => "total_hemoglobin_conc_max",
             Self::TotalHemoglobinConcMin => "total_hemoglobin_conc_min",
             Self::TotalMovingTime => "total_moving_time",
+            Self::TotalPushes => "total_pushes",
+            Self::TotalReps => "total_reps",
             Self::TotalStrides => "total_strides",
             Self::TotalStrokes => "total_strokes",
             Self::TotalTimerTime => "total_timer_time",
@@ -5073,10 +5091,14 @@ pub enum Unit {
     PercentOrBeatsPerMinute,
     /// "% or watts"
     PercentOrWatts,
+    /// "pushes"
+    Push,
     /// "radians"
     Radian,
     /// "radians/second"
     RadiansPerSecond,
+    /// "reps"
+    Repetition,
     /// "rpm"
     RevolutionPerMinute,
     /// "s"
@@ -5164,8 +5186,10 @@ impl Unit {
             Self::Percent => "%",
             Self::PercentOrBeatsPerMinute => "% or bpm",
             Self::PercentOrWatts => "% or watts",
+            Self::Push => "pushes",
             Self::Radian => "radians",
             Self::RadiansPerSecond => "radians/second",
+            Self::Repetition => "reps",
             Self::RevolutionPerMinute => "rpm",
             Self::Second => "s",
             Self::Semicircle => "semicircles",

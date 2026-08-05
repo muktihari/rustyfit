@@ -23,6 +23,7 @@ impl ActivityType {
     pub const SWIMMING: ActivityType = ActivityType(5);
     pub const WALKING: ActivityType = ActivityType(6);
     pub const SEDENTARY: ActivityType = ActivityType(8);
+    pub const WHEELCHAIR_PUSHING: ActivityType = ActivityType(13);
     /// All is for goals only to include all sports.
     pub const ALL: ActivityType = ActivityType(254);
 
@@ -36,6 +37,7 @@ impl ActivityType {
             5 => Some("swimming"),
             6 => Some("walking"),
             8 => Some("sedentary"),
+            13 => Some("wheelchair_pushing"),
             254 => Some("all"),
             _ => None,
         }
