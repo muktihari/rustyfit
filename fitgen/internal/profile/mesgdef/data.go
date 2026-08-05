@@ -19,7 +19,6 @@ type Message struct {
 	Name              string
 	NameSnakeCase     string
 	Fields            []Field
-	DynamicFields     []DynamicField
 	KnownNums         [4]uint64
 	StateSize         byte
 	MaxFieldExpandNum byte
@@ -59,28 +58,6 @@ type Field struct {
 
 	FixedArraySize          byte
 	InvalidArrayValueScaled string
-}
-
-type DynamicField struct {
-	Name        string
-	SwitchCases []SwitchCase
-	Default     ReturnValue
-}
-
-type SwitchCase struct {
-	Name       string
-	CondValues []CondValue
-}
-
-type CondValue struct {
-	Conds       []string
-	ReturnValue ReturnValue
-}
-
-type ReturnValue struct {
-	Name  string
-	Units string
-	Value string
 }
 
 type UtilData struct {
