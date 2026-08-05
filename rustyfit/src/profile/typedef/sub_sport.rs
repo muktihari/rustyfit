@@ -163,7 +163,7 @@ impl SubSport {
     pub const BRICK: SubSport = SubSport(80);
     /// Multisport
     pub const SWIM_RUN: SubSport = SubSport(81);
-    /// Multisport
+    /// Multisport/Running
     pub const ADVENTURE_RACE: SubSport = SubSport(82);
     /// DEZL trucker workout training sport
     pub const TRUCKER_WORKOUT: SubSport = SubSport(83);

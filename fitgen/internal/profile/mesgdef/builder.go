@@ -72,9 +72,8 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			maxLenFields = len(mesg.Fields)
 		}
 		var (
-			knownNums     [4]uint64
-			dynamicFields []DynamicField
-			fields        = make([]Field, 0, len(mesg.Fields))
+			knownNums [4]uint64
+			fields    = make([]Field, 0, len(mesg.Fields))
 		)
 		for _, parserField := range mesg.Fields {
 			knownNums[parserField.Num>>6] |= 1 << (parserField.Num & 63)
@@ -181,8 +180,6 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			if len(parserField.SubFields) == 0 {
 				continue
 			}
-
-			dynamicFields = append(dynamicFields, b.createDynamicField(mesg.Name, &field, &parserField))
 		}
 
 		messages = append(messages, Message{
@@ -197,7 +194,6 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Name:              strutil.ToTitle(mesg.Name),
 			NameSnakeCase:     mesg.Name,
 			Fields:            fields,
-			DynamicFields:     dynamicFields,
 			KnownNums:         knownNums,
 			StateSize:         (maxFieldExpandNum + 8) / 8,
 			MaxFieldExpandNum: maxFieldExpandNum + 1,
@@ -301,72 +297,6 @@ func createComment(field *Field, array string) string {
 	s := escapeSquareBracket.Replace(buf.String())
 
 	return strings.TrimSuffix(s, "; ")
-}
-
-func (b *Builder) createDynamicField(mesgName string, field *Field, parserField *parser.Field) DynamicField {
-	var (
-		rawSwitchCases      = make(map[string][]CondValue)
-		rawSwitchCasesOrder = make(map[string]int)
-		valuesOrder         = make(map[string]map[ReturnValue]int)
-	)
-	for _, subField := range parserField.SubFields {
-		condValue := CondValue{
-			ReturnValue: ReturnValue{
-				Name:  subField.Name,
-				Units: subField.Units,
-			},
-		}
-
-		scale := scaleOrDefault(subField.Scales, 0)
-		offset := offsetOrDefault(subField.Offsets, 0)
-		if scale != 1 || offset != 0 {
-			condValue.ReturnValue.Value = fmt.Sprintf("(float64(m.%s) * %g) - %g", field.Name, scale, offset)
-		} else {
-			condValue.ReturnValue.Value = fmt.Sprintf("%s(m.%s)", b.transformType(subField.Type, "", field.FixedArraySize), field.Name)
-		}
-
-		for i, refValueName := range subField.RefFieldNames {
-			fieldRef := b.lookup.FieldByName(mesgName, refValueName)
-
-			_, ok := rawSwitchCases[fieldRef.Name]
-			if !ok {
-				rawSwitchCasesOrder[fieldRef.Name] = len(rawSwitchCasesOrder)
-				valuesOrder[fieldRef.Name] = make(map[ReturnValue]int)
-			}
-
-			valOrder, ok := valuesOrder[fieldRef.Name][condValue.ReturnValue]
-			if !ok {
-				valOrder = len(rawSwitchCases[fieldRef.Name])
-				valuesOrder[fieldRef.Name][condValue.ReturnValue] = valOrder
-				rawSwitchCases[fieldRef.Name] = append(rawSwitchCases[fieldRef.Name], condValue)
-			}
-
-			condValue = rawSwitchCases[fieldRef.Name][valOrder]
-			condValue.Conds = append(condValue.Conds,
-				fmt.Sprintf("%s%s",
-					b.transformType(fieldRef.Type, fieldRef.Array, field.FixedArraySize), strutil.ToTitle(subField.RefFieldValue[i])))
-
-			rawSwitchCases[fieldRef.Name][valOrder] = condValue
-		}
-	}
-
-	switchCases := make([]SwitchCase, len(rawSwitchCases))
-	for fieldNameRef, i := range rawSwitchCasesOrder {
-		switchCases[i] = SwitchCase{
-			Name:       fmt.Sprintf("m.%s", strutil.ToTitle(fieldNameRef)),
-			CondValues: rawSwitchCases[fieldNameRef],
-		}
-	}
-
-	return DynamicField{
-		Name:        field.Name,
-		SwitchCases: switchCases,
-		Default: ReturnValue{
-			Name:  parserField.Name,
-			Units: parserField.Units,
-			Value: fmt.Sprintf("m.%s", field.Name),
-		},
-	}
 }
 
 func (b *Builder) transformType(fieldType, fieldArray string, fixedArraySize byte) string {

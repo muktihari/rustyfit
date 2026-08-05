@@ -78,6 +78,8 @@ pub struct Monitoring {
     pub moderate_activity_minutes: u16,
     /// Units: minutes
     pub vigorous_activity_minutes: u16,
+    /// Wheelchair Pushes
+    pub pushes: u32,
     state: [u8; 4], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -144,6 +146,8 @@ impl Monitoring {
     pub const MODERATE_ACTIVITY_MINUTES: u8 = 33;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `minutes`
     pub const VIGOROUS_ACTIVITY_MINUTES: u8 = 34;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
+    pub const PUSHES: u8 = 41;
 
     /// Create new Monitoring with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
@@ -177,6 +181,7 @@ impl Monitoring {
             descent: u32::MAX,
             moderate_activity_minutes: u16::MAX,
             vigorous_activity_minutes: u16::MAX,
+            pushes: u32::MAX,
             state: [0u8; 4],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -420,6 +425,7 @@ impl Monitoring {
             + (self.descent != u32::MAX) as usize
             + (self.moderate_activity_minutes != u16::MAX) as usize
             + (self.vigorous_activity_minutes != u16::MAX) as usize
+            + (self.pushes != u32::MAX) as usize
     }
 }
 
@@ -432,7 +438,7 @@ impl Default for Monitoring {
 impl From<&Message> for Monitoring {
     /// from creates new Monitoring struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        const KNOWN_NUMS: [u64; 4] = [34343608319, 0, 0, 2305843009213693952];
+        const KNOWN_NUMS: [u64; 4] = [2233366863871, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
@@ -484,6 +490,7 @@ impl From<&Message> for Monitoring {
                 32 => v.descent = field.value.as_u32(),
                 33 => v.moderate_activity_minutes = field.value.as_u16(),
                 34 => v.vigorous_activity_minutes = field.value.as_u16(),
+                41 => v.pushes = field.value.as_u32(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -735,6 +742,14 @@ impl From<Monitoring> for Message {
                 is_expanded: false,
             });
         };
+        if m.pushes != u32::MAX {
+            fields.push(Field {
+                num: 41,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.pushes),
+                is_expanded: false,
+            });
+        };
 
         fields.extend_from_slice(&m.unknown_fields);
 
@@ -845,6 +860,9 @@ impl Serialize for Monitoring {
         if self.vigorous_activity_minutes != u16::MAX {
             state.serialize_field("vigorous_activity_minutes", &self.vigorous_activity_minutes)?;
         }
+        if self.pushes != u32::MAX {
+            state.serialize_field("pushes", &self.pushes)?;
+        }
         if !self.unknown_fields.is_empty() {
             state.serialize_field("unknown_fields", &self.unknown_fields)?;
         }
@@ -887,6 +905,7 @@ struct De {
     descent: f64,
     moderate_activity_minutes: u16,
     vigorous_activity_minutes: u16,
+    pushes: u32,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -993,6 +1012,7 @@ impl From<De> for Monitoring {
             },
             moderate_activity_minutes: m.moderate_activity_minutes,
             vigorous_activity_minutes: m.vigorous_activity_minutes,
+            pushes: m.pushes,
             state: [0u8; 4],
             unknown_fields: m.unknown_fields,
             developer_fields: m.developer_fields,
@@ -1033,6 +1053,7 @@ impl Default for De {
             descent: f64::from_bits(u64::MAX),
             moderate_activity_minutes: u16::MAX,
             vigorous_activity_minutes: u16::MAX,
+            pushes: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
