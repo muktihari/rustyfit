@@ -176,6 +176,14 @@ impl Encoder {
         Ok(())
     }
 
+    /// Releases heap memory used by the `Encoder` back to the allocator, so it can be reused
+    /// by subsequent allocations in memory-constrained environments such as embedded systems
+    /// when a statically allocated `Encoder` is no longer in use.
+    pub fn release_heap_memory(&mut self) {
+        self.lru = Lru::new();
+        self.message_validator = MessageValidator::new();
+    }
+
     fn select_protocol_version(&mut self, file_header: &mut FileHeader) {
         if self.options.protocol_version.0 != 0 {
             file_header.protocol_version = self.options.protocol_version;

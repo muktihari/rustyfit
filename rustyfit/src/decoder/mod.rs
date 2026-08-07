@@ -182,6 +182,19 @@ impl Decoder {
         }))
     }
 
+    /// Releases heap memory used by the `Decoder` back to the allocator, so it can be reused
+    /// by subsequent allocations in memory-constrained environments such as embedded systems
+    /// when a statically allocated `Decoder` is no longer in use.
+    pub fn release_heap_memory(&mut self) {
+        for mesg_def in &mut self.mesg_definitions {
+            mesg_def.field_definitions = Vec::new();
+            mesg_def.developer_field_definitions = Vec::new();
+        }
+        self.mesg.fields = Vec::new();
+        self.mesg.developer_fields = Vec::new();
+        self.field_descriptions = Vec::new();
+    }
+
     fn decode_file_header<R>(
         &mut self,
         reader: &mut R,
