@@ -14,7 +14,7 @@ use serde::{
 };
 
 /// FIT is FIT protocol data representative.
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize), serde(default))]
 #[derive(Debug, Default)]
 pub struct FIT {
     /// File Header contains either 12 or 14 bytes
