@@ -1,7 +1,7 @@
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
-    Decoder, DecoderError, DecoderEvent, Encoder, EncoderBuilder, Endianness, HeaderOption,
-    StreamingIterator, proto::Message,
+    Decoder, DecoderEvent, Encoder, EncoderBuilder, Endianness, HeaderOption, StreamingIterator,
+    proto::Message,
 };
 use std::{
     error::Error,
@@ -85,22 +85,7 @@ fn do_roudtrip_with_encoder_options(
     let buf = Vec::<u8>::with_capacity(5000 * 1024); // 5 MB, large enough to avoid realloc.
     let mut cursor = Cursor::new(buf);
 
-    'decode: while let Some(fit) = &mut match dec.decode(&mut reader) {
-        Ok(fit) => fit,
-        Err(err) => {
-            if let DecoderError::ChecksumMismatch { .. } = err {
-                // NOTE: Doubts exist regarding the integrity of these files.
-                if let Some(file_name) = path.file_name()
-                    && ["WeightScaleMultiUser.fit", "Settings.fit"]
-                        .iter()
-                        .any(|x| *x == file_name)
-                {
-                    continue 'decode;
-                }
-            }
-            return Err(format!("decode: {:?}", err).into());
-        }
-    } {
+    while let Some(fit) = &mut dec.decode(&mut reader)? {
         cursor.seek(SeekFrom::Start(0)).unwrap();
 
         let mut enc = encoder_builder.build();

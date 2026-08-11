@@ -218,9 +218,10 @@ impl Encoder {
     where
         W: Write + Seek,
     {
-        if file_header.size != 12 {
-            file_header.size = 14;
-        }
+        // When size is 12, we need to do checksum for both file header and data combined.
+        // However, we can only know file header's data size after writing the data and
+        // CRC checksum can only be done sequentially, we don't support size 12.
+        file_header.size = 14;
 
         if file_header.profile_version == 0 {
             file_header.profile_version = PROFILE_VERSION;
@@ -753,13 +754,74 @@ mod tests {
 
     use crate::{
         Encoder,
+        crc16::Crc16,
         encoder::write_value,
-        profile::{mesgdef, typedef},
-        proto::{FIT, FileHeader, Message, ProtocolVersion, Value},
+        profile::{self, mesgdef, typedef},
+        proto::{FIT, Field, FileHeader, Message, ProtocolVersion, Value},
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
     use embedded_io_adapters::std::FromStd;
+
+    #[test]
+    fn test_encode_checksum_for_file_header_size_12() {
+        // We always set the file header's size to be 14,
+        // checking the checksum values is enough.
+        let mut enc = Encoder::new();
+        let mut buf = Vec::<u8>::new();
+        let writer = Cursor::new(&mut buf);
+
+        let mut fit = FIT {
+            file_header: FileHeader {
+                size: 12,
+                protocol_version: ProtocolVersion::V1,
+                profile_version: profile::PROFILE_VERSION,
+                data_size: 0,
+                crc: 0,
+            },
+            messages: vec![Message {
+                header: 0,
+                num: typedef::MesgNum::FILE_ID,
+                fields: vec![Field {
+                    num: mesgdef::FileId::MANUFACTURER,
+                    base_type: typedef::FitBaseType::UINT16,
+                    value: Value::Uint16(typedef::Manufacturer::DEVELOPMENT.0),
+                    is_expanded: false,
+                }],
+                developer_fields: Vec::new(),
+            }],
+            crc: 0,
+        };
+
+        enc.encode(FromStd::new(writer), &mut fit).unwrap();
+
+        let file_header_crc = u16::from_le_bytes(buf[12..14].try_into().unwrap());
+
+        let mut crc16 = Crc16::new();
+        crc16.write(&buf[..12]);
+        let file_header_crc_calculated = crc16.sum16();
+
+        if file_header_crc != file_header_crc_calculated {
+            panic!(
+                "expected file_header_crc: {}, calculated: {}",
+                file_header_crc, file_header_crc_calculated
+            );
+        }
+
+        let len = buf.len();
+        let fit_crc = u16::from_le_bytes(buf[len - 2..len].try_into().unwrap());
+
+        crc16.reset();
+        crc16.write(&buf[14..len - 2]);
+        let fit_crc_calculated = crc16.sum16();
+
+        if fit_crc != fit_crc_calculated {
+            panic!(
+                "expected fit_crc: {}, calculated: {}",
+                fit_crc, fit_crc_calculated
+            );
+        }
+    }
 
     #[test]
     fn compress_timestamp_into_header() {
