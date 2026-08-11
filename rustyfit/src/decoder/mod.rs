@@ -214,25 +214,27 @@ impl Decoder {
             return Err(Error::NotFITFile);
         }
 
+        self.buf[12..14].fill(0); // crc will be zero when size is 12.
         reader.read_exact(&mut self.buf[1..size as usize])?;
 
         if &self.buf[8..12] != FileHeader::DATA_TYPE.as_bytes() {
             return Err(Error::NotFITFile);
         }
 
-        let crc = match size {
-            14 => u16::from_le_bytes([self.buf[12], self.buf[13]]),
-            _ => 0,
-        };
+        let crc = u16::from_le_bytes([self.buf[12], self.buf[13]]);
 
-        if size == 14 && crc != 0 {
+        if self.options.checksum {
+            // If size is 12, checksum both file header and data together.
+            // If size is 14, checksum file header and data separately.
             self.crc16.write(&self.buf[..12]);
-            let found = crc;
-            let calculated = self.crc16.sum16();
-            if self.options.checksum && found != calculated {
-                return Err(Error::ChecksumMismatch { found, calculated });
+            if size == 14 {
+                let found = crc;
+                let calculated = self.crc16.sum16();
+                self.crc16.reset();
+                if found != 0 && found != calculated {
+                    return Err(Error::ChecksumMismatch { found, calculated });
+                }
             }
-            self.crc16.reset();
         }
 
         Ok(Some(FileHeader {
