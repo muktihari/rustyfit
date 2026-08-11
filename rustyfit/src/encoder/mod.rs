@@ -162,7 +162,8 @@ impl Encoder {
         self.select_protocol_version(&mut fit.file_header);
         self.validate(fit)?;
 
-        self.encode_file_header(&mut writer, &mut fit.file_header)?;
+        writer.write_all(&[0u8; 14])?; // Reserve 14 bytes for FileHeader
+        self.n += 14;
 
         for mesg in &mut fit.messages {
             self.encode_message(&mut writer, mesg)?;
@@ -210,7 +211,7 @@ impl Encoder {
         Ok(())
     }
 
-    fn encode_file_header<W>(
+    fn update_file_header<W>(
         &mut self,
         writer: &mut W,
         file_header: &mut FileHeader,
@@ -227,32 +228,14 @@ impl Encoder {
             file_header.profile_version = PROFILE_VERSION;
         }
 
-        let n = write_file_header(&mut self.buf, file_header);
-
-        writer.write_all(&self.buf[..n])?;
-        self.n += n as i64;
-
-        Ok(())
-    }
-
-    fn update_file_header<W>(
-        &mut self,
-        writer: &mut W,
-        file_header: &mut FileHeader,
-    ) -> Result<(), W::Error>
-    where
-        W: Write + Seek,
-    {
         file_header.data_size = self.data_size;
 
         let n = write_file_header(&mut self.buf, file_header);
 
-        if file_header.size == 14 {
-            self.crc16.write(&self.buf[..12]);
-            file_header.crc = self.crc16.sum16();
-            self.buf[12..14].copy_from_slice(&self.crc16.sum16().to_le_bytes());
-            self.crc16.reset();
-        }
+        self.crc16.write(&self.buf[..12]);
+        file_header.crc = self.crc16.sum16();
+        self.buf[12..14].copy_from_slice(&file_header.crc.to_le_bytes());
+        self.crc16.reset();
 
         writer.seek(SeekFrom::Current(-self.n))?;
         writer.write_all(&self.buf[..n])?;
@@ -388,17 +371,13 @@ impl Default for Encoder {
 }
 
 fn write_file_header(buf: &mut [u8], h: &FileHeader) -> usize {
-    let mut n = 0usize;
     buf[0] = h.size;
     buf[1] = h.protocol_version.0;
     buf[2..4].copy_from_slice(&h.profile_version.to_le_bytes());
     buf[4..8].copy_from_slice(&h.data_size.to_le_bytes());
     buf[8..12].copy_from_slice(FileHeader::DATA_TYPE.as_bytes());
-    if h.size == 14 {
-        buf[12..14].copy_from_slice(&h.crc.to_le_bytes());
-        n += 2;
-    }
-    n + 12
+    buf[12..14].copy_from_slice(&h.crc.to_le_bytes());
+    14
 }
 
 fn write_message_definition(buf: &mut [u8], mesg: &Message, arch: u8) -> usize {
