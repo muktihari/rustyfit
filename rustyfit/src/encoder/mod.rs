@@ -145,9 +145,16 @@ impl Encoder {
     {
         self.reset();
 
+        let protocol_version = if self.options.protocol_version.0 != 0 {
+            self.options.protocol_version
+        } else {
+            ProtocolVersion::V1
+        };
+
         Stream {
             writer,
             encoder: self,
+            protocol_version,
             counter: 0,
         }
     }
@@ -657,6 +664,7 @@ impl Default for Builder {
 pub struct Stream<'a, W> {
     writer: W,
     encoder: &'a mut Encoder,
+    protocol_version: ProtocolVersion,
     counter: usize,
 }
 
@@ -672,7 +680,7 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
         if let Err(err) = self
             .encoder
             .message_validator
-            .validate_message(mesg, self.encoder.options.protocol_version)
+            .validate_message(mesg, self.protocol_version)
         {
             return Err(Error::MessageValidation {
                 mesg_index: self.counter,
@@ -697,14 +705,9 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
 
         self.encoder.encode_crc(&mut self.writer)?;
 
-        let mut protocol_version = self.encoder.options.protocol_version;
-        if protocol_version == ProtocolVersion(0) {
-            protocol_version = ProtocolVersion::V1;
-        }
-
         let file_header = FileHeader {
             size: 14,
-            protocol_version,
+            protocol_version: self.protocol_version,
             profile_version: PROFILE_VERSION,
             data_size: self.encoder.data_size,
             crc: 0, // calculated
@@ -734,9 +737,9 @@ mod tests {
     use crate::{
         Encoder,
         crc16::Crc16,
-        encoder::write_value,
+        encoder::{Error, write_value},
         profile::{self, mesgdef, typedef},
-        proto::{FIT, Field, FileHeader, Message, ProtocolVersion, Value},
+        proto::{DeveloperField, FIT, Field, FileHeader, Message, ProtocolVersion, Value},
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
     use embedded_io::{ErrorKind, ErrorType, Seek, Write};
@@ -1322,6 +1325,77 @@ mod tests {
         assert_eq!(
             enc_storage, stream_storage,
             "Encoder and Stream should produce same result"
+        );
+    }
+
+    #[test]
+    fn test_stream_encoder_protocol_version() {
+        let mut enc = Encoder::new();
+        let mut buf = Vec::new();
+        let writer = FromStd::new(Cursor::new(&mut buf));
+        let mut stream = enc.stream(writer);
+
+        assert_eq!(
+            stream.protocol_version,
+            ProtocolVersion::V1,
+            "should use default protocol version 1.0"
+        );
+
+        // Should validate using stream's protocol_version (V1)
+        match stream
+            .write_message(&mut Message {
+                header: 0,
+                num: typedef::MesgNum::RECORD,
+                fields: Vec::new(),
+                developer_fields: vec![DeveloperField {
+                    num: 0,
+                    developer_data_index: 0,
+                    value: Value::Uint8(10),
+                }],
+            })
+            .expect_err("protocol version 1.0 does not support developer data")
+        {
+            Error::MessageValidation { .. } => {}
+            err => {
+                panic!("unexpected error: {err}")
+            }
+        };
+
+        buf.clear();
+
+        // Should encode file_header with stream's protocol_version (V1)
+        let writer = FromStd::new(Cursor::new(&mut buf));
+        let mut stream = enc.stream(writer);
+
+        stream
+            .write_message(&mut {
+                let mut file_id = mesgdef::FileId::new();
+                file_id.manufacturer = typedef::Manufacturer::GARMIN;
+                file_id.product = typedef::GarminProduct::FENIX8_SOLAR.0;
+                file_id.r#type = typedef::File::ACTIVITY;
+                Message::from(file_id)
+            })
+            .unwrap();
+
+        stream.finish().unwrap();
+
+        assert_eq!(
+            buf[1],
+            ProtocolVersion::V1.0,
+            "file header's protocol version mismatch"
+        );
+
+        let expected_protocol_version = ProtocolVersion::V2;
+        let mut enc = Encoder::builder()
+            .protocol_version(expected_protocol_version)
+            .build();
+
+        let writer = FromStd::new(Cursor::new(Vec::new()));
+        let stream = enc.stream(writer);
+
+        assert_eq!(
+            stream.protocol_version, expected_protocol_version,
+            "Stream should use given protocol version (V2)"
         );
     }
 }
