@@ -1,7 +1,7 @@
 use embedded_io_adapters::std::FromStd;
 use rustyfit::{
     Decoder, DecoderEvent, Encoder, EncoderBuilder, Endianness, HeaderOption, StreamingIterator,
-    proto::Message,
+    proto::{Message, ProtocolVersion},
 };
 use std::{
     error::Error,
@@ -175,7 +175,9 @@ fn do_roudtrip_by_streaming(path: &PathBuf) -> Result<(), Box<dyn Error>> {
     cursor.seek(SeekFrom::Start(0)).unwrap();
     let mut writer = FromStd::new(&mut cursor);
 
-    let mut enc = Encoder::new();
+    let mut enc = Encoder::builder()
+        .protocol_version(ProtocolVersion::V2)
+        .build();
     let mut stream_enc = enc.stream(&mut writer);
 
     for mesg in expected_messages.clone().iter_mut() {
