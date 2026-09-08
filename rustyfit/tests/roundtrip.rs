@@ -15,7 +15,7 @@ fn decode_encode_roundtrip() {
     walk_path(
         &Path::new("tests/data").to_path_buf(),
         &mut |path: &PathBuf| {
-            do_roudtrip_with_encoder_options(
+            do_roundtrip_with_encoder_options(
                 path,
                 EncoderBuilder::new()
                     .endianness(Endianness::LittleEndian)
@@ -31,7 +31,7 @@ fn decode_encode_roundtrip_compressed() {
     walk_path(
         &Path::new("tests/data").to_path_buf(),
         &mut |path: &PathBuf| {
-            do_roudtrip_with_encoder_options(
+            do_roundtrip_with_encoder_options(
                 path,
                 EncoderBuilder::new()
                     .endianness(Endianness::BigEndian)
@@ -46,7 +46,7 @@ fn decode_encode_roundtrip_compressed() {
 fn streaming_decode_encode_roundtrip() {
     walk_path(
         &Path::new("tests/data").to_path_buf(),
-        &mut |path: &PathBuf| do_roudtrip_by_streaming(path),
+        &mut |path: &PathBuf| do_roundtrip_by_streaming(path),
     )
     .unwrap();
 }
@@ -72,7 +72,7 @@ where
     Ok(())
 }
 
-fn do_roudtrip_with_encoder_options(
+fn do_roundtrip_with_encoder_options(
     path: &PathBuf,
     encoder_builder: EncoderBuilder,
 ) -> Result<(), Box<dyn Error>> {
@@ -146,15 +146,7 @@ fn do_roudtrip_with_encoder_options(
     Ok(())
 }
 
-fn do_roudtrip_by_streaming(path: &PathBuf) -> Result<(), Box<dyn Error>> {
-    if let Some(file_name) = path.file_name()
-        && ["WeightScaleMultiUser.fit", "Settings.fit"]
-            .iter()
-            .any(|x| *x == file_name)
-    {
-        return Ok(());
-    }
-
+fn do_roundtrip_by_streaming(path: &PathBuf) -> Result<(), Box<dyn Error>> {
     let file = File::open(path).unwrap();
     let br = BufReader::new(file);
     let mut reader = FromStd::new(br);
