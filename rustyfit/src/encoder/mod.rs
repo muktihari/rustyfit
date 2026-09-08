@@ -724,7 +724,6 @@ mod tests {
         proto::{DeveloperField, FIT, Field, FileHeader, Message, ProtocolVersion, Value},
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
-    use embedded_io::{ErrorKind, ErrorType, Seek, Write};
     use embedded_io_adapters::std::FromStd;
 
     #[test]
@@ -1202,43 +1201,13 @@ mod tests {
         }
     }
 
-    struct WriteSeeker {
-        buf: Vec<u8>,
-    }
-
-    impl ErrorType for WriteSeeker {
-        type Error = ErrorKind;
-    }
-
-    impl Write for WriteSeeker {
-        fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-            Ok(self.buf.write(buf).unwrap())
-        }
-        fn flush(&mut self) -> Result<(), Self::Error> {
-            Ok(())
-        }
-    }
-
-    impl Seek for WriteSeeker {
-        fn seek(&mut self, pos: embedded_io::SeekFrom) -> Result<u64, Self::Error> {
-            match pos {
-                embedded_io::SeekFrom::Current(v) => {
-                    let new_len = (self.buf.len() as i64 + v) as usize;
-                    assert!(new_len <= self.buf.capacity());
-                    unsafe { self.buf.set_len(new_len) };
-                    Ok(v.wrapping_abs() as u64)
-                }
-                _ => panic!("only support SeekFrom::Current"),
-            }
-        }
-    }
-
     #[test]
     fn test_update_file_header() {
-        let mut ws = WriteSeeker {
-            buf: vec![14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0, 64],
-        };
-        let n = ws.buf.len();
+        let buf = vec![14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0, 64];
+        let n = buf.len();
+
+        let mut cursor = Cursor::new(buf);
+        cursor.set_position(n as u64);
 
         let mut enc = Encoder::new();
         enc.n = n as i64;
@@ -1253,11 +1222,14 @@ mod tests {
             crc: 0, // [83, 147] updated
         };
 
-        enc.update_file_header(&mut ws, &mut file_header).unwrap();
-        let pos = ws.buf.len();
+        enc.update_file_header(&mut FromStd::new(&mut cursor), &mut file_header)
+            .unwrap();
+
+        let buf = cursor.into_inner();
+        let pos = buf.len();
 
         assert_eq!(
-            &ws.buf,
+            &buf,
             &[14, 16, 213, 82, 1, 0, 0, 0, 46, 70, 73, 84, 83, 147, 64],
             "should write at index 0, and data_size and crc should be updated"
         );
