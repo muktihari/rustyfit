@@ -226,9 +226,8 @@ impl Encoder {
     where
         W: Write + Seek,
     {
-        // When size is 12, we need to do checksum for both file header and data combined.
-        // However, we can only know file header's data size after writing the data and
-        // CRC checksum can only be done sequentially, we don't support size 12.
+        // We do not support size 12 (legacy) since it requires us to do checksum for file header and data combined,
+        // meanwhile, file header's data size can only be known after the data is fully written.
         file_header.size = 14;
 
         if file_header.profile_version == 0 {
@@ -237,23 +236,28 @@ impl Encoder {
 
         file_header.data_size = self.data_size;
 
-        let n = write_file_header(&mut self.buf, file_header);
+        self.buf[0] = file_header.size;
+        self.buf[1] = file_header.protocol_version.0;
+        self.buf[2..4].copy_from_slice(&file_header.profile_version.to_le_bytes());
+        self.buf[4..8].copy_from_slice(&file_header.data_size.to_le_bytes());
+        self.buf[8..12].copy_from_slice(FileHeader::DATA_TYPE.as_bytes());
 
         self.crc16.write(&self.buf[..12]);
         file_header.crc = self.crc16.sum16();
-        self.buf[12..14].copy_from_slice(&file_header.crc.to_le_bytes());
         self.crc16.reset();
 
+        self.buf[12..14].copy_from_slice(&file_header.crc.to_le_bytes());
+
         writer.seek(SeekFrom::Current(-self.n))?;
-        writer.write_all(&self.buf[..n])?;
-        writer.seek(SeekFrom::Current(self.n - n as i64))?;
+        writer.write_all(&self.buf[..14])?;
+        writer.seek(SeekFrom::Current(self.n - 14))?;
 
         Ok(())
     }
 
     fn encode_message<W>(&mut self, writer: &mut W, mesg: &mut Message) -> Result<(), W::Error>
     where
-        W: Write + Seek,
+        W: Write,
     {
         mesg.header = Message::NORMAL_HEADER_MASK;
 
@@ -278,7 +282,7 @@ impl Encoder {
             self.data_size += n as u32;
         }
 
-        self.write_message_checksum(writer, mesg, self.options.endianness as u8)?;
+        self.write_message(writer, mesg, self.options.endianness as u8)?;
 
         Ok(())
     }
@@ -307,14 +311,9 @@ impl Encoder {
 
     /// Write message to the writer and calculate the checksum.
     /// This method writes one Value at a time. At most, we only use 255 bytes of buffer.
-    fn write_message_checksum<W>(
-        &mut self,
-        writer: &mut W,
-        mesg: &Message,
-        arch: u8,
-    ) -> Result<(), W::Error>
+    fn write_message<W>(&mut self, writer: &mut W, mesg: &Message, arch: u8) -> Result<(), W::Error>
     where
-        W: Write + Seek,
+        W: Write,
     {
         writer.write_all(&[mesg.header])?;
         self.crc16.write(&[mesg.header]);
@@ -347,7 +346,7 @@ impl Encoder {
 
     fn encode_crc<W>(&mut self, writer: &mut W) -> Result<(), W::Error>
     where
-        W: Write + Seek,
+        W: Write,
     {
         let crc = self.crc16.sum16();
         writer.write_all(&crc.to_le_bytes())?;
@@ -377,16 +376,8 @@ impl Default for Encoder {
     }
 }
 
-fn write_file_header(buf: &mut [u8], h: &FileHeader) -> usize {
-    buf[0] = h.size;
-    buf[1] = h.protocol_version.0;
-    buf[2..4].copy_from_slice(&h.profile_version.to_le_bytes());
-    buf[4..8].copy_from_slice(&h.data_size.to_le_bytes());
-    buf[8..12].copy_from_slice(FileHeader::DATA_TYPE.as_bytes());
-    buf[12..14].copy_from_slice(&h.crc.to_le_bytes());
-    14
-}
-
+/// Write message definition created from `mesg` into `buf` using `arch` as the byte order,
+/// returning how many bytes were written.
 fn write_message_definition(buf: &mut [u8], mesg: &Message, arch: u8) -> usize {
     let mut n = 0usize;
     buf[0] = Message::DEFINITION_MASK;
@@ -422,6 +413,7 @@ fn write_message_definition(buf: &mut [u8], mesg: &Message, arch: u8) -> usize {
     n
 }
 
+/// Write `value` into `buf` using `arch` as the byte order, returning how many bytes were written.
 fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
     let mut n = 0usize;
     match value {
@@ -665,7 +657,7 @@ pub struct Stream<'a, W> {
     writer: W,
     encoder: &'a mut Encoder,
     protocol_version: ProtocolVersion,
-    counter: usize,
+    counter: u32,
 }
 
 impl<'a, W: Write + Seek> Stream<'a, W> {
@@ -683,7 +675,7 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
             .validate_message(mesg, self.protocol_version)
         {
             return Err(Error::MessageValidation {
-                mesg_index: self.counter,
+                mesg_index: self.counter as usize,
                 err,
             });
         }
@@ -705,23 +697,13 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
 
         self.encoder.encode_crc(&mut self.writer)?;
 
-        let file_header = FileHeader {
-            size: 14,
-            protocol_version: self.protocol_version,
-            profile_version: PROFILE_VERSION,
-            data_size: self.encoder.data_size,
-            crc: 0, // calculated
-        };
-
-        let n = write_file_header(&mut self.encoder.buf, &file_header);
-        self.encoder.crc16.write(&self.encoder.buf[..12]);
-        let crc = self.encoder.crc16.sum16();
-        self.encoder.buf[12..14].copy_from_slice(&crc.to_le_bytes());
-        self.encoder.crc16.reset();
-
-        self.writer.seek(SeekFrom::Current(-self.encoder.n))?;
-        self.writer.write_all(&self.encoder.buf[..n])?;
-        self.writer.seek(SeekFrom::Current(self.encoder.n - 14))?;
+        self.encoder.update_file_header(
+            &mut self.writer,
+            &mut FileHeader {
+                protocol_version: self.protocol_version,
+                ..Default::default()
+            },
+        )?;
 
         self.counter = 0;
         self.encoder.reset();
@@ -742,7 +724,6 @@ mod tests {
         proto::{DeveloperField, FIT, Field, FileHeader, Message, ProtocolVersion, Value},
     };
     use alloc::{borrow::ToOwned, vec, vec::Vec};
-    use embedded_io::{ErrorKind, ErrorType, Seek, Write};
     use embedded_io_adapters::std::FromStd;
 
     #[test]
@@ -1220,43 +1201,13 @@ mod tests {
         }
     }
 
-    struct WriteSeeker {
-        buf: Vec<u8>,
-    }
-
-    impl ErrorType for WriteSeeker {
-        type Error = ErrorKind;
-    }
-
-    impl Write for WriteSeeker {
-        fn write(&mut self, buf: &[u8]) -> Result<usize, Self::Error> {
-            Ok(self.buf.write(buf).unwrap())
-        }
-        fn flush(&mut self) -> Result<(), Self::Error> {
-            Ok(())
-        }
-    }
-
-    impl Seek for WriteSeeker {
-        fn seek(&mut self, pos: embedded_io::SeekFrom) -> Result<u64, Self::Error> {
-            match pos {
-                embedded_io::SeekFrom::Current(v) => {
-                    let new_len = (self.buf.len() as i64 + v) as usize;
-                    assert!(new_len <= self.buf.capacity());
-                    unsafe { self.buf.set_len(new_len) };
-                    Ok(v.wrapping_abs() as u64)
-                }
-                _ => panic!("only support SeekFrom::Current"),
-            }
-        }
-    }
-
     #[test]
     fn test_update_file_header() {
-        let mut ws = WriteSeeker {
-            buf: vec![14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0, 64],
-        };
-        let n = ws.buf.len();
+        let buf = vec![14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0, 64];
+        let n = buf.len();
+
+        let mut cursor = Cursor::new(buf);
+        cursor.set_position(n as u64);
 
         let mut enc = Encoder::new();
         enc.n = n as i64;
@@ -1271,11 +1222,14 @@ mod tests {
             crc: 0, // [83, 147] updated
         };
 
-        enc.update_file_header(&mut ws, &mut file_header).unwrap();
-        let pos = ws.buf.len();
+        enc.update_file_header(&mut FromStd::new(&mut cursor), &mut file_header)
+            .unwrap();
+
+        let buf = cursor.into_inner();
+        let pos = buf.len();
 
         assert_eq!(
-            &ws.buf,
+            &buf,
             &[14, 16, 213, 82, 1, 0, 0, 0, 46, 70, 73, 84, 83, 147, 64],
             "should write at index 0, and data_size and crc should be updated"
         );

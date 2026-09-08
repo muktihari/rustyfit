@@ -1,6 +1,6 @@
 use criterion::{Criterion, criterion_group, criterion_main};
 use embedded_io_adapters::std::FromStd;
-use rustyfit::{Decoder, Encoder, HeaderOption};
+use rustyfit::{Decoder, Encoder, HeaderOption, proto::ProtocolVersion};
 use std::{hint::black_box, io::Cursor, sync::Mutex};
 
 const TEST_FILE: &str = "tests/data/large.fit";
@@ -55,6 +55,22 @@ pub fn bench_encode(c: &mut Criterion) {
                     .build();
                 let mut writer = black_box(FromStd::new(cur));
                 enc.encode(&mut writer, fit).unwrap();
+                buf.clear();
+            })
+        });
+
+        c.bench_function("encode stream", |b| {
+            b.iter(|| {
+                let cur = Cursor::new(&mut buf);
+                let mut enc = Encoder::builder()
+                    .protocol_version(ProtocolVersion::V2)
+                    .build();
+                let writer = black_box(FromStd::new(cur));
+                let mut stream = enc.stream(writer);
+                for mesg in &mut fit.messages {
+                    stream.write_message(mesg).unwrap();
+                }
+                stream.finish().unwrap();
                 buf.clear();
             })
         });
