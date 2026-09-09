@@ -292,7 +292,7 @@ impl Decoder {
 
             mesg_def
                 .field_definitions
-                .extend(buf.chunks_exact(3).map(|b| FieldDefinition {
+                .extend(buf.as_chunks::<3>().0.iter().map(|b| FieldDefinition {
                     num: b[0],
                     size: b[1],
                     base_type: FitBaseType(b[2]),
@@ -325,11 +325,16 @@ impl Decoder {
 
                 mesg_def
                     .developer_field_definitions
-                    .extend(buf.chunks_exact(3).map(|b| DeveloperFieldDefinition {
-                        num: b[0],
-                        size: b[1],
-                        developer_data_index: b[2],
-                    }));
+                    .extend(
+                        buf.as_chunks::<3>()
+                            .0
+                            .iter()
+                            .map(|b| DeveloperFieldDefinition {
+                                num: b[0],
+                                size: b[1],
+                                developer_data_index: b[2],
+                            }),
+                    );
             }
         }
 
