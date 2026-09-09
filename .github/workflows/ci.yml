@@ -8,7 +8,7 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CLIPPY_TOOLCHAIN_VERSION: 1.97.1
+  CLIPPY_TOOLCHAIN_VERSION: 1.98.1
 
 jobs:
   build:

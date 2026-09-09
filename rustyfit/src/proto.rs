@@ -350,12 +350,16 @@ impl Value {
                     let mut vals: Vec<i16> = Vec::with_capacity(buf.len() / 2);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(2)
-                                .map(|x| i16::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<2>()
+                                .0
+                                .iter()
+                                .map(|&x| i16::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(2)
-                                .map(|x| i16::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<2>()
+                                .0
+                                .iter()
+                                .map(|&x| i16::from_be_bytes(x)),
                         ),
                     };
                     vals
@@ -370,12 +374,16 @@ impl Value {
                     let mut vals: Vec<u16> = Vec::with_capacity(buf.len() / 2);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(2)
-                                .map(|x| u16::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<2>()
+                                .0
+                                .iter()
+                                .map(|&x| u16::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(2)
-                                .map(|x| u16::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<2>()
+                                .0
+                                .iter()
+                                .map(|&x| u16::from_be_bytes(x)),
                         ),
                     };
                     vals
@@ -390,12 +398,16 @@ impl Value {
                     let mut vals: Vec<i32> = Vec::with_capacity(buf.len() / 4);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(4)
-                                .map(|x| i32::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<4>()
+                                .0
+                                .iter()
+                                .map(|&x| i32::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(4)
-                                .map(|x| i32::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<4>()
+                                .0
+                                .iter()
+                                .map(|&x| i32::from_be_bytes(x)),
                         ),
                     };
                     vals
@@ -410,12 +422,16 @@ impl Value {
                     let mut vals: Vec<u32> = Vec::with_capacity(buf.len() / 4);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(4)
-                                .map(|x| u32::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<4>()
+                                .0
+                                .iter()
+                                .map(|&x| u32::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(4)
-                                .map(|x| u32::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<4>()
+                                .0
+                                .iter()
+                                .map(|&x| u32::from_be_bytes(x)),
                         ),
                     };
                     vals
@@ -455,12 +471,16 @@ impl Value {
                     let mut vals: Vec<f32> = Vec::with_capacity(buf.len() / 4);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(4)
-                                .map(|x| f32::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<4>()
+                                .0
+                                .iter()
+                                .map(|&x| f32::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(4)
-                                .map(|x| f32::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<4>()
+                                .0
+                                .iter()
+                                .map(|&x| f32::from_be_bytes(x)),
                         ),
                     };
                     vals
@@ -475,12 +495,16 @@ impl Value {
                     let mut vals: Vec<f64> = Vec::with_capacity(buf.len() / 8);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(8)
-                                .map(|x| f64::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<8>()
+                                .0
+                                .iter()
+                                .map(|&x| f64::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(8)
-                                .map(|x| f64::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<8>()
+                                .0
+                                .iter()
+                                .map(|&x| f64::from_be_bytes(x)),
                         ),
                     }
                     vals
@@ -495,12 +519,16 @@ impl Value {
                     let mut vals: Vec<i64> = Vec::with_capacity(buf.len() / 8);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(8)
-                                .map(|x| i64::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<8>()
+                                .0
+                                .iter()
+                                .map(|&x| i64::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(8)
-                                .map(|x| i64::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<8>()
+                                .0
+                                .iter()
+                                .map(|&x| i64::from_be_bytes(x)),
                         ),
                     }
                     vals
@@ -515,12 +543,16 @@ impl Value {
                     let mut vals: Vec<u64> = Vec::with_capacity(buf.len() / 8);
                     match arch {
                         0 => vals.extend(
-                            buf.chunks_exact(8)
-                                .map(|x| u64::from_le_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<8>()
+                                .0
+                                .iter()
+                                .map(|&x| u64::from_le_bytes(x)),
                         ),
                         _ => vals.extend(
-                            buf.chunks_exact(8)
-                                .map(|x| u64::from_be_bytes(x.try_into().unwrap())),
+                            buf.as_chunks::<8>()
+                                .0
+                                .iter()
+                                .map(|&x| u64::from_be_bytes(x)),
                         ),
                     }
                     vals
