@@ -938,7 +938,7 @@ impl ProtocolVersion {
 
     /// Returns minor version.
     pub fn minor(self) -> u8 {
-        self.0 | ((1 << 4) - 1)
+        self.0 & 0xF
     }
 }
 
@@ -973,7 +973,10 @@ impl From<&Message> for LocalFieldDescription {
 
 #[cfg(test)]
 mod tests {
-    use crate::{profile::typedef::FitBaseType, proto::Value};
+    use crate::{
+        profile::typedef::FitBaseType,
+        proto::{ProtocolVersion, Value},
+    };
     use alloc::{borrow::ToOwned, string::String, vec, vec::Vec};
 
     #[test]
@@ -1693,6 +1696,21 @@ mod tests {
             let val = Value::from_parts(&tc.buf, tc.array, tc.base_type, tc.arch);
             assert_eq!(tc.expected, val);
         }
+    }
+
+    #[test]
+    fn test_protocol_version_methods() {
+        let v = ProtocolVersion::V1;
+        assert_eq!(v.major(), 1, "{v:?}: major");
+        assert_eq!(v.minor(), 0, "{v:?}: minor");
+
+        let v = ProtocolVersion::V2;
+        assert_eq!(v.major(), 2, "{v:?}: major");
+        assert_eq!(v.minor(), 0, "{v:?}: minor");
+
+        let v = ProtocolVersion(0b1001_0110);
+        assert_eq!(v.major(), 0b1001, "{v:?}: major");
+        assert_eq!(v.minor(), 0b0110, "{v:?}: minor");
     }
 
     #[cfg(feature = "serde")]
