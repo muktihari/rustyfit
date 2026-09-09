@@ -664,11 +664,6 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
     /// Write message to the `writer`. When done writing all messages,
     /// call `finish()` to complete this FIT sequence.
     pub fn write_message(&mut self, mesg: &mut Message) -> Result<(), Error<W::Error>> {
-        if self.counter == 0 {
-            self.writer.write_all(&[0u8; 14])?; // Reserve 14 bytes for FileHeader
-            self.encoder.n += 14;
-        }
-
         if let Err(err) = self
             .encoder
             .message_validator
@@ -678,6 +673,11 @@ impl<'a, W: Write + Seek> Stream<'a, W> {
                 mesg_index: self.counter as usize,
                 err,
             });
+        }
+
+        if self.counter == 0 {
+            self.writer.write_all(&[0u8; 14])?; // Reserve 14 bytes for FileHeader
+            self.encoder.n += 14;
         }
 
         self.encoder.encode_message(&mut self.writer, mesg)?;
