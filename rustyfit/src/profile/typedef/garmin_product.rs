@@ -491,6 +491,9 @@ impl GarminProduct {
     pub const FENIX8_SMALL: GarminProduct = GarminProduct(4534);
     pub const FENIX8: GarminProduct = GarminProduct(4536);
     pub const D2_MACH1_PRO: GarminProduct = GarminProduct(4556);
+    pub const FR970: GarminProduct = GarminProduct(4565);
+    pub const FR570_LARGE: GarminProduct = GarminProduct(4570);
+    pub const FR570_SMALL: GarminProduct = GarminProduct(4574);
     pub const ENDURO3: GarminProduct = GarminProduct(4575);
     pub const INSTINCTE_40MM: GarminProduct = GarminProduct(4583);
     pub const INSTINCTE_45MM: GarminProduct = GarminProduct(4584);
@@ -520,6 +523,14 @@ impl GarminProduct {
     pub const APPROACH_J1: GarminProduct = GarminProduct(4825);
     pub const D2_MACH2: GarminProduct = GarminProduct(4879);
     pub const FR70_2026: GarminProduct = GarminProduct(4916);
+    pub const FENIX9_PRO_43MM: GarminProduct = GarminProduct(4952);
+    pub const FENIX9_PRO_47MM: GarminProduct = GarminProduct(4953);
+    pub const FENIX9_PRO_51MM: GarminProduct = GarminProduct(4954);
+    pub const FENIX9_PRO_SOLAR_47MM: GarminProduct = GarminProduct(4955);
+    pub const FENIX9_PRO_SOLAR_51MM: GarminProduct = GarminProduct(4956);
+    pub const FENIX9_43MM: GarminProduct = GarminProduct(5133);
+    /// 47mm & 57mm
+    pub const FENIX9: GarminProduct = GarminProduct(5134);
     pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
     pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
     pub const CIRQA_SMART_BAND: GarminProduct = GarminProduct(5019);
@@ -534,6 +545,11 @@ impl GarminProduct {
     pub const TACX_TRAINING_APP_ANDROID: GarminProduct = GarminProduct(30045);
     pub const TACX_TRAINING_APP_IOS: GarminProduct = GarminProduct(30046);
     pub const TACX_TRAINING_APP_LEGACY: GarminProduct = GarminProduct(30047);
+    pub const TRAINING_PEAKS_VIRTUAL_IOS: GarminProduct = GarminProduct(30059);
+    pub const TRAINING_PEAKS_VIRTUAL_ANDROID: GarminProduct = GarminProduct(30060);
+    pub const TRAINING_PEAKS_VIRTUAL_WINDOWS: GarminProduct = GarminProduct(30061);
+    pub const TRAINING_PEAKS_VIRTUAL_MAC_OS: GarminProduct = GarminProduct(30062);
+    pub const TRAINING_PEAKS_VIRTUAL_APPLE_TV: GarminProduct = GarminProduct(30063);
     pub const CONNECTIQ_SIMULATOR: GarminProduct = GarminProduct(65531);
     pub const ANDROID_ANTPLUS_PLUGIN: GarminProduct = GarminProduct(65532);
     /// Garmin Connect website
@@ -977,6 +993,9 @@ impl GarminProduct {
             4534 => Some("fenix8_small"),
             4536 => Some("fenix8"),
             4556 => Some("d2_mach1_pro"),
+            4565 => Some("fr970"),
+            4570 => Some("fr570_large"),
+            4574 => Some("fr570_small"),
             4575 => Some("enduro3"),
             4583 => Some("instinctE_40mm"),
             4584 => Some("instinctE_45mm"),
@@ -1006,6 +1025,13 @@ impl GarminProduct {
             4825 => Some("approach_j1"),
             4879 => Some("d2_mach2"),
             4916 => Some("fr70_2026"),
+            4952 => Some("fenix9_pro_43mm"),
+            4953 => Some("fenix9_pro_47mm"),
+            4954 => Some("fenix9_pro_51mm"),
+            4955 => Some("fenix9_pro_solar_47mm"),
+            4956 => Some("fenix9_pro_solar_51mm"),
+            5133 => Some("fenix9_43mm"),
+            5134 => Some("fenix9"),
             4678 => Some("instinct_crossover_amoled"),
             4944 => Some("d2_air_x15"),
             5019 => Some("cirqa_smart_band"),
@@ -1019,6 +1045,11 @@ impl GarminProduct {
             30045 => Some("tacx_training_app_android"),
             30046 => Some("tacx_training_app_ios"),
             30047 => Some("tacx_training_app_legacy"),
+            30059 => Some("training_peaks_virtual_ios"),
+            30060 => Some("training_peaks_virtual_android"),
+            30061 => Some("training_peaks_virtual_windows"),
+            30062 => Some("training_peaks_virtual_mac_os"),
+            30063 => Some("training_peaks_virtual_apple_tv"),
             65531 => Some("connectiq_simulator"),
             65532 => Some("android_antplus_plugin"),
             65534 => Some("connect"),
