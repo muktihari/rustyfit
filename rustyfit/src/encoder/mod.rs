@@ -117,11 +117,10 @@ struct Options {
 /// Encoder for encoding FIT file.
 pub struct Encoder {
     buf: [u8; 1537], // 5+1+(3*255)+1+(3*255)
-    n: i64,
-    data_size: u32,
+    n: i64,          // total written: file_header + data + crc
     crc16: Crc16,
     lru: Lru,
-    timestamp_reference: u32,
+    timestamp: u32,
     options: Options,
     message_validator: MessageValidator,
 }
@@ -234,7 +233,7 @@ impl Encoder {
             file_header.profile_version = PROFILE_VERSION;
         }
 
-        file_header.data_size = self.data_size;
+        file_header.data_size = (self.n - 14 - 2) as u32;
 
         self.buf[0] = file_header.size;
         self.buf[1] = file_header.protocol_version.0;
@@ -279,7 +278,6 @@ impl Encoder {
             writer.write_all(&self.buf[..n])?;
             self.crc16.write(&self.buf[..n]);
             self.n += n as i64;
-            self.data_size += n as u32;
         }
 
         self.write_message(writer, mesg, self.options.endianness as u8)?;
@@ -288,19 +286,20 @@ impl Encoder {
     }
 
     fn compress_timestamp_into_header(&mut self, mesg: &mut Message) {
-        let mut timestamp = u32::MAX;
-        if let Some(field) = mesg.fields.iter().find(|f| f.num == Field::TIMESTAMP)
-            && let Value::Uint32(v) = field.value
-        {
-            timestamp = v;
-        }
-
-        if timestamp == u32::MAX || timestamp < DateTime::MIN.0 {
+        let Some(timestamp) = mesg
+            .fields
+            .iter()
+            .find(|f| f.num == Field::TIMESTAMP)
+            .and_then(|f| match f.value {
+                Value::Uint32(v) if v != u32::MAX && v >= DateTime::MIN.0 => Some(v),
+                _ => None,
+            })
+        else {
             return;
-        }
+        };
 
-        if timestamp.wrapping_sub(self.timestamp_reference) as u8 > Message::COMPRESSED_TIME_MASK {
-            self.timestamp_reference = timestamp;
+        if timestamp.wrapping_sub(self.timestamp) as u8 > Message::COMPRESSED_TIME_MASK {
+            self.timestamp = timestamp;
             return;
         }
 
@@ -317,28 +316,20 @@ impl Encoder {
     {
         writer.write_all(&[mesg.header])?;
         self.crc16.write(&[mesg.header]);
-
         self.n += 1;
-        self.data_size += 1;
 
         for field in &mesg.fields {
             let n = write_value(&mut self.buf, &field.value, arch);
-
             writer.write_all(&self.buf[..n])?;
             self.crc16.write(&self.buf[..n]);
-
             self.n += n as i64;
-            self.data_size += n as u32;
         }
 
         for dev_field in &mesg.developer_fields {
             let n = write_value(&mut self.buf, &dev_field.value, arch);
-
             writer.write_all(&self.buf[..n])?;
             self.crc16.write(&self.buf[..n]);
-
             self.n += n as i64;
-            self.data_size += n as u32;
         }
 
         Ok(())
@@ -357,8 +348,7 @@ impl Encoder {
 
     fn reset(&mut self) {
         self.n = 0;
-        self.timestamp_reference = 0;
-        self.data_size = 0;
+        self.timestamp = 0;
         self.message_validator.reset();
 
         self.lru.reset(
@@ -636,10 +626,9 @@ impl Builder {
         Encoder {
             buf: [0u8; 1537],
             n: 0,
-            data_size: 0,
             crc16: Crc16::new(),
             lru: Lru::new(),
-            timestamp_reference: 0,
+            timestamp: 0,
             options: self.options,
             message_validator: MessageValidator::new(),
         }
@@ -1203,7 +1192,11 @@ mod tests {
 
     #[test]
     fn test_update_file_header() {
-        let buf = vec![14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0, 64];
+        let buf = vec![
+            14, 16, 213, 82, 0, 0, 0, 0, 46, 70, 73, 84, 0, 0,  // file_header
+            64, // dummy data
+            0, 0, // dummy crc
+        ];
         let n = buf.len();
 
         let mut cursor = Cursor::new(buf);
@@ -1211,7 +1204,6 @@ mod tests {
 
         let mut enc = Encoder::new();
         enc.n = n as i64;
-        enc.data_size = 1;
 
         let mut file_header = FileHeader {
             size: 14,
@@ -1230,7 +1222,9 @@ mod tests {
 
         assert_eq!(
             &buf,
-            &[14, 16, 213, 82, 1, 0, 0, 0, 46, 70, 73, 84, 83, 147, 64],
+            &[
+                14, 16, 213, 82, 1, 0, 0, 0, 46, 70, 73, 84, 83, 147, 64, 0, 0
+            ],
             "should write at index 0, and data_size and crc should be updated"
         );
 
