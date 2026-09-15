@@ -298,7 +298,7 @@ impl Encoder {
             return;
         };
 
-        if timestamp.wrapping_sub(self.timestamp) as u8 > Message::COMPRESSED_TIME_MASK {
+        if timestamp.wrapping_sub(self.timestamp) > Message::COMPRESSED_TIME_MASK as u32 {
             self.timestamp = timestamp;
             return;
         }
@@ -803,6 +803,12 @@ mod tests {
                 rec.distance = 300 * meter;
                 Message::from(rec)
             },
+            {
+                let mut rec = mesgdef::Record::new();
+                rec.timestamp = typedef::DateTime(1062595180); // roll over 255s
+                rec.distance = 400 * meter;
+                Message::from(rec)
+            },
         ];
 
         let expected = vec![
@@ -831,6 +837,12 @@ mod tests {
                 mesg.header |= Message::COMPRESSED_HEADER_MASK
                     | (1062594925 & Message::COMPRESSED_TIME_MASK as u32) as u8;
                 mesg
+            },
+            {
+                let mut rec = mesgdef::Record::new();
+                rec.timestamp = typedef::DateTime(1062595180); // Keep since roll over > 31
+                rec.distance = 400 * meter;
+                Message::from(rec)
             },
         ];
 
