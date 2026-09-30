@@ -74,6 +74,14 @@ pub struct Lap {
     pub lap_trigger: typedef::LapTrigger,
     pub sport: typedef::Sport,
     pub event_group: u8,
+    /// Units: semicircles; North east corner latitude.
+    pub nec_lat: i32,
+    /// Units: semicircles; North east corner longitude.
+    pub nec_long: i32,
+    /// Units: semicircles; South west corner latitude.
+    pub swc_lat: i32,
+    /// Units: semicircles; South west corner latitude.
+    pub swc_long: i32,
     /// Units: lengths; # of lengths of swim pool
     pub num_lengths: u16,
     /// Units: watts
@@ -134,6 +142,7 @@ pub struct Lap {
     /// Scale: 1000; Units: s
     pub active_time: u32,
     pub wkt_step_index: typedef::MessageIndex,
+    pub avg_swolf: u16,
     pub opponent_score: u16,
     /// Units: counts; stroke_type enum used as the index
     pub stroke_count: Vec<u16>,
@@ -164,6 +173,8 @@ pub struct Lap {
     pub min_saturated_hemoglobin_percent: Vec<u16>,
     /// Scale: 10; Units: %; Max percentage of hemoglobin saturated with oxygen
     pub max_saturated_hemoglobin_percent: Vec<u16>,
+    /// Scale: 10; Units: strokes / length
+    pub avg_strokes_per_length: u16,
     /// Scale: 2; Units: percent
     pub avg_left_torque_effectiveness: u8,
     /// Scale: 2; Units: percent
@@ -174,6 +185,8 @@ pub struct Lap {
     pub avg_right_pedal_smoothness: u8,
     /// Scale: 2; Units: percent
     pub avg_combined_pedal_smoothness: u8,
+    pub front_gear_shift_count: u16,
+    pub rear_gear_shift_count: u16,
     /// Scale: 1000; Units: s; Total time spent in the standing position
     pub time_standing: u32,
     /// Number of transitions to the standing state
@@ -243,6 +256,8 @@ pub struct Lap {
     pub avg_grit: f32,
     /// Units: Flow; The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
     pub avg_flow: f32,
+    /// Units: kcal
+    pub metabolic_calories: u16,
     /// Scale: 100; Units: m; fractional part of total_ascent
     pub total_fractional_ascent: u8,
     /// Scale: 100; Units: m; fractional part of total_descent
@@ -253,6 +268,8 @@ pub struct Lap {
     pub min_core_temperature: u16,
     /// Scale: 100; Units: C
     pub max_core_temperature: u16,
+    /// Scale: 1000; Units: m/s
+    pub avg_grade_adjusted_speed: u32,
     state: [u8; 18], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -319,6 +336,14 @@ impl Lap {
     pub const SPORT: u8 = 25;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const EVENT_GROUP: u8 = 26;
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
+    pub const NEC_LAT: u8 = 27;
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
+    pub const NEC_LONG: u8 = 28;
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
+    pub const SWC_LAT: u8 = 29;
+    /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
+    pub const SWC_LONG: u8 = 30;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `lengths`
     pub const NUM_LENGTHS: u8 = 32;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
@@ -386,6 +411,8 @@ impl Lap {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const WKT_STEP_INDEX: u8 = 71;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const AVG_SWOLF: u8 = 73;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const OPPONENT_SCORE: u8 = 74;
     /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const STROKE_COUNT: u8 = 75;
@@ -417,6 +444,8 @@ impl Lap {
     pub const MIN_SATURATED_HEMOGLOBIN_PERCENT: u8 = 88;
     /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
     pub const MAX_SATURATED_HEMOGLOBIN_PERCENT: u8 = 89;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `strokes / length`
+    pub const AVG_STROKES_PER_LENGTH: u8 = 90;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 91;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
@@ -427,6 +456,10 @@ impl Lap {
     pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 94;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 95;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const FRONT_GEAR_SHIFT_COUNT: u8 = 96;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const REAR_GEAR_SHIFT_COUNT: u8 = 97;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_STANDING: u8 = 98;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
@@ -499,6 +532,8 @@ impl Lap {
     pub const AVG_GRIT: u8 = 153;
     /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `Flow`
     pub const AVG_FLOW: u8 = 154;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
+    pub const METABOLIC_CALORIES: u8 = 155;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
     pub const TOTAL_FRACTIONAL_ASCENT: u8 = 156;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
@@ -509,6 +544,8 @@ impl Lap {
     pub const MIN_CORE_TEMPERATURE: u8 = 159;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `C`
     pub const MAX_CORE_TEMPERATURE: u8 = 160;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
+    pub const AVG_GRADE_ADJUSTED_SPEED: u8 = 161;
 
     /// Create new Lap with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
@@ -542,6 +579,10 @@ impl Lap {
             lap_trigger: typedef::LapTrigger(u8::MAX),
             sport: typedef::Sport(u8::MAX),
             event_group: u8::MAX,
+            nec_lat: i32::MAX,
+            nec_long: i32::MAX,
+            swc_lat: i32::MAX,
+            swc_long: i32::MAX,
             num_lengths: u16::MAX,
             normalized_power: u16::MAX,
             left_right_balance: typedef::LeftRightBalance100(u16::MAX),
@@ -575,6 +616,7 @@ impl Lap {
             min_heart_rate: u8::MAX,
             active_time: u32::MAX,
             wkt_step_index: typedef::MessageIndex(u16::MAX),
+            avg_swolf: u16::MAX,
             opponent_score: u16::MAX,
             stroke_count: Vec::new(),
             zone_count: Vec::new(),
@@ -591,11 +633,14 @@ impl Lap {
             avg_saturated_hemoglobin_percent: Vec::new(),
             min_saturated_hemoglobin_percent: Vec::new(),
             max_saturated_hemoglobin_percent: Vec::new(),
+            avg_strokes_per_length: u16::MAX,
             avg_left_torque_effectiveness: u8::MAX,
             avg_right_torque_effectiveness: u8::MAX,
             avg_left_pedal_smoothness: u8::MAX,
             avg_right_pedal_smoothness: u8::MAX,
             avg_combined_pedal_smoothness: u8::MAX,
+            front_gear_shift_count: u16::MAX,
+            rear_gear_shift_count: u16::MAX,
             time_standing: u32::MAX,
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
@@ -632,11 +677,13 @@ impl Lap {
             jump_count: u16::MAX,
             avg_grit: f32::from_bits(u32::MAX),
             avg_flow: f32::from_bits(u32::MAX),
+            metabolic_calories: u16::MAX,
             total_fractional_ascent: u8::MAX,
             total_fractional_descent: u8::MAX,
             avg_core_temperature: u16::MAX,
             min_core_temperature: u16::MAX,
             max_core_temperature: u16::MAX,
+            avg_grade_adjusted_speed: u32::MAX,
             state: [0u8; 18],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -684,6 +731,50 @@ impl Lap {
     /// Set `end_position_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
     pub fn set_end_position_long_degrees(&mut self, v: f64) -> &mut Self {
         self.end_position_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
+    /// Returns `nec_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
+    pub fn nec_lat_degrees(&self) -> Option<f64> {
+        semconv::to_degrees(self.nec_lat)
+    }
+
+    /// Set `nec_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_nec_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.nec_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
+    /// Returns `nec_long` in degrees instead of semicircles. It returns `None` when value is invalid.
+    pub fn nec_long_degrees(&self) -> Option<f64> {
+        semconv::to_degrees(self.nec_long)
+    }
+
+    /// Set `nec_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_nec_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.nec_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
+    /// Returns `swc_lat` in degrees instead of semicircles. It returns `None` when value is invalid.
+    pub fn swc_lat_degrees(&self) -> Option<f64> {
+        semconv::to_degrees(self.swc_lat)
+    }
+
+    /// Set `swc_lat` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_swc_lat_degrees(&mut self, v: f64) -> &mut Self {
+        self.swc_lat = semconv::to_semicircles(v).unwrap_or(i32::MAX);
+        self
+    }
+
+    /// Returns `swc_long` in degrees instead of semicircles. It returns `None` when value is invalid.
+    pub fn swc_long_degrees(&self) -> Option<f64> {
+        semconv::to_degrees(self.swc_long)
+    }
+
+    /// Set `swc_long` with a value in degrees instead of semicircles, the value will be converted to semicircles.
+    pub fn set_swc_long_degrees(&mut self, v: f64) -> &mut Self {
+        self.swc_long = semconv::to_semicircles(v).unwrap_or(i32::MAX);
         self
     }
 
@@ -1543,6 +1634,27 @@ impl Lap {
         self
     }
 
+    /// Returns `avg_strokes_per_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: strokes / length
+    pub fn avg_strokes_per_length_scaled(&self) -> Option<f64> {
+        if self.avg_strokes_per_length == u16::MAX {
+            return None;
+        }
+        Some(self.avg_strokes_per_length as f64 / 10.0 - 0.0)
+    }
+
+    /// Set `avg_strokes_per_length` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_strokes_per_length_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 10.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_strokes_per_length = u16::MAX;
+            return self;
+        }
+        self.avg_strokes_per_length = unscaled as u16;
+        self
+    }
+
     /// Returns `avg_left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
     ///
     /// Units: percent
@@ -2192,6 +2304,27 @@ impl Lap {
         self
     }
 
+    /// Returns `avg_grade_adjusted_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
+    pub fn avg_grade_adjusted_speed_scaled(&self) -> Option<f64> {
+        if self.avg_grade_adjusted_speed == u32::MAX {
+            return None;
+        }
+        Some(self.avg_grade_adjusted_speed as f64 / 1000.0 - 0.0)
+    }
+
+    /// Set `avg_grade_adjusted_speed` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_grade_adjusted_speed_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.avg_grade_adjusted_speed = u32::MAX;
+            return self;
+        }
+        self.avg_grade_adjusted_speed = unscaled as u32;
+        self
+    }
+
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).
     pub fn mark_as_expanded(&mut self, num: u8, flag: bool) -> bool {
         match num {
@@ -2242,6 +2375,10 @@ impl Lap {
             + (self.lap_trigger.0 != u8::MAX) as usize
             + (self.sport.0 != u8::MAX) as usize
             + (self.event_group != u8::MAX) as usize
+            + (self.nec_lat != i32::MAX) as usize
+            + (self.nec_long != i32::MAX) as usize
+            + (self.swc_lat != i32::MAX) as usize
+            + (self.swc_long != i32::MAX) as usize
             + (self.num_lengths != u16::MAX) as usize
             + (self.normalized_power != u16::MAX) as usize
             + (self.left_right_balance.0 != u16::MAX) as usize
@@ -2275,6 +2412,7 @@ impl Lap {
             + (self.min_heart_rate != u8::MAX) as usize
             + (self.active_time != u32::MAX) as usize
             + (self.wkt_step_index.0 != u16::MAX) as usize
+            + (self.avg_swolf != u16::MAX) as usize
             + (self.opponent_score != u16::MAX) as usize
             + (!self.stroke_count.is_empty()) as usize
             + (!self.zone_count.is_empty()) as usize
@@ -2291,11 +2429,14 @@ impl Lap {
             + (!self.avg_saturated_hemoglobin_percent.is_empty()) as usize
             + (!self.min_saturated_hemoglobin_percent.is_empty()) as usize
             + (!self.max_saturated_hemoglobin_percent.is_empty()) as usize
+            + (self.avg_strokes_per_length != u16::MAX) as usize
             + (self.avg_left_torque_effectiveness != u8::MAX) as usize
             + (self.avg_right_torque_effectiveness != u8::MAX) as usize
             + (self.avg_left_pedal_smoothness != u8::MAX) as usize
             + (self.avg_right_pedal_smoothness != u8::MAX) as usize
             + (self.avg_combined_pedal_smoothness != u8::MAX) as usize
+            + (self.front_gear_shift_count != u16::MAX) as usize
+            + (self.rear_gear_shift_count != u16::MAX) as usize
             + (self.time_standing != u32::MAX) as usize
             + (self.stand_count != u16::MAX) as usize
             + (self.avg_left_pco != i8::MAX) as usize
@@ -2332,11 +2473,13 @@ impl Lap {
             + (self.jump_count != u16::MAX) as usize
             + (self.avg_grit.to_bits() != u32::MAX) as usize
             + (self.avg_flow.to_bits() != u32::MAX) as usize
+            + (self.metabolic_calories != u16::MAX) as usize
             + (self.total_fractional_ascent != u8::MAX) as usize
             + (self.total_fractional_descent != u8::MAX) as usize
             + (self.avg_core_temperature != u16::MAX) as usize
             + (self.min_core_temperature != u16::MAX) as usize
             + (self.max_core_temperature != u16::MAX) as usize
+            + (self.avg_grade_adjusted_speed != u32::MAX) as usize
     }
 }
 
@@ -2350,9 +2493,9 @@ impl From<&Message> for Lap {
     /// from creates new Lap struct based on given mesg.
     fn from(mesg: &Message) -> Self {
         const KNOWN_NUMS: [u64; 4] = [
-            18446744000829325311,
-            2305842996261682368,
-            8438416128,
+            18446744002842591231,
+            2305843009213693632,
+            17162568448,
             6917529027641081856,
         ];
         let mut n = 0u64;
@@ -2395,6 +2538,10 @@ impl From<&Message> for Lap {
                 24 => v.lap_trigger = typedef::LapTrigger(field.value.as_u8()),
                 25 => v.sport = typedef::Sport(field.value.as_u8()),
                 26 => v.event_group = field.value.as_u8(),
+                27 => v.nec_lat = field.value.as_i32(),
+                28 => v.nec_long = field.value.as_i32(),
+                29 => v.swc_lat = field.value.as_i32(),
+                30 => v.swc_long = field.value.as_i32(),
                 32 => v.num_lengths = field.value.as_u16(),
                 33 => v.normalized_power = field.value.as_u16(),
                 34 => v.left_right_balance = typedef::LeftRightBalance100(field.value.as_u16()),
@@ -2428,6 +2575,7 @@ impl From<&Message> for Lap {
                 63 => v.min_heart_rate = field.value.as_u8(),
                 70 => v.active_time = field.value.as_u32(),
                 71 => v.wkt_step_index = typedef::MessageIndex(field.value.as_u16()),
+                73 => v.avg_swolf = field.value.as_u16(),
                 74 => v.opponent_score = field.value.as_u16(),
                 75 => v.stroke_count = field.value.to_vec_u16(),
                 76 => v.zone_count = field.value.to_vec_u16(),
@@ -2444,11 +2592,14 @@ impl From<&Message> for Lap {
                 87 => v.avg_saturated_hemoglobin_percent = field.value.to_vec_u16(),
                 88 => v.min_saturated_hemoglobin_percent = field.value.to_vec_u16(),
                 89 => v.max_saturated_hemoglobin_percent = field.value.to_vec_u16(),
+                90 => v.avg_strokes_per_length = field.value.as_u16(),
                 91 => v.avg_left_torque_effectiveness = field.value.as_u8(),
                 92 => v.avg_right_torque_effectiveness = field.value.as_u8(),
                 93 => v.avg_left_pedal_smoothness = field.value.as_u8(),
                 94 => v.avg_right_pedal_smoothness = field.value.as_u8(),
                 95 => v.avg_combined_pedal_smoothness = field.value.as_u8(),
+                96 => v.front_gear_shift_count = field.value.as_u16(),
+                97 => v.rear_gear_shift_count = field.value.as_u16(),
                 98 => v.time_standing = field.value.as_u32(),
                 99 => v.stand_count = field.value.as_u16(),
                 100 => v.avg_left_pco = field.value.as_i8(),
@@ -2485,11 +2636,13 @@ impl From<&Message> for Lap {
                 151 => v.jump_count = field.value.as_u16(),
                 153 => v.avg_grit = field.value.as_f32(),
                 154 => v.avg_flow = field.value.as_f32(),
+                155 => v.metabolic_calories = field.value.as_u16(),
                 156 => v.total_fractional_ascent = field.value.as_u8(),
                 157 => v.total_fractional_descent = field.value.as_u8(),
                 158 => v.avg_core_temperature = field.value.as_u16(),
                 159 => v.min_core_temperature = field.value.as_u16(),
                 160 => v.max_core_temperature = field.value.as_u16(),
+                161 => v.avg_grade_adjusted_speed = field.value.as_u32(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -2738,6 +2891,38 @@ impl From<Lap> for Message {
                 num: 26,
                 base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.event_group),
+                is_expanded: false,
+            });
+        };
+        if m.nec_lat != i32::MAX {
+            fields.push(Field {
+                num: 27,
+                base_type: FitBaseType::SINT32,
+                value: Value::Int32(m.nec_lat),
+                is_expanded: false,
+            });
+        };
+        if m.nec_long != i32::MAX {
+            fields.push(Field {
+                num: 28,
+                base_type: FitBaseType::SINT32,
+                value: Value::Int32(m.nec_long),
+                is_expanded: false,
+            });
+        };
+        if m.swc_lat != i32::MAX {
+            fields.push(Field {
+                num: 29,
+                base_type: FitBaseType::SINT32,
+                value: Value::Int32(m.swc_lat),
+                is_expanded: false,
+            });
+        };
+        if m.swc_long != i32::MAX {
+            fields.push(Field {
+                num: 30,
+                base_type: FitBaseType::SINT32,
+                value: Value::Int32(m.swc_long),
                 is_expanded: false,
             });
         };
@@ -3005,6 +3190,14 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
+        if m.avg_swolf != u16::MAX {
+            fields.push(Field {
+                num: 73,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_swolf),
+                is_expanded: false,
+            });
+        };
         if m.opponent_score != u16::MAX {
             fields.push(Field {
                 num: 74,
@@ -3133,6 +3326,14 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
+        if m.avg_strokes_per_length != u16::MAX {
+            fields.push(Field {
+                num: 90,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_strokes_per_length),
+                is_expanded: false,
+            });
+        };
         if m.avg_left_torque_effectiveness != u8::MAX {
             fields.push(Field {
                 num: 91,
@@ -3170,6 +3371,22 @@ impl From<Lap> for Message {
                 num: 95,
                 base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_combined_pedal_smoothness),
+                is_expanded: false,
+            });
+        };
+        if m.front_gear_shift_count != u16::MAX {
+            fields.push(Field {
+                num: 96,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.front_gear_shift_count),
+                is_expanded: false,
+            });
+        };
+        if m.rear_gear_shift_count != u16::MAX {
+            fields.push(Field {
+                num: 97,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.rear_gear_shift_count),
                 is_expanded: false,
             });
         };
@@ -3461,6 +3678,14 @@ impl From<Lap> for Message {
                 is_expanded: false,
             });
         };
+        if m.metabolic_calories != u16::MAX {
+            fields.push(Field {
+                num: 155,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.metabolic_calories),
+                is_expanded: false,
+            });
+        };
         if m.total_fractional_ascent != u8::MAX {
             fields.push(Field {
                 num: 156,
@@ -3498,6 +3723,14 @@ impl From<Lap> for Message {
                 num: 160,
                 base_type: FitBaseType::UINT16,
                 value: Value::Uint16(m.max_core_temperature),
+                is_expanded: false,
+            });
+        };
+        if m.avg_grade_adjusted_speed != u32::MAX {
+            fields.push(Field {
+                num: 161,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.avg_grade_adjusted_speed),
                 is_expanded: false,
             });
         };
@@ -3608,6 +3841,18 @@ impl Serialize for Lap {
         if self.event_group != u8::MAX {
             state.serialize_field("event_group", &self.event_group)?;
         }
+        if let Some(v) = self.nec_lat_degrees() {
+            state.serialize_field("nec_lat", &v)?;
+        }
+        if let Some(v) = self.nec_long_degrees() {
+            state.serialize_field("nec_long", &v)?;
+        }
+        if let Some(v) = self.swc_lat_degrees() {
+            state.serialize_field("swc_lat", &v)?;
+        }
+        if let Some(v) = self.swc_long_degrees() {
+            state.serialize_field("swc_long", &v)?;
+        }
         if self.num_lengths != u16::MAX {
             state.serialize_field("num_lengths", &self.num_lengths)?;
         }
@@ -3707,6 +3952,9 @@ impl Serialize for Lap {
         if self.wkt_step_index.0 != u16::MAX {
             state.serialize_field("wkt_step_index", &self.wkt_step_index)?;
         }
+        if self.avg_swolf != u16::MAX {
+            state.serialize_field("avg_swolf", &self.avg_swolf)?;
+        }
         if self.opponent_score != u16::MAX {
             state.serialize_field("opponent_score", &self.opponent_score)?;
         }
@@ -3755,6 +4003,9 @@ impl Serialize for Lap {
         if let Some(v) = self.max_saturated_hemoglobin_percent_scaled() {
             state.serialize_field("max_saturated_hemoglobin_percent", &v)?;
         }
+        if let Some(v) = self.avg_strokes_per_length_scaled() {
+            state.serialize_field("avg_strokes_per_length", &v)?;
+        }
         if let Some(v) = self.avg_left_torque_effectiveness_scaled() {
             state.serialize_field("avg_left_torque_effectiveness", &v)?;
         }
@@ -3769,6 +4020,12 @@ impl Serialize for Lap {
         }
         if let Some(v) = self.avg_combined_pedal_smoothness_scaled() {
             state.serialize_field("avg_combined_pedal_smoothness", &v)?;
+        }
+        if self.front_gear_shift_count != u16::MAX {
+            state.serialize_field("front_gear_shift_count", &self.front_gear_shift_count)?;
+        }
+        if self.rear_gear_shift_count != u16::MAX {
+            state.serialize_field("rear_gear_shift_count", &self.rear_gear_shift_count)?;
         }
         if let Some(v) = self.time_standing_scaled() {
             state.serialize_field("time_standing", &v)?;
@@ -3878,6 +4135,9 @@ impl Serialize for Lap {
         if self.avg_flow.to_bits() != u32::MAX {
             state.serialize_field("avg_flow", &self.avg_flow)?;
         }
+        if self.metabolic_calories != u16::MAX {
+            state.serialize_field("metabolic_calories", &self.metabolic_calories)?;
+        }
         if let Some(v) = self.total_fractional_ascent_scaled() {
             state.serialize_field("total_fractional_ascent", &v)?;
         }
@@ -3892,6 +4152,9 @@ impl Serialize for Lap {
         }
         if let Some(v) = self.max_core_temperature_scaled() {
             state.serialize_field("max_core_temperature", &v)?;
+        }
+        if let Some(v) = self.avg_grade_adjusted_speed_scaled() {
+            state.serialize_field("avg_grade_adjusted_speed", &v)?;
         }
         if !self.unknown_fields.is_empty() {
             state.serialize_field("unknown_fields", &self.unknown_fields)?;
@@ -3939,6 +4202,14 @@ struct De {
     lap_trigger: typedef::LapTrigger,
     sport: typedef::Sport,
     event_group: u8,
+    /// Degrees.
+    nec_lat: f64,
+    /// Degrees.
+    nec_long: f64,
+    /// Degrees.
+    swc_lat: f64,
+    /// Degrees.
+    swc_long: f64,
     num_lengths: u16,
     normalized_power: u16,
     left_right_balance: typedef::LeftRightBalance100,
@@ -3972,6 +4243,7 @@ struct De {
     min_heart_rate: u8,
     active_time: f64,
     wkt_step_index: typedef::MessageIndex,
+    avg_swolf: u16,
     opponent_score: u16,
     stroke_count: Vec<u16>,
     zone_count: Vec<u16>,
@@ -3988,11 +4260,14 @@ struct De {
     avg_saturated_hemoglobin_percent: Vec<f64>,
     min_saturated_hemoglobin_percent: Vec<f64>,
     max_saturated_hemoglobin_percent: Vec<f64>,
+    avg_strokes_per_length: f64,
     avg_left_torque_effectiveness: f64,
     avg_right_torque_effectiveness: f64,
     avg_left_pedal_smoothness: f64,
     avg_right_pedal_smoothness: f64,
     avg_combined_pedal_smoothness: f64,
+    front_gear_shift_count: u16,
+    rear_gear_shift_count: u16,
     time_standing: f64,
     stand_count: u16,
     avg_left_pco: i8,
@@ -4029,11 +4304,13 @@ struct De {
     jump_count: u16,
     avg_grit: f32,
     avg_flow: f32,
+    metabolic_calories: u16,
     total_fractional_ascent: f64,
     total_fractional_descent: f64,
     avg_core_temperature: f64,
     min_core_temperature: f64,
     max_core_temperature: f64,
+    avg_grade_adjusted_speed: f64,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -4112,6 +4389,10 @@ impl From<De> for Lap {
             lap_trigger: m.lap_trigger,
             sport: m.sport,
             event_group: m.event_group,
+            nec_lat: semconv::to_semicircles(m.nec_lat).unwrap_or(i32::MAX),
+            nec_long: semconv::to_semicircles(m.nec_long).unwrap_or(i32::MAX),
+            swc_lat: semconv::to_semicircles(m.swc_lat).unwrap_or(i32::MAX),
+            swc_long: semconv::to_semicircles(m.swc_long).unwrap_or(i32::MAX),
             num_lengths: m.num_lengths,
             normalized_power: m.normalized_power,
             left_right_balance: m.left_right_balance,
@@ -4314,6 +4595,7 @@ impl From<De> for Lap {
                 }
             },
             wkt_step_index: m.wkt_step_index,
+            avg_swolf: m.avg_swolf,
             opponent_score: m.opponent_score,
             stroke_count: m.stroke_count,
             zone_count: m.zone_count,
@@ -4468,6 +4750,14 @@ impl From<De> for Lap {
                     vals
                 }
             },
+            avg_strokes_per_length: {
+                let unscaled = (m.avg_strokes_per_length + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
             avg_left_torque_effectiveness: {
                 let unscaled = (m.avg_left_torque_effectiveness + 0.0) * 2.0;
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -4508,6 +4798,8 @@ impl From<De> for Lap {
                     unscaled as u8
                 }
             },
+            front_gear_shift_count: m.front_gear_shift_count,
+            rear_gear_shift_count: m.rear_gear_shift_count,
             time_standing: {
                 let unscaled = (m.time_standing + 0.0) * 1000.0;
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -4713,6 +5005,7 @@ impl From<De> for Lap {
             jump_count: m.jump_count,
             avg_grit: m.avg_grit,
             avg_flow: m.avg_flow,
+            metabolic_calories: m.metabolic_calories,
             total_fractional_ascent: {
                 let unscaled = (m.total_fractional_ascent + 0.0) * 100.0;
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -4751,6 +5044,14 @@ impl From<De> for Lap {
                     u16::MAX
                 } else {
                     unscaled as u16
+                }
+            },
+            avg_grade_adjusted_speed: {
+                let unscaled = (m.avg_grade_adjusted_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
                 }
             },
             state: [0u8; 18],
@@ -4793,6 +5094,10 @@ impl Default for De {
             lap_trigger: typedef::LapTrigger(u8::MAX),
             sport: typedef::Sport(u8::MAX),
             event_group: u8::MAX,
+            nec_lat: f64::from_bits(u64::MAX),
+            nec_long: f64::from_bits(u64::MAX),
+            swc_lat: f64::from_bits(u64::MAX),
+            swc_long: f64::from_bits(u64::MAX),
             num_lengths: u16::MAX,
             normalized_power: u16::MAX,
             left_right_balance: typedef::LeftRightBalance100(u16::MAX),
@@ -4826,6 +5131,7 @@ impl Default for De {
             min_heart_rate: u8::MAX,
             active_time: f64::from_bits(u64::MAX),
             wkt_step_index: typedef::MessageIndex(u16::MAX),
+            avg_swolf: u16::MAX,
             opponent_score: u16::MAX,
             stroke_count: Vec::new(),
             zone_count: Vec::new(),
@@ -4842,11 +5148,14 @@ impl Default for De {
             avg_saturated_hemoglobin_percent: Vec::new(),
             min_saturated_hemoglobin_percent: Vec::new(),
             max_saturated_hemoglobin_percent: Vec::new(),
+            avg_strokes_per_length: f64::from_bits(u64::MAX),
             avg_left_torque_effectiveness: f64::from_bits(u64::MAX),
             avg_right_torque_effectiveness: f64::from_bits(u64::MAX),
             avg_left_pedal_smoothness: f64::from_bits(u64::MAX),
             avg_right_pedal_smoothness: f64::from_bits(u64::MAX),
             avg_combined_pedal_smoothness: f64::from_bits(u64::MAX),
+            front_gear_shift_count: u16::MAX,
+            rear_gear_shift_count: u16::MAX,
             time_standing: f64::from_bits(u64::MAX),
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
@@ -4883,11 +5192,13 @@ impl Default for De {
             jump_count: u16::MAX,
             avg_grit: f32::from_bits(u32::MAX),
             avg_flow: f32::from_bits(u32::MAX),
+            metabolic_calories: u16::MAX,
             total_fractional_ascent: f64::from_bits(u64::MAX),
             total_fractional_descent: f64::from_bits(u64::MAX),
             avg_core_temperature: f64::from_bits(u64::MAX),
             min_core_temperature: f64::from_bits(u64::MAX),
             max_core_temperature: f64::from_bits(u64::MAX),
+            avg_grade_adjusted_speed: f64::from_bits(u64::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

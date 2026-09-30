@@ -164,6 +164,9 @@ pub struct Session {
     pub min_altitude: u16,
     /// Scale: 1000; Units: s
     pub active_time: u32,
+    /// Scale: 10; Units: strokes/length
+    pub avg_strokes_per_length: u16,
+    pub avg_swolf: u16,
     pub player_score: u16,
     pub opponent_score: u16,
     pub opponent_name: String,
@@ -209,6 +212,9 @@ pub struct Session {
     pub avg_right_pedal_smoothness: u8,
     /// Scale: 2; Units: percent
     pub avg_combined_pedal_smoothness: u8,
+    pub num_segment_laps: u16,
+    pub front_gear_shift_count: u16,
+    pub rear_gear_shift_count: u16,
     /// Sport name from associated sport mesg
     pub sport_profile_name: String,
     pub sport_index: u8,
@@ -325,6 +331,8 @@ pub struct Session {
     pub min_core_temperature: u16,
     /// Scale: 100; Units: C
     pub max_core_temperature: u16,
+    /// Scale: 1000; Units: m/s
+    pub avg_grade_adjusted_speed: u32,
     state: [u8; 23], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -479,6 +487,10 @@ impl Session {
     pub const MIN_ALTITUDE: u8 = 71;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 78;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `strokes/length`
+    pub const AVG_STROKES_PER_LENGTH: u8 = 79;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const AVG_SWOLF: u8 = 80;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PLAYER_SCORE: u8 = 82;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
@@ -527,6 +539,12 @@ impl Session {
     pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 104;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 105;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const NUM_SEGMENT_LAPS: u8 = 106;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const FRONT_GEAR_SHIFT_COUNT: u8 = 107;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const REAR_GEAR_SHIFT_COUNT: u8 = 108;
     /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
     pub const SPORT_PROFILE_NAME: u8 = 110;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
@@ -649,6 +667,8 @@ impl Session {
     pub const MIN_CORE_TEMPERATURE: u8 = 209;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `C`
     pub const MAX_CORE_TEMPERATURE: u8 = 210;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
+    pub const AVG_GRADE_ADJUSTED_SPEED: u8 = 211;
 
     /// Create new Session with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
@@ -726,6 +746,8 @@ impl Session {
             best_lap_index: u16::MAX,
             min_altitude: u16::MAX,
             active_time: u32::MAX,
+            avg_strokes_per_length: u16::MAX,
+            avg_swolf: u16::MAX,
             player_score: u16::MAX,
             opponent_score: u16::MAX,
             opponent_name: String::new(),
@@ -750,6 +772,9 @@ impl Session {
             avg_left_pedal_smoothness: u8::MAX,
             avg_right_pedal_smoothness: u8::MAX,
             avg_combined_pedal_smoothness: u8::MAX,
+            num_segment_laps: u16::MAX,
+            front_gear_shift_count: u16::MAX,
+            rear_gear_shift_count: u16::MAX,
             sport_profile_name: String::new(),
             sport_index: u8::MAX,
             time_standing: u32::MAX,
@@ -811,6 +836,7 @@ impl Session {
             avg_core_temperature: u16::MAX,
             min_core_temperature: u16::MAX,
             max_core_temperature: u16::MAX,
+            avg_grade_adjusted_speed: u32::MAX,
             state: [0u8; 23],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -1570,6 +1596,27 @@ impl Session {
             return self;
         }
         self.active_time = unscaled as u32;
+        self
+    }
+
+    /// Returns `avg_strokes_per_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: strokes/length
+    pub fn avg_strokes_per_length_scaled(&self) -> Option<f64> {
+        if self.avg_strokes_per_length == u16::MAX {
+            return None;
+        }
+        Some(self.avg_strokes_per_length as f64 / 10.0 - 0.0)
+    }
+
+    /// Set `avg_strokes_per_length` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_strokes_per_length_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 10.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_strokes_per_length = u16::MAX;
+            return self;
+        }
+        self.avg_strokes_per_length = unscaled as u16;
         self
     }
 
@@ -2633,6 +2680,27 @@ impl Session {
         self
     }
 
+    /// Returns `avg_grade_adjusted_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
+    pub fn avg_grade_adjusted_speed_scaled(&self) -> Option<f64> {
+        if self.avg_grade_adjusted_speed == u32::MAX {
+            return None;
+        }
+        Some(self.avg_grade_adjusted_speed as f64 / 1000.0 - 0.0)
+    }
+
+    /// Set `avg_grade_adjusted_speed` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_grade_adjusted_speed_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.avg_grade_adjusted_speed = u32::MAX;
+            return self;
+        }
+        self.avg_grade_adjusted_speed = unscaled as u32;
+        self
+    }
+
     /// Marks whether given field's num is an expanded field (field that being generated through a component expansion).
     pub fn mark_as_expanded(&mut self, num: u8, flag: bool) -> bool {
         match num {
@@ -2727,6 +2795,8 @@ impl Session {
             + (self.best_lap_index != u16::MAX) as usize
             + (self.min_altitude != u16::MAX) as usize
             + (self.active_time != u32::MAX) as usize
+            + (self.avg_strokes_per_length != u16::MAX) as usize
+            + (self.avg_swolf != u16::MAX) as usize
             + (self.player_score != u16::MAX) as usize
             + (self.opponent_score != u16::MAX) as usize
             + (!self.opponent_name.is_empty()) as usize
@@ -2751,6 +2821,9 @@ impl Session {
             + (self.avg_left_pedal_smoothness != u8::MAX) as usize
             + (self.avg_right_pedal_smoothness != u8::MAX) as usize
             + (self.avg_combined_pedal_smoothness != u8::MAX) as usize
+            + (self.num_segment_laps != u16::MAX) as usize
+            + (self.front_gear_shift_count != u16::MAX) as usize
+            + (self.rear_gear_shift_count != u16::MAX) as usize
             + (!self.sport_profile_name.is_empty()) as usize
             + (self.sport_index != u8::MAX) as usize
             + (self.time_standing != u32::MAX) as usize
@@ -2812,6 +2885,7 @@ impl Session {
             + (self.avg_core_temperature != u16::MAX) as usize
             + (self.min_core_temperature != u16::MAX) as usize
             + (self.max_core_temperature != u16::MAX) as usize
+            + (self.avg_grade_adjusted_speed != u32::MAX) as usize
     }
 }
 
@@ -2826,9 +2900,9 @@ impl From<&Message> for Session {
     fn from(mesg: &Message) -> Self {
         const KNOWN_NUMS: [u64; 4] = [
             18446742974197919743,
-            18446678103011639551,
+            18446708889337315583,
             932252819858127487,
-            6917529027641541119,
+            6917529027642065407,
         ];
         let mut n = 0u64;
         for field in &mesg.fields {
@@ -2914,6 +2988,8 @@ impl From<&Message> for Session {
                 70 => v.best_lap_index = field.value.as_u16(),
                 71 => v.min_altitude = field.value.as_u16(),
                 78 => v.active_time = field.value.as_u32(),
+                79 => v.avg_strokes_per_length = field.value.as_u16(),
+                80 => v.avg_swolf = field.value.as_u16(),
                 82 => v.player_score = field.value.as_u16(),
                 83 => v.opponent_score = field.value.as_u16(),
                 84 => v.opponent_name = field.value.as_str().to_owned(),
@@ -2938,6 +3014,9 @@ impl From<&Message> for Session {
                 103 => v.avg_left_pedal_smoothness = field.value.as_u8(),
                 104 => v.avg_right_pedal_smoothness = field.value.as_u8(),
                 105 => v.avg_combined_pedal_smoothness = field.value.as_u8(),
+                106 => v.num_segment_laps = field.value.as_u16(),
+                107 => v.front_gear_shift_count = field.value.as_u16(),
+                108 => v.rear_gear_shift_count = field.value.as_u16(),
                 110 => v.sport_profile_name = field.value.as_str().to_owned(),
                 111 => v.sport_index = field.value.as_u8(),
                 112 => v.time_standing = field.value.as_u32(),
@@ -2999,6 +3078,7 @@ impl From<&Message> for Session {
                 208 => v.avg_core_temperature = field.value.as_u16(),
                 209 => v.min_core_temperature = field.value.as_u16(),
                 210 => v.max_core_temperature = field.value.as_u16(),
+                211 => v.avg_grade_adjusted_speed = field.value.as_u32(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -3602,6 +3682,22 @@ impl From<Session> for Message {
                 is_expanded: false,
             });
         };
+        if m.avg_strokes_per_length != u16::MAX {
+            fields.push(Field {
+                num: 79,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_strokes_per_length),
+                is_expanded: false,
+            });
+        };
+        if m.avg_swolf != u16::MAX {
+            fields.push(Field {
+                num: 80,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_swolf),
+                is_expanded: false,
+            });
+        };
         if m.player_score != u16::MAX {
             fields.push(Field {
                 num: 82,
@@ -3791,6 +3887,30 @@ impl From<Session> for Message {
                 num: 105,
                 base_type: FitBaseType::UINT8,
                 value: Value::Uint8(m.avg_combined_pedal_smoothness),
+                is_expanded: false,
+            });
+        };
+        if m.num_segment_laps != u16::MAX {
+            fields.push(Field {
+                num: 106,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.num_segment_laps),
+                is_expanded: false,
+            });
+        };
+        if m.front_gear_shift_count != u16::MAX {
+            fields.push(Field {
+                num: 107,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.front_gear_shift_count),
+                is_expanded: false,
+            });
+        };
+        if m.rear_gear_shift_count != u16::MAX {
+            fields.push(Field {
+                num: 108,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.rear_gear_shift_count),
                 is_expanded: false,
             });
         };
@@ -4282,6 +4402,14 @@ impl From<Session> for Message {
                 is_expanded: false,
             });
         };
+        if m.avg_grade_adjusted_speed != u32::MAX {
+            fields.push(Field {
+                num: 211,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.avg_grade_adjusted_speed),
+                is_expanded: false,
+            });
+        };
 
         fields.extend_from_slice(&m.unknown_fields);
 
@@ -4521,6 +4649,12 @@ impl Serialize for Session {
         if let Some(v) = self.active_time_scaled() {
             state.serialize_field("active_time", &v)?;
         }
+        if let Some(v) = self.avg_strokes_per_length_scaled() {
+            state.serialize_field("avg_strokes_per_length", &v)?;
+        }
+        if self.avg_swolf != u16::MAX {
+            state.serialize_field("avg_swolf", &self.avg_swolf)?;
+        }
         if self.player_score != u16::MAX {
             state.serialize_field("player_score", &self.player_score)?;
         }
@@ -4592,6 +4726,15 @@ impl Serialize for Session {
         }
         if let Some(v) = self.avg_combined_pedal_smoothness_scaled() {
             state.serialize_field("avg_combined_pedal_smoothness", &v)?;
+        }
+        if self.num_segment_laps != u16::MAX {
+            state.serialize_field("num_segment_laps", &self.num_segment_laps)?;
+        }
+        if self.front_gear_shift_count != u16::MAX {
+            state.serialize_field("front_gear_shift_count", &self.front_gear_shift_count)?;
+        }
+        if self.rear_gear_shift_count != u16::MAX {
+            state.serialize_field("rear_gear_shift_count", &self.rear_gear_shift_count)?;
         }
         if !self.sport_profile_name.is_empty() {
             state.serialize_field("sport_profile_name", &self.sport_profile_name)?;
@@ -4776,6 +4919,9 @@ impl Serialize for Session {
         if let Some(v) = self.max_core_temperature_scaled() {
             state.serialize_field("max_core_temperature", &v)?;
         }
+        if let Some(v) = self.avg_grade_adjusted_speed_scaled() {
+            state.serialize_field("avg_grade_adjusted_speed", &v)?;
+        }
         if !self.unknown_fields.is_empty() {
             state.serialize_field("unknown_fields", &self.unknown_fields)?;
         }
@@ -4870,6 +5016,8 @@ struct De {
     best_lap_index: u16,
     min_altitude: f64,
     active_time: f64,
+    avg_strokes_per_length: f64,
+    avg_swolf: u16,
     player_score: u16,
     opponent_score: u16,
     opponent_name: String,
@@ -4894,6 +5042,9 @@ struct De {
     avg_left_pedal_smoothness: f64,
     avg_right_pedal_smoothness: f64,
     avg_combined_pedal_smoothness: f64,
+    num_segment_laps: u16,
+    front_gear_shift_count: u16,
+    rear_gear_shift_count: u16,
     sport_profile_name: String,
     sport_index: u8,
     time_standing: f64,
@@ -4955,6 +5106,7 @@ struct De {
     avg_core_temperature: f64,
     min_core_temperature: f64,
     max_core_temperature: f64,
+    avg_grade_adjusted_speed: f64,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -5288,6 +5440,15 @@ impl From<De> for Session {
                     unscaled as u32
                 }
             },
+            avg_strokes_per_length: {
+                let unscaled = (m.avg_strokes_per_length + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_swolf: m.avg_swolf,
             player_score: m.player_score,
             opponent_score: m.opponent_score,
             opponent_name: m.opponent_name,
@@ -5499,6 +5660,9 @@ impl From<De> for Session {
                     unscaled as u8
                 }
             },
+            num_segment_laps: m.num_segment_laps,
+            front_gear_shift_count: m.front_gear_shift_count,
+            rear_gear_shift_count: m.rear_gear_shift_count,
             sport_profile_name: m.sport_profile_name,
             sport_index: m.sport_index,
             time_standing: {
@@ -5785,6 +5949,14 @@ impl From<De> for Session {
                     unscaled as u16
                 }
             },
+            avg_grade_adjusted_speed: {
+                let unscaled = (m.avg_grade_adjusted_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
             state: [0u8; 23],
             unknown_fields: m.unknown_fields,
             developer_fields: m.developer_fields,
@@ -5869,6 +6041,8 @@ impl Default for De {
             best_lap_index: u16::MAX,
             min_altitude: f64::from_bits(u64::MAX),
             active_time: f64::from_bits(u64::MAX),
+            avg_strokes_per_length: f64::from_bits(u64::MAX),
+            avg_swolf: u16::MAX,
             player_score: u16::MAX,
             opponent_score: u16::MAX,
             opponent_name: String::new(),
@@ -5893,6 +6067,9 @@ impl Default for De {
             avg_left_pedal_smoothness: f64::from_bits(u64::MAX),
             avg_right_pedal_smoothness: f64::from_bits(u64::MAX),
             avg_combined_pedal_smoothness: f64::from_bits(u64::MAX),
+            num_segment_laps: u16::MAX,
+            front_gear_shift_count: u16::MAX,
+            rear_gear_shift_count: u16::MAX,
             sport_profile_name: String::new(),
             sport_index: u8::MAX,
             time_standing: f64::from_bits(u64::MAX),
@@ -5954,6 +6131,7 @@ impl Default for De {
             avg_core_temperature: f64::from_bits(u64::MAX),
             min_core_temperature: f64::from_bits(u64::MAX),
             max_core_temperature: f64::from_bits(u64::MAX),
+            avg_grade_adjusted_speed: f64::from_bits(u64::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

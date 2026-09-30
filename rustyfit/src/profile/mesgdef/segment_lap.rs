@@ -190,6 +190,8 @@ pub struct SegmentLap {
     pub avg_grit: f32,
     /// Units: Flow; The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
     pub avg_flow: f32,
+    /// Units: kcal
+    pub metabolic_calories: u16,
     /// Scale: 100; Units: m; fractional part of total_ascent
     pub total_fractional_ascent: u8,
     /// Scale: 100; Units: m; fractional part of total_descent
@@ -388,6 +390,8 @@ impl SegmentLap {
     pub const AVG_GRIT: u8 = 86;
     /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `Flow`
     pub const AVG_FLOW: u8 = 87;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
+    pub const METABOLIC_CALORIES: u8 = 88;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
     pub const TOTAL_FRACTIONAL_ASCENT: u8 = 89;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
@@ -492,6 +496,7 @@ impl SegmentLap {
             total_flow: f32::from_bits(u32::MAX),
             avg_grit: f32::from_bits(u32::MAX),
             avg_flow: f32::from_bits(u32::MAX),
+            metabolic_calories: u16::MAX,
             total_fractional_ascent: u8::MAX,
             total_fractional_descent: u8::MAX,
             enhanced_avg_altitude: u32::MAX,
@@ -1643,6 +1648,7 @@ impl SegmentLap {
             + (self.total_flow.to_bits() != u32::MAX) as usize
             + (self.avg_grit.to_bits() != u32::MAX) as usize
             + (self.avg_flow.to_bits() != u32::MAX) as usize
+            + (self.metabolic_calories != u16::MAX) as usize
             + (self.total_fractional_ascent != u8::MAX) as usize
             + (self.total_fractional_descent != u8::MAX) as usize
             + (self.enhanced_avg_altitude != u32::MAX) as usize
@@ -1660,7 +1666,7 @@ impl Default for SegmentLap {
 impl From<&Message> for SegmentLap {
     /// from creates new SegmentLap struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        const KNOWN_NUMS: [u64; 4] = [18446744073709551615, 1056964607, 0, 6917529027641081856];
+        const KNOWN_NUMS: [u64; 4] = [18446744073709551615, 1073741823, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
@@ -1762,6 +1768,7 @@ impl From<&Message> for SegmentLap {
                 85 => v.total_flow = field.value.as_f32(),
                 86 => v.avg_grit = field.value.as_f32(),
                 87 => v.avg_flow = field.value.as_f32(),
+                88 => v.metabolic_calories = field.value.as_u16(),
                 89 => v.total_fractional_ascent = field.value.as_u8(),
                 90 => v.total_fractional_descent = field.value.as_u8(),
                 91 => v.enhanced_avg_altitude = field.value.as_u32(),
@@ -2506,6 +2513,14 @@ impl From<SegmentLap> for Message {
                 is_expanded: false,
             });
         };
+        if m.metabolic_calories != u16::MAX {
+            fields.push(Field {
+                num: 88,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.metabolic_calories),
+                is_expanded: false,
+            });
+        };
         if m.total_fractional_ascent != u8::MAX {
             fields.push(Field {
                 num: 89,
@@ -2836,6 +2851,9 @@ impl Serialize for SegmentLap {
         if self.avg_flow.to_bits() != u32::MAX {
             state.serialize_field("avg_flow", &self.avg_flow)?;
         }
+        if self.metabolic_calories != u16::MAX {
+            state.serialize_field("metabolic_calories", &self.metabolic_calories)?;
+        }
         if let Some(v) = self.total_fractional_ascent_scaled() {
             state.serialize_field("total_fractional_ascent", &v)?;
         }
@@ -2962,6 +2980,7 @@ struct De {
     total_flow: f32,
     avg_grit: f32,
     avg_flow: f32,
+    metabolic_calories: u16,
     total_fractional_ascent: f64,
     total_fractional_descent: f64,
     enhanced_avg_altitude: f64,
@@ -3395,6 +3414,7 @@ impl From<De> for SegmentLap {
             total_flow: m.total_flow,
             avg_grit: m.avg_grit,
             avg_flow: m.avg_flow,
+            metabolic_calories: m.metabolic_calories,
             total_fractional_ascent: {
                 let unscaled = (m.total_fractional_ascent + 0.0) * 100.0;
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
@@ -3536,6 +3556,7 @@ impl Default for De {
             total_flow: f32::from_bits(u32::MAX),
             avg_grit: f32::from_bits(u32::MAX),
             avg_flow: f32::from_bits(u32::MAX),
+            metabolic_calories: u16::MAX,
             total_fractional_ascent: f64::from_bits(u64::MAX),
             total_fractional_descent: f64::from_bits(u64::MAX),
             enhanced_avg_altitude: f64::from_bits(u64::MAX),

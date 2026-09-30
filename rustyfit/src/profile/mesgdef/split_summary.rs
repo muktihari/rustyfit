@@ -15,7 +15,11 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct SplitSummary {
     pub message_index: typedef::MessageIndex,
+    /// Units: s
+    pub timestamp: typedef::DateTime,
     pub split_type: typedef::SplitType,
+    pub sport: typedef::Sport,
+    pub sub_sport: typedef::SubSport,
     pub num_splits: u16,
     /// Scale: 1000; Units: s
     pub total_timer_time: u32,
@@ -37,10 +41,112 @@ pub struct SplitSummary {
     pub avg_vert_speed: i32,
     /// Units: kcal
     pub total_calories: u32,
+    /// Scale: 128; Units: rpm
+    pub avg_cadence: u16,
+    /// Scale: 128; Units: rpm
+    pub max_cadence: u16,
+    /// Units: cycles
+    pub total_cycles: u32,
+    /// Units: C
+    pub avg_temperature: i8,
+    /// Units: C
+    pub max_temperature: i8,
+    /// Units: C
+    pub min_temperature: i8,
+    /// Scale: 10; Units: mm
+    pub avg_vertical_oscillation: u16,
+    /// Scale: 100; Units: percent
+    pub avg_vertical_ratio: u16,
+    /// Scale: 10; Units: ms
+    pub avg_stance_time: u16,
+    /// Scale: 100; Units: percent
+    pub avg_stance_time_balance: u16,
+    /// Scale: 10; Units: mm
+    pub avg_step_length: u16,
+    /// Units: watts
+    pub avg_power: u16,
+    /// Units: watts
+    pub max_power: u16,
+    /// Units: watts
+    pub normalized_power: u16,
+    /// Total time spent in the standing position
+    pub left_right_balance: typedef::LeftRightBalance100,
+    /// Scale: 1000; Units: s; Average left platform center offset
+    pub time_standing: u32,
+    /// Units: mm; Average right platform center offset
+    pub avg_left_pco: i8,
+    /// Units: mm; Average left power phase angles. Data value indexes defined by power_phase_type.
+    pub avg_right_pco: i8,
+    /// Scale: 0.7111111; Units: degrees; Average left power phase peak angles. Data value indexes defined by power_phase_type.
+    pub avg_left_power_phase: Vec<u8>,
+    /// Scale: 0.7111111; Units: degrees; Average right power phase angles. Data value indexes defined by power_phase_type.
+    pub avg_left_power_phase_peak: Vec<u8>,
+    /// Scale: 0.7111111; Units: degrees; Average right power phase peak angles. Data value indexes defined by power_phase_type.
+    pub avg_right_power_phase: Vec<u8>,
+    /// Scale: 0.7111111; Units: degrees; Average power by position. Data value indexes defined by rider_position_type.
+    pub avg_right_power_phase_peak: Vec<u8>,
+    /// Units: watts; Maximum power by position. Data value indexes defined by rider_position_type.
+    pub avg_power_position: Vec<u16>,
+    /// Units: watts
+    pub max_power_position: Vec<u16>,
+    /// Scale: 2; Units: percent
+    pub avg_left_torque_effectiveness: u8,
+    /// Scale: 2; Units: percent
+    pub avg_right_torque_effectiveness: u8,
+    /// Scale: 2; Units: percent
+    pub avg_left_pedal_smoothness: u8,
+    /// Scale: 2; Units: percent
+    pub avg_right_pedal_smoothness: u8,
+    /// Scale: 2; Units: percent; The flow score estimates how long distance wise a cyclist deaccelerates over intervals where deacceleration is unnecessary such as smooth turns or small grade angle intervals.
+    pub avg_combined_pedal_smoothness: u8,
+    /// Units: Flow; The grit score estimates how challenging a route could be for a cyclist in terms of time spent going over sharp turns or large grade slopes.
+    pub avg_flow: f32,
+    /// Units: kGrit
+    pub total_grit: f32,
+    /// # of active lengths of swim pool
+    pub swim_stroke: typedef::SwimStroke,
+    /// Units: lengths
+    pub num_active_lengths: u16,
+    pub avg_swolf: u16,
+    /// Scale: 100; Units: m
+    pub avg_stroke_distance: u16,
+    /// Scale: 10; Units: strokes / length
+    pub avg_strokes_per_length: u16,
+    /// Units: m
+    pub avg_ascent: u16,
+    /// Units: m
+    pub max_ascent: u16,
+    pub climb_grading_scale: typedef::ClimbGradingScale,
+    pub climb_max_grade_value: u32,
+    pub num_falls: u16,
+    pub num_climbs_attempted: u16,
+    pub num_climbs_completed: u16,
+    /// Scale: 100; Units: m; Distance of the longest split
+    pub max_distance: u32,
+    /// Units: kcal
+    pub metabolic_calories: u16,
     /// Scale: 1000; Units: s; total active time in all split rounds
     pub active_time: u32,
+    /// Scale: 100; Units: m; fractional part of total_ascent
+    pub total_fractional_ascent: u8,
+    /// Scale: 100; Units: m; fractional part of total_descent
+    pub total_fractional_descent: u8,
+    /// Scale: 100; Units: m; fractional part of avg_ascent
+    pub avg_fractional_ascent: u8,
+    /// Scale: 100; Units: m; fractional part of max_descent
+    pub max_fractional_ascent: u8,
+    /// Scale: 1000; Units: m/s
+    pub avg_grade_adjusted_speed: u32,
+    pub avg_stress: u16,
     /// Scale: 1000; Units: s
     pub total_moving_time: u32,
+    pub start_time: typedef::DateTime,
+    /// Units: bpm
+    pub min_heart_rate: u8,
+    /// Scale: 100; Units: percent
+    pub avg_stance_time_percent: u16,
+    /// Scale: 1000; Units: s
+    pub max_total_timer_time: u32,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -50,8 +156,14 @@ pub struct SplitSummary {
 impl SplitSummary {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
+    pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SplitType
     pub const SPLIT_TYPE: u8 = 0;
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
+    pub const SPORT: u8 = 1;
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
+    pub const SUB_SPORT: u8 = 2;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUM_SPLITS: u8 = 3;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
@@ -74,16 +186,129 @@ impl SplitSummary {
     pub const AVG_VERT_SPEED: u8 = 12;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `kcal`
     pub const TOTAL_CALORIES: u8 = 13;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `rpm`
+    pub const AVG_CADENCE: u8 = 14;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `128`; Units: `rpm`
+    pub const MAX_CADENCE: u8 = 15;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `cycles`
+    pub const TOTAL_CYCLES: u8 = 16;
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
+    pub const AVG_TEMPERATURE: u8 = 17;
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
+    pub const MAX_TEMPERATURE: u8 = 18;
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
+    pub const MIN_TEMPERATURE: u8 = 19;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `mm`
+    pub const AVG_VERTICAL_OSCILLATION: u8 = 20;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `percent`
+    pub const AVG_VERTICAL_RATIO: u8 = 21;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `ms`
+    pub const AVG_STANCE_TIME: u8 = 22;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `percent`
+    pub const AVG_STANCE_TIME_BALANCE: u8 = 23;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `mm`
+    pub const AVG_STEP_LENGTH: u8 = 24;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    pub const AVG_POWER: u8 = 25;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    pub const MAX_POWER: u8 = 26;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    pub const NORMALIZED_POWER: u8 = 27;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::LeftRightBalance100
+    pub const LEFT_RIGHT_BALANCE: u8 = 28;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    pub const TIME_STANDING: u8 = 29;
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
+    pub const AVG_LEFT_PCO: u8 = 30;
+    /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
+    pub const AVG_RIGHT_PCO: u8 = 31;
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    pub const AVG_LEFT_POWER_PHASE: u8 = 32;
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 33;
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    pub const AVG_RIGHT_POWER_PHASE: u8 = 34;
+    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 35;
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    pub const AVG_POWER_POSITION: u8 = 36;
+    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    pub const MAX_POWER_POSITION: u8 = 37;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
+    pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 38;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
+    pub const AVG_RIGHT_TORQUE_EFFECTIVENESS: u8 = 39;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
+    pub const AVG_LEFT_PEDAL_SMOOTHNESS: u8 = 40;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
+    pub const AVG_RIGHT_PEDAL_SMOOTHNESS: u8 = 41;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
+    pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 42;
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `Flow`
+    pub const AVG_FLOW: u8 = 43;
+    /// Value's type: `f32`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `kGrit`
+    pub const TOTAL_GRIT: u8 = 44;
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SwimStroke
+    pub const SWIM_STROKE: u8 = 47;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `lengths`
+    pub const NUM_ACTIVE_LENGTHS: u8 = 48;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const AVG_SWOLF: u8 = 49;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `m`
+    pub const AVG_STROKE_DISTANCE: u8 = 50;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `strokes / length`
+    pub const AVG_STROKES_PER_LENGTH: u8 = 51;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
+    pub const AVG_ASCENT: u8 = 52;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `m`
+    pub const MAX_ASCENT: u8 = 53;
+    /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ClimbGradingScale
+    pub const CLIMB_GRADING_SCALE: u8 = 54;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
+    pub const CLIMB_MAX_GRADE_VALUE: u8 = 55;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const NUM_FALLS: u8 = 56;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const NUM_CLIMBS_ATTEMPTED: u8 = 58;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const NUM_CLIMBS_COMPLETED: u8 = 59;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `100`; Units: `m`
+    pub const MAX_DISTANCE: u8 = 60;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
+    pub const METABOLIC_CALORIES: u8 = 64;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const ACTIVE_TIME: u8 = 65;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
+    pub const TOTAL_FRACTIONAL_ASCENT: u8 = 66;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
+    pub const TOTAL_FRACTIONAL_DESCENT: u8 = 67;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
+    pub const AVG_FRACTIONAL_ASCENT: u8 = 68;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `100`; Units: `m`
+    pub const MAX_FRACTIONAL_ASCENT: u8 = 69;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
+    pub const AVG_GRADE_ADJUSTED_SPEED: u8 = 71;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
+    pub const AVG_STRESS: u8 = 72;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TOTAL_MOVING_TIME: u8 = 77;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
+    pub const START_TIME: u8 = 79;
+    /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
+    pub const MIN_HEART_RATE: u8 = 87;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `percent`
+    pub const AVG_STANCE_TIME_PERCENT: u8 = 91;
+    /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    pub const MAX_TOTAL_TIMER_TIME: u8 = 101;
 
     /// Create new SplitSummary with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: typedef::DateTime(u32::MAX),
             split_type: typedef::SplitType(u8::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
             num_splits: u16::MAX,
             total_timer_time: u32::MAX,
             total_distance: u32::MAX,
@@ -95,8 +320,63 @@ impl SplitSummary {
             max_heart_rate: u8::MAX,
             avg_vert_speed: i32::MAX,
             total_calories: u32::MAX,
+            avg_cadence: u16::MAX,
+            max_cadence: u16::MAX,
+            total_cycles: u32::MAX,
+            avg_temperature: i8::MAX,
+            max_temperature: i8::MAX,
+            min_temperature: i8::MAX,
+            avg_vertical_oscillation: u16::MAX,
+            avg_vertical_ratio: u16::MAX,
+            avg_stance_time: u16::MAX,
+            avg_stance_time_balance: u16::MAX,
+            avg_step_length: u16::MAX,
+            avg_power: u16::MAX,
+            max_power: u16::MAX,
+            normalized_power: u16::MAX,
+            left_right_balance: typedef::LeftRightBalance100(u16::MAX),
+            time_standing: u32::MAX,
+            avg_left_pco: i8::MAX,
+            avg_right_pco: i8::MAX,
+            avg_left_power_phase: Vec::new(),
+            avg_left_power_phase_peak: Vec::new(),
+            avg_right_power_phase: Vec::new(),
+            avg_right_power_phase_peak: Vec::new(),
+            avg_power_position: Vec::new(),
+            max_power_position: Vec::new(),
+            avg_left_torque_effectiveness: u8::MAX,
+            avg_right_torque_effectiveness: u8::MAX,
+            avg_left_pedal_smoothness: u8::MAX,
+            avg_right_pedal_smoothness: u8::MAX,
+            avg_combined_pedal_smoothness: u8::MAX,
+            avg_flow: f32::from_bits(u32::MAX),
+            total_grit: f32::from_bits(u32::MAX),
+            swim_stroke: typedef::SwimStroke(u8::MAX),
+            num_active_lengths: u16::MAX,
+            avg_swolf: u16::MAX,
+            avg_stroke_distance: u16::MAX,
+            avg_strokes_per_length: u16::MAX,
+            avg_ascent: u16::MAX,
+            max_ascent: u16::MAX,
+            climb_grading_scale: typedef::ClimbGradingScale(u8::MAX),
+            climb_max_grade_value: u32::MAX,
+            num_falls: u16::MAX,
+            num_climbs_attempted: u16::MAX,
+            num_climbs_completed: u16::MAX,
+            max_distance: u32::MAX,
+            metabolic_calories: u16::MAX,
             active_time: u32::MAX,
+            total_fractional_ascent: u8::MAX,
+            total_fractional_descent: u8::MAX,
+            avg_fractional_ascent: u8::MAX,
+            max_fractional_ascent: u8::MAX,
+            avg_grade_adjusted_speed: u32::MAX,
+            avg_stress: u16::MAX,
             total_moving_time: u32::MAX,
+            start_time: typedef::DateTime(u32::MAX),
+            min_heart_rate: u8::MAX,
+            avg_stance_time_percent: u16::MAX,
+            max_total_timer_time: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -207,6 +487,466 @@ impl SplitSummary {
         self
     }
 
+    /// Returns `avg_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
+    pub fn avg_cadence_scaled(&self) -> Option<f64> {
+        if self.avg_cadence == u16::MAX {
+            return None;
+        }
+        Some(self.avg_cadence as f64 / 128.0 - 0.0)
+    }
+
+    /// Set `avg_cadence` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_cadence_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 128.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_cadence = u16::MAX;
+            return self;
+        }
+        self.avg_cadence = unscaled as u16;
+        self
+    }
+
+    /// Returns `max_cadence` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: rpm
+    pub fn max_cadence_scaled(&self) -> Option<f64> {
+        if self.max_cadence == u16::MAX {
+            return None;
+        }
+        Some(self.max_cadence as f64 / 128.0 - 0.0)
+    }
+
+    /// Set `max_cadence` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_max_cadence_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 128.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.max_cadence = u16::MAX;
+            return self;
+        }
+        self.max_cadence = unscaled as u16;
+        self
+    }
+
+    /// Returns `avg_vertical_oscillation` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
+    pub fn avg_vertical_oscillation_scaled(&self) -> Option<f64> {
+        if self.avg_vertical_oscillation == u16::MAX {
+            return None;
+        }
+        Some(self.avg_vertical_oscillation as f64 / 10.0 - 0.0)
+    }
+
+    /// Set `avg_vertical_oscillation` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_vertical_oscillation_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 10.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_vertical_oscillation = u16::MAX;
+            return self;
+        }
+        self.avg_vertical_oscillation = unscaled as u16;
+        self
+    }
+
+    /// Returns `avg_vertical_ratio` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_vertical_ratio_scaled(&self) -> Option<f64> {
+        if self.avg_vertical_ratio == u16::MAX {
+            return None;
+        }
+        Some(self.avg_vertical_ratio as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `avg_vertical_ratio` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_vertical_ratio_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_vertical_ratio = u16::MAX;
+            return self;
+        }
+        self.avg_vertical_ratio = unscaled as u16;
+        self
+    }
+
+    /// Returns `avg_stance_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: ms
+    pub fn avg_stance_time_scaled(&self) -> Option<f64> {
+        if self.avg_stance_time == u16::MAX {
+            return None;
+        }
+        Some(self.avg_stance_time as f64 / 10.0 - 0.0)
+    }
+
+    /// Set `avg_stance_time` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_stance_time_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 10.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_stance_time = u16::MAX;
+            return self;
+        }
+        self.avg_stance_time = unscaled as u16;
+        self
+    }
+
+    /// Returns `avg_stance_time_balance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_stance_time_balance_scaled(&self) -> Option<f64> {
+        if self.avg_stance_time_balance == u16::MAX {
+            return None;
+        }
+        Some(self.avg_stance_time_balance as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `avg_stance_time_balance` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_stance_time_balance_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_stance_time_balance = u16::MAX;
+            return self;
+        }
+        self.avg_stance_time_balance = unscaled as u16;
+        self
+    }
+
+    /// Returns `avg_step_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: mm
+    pub fn avg_step_length_scaled(&self) -> Option<f64> {
+        if self.avg_step_length == u16::MAX {
+            return None;
+        }
+        Some(self.avg_step_length as f64 / 10.0 - 0.0)
+    }
+
+    /// Set `avg_step_length` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_step_length_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 10.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_step_length = u16::MAX;
+            return self;
+        }
+        self.avg_step_length = unscaled as u16;
+        self
+    }
+
+    /// Returns `time_standing` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
+    pub fn time_standing_scaled(&self) -> Option<f64> {
+        if self.time_standing == u32::MAX {
+            return None;
+        }
+        Some(self.time_standing as f64 / 1000.0 - 0.0)
+    }
+
+    /// Set `time_standing` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_time_standing_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.time_standing = u32::MAX;
+            return self;
+        }
+        self.time_standing = unscaled as u32;
+        self
+    }
+
+    /// Returns `avg_left_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
+    pub fn avg_left_power_phase_scaled(&self) -> Option<Vec<f64>> {
+        if self.avg_left_power_phase.is_empty() {
+            return None;
+        }
+        let mut v = Vec::with_capacity(self.avg_left_power_phase.len());
+        for &x in &self.avg_left_power_phase {
+            v.push(x as f64 / 0.7111111 - 0.0)
+        }
+        Some(v)
+    }
+
+    /// Set `avg_left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
+        self.avg_left_power_phase = Vec::with_capacity(v.len());
+        if v.is_empty() {
+            return self;
+        }
+        for &x in v {
+            let unscaled = (x + 0.0) * 0.7111111;
+            if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                self.avg_left_power_phase.push(u8::MAX);
+                continue;
+            }
+            self.avg_left_power_phase.push(unscaled as u8);
+        }
+        self
+    }
+
+    /// Returns `avg_left_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
+    pub fn avg_left_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
+        if self.avg_left_power_phase_peak.is_empty() {
+            return None;
+        }
+        let mut v = Vec::with_capacity(self.avg_left_power_phase_peak.len());
+        for &x in &self.avg_left_power_phase_peak {
+            v.push(x as f64 / 0.7111111 - 0.0)
+        }
+        Some(v)
+    }
+
+    /// Set `avg_left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
+        self.avg_left_power_phase_peak = Vec::with_capacity(v.len());
+        if v.is_empty() {
+            return self;
+        }
+        for &x in v {
+            let unscaled = (x + 0.0) * 0.7111111;
+            if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                self.avg_left_power_phase_peak.push(u8::MAX);
+                continue;
+            }
+            self.avg_left_power_phase_peak.push(unscaled as u8);
+        }
+        self
+    }
+
+    /// Returns `avg_right_power_phase` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
+    pub fn avg_right_power_phase_scaled(&self) -> Option<Vec<f64>> {
+        if self.avg_right_power_phase.is_empty() {
+            return None;
+        }
+        let mut v = Vec::with_capacity(self.avg_right_power_phase.len());
+        for &x in &self.avg_right_power_phase {
+            v.push(x as f64 / 0.7111111 - 0.0)
+        }
+        Some(v)
+    }
+
+    /// Set `avg_right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
+        self.avg_right_power_phase = Vec::with_capacity(v.len());
+        if v.is_empty() {
+            return self;
+        }
+        for &x in v {
+            let unscaled = (x + 0.0) * 0.7111111;
+            if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                self.avg_right_power_phase.push(u8::MAX);
+                continue;
+            }
+            self.avg_right_power_phase.push(unscaled as u8);
+        }
+        self
+    }
+
+    /// Returns `avg_right_power_phase_peak` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: degrees
+    pub fn avg_right_power_phase_peak_scaled(&self) -> Option<Vec<f64>> {
+        if self.avg_right_power_phase_peak.is_empty() {
+            return None;
+        }
+        let mut v = Vec::with_capacity(self.avg_right_power_phase_peak.len());
+        for &x in &self.avg_right_power_phase_peak {
+            v.push(x as f64 / 0.7111111 - 0.0)
+        }
+        Some(v)
+    }
+
+    /// Set `avg_right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
+        self.avg_right_power_phase_peak = Vec::with_capacity(v.len());
+        if v.is_empty() {
+            return self;
+        }
+        for &x in v {
+            let unscaled = (x + 0.0) * 0.7111111;
+            if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                self.avg_right_power_phase_peak.push(u8::MAX);
+                continue;
+            }
+            self.avg_right_power_phase_peak.push(unscaled as u8);
+        }
+        self
+    }
+
+    /// Returns `avg_left_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_left_torque_effectiveness_scaled(&self) -> Option<f64> {
+        if self.avg_left_torque_effectiveness == u8::MAX {
+            return None;
+        }
+        Some(self.avg_left_torque_effectiveness as f64 / 2.0 - 0.0)
+    }
+
+    /// Set `avg_left_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_left_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 2.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.avg_left_torque_effectiveness = u8::MAX;
+            return self;
+        }
+        self.avg_left_torque_effectiveness = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_right_torque_effectiveness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_right_torque_effectiveness_scaled(&self) -> Option<f64> {
+        if self.avg_right_torque_effectiveness == u8::MAX {
+            return None;
+        }
+        Some(self.avg_right_torque_effectiveness as f64 / 2.0 - 0.0)
+    }
+
+    /// Set `avg_right_torque_effectiveness` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_right_torque_effectiveness_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 2.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.avg_right_torque_effectiveness = u8::MAX;
+            return self;
+        }
+        self.avg_right_torque_effectiveness = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_left_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_left_pedal_smoothness_scaled(&self) -> Option<f64> {
+        if self.avg_left_pedal_smoothness == u8::MAX {
+            return None;
+        }
+        Some(self.avg_left_pedal_smoothness as f64 / 2.0 - 0.0)
+    }
+
+    /// Set `avg_left_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_left_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 2.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.avg_left_pedal_smoothness = u8::MAX;
+            return self;
+        }
+        self.avg_left_pedal_smoothness = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_right_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_right_pedal_smoothness_scaled(&self) -> Option<f64> {
+        if self.avg_right_pedal_smoothness == u8::MAX {
+            return None;
+        }
+        Some(self.avg_right_pedal_smoothness as f64 / 2.0 - 0.0)
+    }
+
+    /// Set `avg_right_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_right_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 2.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.avg_right_pedal_smoothness = u8::MAX;
+            return self;
+        }
+        self.avg_right_pedal_smoothness = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_combined_pedal_smoothness` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_combined_pedal_smoothness_scaled(&self) -> Option<f64> {
+        if self.avg_combined_pedal_smoothness == u8::MAX {
+            return None;
+        }
+        Some(self.avg_combined_pedal_smoothness as f64 / 2.0 - 0.0)
+    }
+
+    /// Set `avg_combined_pedal_smoothness` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_combined_pedal_smoothness_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 2.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.avg_combined_pedal_smoothness = u8::MAX;
+            return self;
+        }
+        self.avg_combined_pedal_smoothness = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_stroke_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn avg_stroke_distance_scaled(&self) -> Option<f64> {
+        if self.avg_stroke_distance == u16::MAX {
+            return None;
+        }
+        Some(self.avg_stroke_distance as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `avg_stroke_distance` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_stroke_distance_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_stroke_distance = u16::MAX;
+            return self;
+        }
+        self.avg_stroke_distance = unscaled as u16;
+        self
+    }
+
+    /// Returns `avg_strokes_per_length` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: strokes / length
+    pub fn avg_strokes_per_length_scaled(&self) -> Option<f64> {
+        if self.avg_strokes_per_length == u16::MAX {
+            return None;
+        }
+        Some(self.avg_strokes_per_length as f64 / 10.0 - 0.0)
+    }
+
+    /// Set `avg_strokes_per_length` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_strokes_per_length_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 10.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_strokes_per_length = u16::MAX;
+            return self;
+        }
+        self.avg_strokes_per_length = unscaled as u16;
+        self
+    }
+
+    /// Returns `max_distance` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn max_distance_scaled(&self) -> Option<f64> {
+        if self.max_distance == u32::MAX {
+            return None;
+        }
+        Some(self.max_distance as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `max_distance` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_max_distance_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.max_distance = u32::MAX;
+            return self;
+        }
+        self.max_distance = unscaled as u32;
+        self
+    }
+
     /// Returns `active_time` in its scaled value. It returns `None` when value is invalid.
     ///
     /// Units: s
@@ -225,6 +965,111 @@ impl SplitSummary {
             return self;
         }
         self.active_time = unscaled as u32;
+        self
+    }
+
+    /// Returns `total_fractional_ascent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn total_fractional_ascent_scaled(&self) -> Option<f64> {
+        if self.total_fractional_ascent == u8::MAX {
+            return None;
+        }
+        Some(self.total_fractional_ascent as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `total_fractional_ascent` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_total_fractional_ascent_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.total_fractional_ascent = u8::MAX;
+            return self;
+        }
+        self.total_fractional_ascent = unscaled as u8;
+        self
+    }
+
+    /// Returns `total_fractional_descent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn total_fractional_descent_scaled(&self) -> Option<f64> {
+        if self.total_fractional_descent == u8::MAX {
+            return None;
+        }
+        Some(self.total_fractional_descent as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `total_fractional_descent` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_total_fractional_descent_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.total_fractional_descent = u8::MAX;
+            return self;
+        }
+        self.total_fractional_descent = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_fractional_ascent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn avg_fractional_ascent_scaled(&self) -> Option<f64> {
+        if self.avg_fractional_ascent == u8::MAX {
+            return None;
+        }
+        Some(self.avg_fractional_ascent as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `avg_fractional_ascent` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_fractional_ascent_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.avg_fractional_ascent = u8::MAX;
+            return self;
+        }
+        self.avg_fractional_ascent = unscaled as u8;
+        self
+    }
+
+    /// Returns `max_fractional_ascent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn max_fractional_ascent_scaled(&self) -> Option<f64> {
+        if self.max_fractional_ascent == u8::MAX {
+            return None;
+        }
+        Some(self.max_fractional_ascent as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `max_fractional_ascent` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_max_fractional_ascent_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+            self.max_fractional_ascent = u8::MAX;
+            return self;
+        }
+        self.max_fractional_ascent = unscaled as u8;
+        self
+    }
+
+    /// Returns `avg_grade_adjusted_speed` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m/s
+    pub fn avg_grade_adjusted_speed_scaled(&self) -> Option<f64> {
+        if self.avg_grade_adjusted_speed == u32::MAX {
+            return None;
+        }
+        Some(self.avg_grade_adjusted_speed as f64 / 1000.0 - 0.0)
+    }
+
+    /// Set `avg_grade_adjusted_speed` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_grade_adjusted_speed_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.avg_grade_adjusted_speed = u32::MAX;
+            return self;
+        }
+        self.avg_grade_adjusted_speed = unscaled as u32;
         self
     }
 
@@ -249,9 +1094,54 @@ impl SplitSummary {
         self
     }
 
+    /// Returns `avg_stance_time_percent` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: percent
+    pub fn avg_stance_time_percent_scaled(&self) -> Option<f64> {
+        if self.avg_stance_time_percent == u16::MAX {
+            return None;
+        }
+        Some(self.avg_stance_time_percent as f64 / 100.0 - 0.0)
+    }
+
+    /// Set `avg_stance_time_percent` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_avg_stance_time_percent_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 100.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+            self.avg_stance_time_percent = u16::MAX;
+            return self;
+        }
+        self.avg_stance_time_percent = unscaled as u16;
+        self
+    }
+
+    /// Returns `max_total_timer_time` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: s
+    pub fn max_total_timer_time_scaled(&self) -> Option<f64> {
+        if self.max_total_timer_time == u32::MAX {
+            return None;
+        }
+        Some(self.max_total_timer_time as f64 / 1000.0 - 0.0)
+    }
+
+    /// Set `max_total_timer_time` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_max_total_timer_time_scaled(&mut self, v: f64) -> &mut Self {
+        let unscaled = (v + 0.0) * 1000.0;
+        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+            self.max_total_timer_time = u32::MAX;
+            return self;
+        }
+        self.max_total_timer_time = unscaled as u32;
+        self
+    }
+
     fn count_valid_fields(&self) -> usize {
         (self.message_index.0 != u16::MAX) as usize
+            + (self.timestamp.0 != u32::MAX) as usize
             + (self.split_type.0 != u8::MAX) as usize
+            + (self.sport.0 != u8::MAX) as usize
+            + (self.sub_sport.0 != u8::MAX) as usize
             + (self.num_splits != u16::MAX) as usize
             + (self.total_timer_time != u32::MAX) as usize
             + (self.total_distance != u32::MAX) as usize
@@ -263,8 +1153,63 @@ impl SplitSummary {
             + (self.max_heart_rate != u8::MAX) as usize
             + (self.avg_vert_speed != i32::MAX) as usize
             + (self.total_calories != u32::MAX) as usize
+            + (self.avg_cadence != u16::MAX) as usize
+            + (self.max_cadence != u16::MAX) as usize
+            + (self.total_cycles != u32::MAX) as usize
+            + (self.avg_temperature != i8::MAX) as usize
+            + (self.max_temperature != i8::MAX) as usize
+            + (self.min_temperature != i8::MAX) as usize
+            + (self.avg_vertical_oscillation != u16::MAX) as usize
+            + (self.avg_vertical_ratio != u16::MAX) as usize
+            + (self.avg_stance_time != u16::MAX) as usize
+            + (self.avg_stance_time_balance != u16::MAX) as usize
+            + (self.avg_step_length != u16::MAX) as usize
+            + (self.avg_power != u16::MAX) as usize
+            + (self.max_power != u16::MAX) as usize
+            + (self.normalized_power != u16::MAX) as usize
+            + (self.left_right_balance.0 != u16::MAX) as usize
+            + (self.time_standing != u32::MAX) as usize
+            + (self.avg_left_pco != i8::MAX) as usize
+            + (self.avg_right_pco != i8::MAX) as usize
+            + (!self.avg_left_power_phase.is_empty()) as usize
+            + (!self.avg_left_power_phase_peak.is_empty()) as usize
+            + (!self.avg_right_power_phase.is_empty()) as usize
+            + (!self.avg_right_power_phase_peak.is_empty()) as usize
+            + (!self.avg_power_position.is_empty()) as usize
+            + (!self.max_power_position.is_empty()) as usize
+            + (self.avg_left_torque_effectiveness != u8::MAX) as usize
+            + (self.avg_right_torque_effectiveness != u8::MAX) as usize
+            + (self.avg_left_pedal_smoothness != u8::MAX) as usize
+            + (self.avg_right_pedal_smoothness != u8::MAX) as usize
+            + (self.avg_combined_pedal_smoothness != u8::MAX) as usize
+            + (self.avg_flow.to_bits() != u32::MAX) as usize
+            + (self.total_grit.to_bits() != u32::MAX) as usize
+            + (self.swim_stroke.0 != u8::MAX) as usize
+            + (self.num_active_lengths != u16::MAX) as usize
+            + (self.avg_swolf != u16::MAX) as usize
+            + (self.avg_stroke_distance != u16::MAX) as usize
+            + (self.avg_strokes_per_length != u16::MAX) as usize
+            + (self.avg_ascent != u16::MAX) as usize
+            + (self.max_ascent != u16::MAX) as usize
+            + (self.climb_grading_scale.0 != u8::MAX) as usize
+            + (self.climb_max_grade_value != u32::MAX) as usize
+            + (self.num_falls != u16::MAX) as usize
+            + (self.num_climbs_attempted != u16::MAX) as usize
+            + (self.num_climbs_completed != u16::MAX) as usize
+            + (self.max_distance != u32::MAX) as usize
+            + (self.metabolic_calories != u16::MAX) as usize
             + (self.active_time != u32::MAX) as usize
+            + (self.total_fractional_ascent != u8::MAX) as usize
+            + (self.total_fractional_descent != u8::MAX) as usize
+            + (self.avg_fractional_ascent != u8::MAX) as usize
+            + (self.max_fractional_ascent != u8::MAX) as usize
+            + (self.avg_grade_adjusted_speed != u32::MAX) as usize
+            + (self.avg_stress != u16::MAX) as usize
             + (self.total_moving_time != u32::MAX) as usize
+            + (self.start_time.0 != u32::MAX) as usize
+            + (self.min_heart_rate != u8::MAX) as usize
+            + (self.avg_stance_time_percent != u16::MAX) as usize
+            + (self.max_total_timer_time != u32::MAX) as usize
     }
 }
 
@@ -277,7 +1222,7 @@ impl Default for SplitSummary {
 impl From<&Message> for SplitSummary {
     /// from creates new SplitSummary struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        const KNOWN_NUMS: [u64; 4] = [16377, 8194, 0, 4611686018427387904];
+        const KNOWN_NUMS: [u64; 4] = [2161622268021571583, 137581601215, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
@@ -290,7 +1235,10 @@ impl From<&Message> for SplitSummary {
         for field in &mesg.fields {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
+                253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.split_type = typedef::SplitType(field.value.as_u8()),
+                1 => v.sport = typedef::Sport(field.value.as_u8()),
+                2 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
                 3 => v.num_splits = field.value.as_u16(),
                 4 => v.total_timer_time = field.value.as_u32(),
                 5 => v.total_distance = field.value.as_u32(),
@@ -302,8 +1250,63 @@ impl From<&Message> for SplitSummary {
                 11 => v.max_heart_rate = field.value.as_u8(),
                 12 => v.avg_vert_speed = field.value.as_i32(),
                 13 => v.total_calories = field.value.as_u32(),
+                14 => v.avg_cadence = field.value.as_u16(),
+                15 => v.max_cadence = field.value.as_u16(),
+                16 => v.total_cycles = field.value.as_u32(),
+                17 => v.avg_temperature = field.value.as_i8(),
+                18 => v.max_temperature = field.value.as_i8(),
+                19 => v.min_temperature = field.value.as_i8(),
+                20 => v.avg_vertical_oscillation = field.value.as_u16(),
+                21 => v.avg_vertical_ratio = field.value.as_u16(),
+                22 => v.avg_stance_time = field.value.as_u16(),
+                23 => v.avg_stance_time_balance = field.value.as_u16(),
+                24 => v.avg_step_length = field.value.as_u16(),
+                25 => v.avg_power = field.value.as_u16(),
+                26 => v.max_power = field.value.as_u16(),
+                27 => v.normalized_power = field.value.as_u16(),
+                28 => v.left_right_balance = typedef::LeftRightBalance100(field.value.as_u16()),
+                29 => v.time_standing = field.value.as_u32(),
+                30 => v.avg_left_pco = field.value.as_i8(),
+                31 => v.avg_right_pco = field.value.as_i8(),
+                32 => v.avg_left_power_phase = field.value.to_vec_u8(),
+                33 => v.avg_left_power_phase_peak = field.value.to_vec_u8(),
+                34 => v.avg_right_power_phase = field.value.to_vec_u8(),
+                35 => v.avg_right_power_phase_peak = field.value.to_vec_u8(),
+                36 => v.avg_power_position = field.value.to_vec_u16(),
+                37 => v.max_power_position = field.value.to_vec_u16(),
+                38 => v.avg_left_torque_effectiveness = field.value.as_u8(),
+                39 => v.avg_right_torque_effectiveness = field.value.as_u8(),
+                40 => v.avg_left_pedal_smoothness = field.value.as_u8(),
+                41 => v.avg_right_pedal_smoothness = field.value.as_u8(),
+                42 => v.avg_combined_pedal_smoothness = field.value.as_u8(),
+                43 => v.avg_flow = field.value.as_f32(),
+                44 => v.total_grit = field.value.as_f32(),
+                47 => v.swim_stroke = typedef::SwimStroke(field.value.as_u8()),
+                48 => v.num_active_lengths = field.value.as_u16(),
+                49 => v.avg_swolf = field.value.as_u16(),
+                50 => v.avg_stroke_distance = field.value.as_u16(),
+                51 => v.avg_strokes_per_length = field.value.as_u16(),
+                52 => v.avg_ascent = field.value.as_u16(),
+                53 => v.max_ascent = field.value.as_u16(),
+                54 => v.climb_grading_scale = typedef::ClimbGradingScale(field.value.as_u8()),
+                55 => v.climb_max_grade_value = field.value.as_u32(),
+                56 => v.num_falls = field.value.as_u16(),
+                58 => v.num_climbs_attempted = field.value.as_u16(),
+                59 => v.num_climbs_completed = field.value.as_u16(),
+                60 => v.max_distance = field.value.as_u32(),
+                64 => v.metabolic_calories = field.value.as_u16(),
                 65 => v.active_time = field.value.as_u32(),
+                66 => v.total_fractional_ascent = field.value.as_u8(),
+                67 => v.total_fractional_descent = field.value.as_u8(),
+                68 => v.avg_fractional_ascent = field.value.as_u8(),
+                69 => v.max_fractional_ascent = field.value.as_u8(),
+                71 => v.avg_grade_adjusted_speed = field.value.as_u32(),
+                72 => v.avg_stress = field.value.as_u16(),
                 77 => v.total_moving_time = field.value.as_u32(),
+                79 => v.start_time = typedef::DateTime(field.value.as_u32()),
+                87 => v.min_heart_rate = field.value.as_u8(),
+                91 => v.avg_stance_time_percent = field.value.as_u16(),
+                101 => v.max_total_timer_time = field.value.as_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -325,11 +1328,35 @@ impl From<SplitSummary> for Message {
                 is_expanded: false,
             });
         };
+        if m.timestamp.0 != u32::MAX {
+            fields.push(Field {
+                num: 253,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.timestamp.0),
+                is_expanded: false,
+            });
+        };
         if m.split_type.0 != u8::MAX {
             fields.push(Field {
                 num: 0,
                 base_type: FitBaseType::ENUM,
                 value: Value::Uint8(m.split_type.0),
+                is_expanded: false,
+            });
+        };
+        if m.sport.0 != u8::MAX {
+            fields.push(Field {
+                num: 1,
+                base_type: FitBaseType::ENUM,
+                value: Value::Uint8(m.sport.0),
+                is_expanded: false,
+            });
+        };
+        if m.sub_sport.0 != u8::MAX {
+            fields.push(Field {
+                num: 2,
+                base_type: FitBaseType::ENUM,
+                value: Value::Uint8(m.sub_sport.0),
                 is_expanded: false,
             });
         };
@@ -421,6 +1448,366 @@ impl From<SplitSummary> for Message {
                 is_expanded: false,
             });
         };
+        if m.avg_cadence != u16::MAX {
+            fields.push(Field {
+                num: 14,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_cadence),
+                is_expanded: false,
+            });
+        };
+        if m.max_cadence != u16::MAX {
+            fields.push(Field {
+                num: 15,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.max_cadence),
+                is_expanded: false,
+            });
+        };
+        if m.total_cycles != u32::MAX {
+            fields.push(Field {
+                num: 16,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.total_cycles),
+                is_expanded: false,
+            });
+        };
+        if m.avg_temperature != i8::MAX {
+            fields.push(Field {
+                num: 17,
+                base_type: FitBaseType::SINT8,
+                value: Value::Int8(m.avg_temperature),
+                is_expanded: false,
+            });
+        };
+        if m.max_temperature != i8::MAX {
+            fields.push(Field {
+                num: 18,
+                base_type: FitBaseType::SINT8,
+                value: Value::Int8(m.max_temperature),
+                is_expanded: false,
+            });
+        };
+        if m.min_temperature != i8::MAX {
+            fields.push(Field {
+                num: 19,
+                base_type: FitBaseType::SINT8,
+                value: Value::Int8(m.min_temperature),
+                is_expanded: false,
+            });
+        };
+        if m.avg_vertical_oscillation != u16::MAX {
+            fields.push(Field {
+                num: 20,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_vertical_oscillation),
+                is_expanded: false,
+            });
+        };
+        if m.avg_vertical_ratio != u16::MAX {
+            fields.push(Field {
+                num: 21,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_vertical_ratio),
+                is_expanded: false,
+            });
+        };
+        if m.avg_stance_time != u16::MAX {
+            fields.push(Field {
+                num: 22,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_stance_time),
+                is_expanded: false,
+            });
+        };
+        if m.avg_stance_time_balance != u16::MAX {
+            fields.push(Field {
+                num: 23,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_stance_time_balance),
+                is_expanded: false,
+            });
+        };
+        if m.avg_step_length != u16::MAX {
+            fields.push(Field {
+                num: 24,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_step_length),
+                is_expanded: false,
+            });
+        };
+        if m.avg_power != u16::MAX {
+            fields.push(Field {
+                num: 25,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_power),
+                is_expanded: false,
+            });
+        };
+        if m.max_power != u16::MAX {
+            fields.push(Field {
+                num: 26,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.max_power),
+                is_expanded: false,
+            });
+        };
+        if m.normalized_power != u16::MAX {
+            fields.push(Field {
+                num: 27,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.normalized_power),
+                is_expanded: false,
+            });
+        };
+        if m.left_right_balance.0 != u16::MAX {
+            fields.push(Field {
+                num: 28,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.left_right_balance.0),
+                is_expanded: false,
+            });
+        };
+        if m.time_standing != u32::MAX {
+            fields.push(Field {
+                num: 29,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.time_standing),
+                is_expanded: false,
+            });
+        };
+        if m.avg_left_pco != i8::MAX {
+            fields.push(Field {
+                num: 30,
+                base_type: FitBaseType::SINT8,
+                value: Value::Int8(m.avg_left_pco),
+                is_expanded: false,
+            });
+        };
+        if m.avg_right_pco != i8::MAX {
+            fields.push(Field {
+                num: 31,
+                base_type: FitBaseType::SINT8,
+                value: Value::Int8(m.avg_right_pco),
+                is_expanded: false,
+            });
+        };
+        if !m.avg_left_power_phase.is_empty() {
+            fields.push(Field {
+                num: 32,
+                base_type: FitBaseType::UINT8,
+                value: Value::VecUint8(m.avg_left_power_phase),
+                is_expanded: false,
+            });
+        };
+        if !m.avg_left_power_phase_peak.is_empty() {
+            fields.push(Field {
+                num: 33,
+                base_type: FitBaseType::UINT8,
+                value: Value::VecUint8(m.avg_left_power_phase_peak),
+                is_expanded: false,
+            });
+        };
+        if !m.avg_right_power_phase.is_empty() {
+            fields.push(Field {
+                num: 34,
+                base_type: FitBaseType::UINT8,
+                value: Value::VecUint8(m.avg_right_power_phase),
+                is_expanded: false,
+            });
+        };
+        if !m.avg_right_power_phase_peak.is_empty() {
+            fields.push(Field {
+                num: 35,
+                base_type: FitBaseType::UINT8,
+                value: Value::VecUint8(m.avg_right_power_phase_peak),
+                is_expanded: false,
+            });
+        };
+        if !m.avg_power_position.is_empty() {
+            fields.push(Field {
+                num: 36,
+                base_type: FitBaseType::UINT16,
+                value: Value::VecUint16(m.avg_power_position),
+                is_expanded: false,
+            });
+        };
+        if !m.max_power_position.is_empty() {
+            fields.push(Field {
+                num: 37,
+                base_type: FitBaseType::UINT16,
+                value: Value::VecUint16(m.max_power_position),
+                is_expanded: false,
+            });
+        };
+        if m.avg_left_torque_effectiveness != u8::MAX {
+            fields.push(Field {
+                num: 38,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.avg_left_torque_effectiveness),
+                is_expanded: false,
+            });
+        };
+        if m.avg_right_torque_effectiveness != u8::MAX {
+            fields.push(Field {
+                num: 39,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.avg_right_torque_effectiveness),
+                is_expanded: false,
+            });
+        };
+        if m.avg_left_pedal_smoothness != u8::MAX {
+            fields.push(Field {
+                num: 40,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.avg_left_pedal_smoothness),
+                is_expanded: false,
+            });
+        };
+        if m.avg_right_pedal_smoothness != u8::MAX {
+            fields.push(Field {
+                num: 41,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.avg_right_pedal_smoothness),
+                is_expanded: false,
+            });
+        };
+        if m.avg_combined_pedal_smoothness != u8::MAX {
+            fields.push(Field {
+                num: 42,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.avg_combined_pedal_smoothness),
+                is_expanded: false,
+            });
+        };
+        if m.avg_flow.to_bits() != u32::MAX {
+            fields.push(Field {
+                num: 43,
+                base_type: FitBaseType::FLOAT32,
+                value: Value::Float32(m.avg_flow),
+                is_expanded: false,
+            });
+        };
+        if m.total_grit.to_bits() != u32::MAX {
+            fields.push(Field {
+                num: 44,
+                base_type: FitBaseType::FLOAT32,
+                value: Value::Float32(m.total_grit),
+                is_expanded: false,
+            });
+        };
+        if m.swim_stroke.0 != u8::MAX {
+            fields.push(Field {
+                num: 47,
+                base_type: FitBaseType::ENUM,
+                value: Value::Uint8(m.swim_stroke.0),
+                is_expanded: false,
+            });
+        };
+        if m.num_active_lengths != u16::MAX {
+            fields.push(Field {
+                num: 48,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.num_active_lengths),
+                is_expanded: false,
+            });
+        };
+        if m.avg_swolf != u16::MAX {
+            fields.push(Field {
+                num: 49,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_swolf),
+                is_expanded: false,
+            });
+        };
+        if m.avg_stroke_distance != u16::MAX {
+            fields.push(Field {
+                num: 50,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_stroke_distance),
+                is_expanded: false,
+            });
+        };
+        if m.avg_strokes_per_length != u16::MAX {
+            fields.push(Field {
+                num: 51,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_strokes_per_length),
+                is_expanded: false,
+            });
+        };
+        if m.avg_ascent != u16::MAX {
+            fields.push(Field {
+                num: 52,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_ascent),
+                is_expanded: false,
+            });
+        };
+        if m.max_ascent != u16::MAX {
+            fields.push(Field {
+                num: 53,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.max_ascent),
+                is_expanded: false,
+            });
+        };
+        if m.climb_grading_scale.0 != u8::MAX {
+            fields.push(Field {
+                num: 54,
+                base_type: FitBaseType::ENUM,
+                value: Value::Uint8(m.climb_grading_scale.0),
+                is_expanded: false,
+            });
+        };
+        if m.climb_max_grade_value != u32::MAX {
+            fields.push(Field {
+                num: 55,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.climb_max_grade_value),
+                is_expanded: false,
+            });
+        };
+        if m.num_falls != u16::MAX {
+            fields.push(Field {
+                num: 56,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.num_falls),
+                is_expanded: false,
+            });
+        };
+        if m.num_climbs_attempted != u16::MAX {
+            fields.push(Field {
+                num: 58,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.num_climbs_attempted),
+                is_expanded: false,
+            });
+        };
+        if m.num_climbs_completed != u16::MAX {
+            fields.push(Field {
+                num: 59,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.num_climbs_completed),
+                is_expanded: false,
+            });
+        };
+        if m.max_distance != u32::MAX {
+            fields.push(Field {
+                num: 60,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.max_distance),
+                is_expanded: false,
+            });
+        };
+        if m.metabolic_calories != u16::MAX {
+            fields.push(Field {
+                num: 64,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.metabolic_calories),
+                is_expanded: false,
+            });
+        };
         if m.active_time != u32::MAX {
             fields.push(Field {
                 num: 65,
@@ -429,11 +1816,91 @@ impl From<SplitSummary> for Message {
                 is_expanded: false,
             });
         };
+        if m.total_fractional_ascent != u8::MAX {
+            fields.push(Field {
+                num: 66,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.total_fractional_ascent),
+                is_expanded: false,
+            });
+        };
+        if m.total_fractional_descent != u8::MAX {
+            fields.push(Field {
+                num: 67,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.total_fractional_descent),
+                is_expanded: false,
+            });
+        };
+        if m.avg_fractional_ascent != u8::MAX {
+            fields.push(Field {
+                num: 68,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.avg_fractional_ascent),
+                is_expanded: false,
+            });
+        };
+        if m.max_fractional_ascent != u8::MAX {
+            fields.push(Field {
+                num: 69,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.max_fractional_ascent),
+                is_expanded: false,
+            });
+        };
+        if m.avg_grade_adjusted_speed != u32::MAX {
+            fields.push(Field {
+                num: 71,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.avg_grade_adjusted_speed),
+                is_expanded: false,
+            });
+        };
+        if m.avg_stress != u16::MAX {
+            fields.push(Field {
+                num: 72,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_stress),
+                is_expanded: false,
+            });
+        };
         if m.total_moving_time != u32::MAX {
             fields.push(Field {
                 num: 77,
                 base_type: FitBaseType::UINT32,
                 value: Value::Uint32(m.total_moving_time),
+                is_expanded: false,
+            });
+        };
+        if m.start_time.0 != u32::MAX {
+            fields.push(Field {
+                num: 79,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.start_time.0),
+                is_expanded: false,
+            });
+        };
+        if m.min_heart_rate != u8::MAX {
+            fields.push(Field {
+                num: 87,
+                base_type: FitBaseType::UINT8,
+                value: Value::Uint8(m.min_heart_rate),
+                is_expanded: false,
+            });
+        };
+        if m.avg_stance_time_percent != u16::MAX {
+            fields.push(Field {
+                num: 91,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.avg_stance_time_percent),
+                is_expanded: false,
+            });
+        };
+        if m.max_total_timer_time != u32::MAX {
+            fields.push(Field {
+                num: 101,
+                base_type: FitBaseType::UINT32,
+                value: Value::Uint32(m.max_total_timer_time),
                 is_expanded: false,
             });
         };
@@ -460,8 +1927,17 @@ impl Serialize for SplitSummary {
         if self.message_index.0 != u16::MAX {
             state.serialize_field("message_index", &self.message_index)?;
         }
+        if let Some(v) = self.timestamp.unix_timestamp() {
+            state.serialize_field("timestamp", &v)?;
+        }
         if self.split_type.0 != u8::MAX {
             state.serialize_field("split_type", &self.split_type)?;
+        }
+        if self.sport.0 != u8::MAX {
+            state.serialize_field("sport", &self.sport)?;
+        }
+        if self.sub_sport.0 != u8::MAX {
+            state.serialize_field("sub_sport", &self.sub_sport)?;
         }
         if self.num_splits != u16::MAX {
             state.serialize_field("num_splits", &self.num_splits)?;
@@ -496,11 +1972,176 @@ impl Serialize for SplitSummary {
         if self.total_calories != u32::MAX {
             state.serialize_field("total_calories", &self.total_calories)?;
         }
+        if let Some(v) = self.avg_cadence_scaled() {
+            state.serialize_field("avg_cadence", &v)?;
+        }
+        if let Some(v) = self.max_cadence_scaled() {
+            state.serialize_field("max_cadence", &v)?;
+        }
+        if self.total_cycles != u32::MAX {
+            state.serialize_field("total_cycles", &self.total_cycles)?;
+        }
+        if self.avg_temperature != i8::MAX {
+            state.serialize_field("avg_temperature", &self.avg_temperature)?;
+        }
+        if self.max_temperature != i8::MAX {
+            state.serialize_field("max_temperature", &self.max_temperature)?;
+        }
+        if self.min_temperature != i8::MAX {
+            state.serialize_field("min_temperature", &self.min_temperature)?;
+        }
+        if let Some(v) = self.avg_vertical_oscillation_scaled() {
+            state.serialize_field("avg_vertical_oscillation", &v)?;
+        }
+        if let Some(v) = self.avg_vertical_ratio_scaled() {
+            state.serialize_field("avg_vertical_ratio", &v)?;
+        }
+        if let Some(v) = self.avg_stance_time_scaled() {
+            state.serialize_field("avg_stance_time", &v)?;
+        }
+        if let Some(v) = self.avg_stance_time_balance_scaled() {
+            state.serialize_field("avg_stance_time_balance", &v)?;
+        }
+        if let Some(v) = self.avg_step_length_scaled() {
+            state.serialize_field("avg_step_length", &v)?;
+        }
+        if self.avg_power != u16::MAX {
+            state.serialize_field("avg_power", &self.avg_power)?;
+        }
+        if self.max_power != u16::MAX {
+            state.serialize_field("max_power", &self.max_power)?;
+        }
+        if self.normalized_power != u16::MAX {
+            state.serialize_field("normalized_power", &self.normalized_power)?;
+        }
+        if self.left_right_balance.0 != u16::MAX {
+            state.serialize_field("left_right_balance", &self.left_right_balance)?;
+        }
+        if let Some(v) = self.time_standing_scaled() {
+            state.serialize_field("time_standing", &v)?;
+        }
+        if self.avg_left_pco != i8::MAX {
+            state.serialize_field("avg_left_pco", &self.avg_left_pco)?;
+        }
+        if self.avg_right_pco != i8::MAX {
+            state.serialize_field("avg_right_pco", &self.avg_right_pco)?;
+        }
+        if let Some(v) = self.avg_left_power_phase_scaled() {
+            state.serialize_field("avg_left_power_phase", &v)?;
+        }
+        if let Some(v) = self.avg_left_power_phase_peak_scaled() {
+            state.serialize_field("avg_left_power_phase_peak", &v)?;
+        }
+        if let Some(v) = self.avg_right_power_phase_scaled() {
+            state.serialize_field("avg_right_power_phase", &v)?;
+        }
+        if let Some(v) = self.avg_right_power_phase_peak_scaled() {
+            state.serialize_field("avg_right_power_phase_peak", &v)?;
+        }
+        if !self.avg_power_position.is_empty() {
+            state.serialize_field("avg_power_position", &self.avg_power_position)?;
+        }
+        if !self.max_power_position.is_empty() {
+            state.serialize_field("max_power_position", &self.max_power_position)?;
+        }
+        if let Some(v) = self.avg_left_torque_effectiveness_scaled() {
+            state.serialize_field("avg_left_torque_effectiveness", &v)?;
+        }
+        if let Some(v) = self.avg_right_torque_effectiveness_scaled() {
+            state.serialize_field("avg_right_torque_effectiveness", &v)?;
+        }
+        if let Some(v) = self.avg_left_pedal_smoothness_scaled() {
+            state.serialize_field("avg_left_pedal_smoothness", &v)?;
+        }
+        if let Some(v) = self.avg_right_pedal_smoothness_scaled() {
+            state.serialize_field("avg_right_pedal_smoothness", &v)?;
+        }
+        if let Some(v) = self.avg_combined_pedal_smoothness_scaled() {
+            state.serialize_field("avg_combined_pedal_smoothness", &v)?;
+        }
+        if self.avg_flow.to_bits() != u32::MAX {
+            state.serialize_field("avg_flow", &self.avg_flow)?;
+        }
+        if self.total_grit.to_bits() != u32::MAX {
+            state.serialize_field("total_grit", &self.total_grit)?;
+        }
+        if self.swim_stroke.0 != u8::MAX {
+            state.serialize_field("swim_stroke", &self.swim_stroke)?;
+        }
+        if self.num_active_lengths != u16::MAX {
+            state.serialize_field("num_active_lengths", &self.num_active_lengths)?;
+        }
+        if self.avg_swolf != u16::MAX {
+            state.serialize_field("avg_swolf", &self.avg_swolf)?;
+        }
+        if let Some(v) = self.avg_stroke_distance_scaled() {
+            state.serialize_field("avg_stroke_distance", &v)?;
+        }
+        if let Some(v) = self.avg_strokes_per_length_scaled() {
+            state.serialize_field("avg_strokes_per_length", &v)?;
+        }
+        if self.avg_ascent != u16::MAX {
+            state.serialize_field("avg_ascent", &self.avg_ascent)?;
+        }
+        if self.max_ascent != u16::MAX {
+            state.serialize_field("max_ascent", &self.max_ascent)?;
+        }
+        if self.climb_grading_scale.0 != u8::MAX {
+            state.serialize_field("climb_grading_scale", &self.climb_grading_scale)?;
+        }
+        if self.climb_max_grade_value != u32::MAX {
+            state.serialize_field("climb_max_grade_value", &self.climb_max_grade_value)?;
+        }
+        if self.num_falls != u16::MAX {
+            state.serialize_field("num_falls", &self.num_falls)?;
+        }
+        if self.num_climbs_attempted != u16::MAX {
+            state.serialize_field("num_climbs_attempted", &self.num_climbs_attempted)?;
+        }
+        if self.num_climbs_completed != u16::MAX {
+            state.serialize_field("num_climbs_completed", &self.num_climbs_completed)?;
+        }
+        if let Some(v) = self.max_distance_scaled() {
+            state.serialize_field("max_distance", &v)?;
+        }
+        if self.metabolic_calories != u16::MAX {
+            state.serialize_field("metabolic_calories", &self.metabolic_calories)?;
+        }
         if let Some(v) = self.active_time_scaled() {
             state.serialize_field("active_time", &v)?;
         }
+        if let Some(v) = self.total_fractional_ascent_scaled() {
+            state.serialize_field("total_fractional_ascent", &v)?;
+        }
+        if let Some(v) = self.total_fractional_descent_scaled() {
+            state.serialize_field("total_fractional_descent", &v)?;
+        }
+        if let Some(v) = self.avg_fractional_ascent_scaled() {
+            state.serialize_field("avg_fractional_ascent", &v)?;
+        }
+        if let Some(v) = self.max_fractional_ascent_scaled() {
+            state.serialize_field("max_fractional_ascent", &v)?;
+        }
+        if let Some(v) = self.avg_grade_adjusted_speed_scaled() {
+            state.serialize_field("avg_grade_adjusted_speed", &v)?;
+        }
+        if self.avg_stress != u16::MAX {
+            state.serialize_field("avg_stress", &self.avg_stress)?;
+        }
         if let Some(v) = self.total_moving_time_scaled() {
             state.serialize_field("total_moving_time", &v)?;
+        }
+        if let Some(v) = self.start_time.unix_timestamp() {
+            state.serialize_field("start_time", &v)?;
+        }
+        if self.min_heart_rate != u8::MAX {
+            state.serialize_field("min_heart_rate", &self.min_heart_rate)?;
+        }
+        if let Some(v) = self.avg_stance_time_percent_scaled() {
+            state.serialize_field("avg_stance_time_percent", &v)?;
+        }
+        if let Some(v) = self.max_total_timer_time_scaled() {
+            state.serialize_field("max_total_timer_time", &v)?;
         }
         if !self.unknown_fields.is_empty() {
             state.serialize_field("unknown_fields", &self.unknown_fields)?;
@@ -516,7 +2157,10 @@ impl Serialize for SplitSummary {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     message_index: typedef::MessageIndex,
+    timestamp: Option<i64>,
     split_type: typedef::SplitType,
+    sport: typedef::Sport,
+    sub_sport: typedef::SubSport,
     num_splits: u16,
     total_timer_time: f64,
     total_distance: f64,
@@ -528,8 +2172,63 @@ struct De {
     max_heart_rate: u8,
     avg_vert_speed: f64,
     total_calories: u32,
+    avg_cadence: f64,
+    max_cadence: f64,
+    total_cycles: u32,
+    avg_temperature: i8,
+    max_temperature: i8,
+    min_temperature: i8,
+    avg_vertical_oscillation: f64,
+    avg_vertical_ratio: f64,
+    avg_stance_time: f64,
+    avg_stance_time_balance: f64,
+    avg_step_length: f64,
+    avg_power: u16,
+    max_power: u16,
+    normalized_power: u16,
+    left_right_balance: typedef::LeftRightBalance100,
+    time_standing: f64,
+    avg_left_pco: i8,
+    avg_right_pco: i8,
+    avg_left_power_phase: Vec<f64>,
+    avg_left_power_phase_peak: Vec<f64>,
+    avg_right_power_phase: Vec<f64>,
+    avg_right_power_phase_peak: Vec<f64>,
+    avg_power_position: Vec<u16>,
+    max_power_position: Vec<u16>,
+    avg_left_torque_effectiveness: f64,
+    avg_right_torque_effectiveness: f64,
+    avg_left_pedal_smoothness: f64,
+    avg_right_pedal_smoothness: f64,
+    avg_combined_pedal_smoothness: f64,
+    avg_flow: f32,
+    total_grit: f32,
+    swim_stroke: typedef::SwimStroke,
+    num_active_lengths: u16,
+    avg_swolf: u16,
+    avg_stroke_distance: f64,
+    avg_strokes_per_length: f64,
+    avg_ascent: u16,
+    max_ascent: u16,
+    climb_grading_scale: typedef::ClimbGradingScale,
+    climb_max_grade_value: u32,
+    num_falls: u16,
+    num_climbs_attempted: u16,
+    num_climbs_completed: u16,
+    max_distance: f64,
+    metabolic_calories: u16,
     active_time: f64,
+    total_fractional_ascent: f64,
+    total_fractional_descent: f64,
+    avg_fractional_ascent: f64,
+    max_fractional_ascent: f64,
+    avg_grade_adjusted_speed: f64,
+    avg_stress: u16,
     total_moving_time: f64,
+    start_time: Option<i64>,
+    min_heart_rate: u8,
+    avg_stance_time_percent: f64,
+    max_total_timer_time: f64,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -539,7 +2238,13 @@ impl From<De> for SplitSummary {
     fn from(m: De) -> Self {
         Self {
             message_index: m.message_index,
+            timestamp: m.timestamp.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
             split_type: m.split_type,
+            sport: m.sport,
+            sub_sport: m.sub_sport,
             num_splits: m.num_splits,
             total_timer_time: {
                 let unscaled = (m.total_timer_time + 0.0) * 1000.0;
@@ -586,6 +2291,227 @@ impl From<De> for SplitSummary {
                 }
             },
             total_calories: m.total_calories,
+            avg_cadence: {
+                let unscaled = (m.avg_cadence + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            max_cadence: {
+                let unscaled = (m.max_cadence + 0.0) * 128.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            total_cycles: m.total_cycles,
+            avg_temperature: m.avg_temperature,
+            max_temperature: m.max_temperature,
+            min_temperature: m.min_temperature,
+            avg_vertical_oscillation: {
+                let unscaled = (m.avg_vertical_oscillation + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_vertical_ratio: {
+                let unscaled = (m.avg_vertical_ratio + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_stance_time: {
+                let unscaled = (m.avg_stance_time + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_stance_time_balance: {
+                let unscaled = (m.avg_stance_time_balance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_step_length: {
+                let unscaled = (m.avg_step_length + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_power: m.avg_power,
+            max_power: m.max_power,
+            normalized_power: m.normalized_power,
+            left_right_balance: m.left_right_balance,
+            time_standing: {
+                let unscaled = (m.time_standing + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_left_pco: m.avg_left_pco,
+            avg_right_pco: m.avg_right_pco,
+            avg_left_power_phase: {
+                if m.avg_left_power_phase.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_left_power_phase.len());
+                    for &x in m.avg_left_power_phase.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_left_power_phase_peak: {
+                if m.avg_left_power_phase_peak.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_left_power_phase_peak.len());
+                    for &x in m.avg_left_power_phase_peak.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_right_power_phase: {
+                if m.avg_right_power_phase.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_right_power_phase.len());
+                    for &x in m.avg_right_power_phase.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_right_power_phase_peak: {
+                if m.avg_right_power_phase_peak.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.avg_right_power_phase_peak.len());
+                    for &x in m.avg_right_power_phase_peak.iter() {
+                        let unscaled = (x + 0.0) * 0.7111111;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64
+                        {
+                            vals.push(u8::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u8);
+                    }
+                    vals
+                }
+            },
+            avg_power_position: m.avg_power_position,
+            max_power_position: m.max_power_position,
+            avg_left_torque_effectiveness: {
+                let unscaled = (m.avg_left_torque_effectiveness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_right_torque_effectiveness: {
+                let unscaled = (m.avg_right_torque_effectiveness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_left_pedal_smoothness: {
+                let unscaled = (m.avg_left_pedal_smoothness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_right_pedal_smoothness: {
+                let unscaled = (m.avg_right_pedal_smoothness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_combined_pedal_smoothness: {
+                let unscaled = (m.avg_combined_pedal_smoothness + 0.0) * 2.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_flow: m.avg_flow,
+            total_grit: m.total_grit,
+            swim_stroke: m.swim_stroke,
+            num_active_lengths: m.num_active_lengths,
+            avg_swolf: m.avg_swolf,
+            avg_stroke_distance: {
+                let unscaled = (m.avg_stroke_distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_strokes_per_length: {
+                let unscaled = (m.avg_strokes_per_length + 0.0) * 10.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            avg_ascent: m.avg_ascent,
+            max_ascent: m.max_ascent,
+            climb_grading_scale: m.climb_grading_scale,
+            climb_max_grade_value: m.climb_max_grade_value,
+            num_falls: m.num_falls,
+            num_climbs_attempted: m.num_climbs_attempted,
+            num_climbs_completed: m.num_climbs_completed,
+            max_distance: {
+                let unscaled = (m.max_distance + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            metabolic_calories: m.metabolic_calories,
             active_time: {
                 let unscaled = (m.active_time + 0.0) * 1000.0;
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
@@ -594,8 +2520,70 @@ impl From<De> for SplitSummary {
                     unscaled as u32
                 }
             },
+            total_fractional_ascent: {
+                let unscaled = (m.total_fractional_ascent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            total_fractional_descent: {
+                let unscaled = (m.total_fractional_descent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_fractional_ascent: {
+                let unscaled = (m.avg_fractional_ascent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            max_fractional_ascent: {
+                let unscaled = (m.max_fractional_ascent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
+                    u8::MAX
+                } else {
+                    unscaled as u8
+                }
+            },
+            avg_grade_adjusted_speed: {
+                let unscaled = (m.avg_grade_adjusted_speed + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            avg_stress: m.avg_stress,
             total_moving_time: {
                 let unscaled = (m.total_moving_time + 0.0) * 1000.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                    u32::MAX
+                } else {
+                    unscaled as u32
+                }
+            },
+            start_time: m.start_time.map_or_else(
+                || typedef::DateTime(u32::MAX),
+                typedef::DateTime::from_unix_timestamp,
+            ),
+            min_heart_rate: m.min_heart_rate,
+            avg_stance_time_percent: {
+                let unscaled = (m.avg_stance_time_percent + 0.0) * 100.0;
+                if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
+                    u16::MAX
+                } else {
+                    unscaled as u16
+                }
+            },
+            max_total_timer_time: {
+                let unscaled = (m.max_total_timer_time + 0.0) * 1000.0;
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
                     u32::MAX
                 } else {
@@ -613,7 +2601,10 @@ impl Default for De {
     fn default() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
+            timestamp: None,
             split_type: typedef::SplitType(u8::MAX),
+            sport: typedef::Sport(u8::MAX),
+            sub_sport: typedef::SubSport(u8::MAX),
             num_splits: u16::MAX,
             total_timer_time: f64::from_bits(u64::MAX),
             total_distance: f64::from_bits(u64::MAX),
@@ -625,8 +2616,63 @@ impl Default for De {
             max_heart_rate: u8::MAX,
             avg_vert_speed: f64::from_bits(u64::MAX),
             total_calories: u32::MAX,
+            avg_cadence: f64::from_bits(u64::MAX),
+            max_cadence: f64::from_bits(u64::MAX),
+            total_cycles: u32::MAX,
+            avg_temperature: i8::MAX,
+            max_temperature: i8::MAX,
+            min_temperature: i8::MAX,
+            avg_vertical_oscillation: f64::from_bits(u64::MAX),
+            avg_vertical_ratio: f64::from_bits(u64::MAX),
+            avg_stance_time: f64::from_bits(u64::MAX),
+            avg_stance_time_balance: f64::from_bits(u64::MAX),
+            avg_step_length: f64::from_bits(u64::MAX),
+            avg_power: u16::MAX,
+            max_power: u16::MAX,
+            normalized_power: u16::MAX,
+            left_right_balance: typedef::LeftRightBalance100(u16::MAX),
+            time_standing: f64::from_bits(u64::MAX),
+            avg_left_pco: i8::MAX,
+            avg_right_pco: i8::MAX,
+            avg_left_power_phase: Vec::new(),
+            avg_left_power_phase_peak: Vec::new(),
+            avg_right_power_phase: Vec::new(),
+            avg_right_power_phase_peak: Vec::new(),
+            avg_power_position: Vec::new(),
+            max_power_position: Vec::new(),
+            avg_left_torque_effectiveness: f64::from_bits(u64::MAX),
+            avg_right_torque_effectiveness: f64::from_bits(u64::MAX),
+            avg_left_pedal_smoothness: f64::from_bits(u64::MAX),
+            avg_right_pedal_smoothness: f64::from_bits(u64::MAX),
+            avg_combined_pedal_smoothness: f64::from_bits(u64::MAX),
+            avg_flow: f32::from_bits(u32::MAX),
+            total_grit: f32::from_bits(u32::MAX),
+            swim_stroke: typedef::SwimStroke(u8::MAX),
+            num_active_lengths: u16::MAX,
+            avg_swolf: u16::MAX,
+            avg_stroke_distance: f64::from_bits(u64::MAX),
+            avg_strokes_per_length: f64::from_bits(u64::MAX),
+            avg_ascent: u16::MAX,
+            max_ascent: u16::MAX,
+            climb_grading_scale: typedef::ClimbGradingScale(u8::MAX),
+            climb_max_grade_value: u32::MAX,
+            num_falls: u16::MAX,
+            num_climbs_attempted: u16::MAX,
+            num_climbs_completed: u16::MAX,
+            max_distance: f64::from_bits(u64::MAX),
+            metabolic_calories: u16::MAX,
             active_time: f64::from_bits(u64::MAX),
+            total_fractional_ascent: f64::from_bits(u64::MAX),
+            total_fractional_descent: f64::from_bits(u64::MAX),
+            avg_fractional_ascent: f64::from_bits(u64::MAX),
+            max_fractional_ascent: f64::from_bits(u64::MAX),
+            avg_grade_adjusted_speed: f64::from_bits(u64::MAX),
+            avg_stress: u16::MAX,
             total_moving_time: f64::from_bits(u64::MAX),
+            start_time: None,
+            min_heart_rate: u8::MAX,
+            avg_stance_time_percent: f64::from_bits(u64::MAX),
+            max_total_timer_time: f64::from_bits(u64::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
