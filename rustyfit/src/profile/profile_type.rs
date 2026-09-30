@@ -8,7 +8,7 @@
 use serde::{Serialize, Serializer};
 
 /// Current profile version.
-pub const PROFILE_VERSION: u16 = 21214;
+pub const PROFILE_VERSION: u16 = 21217;
 
 /// ProfileType is an abstraction layer over primitive-types such as sint, uint, etc.
 /// For example, if a Field has u32 value having ProfileType::DATE_TIME, that u32 value
@@ -224,6 +224,19 @@ pub enum ProfileType {
     SplitType,
     ClimbProEvent,
     GasConsumptionRateType,
+    ClimbGradingScale,
+    YdsGradingScale,
+    UiaaGradingScale,
+    FrenchGradingScale,
+    BritishAdjectivalGradingScale,
+    BritishTechnicalGradingScale,
+    EwbankGradingScale,
+    BrazilianGradingScale,
+    SaxonGradingScale,
+    VerminGradingScale,
+    FontGradingScale,
+    DankyuGradingScale,
+    SplitStatus,
     TapSensitivity,
     RadarThreatLevelType,
     SleepDisruptionSeverity,
@@ -233,6 +246,8 @@ pub enum ProfileType {
     MaxMetHeartRateSource,
     HrvStatus,
     NoFlyTimeMode,
+    DiveSectionType,
+    ApneaDiscipline,
     Invalid,
 }
 
@@ -452,6 +467,19 @@ impl Serialize for ProfileType {
             Self::SplitType => "split_type",
             Self::ClimbProEvent => "climb_pro_event",
             Self::GasConsumptionRateType => "gas_consumption_rate_type",
+            Self::ClimbGradingScale => "climb_grading_scale",
+            Self::YdsGradingScale => "yds_grading_scale",
+            Self::UiaaGradingScale => "uiaa_grading_scale",
+            Self::FrenchGradingScale => "french_grading_scale",
+            Self::BritishAdjectivalGradingScale => "british_adjectival_grading_scale",
+            Self::BritishTechnicalGradingScale => "british_technical_grading_scale",
+            Self::EwbankGradingScale => "ewbank_grading_scale",
+            Self::BrazilianGradingScale => "brazilian_grading_scale",
+            Self::SaxonGradingScale => "saxon_grading_scale",
+            Self::VerminGradingScale => "vermin_grading_scale",
+            Self::FontGradingScale => "font_grading_scale",
+            Self::DankyuGradingScale => "dankyu_grading_scale",
+            Self::SplitStatus => "split_status",
             Self::TapSensitivity => "tap_sensitivity",
             Self::RadarThreatLevelType => "radar_threat_level_type",
             Self::SleepDisruptionSeverity => "sleep_disruption_severity",
@@ -461,6 +489,8 @@ impl Serialize for ProfileType {
             Self::MaxMetHeartRateSource => "max_met_heart_rate_source",
             Self::HrvStatus => "hrv_status",
             Self::NoFlyTimeMode => "no_fly_time_mode",
+            Self::DiveSectionType => "dive_section_type",
+            Self::ApneaDiscipline => "apnea_discipline",
             Self::Invalid => "invalid",
         })
     }

@@ -56,6 +56,8 @@ pub struct Length {
     pub enhanced_max_respiration_rate: u16,
     pub avg_respiration_rate: u8,
     pub max_respiration_rate: u8,
+    /// Units: kcal
+    pub metabolic_calories: u16,
     state: [u8; 3], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -108,6 +110,8 @@ impl Length {
     pub const AVG_RESPIRATION_RATE: u8 = 24;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const MAX_RESPIRATION_RATE: u8 = 25;
+    /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal`
+    pub const METABOLIC_CALORIES: u8 = 26;
 
     /// Create new Length with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
@@ -134,6 +138,7 @@ impl Length {
             enhanced_max_respiration_rate: u16::MAX,
             avg_respiration_rate: u8::MAX,
             max_respiration_rate: u8::MAX,
+            metabolic_calories: u16::MAX,
             state: [0u8; 3],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -288,6 +293,7 @@ impl Length {
             + (self.enhanced_max_respiration_rate != u16::MAX) as usize
             + (self.avg_respiration_rate != u8::MAX) as usize
             + (self.max_respiration_rate != u8::MAX) as usize
+            + (self.metabolic_calories != u16::MAX) as usize
     }
 }
 
@@ -300,7 +306,7 @@ impl Default for Length {
 impl From<&Message> for Length {
     /// from creates new Length struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        const KNOWN_NUMS: [u64; 4] = [66854655, 0, 0, 6917529027641081856];
+        const KNOWN_NUMS: [u64; 4] = [133963519, 0, 0, 6917529027641081856];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
@@ -334,6 +340,7 @@ impl From<&Message> for Length {
                 23 => v.enhanced_max_respiration_rate = field.value.as_u16(),
                 24 => v.avg_respiration_rate = field.value.as_u8(),
                 25 => v.max_respiration_rate = field.value.as_u8(),
+                26 => v.metabolic_calories = field.value.as_u16(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -529,6 +536,14 @@ impl From<Length> for Message {
                 is_expanded: false,
             });
         };
+        if m.metabolic_calories != u16::MAX {
+            fields.push(Field {
+                num: 26,
+                base_type: FitBaseType::UINT16,
+                value: Value::Uint16(m.metabolic_calories),
+                is_expanded: false,
+            });
+        };
 
         fields.extend_from_slice(&m.unknown_fields);
 
@@ -615,6 +630,9 @@ impl Serialize for Length {
         if self.max_respiration_rate != u8::MAX {
             state.serialize_field("max_respiration_rate", &self.max_respiration_rate)?;
         }
+        if self.metabolic_calories != u16::MAX {
+            state.serialize_field("metabolic_calories", &self.metabolic_calories)?;
+        }
         if !self.unknown_fields.is_empty() {
             state.serialize_field("unknown_fields", &self.unknown_fields)?;
         }
@@ -650,6 +668,7 @@ struct De {
     enhanced_max_respiration_rate: f64,
     avg_respiration_rate: u8,
     max_respiration_rate: u8,
+    metabolic_calories: u16,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -721,6 +740,7 @@ impl From<De> for Length {
             },
             avg_respiration_rate: m.avg_respiration_rate,
             max_respiration_rate: m.max_respiration_rate,
+            metabolic_calories: m.metabolic_calories,
             state: [0u8; 3],
             unknown_fields: m.unknown_fields,
             developer_fields: m.developer_fields,
@@ -754,6 +774,7 @@ impl Default for De {
             enhanced_max_respiration_rate: f64::from_bits(u64::MAX),
             avg_respiration_rate: u8::MAX,
             max_respiration_rate: u8::MAX,
+            metabolic_calories: u16::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

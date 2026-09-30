@@ -582,11 +582,33 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             18 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
                     SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             19 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
                     SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             20 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
@@ -647,6 +669,8 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                     Component { field_num: 127 /* enhanced_min_altitude */, scale: 5.0, offset: 500.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
             78 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            79 => Some(FieldReference { name: Name::AvgStrokesPerLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::StrokesPerLength, ..FR_DEF }),
+            80 => Some(FieldReference { name: Name::AvgSwolf, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             82 => Some(FieldReference { name: Name::PlayerScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             83 => Some(FieldReference { name: Name::OpponentScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             84 => Some(FieldReference { name: Name::OpponentName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
@@ -671,6 +695,9 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             103 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
             104 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
             105 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            106 => Some(FieldReference { name: Name::NumSegmentLaps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            107 => Some(FieldReference { name: Name::FrontGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            108 => Some(FieldReference { name: Name::RearGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             110 => Some(FieldReference { name: Name::SportProfileName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
             111 => Some(FieldReference { name: Name::SportIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
             112 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
@@ -738,6 +765,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             208 => Some(FieldReference { name: Name::AvgCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
             209 => Some(FieldReference { name: Name::MinCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
             210 => Some(FieldReference { name: Name::MaxCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            211 => Some(FieldReference { name: Name::AvgGradeAdjustedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::LAP => { match field_num {
@@ -763,6 +791,10 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             11 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
@@ -778,11 +810,33 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             17 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
                     SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             18 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
                     SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             19 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
@@ -793,6 +847,10 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             24 => Some(FieldReference { name: Name::LapTrigger, base_type: FitBaseType::ENUM, profile_type: ProfileType::LapTrigger, ..FR_DEF }),
             25 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
             26 => Some(FieldReference { name: Name::EventGroup, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::NecLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::NecLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::SwcLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::SwcLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
             32 => Some(FieldReference { name: Name::NumLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
             33 => Some(FieldReference { name: Name::NormalizedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
             34 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
@@ -832,6 +890,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             63 => Some(FieldReference { name: Name::MinHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
             70 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             71 => Some(FieldReference { name: Name::WktStepIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            73 => Some(FieldReference { name: Name::AvgSwolf, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             74 => Some(FieldReference { name: Name::OpponentScore, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             75 => Some(FieldReference { name: Name::StrokeCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
             76 => Some(FieldReference { name: Name::ZoneCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Count, ..FR_DEF }),
@@ -848,11 +907,14 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             87 => Some(FieldReference { name: Name::AvgSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
             88 => Some(FieldReference { name: Name::MinSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
             89 => Some(FieldReference { name: Name::MaxSaturatedHemoglobinPercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, scale: 10.0, units: Unit::Percent, ..FR_DEF }),
+            90 => Some(FieldReference { name: Name::AvgStrokesPerLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::StrokesPerLength, ..FR_DEF }),
             91 => Some(FieldReference { name: Name::AvgLeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
             92 => Some(FieldReference { name: Name::AvgRightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
             93 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
             94 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
             95 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            96 => Some(FieldReference { name: Name::FrontGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            97 => Some(FieldReference { name: Name::RearGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             98 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             99 => Some(FieldReference { name: Name::StandCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             100 => Some(FieldReference { name: Name::AvgLeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
@@ -893,11 +955,13 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             151 => Some(FieldReference { name: Name::JumpCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             153 => Some(FieldReference { name: Name::AvgGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
             154 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            155 => Some(FieldReference { name: Name::MetabolicCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
             156 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             157 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             158 => Some(FieldReference { name: Name::AvgCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
             159 => Some(FieldReference { name: Name::MinCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
             160 => Some(FieldReference { name: Name::MaxCoreTemperature, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Celcius, ..FR_DEF }),
+            161 => Some(FieldReference { name: Name::AvgGradeAdjustedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::LENGTH => { match field_num {
@@ -927,6 +991,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             25 => Some(FieldReference { name: Name::MaxRespirationRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, components: &[
                     Component { field_num: 23 /* enhanced_max_respiration_rate */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 }
                 ], ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::MetabolicCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::RECORD => { match field_num {
@@ -1213,6 +1278,11 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             4 => Some(FieldReference { name: Name::TimeCreated, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
            _ => None,
         }},
+        MesgNum::BATTERY => { match field_num {
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::Capacity, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::Percent, ..FR_DEF }),
+           _ => None,
+        }},
         MesgNum::WEATHER_CONDITIONS => { match field_num {
             253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::WeatherReport, base_type: FitBaseType::ENUM, profile_type: ProfileType::WeatherReport, ..FR_DEF }),
@@ -1305,6 +1375,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             0 => Some(FieldReference { name: Name::TimestampMs, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Millisecond, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::SampleTimeOffset, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Millisecond, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::BaroPres, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, units: Unit::Pascal, ..FR_DEF }),
+            3 => Some(FieldReference { name: Name::EnhancedAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, array: true /* [N] */, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::THREE_D_SENSOR_CALIBRATION => { match field_num {
@@ -1435,14 +1506,23 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
         }},
         MesgNum::SPLIT => { match field_num {
             254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::SplitType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitType, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::TotalElapsedTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             3 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             4 => Some(FieldReference { name: Name::AvgSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
             9 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            11 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            12 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
             13 => Some(FieldReference { name: Name::TotalAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
             14 => Some(FieldReference { name: Name::TotalDescent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::NecLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::NecLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::SwcLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::SwcLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
             21 => Some(FieldReference { name: Name::StartPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
             22 => Some(FieldReference { name: Name::StartPositionLong, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
             23 => Some(FieldReference { name: Name::EndPositionLat, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, units: Unit::Semicircle, ..FR_DEF }),
@@ -1451,14 +1531,185 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             26 => Some(FieldReference { name: Name::AvgVertSpeed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
             27 => Some(FieldReference { name: Name::EndTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
             28 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 11 /* walking */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 2 /* cycling */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 62 /* hiit */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::AvgTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::MaxTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            34 => Some(FieldReference { name: Name::MinTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            35 => Some(FieldReference { name: Name::AvgVerticalOscillation, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            36 => Some(FieldReference { name: Name::AvgVerticalRatio, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::AvgStanceTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millisecond, ..FR_DEF }),
+            38 => Some(FieldReference { name: Name::AvgStanceTimeBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::AvgStepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::MaxPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            42 => Some(FieldReference { name: Name::NormalizedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            43 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
+            44 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            45 => Some(FieldReference { name: Name::AvgLeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            46 => Some(FieldReference { name: Name::AvgRightPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::AvgLeftPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            48 => Some(FieldReference { name: Name::AvgLeftPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::AvgRightPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            50 => Some(FieldReference { name: Name::AvgRightPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            51 => Some(FieldReference { name: Name::AvgPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            52 => Some(FieldReference { name: Name::MaxPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            53 => Some(FieldReference { name: Name::AvgLeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            54 => Some(FieldReference { name: Name::AvgRightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            57 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::TotalGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            62 => Some(FieldReference { name: Name::SwimStroke, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, ..FR_DEF }),
+            63 => Some(FieldReference { name: Name::NumActiveLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
+            64 => Some(FieldReference { name: Name::AvgSwolf, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            65 => Some(FieldReference { name: Name::AvgStrokeDistance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            66 => Some(FieldReference { name: Name::AvgStrokesPerLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::StrokesPerLength, ..FR_DEF }),
+            67 => Some(FieldReference { name: Name::FirstLapIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            68 => Some(FieldReference { name: Name::NumLaps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            69 => Some(FieldReference { name: Name::ClimbGradingScale, base_type: FitBaseType::ENUM, profile_type: ProfileType::ClimbGradingScale, ..FR_DEF }),
+            70 => Some(FieldReference { name: Name::ClimbGradeValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::ClimbGradeYds, base_type: FitBaseType::UINT32, profile_type: ProfileType::YdsGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 0 /* yds */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeUiaa, base_type: FitBaseType::UINT32, profile_type: ProfileType::UiaaGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 1 /* uiaa */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeFrench, base_type: FitBaseType::UINT32, profile_type: ProfileType::FrenchGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 2 /* french */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeBritishAdjectival, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishAdjectivalGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 3 /* british_adjectival */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeBritishTechnical, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishTechnicalGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 4 /* british_technical */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeEwbank, base_type: FitBaseType::UINT32, profile_type: ProfileType::EwbankGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 5 /* ewbank */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeBrazilian, base_type: FitBaseType::UINT32, profile_type: ProfileType::BrazilianGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 6 /* brazilian */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeSaxon, base_type: FitBaseType::UINT32, profile_type: ProfileType::SaxonGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 7 /* saxon */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeVermin, base_type: FitBaseType::UINT32, profile_type: ProfileType::VerminGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 8 /* vermin */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeFont, base_type: FitBaseType::UINT32, profile_type: ProfileType::FontGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 9 /* font */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbGradeDankyu, base_type: FitBaseType::UINT32, profile_type: ProfileType::DankyuGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 10 /* dankyu */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            71 => Some(FieldReference { name: Name::Status, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitStatus, ..FR_DEF }),
+            72 => Some(FieldReference { name: Name::NumFalls, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            73 => Some(FieldReference { name: Name::ClimbSend, base_type: FitBaseType::ENUM, profile_type: ProfileType::Bool, ..FR_DEF }),
             74 => Some(FieldReference { name: Name::StartElevation, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
             78 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            79 => Some(FieldReference { name: Name::MetabolicCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
+            80 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            81 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            88 => Some(FieldReference { name: Name::AvgGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            89 => Some(FieldReference { name: Name::MaxGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            90 => Some(FieldReference { name: Name::MinCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::MinRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MinSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MinPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MinPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            93 => Some(FieldReference { name: Name::AvgGradeAdjustedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            94 => Some(FieldReference { name: Name::AvgStress, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            99 => Some(FieldReference { name: Name::AvgVam, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            104 => Some(FieldReference { name: Name::JumpCount, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, ..FR_DEF }),
             110 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            112 => Some(FieldReference { name: Name::DiveSectionType, base_type: FitBaseType::ENUM, profile_type: ProfileType::DiveSectionType, ..FR_DEF }),
+            113 => Some(FieldReference { name: Name::AvgAscentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            114 => Some(FieldReference { name: Name::MaxAscentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            115 => Some(FieldReference { name: Name::AvgDescentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            116 => Some(FieldReference { name: Name::MaxDescentRate, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            117 => Some(FieldReference { name: Name::TotalAscentTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            118 => Some(FieldReference { name: Name::TotalDescentTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            119 => Some(FieldReference { name: Name::TotalHangTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            120 => Some(FieldReference { name: Name::ApneaDiscipline, base_type: FitBaseType::ENUM, profile_type: ProfileType::ApneaDiscipline, ..FR_DEF }),
+            121 => Some(FieldReference { name: Name::AvgDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            122 => Some(FieldReference { name: Name::MaxDepth, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Meter, ..FR_DEF }),
+            124 => Some(FieldReference { name: Name::MinHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            127 => Some(FieldReference { name: Name::SurfaceInterval, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Second, ..FR_DEF }),
+            142 => Some(FieldReference { name: Name::TotalFractionalCycles, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 128.0, units: Unit::Cycle, ..FR_DEF }),
+            144 => Some(FieldReference { name: Name::AvgStanceTimePercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            168 => Some(FieldReference { name: Name::TotalAnaerobicTrainingEffect, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 10.0, ..FR_DEF }),
+            169 => Some(FieldReference { name: Name::FrontGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            170 => Some(FieldReference { name: Name::RearGearShiftCount, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::SPLIT_SUMMARY => { match field_num {
             254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
+            253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::SplitType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SplitType, ..FR_DEF }),
+            1 => Some(FieldReference { name: Name::Sport, base_type: FitBaseType::ENUM, profile_type: ProfileType::Sport, ..FR_DEF }),
+            2 => Some(FieldReference { name: Name::SubSport, base_type: FitBaseType::ENUM, profile_type: ProfileType::SubSport, ..FR_DEF }),
             3 => Some(FieldReference { name: Name::NumSplits, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             4 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             5 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
@@ -1470,8 +1721,145 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             11 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
             12 => Some(FieldReference { name: Name::AvgVertSpeed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
             13 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
+            14 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            15 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
+                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 1 /* running */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 5 /* swimming */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            16 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
+                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 1 /* running */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 11 /* walking */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 2 /* cycling */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 5 /* swimming */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 15 /* rowing */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 62 /* hiit */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
+                        SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            17 => Some(FieldReference { name: Name::AvgTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            18 => Some(FieldReference { name: Name::MaxTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            19 => Some(FieldReference { name: Name::MinTemperature, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Celcius, ..FR_DEF }),
+            20 => Some(FieldReference { name: Name::AvgVerticalOscillation, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            21 => Some(FieldReference { name: Name::AvgVerticalRatio, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            22 => Some(FieldReference { name: Name::AvgStanceTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millisecond, ..FR_DEF }),
+            23 => Some(FieldReference { name: Name::AvgStanceTimeBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            24 => Some(FieldReference { name: Name::AvgStepLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::Millimeter, ..FR_DEF }),
+            25 => Some(FieldReference { name: Name::AvgPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            26 => Some(FieldReference { name: Name::MaxPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            27 => Some(FieldReference { name: Name::NormalizedPower, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Watt, ..FR_DEF }),
+            28 => Some(FieldReference { name: Name::LeftRightBalance, base_type: FitBaseType::UINT16, profile_type: ProfileType::LeftRightBalance100, ..FR_DEF }),
+            29 => Some(FieldReference { name: Name::TimeStanding, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            30 => Some(FieldReference { name: Name::AvgLeftPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            31 => Some(FieldReference { name: Name::AvgRightPco, base_type: FitBaseType::SINT8, profile_type: ProfileType::Sint8, units: Unit::Millimeter, ..FR_DEF }),
+            32 => Some(FieldReference { name: Name::AvgLeftPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            33 => Some(FieldReference { name: Name::AvgLeftPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            34 => Some(FieldReference { name: Name::AvgRightPowerPhase, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            35 => Some(FieldReference { name: Name::AvgRightPowerPhasePeak, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, array: true /* [N] */, scale: 0.7111111, units: Unit::Degree, ..FR_DEF }),
+            36 => Some(FieldReference { name: Name::AvgPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            37 => Some(FieldReference { name: Name::MaxPowerPosition, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, array: true /* [N] */, units: Unit::Watt, ..FR_DEF }),
+            38 => Some(FieldReference { name: Name::AvgLeftTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            39 => Some(FieldReference { name: Name::AvgRightTorqueEffectiveness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            40 => Some(FieldReference { name: Name::AvgLeftPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            41 => Some(FieldReference { name: Name::AvgRightPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            42 => Some(FieldReference { name: Name::AvgCombinedPedalSmoothness, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 2.0, units: Unit::Percent, ..FR_DEF }),
+            43 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            44 => Some(FieldReference { name: Name::TotalGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
+            47 => Some(FieldReference { name: Name::SwimStroke, base_type: FitBaseType::ENUM, profile_type: ProfileType::SwimStroke, ..FR_DEF }),
+            48 => Some(FieldReference { name: Name::NumActiveLengths, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Length, ..FR_DEF }),
+            49 => Some(FieldReference { name: Name::AvgSwolf, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            50 => Some(FieldReference { name: Name::AvgStrokeDistance, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            51 => Some(FieldReference { name: Name::AvgStrokesPerLength, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 10.0, units: Unit::StrokesPerLength, ..FR_DEF }),
+            52 => Some(FieldReference { name: Name::AvgAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            53 => Some(FieldReference { name: Name::MaxAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
+            54 => Some(FieldReference { name: Name::ClimbGradingScale, base_type: FitBaseType::ENUM, profile_type: ProfileType::ClimbGradingScale, ..FR_DEF }),
+            55 => Some(FieldReference { name: Name::ClimbMaxGradeValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
+                    SubField { name: Name::ClimbMaxGradeYds, base_type: FitBaseType::UINT32, profile_type: ProfileType::YdsGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 0 /* yds */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeUiaa, base_type: FitBaseType::UINT32, profile_type: ProfileType::UiaaGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 1 /* uiaa */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeFrench, base_type: FitBaseType::UINT32, profile_type: ProfileType::FrenchGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 2 /* french */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeBritishAdjectival, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishAdjectivalGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 3 /* british_adjectival */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeBritishTechnical, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishTechnicalGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 4 /* british_technical */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeEwbank, base_type: FitBaseType::UINT32, profile_type: ProfileType::EwbankGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 5 /* ewbank */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeBrazilian, base_type: FitBaseType::UINT32, profile_type: ProfileType::BrazilianGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 6 /* brazilian */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeSaxon, base_type: FitBaseType::UINT32, profile_type: ProfileType::SaxonGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 7 /* saxon */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeVermin, base_type: FitBaseType::UINT32, profile_type: ProfileType::VerminGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 8 /* vermin */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeFont, base_type: FitBaseType::UINT32, profile_type: ProfileType::FontGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 9 /* font */ },
+                    ], ..SF_DEF },
+                    SubField { name: Name::ClimbMaxGradeDankyu, base_type: FitBaseType::UINT32, profile_type: ProfileType::DankyuGradingScale, maps: &[
+                        SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 10 /* dankyu */ },
+                    ], ..SF_DEF }
+                ], ..FR_DEF }),
+            56 => Some(FieldReference { name: Name::NumFalls, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            58 => Some(FieldReference { name: Name::NumClimbsAttempted, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            59 => Some(FieldReference { name: Name::NumClimbsCompleted, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
+            60 => Some(FieldReference { name: Name::MaxDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            64 => Some(FieldReference { name: Name::MetabolicCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
             65 => Some(FieldReference { name: Name::ActiveTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            66 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            67 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            68 => Some(FieldReference { name: Name::AvgFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            69 => Some(FieldReference { name: Name::MaxFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
+            71 => Some(FieldReference { name: Name::AvgGradeAdjustedSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
+            72 => Some(FieldReference { name: Name::AvgStress, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             77 => Some(FieldReference { name: Name::TotalMovingTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
+            79 => Some(FieldReference { name: Name::StartTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
+            87 => Some(FieldReference { name: Name::MinHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
+            91 => Some(FieldReference { name: Name::AvgStanceTimePercent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
+            101 => Some(FieldReference { name: Name::MaxTotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
            _ => None,
         }},
         MesgNum::CLIMB_PRO => { match field_num {
@@ -1662,6 +2050,7 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
             85 => Some(FieldReference { name: Name::TotalFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
             86 => Some(FieldReference { name: Name::AvgGrit, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::KGrit, ..FR_DEF }),
             87 => Some(FieldReference { name: Name::AvgFlow, base_type: FitBaseType::FLOAT32, profile_type: ProfileType::Float32, units: Unit::Flow, ..FR_DEF }),
+            88 => Some(FieldReference { name: Name::MetabolicCalories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
             89 => Some(FieldReference { name: Name::TotalFractionalAscent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             90 => Some(FieldReference { name: Name::TotalFractionalDescent, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             91 => Some(FieldReference { name: Name::EnhancedAvgAltitude, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 5.0, offset: 500.0,units: Unit::Meter, ..FR_DEF }),
@@ -2487,6 +2876,8 @@ pub enum Name {
     ApneaCountdownEnabled,
     /// "apnea_countdown_time"
     ApneaCountdownTime,
+    /// "apnea_discipline"
+    ApneaDiscipline,
     /// "application_id"
     ApplicationId,
     /// "application_version"
@@ -2529,6 +2920,8 @@ pub enum Name {
     AverageStressDuringSleep,
     /// "avg_altitude"
     AvgAltitude,
+    /// "avg_ascent"
+    AvgAscent,
     /// "avg_ascent_rate"
     AvgAscentRate,
     /// "avg_ball_speed"
@@ -2547,10 +2940,14 @@ pub enum Name {
     AvgDescentRate,
     /// "avg_flow"
     AvgFlow,
+    /// "avg_fractional_ascent"
+    AvgFractionalAscent,
     /// "avg_fractional_cadence"
     AvgFractionalCadence,
     /// "avg_grade"
     AvgGrade,
+    /// "avg_grade_adjusted_speed"
+    AvgGradeAdjustedSpeed,
     /// "avg_grit"
     AvgGrit,
     /// "avg_heart_rate"
@@ -2573,6 +2970,8 @@ pub enum Name {
     AvgNegGrade,
     /// "avg_neg_vertical_speed"
     AvgNegVerticalSpeed,
+    /// "avg_paddlesport_cadence"
+    AvgPaddlesportCadence,
     /// "avg_pos_grade"
     AvgPosGrade,
     /// "avg_pos_vertical_speed"
@@ -2583,6 +2982,8 @@ pub enum Name {
     AvgPowerPosition,
     /// "avg_pressure_sac"
     AvgPressureSac,
+    /// "avg_push_cadence"
+    AvgPushCadence,
     /// "avg_respiration_rate"
     AvgRespirationRate,
     /// "avg_right_pco"
@@ -2619,8 +3020,12 @@ pub enum Name {
     AvgStrokeCount,
     /// "avg_stroke_distance"
     AvgStrokeDistance,
+    /// "avg_strokes_per_length"
+    AvgStrokesPerLength,
     /// "avg_swimming_cadence"
     AvgSwimmingCadence,
+    /// "avg_swolf"
+    AvgSwolf,
     /// "avg_temperature"
     AvgTemperature,
     /// "avg_total_hemoglobin_conc"
@@ -2757,6 +3162,8 @@ pub enum Name {
     CameraOrientation,
     /// "capabilities"
     Capabilities,
+    /// "capacity"
+    Capacity,
     /// "category"
     Category,
     /// "category_subtype"
@@ -2779,10 +3186,62 @@ pub enum Name {
     Charged,
     /// "climb_category"
     ClimbCategory,
+    /// "climb_grade_brazilian"
+    ClimbGradeBrazilian,
+    /// "climb_grade_british_adjectival"
+    ClimbGradeBritishAdjectival,
+    /// "climb_grade_british_technical"
+    ClimbGradeBritishTechnical,
+    /// "climb_grade_dankyu"
+    ClimbGradeDankyu,
+    /// "climb_grade_ewbank"
+    ClimbGradeEwbank,
+    /// "climb_grade_font"
+    ClimbGradeFont,
+    /// "climb_grade_french"
+    ClimbGradeFrench,
+    /// "climb_grade_saxon"
+    ClimbGradeSaxon,
+    /// "climb_grade_uiaa"
+    ClimbGradeUiaa,
+    /// "climb_grade_value"
+    ClimbGradeValue,
+    /// "climb_grade_vermin"
+    ClimbGradeVermin,
+    /// "climb_grade_yds"
+    ClimbGradeYds,
+    /// "climb_grading_scale"
+    ClimbGradingScale,
+    /// "climb_max_grade_brazilian"
+    ClimbMaxGradeBrazilian,
+    /// "climb_max_grade_british_adjectival"
+    ClimbMaxGradeBritishAdjectival,
+    /// "climb_max_grade_british_technical"
+    ClimbMaxGradeBritishTechnical,
+    /// "climb_max_grade_dankyu"
+    ClimbMaxGradeDankyu,
+    /// "climb_max_grade_ewbank"
+    ClimbMaxGradeEwbank,
+    /// "climb_max_grade_font"
+    ClimbMaxGradeFont,
+    /// "climb_max_grade_french"
+    ClimbMaxGradeFrench,
+    /// "climb_max_grade_saxon"
+    ClimbMaxGradeSaxon,
+    /// "climb_max_grade_uiaa"
+    ClimbMaxGradeUiaa,
+    /// "climb_max_grade_value"
+    ClimbMaxGradeValue,
+    /// "climb_max_grade_vermin"
+    ClimbMaxGradeVermin,
+    /// "climb_max_grade_yds"
+    ClimbMaxGradeYds,
     /// "climb_number"
     ClimbNumber,
     /// "climb_pro_event"
     ClimbProEvent,
+    /// "climb_send"
+    ClimbSend,
     /// "clip_end"
     ClipEnd,
     /// "clip_number"
@@ -2957,6 +3416,8 @@ pub enum Name {
     DiveCount,
     /// "dive_number"
     DiveNumber,
+    /// "dive_section_type"
+    DiveSectionType,
     /// "dive_sounds"
     DiveSounds,
     /// "dive_types"
@@ -3309,6 +3770,8 @@ pub enum Name {
     MapMorningValues,
     /// "max_altitude"
     MaxAltitude,
+    /// "max_ascent"
+    MaxAscent,
     /// "max_ascent_rate"
     MaxAscentRate,
     /// "max_ball_speed"
@@ -3325,8 +3788,14 @@ pub enum Name {
     MaxDepth,
     /// "max_descent_rate"
     MaxDescentRate,
+    /// "max_distance"
+    MaxDistance,
+    /// "max_fractional_ascent"
+    MaxFractionalAscent,
     /// "max_fractional_cadence"
     MaxFractionalCadence,
+    /// "max_grade"
+    MaxGrade,
     /// "max_heart_rate"
     MaxHeartRate,
     /// "max_lev_motor_power"
@@ -3337,6 +3806,8 @@ pub enum Name {
     MaxNegGrade,
     /// "max_neg_vertical_speed"
     MaxNegVerticalSpeed,
+    /// "max_paddlesport_cadence"
+    MaxPaddlesportCadence,
     /// "max_per_file"
     MaxPerFile,
     /// "max_per_file_type"
@@ -3349,6 +3820,8 @@ pub enum Name {
     MaxPower,
     /// "max_power_position"
     MaxPowerPosition,
+    /// "max_push_cadence"
+    MaxPushCadence,
     /// "max_respiration_rate"
     MaxRespirationRate,
     /// "max_running_cadence"
@@ -3359,10 +3832,14 @@ pub enum Name {
     MaxSize,
     /// "max_speed"
     MaxSpeed,
+    /// "max_swimming_cadence"
+    MaxSwimmingCadence,
     /// "max_temperature"
     MaxTemperature,
     /// "max_total_hemoglobin_conc"
     MaxTotalHemoglobinConc,
+    /// "max_total_timer_time"
+    MaxTotalTimerTime,
     /// "mean_arterial_pressure"
     MeanArterialPressure,
     /// "memo"
@@ -3383,16 +3860,26 @@ pub enum Name {
     MetabolicCalories,
     /// "min_altitude"
     MinAltitude,
+    /// "min_cadence"
+    MinCadence,
     /// "min_core_temperature"
     MinCoreTemperature,
     /// "min_heart_rate"
     MinHeartRate,
+    /// "min_paddlesport_cadence"
+    MinPaddlesportCadence,
+    /// "min_push_cadence"
+    MinPushCadence,
     /// "min_respiration_rate"
     MinRespirationRate,
+    /// "min_running_cadence"
+    MinRunningCadence,
     /// "min_saturated_hemoglobin_percent"
     MinSaturatedHemoglobinPercent,
     /// "min_speed"
     MinSpeed,
+    /// "min_swimming_cadence"
+    MinSwimmingCadence,
     /// "min_temperature"
     MinTemperature,
     /// "min_total_hemoglobin_conc"
@@ -3439,12 +3926,20 @@ pub enum Name {
     Notes,
     /// "num_active_lengths"
     NumActiveLengths,
+    /// "num_climbs_attempted"
+    NumClimbsAttempted,
+    /// "num_climbs_completed"
+    NumClimbsCompleted,
+    /// "num_falls"
+    NumFalls,
     /// "num_laps"
     NumLaps,
     /// "num_lengths"
     NumLengths,
     /// "num_per_file"
     NumPerFile,
+    /// "num_segment_laps"
+    NumSegmentLaps,
     /// "num_sessions"
     NumSessions,
     /// "num_splits"
@@ -3959,12 +4454,16 @@ pub enum Name {
     TotalAnaerobicTrainingEffect,
     /// "total_ascent"
     TotalAscent,
+    /// "total_ascent_time"
+    TotalAscentTime,
     /// "total_calories"
     TotalCalories,
     /// "total_cycles"
     TotalCycles,
     /// "total_descent"
     TotalDescent,
+    /// "total_descent_time"
+    TotalDescentTime,
     /// "total_distance"
     TotalDistance,
     /// "total_elapsed_time"
@@ -3981,6 +4480,8 @@ pub enum Name {
     TotalFractionalDescent,
     /// "total_grit"
     TotalGrit,
+    /// "total_hang_time"
+    TotalHangTime,
     /// "total_hemoglobin_conc"
     TotalHemoglobinConc,
     /// "total_hemoglobin_conc_max"
@@ -4163,6 +4664,7 @@ impl Name {
             Self::AntplusDeviceType => "antplus_device_type",
             Self::ApneaCountdownEnabled => "apnea_countdown_enabled",
             Self::ApneaCountdownTime => "apnea_countdown_time",
+            Self::ApneaDiscipline => "apnea_discipline",
             Self::ApplicationId => "application_id",
             Self::ApplicationVersion => "application_version",
             Self::Array => "array",
@@ -4184,6 +4686,7 @@ impl Name {
             Self::AverageDeviation => "average_deviation",
             Self::AverageStressDuringSleep => "average_stress_during_sleep",
             Self::AvgAltitude => "avg_altitude",
+            Self::AvgAscent => "avg_ascent",
             Self::AvgAscentRate => "avg_ascent_rate",
             Self::AvgBallSpeed => "avg_ball_speed",
             Self::AvgCadence => "avg_cadence",
@@ -4193,8 +4696,10 @@ impl Name {
             Self::AvgDepth => "avg_depth",
             Self::AvgDescentRate => "avg_descent_rate",
             Self::AvgFlow => "avg_flow",
+            Self::AvgFractionalAscent => "avg_fractional_ascent",
             Self::AvgFractionalCadence => "avg_fractional_cadence",
             Self::AvgGrade => "avg_grade",
+            Self::AvgGradeAdjustedSpeed => "avg_grade_adjusted_speed",
             Self::AvgGrit => "avg_grit",
             Self::AvgHeartRate => "avg_heart_rate",
             Self::AvgLapTime => "avg_lap_time",
@@ -4206,11 +4711,13 @@ impl Name {
             Self::AvgLevMotorPower => "avg_lev_motor_power",
             Self::AvgNegGrade => "avg_neg_grade",
             Self::AvgNegVerticalSpeed => "avg_neg_vertical_speed",
+            Self::AvgPaddlesportCadence => "avg_paddlesport_cadence",
             Self::AvgPosGrade => "avg_pos_grade",
             Self::AvgPosVerticalSpeed => "avg_pos_vertical_speed",
             Self::AvgPower => "avg_power",
             Self::AvgPowerPosition => "avg_power_position",
             Self::AvgPressureSac => "avg_pressure_sac",
+            Self::AvgPushCadence => "avg_push_cadence",
             Self::AvgRespirationRate => "avg_respiration_rate",
             Self::AvgRightPco => "avg_right_pco",
             Self::AvgRightPedalSmoothness => "avg_right_pedal_smoothness",
@@ -4229,7 +4736,9 @@ impl Name {
             Self::AvgStress => "avg_stress",
             Self::AvgStrokeCount => "avg_stroke_count",
             Self::AvgStrokeDistance => "avg_stroke_distance",
+            Self::AvgStrokesPerLength => "avg_strokes_per_length",
             Self::AvgSwimmingCadence => "avg_swimming_cadence",
+            Self::AvgSwolf => "avg_swolf",
             Self::AvgTemperature => "avg_temperature",
             Self::AvgTotalHemoglobinConc => "avg_total_hemoglobin_conc",
             Self::AvgVam => "avg_vam",
@@ -4298,6 +4807,7 @@ impl Name {
             Self::CameraFileUuid => "camera_file_uuid",
             Self::CameraOrientation => "camera_orientation",
             Self::Capabilities => "capabilities",
+            Self::Capacity => "capacity",
             Self::Category => "category",
             Self::CategorySubtype => "category_subtype",
             Self::CcrHighSetpoint => "ccr_high_setpoint",
@@ -4309,8 +4819,34 @@ impl Name {
             Self::ChannelNumber => "channel_number",
             Self::Charged => "charged",
             Self::ClimbCategory => "climb_category",
+            Self::ClimbGradeBrazilian => "climb_grade_brazilian",
+            Self::ClimbGradeBritishAdjectival => "climb_grade_british_adjectival",
+            Self::ClimbGradeBritishTechnical => "climb_grade_british_technical",
+            Self::ClimbGradeDankyu => "climb_grade_dankyu",
+            Self::ClimbGradeEwbank => "climb_grade_ewbank",
+            Self::ClimbGradeFont => "climb_grade_font",
+            Self::ClimbGradeFrench => "climb_grade_french",
+            Self::ClimbGradeSaxon => "climb_grade_saxon",
+            Self::ClimbGradeUiaa => "climb_grade_uiaa",
+            Self::ClimbGradeValue => "climb_grade_value",
+            Self::ClimbGradeVermin => "climb_grade_vermin",
+            Self::ClimbGradeYds => "climb_grade_yds",
+            Self::ClimbGradingScale => "climb_grading_scale",
+            Self::ClimbMaxGradeBrazilian => "climb_max_grade_brazilian",
+            Self::ClimbMaxGradeBritishAdjectival => "climb_max_grade_british_adjectival",
+            Self::ClimbMaxGradeBritishTechnical => "climb_max_grade_british_technical",
+            Self::ClimbMaxGradeDankyu => "climb_max_grade_dankyu",
+            Self::ClimbMaxGradeEwbank => "climb_max_grade_ewbank",
+            Self::ClimbMaxGradeFont => "climb_max_grade_font",
+            Self::ClimbMaxGradeFrench => "climb_max_grade_french",
+            Self::ClimbMaxGradeSaxon => "climb_max_grade_saxon",
+            Self::ClimbMaxGradeUiaa => "climb_max_grade_uiaa",
+            Self::ClimbMaxGradeValue => "climb_max_grade_value",
+            Self::ClimbMaxGradeVermin => "climb_max_grade_vermin",
+            Self::ClimbMaxGradeYds => "climb_max_grade_yds",
             Self::ClimbNumber => "climb_number",
             Self::ClimbProEvent => "climb_pro_event",
+            Self::ClimbSend => "climb_send",
             Self::ClipEnd => "clip_end",
             Self::ClipNumber => "clip_number",
             Self::ClipStart => "clip_start",
@@ -4398,6 +4934,7 @@ impl Name {
             Self::DiveAlert => "dive_alert",
             Self::DiveCount => "dive_count",
             Self::DiveNumber => "dive_number",
+            Self::DiveSectionType => "dive_section_type",
             Self::DiveSounds => "dive_sounds",
             Self::DiveTypes => "dive_types",
             Self::Duration => "duration",
@@ -4574,6 +5111,7 @@ impl Name {
             Self::MapEveningValues => "map_evening_values",
             Self::MapMorningValues => "map_morning_values",
             Self::MaxAltitude => "max_altitude",
+            Self::MaxAscent => "max_ascent",
             Self::MaxAscentRate => "max_ascent_rate",
             Self::MaxBallSpeed => "max_ball_speed",
             Self::MaxCadence => "max_cadence",
@@ -4582,25 +5120,32 @@ impl Name {
             Self::MaxCount => "max_count",
             Self::MaxDepth => "max_depth",
             Self::MaxDescentRate => "max_descent_rate",
+            Self::MaxDistance => "max_distance",
+            Self::MaxFractionalAscent => "max_fractional_ascent",
             Self::MaxFractionalCadence => "max_fractional_cadence",
+            Self::MaxGrade => "max_grade",
             Self::MaxHeartRate => "max_heart_rate",
             Self::MaxLevMotorPower => "max_lev_motor_power",
             Self::MaxMetCategory => "max_met_category",
             Self::MaxNegGrade => "max_neg_grade",
             Self::MaxNegVerticalSpeed => "max_neg_vertical_speed",
+            Self::MaxPaddlesportCadence => "max_paddlesport_cadence",
             Self::MaxPerFile => "max_per_file",
             Self::MaxPerFileType => "max_per_file_type",
             Self::MaxPosGrade => "max_pos_grade",
             Self::MaxPosVerticalSpeed => "max_pos_vertical_speed",
             Self::MaxPower => "max_power",
             Self::MaxPowerPosition => "max_power_position",
+            Self::MaxPushCadence => "max_push_cadence",
             Self::MaxRespirationRate => "max_respiration_rate",
             Self::MaxRunningCadence => "max_running_cadence",
             Self::MaxSaturatedHemoglobinPercent => "max_saturated_hemoglobin_percent",
             Self::MaxSize => "max_size",
             Self::MaxSpeed => "max_speed",
+            Self::MaxSwimmingCadence => "max_swimming_cadence",
             Self::MaxTemperature => "max_temperature",
             Self::MaxTotalHemoglobinConc => "max_total_hemoglobin_conc",
+            Self::MaxTotalTimerTime => "max_total_timer_time",
             Self::MeanArterialPressure => "mean_arterial_pressure",
             Self::Memo => "memo",
             Self::MesgData => "mesg_data",
@@ -4611,11 +5156,16 @@ impl Name {
             Self::MetabolicAge => "metabolic_age",
             Self::MetabolicCalories => "metabolic_calories",
             Self::MinAltitude => "min_altitude",
+            Self::MinCadence => "min_cadence",
             Self::MinCoreTemperature => "min_core_temperature",
             Self::MinHeartRate => "min_heart_rate",
+            Self::MinPaddlesportCadence => "min_paddlesport_cadence",
+            Self::MinPushCadence => "min_push_cadence",
             Self::MinRespirationRate => "min_respiration_rate",
+            Self::MinRunningCadence => "min_running_cadence",
             Self::MinSaturatedHemoglobinPercent => "min_saturated_hemoglobin_percent",
             Self::MinSpeed => "min_speed",
+            Self::MinSwimmingCadence => "min_swimming_cadence",
             Self::MinTemperature => "min_temperature",
             Self::MinTotalHemoglobinConc => "min_total_hemoglobin_conc",
             Self::Mode => "mode",
@@ -4639,9 +5189,13 @@ impl Name {
             Self::NormalizedPower => "normalized_power",
             Self::Notes => "notes",
             Self::NumActiveLengths => "num_active_lengths",
+            Self::NumClimbsAttempted => "num_climbs_attempted",
+            Self::NumClimbsCompleted => "num_climbs_completed",
+            Self::NumFalls => "num_falls",
             Self::NumLaps => "num_laps",
             Self::NumLengths => "num_lengths",
             Self::NumPerFile => "num_per_file",
+            Self::NumSegmentLaps => "num_segment_laps",
             Self::NumSessions => "num_sessions",
             Self::NumSplits => "num_splits",
             Self::NumValidSteps => "num_valid_steps",
@@ -4899,9 +5453,11 @@ impl Name {
             Self::Title => "title",
             Self::TotalAnaerobicTrainingEffect => "total_anaerobic_training_effect",
             Self::TotalAscent => "total_ascent",
+            Self::TotalAscentTime => "total_ascent_time",
             Self::TotalCalories => "total_calories",
             Self::TotalCycles => "total_cycles",
             Self::TotalDescent => "total_descent",
+            Self::TotalDescentTime => "total_descent_time",
             Self::TotalDistance => "total_distance",
             Self::TotalElapsedTime => "total_elapsed_time",
             Self::TotalFatCalories => "total_fat_calories",
@@ -4910,6 +5466,7 @@ impl Name {
             Self::TotalFractionalCycles => "total_fractional_cycles",
             Self::TotalFractionalDescent => "total_fractional_descent",
             Self::TotalGrit => "total_grit",
+            Self::TotalHangTime => "total_hang_time",
             Self::TotalHemoglobinConc => "total_hemoglobin_conc",
             Self::TotalHemoglobinConcMax => "total_hemoglobin_conc_max",
             Self::TotalHemoglobinConcMin => "total_hemoglobin_conc_min",
@@ -5093,6 +5650,8 @@ pub enum Unit {
     PercentOrWatts,
     /// "pushes"
     Push,
+    /// "pushes/min"
+    PushesPerMin,
     /// "radians"
     Radian,
     /// "radians/second"
@@ -5115,6 +5674,8 @@ pub enum Unit {
     Stroke,
     /// "strokes/lap"
     StrokePerLap,
+    /// "strokes/length"
+    StrokesPerLength,
     /// "strokes/min"
     StrokesPerMinute,
     /// "swim_stroke"
@@ -5187,6 +5748,7 @@ impl Unit {
             Self::PercentOrBeatsPerMinute => "% or bpm",
             Self::PercentOrWatts => "% or watts",
             Self::Push => "pushes",
+            Self::PushesPerMin => "pushes/min",
             Self::Radian => "radians",
             Self::RadiansPerSecond => "radians/second",
             Self::Repetition => "reps",
@@ -5198,6 +5760,7 @@ impl Unit {
             Self::StridesPerMinute => "strides/min",
             Self::Stroke => "strokes",
             Self::StrokePerLap => "strokes/lap",
+            Self::StrokesPerLength => "strokes/length",
             Self::StrokesPerMinute => "strokes/min",
             Self::SwimStroke => "swim_stroke",
             Self::TrainingStressScore => "tss",

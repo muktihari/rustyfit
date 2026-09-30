@@ -22,6 +22,8 @@ pub struct BarometerData {
     pub sample_time_offset: Vec<u16>,
     /// Units: Pa; These are the raw ADC reading. The samples may span across seconds. A conversion will need to be done on this data once read.
     pub baro_pres: Vec<u32>,
+    /// Scale: 5; Offset: 500; Units: m
+    pub enhanced_altitude: Vec<u32>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -37,6 +39,8 @@ impl BarometerData {
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
     /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `Pa`
     pub const BARO_PRES: u8 = 2;
+    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
+    pub const ENHANCED_ALTITUDE: u8 = 3;
 
     /// Create new BarometerData with all fields being set to its corresponding invalid value.
     pub const fn new() -> Self {
@@ -45,9 +49,41 @@ impl BarometerData {
             timestamp_ms: u16::MAX,
             sample_time_offset: Vec::new(),
             baro_pres: Vec::new(),
+            enhanced_altitude: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
+    }
+
+    /// Returns `enhanced_altitude` in its scaled value. It returns `None` when value is invalid.
+    ///
+    /// Units: m
+    pub fn enhanced_altitude_scaled(&self) -> Option<Vec<f64>> {
+        if self.enhanced_altitude.is_empty() {
+            return None;
+        }
+        let mut v = Vec::with_capacity(self.enhanced_altitude.len());
+        for &x in &self.enhanced_altitude {
+            v.push(x as f64 / 5.0 - 500.0)
+        }
+        Some(v)
+    }
+
+    /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
+    pub fn set_enhanced_altitude_scaled(&mut self, v: &[f64]) -> &mut Self {
+        self.enhanced_altitude = Vec::with_capacity(v.len());
+        if v.is_empty() {
+            return self;
+        }
+        for &x in v {
+            let unscaled = (x + 500.0) * 5.0;
+            if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
+                self.enhanced_altitude.push(u32::MAX);
+                continue;
+            }
+            self.enhanced_altitude.push(unscaled as u32);
+        }
+        self
     }
 
     fn count_valid_fields(&self) -> usize {
@@ -55,6 +91,7 @@ impl BarometerData {
             + (self.timestamp_ms != u16::MAX) as usize
             + (!self.sample_time_offset.is_empty()) as usize
             + (!self.baro_pres.is_empty()) as usize
+            + (!self.enhanced_altitude.is_empty()) as usize
     }
 }
 
@@ -67,7 +104,7 @@ impl Default for BarometerData {
 impl From<&Message> for BarometerData {
     /// from creates new BarometerData struct based on given mesg.
     fn from(mesg: &Message) -> Self {
-        const KNOWN_NUMS: [u64; 4] = [7, 0, 0, 2305843009213693952];
+        const KNOWN_NUMS: [u64; 4] = [15, 0, 0, 2305843009213693952];
         let mut n = 0u64;
         for field in &mesg.fields {
             n += (KNOWN_NUMS[field.num as usize >> 6] >> (field.num & 63)) & 1 ^ 1
@@ -83,6 +120,7 @@ impl From<&Message> for BarometerData {
                 0 => v.timestamp_ms = field.value.as_u16(),
                 1 => v.sample_time_offset = field.value.to_vec_u16(),
                 2 => v.baro_pres = field.value.to_vec_u32(),
+                3 => v.enhanced_altitude = field.value.to_vec_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -128,6 +166,14 @@ impl From<BarometerData> for Message {
                 is_expanded: false,
             });
         };
+        if !m.enhanced_altitude.is_empty() {
+            fields.push(Field {
+                num: 3,
+                base_type: FitBaseType::UINT32,
+                value: Value::VecUint32(m.enhanced_altitude),
+                is_expanded: false,
+            });
+        };
 
         fields.extend_from_slice(&m.unknown_fields);
 
@@ -160,6 +206,9 @@ impl Serialize for BarometerData {
         if !self.baro_pres.is_empty() {
             state.serialize_field("baro_pres", &self.baro_pres)?;
         }
+        if let Some(v) = self.enhanced_altitude_scaled() {
+            state.serialize_field("enhanced_altitude", &v)?;
+        }
         if !self.unknown_fields.is_empty() {
             state.serialize_field("unknown_fields", &self.unknown_fields)?;
         }
@@ -177,6 +226,7 @@ struct De {
     timestamp_ms: u16,
     sample_time_offset: Vec<u16>,
     baro_pres: Vec<u32>,
+    enhanced_altitude: Vec<f64>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -192,6 +242,23 @@ impl From<De> for BarometerData {
             timestamp_ms: m.timestamp_ms,
             sample_time_offset: m.sample_time_offset,
             baro_pres: m.baro_pres,
+            enhanced_altitude: {
+                if m.enhanced_altitude.is_empty() {
+                    Vec::new()
+                } else {
+                    let mut vals = Vec::with_capacity(m.enhanced_altitude.len());
+                    for &x in m.enhanced_altitude.iter() {
+                        let unscaled = (x + 500.0) * 5.0;
+                        if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64
+                        {
+                            vals.push(u32::MAX);
+                            continue;
+                        }
+                        vals.push(unscaled as u32);
+                    }
+                    vals
+                }
+            },
             unknown_fields: m.unknown_fields,
             developer_fields: m.developer_fields,
         }
@@ -206,6 +273,7 @@ impl Default for De {
             timestamp_ms: u16::MAX,
             sample_time_offset: Vec::new(),
             baro_pres: Vec::new(),
+            enhanced_altitude: Vec::new(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

@@ -56,6 +56,7 @@ impl MesgNum {
     pub const ANT_CHANNEL_ID: MesgNum = MesgNum(82);
     pub const LENGTH: MesgNum = MesgNum(101);
     pub const MONITORING_INFO: MesgNum = MesgNum(103);
+    pub const BATTERY: MesgNum = MesgNum(104);
     pub const PAD: MesgNum = MesgNum(105);
     pub const SLAVE_DEVICE: MesgNum = MesgNum(106);
     pub const CONNECTIVITY: MesgNum = MesgNum(127);
@@ -188,6 +189,7 @@ impl MesgNum {
             82 => Some("ant_channel_id"),
             101 => Some("length"),
             103 => Some("monitoring_info"),
+            104 => Some("battery"),
             105 => Some("pad"),
             106 => Some("slave_device"),
             127 => Some("connectivity"),
