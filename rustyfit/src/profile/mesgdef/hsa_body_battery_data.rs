@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,11 +20,11 @@ pub struct HsaBodyBatteryData {
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
     /// Units: percent; Body battery level: \[0,100\] Blank: -16
-    pub level: Vec<i8>,
+    pub level: Box<[i8]>,
     /// Body battery charged value
-    pub charged: Vec<i16>,
+    pub charged: Box<[i16]>,
     /// Body battery uncharged value
-    pub uncharged: Vec<i16>,
+    pub uncharged: Box<[i16]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -35,21 +36,21 @@ impl HsaBodyBatteryData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i8>`; FitBaseType::SINT8; ProfileType::Sint8; Units: `percent`
+    /// Value's type: `Box<[i8]>`; FitBaseType::SINT8; ProfileType::Sint8; Units: `percent`
     pub const LEVEL: u8 = 1;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16
     pub const CHARGED: u8 = 2;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16
     pub const UNCHARGED: u8 = 3;
 
     /// Create new HsaBodyBatteryData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            level: Vec::new(),
-            charged: Vec::new(),
-            uncharged: Vec::new(),
+            level: Box::new([]),
+            charged: Box::new([]),
+            uncharged: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -87,9 +88,9 @@ impl From<&Message> for HsaBodyBatteryData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
-                1 => v.level = field.value.to_vec_i8(),
-                2 => v.charged = field.value.to_vec_i16(),
-                3 => v.uncharged = field.value.to_vec_i16(),
+                1 => v.level = field.value.to_array_i8(),
+                2 => v.charged = field.value.to_array_i16(),
+                3 => v.uncharged = field.value.to_array_i16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -123,7 +124,7 @@ impl From<HsaBodyBatteryData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::SINT8,
-                value: Value::VecInt8(m.level),
+                value: Value::ArrayInt8(m.level),
                 is_expanded: false,
             });
         };
@@ -131,7 +132,7 @@ impl From<HsaBodyBatteryData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.charged),
+                value: Value::ArrayInt16(m.charged),
                 is_expanded: false,
             });
         };
@@ -139,7 +140,7 @@ impl From<HsaBodyBatteryData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.uncharged),
+                value: Value::ArrayInt16(m.uncharged),
                 is_expanded: false,
             });
         };
@@ -193,9 +194,9 @@ impl Serialize for HsaBodyBatteryData {
 struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
-    level: Vec<i8>,
-    charged: Vec<i16>,
-    uncharged: Vec<i16>,
+    level: Box<[i8]>,
+    charged: Box<[i16]>,
+    uncharged: Box<[i16]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -224,9 +225,9 @@ impl Default for De {
         Self {
             timestamp: None,
             processing_interval: u16::MAX,
-            level: Vec::new(),
-            charged: Vec::new(),
-            uncharged: Vec::new(),
+            level: Box::new([]),
+            charged: Box::new([]),
+            uncharged: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

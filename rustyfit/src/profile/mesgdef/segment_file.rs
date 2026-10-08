@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,19 +17,19 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 pub struct SegmentFile {
     pub message_index: typedef::MessageIndex,
     /// UUID of the segment file
-    pub file_uuid: String,
+    pub file_uuid: Box<str>,
     /// Enabled state of the segment file
     pub enabled: typedef::Bool,
     /// Primary key of the user that created the segment file
     pub user_profile_primary_key: u32,
     /// Leader type of each leader in the segment file
-    pub leader_type: Vec<typedef::SegmentLeaderboardType>,
+    pub leader_type: Box<[typedef::SegmentLeaderboardType]>,
     /// Group primary key of each leader in the segment file
-    pub leader_group_primary_key: Vec<u32>,
+    pub leader_group_primary_key: Box<[u32]>,
     /// Activity ID of each leader in the segment file
-    pub leader_activity_id: Vec<u32>,
+    pub leader_activity_id: Box<[u32]>,
     /// String version of the activity ID of each leader in the segment file. 21 characters long for each ID, express in decimal
-    pub leader_activity_id_string: Vec<String>,
+    pub leader_activity_id_string: Box<[Box<str>]>,
     /// Index for the Leader Board entry selected as the default race participant
     pub default_race_leader: u8,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -42,34 +41,34 @@ pub struct SegmentFile {
 impl SegmentFile {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const FILE_UUID: u8 = 1;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ENABLED: u8 = 3;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const USER_PROFILE_PRIMARY_KEY: u8 = 4;
-    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::SegmentLeaderboardType
+    /// Value's type: `Box<[u8]>`; FitBaseType::ENUM; ProfileType::SegmentLeaderboardType
     pub const LEADER_TYPE: u8 = 7;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32
     pub const LEADER_GROUP_PRIMARY_KEY: u8 = 8;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32
     pub const LEADER_ACTIVITY_ID: u8 = 9;
-    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<[Box<str>]>`; FitBaseType::STRING; ProfileType::String
     pub const LEADER_ACTIVITY_ID_STRING: u8 = 10;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DEFAULT_RACE_LEADER: u8 = 11;
 
     /// Create new SegmentFile with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            file_uuid: String::new(),
+            file_uuid: Box::from(""),
             enabled: typedef::Bool(u8::MAX),
             user_profile_primary_key: u32::MAX,
-            leader_type: Vec::new(),
-            leader_group_primary_key: Vec::new(),
-            leader_activity_id: Vec::new(),
-            leader_activity_id_string: Vec::new(),
+            leader_type: Box::new([]),
+            leader_group_primary_key: Box::new([]),
+            leader_activity_id: Box::new([]),
+            leader_activity_id_string: Box::new([]),
             default_race_leader: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -111,22 +110,22 @@ impl From<&Message> for SegmentFile {
         for field in &mesg.fields {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
-                1 => v.file_uuid = field.value.as_str().to_owned(),
+                1 => v.file_uuid = Box::from(field.value.as_str()),
                 3 => v.enabled = typedef::Bool(field.value.as_u8()),
                 4 => v.user_profile_primary_key = field.value.as_u32(),
                 7 => {
                     v.leader_type = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::SegmentLeaderboardType(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
-                8 => v.leader_group_primary_key = field.value.to_vec_u32(),
-                9 => v.leader_activity_id = field.value.to_vec_u32(),
-                10 => v.leader_activity_id_string = field.value.to_vec_string(),
+                8 => v.leader_group_primary_key = field.value.to_array_u32(),
+                9 => v.leader_activity_id = field.value.to_array_u32(),
+                10 => v.leader_activity_id_string = field.value.to_array_string(),
                 11 => v.default_race_leader = field.value.as_u8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -177,9 +176,10 @@ impl From<SegmentFile> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::ENUM,
-                value: Value::VecUint8({
-                    let (ptr, len, capacity) = m.leader_type.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
+                value: Value::ArrayUint8({
+                    let (ptr, len, capacity) = m.leader_type.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -188,7 +188,7 @@ impl From<SegmentFile> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.leader_group_primary_key),
+                value: Value::ArrayUint32(m.leader_group_primary_key),
                 is_expanded: false,
             });
         };
@@ -196,7 +196,7 @@ impl From<SegmentFile> for Message {
             fields.push(Field {
                 num: 9,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.leader_activity_id),
+                value: Value::ArrayUint32(m.leader_activity_id),
                 is_expanded: false,
             });
         };
@@ -204,7 +204,7 @@ impl From<SegmentFile> for Message {
             fields.push(Field {
                 num: 10,
                 base_type: FitBaseType::STRING,
-                value: Value::VecString(m.leader_activity_id_string),
+                value: Value::ArrayString(m.leader_activity_id_string),
                 is_expanded: false,
             });
         };
@@ -277,13 +277,13 @@ impl Serialize for SegmentFile {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     message_index: typedef::MessageIndex,
-    file_uuid: String,
+    file_uuid: Box<str>,
     enabled: typedef::Bool,
     user_profile_primary_key: u32,
-    leader_type: Vec<typedef::SegmentLeaderboardType>,
-    leader_group_primary_key: Vec<u32>,
-    leader_activity_id: Vec<u32>,
-    leader_activity_id_string: Vec<String>,
+    leader_type: Box<[typedef::SegmentLeaderboardType]>,
+    leader_group_primary_key: Box<[u32]>,
+    leader_activity_id: Box<[u32]>,
+    leader_activity_id_string: Box<[Box<str>]>,
     default_race_leader: u8,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -313,13 +313,13 @@ impl Default for De {
     fn default() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            file_uuid: String::new(),
+            file_uuid: Box::from(""),
             enabled: typedef::Bool(u8::MAX),
             user_profile_primary_key: u32::MAX,
-            leader_type: Vec::new(),
-            leader_group_primary_key: Vec::new(),
-            leader_activity_id: Vec::new(),
-            leader_activity_id_string: Vec::new(),
+            leader_type: Box::new([]),
+            leader_group_primary_key: Box::new([]),
+            leader_activity_id: Box::new([]),
+            leader_activity_id_string: Box::new([]),
             default_race_leader: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

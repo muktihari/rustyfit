@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -21,7 +22,7 @@ pub struct HsaHeartRateData {
     /// Status of measurements in buffer - 0 indicates SEARCHING 1 indicates LOCKED
     pub status: u8,
     /// Units: bpm; Beats / min. Blank: 0
-    pub heart_rate: Vec<u8>,
+    pub heart_rate: Box<[u8]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -35,16 +36,16 @@ impl HsaHeartRateData {
     pub const PROCESSING_INTERVAL: u8 = 0;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const STATUS: u8 = 1;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HEART_RATE: u8 = 2;
 
     /// Create new HsaHeartRateData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
             status: u8::MAX,
-            heart_rate: Vec::new(),
+            heart_rate: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -82,7 +83,7 @@ impl From<&Message> for HsaHeartRateData {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
                 1 => v.status = field.value.as_u8(),
-                2 => v.heart_rate = field.value.to_vec_u8(),
+                2 => v.heart_rate = field.value.to_array_u8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -124,7 +125,7 @@ impl From<HsaHeartRateData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.heart_rate),
+                value: Value::ArrayUint8(m.heart_rate),
                 is_expanded: false,
             });
         };
@@ -176,7 +177,7 @@ struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
     status: u8,
-    heart_rate: Vec<u8>,
+    heart_rate: Box<[u8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -205,7 +206,7 @@ impl Default for De {
             timestamp: None,
             processing_interval: u16::MAX,
             status: u8::MAX,
-            heart_rate: Vec::new(),
+            heart_rate: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

@@ -9,6 +9,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -127,13 +128,13 @@ pub struct Lap {
     /// Scale: 1000; Units: m/s
     pub max_neg_vertical_speed: i16,
     /// Scale: 1000; Units: s
-    pub time_in_hr_zone: Vec<u32>,
+    pub time_in_hr_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_speed_zone: Vec<u32>,
+    pub time_in_speed_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_cadence_zone: Vec<u32>,
+    pub time_in_cadence_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_power_zone: Vec<u32>,
+    pub time_in_power_zone: Box<[u32]>,
     pub repetition_num: u16,
     /// Scale: 5; Offset: 500; Units: m
     pub min_altitude: u16,
@@ -145,9 +146,9 @@ pub struct Lap {
     pub avg_swolf: u16,
     pub opponent_score: u16,
     /// Units: counts; stroke_type enum used as the index
-    pub stroke_count: Vec<u16>,
+    pub stroke_count: Box<[u16]>,
     /// Units: counts; zone number used as the index
-    pub zone_count: Vec<u16>,
+    pub zone_count: Box<[u16]>,
     /// Scale: 10; Units: mm
     pub avg_vertical_oscillation: u16,
     /// Scale: 100; Units: percent
@@ -162,17 +163,17 @@ pub struct Lap {
     pub total_fractional_cycles: u8,
     pub player_score: u16,
     /// Scale: 100; Units: g/dL; Avg saturated and unsaturated hemoglobin
-    pub avg_total_hemoglobin_conc: Vec<u16>,
+    pub avg_total_hemoglobin_conc: Box<[u16]>,
     /// Scale: 100; Units: g/dL; Min saturated and unsaturated hemoglobin
-    pub min_total_hemoglobin_conc: Vec<u16>,
+    pub min_total_hemoglobin_conc: Box<[u16]>,
     /// Scale: 100; Units: g/dL; Max saturated and unsaturated hemoglobin
-    pub max_total_hemoglobin_conc: Vec<u16>,
+    pub max_total_hemoglobin_conc: Box<[u16]>,
     /// Scale: 10; Units: %; Avg percentage of hemoglobin saturated with oxygen
-    pub avg_saturated_hemoglobin_percent: Vec<u16>,
+    pub avg_saturated_hemoglobin_percent: Box<[u16]>,
     /// Scale: 10; Units: %; Min percentage of hemoglobin saturated with oxygen
-    pub min_saturated_hemoglobin_percent: Vec<u16>,
+    pub min_saturated_hemoglobin_percent: Box<[u16]>,
     /// Scale: 10; Units: %; Max percentage of hemoglobin saturated with oxygen
-    pub max_saturated_hemoglobin_percent: Vec<u16>,
+    pub max_saturated_hemoglobin_percent: Box<[u16]>,
     /// Scale: 10; Units: strokes / length
     pub avg_strokes_per_length: u16,
     /// Scale: 2; Units: percent
@@ -196,21 +197,21 @@ pub struct Lap {
     /// Units: mm; Average right platform center offset
     pub avg_right_pco: i8,
     /// Scale: 0.7111111; Units: degrees; Average left power phase angles. Data value indexes defined by power_phase_type.
-    pub avg_left_power_phase: Vec<u8>,
+    pub avg_left_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average left power phase peak angles. Data value indexes defined by power_phase_type.
-    pub avg_left_power_phase_peak: Vec<u8>,
+    pub avg_left_power_phase_peak: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average right power phase angles. Data value indexes defined by power_phase_type.
-    pub avg_right_power_phase: Vec<u8>,
+    pub avg_right_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average right power phase peak angles. Data value indexes defined by power_phase_type.
-    pub avg_right_power_phase_peak: Vec<u8>,
+    pub avg_right_power_phase_peak: Box<[u8]>,
     /// Units: watts; Average power by position. Data value indexes defined by rider_position_type.
-    pub avg_power_position: Vec<u16>,
+    pub avg_power_position: Box<[u16]>,
     /// Units: watts; Maximum power by position. Data value indexes defined by rider_position_type.
-    pub max_power_position: Vec<u16>,
+    pub max_power_position: Box<[u16]>,
     /// Units: rpm; Average cadence by position. Data value indexes defined by rider_position_type.
-    pub avg_cadence_position: Vec<u8>,
+    pub avg_cadence_position: Box<[u8]>,
     /// Units: rpm; Maximum cadence by position. Data value indexes defined by rider_position_type.
-    pub max_cadence_position: Vec<u8>,
+    pub max_cadence_position: Box<[u8]>,
     /// Scale: 1000; Units: m/s
     pub enhanced_avg_speed: u32,
     /// Scale: 1000; Units: m/s
@@ -392,13 +393,13 @@ impl Lap {
     pub const MAX_POS_VERTICAL_SPEED: u8 = 55;
     /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1000`; Units: `m/s`
     pub const MAX_NEG_VERTICAL_SPEED: u8 = 56;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 57;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 58;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 59;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 60;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const REPETITION_NUM: u8 = 61;
@@ -414,9 +415,9 @@ impl Lap {
     pub const AVG_SWOLF: u8 = 73;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const OPPONENT_SCORE: u8 = 74;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const STROKE_COUNT: u8 = 75;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ZONE_COUNT: u8 = 76;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `mm`
     pub const AVG_VERTICAL_OSCILLATION: u8 = 77;
@@ -432,17 +433,17 @@ impl Lap {
     pub const TOTAL_FRACTIONAL_CYCLES: u8 = 82;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PLAYER_SCORE: u8 = 83;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `g/dL`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `g/dL`
     pub const AVG_TOTAL_HEMOGLOBIN_CONC: u8 = 84;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `g/dL`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `g/dL`
     pub const MIN_TOTAL_HEMOGLOBIN_CONC: u8 = 85;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `g/dL`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `g/dL`
     pub const MAX_TOTAL_HEMOGLOBIN_CONC: u8 = 86;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
     pub const AVG_SATURATED_HEMOGLOBIN_PERCENT: u8 = 87;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
     pub const MIN_SATURATED_HEMOGLOBIN_PERCENT: u8 = 88;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `%`
     pub const MAX_SATURATED_HEMOGLOBIN_PERCENT: u8 = 89;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10`; Units: `strokes / length`
     pub const AVG_STROKES_PER_LENGTH: u8 = 90;
@@ -468,21 +469,21 @@ impl Lap {
     pub const AVG_LEFT_PCO: u8 = 100;
     /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
     pub const AVG_RIGHT_PCO: u8 = 101;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE: u8 = 102;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 103;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 104;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 105;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const AVG_POWER_POSITION: u8 = 106;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const MAX_POWER_POSITION: u8 = 107;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const AVG_CADENCE_POSITION: u8 = 108;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const MAX_CADENCE_POSITION: u8 = 109;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_AVG_SPEED: u8 = 110;
@@ -548,7 +549,7 @@ impl Lap {
     pub const AVG_GRADE_ADJUSTED_SPEED: u8 = 161;
 
     /// Create new Lap with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             timestamp: typedef::DateTime(u32::MAX),
@@ -607,10 +608,10 @@ impl Lap {
             avg_neg_vertical_speed: i16::MAX,
             max_pos_vertical_speed: i16::MAX,
             max_neg_vertical_speed: i16::MAX,
-            time_in_hr_zone: Vec::new(),
-            time_in_speed_zone: Vec::new(),
-            time_in_cadence_zone: Vec::new(),
-            time_in_power_zone: Vec::new(),
+            time_in_hr_zone: Box::new([]),
+            time_in_speed_zone: Box::new([]),
+            time_in_cadence_zone: Box::new([]),
+            time_in_power_zone: Box::new([]),
             repetition_num: u16::MAX,
             min_altitude: u16::MAX,
             min_heart_rate: u8::MAX,
@@ -618,8 +619,8 @@ impl Lap {
             wkt_step_index: typedef::MessageIndex(u16::MAX),
             avg_swolf: u16::MAX,
             opponent_score: u16::MAX,
-            stroke_count: Vec::new(),
-            zone_count: Vec::new(),
+            stroke_count: Box::new([]),
+            zone_count: Box::new([]),
             avg_vertical_oscillation: u16::MAX,
             avg_stance_time_percent: u16::MAX,
             avg_stance_time: u16::MAX,
@@ -627,12 +628,12 @@ impl Lap {
             max_fractional_cadence: u8::MAX,
             total_fractional_cycles: u8::MAX,
             player_score: u16::MAX,
-            avg_total_hemoglobin_conc: Vec::new(),
-            min_total_hemoglobin_conc: Vec::new(),
-            max_total_hemoglobin_conc: Vec::new(),
-            avg_saturated_hemoglobin_percent: Vec::new(),
-            min_saturated_hemoglobin_percent: Vec::new(),
-            max_saturated_hemoglobin_percent: Vec::new(),
+            avg_total_hemoglobin_conc: Box::new([]),
+            min_total_hemoglobin_conc: Box::new([]),
+            max_total_hemoglobin_conc: Box::new([]),
+            avg_saturated_hemoglobin_percent: Box::new([]),
+            min_saturated_hemoglobin_percent: Box::new([]),
+            max_saturated_hemoglobin_percent: Box::new([]),
             avg_strokes_per_length: u16::MAX,
             avg_left_torque_effectiveness: u8::MAX,
             avg_right_torque_effectiveness: u8::MAX,
@@ -645,14 +646,14 @@ impl Lap {
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::new(),
-            avg_left_power_phase_peak: Vec::new(),
-            avg_right_power_phase: Vec::new(),
-            avg_right_power_phase_peak: Vec::new(),
-            avg_power_position: Vec::new(),
-            max_power_position: Vec::new(),
-            avg_cadence_position: Vec::new(),
-            max_cadence_position: Vec::new(),
+            avg_left_power_phase: Box::new([]),
+            avg_left_power_phase_peak: Box::new([]),
+            avg_right_power_phase: Box::new([]),
+            avg_right_power_phase_peak: Box::new([]),
+            avg_power_position: Box::new([]),
+            max_power_position: Box::new([]),
+            avg_cadence_position: Box::new([]),
+            max_cadence_position: Box::new([]),
             enhanced_avg_speed: u32::MAX,
             enhanced_max_speed: u32::MAX,
             enhanced_avg_altitude: u32::MAX,
@@ -1172,18 +1173,20 @@ impl Lap {
 
     /// Set `time_in_hr_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_hr_zone = Vec::with_capacity(v.len());
+        self.time_in_hr_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_hr_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_hr_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_hr_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1203,18 +1206,20 @@ impl Lap {
 
     /// Set `time_in_speed_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_speed_zone = Vec::with_capacity(v.len());
+        self.time_in_speed_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_speed_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_speed_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_speed_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1234,18 +1239,20 @@ impl Lap {
 
     /// Set `time_in_cadence_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_cadence_zone = Vec::with_capacity(v.len());
+        self.time_in_cadence_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_cadence_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_cadence_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_cadence_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1265,18 +1272,20 @@ impl Lap {
 
     /// Set `time_in_power_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_power_zone = Vec::with_capacity(v.len());
+        self.time_in_power_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_power_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_power_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_power_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1464,18 +1473,20 @@ impl Lap {
 
     /// Set `avg_total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_total_hemoglobin_conc = Vec::with_capacity(v.len());
+        self.avg_total_hemoglobin_conc = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.avg_total_hemoglobin_conc.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.avg_total_hemoglobin_conc.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.avg_total_hemoglobin_conc = vals.into_boxed_slice();
         self
     }
 
@@ -1495,18 +1506,20 @@ impl Lap {
 
     /// Set `min_total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_min_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.min_total_hemoglobin_conc = Vec::with_capacity(v.len());
+        self.min_total_hemoglobin_conc = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.min_total_hemoglobin_conc.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.min_total_hemoglobin_conc.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.min_total_hemoglobin_conc = vals.into_boxed_slice();
         self
     }
 
@@ -1526,18 +1539,20 @@ impl Lap {
 
     /// Set `max_total_hemoglobin_conc` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_max_total_hemoglobin_conc_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.max_total_hemoglobin_conc = Vec::with_capacity(v.len());
+        self.max_total_hemoglobin_conc = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.max_total_hemoglobin_conc.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.max_total_hemoglobin_conc.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.max_total_hemoglobin_conc = vals.into_boxed_slice();
         self
     }
 
@@ -1557,18 +1572,20 @@ impl Lap {
 
     /// Set `avg_saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_saturated_hemoglobin_percent = Vec::with_capacity(v.len());
+        self.avg_saturated_hemoglobin_percent = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.avg_saturated_hemoglobin_percent.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.avg_saturated_hemoglobin_percent.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.avg_saturated_hemoglobin_percent = vals.into_boxed_slice();
         self
     }
 
@@ -1588,18 +1605,20 @@ impl Lap {
 
     /// Set `min_saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_min_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.min_saturated_hemoglobin_percent = Vec::with_capacity(v.len());
+        self.min_saturated_hemoglobin_percent = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.min_saturated_hemoglobin_percent.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.min_saturated_hemoglobin_percent.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.min_saturated_hemoglobin_percent = vals.into_boxed_slice();
         self
     }
 
@@ -1619,18 +1638,20 @@ impl Lap {
 
     /// Set `max_saturated_hemoglobin_percent` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_max_saturated_hemoglobin_percent_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.max_saturated_hemoglobin_percent = Vec::with_capacity(v.len());
+        self.max_saturated_hemoglobin_percent = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.max_saturated_hemoglobin_percent.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.max_saturated_hemoglobin_percent.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.max_saturated_hemoglobin_percent = vals.into_boxed_slice();
         self
     }
 
@@ -1797,18 +1818,20 @@ impl Lap {
 
     /// Set `avg_left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_left_power_phase = Vec::with_capacity(v.len());
+        self.avg_left_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_left_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_left_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_left_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -1828,18 +1851,20 @@ impl Lap {
 
     /// Set `avg_left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_left_power_phase_peak = Vec::with_capacity(v.len());
+        self.avg_left_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_left_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_left_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_left_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -1859,18 +1884,20 @@ impl Lap {
 
     /// Set `avg_right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_right_power_phase = Vec::with_capacity(v.len());
+        self.avg_right_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_right_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_right_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_right_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -1890,18 +1917,20 @@ impl Lap {
 
     /// Set `avg_right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_right_power_phase_peak = Vec::with_capacity(v.len());
+        self.avg_right_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_right_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_right_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_right_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -2566,10 +2595,10 @@ impl From<&Message> for Lap {
                 54 => v.avg_neg_vertical_speed = field.value.as_i16(),
                 55 => v.max_pos_vertical_speed = field.value.as_i16(),
                 56 => v.max_neg_vertical_speed = field.value.as_i16(),
-                57 => v.time_in_hr_zone = field.value.to_vec_u32(),
-                58 => v.time_in_speed_zone = field.value.to_vec_u32(),
-                59 => v.time_in_cadence_zone = field.value.to_vec_u32(),
-                60 => v.time_in_power_zone = field.value.to_vec_u32(),
+                57 => v.time_in_hr_zone = field.value.to_array_u32(),
+                58 => v.time_in_speed_zone = field.value.to_array_u32(),
+                59 => v.time_in_cadence_zone = field.value.to_array_u32(),
+                60 => v.time_in_power_zone = field.value.to_array_u32(),
                 61 => v.repetition_num = field.value.as_u16(),
                 62 => v.min_altitude = field.value.as_u16(),
                 63 => v.min_heart_rate = field.value.as_u8(),
@@ -2577,8 +2606,8 @@ impl From<&Message> for Lap {
                 71 => v.wkt_step_index = typedef::MessageIndex(field.value.as_u16()),
                 73 => v.avg_swolf = field.value.as_u16(),
                 74 => v.opponent_score = field.value.as_u16(),
-                75 => v.stroke_count = field.value.to_vec_u16(),
-                76 => v.zone_count = field.value.to_vec_u16(),
+                75 => v.stroke_count = field.value.to_array_u16(),
+                76 => v.zone_count = field.value.to_array_u16(),
                 77 => v.avg_vertical_oscillation = field.value.as_u16(),
                 78 => v.avg_stance_time_percent = field.value.as_u16(),
                 79 => v.avg_stance_time = field.value.as_u16(),
@@ -2586,12 +2615,12 @@ impl From<&Message> for Lap {
                 81 => v.max_fractional_cadence = field.value.as_u8(),
                 82 => v.total_fractional_cycles = field.value.as_u8(),
                 83 => v.player_score = field.value.as_u16(),
-                84 => v.avg_total_hemoglobin_conc = field.value.to_vec_u16(),
-                85 => v.min_total_hemoglobin_conc = field.value.to_vec_u16(),
-                86 => v.max_total_hemoglobin_conc = field.value.to_vec_u16(),
-                87 => v.avg_saturated_hemoglobin_percent = field.value.to_vec_u16(),
-                88 => v.min_saturated_hemoglobin_percent = field.value.to_vec_u16(),
-                89 => v.max_saturated_hemoglobin_percent = field.value.to_vec_u16(),
+                84 => v.avg_total_hemoglobin_conc = field.value.to_array_u16(),
+                85 => v.min_total_hemoglobin_conc = field.value.to_array_u16(),
+                86 => v.max_total_hemoglobin_conc = field.value.to_array_u16(),
+                87 => v.avg_saturated_hemoglobin_percent = field.value.to_array_u16(),
+                88 => v.min_saturated_hemoglobin_percent = field.value.to_array_u16(),
+                89 => v.max_saturated_hemoglobin_percent = field.value.to_array_u16(),
                 90 => v.avg_strokes_per_length = field.value.as_u16(),
                 91 => v.avg_left_torque_effectiveness = field.value.as_u8(),
                 92 => v.avg_right_torque_effectiveness = field.value.as_u8(),
@@ -2604,14 +2633,14 @@ impl From<&Message> for Lap {
                 99 => v.stand_count = field.value.as_u16(),
                 100 => v.avg_left_pco = field.value.as_i8(),
                 101 => v.avg_right_pco = field.value.as_i8(),
-                102 => v.avg_left_power_phase = field.value.to_vec_u8(),
-                103 => v.avg_left_power_phase_peak = field.value.to_vec_u8(),
-                104 => v.avg_right_power_phase = field.value.to_vec_u8(),
-                105 => v.avg_right_power_phase_peak = field.value.to_vec_u8(),
-                106 => v.avg_power_position = field.value.to_vec_u16(),
-                107 => v.max_power_position = field.value.to_vec_u16(),
-                108 => v.avg_cadence_position = field.value.to_vec_u8(),
-                109 => v.max_cadence_position = field.value.to_vec_u8(),
+                102 => v.avg_left_power_phase = field.value.to_array_u8(),
+                103 => v.avg_left_power_phase_peak = field.value.to_array_u8(),
+                104 => v.avg_right_power_phase = field.value.to_array_u8(),
+                105 => v.avg_right_power_phase_peak = field.value.to_array_u8(),
+                106 => v.avg_power_position = field.value.to_array_u16(),
+                107 => v.max_power_position = field.value.to_array_u16(),
+                108 => v.avg_cadence_position = field.value.to_array_u8(),
+                109 => v.max_cadence_position = field.value.to_array_u8(),
                 110 => v.enhanced_avg_speed = field.value.as_u32(),
                 111 => v.enhanced_max_speed = field.value.as_u32(),
                 112 => v.enhanced_avg_altitude = field.value.as_u32(),
@@ -3122,7 +3151,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 57,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_hr_zone),
+                value: Value::ArrayUint32(m.time_in_hr_zone),
                 is_expanded: false,
             });
         };
@@ -3130,7 +3159,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 58,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_speed_zone),
+                value: Value::ArrayUint32(m.time_in_speed_zone),
                 is_expanded: false,
             });
         };
@@ -3138,7 +3167,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 59,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_cadence_zone),
+                value: Value::ArrayUint32(m.time_in_cadence_zone),
                 is_expanded: false,
             });
         };
@@ -3146,7 +3175,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 60,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_power_zone),
+                value: Value::ArrayUint32(m.time_in_power_zone),
                 is_expanded: false,
             });
         };
@@ -3210,7 +3239,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 75,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.stroke_count),
+                value: Value::ArrayUint16(m.stroke_count),
                 is_expanded: false,
             });
         };
@@ -3218,7 +3247,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 76,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.zone_count),
+                value: Value::ArrayUint16(m.zone_count),
                 is_expanded: false,
             });
         };
@@ -3282,7 +3311,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 84,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.avg_total_hemoglobin_conc),
+                value: Value::ArrayUint16(m.avg_total_hemoglobin_conc),
                 is_expanded: false,
             });
         };
@@ -3290,7 +3319,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 85,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.min_total_hemoglobin_conc),
+                value: Value::ArrayUint16(m.min_total_hemoglobin_conc),
                 is_expanded: false,
             });
         };
@@ -3298,7 +3327,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 86,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.max_total_hemoglobin_conc),
+                value: Value::ArrayUint16(m.max_total_hemoglobin_conc),
                 is_expanded: false,
             });
         };
@@ -3306,7 +3335,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 87,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.avg_saturated_hemoglobin_percent),
+                value: Value::ArrayUint16(m.avg_saturated_hemoglobin_percent),
                 is_expanded: false,
             });
         };
@@ -3314,7 +3343,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 88,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.min_saturated_hemoglobin_percent),
+                value: Value::ArrayUint16(m.min_saturated_hemoglobin_percent),
                 is_expanded: false,
             });
         };
@@ -3322,7 +3351,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 89,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.max_saturated_hemoglobin_percent),
+                value: Value::ArrayUint16(m.max_saturated_hemoglobin_percent),
                 is_expanded: false,
             });
         };
@@ -3426,7 +3455,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 102,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_left_power_phase),
+                value: Value::ArrayUint8(m.avg_left_power_phase),
                 is_expanded: false,
             });
         };
@@ -3434,7 +3463,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 103,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_left_power_phase_peak),
+                value: Value::ArrayUint8(m.avg_left_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -3442,7 +3471,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 104,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_right_power_phase),
+                value: Value::ArrayUint8(m.avg_right_power_phase),
                 is_expanded: false,
             });
         };
@@ -3450,7 +3479,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 105,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_right_power_phase_peak),
+                value: Value::ArrayUint8(m.avg_right_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -3458,7 +3487,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 106,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.avg_power_position),
+                value: Value::ArrayUint16(m.avg_power_position),
                 is_expanded: false,
             });
         };
@@ -3466,7 +3495,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 107,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.max_power_position),
+                value: Value::ArrayUint16(m.max_power_position),
                 is_expanded: false,
             });
         };
@@ -3474,7 +3503,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 108,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_cadence_position),
+                value: Value::ArrayUint8(m.avg_cadence_position),
                 is_expanded: false,
             });
         };
@@ -3482,7 +3511,7 @@ impl From<Lap> for Message {
             fields.push(Field {
                 num: 109,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.max_cadence_position),
+                value: Value::ArrayUint8(m.max_cadence_position),
                 is_expanded: false,
             });
         };
@@ -4234,10 +4263,10 @@ struct De {
     avg_neg_vertical_speed: f64,
     max_pos_vertical_speed: f64,
     max_neg_vertical_speed: f64,
-    time_in_hr_zone: Vec<f64>,
-    time_in_speed_zone: Vec<f64>,
-    time_in_cadence_zone: Vec<f64>,
-    time_in_power_zone: Vec<f64>,
+    time_in_hr_zone: Box<[f64]>,
+    time_in_speed_zone: Box<[f64]>,
+    time_in_cadence_zone: Box<[f64]>,
+    time_in_power_zone: Box<[f64]>,
     repetition_num: u16,
     min_altitude: f64,
     min_heart_rate: u8,
@@ -4245,8 +4274,8 @@ struct De {
     wkt_step_index: typedef::MessageIndex,
     avg_swolf: u16,
     opponent_score: u16,
-    stroke_count: Vec<u16>,
-    zone_count: Vec<u16>,
+    stroke_count: Box<[u16]>,
+    zone_count: Box<[u16]>,
     avg_vertical_oscillation: f64,
     avg_stance_time_percent: f64,
     avg_stance_time: f64,
@@ -4254,12 +4283,12 @@ struct De {
     max_fractional_cadence: f64,
     total_fractional_cycles: f64,
     player_score: u16,
-    avg_total_hemoglobin_conc: Vec<f64>,
-    min_total_hemoglobin_conc: Vec<f64>,
-    max_total_hemoglobin_conc: Vec<f64>,
-    avg_saturated_hemoglobin_percent: Vec<f64>,
-    min_saturated_hemoglobin_percent: Vec<f64>,
-    max_saturated_hemoglobin_percent: Vec<f64>,
+    avg_total_hemoglobin_conc: Box<[f64]>,
+    min_total_hemoglobin_conc: Box<[f64]>,
+    max_total_hemoglobin_conc: Box<[f64]>,
+    avg_saturated_hemoglobin_percent: Box<[f64]>,
+    min_saturated_hemoglobin_percent: Box<[f64]>,
+    max_saturated_hemoglobin_percent: Box<[f64]>,
     avg_strokes_per_length: f64,
     avg_left_torque_effectiveness: f64,
     avg_right_torque_effectiveness: f64,
@@ -4272,14 +4301,14 @@ struct De {
     stand_count: u16,
     avg_left_pco: i8,
     avg_right_pco: i8,
-    avg_left_power_phase: Vec<f64>,
-    avg_left_power_phase_peak: Vec<f64>,
-    avg_right_power_phase: Vec<f64>,
-    avg_right_power_phase_peak: Vec<f64>,
-    avg_power_position: Vec<u16>,
-    max_power_position: Vec<u16>,
-    avg_cadence_position: Vec<u8>,
-    max_cadence_position: Vec<u8>,
+    avg_left_power_phase: Box<[f64]>,
+    avg_left_power_phase_peak: Box<[f64]>,
+    avg_right_power_phase: Box<[f64]>,
+    avg_right_power_phase_peak: Box<[f64]>,
+    avg_power_position: Box<[u16]>,
+    max_power_position: Box<[u16]>,
+    avg_cadence_position: Box<[u8]>,
+    max_cadence_position: Box<[u8]>,
     enhanced_avg_speed: f64,
     enhanced_max_speed: f64,
     enhanced_avg_altitude: f64,
@@ -4510,7 +4539,7 @@ impl From<De> for Lap {
             },
             time_in_hr_zone: {
                 if m.time_in_hr_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_hr_zone.len());
                     for &x in m.time_in_hr_zone.iter() {
@@ -4522,12 +4551,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_speed_zone: {
                 if m.time_in_speed_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_speed_zone.len());
                     for &x in m.time_in_speed_zone.iter() {
@@ -4539,12 +4568,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_cadence_zone: {
                 if m.time_in_cadence_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_cadence_zone.len());
                     for &x in m.time_in_cadence_zone.iter() {
@@ -4556,12 +4585,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_power_zone: {
                 if m.time_in_power_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_power_zone.len());
                     for &x in m.time_in_power_zone.iter() {
@@ -4573,7 +4602,7 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             repetition_num: m.repetition_num,
@@ -4650,7 +4679,7 @@ impl From<De> for Lap {
             player_score: m.player_score,
             avg_total_hemoglobin_conc: {
                 if m.avg_total_hemoglobin_conc.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_total_hemoglobin_conc.len());
                     for &x in m.avg_total_hemoglobin_conc.iter() {
@@ -4662,12 +4691,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             min_total_hemoglobin_conc: {
                 if m.min_total_hemoglobin_conc.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.min_total_hemoglobin_conc.len());
                     for &x in m.min_total_hemoglobin_conc.iter() {
@@ -4679,12 +4708,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             max_total_hemoglobin_conc: {
                 if m.max_total_hemoglobin_conc.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.max_total_hemoglobin_conc.len());
                     for &x in m.max_total_hemoglobin_conc.iter() {
@@ -4696,12 +4725,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_saturated_hemoglobin_percent: {
                 if m.avg_saturated_hemoglobin_percent.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_saturated_hemoglobin_percent.len());
                     for &x in m.avg_saturated_hemoglobin_percent.iter() {
@@ -4713,12 +4742,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             min_saturated_hemoglobin_percent: {
                 if m.min_saturated_hemoglobin_percent.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.min_saturated_hemoglobin_percent.len());
                     for &x in m.min_saturated_hemoglobin_percent.iter() {
@@ -4730,12 +4759,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             max_saturated_hemoglobin_percent: {
                 if m.max_saturated_hemoglobin_percent.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.max_saturated_hemoglobin_percent.len());
                     for &x in m.max_saturated_hemoglobin_percent.iter() {
@@ -4747,7 +4776,7 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_strokes_per_length: {
@@ -4813,7 +4842,7 @@ impl From<De> for Lap {
             avg_right_pco: m.avg_right_pco,
             avg_left_power_phase: {
                 if m.avg_left_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_left_power_phase.len());
                     for &x in m.avg_left_power_phase.iter() {
@@ -4825,12 +4854,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_left_power_phase_peak: {
                 if m.avg_left_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_left_power_phase_peak.len());
                     for &x in m.avg_left_power_phase_peak.iter() {
@@ -4842,12 +4871,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_right_power_phase: {
                 if m.avg_right_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_right_power_phase.len());
                     for &x in m.avg_right_power_phase.iter() {
@@ -4859,12 +4888,12 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_right_power_phase_peak: {
                 if m.avg_right_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_right_power_phase_peak.len());
                     for &x in m.avg_right_power_phase_peak.iter() {
@@ -4876,7 +4905,7 @@ impl From<De> for Lap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_power_position: m.avg_power_position,
@@ -5122,10 +5151,10 @@ impl Default for De {
             avg_neg_vertical_speed: f64::from_bits(u64::MAX),
             max_pos_vertical_speed: f64::from_bits(u64::MAX),
             max_neg_vertical_speed: f64::from_bits(u64::MAX),
-            time_in_hr_zone: Vec::new(),
-            time_in_speed_zone: Vec::new(),
-            time_in_cadence_zone: Vec::new(),
-            time_in_power_zone: Vec::new(),
+            time_in_hr_zone: Box::new([]),
+            time_in_speed_zone: Box::new([]),
+            time_in_cadence_zone: Box::new([]),
+            time_in_power_zone: Box::new([]),
             repetition_num: u16::MAX,
             min_altitude: f64::from_bits(u64::MAX),
             min_heart_rate: u8::MAX,
@@ -5133,8 +5162,8 @@ impl Default for De {
             wkt_step_index: typedef::MessageIndex(u16::MAX),
             avg_swolf: u16::MAX,
             opponent_score: u16::MAX,
-            stroke_count: Vec::new(),
-            zone_count: Vec::new(),
+            stroke_count: Box::new([]),
+            zone_count: Box::new([]),
             avg_vertical_oscillation: f64::from_bits(u64::MAX),
             avg_stance_time_percent: f64::from_bits(u64::MAX),
             avg_stance_time: f64::from_bits(u64::MAX),
@@ -5142,12 +5171,12 @@ impl Default for De {
             max_fractional_cadence: f64::from_bits(u64::MAX),
             total_fractional_cycles: f64::from_bits(u64::MAX),
             player_score: u16::MAX,
-            avg_total_hemoglobin_conc: Vec::new(),
-            min_total_hemoglobin_conc: Vec::new(),
-            max_total_hemoglobin_conc: Vec::new(),
-            avg_saturated_hemoglobin_percent: Vec::new(),
-            min_saturated_hemoglobin_percent: Vec::new(),
-            max_saturated_hemoglobin_percent: Vec::new(),
+            avg_total_hemoglobin_conc: Box::new([]),
+            min_total_hemoglobin_conc: Box::new([]),
+            max_total_hemoglobin_conc: Box::new([]),
+            avg_saturated_hemoglobin_percent: Box::new([]),
+            min_saturated_hemoglobin_percent: Box::new([]),
+            max_saturated_hemoglobin_percent: Box::new([]),
             avg_strokes_per_length: f64::from_bits(u64::MAX),
             avg_left_torque_effectiveness: f64::from_bits(u64::MAX),
             avg_right_torque_effectiveness: f64::from_bits(u64::MAX),
@@ -5160,14 +5189,14 @@ impl Default for De {
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::new(),
-            avg_left_power_phase_peak: Vec::new(),
-            avg_right_power_phase: Vec::new(),
-            avg_right_power_phase_peak: Vec::new(),
-            avg_power_position: Vec::new(),
-            max_power_position: Vec::new(),
-            avg_cadence_position: Vec::new(),
-            max_cadence_position: Vec::new(),
+            avg_left_power_phase: Box::new([]),
+            avg_left_power_phase_peak: Box::new([]),
+            avg_right_power_phase: Box::new([]),
+            avg_right_power_phase_peak: Box::new([]),
+            avg_power_position: Box::new([]),
+            max_power_position: Box::new([]),
+            avg_cadence_position: Box::new([]),
+            max_cadence_position: Box::new([]),
             enhanced_avg_speed: f64::from_bits(u64::MAX),
             enhanced_max_speed: f64::from_bits(u64::MAX),
             enhanced_avg_altitude: f64::from_bits(u64::MAX),

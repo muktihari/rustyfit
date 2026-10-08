@@ -39,7 +39,7 @@ impl TrainingSettings {
     pub const PRECISE_TARGET_SPEED: u8 = 153;
 
     /// Create new TrainingSettings with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             target_distance: u32::MAX,
             target_speed: u16::MAX,

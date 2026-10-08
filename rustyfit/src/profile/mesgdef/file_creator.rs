@@ -29,7 +29,7 @@ impl FileCreator {
     pub const HARDWARE_VERSION: u8 = 1;
 
     /// Create new FileCreator with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             software_version: u16::MAX,
             hardware_version: u8::MAX,

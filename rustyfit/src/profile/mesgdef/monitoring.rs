@@ -8,6 +8,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -150,7 +151,7 @@ impl Monitoring {
     pub const PUSHES: u8 = 41;
 
     /// Create new Monitoring with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             device_index: typedef::DeviceIndex(u8::MAX),
@@ -468,14 +469,14 @@ impl From<&Message> for Monitoring {
                 15 => v.temperature_max = field.value.as_i16(),
                 16 => {
                     v.activity_time = match &field.value {
-                        Value::VecUint16(v) => {
+                        Value::ArrayUint16(v) => {
                             let mut arr = [u16::MAX; 8];
                             for (i, x) in v.iter().take(8).enumerate() {
                                 arr[i] = *x;
                             }
                             arr
                         }
-                        _ => [u16::MAX; 8],
+                        _ => Default::default(),
                     }
                 }
                 19 => v.active_calories = field.value.as_u16(),
@@ -642,7 +643,7 @@ impl From<Monitoring> for Message {
             fields.push(Field {
                 num: 16,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(Vec::from(&m.activity_time)),
+                value: Value::ArrayUint16(Box::from(m.activity_time)),
                 is_expanded: false,
             });
         };

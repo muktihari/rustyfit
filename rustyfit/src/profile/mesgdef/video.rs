@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -16,8 +15,8 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct Video {
-    pub url: String,
-    pub hosting_provider: String,
+    pub url: Box<str>,
+    pub hosting_provider: Box<str>,
     /// Units: ms; Playback time of video
     pub duration: u32,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -27,18 +26,18 @@ pub struct Video {
 }
 
 impl Video {
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const URL: u8 = 0;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const HOSTING_PROVIDER: u8 = 1;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
     pub const DURATION: u8 = 2;
 
     /// Create new Video with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            url: String::new(),
-            hosting_provider: String::new(),
+            url: Box::from(""),
+            hosting_provider: Box::from(""),
             duration: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -73,8 +72,8 @@ impl From<&Message> for Video {
 
         for field in &mesg.fields {
             match field.num {
-                0 => v.url = field.value.as_str().to_owned(),
-                1 => v.hosting_provider = field.value.as_str().to_owned(),
+                0 => v.url = Box::from(field.value.as_str()),
+                1 => v.hosting_provider = Box::from(field.value.as_str()),
                 2 => v.duration = field.value.as_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -155,8 +154,8 @@ impl Serialize for Video {
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
-    url: String,
-    hosting_provider: String,
+    url: Box<str>,
+    hosting_provider: Box<str>,
     duration: u32,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -179,8 +178,8 @@ impl From<De> for Video {
 impl Default for De {
     fn default() -> Self {
         Self {
-            url: String::new(),
-            hosting_provider: String::new(),
+            url: Box::from(""),
+            hosting_provider: Box::from(""),
             duration: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

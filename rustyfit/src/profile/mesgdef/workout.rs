@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -22,13 +21,13 @@ pub struct Workout {
     pub capabilities: typedef::WorkoutCapabilities,
     /// number of valid steps
     pub num_valid_steps: u16,
-    pub wkt_name: String,
+    pub wkt_name: Box<str>,
     pub sub_sport: typedef::SubSport,
     /// Scale: 100; Units: m
     pub pool_length: u16,
     pub pool_length_unit: typedef::DisplayMeasure,
     /// Description of the workout
-    pub wkt_description: String,
+    pub wkt_description: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -44,7 +43,7 @@ impl Workout {
     pub const CAPABILITIES: u8 = 5;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUM_VALID_STEPS: u8 = 6;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const WKT_NAME: u8 = 8;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 11;
@@ -52,21 +51,21 @@ impl Workout {
     pub const POOL_LENGTH: u8 = 14;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::DisplayMeasure
     pub const POOL_LENGTH_UNIT: u8 = 15;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const WKT_DESCRIPTION: u8 = 17;
 
     /// Create new Workout with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             sport: typedef::Sport(u8::MAX),
             capabilities: typedef::WorkoutCapabilities(u32::MIN),
             num_valid_steps: u16::MAX,
-            wkt_name: String::new(),
+            wkt_name: Box::from(""),
             sub_sport: typedef::SubSport(u8::MAX),
             pool_length: u16::MAX,
             pool_length_unit: typedef::DisplayMeasure(u8::MAX),
-            wkt_description: String::new(),
+            wkt_description: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -131,11 +130,11 @@ impl From<&Message> for Workout {
                 4 => v.sport = typedef::Sport(field.value.as_u8()),
                 5 => v.capabilities = typedef::WorkoutCapabilities(field.value.as_u32z()),
                 6 => v.num_valid_steps = field.value.as_u16(),
-                8 => v.wkt_name = field.value.as_str().to_owned(),
+                8 => v.wkt_name = Box::from(field.value.as_str()),
                 11 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
                 14 => v.pool_length = field.value.as_u16(),
                 15 => v.pool_length_unit = typedef::DisplayMeasure(field.value.as_u8()),
-                17 => v.wkt_description = field.value.as_str().to_owned(),
+                17 => v.wkt_description = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -285,11 +284,11 @@ struct De {
     sport: typedef::Sport,
     capabilities: typedef::WorkoutCapabilities,
     num_valid_steps: u16,
-    wkt_name: String,
+    wkt_name: Box<str>,
     sub_sport: typedef::SubSport,
     pool_length: f64,
     pool_length_unit: typedef::DisplayMeasure,
-    wkt_description: String,
+    wkt_description: Box<str>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -328,11 +327,11 @@ impl Default for De {
             sport: typedef::Sport(u8::MAX),
             capabilities: typedef::WorkoutCapabilities(u32::MIN),
             num_valid_steps: u16::MAX,
-            wkt_name: String::new(),
+            wkt_name: Box::from(""),
             sub_sport: typedef::SubSport(u8::MAX),
             pool_length: f64::from_bits(u64::MAX),
             pool_length_unit: typedef::DisplayMeasure(u8::MAX),
-            wkt_description: String::new(),
+            wkt_description: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

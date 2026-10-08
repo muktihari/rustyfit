@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,14 +18,14 @@ pub struct FieldDescription {
     pub developer_data_index: u8,
     pub field_definition_number: u8,
     pub fit_base_type_id: typedef::FitBaseType,
-    pub field_name: Vec<String>,
+    pub field_name: Box<[Box<str>]>,
     pub array: u8,
-    pub components: String,
+    pub components: Box<str>,
     pub scale: u8,
     pub offset: i8,
-    pub units: Vec<String>,
-    pub bits: String,
-    pub accumulate: String,
+    pub units: Box<[Box<str>]>,
+    pub bits: Box<str>,
+    pub accumulate: Box<str>,
     pub fit_base_unit_id: typedef::FitBaseUnit,
     pub native_mesg_num: typedef::MesgNum,
     pub native_field_num: u8,
@@ -41,21 +40,21 @@ impl FieldDescription {
     pub const FIELD_DEFINITION_NUMBER: u8 = 1;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::FitBaseType
     pub const FIT_BASE_TYPE_ID: u8 = 2;
-    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<[Box<str>]>`; FitBaseType::STRING; ProfileType::String
     pub const FIELD_NAME: u8 = 3;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const ARRAY: u8 = 4;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const COMPONENTS: u8 = 5;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const SCALE: u8 = 6;
     /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8
     pub const OFFSET: u8 = 7;
-    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<[Box<str>]>`; FitBaseType::STRING; ProfileType::String
     pub const UNITS: u8 = 8;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const BITS: u8 = 9;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const ACCUMULATE: u8 = 10;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::FitBaseUnit
     pub const FIT_BASE_UNIT_ID: u8 = 13;
@@ -65,19 +64,19 @@ impl FieldDescription {
     pub const NATIVE_FIELD_NUM: u8 = 15;
 
     /// Create new FieldDescription with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             developer_data_index: u8::MAX,
             field_definition_number: u8::MAX,
             fit_base_type_id: typedef::FitBaseType(u8::MAX),
-            field_name: Vec::new(),
+            field_name: Box::new([]),
             array: u8::MAX,
-            components: String::new(),
+            components: Box::from(""),
             scale: u8::MAX,
             offset: i8::MAX,
-            units: Vec::new(),
-            bits: String::new(),
-            accumulate: String::new(),
+            units: Box::new([]),
+            bits: Box::from(""),
+            accumulate: Box::from(""),
             fit_base_unit_id: typedef::FitBaseUnit(u16::MAX),
             native_mesg_num: typedef::MesgNum(u16::MAX),
             native_field_num: u8::MAX,
@@ -126,14 +125,14 @@ impl From<&Message> for FieldDescription {
                 0 => v.developer_data_index = field.value.as_u8(),
                 1 => v.field_definition_number = field.value.as_u8(),
                 2 => v.fit_base_type_id = typedef::FitBaseType(field.value.as_u8()),
-                3 => v.field_name = field.value.to_vec_string(),
+                3 => v.field_name = field.value.to_array_string(),
                 4 => v.array = field.value.as_u8(),
-                5 => v.components = field.value.as_str().to_owned(),
+                5 => v.components = Box::from(field.value.as_str()),
                 6 => v.scale = field.value.as_u8(),
                 7 => v.offset = field.value.as_i8(),
-                8 => v.units = field.value.to_vec_string(),
-                9 => v.bits = field.value.as_str().to_owned(),
-                10 => v.accumulate = field.value.as_str().to_owned(),
+                8 => v.units = field.value.to_array_string(),
+                9 => v.bits = Box::from(field.value.as_str()),
+                10 => v.accumulate = Box::from(field.value.as_str()),
                 13 => v.fit_base_unit_id = typedef::FitBaseUnit(field.value.as_u16()),
                 14 => v.native_mesg_num = typedef::MesgNum(field.value.as_u16()),
                 15 => v.native_field_num = field.value.as_u8(),
@@ -178,7 +177,7 @@ impl From<FieldDescription> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::STRING,
-                value: Value::VecString(m.field_name),
+                value: Value::ArrayString(m.field_name),
                 is_expanded: false,
             });
         };
@@ -218,7 +217,7 @@ impl From<FieldDescription> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::STRING,
-                value: Value::VecString(m.units),
+                value: Value::ArrayString(m.units),
                 is_expanded: false,
             });
         };
@@ -337,14 +336,14 @@ struct De {
     developer_data_index: u8,
     field_definition_number: u8,
     fit_base_type_id: typedef::FitBaseType,
-    field_name: Vec<String>,
+    field_name: Box<[Box<str>]>,
     array: u8,
-    components: String,
+    components: Box<str>,
     scale: u8,
     offset: i8,
-    units: Vec<String>,
-    bits: String,
-    accumulate: String,
+    units: Box<[Box<str>]>,
+    bits: Box<str>,
+    accumulate: Box<str>,
     fit_base_unit_id: typedef::FitBaseUnit,
     native_mesg_num: typedef::MesgNum,
     native_field_num: u8,
@@ -381,14 +380,14 @@ impl Default for De {
             developer_data_index: u8::MAX,
             field_definition_number: u8::MAX,
             fit_base_type_id: typedef::FitBaseType(u8::MAX),
-            field_name: Vec::new(),
+            field_name: Box::new([]),
             array: u8::MAX,
-            components: String::new(),
+            components: Box::from(""),
             scale: u8::MAX,
             offset: i8::MAX,
-            units: Vec::new(),
-            bits: String::new(),
-            accumulate: String::new(),
+            units: Box::new([]),
+            bits: Box::from(""),
+            accumulate: Box::from(""),
             fit_base_unit_id: typedef::FitBaseUnit(u16::MAX),
             native_mesg_num: typedef::MesgNum(u16::MAX),
             native_field_num: u8::MAX,

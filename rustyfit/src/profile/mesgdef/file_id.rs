@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -26,7 +25,7 @@ pub struct FileId {
     /// Only set for files that are not created/erased.
     pub number: u16,
     /// Optional free form string to indicate the devices name or model
-    pub product_name: String,
+    pub product_name: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
 }
@@ -44,11 +43,11 @@ impl FileId {
     pub const TIME_CREATED: u8 = 4;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const NUMBER: u8 = 5;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const PRODUCT_NAME: u8 = 8;
 
     /// Create new FileId with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             r#type: typedef::File(u8::MAX),
             manufacturer: typedef::Manufacturer(u16::MAX),
@@ -56,7 +55,7 @@ impl FileId {
             serial_number: u32::MIN,
             time_created: typedef::DateTime(u32::MAX),
             number: u16::MAX,
-            product_name: String::new(),
+            product_name: Box::from(""),
             unknown_fields: Vec::new(),
         }
     }
@@ -98,7 +97,7 @@ impl From<&Message> for FileId {
                 3 => v.serial_number = field.value.as_u32z(),
                 4 => v.time_created = typedef::DateTime(field.value.as_u32()),
                 5 => v.number = field.value.as_u16(),
-                8 => v.product_name = field.value.as_str().to_owned(),
+                8 => v.product_name = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -225,7 +224,7 @@ struct De {
     serial_number: u32,
     time_created: Option<i64>,
     number: u16,
-    product_name: String,
+    product_name: Box<str>,
     unknown_fields: Vec<Field>,
 }
 
@@ -258,7 +257,7 @@ impl Default for De {
             serial_number: u32::MIN,
             time_created: None,
             number: u16::MAX,
-            product_name: String::new(),
+            product_name: Box::from(""),
             unknown_fields: Vec::new(),
         }
     }

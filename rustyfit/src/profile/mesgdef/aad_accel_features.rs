@@ -46,7 +46,7 @@ impl AadAccelFeatures {
     pub const TIME_ABOVE_THRESHOLD: u8 = 4;
 
     /// Create new AadAccelFeatures with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             time: u16::MAX,

@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,23 +20,23 @@ pub struct AviationAttitude {
     /// Units: ms; Fractional part of timestamp, added to timestamp
     pub timestamp_ms: u16,
     /// Units: ms; System time associated with sample expressed in ms.
-    pub system_time: Vec<u32>,
+    pub system_time: Box<[u32]>,
     /// Scale: 10430.38; Units: radians; Range -PI/2 to +PI/2
-    pub pitch: Vec<i16>,
+    pub pitch: Box<[i16]>,
     /// Scale: 10430.38; Units: radians; Range -PI to +PI
-    pub roll: Vec<i16>,
+    pub roll: Box<[i16]>,
     /// Scale: 100; Units: m/s^2; Range -78.4 to +78.4 (-8 Gs to 8 Gs)
-    pub accel_lateral: Vec<i16>,
+    pub accel_lateral: Box<[i16]>,
     /// Scale: 100; Units: m/s^2; Range -78.4 to +78.4 (-8 Gs to 8 Gs)
-    pub accel_normal: Vec<i16>,
+    pub accel_normal: Box<[i16]>,
     /// Scale: 1024; Units: radians/second; Range -8.727 to +8.727 (-500 degs/sec to +500 degs/sec)
-    pub turn_rate: Vec<i16>,
-    pub stage: Vec<typedef::AttitudeStage>,
+    pub turn_rate: Box<[i16]>,
+    pub stage: Box<[typedef::AttitudeStage]>,
     /// Units: %; The percent complete of the current attitude stage. Set to 0 for attitude stages 0, 1 and 2 and to 100 for attitude stage 3 by AHRS modules that do not support it. Range - 100
-    pub attitude_stage_complete: Vec<u8>,
+    pub attitude_stage_complete: Box<[u8]>,
     /// Scale: 10430.38; Units: radians; Track Angle/Heading Range 0 - 2pi
-    pub track: Vec<u16>,
-    pub validity: Vec<typedef::AttitudeValidity>,
+    pub track: Box<[u16]>,
+    pub validity: Box<[typedef::AttitudeValidity]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -47,42 +48,42 @@ impl AviationAttitude {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `ms`
     pub const SYSTEM_TIME: u8 = 1;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `10430.38`; Units: `radians`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `10430.38`; Units: `radians`
     pub const PITCH: u8 = 2;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `10430.38`; Units: `radians`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `10430.38`; Units: `radians`
     pub const ROLL: u8 = 3;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s^2`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s^2`
     pub const ACCEL_LATERAL: u8 = 4;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s^2`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `m/s^2`
     pub const ACCEL_NORMAL: u8 = 5;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1024`; Units: `radians/second`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1024`; Units: `radians/second`
     pub const TURN_RATE: u8 = 6;
-    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::AttitudeStage
+    /// Value's type: `Box<[u8]>`; FitBaseType::ENUM; ProfileType::AttitudeStage
     pub const STAGE: u8 = 7;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `%`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `%`
     pub const ATTITUDE_STAGE_COMPLETE: u8 = 8;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10430.38`; Units: `radians`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `10430.38`; Units: `radians`
     pub const TRACK: u8 = 9;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::AttitudeValidity
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::AttitudeValidity
     pub const VALIDITY: u8 = 10;
 
     /// Create new AviationAttitude with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            system_time: Vec::new(),
-            pitch: Vec::new(),
-            roll: Vec::new(),
-            accel_lateral: Vec::new(),
-            accel_normal: Vec::new(),
-            turn_rate: Vec::new(),
-            stage: Vec::new(),
-            attitude_stage_complete: Vec::new(),
-            track: Vec::new(),
-            validity: Vec::new(),
+            system_time: Box::new([]),
+            pitch: Box::new([]),
+            roll: Box::new([]),
+            accel_lateral: Box::new([]),
+            accel_normal: Box::new([]),
+            turn_rate: Box::new([]),
+            stage: Box::new([]),
+            attitude_stage_complete: Box::new([]),
+            track: Box::new([]),
+            validity: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -104,18 +105,20 @@ impl AviationAttitude {
 
     /// Set `pitch` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_pitch_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.pitch = Vec::with_capacity(v.len());
+        self.pitch = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10430.38;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.pitch.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.pitch.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.pitch = vals.into_boxed_slice();
         self
     }
 
@@ -135,18 +138,20 @@ impl AviationAttitude {
 
     /// Set `roll` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_roll_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.roll = Vec::with_capacity(v.len());
+        self.roll = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10430.38;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.roll.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.roll.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.roll = vals.into_boxed_slice();
         self
     }
 
@@ -166,18 +171,20 @@ impl AviationAttitude {
 
     /// Set `accel_lateral` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_accel_lateral_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.accel_lateral = Vec::with_capacity(v.len());
+        self.accel_lateral = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.accel_lateral.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.accel_lateral.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.accel_lateral = vals.into_boxed_slice();
         self
     }
 
@@ -197,18 +204,20 @@ impl AviationAttitude {
 
     /// Set `accel_normal` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_accel_normal_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.accel_normal = Vec::with_capacity(v.len());
+        self.accel_normal = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.accel_normal.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.accel_normal.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.accel_normal = vals.into_boxed_slice();
         self
     }
 
@@ -228,18 +237,20 @@ impl AviationAttitude {
 
     /// Set `turn_rate` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_turn_rate_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.turn_rate = Vec::with_capacity(v.len());
+        self.turn_rate = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1024.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.turn_rate.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.turn_rate.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.turn_rate = vals.into_boxed_slice();
         self
     }
 
@@ -259,18 +270,20 @@ impl AviationAttitude {
 
     /// Set `track` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_track_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.track = Vec::with_capacity(v.len());
+        self.track = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 10430.38;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.track.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.track.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.track = vals.into_boxed_slice();
         self
     }
 
@@ -313,32 +326,32 @@ impl From<&Message> for AviationAttitude {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.system_time = field.value.to_vec_u32(),
-                2 => v.pitch = field.value.to_vec_i16(),
-                3 => v.roll = field.value.to_vec_i16(),
-                4 => v.accel_lateral = field.value.to_vec_i16(),
-                5 => v.accel_normal = field.value.to_vec_i16(),
-                6 => v.turn_rate = field.value.to_vec_i16(),
+                1 => v.system_time = field.value.to_array_u32(),
+                2 => v.pitch = field.value.to_array_i16(),
+                3 => v.roll = field.value.to_array_i16(),
+                4 => v.accel_lateral = field.value.to_array_i16(),
+                5 => v.accel_normal = field.value.to_array_i16(),
+                6 => v.turn_rate = field.value.to_array_i16(),
                 7 => {
                     v.stage = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::AttitudeStage(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
-                8 => v.attitude_stage_complete = field.value.to_vec_u8(),
-                9 => v.track = field.value.to_vec_u16(),
+                8 => v.attitude_stage_complete = field.value.to_array_u8(),
+                9 => v.track = field.value.to_array_u16(),
                 10 => {
                     v.validity = match &field.value {
-                        Value::VecUint16(v) => {
+                        Value::ArrayUint16(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::AttitudeValidity(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
                 _ => v.unknown_fields.push(field.clone()),
@@ -374,7 +387,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.system_time),
+                value: Value::ArrayUint32(m.system_time),
                 is_expanded: false,
             });
         };
@@ -382,7 +395,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.pitch),
+                value: Value::ArrayInt16(m.pitch),
                 is_expanded: false,
             });
         };
@@ -390,7 +403,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.roll),
+                value: Value::ArrayInt16(m.roll),
                 is_expanded: false,
             });
         };
@@ -398,7 +411,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.accel_lateral),
+                value: Value::ArrayInt16(m.accel_lateral),
                 is_expanded: false,
             });
         };
@@ -406,7 +419,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.accel_normal),
+                value: Value::ArrayInt16(m.accel_normal),
                 is_expanded: false,
             });
         };
@@ -414,7 +427,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 6,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.turn_rate),
+                value: Value::ArrayInt16(m.turn_rate),
                 is_expanded: false,
             });
         };
@@ -422,9 +435,10 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::ENUM,
-                value: Value::VecUint8({
-                    let (ptr, len, capacity) = m.stage.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
+                value: Value::ArrayUint8({
+                    let (ptr, len, capacity) = m.stage.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -433,7 +447,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.attitude_stage_complete),
+                value: Value::ArrayUint8(m.attitude_stage_complete),
                 is_expanded: false,
             });
         };
@@ -441,7 +455,7 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 9,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.track),
+                value: Value::ArrayUint16(m.track),
                 is_expanded: false,
             });
         };
@@ -449,9 +463,10 @@ impl From<AviationAttitude> for Message {
             fields.push(Field {
                 num: 10,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16({
-                    let (ptr, len, capacity) = m.validity.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
+                value: Value::ArrayUint16({
+                    let (ptr, len, capacity) = m.validity.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -527,16 +542,16 @@ impl Serialize for AviationAttitude {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    system_time: Vec<u32>,
-    pitch: Vec<f64>,
-    roll: Vec<f64>,
-    accel_lateral: Vec<f64>,
-    accel_normal: Vec<f64>,
-    turn_rate: Vec<f64>,
-    stage: Vec<typedef::AttitudeStage>,
-    attitude_stage_complete: Vec<u8>,
-    track: Vec<f64>,
-    validity: Vec<typedef::AttitudeValidity>,
+    system_time: Box<[u32]>,
+    pitch: Box<[f64]>,
+    roll: Box<[f64]>,
+    accel_lateral: Box<[f64]>,
+    accel_normal: Box<[f64]>,
+    turn_rate: Box<[f64]>,
+    stage: Box<[typedef::AttitudeStage]>,
+    attitude_stage_complete: Box<[u8]>,
+    track: Box<[f64]>,
+    validity: Box<[typedef::AttitudeValidity]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -553,7 +568,7 @@ impl From<De> for AviationAttitude {
             system_time: m.system_time,
             pitch: {
                 if m.pitch.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.pitch.len());
                     for &x in m.pitch.iter() {
@@ -565,12 +580,12 @@ impl From<De> for AviationAttitude {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             roll: {
                 if m.roll.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.roll.len());
                     for &x in m.roll.iter() {
@@ -582,12 +597,12 @@ impl From<De> for AviationAttitude {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             accel_lateral: {
                 if m.accel_lateral.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.accel_lateral.len());
                     for &x in m.accel_lateral.iter() {
@@ -599,12 +614,12 @@ impl From<De> for AviationAttitude {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             accel_normal: {
                 if m.accel_normal.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.accel_normal.len());
                     for &x in m.accel_normal.iter() {
@@ -616,12 +631,12 @@ impl From<De> for AviationAttitude {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             turn_rate: {
                 if m.turn_rate.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.turn_rate.len());
                     for &x in m.turn_rate.iter() {
@@ -633,14 +648,14 @@ impl From<De> for AviationAttitude {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             stage: m.stage,
             attitude_stage_complete: m.attitude_stage_complete,
             track: {
                 if m.track.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.track.len());
                     for &x in m.track.iter() {
@@ -652,7 +667,7 @@ impl From<De> for AviationAttitude {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             validity: m.validity,
@@ -668,16 +683,16 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            system_time: Vec::new(),
-            pitch: Vec::new(),
-            roll: Vec::new(),
-            accel_lateral: Vec::new(),
-            accel_normal: Vec::new(),
-            turn_rate: Vec::new(),
-            stage: Vec::new(),
-            attitude_stage_complete: Vec::new(),
-            track: Vec::new(),
-            validity: Vec::new(),
+            system_time: Box::new([]),
+            pitch: Box::new([]),
+            roll: Box::new([]),
+            accel_lateral: Box::new([]),
+            accel_normal: Box::new([]),
+            turn_rate: Box::new([]),
+            stage: Box::new([]),
+            attitude_stage_complete: Box::new([]),
+            track: Box::new([]),
+            validity: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

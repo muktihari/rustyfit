@@ -41,7 +41,7 @@ impl AntChannelId {
     pub const DEVICE_INDEX: u8 = 4;
 
     /// Create new AntChannelId with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             channel_number: u8::MAX,
             device_type: u8::MIN,

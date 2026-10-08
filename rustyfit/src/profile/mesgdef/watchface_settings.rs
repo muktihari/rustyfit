@@ -32,7 +32,7 @@ impl WatchfaceSettings {
     pub const LAYOUT: u8 = 1;
 
     /// Create new WatchfaceSettings with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             mode: typedef::WatchfaceMode(u8::MAX),

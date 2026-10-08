@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +19,7 @@ pub struct BeatIntervals {
     /// Units: ms; Milliseconds past date_time
     pub timestamp_ms: u16,
     /// Units: ms; Array of millisecond times between beats
-    pub time: Vec<u16>,
+    pub time: Box<[u16]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -30,15 +31,15 @@ impl BeatIntervals {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIME: u8 = 1;
 
     /// Create new BeatIntervals with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            time: Vec::new(),
+            time: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -74,7 +75,7 @@ impl From<&Message> for BeatIntervals {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.time = field.value.to_vec_u16(),
+                1 => v.time = field.value.to_array_u16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -108,7 +109,7 @@ impl From<BeatIntervals> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.time),
+                value: Value::ArrayUint16(m.time),
                 is_expanded: false,
             });
         };
@@ -156,7 +157,7 @@ impl Serialize for BeatIntervals {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    time: Vec<u16>,
+    time: Box<[u16]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -183,7 +184,7 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            time: Vec::new(),
+            time: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

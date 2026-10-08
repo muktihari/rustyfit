@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -21,11 +22,11 @@ pub struct HsaAccelerometerData {
     /// Units: ms; Sampling Interval in Milliseconds
     pub sampling_interval: u16,
     /// Scale: 1.024; Units: mG; X-Axis Measurement
-    pub accel_x: Vec<i16>,
+    pub accel_x: Box<[i16]>,
     /// Scale: 1.024; Units: mG; Y-Axis Measurement
-    pub accel_y: Vec<i16>,
+    pub accel_y: Box<[i16]>,
     /// Scale: 1.024; Units: mG; Z-Axis Measurement
-    pub accel_z: Vec<i16>,
+    pub accel_z: Box<[i16]>,
     /// 32 kHz timestamp
     pub timestamp_32k: u32,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -41,24 +42,24 @@ impl HsaAccelerometerData {
     pub const TIMESTAMP_MS: u8 = 0;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLING_INTERVAL: u8 = 1;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1.024`; Units: `mG`
     pub const ACCEL_Z: u8 = 4;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaAccelerometerData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
             sampling_interval: u16::MAX,
-            accel_x: Vec::new(),
-            accel_y: Vec::new(),
-            accel_z: Vec::new(),
+            accel_x: Box::new([]),
+            accel_y: Box::new([]),
+            accel_z: Box::new([]),
             timestamp_32k: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -81,18 +82,20 @@ impl HsaAccelerometerData {
 
     /// Set `accel_x` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_accel_x_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.accel_x = Vec::with_capacity(v.len());
+        self.accel_x = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1.024;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.accel_x.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.accel_x.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.accel_x = vals.into_boxed_slice();
         self
     }
 
@@ -112,18 +115,20 @@ impl HsaAccelerometerData {
 
     /// Set `accel_y` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_accel_y_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.accel_y = Vec::with_capacity(v.len());
+        self.accel_y = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1.024;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.accel_y.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.accel_y.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.accel_y = vals.into_boxed_slice();
         self
     }
 
@@ -143,18 +148,20 @@ impl HsaAccelerometerData {
 
     /// Set `accel_z` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_accel_z_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.accel_z = Vec::with_capacity(v.len());
+        self.accel_z = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1.024;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.accel_z.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.accel_z.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.accel_z = vals.into_boxed_slice();
         self
     }
 
@@ -193,9 +200,9 @@ impl From<&Message> for HsaAccelerometerData {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
                 1 => v.sampling_interval = field.value.as_u16(),
-                2 => v.accel_x = field.value.to_vec_i16(),
-                3 => v.accel_y = field.value.to_vec_i16(),
-                4 => v.accel_z = field.value.to_vec_i16(),
+                2 => v.accel_x = field.value.to_array_i16(),
+                3 => v.accel_y = field.value.to_array_i16(),
+                4 => v.accel_z = field.value.to_array_i16(),
                 5 => v.timestamp_32k = field.value.as_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -238,7 +245,7 @@ impl From<HsaAccelerometerData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.accel_x),
+                value: Value::ArrayInt16(m.accel_x),
                 is_expanded: false,
             });
         };
@@ -246,7 +253,7 @@ impl From<HsaAccelerometerData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.accel_y),
+                value: Value::ArrayInt16(m.accel_y),
                 is_expanded: false,
             });
         };
@@ -254,7 +261,7 @@ impl From<HsaAccelerometerData> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.accel_z),
+                value: Value::ArrayInt16(m.accel_z),
                 is_expanded: false,
             });
         };
@@ -323,9 +330,9 @@ struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
     sampling_interval: u16,
-    accel_x: Vec<f64>,
-    accel_y: Vec<f64>,
-    accel_z: Vec<f64>,
+    accel_x: Box<[f64]>,
+    accel_y: Box<[f64]>,
+    accel_z: Box<[f64]>,
     timestamp_32k: u32,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -343,7 +350,7 @@ impl From<De> for HsaAccelerometerData {
             sampling_interval: m.sampling_interval,
             accel_x: {
                 if m.accel_x.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.accel_x.len());
                     for &x in m.accel_x.iter() {
@@ -355,12 +362,12 @@ impl From<De> for HsaAccelerometerData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             accel_y: {
                 if m.accel_y.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.accel_y.len());
                     for &x in m.accel_y.iter() {
@@ -372,12 +379,12 @@ impl From<De> for HsaAccelerometerData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             accel_z: {
                 if m.accel_z.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.accel_z.len());
                     for &x in m.accel_z.iter() {
@@ -389,7 +396,7 @@ impl From<De> for HsaAccelerometerData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             timestamp_32k: m.timestamp_32k,
@@ -406,9 +413,9 @@ impl Default for De {
             timestamp: None,
             timestamp_ms: u16::MAX,
             sampling_interval: u16::MAX,
-            accel_x: Vec::new(),
-            accel_y: Vec::new(),
-            accel_z: Vec::new(),
+            accel_x: Box::new([]),
+            accel_y: Box::new([]),
+            accel_z: Box::new([]),
             timestamp_32k: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

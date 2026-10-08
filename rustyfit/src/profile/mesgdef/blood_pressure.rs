@@ -65,7 +65,7 @@ impl BloodPressure {
     pub const USER_PROFILE_INDEX: u8 = 9;
 
     /// Create new BloodPressure with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             systolic_pressure: u16::MAX,

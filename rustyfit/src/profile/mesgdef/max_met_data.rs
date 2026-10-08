@@ -52,7 +52,7 @@ impl MaxMetData {
     pub const SPEED_SOURCE: u8 = 13;
 
     /// Create new MaxMetData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             update_time: typedef::DateTime(u32::MAX),
             vo2_max: u16::MAX,

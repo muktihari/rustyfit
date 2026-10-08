@@ -39,7 +39,7 @@ impl DeviceAuxBatteryInfo {
     pub const BATTERY_IDENTIFIER: u8 = 3;
 
     /// Create new DeviceAuxBatteryInfo with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             device_index: typedef::DeviceIndex(u8::MAX),

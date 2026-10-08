@@ -73,7 +73,7 @@ impl Jump {
     pub const ENHANCED_SPEED: u8 = 8;
 
     /// Create new Jump with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             distance: f32::from_bits(u32::MAX),

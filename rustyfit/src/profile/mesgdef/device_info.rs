@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -35,7 +34,7 @@ pub struct DeviceInfo {
     /// Indicates the location of the sensor
     pub sensor_position: typedef::BodyLocation,
     /// Used to describe the sensor or location
-    pub descriptor: String,
+    pub descriptor: Box<str>,
     /// Base: UINT8Z
     pub ant_transmission_type: u8,
     /// Base: UINT16Z
@@ -43,7 +42,7 @@ pub struct DeviceInfo {
     pub ant_network: typedef::AntNetwork,
     pub source_type: typedef::SourceType,
     /// Optional free form string to indicate the devices name or model
-    pub product_name: String,
+    pub product_name: Box<str>,
     /// Units: %
     pub battery_level: u8,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -77,7 +76,7 @@ impl DeviceInfo {
     pub const BATTERY_STATUS: u8 = 11;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::BodyLocation
     pub const SENSOR_POSITION: u8 = 18;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const DESCRIPTOR: u8 = 19;
     /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const ANT_TRANSMISSION_TYPE: u8 = 20;
@@ -87,13 +86,13 @@ impl DeviceInfo {
     pub const ANT_NETWORK: u8 = 22;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SourceType
     pub const SOURCE_TYPE: u8 = 25;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const PRODUCT_NAME: u8 = 27;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `%`
     pub const BATTERY_LEVEL: u8 = 32;
 
     /// Create new DeviceInfo with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             device_index: typedef::DeviceIndex(u8::MAX),
@@ -107,12 +106,12 @@ impl DeviceInfo {
             battery_voltage: u16::MAX,
             battery_status: typedef::BatteryStatus(u8::MAX),
             sensor_position: typedef::BodyLocation(u8::MAX),
-            descriptor: String::new(),
+            descriptor: Box::from(""),
             ant_transmission_type: u8::MIN,
             ant_device_number: u16::MIN,
             ant_network: typedef::AntNetwork(u8::MAX),
             source_type: typedef::SourceType(u8::MAX),
-            product_name: String::new(),
+            product_name: Box::from(""),
             battery_level: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -215,12 +214,12 @@ impl From<&Message> for DeviceInfo {
                 10 => v.battery_voltage = field.value.as_u16(),
                 11 => v.battery_status = typedef::BatteryStatus(field.value.as_u8()),
                 18 => v.sensor_position = typedef::BodyLocation(field.value.as_u8()),
-                19 => v.descriptor = field.value.as_str().to_owned(),
+                19 => v.descriptor = Box::from(field.value.as_str()),
                 20 => v.ant_transmission_type = field.value.as_u8z(),
                 21 => v.ant_device_number = field.value.as_u16z(),
                 22 => v.ant_network = typedef::AntNetwork(field.value.as_u8()),
                 25 => v.source_type = typedef::SourceType(field.value.as_u8()),
-                27 => v.product_name = field.value.as_str().to_owned(),
+                27 => v.product_name = Box::from(field.value.as_str()),
                 32 => v.battery_level = field.value.as_u8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -489,12 +488,12 @@ struct De {
     battery_voltage: f64,
     battery_status: typedef::BatteryStatus,
     sensor_position: typedef::BodyLocation,
-    descriptor: String,
+    descriptor: Box<str>,
     ant_transmission_type: u8,
     ant_device_number: u16,
     ant_network: typedef::AntNetwork,
     source_type: typedef::SourceType,
-    product_name: String,
+    product_name: Box<str>,
     battery_level: u8,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -562,12 +561,12 @@ impl Default for De {
             battery_voltage: f64::from_bits(u64::MAX),
             battery_status: typedef::BatteryStatus(u8::MAX),
             sensor_position: typedef::BodyLocation(u8::MAX),
-            descriptor: String::new(),
+            descriptor: Box::from(""),
             ant_transmission_type: u8::MIN,
             ant_device_number: u16::MIN,
             ant_network: typedef::AntNetwork(u8::MAX),
             source_type: typedef::SourceType(u8::MAX),
-            product_name: String::new(),
+            product_name: Box::from(""),
             battery_level: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

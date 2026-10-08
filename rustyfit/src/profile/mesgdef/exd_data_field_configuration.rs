@@ -8,8 +8,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -31,7 +30,7 @@ pub struct ExdDataFieldConfiguration {
     pub concept_count: u8,
     pub display_type: typedef::ExdDisplayType,
     /// Array: \[32\]
-    pub title: [String; 32],
+    pub title: [Box<str>; 32],
     state: [u8; 1], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -50,18 +49,18 @@ impl ExdDataFieldConfiguration {
     pub const CONCEPT_COUNT: u8 = 3;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::ExdDisplayType
     pub const DISPLAY_TYPE: u8 = 4;
-    /// Value's type: `[String; 32]`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `[Box<str>; 32]`; FitBaseType::STRING; ProfileType::String
     pub const TITLE: u8 = 5;
 
     /// Create new ExdDataFieldConfiguration with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             screen_index: u8::MAX,
             concept_field: u8::MAX,
             field_id: u8::MAX,
             concept_count: u8::MAX,
             display_type: typedef::ExdDisplayType(u8::MAX),
-            title: [const { String::new() }; 32],
+            title: <[Box<str>; 32]>::default(),
             state: [0u8; 1],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -94,7 +93,7 @@ impl ExdDataFieldConfiguration {
             + (self.field_id != u8::MAX) as usize
             + (self.concept_count != u8::MAX) as usize
             + (self.display_type.0 != u8::MAX) as usize
-            + (self.title != [const { String::new() }; 32]) as usize
+            + (self.title != <[Box<str>; 32]>::default()) as usize
     }
 }
 
@@ -126,14 +125,14 @@ impl From<&Message> for ExdDataFieldConfiguration {
                 4 => v.display_type = typedef::ExdDisplayType(field.value.as_u8()),
                 5 => {
                     v.title = match &field.value {
-                        Value::VecString(v) => {
-                            let mut arr = [const { String::new() }; 32];
+                        Value::ArrayString(v) => {
+                            let mut arr: [Box<str>; 32] = Default::default();
                             for (i, x) in v.iter().take(32).enumerate() {
-                                arr[i] = x.to_owned();
+                                arr[i] = x.clone();
                             }
                             arr
                         }
-                        _ => [const { String::new() }; 32],
+                        _ => Default::default(),
                     }
                 }
                 _ => {
@@ -195,11 +194,11 @@ impl From<ExdDataFieldConfiguration> for Message {
                 is_expanded: false,
             });
         };
-        if m.title != [const { String::new() }; 32] {
+        if m.title != <[Box<str>; 32]>::default() {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::STRING,
-                value: Value::VecString(Vec::from(&m.title)),
+                value: Value::ArrayString(Box::from(m.title)),
                 is_expanded: false,
             });
         };
@@ -238,7 +237,7 @@ impl Serialize for ExdDataFieldConfiguration {
         if self.display_type.0 != u8::MAX {
             state.serialize_field("display_type", &self.display_type)?;
         }
-        if self.title != [const { String::new() }; 32] {
+        if self.title != <[Box<str>; 32]>::default() {
             state.serialize_field("title", &self.title)?;
         }
         if !self.unknown_fields.is_empty() {
@@ -259,7 +258,7 @@ struct De {
     field_id: u8,
     concept_count: u8,
     display_type: typedef::ExdDisplayType,
-    title: [String; 32],
+    title: [Box<str>; 32],
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -290,7 +289,7 @@ impl Default for De {
             field_id: u8::MAX,
             concept_count: u8::MAX,
             display_type: typedef::ExdDisplayType(u8::MAX),
-            title: [const { String::new() }; 32],
+            title: <[Box<str>; 32]>::default(),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

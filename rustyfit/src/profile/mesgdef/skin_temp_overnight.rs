@@ -41,7 +41,7 @@ impl SkinTempOvernight {
     pub const NIGHTLY_VALUE: u8 = 4;
 
     /// Create new SkinTempOvernight with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             local_timestamp: typedef::LocalDateTime(u32::MAX),

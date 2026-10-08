@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -27,7 +28,7 @@ pub struct DiveAlarm {
     /// Tone and Vibe setting for the alarm
     pub sound: typedef::Tone,
     /// Dive types the alarm will trigger on
-    pub dive_types: Vec<typedef::SubSport>,
+    pub dive_types: Box<[typedef::SubSport]>,
     /// Alarm ID
     pub id: u32,
     /// Show a visible pop-up for this alarm
@@ -59,7 +60,7 @@ impl DiveAlarm {
     pub const ALARM_TYPE: u8 = 3;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Tone
     pub const SOUND: u8 = 4;
-    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::SubSport
+    /// Value's type: `Box<[u8]>`; FitBaseType::ENUM; ProfileType::SubSport
     pub const DIVE_TYPES: u8 = 5;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const ID: u8 = 6;
@@ -75,7 +76,7 @@ impl DiveAlarm {
     pub const SPEED: u8 = 11;
 
     /// Create new DiveAlarm with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             depth: u32::MAX,
@@ -83,7 +84,7 @@ impl DiveAlarm {
             enabled: typedef::Bool(u8::MAX),
             alarm_type: typedef::DiveAlarmType(u8::MAX),
             sound: typedef::Tone(u8::MAX),
-            dive_types: Vec::new(),
+            dive_types: Box::new([]),
             id: u32::MAX,
             popup_enabled: typedef::Bool(u8::MAX),
             trigger_on_descent: typedef::Bool(u8::MAX),
@@ -183,12 +184,12 @@ impl From<&Message> for DiveAlarm {
                 4 => v.sound = typedef::Tone(field.value.as_u8()),
                 5 => {
                     v.dive_types = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::SubSport(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
                 6 => v.id = field.value.as_u32(),
@@ -262,9 +263,10 @@ impl From<DiveAlarm> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::ENUM,
-                value: Value::VecUint8({
-                    let (ptr, len, capacity) = m.dive_types.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
+                value: Value::ArrayUint8({
+                    let (ptr, len, capacity) = m.dive_types.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -395,7 +397,7 @@ struct De {
     enabled: typedef::Bool,
     alarm_type: typedef::DiveAlarmType,
     sound: typedef::Tone,
-    dive_types: Vec<typedef::SubSport>,
+    dive_types: Box<[typedef::SubSport]>,
     id: u32,
     popup_enabled: typedef::Bool,
     trigger_on_descent: typedef::Bool,
@@ -453,7 +455,7 @@ impl Default for De {
             enabled: typedef::Bool(u8::MAX),
             alarm_type: typedef::DiveAlarmType(u8::MAX),
             sound: typedef::Tone(u8::MAX),
-            dive_types: Vec::new(),
+            dive_types: Box::new([]),
             id: u32::MAX,
             popup_enabled: typedef::Bool(u8::MAX),
             trigger_on_descent: typedef::Bool(u8::MAX),

@@ -7,6 +7,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -60,7 +61,7 @@ impl GpsMetadata {
     pub const VELOCITY: u8 = 7;
 
     /// Create new GpsMetadata with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
@@ -235,14 +236,14 @@ impl From<&Message> for GpsMetadata {
                 6 => v.utc_timestamp = typedef::DateTime(field.value.as_u32()),
                 7 => {
                     v.velocity = match &field.value {
-                        Value::VecInt16(v) => {
+                        Value::ArrayInt16(v) => {
                             let mut arr = [i16::MAX; 3];
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
                             arr
                         }
-                        _ => [i16::MAX; 3],
+                        _ => Default::default(),
                     }
                 }
                 _ => v.unknown_fields.push(field.clone()),
@@ -326,7 +327,7 @@ impl From<GpsMetadata> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(Vec::from(&m.velocity)),
+                value: Value::ArrayInt16(Box::from(m.velocity)),
                 is_expanded: false,
             });
         };

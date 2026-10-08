@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,19 +20,19 @@ pub struct GyroscopeData {
     /// Units: ms; Millisecond part of the timestamp.
     pub timestamp_ms: u16,
     /// Units: ms; Each time in the array describes the time at which the gyro sample with the corresponding index was taken. Limited to 30 samples in each message. The samples may span across seconds. Array size must match the number of samples in gyro_x and gyro_y and gyro_z
-    pub sample_time_offset: Vec<u16>,
+    pub sample_time_offset: Box<[u16]>,
     /// Units: counts; These are the raw ADC reading. Maximum number of samples is 30 in each message. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub gyro_x: Vec<u16>,
+    pub gyro_x: Box<[u16]>,
     /// Units: counts; These are the raw ADC reading. Maximum number of samples is 30 in each message. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub gyro_y: Vec<u16>,
+    pub gyro_y: Box<[u16]>,
     /// Units: counts; These are the raw ADC reading. Maximum number of samples is 30 in each message. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub gyro_z: Vec<u16>,
+    pub gyro_z: Box<[u16]>,
     /// Units: deg/s; Calibrated gyro reading
-    pub calibrated_gyro_x: Vec<f32>,
+    pub calibrated_gyro_x: Box<[f32]>,
     /// Units: deg/s; Calibrated gyro reading
-    pub calibrated_gyro_y: Vec<f32>,
+    pub calibrated_gyro_y: Box<[f32]>,
     /// Units: deg/s; Calibrated gyro reading
-    pub calibrated_gyro_z: Vec<f32>,
+    pub calibrated_gyro_z: Box<[f32]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -43,33 +44,33 @@ impl GyroscopeData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const GYRO_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const GYRO_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const GYRO_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
+    /// Value's type: `Box<[f32]>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
     pub const CALIBRATED_GYRO_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
+    /// Value's type: `Box<[f32]>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
     pub const CALIBRATED_GYRO_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
+    /// Value's type: `Box<[f32]>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `deg/s`
     pub const CALIBRATED_GYRO_Z: u8 = 7;
 
     /// Create new GyroscopeData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::new(),
-            gyro_x: Vec::new(),
-            gyro_y: Vec::new(),
-            gyro_z: Vec::new(),
-            calibrated_gyro_x: Vec::new(),
-            calibrated_gyro_y: Vec::new(),
-            calibrated_gyro_z: Vec::new(),
+            sample_time_offset: Box::new([]),
+            gyro_x: Box::new([]),
+            gyro_y: Box::new([]),
+            gyro_z: Box::new([]),
+            calibrated_gyro_x: Box::new([]),
+            calibrated_gyro_y: Box::new([]),
+            calibrated_gyro_z: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -111,13 +112,13 @@ impl From<&Message> for GyroscopeData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.sample_time_offset = field.value.to_vec_u16(),
-                2 => v.gyro_x = field.value.to_vec_u16(),
-                3 => v.gyro_y = field.value.to_vec_u16(),
-                4 => v.gyro_z = field.value.to_vec_u16(),
-                5 => v.calibrated_gyro_x = field.value.to_vec_f32(),
-                6 => v.calibrated_gyro_y = field.value.to_vec_f32(),
-                7 => v.calibrated_gyro_z = field.value.to_vec_f32(),
+                1 => v.sample_time_offset = field.value.to_array_u16(),
+                2 => v.gyro_x = field.value.to_array_u16(),
+                3 => v.gyro_y = field.value.to_array_u16(),
+                4 => v.gyro_z = field.value.to_array_u16(),
+                5 => v.calibrated_gyro_x = field.value.to_array_f32(),
+                6 => v.calibrated_gyro_y = field.value.to_array_f32(),
+                7 => v.calibrated_gyro_z = field.value.to_array_f32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -151,7 +152,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.sample_time_offset),
+                value: Value::ArrayUint16(m.sample_time_offset),
                 is_expanded: false,
             });
         };
@@ -159,7 +160,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.gyro_x),
+                value: Value::ArrayUint16(m.gyro_x),
                 is_expanded: false,
             });
         };
@@ -167,7 +168,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.gyro_y),
+                value: Value::ArrayUint16(m.gyro_y),
                 is_expanded: false,
             });
         };
@@ -175,7 +176,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.gyro_z),
+                value: Value::ArrayUint16(m.gyro_z),
                 is_expanded: false,
             });
         };
@@ -183,7 +184,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::FLOAT32,
-                value: Value::VecFloat32(m.calibrated_gyro_x),
+                value: Value::ArrayFloat32(m.calibrated_gyro_x),
                 is_expanded: false,
             });
         };
@@ -191,7 +192,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 6,
                 base_type: FitBaseType::FLOAT32,
-                value: Value::VecFloat32(m.calibrated_gyro_y),
+                value: Value::ArrayFloat32(m.calibrated_gyro_y),
                 is_expanded: false,
             });
         };
@@ -199,7 +200,7 @@ impl From<GyroscopeData> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::FLOAT32,
-                value: Value::VecFloat32(m.calibrated_gyro_z),
+                value: Value::ArrayFloat32(m.calibrated_gyro_z),
                 is_expanded: false,
             });
         };
@@ -265,13 +266,13 @@ impl Serialize for GyroscopeData {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    sample_time_offset: Vec<u16>,
-    gyro_x: Vec<u16>,
-    gyro_y: Vec<u16>,
-    gyro_z: Vec<u16>,
-    calibrated_gyro_x: Vec<f32>,
-    calibrated_gyro_y: Vec<f32>,
-    calibrated_gyro_z: Vec<f32>,
+    sample_time_offset: Box<[u16]>,
+    gyro_x: Box<[u16]>,
+    gyro_y: Box<[u16]>,
+    gyro_z: Box<[u16]>,
+    calibrated_gyro_x: Box<[f32]>,
+    calibrated_gyro_y: Box<[f32]>,
+    calibrated_gyro_z: Box<[f32]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -304,13 +305,13 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::new(),
-            gyro_x: Vec::new(),
-            gyro_y: Vec::new(),
-            gyro_z: Vec::new(),
-            calibrated_gyro_x: Vec::new(),
-            calibrated_gyro_y: Vec::new(),
-            calibrated_gyro_z: Vec::new(),
+            sample_time_offset: Box::new([]),
+            gyro_x: Box::new([]),
+            gyro_y: Box::new([]),
+            gyro_z: Box::new([]),
+            calibrated_gyro_x: Box::new([]),
+            calibrated_gyro_y: Box::new([]),
+            calibrated_gyro_z: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

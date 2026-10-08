@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,7 +18,7 @@ pub struct HrZone {
     pub message_index: typedef::MessageIndex,
     /// Units: bpm
     pub high_bpm: u8,
-    pub name: String,
+    pub name: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -31,15 +30,15 @@ impl HrZone {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HIGH_BPM: u8 = 1;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 2;
 
     /// Create new HrZone with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             high_bpm: u8::MAX,
-            name: String::new(),
+            name: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -75,7 +74,7 @@ impl From<&Message> for HrZone {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
                 1 => v.high_bpm = field.value.as_u8(),
-                2 => v.name = field.value.as_str().to_owned(),
+                2 => v.name = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -157,7 +156,7 @@ impl Serialize for HrZone {
 struct De {
     message_index: typedef::MessageIndex,
     high_bpm: u8,
-    name: String,
+    name: Box<str>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -181,7 +180,7 @@ impl Default for De {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             high_bpm: u8::MAX,
-            name: String::new(),
+            name: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

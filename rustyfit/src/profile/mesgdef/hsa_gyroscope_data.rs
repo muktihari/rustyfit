@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -21,11 +22,11 @@ pub struct HsaGyroscopeData {
     /// Units: 1/32768 s; Sampling Interval in 32 kHz timescale
     pub sampling_interval: u16,
     /// Scale: 28.57143; Units: deg/s; X-Axis Measurement
-    pub gyro_x: Vec<i16>,
+    pub gyro_x: Box<[i16]>,
     /// Scale: 28.57143; Units: deg/s; Y-Axis Measurement
-    pub gyro_y: Vec<i16>,
+    pub gyro_y: Box<[i16]>,
     /// Scale: 28.57143; Units: deg/s; Z-Axis Measurement
-    pub gyro_z: Vec<i16>,
+    pub gyro_z: Box<[i16]>,
     /// Units: 1/32768 s; 32 kHz timestamp
     pub timestamp_32k: u32,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -41,24 +42,24 @@ impl HsaGyroscopeData {
     pub const TIMESTAMP_MS: u8 = 0;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `1/32768 s`
     pub const SAMPLING_INTERVAL: u8 = 1;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `28.57143`; Units: `deg/s`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `28.57143`; Units: `deg/s`
     pub const GYRO_X: u8 = 2;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `28.57143`; Units: `deg/s`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `28.57143`; Units: `deg/s`
     pub const GYRO_Y: u8 = 3;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `28.57143`; Units: `deg/s`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `28.57143`; Units: `deg/s`
     pub const GYRO_Z: u8 = 4;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Units: `1/32768 s`
     pub const TIMESTAMP_32K: u8 = 5;
 
     /// Create new HsaGyroscopeData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
             sampling_interval: u16::MAX,
-            gyro_x: Vec::new(),
-            gyro_y: Vec::new(),
-            gyro_z: Vec::new(),
+            gyro_x: Box::new([]),
+            gyro_y: Box::new([]),
+            gyro_z: Box::new([]),
             timestamp_32k: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -81,18 +82,20 @@ impl HsaGyroscopeData {
 
     /// Set `gyro_x` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_gyro_x_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.gyro_x = Vec::with_capacity(v.len());
+        self.gyro_x = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 28.57143;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.gyro_x.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.gyro_x.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.gyro_x = vals.into_boxed_slice();
         self
     }
 
@@ -112,18 +115,20 @@ impl HsaGyroscopeData {
 
     /// Set `gyro_y` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_gyro_y_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.gyro_y = Vec::with_capacity(v.len());
+        self.gyro_y = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 28.57143;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.gyro_y.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.gyro_y.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.gyro_y = vals.into_boxed_slice();
         self
     }
 
@@ -143,18 +148,20 @@ impl HsaGyroscopeData {
 
     /// Set `gyro_z` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_gyro_z_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.gyro_z = Vec::with_capacity(v.len());
+        self.gyro_z = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 28.57143;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.gyro_z.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.gyro_z.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.gyro_z = vals.into_boxed_slice();
         self
     }
 
@@ -193,9 +200,9 @@ impl From<&Message> for HsaGyroscopeData {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
                 1 => v.sampling_interval = field.value.as_u16(),
-                2 => v.gyro_x = field.value.to_vec_i16(),
-                3 => v.gyro_y = field.value.to_vec_i16(),
-                4 => v.gyro_z = field.value.to_vec_i16(),
+                2 => v.gyro_x = field.value.to_array_i16(),
+                3 => v.gyro_y = field.value.to_array_i16(),
+                4 => v.gyro_z = field.value.to_array_i16(),
                 5 => v.timestamp_32k = field.value.as_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -238,7 +245,7 @@ impl From<HsaGyroscopeData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.gyro_x),
+                value: Value::ArrayInt16(m.gyro_x),
                 is_expanded: false,
             });
         };
@@ -246,7 +253,7 @@ impl From<HsaGyroscopeData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.gyro_y),
+                value: Value::ArrayInt16(m.gyro_y),
                 is_expanded: false,
             });
         };
@@ -254,7 +261,7 @@ impl From<HsaGyroscopeData> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.gyro_z),
+                value: Value::ArrayInt16(m.gyro_z),
                 is_expanded: false,
             });
         };
@@ -323,9 +330,9 @@ struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
     sampling_interval: u16,
-    gyro_x: Vec<f64>,
-    gyro_y: Vec<f64>,
-    gyro_z: Vec<f64>,
+    gyro_x: Box<[f64]>,
+    gyro_y: Box<[f64]>,
+    gyro_z: Box<[f64]>,
     timestamp_32k: u32,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -343,7 +350,7 @@ impl From<De> for HsaGyroscopeData {
             sampling_interval: m.sampling_interval,
             gyro_x: {
                 if m.gyro_x.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.gyro_x.len());
                     for &x in m.gyro_x.iter() {
@@ -355,12 +362,12 @@ impl From<De> for HsaGyroscopeData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             gyro_y: {
                 if m.gyro_y.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.gyro_y.len());
                     for &x in m.gyro_y.iter() {
@@ -372,12 +379,12 @@ impl From<De> for HsaGyroscopeData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             gyro_z: {
                 if m.gyro_z.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.gyro_z.len());
                     for &x in m.gyro_z.iter() {
@@ -389,7 +396,7 @@ impl From<De> for HsaGyroscopeData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             timestamp_32k: m.timestamp_32k,
@@ -406,9 +413,9 @@ impl Default for De {
             timestamp: None,
             timestamp_ms: u16::MAX,
             sampling_interval: u16::MAX,
-            gyro_x: Vec::new(),
-            gyro_y: Vec::new(),
-            gyro_z: Vec::new(),
+            gyro_x: Box::new([]),
+            gyro_y: Box::new([]),
+            gyro_z: Box::new([]),
             timestamp_32k: u32::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

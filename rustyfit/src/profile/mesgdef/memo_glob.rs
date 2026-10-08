@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -17,7 +18,7 @@ pub struct MemoGlob {
     /// Sequence number of memo blocks
     pub part_index: u32,
     /// Deprecated. Use data field.
-    pub memo: Vec<u8>,
+    pub memo: Box<[u8]>,
     /// Message Number of the parent message
     pub mesg_num: typedef::MesgNum,
     /// Index of mesg that this glob is associated with.
@@ -25,7 +26,7 @@ pub struct MemoGlob {
     /// Field within the parent that this glob is associated with
     pub field_num: u8,
     /// Base: UINT8Z; Block of utf8 bytes. Note, mutltibyte characters may be split across adjoining memo_glob messages.
-    pub data: Vec<u8>,
+    pub data: Box<[u8]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -35,7 +36,7 @@ pub struct MemoGlob {
 impl MemoGlob {
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const PART_INDEX: u8 = 250;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const MEMO: u8 = 0;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MesgNum
     pub const MESG_NUM: u8 = 1;
@@ -43,18 +44,18 @@ impl MemoGlob {
     pub const PARENT_INDEX: u8 = 2;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const FIELD_NUM: u8 = 3;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const DATA: u8 = 4;
 
     /// Create new MemoGlob with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             part_index: u32::MAX,
-            memo: Vec::new(),
+            memo: Box::new([]),
             mesg_num: typedef::MesgNum(u16::MAX),
             parent_index: typedef::MessageIndex(u16::MAX),
             field_num: u8::MAX,
-            data: Vec::new(),
+            data: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -92,11 +93,11 @@ impl From<&Message> for MemoGlob {
         for field in &mesg.fields {
             match field.num {
                 250 => v.part_index = field.value.as_u32(),
-                0 => v.memo = field.value.to_vec_u8(),
+                0 => v.memo = field.value.to_array_u8(),
                 1 => v.mesg_num = typedef::MesgNum(field.value.as_u16()),
                 2 => v.parent_index = typedef::MessageIndex(field.value.as_u16()),
                 3 => v.field_num = field.value.as_u8(),
-                4 => v.data = field.value.to_vec_u8(),
+                4 => v.data = field.value.to_array_u8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -122,7 +123,7 @@ impl From<MemoGlob> for Message {
             fields.push(Field {
                 num: 0,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.memo),
+                value: Value::ArrayUint8(m.memo),
                 is_expanded: false,
             });
         };
@@ -154,7 +155,7 @@ impl From<MemoGlob> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT8Z,
-                value: Value::VecUint8(m.data),
+                value: Value::ArrayUint8(m.data),
                 is_expanded: false,
             });
         };
@@ -210,11 +211,11 @@ impl Serialize for MemoGlob {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     part_index: u32,
-    memo: Vec<u8>,
+    memo: Box<[u8]>,
     mesg_num: typedef::MesgNum,
     parent_index: typedef::MessageIndex,
     field_num: u8,
-    data: Vec<u8>,
+    data: Box<[u8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -240,11 +241,11 @@ impl Default for De {
     fn default() -> Self {
         Self {
             part_index: u32::MAX,
-            memo: Vec::new(),
+            memo: Box::new([]),
             mesg_num: typedef::MesgNum(u16::MAX),
             parent_index: typedef::MessageIndex(u16::MAX),
             field_num: u8::MAX,
-            data: Vec::new(),
+            data: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

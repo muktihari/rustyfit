@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -14,8 +15,8 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(from = "De"))]
 #[derive(Debug, Clone)]
 pub struct DeveloperDataId {
-    pub developer_id: Vec<u8>,
-    pub application_id: Vec<u8>,
+    pub developer_id: Box<[u8]>,
+    pub application_id: Box<[u8]>,
     pub manufacturer_id: typedef::Manufacturer,
     pub developer_data_index: u8,
     pub application_version: u32,
@@ -24,9 +25,9 @@ pub struct DeveloperDataId {
 }
 
 impl DeveloperDataId {
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const DEVELOPER_ID: u8 = 0;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const APPLICATION_ID: u8 = 1;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER_ID: u8 = 2;
@@ -36,10 +37,10 @@ impl DeveloperDataId {
     pub const APPLICATION_VERSION: u8 = 4;
 
     /// Create new DeveloperDataId with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            developer_id: Vec::new(),
-            application_id: Vec::new(),
+            developer_id: Box::new([]),
+            application_id: Box::new([]),
             manufacturer_id: typedef::Manufacturer(u16::MAX),
             developer_data_index: u8::MAX,
             application_version: u32::MAX,
@@ -76,8 +77,8 @@ impl From<&Message> for DeveloperDataId {
 
         for field in &mesg.fields {
             match field.num {
-                0 => v.developer_id = field.value.to_vec_u8(),
-                1 => v.application_id = field.value.to_vec_u8(),
+                0 => v.developer_id = field.value.to_array_u8(),
+                1 => v.application_id = field.value.to_array_u8(),
                 2 => v.manufacturer_id = typedef::Manufacturer(field.value.as_u16()),
                 3 => v.developer_data_index = field.value.as_u8(),
                 4 => v.application_version = field.value.as_u32(),
@@ -98,7 +99,7 @@ impl From<DeveloperDataId> for Message {
             fields.push(Field {
                 num: 0,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.developer_id),
+                value: Value::ArrayUint8(m.developer_id),
                 is_expanded: false,
             });
         };
@@ -106,7 +107,7 @@ impl From<DeveloperDataId> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.application_id),
+                value: Value::ArrayUint8(m.application_id),
                 is_expanded: false,
             });
         };
@@ -179,8 +180,8 @@ impl Serialize for DeveloperDataId {
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
-    developer_id: Vec<u8>,
-    application_id: Vec<u8>,
+    developer_id: Box<[u8]>,
+    application_id: Box<[u8]>,
     manufacturer_id: typedef::Manufacturer,
     developer_data_index: u8,
     application_version: u32,
@@ -205,8 +206,8 @@ impl From<De> for DeveloperDataId {
 impl Default for De {
     fn default() -> Self {
         Self {
-            developer_id: Vec::new(),
-            application_id: Vec::new(),
+            developer_id: Box::new([]),
+            application_id: Box::new([]),
             manufacturer_id: typedef::Manufacturer(u16::MAX),
             developer_data_index: u8::MAX,
             application_version: u32::MAX,

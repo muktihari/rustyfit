@@ -7,8 +7,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -35,7 +34,7 @@ pub struct WeatherConditions {
     pub temperature_feels_like: i8,
     pub relative_humidity: u8,
     /// string corresponding to GCS response location string
-    pub location: String,
+    pub location: Box<str>,
     pub observed_at_time: typedef::DateTime,
     /// Units: semicircles
     pub observed_location_lat: i32,
@@ -71,7 +70,7 @@ impl WeatherConditions {
     pub const TEMPERATURE_FEELS_LIKE: u8 = 6;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const RELATIVE_HUMIDITY: u8 = 7;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const LOCATION: u8 = 8;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const OBSERVED_AT_TIME: u8 = 9;
@@ -87,7 +86,7 @@ impl WeatherConditions {
     pub const LOW_TEMPERATURE: u8 = 14;
 
     /// Create new WeatherConditions with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             weather_report: typedef::WeatherReport(u8::MAX),
@@ -98,7 +97,7 @@ impl WeatherConditions {
             precipitation_probability: u8::MAX,
             temperature_feels_like: i8::MAX,
             relative_humidity: u8::MAX,
-            location: String::new(),
+            location: Box::from(""),
             observed_at_time: typedef::DateTime(u32::MAX),
             observed_location_lat: i32::MAX,
             observed_location_long: i32::MAX,
@@ -203,7 +202,7 @@ impl From<&Message> for WeatherConditions {
                 5 => v.precipitation_probability = field.value.as_u8(),
                 6 => v.temperature_feels_like = field.value.as_i8(),
                 7 => v.relative_humidity = field.value.as_u8(),
-                8 => v.location = field.value.as_str().to_owned(),
+                8 => v.location = Box::from(field.value.as_str()),
                 9 => v.observed_at_time = typedef::DateTime(field.value.as_u32()),
                 10 => v.observed_location_lat = field.value.as_i32(),
                 11 => v.observed_location_long = field.value.as_i32(),
@@ -441,7 +440,7 @@ struct De {
     precipitation_probability: u8,
     temperature_feels_like: i8,
     relative_humidity: u8,
-    location: String,
+    location: Box<str>,
     observed_at_time: Option<i64>,
     /// Degrees.
     observed_location_lat: f64,
@@ -508,7 +507,7 @@ impl Default for De {
             precipitation_probability: u8::MAX,
             temperature_feels_like: i8::MAX,
             relative_humidity: u8::MAX,
-            location: String::new(),
+            location: Box::from(""),
             observed_at_time: None,
             observed_location_lat: f64::from_bits(u64::MAX),
             observed_location_long: f64::from_bits(u64::MAX),

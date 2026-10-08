@@ -112,7 +112,7 @@ impl DiveSummary {
     pub const HANG_TIME: u8 = 25;
 
     /// Create new DiveSummary with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             reference_mesg: typedef::MesgNum(u16::MAX),

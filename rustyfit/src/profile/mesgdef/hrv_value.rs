@@ -30,7 +30,7 @@ impl HrvValue {
     pub const VALUE: u8 = 0;
 
     /// Create new HrvValue with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             value: u16::MAX,

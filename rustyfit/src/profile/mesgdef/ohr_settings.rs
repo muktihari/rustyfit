@@ -30,7 +30,7 @@ impl OhrSettings {
     pub const ENABLED: u8 = 0;
 
     /// Create new OhrSettings with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             enabled: typedef::Switch(u8::MAX),

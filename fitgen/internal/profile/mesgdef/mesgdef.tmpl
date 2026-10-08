@@ -61,7 +61,7 @@ pub struct {{ .Name }} {
 
 impl {{ .Name }} {
     {{ range .Fields -}}
-    /// Value's type: {{ if gt .FixedArraySize 0 -}} `[{{ .BaseType0 }}; {{ .FixedArraySize }}]` {{- else if .Array -}} `Vec<{{ .BaseType0 }}>` {{- else -}} `{{ .BaseType0 }}` {{- end -}}
+    /// Value's type: {{ if gt .FixedArraySize 0 -}} `[{{ .BaseType0 }}; {{ .FixedArraySize }}]` {{- else if .Array -}} `Box<[{{ .BaseType0 }}]>` {{- else -}} `{{ .BaseType0 }}` {{- end -}}
     ; FitBaseType::{{ .BaseType }}; {{ .ProfileType }}
     {{- if ne .Scale 1.0 }}; Scale: `{{ .Scale }}` {{- end }} 
     {{- if ne .Offset 0.0 }}; Offset: `{{ .Offset }}` {{- end }}
@@ -69,7 +69,7 @@ impl {{ .Name }} {
     pub const {{ .NameUpperCase }}: u8 = {{ .Num }};
     {{ end }}
     /// Create new {{ .Name }} with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             {{ range .Fields -}}
             {{ .Name }}: {{ .InvalidValue }},
@@ -154,18 +154,20 @@ impl {{ .Name }} {
         }
         {{ else if eq .FixedArraySize 0 -}}
         pub fn set_{{ .Name }}_scaled(&mut self, v: &[f64]) -> &mut Self {
-            self.{{ .Name }} = Vec::with_capacity(v.len());
+            self.{{ .Name }} = Box::new([]); {{/* drop first to make space for the new data */}}
             if v.is_empty() {
                 return self;
             }
+            let mut vals = Vec::with_capacity(v.len());
             for &x in v{
                 let unscaled = (x + {{ formatFloat .Offset }}) * {{ formatFloat .Scale }};
                 if unscaled.is_nan() || unscaled.is_infinite() || unscaled > {{ .MaxValue }} as f64 {
-                    self.{{ .Name }}.push({{ .BaseType0Invalid }});
+                    vals.push({{ .BaseType0Invalid }});
                     continue
                 }
-                self.{{ .Name }}.push(unscaled as {{ .BaseType0 }});
+                vals.push(unscaled as {{ .BaseType0 }});
             }
+            self.{{ .Name }} = vals.into_boxed_slice();
             self
         }
         {{ else -}}
@@ -341,7 +343,7 @@ struct De {
     	    {{ if not .Array -}}
     	        {{ .Name }}: f64,
             {{ else if eq .FixedArraySize 0 -}}
-                {{ .Name }}: Vec<f64>,
+                {{ .Name }}: Box<[f64]>,
             {{ else -}}
                 {{ .Name }}: [f64; {{ .FixedArraySize }}],
             {{ end -}}
@@ -378,7 +380,7 @@ impl From<De> for {{ .Name }} {
                     {{ else if eq .FixedArraySize 0 -}}
                         {{ .Name }}: {
                             if m.{{ .Name }}.is_empty() {
-                                Vec::new()
+                                Box::new([])
                             } else {
                                 let mut vals = Vec::with_capacity(m.{{ .Name }}.len());
                                 for &x in m.{{ .Name }}.iter() {
@@ -389,7 +391,7 @@ impl From<De> for {{ .Name }} {
                                     }
                                     vals.push(unscaled as {{ .BaseType0 }});
                                 }
-                                vals
+                                vals.into_boxed_slice()
                             }
                         },
                     {{ else -}}
@@ -435,7 +437,7 @@ impl Default for De {
            	    {{ if not .Array -}}
            	        {{ .Name }}: f64::from_bits(u64::MAX),
                     {{ else if eq .FixedArraySize 0 -}}
-                        {{ .Name }}: Vec::new(),
+                        {{ .Name }}: Box::new([]),
                     {{ else -}}
                         {{ .Name }}: [const { f64::from_bits(u64::MAX) }; {{ .FixedArraySize }}],
                     {{ end -}}

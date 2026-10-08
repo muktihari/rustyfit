@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,7 +20,7 @@ pub struct HsaStepData {
     /// Units: s; Processing interval length in seconds. File start: 0xFFFFFFEF File stop: 0xFFFFFFEE
     pub processing_interval: u16,
     /// Units: steps; Total step sum
-    pub steps: Vec<u32>,
+    pub steps: Box<[u32]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -31,15 +32,15 @@ impl HsaStepData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `steps`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `steps`
     pub const STEPS: u8 = 1;
 
     /// Create new HsaStepData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            steps: Vec::new(),
+            steps: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -75,7 +76,7 @@ impl From<&Message> for HsaStepData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
-                1 => v.steps = field.value.to_vec_u32(),
+                1 => v.steps = field.value.to_array_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -109,7 +110,7 @@ impl From<HsaStepData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.steps),
+                value: Value::ArrayUint32(m.steps),
                 is_expanded: false,
             });
         };
@@ -157,7 +158,7 @@ impl Serialize for HsaStepData {
 struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
-    steps: Vec<u32>,
+    steps: Box<[u32]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -184,7 +185,7 @@ impl Default for De {
         Self {
             timestamp: None,
             processing_interval: u16::MAX,
-            steps: Vec::new(),
+            steps: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

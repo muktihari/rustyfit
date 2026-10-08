@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,25 +20,25 @@ pub struct AccelerometerData {
     /// Units: ms; Millisecond part of the timestamp.
     pub timestamp_ms: u16,
     /// Units: ms; Each time in the array describes the time at which the accelerometer sample with the corresponding index was taken. Limited to 30 samples in each message. The samples may span across seconds. Array size must match the number of samples in accel_x and accel_y and accel_z
-    pub sample_time_offset: Vec<u16>,
+    pub sample_time_offset: Box<[u16]>,
     /// Units: counts; These are the raw ADC reading. Maximum number of samples is 30 in each message. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub accel_x: Vec<u16>,
+    pub accel_x: Box<[u16]>,
     /// Units: counts; These are the raw ADC reading. Maximum number of samples is 30 in each message. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub accel_y: Vec<u16>,
+    pub accel_y: Box<[u16]>,
     /// Units: counts; These are the raw ADC reading. Maximum number of samples is 30 in each message. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub accel_z: Vec<u16>,
+    pub accel_z: Box<[u16]>,
     /// Units: g; Calibrated accel reading
-    pub calibrated_accel_x: Vec<f32>,
+    pub calibrated_accel_x: Box<[f32]>,
     /// Units: g; Calibrated accel reading
-    pub calibrated_accel_y: Vec<f32>,
+    pub calibrated_accel_y: Box<[f32]>,
     /// Units: g; Calibrated accel reading
-    pub calibrated_accel_z: Vec<f32>,
+    pub calibrated_accel_z: Box<[f32]>,
     /// Units: mG; Calibrated accel reading
-    pub compressed_calibrated_accel_x: Vec<i16>,
+    pub compressed_calibrated_accel_x: Box<[i16]>,
     /// Units: mG; Calibrated accel reading
-    pub compressed_calibrated_accel_y: Vec<i16>,
+    pub compressed_calibrated_accel_y: Box<[i16]>,
     /// Units: mG; Calibrated accel reading
-    pub compressed_calibrated_accel_z: Vec<i16>,
+    pub compressed_calibrated_accel_z: Box<[i16]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -49,42 +50,42 @@ impl AccelerometerData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ACCEL_X: u8 = 2;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ACCEL_Y: u8 = 3;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ACCEL_Z: u8 = 4;
-    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
+    /// Value's type: `Box<[f32]>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
     pub const CALIBRATED_ACCEL_X: u8 = 5;
-    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
+    /// Value's type: `Box<[f32]>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
     pub const CALIBRATED_ACCEL_Y: u8 = 6;
-    /// Value's type: `Vec<f32>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
+    /// Value's type: `Box<[f32]>`; FitBaseType::FLOAT32; ProfileType::Float32; Units: `g`
     pub const CALIBRATED_ACCEL_Z: u8 = 7;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
     pub const COMPRESSED_CALIBRATED_ACCEL_X: u8 = 8;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
     pub const COMPRESSED_CALIBRATED_ACCEL_Y: u8 = 9;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Units: `mG`
     pub const COMPRESSED_CALIBRATED_ACCEL_Z: u8 = 10;
 
     /// Create new AccelerometerData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::new(),
-            accel_x: Vec::new(),
-            accel_y: Vec::new(),
-            accel_z: Vec::new(),
-            calibrated_accel_x: Vec::new(),
-            calibrated_accel_y: Vec::new(),
-            calibrated_accel_z: Vec::new(),
-            compressed_calibrated_accel_x: Vec::new(),
-            compressed_calibrated_accel_y: Vec::new(),
-            compressed_calibrated_accel_z: Vec::new(),
+            sample_time_offset: Box::new([]),
+            accel_x: Box::new([]),
+            accel_y: Box::new([]),
+            accel_z: Box::new([]),
+            calibrated_accel_x: Box::new([]),
+            calibrated_accel_y: Box::new([]),
+            calibrated_accel_z: Box::new([]),
+            compressed_calibrated_accel_x: Box::new([]),
+            compressed_calibrated_accel_y: Box::new([]),
+            compressed_calibrated_accel_z: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -129,16 +130,16 @@ impl From<&Message> for AccelerometerData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.sample_time_offset = field.value.to_vec_u16(),
-                2 => v.accel_x = field.value.to_vec_u16(),
-                3 => v.accel_y = field.value.to_vec_u16(),
-                4 => v.accel_z = field.value.to_vec_u16(),
-                5 => v.calibrated_accel_x = field.value.to_vec_f32(),
-                6 => v.calibrated_accel_y = field.value.to_vec_f32(),
-                7 => v.calibrated_accel_z = field.value.to_vec_f32(),
-                8 => v.compressed_calibrated_accel_x = field.value.to_vec_i16(),
-                9 => v.compressed_calibrated_accel_y = field.value.to_vec_i16(),
-                10 => v.compressed_calibrated_accel_z = field.value.to_vec_i16(),
+                1 => v.sample_time_offset = field.value.to_array_u16(),
+                2 => v.accel_x = field.value.to_array_u16(),
+                3 => v.accel_y = field.value.to_array_u16(),
+                4 => v.accel_z = field.value.to_array_u16(),
+                5 => v.calibrated_accel_x = field.value.to_array_f32(),
+                6 => v.calibrated_accel_y = field.value.to_array_f32(),
+                7 => v.calibrated_accel_z = field.value.to_array_f32(),
+                8 => v.compressed_calibrated_accel_x = field.value.to_array_i16(),
+                9 => v.compressed_calibrated_accel_y = field.value.to_array_i16(),
+                10 => v.compressed_calibrated_accel_z = field.value.to_array_i16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -172,7 +173,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.sample_time_offset),
+                value: Value::ArrayUint16(m.sample_time_offset),
                 is_expanded: false,
             });
         };
@@ -180,7 +181,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.accel_x),
+                value: Value::ArrayUint16(m.accel_x),
                 is_expanded: false,
             });
         };
@@ -188,7 +189,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.accel_y),
+                value: Value::ArrayUint16(m.accel_y),
                 is_expanded: false,
             });
         };
@@ -196,7 +197,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.accel_z),
+                value: Value::ArrayUint16(m.accel_z),
                 is_expanded: false,
             });
         };
@@ -204,7 +205,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::FLOAT32,
-                value: Value::VecFloat32(m.calibrated_accel_x),
+                value: Value::ArrayFloat32(m.calibrated_accel_x),
                 is_expanded: false,
             });
         };
@@ -212,7 +213,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 6,
                 base_type: FitBaseType::FLOAT32,
-                value: Value::VecFloat32(m.calibrated_accel_y),
+                value: Value::ArrayFloat32(m.calibrated_accel_y),
                 is_expanded: false,
             });
         };
@@ -220,7 +221,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::FLOAT32,
-                value: Value::VecFloat32(m.calibrated_accel_z),
+                value: Value::ArrayFloat32(m.calibrated_accel_z),
                 is_expanded: false,
             });
         };
@@ -228,7 +229,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.compressed_calibrated_accel_x),
+                value: Value::ArrayInt16(m.compressed_calibrated_accel_x),
                 is_expanded: false,
             });
         };
@@ -236,7 +237,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 9,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.compressed_calibrated_accel_y),
+                value: Value::ArrayInt16(m.compressed_calibrated_accel_y),
                 is_expanded: false,
             });
         };
@@ -244,7 +245,7 @@ impl From<AccelerometerData> for Message {
             fields.push(Field {
                 num: 10,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.compressed_calibrated_accel_z),
+                value: Value::ArrayInt16(m.compressed_calibrated_accel_z),
                 is_expanded: false,
             });
         };
@@ -328,16 +329,16 @@ impl Serialize for AccelerometerData {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    sample_time_offset: Vec<u16>,
-    accel_x: Vec<u16>,
-    accel_y: Vec<u16>,
-    accel_z: Vec<u16>,
-    calibrated_accel_x: Vec<f32>,
-    calibrated_accel_y: Vec<f32>,
-    calibrated_accel_z: Vec<f32>,
-    compressed_calibrated_accel_x: Vec<i16>,
-    compressed_calibrated_accel_y: Vec<i16>,
-    compressed_calibrated_accel_z: Vec<i16>,
+    sample_time_offset: Box<[u16]>,
+    accel_x: Box<[u16]>,
+    accel_y: Box<[u16]>,
+    accel_z: Box<[u16]>,
+    calibrated_accel_x: Box<[f32]>,
+    calibrated_accel_y: Box<[f32]>,
+    calibrated_accel_z: Box<[f32]>,
+    compressed_calibrated_accel_x: Box<[i16]>,
+    compressed_calibrated_accel_y: Box<[i16]>,
+    compressed_calibrated_accel_z: Box<[i16]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -373,16 +374,16 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::new(),
-            accel_x: Vec::new(),
-            accel_y: Vec::new(),
-            accel_z: Vec::new(),
-            calibrated_accel_x: Vec::new(),
-            calibrated_accel_y: Vec::new(),
-            calibrated_accel_z: Vec::new(),
-            compressed_calibrated_accel_x: Vec::new(),
-            compressed_calibrated_accel_y: Vec::new(),
-            compressed_calibrated_accel_z: Vec::new(),
+            sample_time_offset: Box::new([]),
+            accel_x: Box::new([]),
+            accel_y: Box::new([]),
+            accel_z: Box::new([]),
+            calibrated_accel_x: Box::new([]),
+            calibrated_accel_y: Box::new([]),
+            calibrated_accel_z: Box::new([]),
+            compressed_calibrated_accel_x: Box::new([]),
+            compressed_calibrated_accel_y: Box::new([]),
+            compressed_calibrated_accel_z: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,15 +20,15 @@ pub struct ObdiiData {
     /// Units: ms; Fractional part of timestamp, added to timestamp
     pub timestamp_ms: u16,
     /// Units: ms; Offset of PID reading \[i\] from start_timestamp+start_timestamp_ms. Readings may span across seconds.
-    pub time_offset: Vec<u16>,
+    pub time_offset: Box<[u16]>,
     /// Parameter ID
     pub pid: u8,
     /// Raw parameter data
-    pub raw_data: Vec<u8>,
+    pub raw_data: Box<[u8]>,
     /// Optional, data size of PID\[i\]. If not specified refer to SAE J1979.
-    pub pid_data_size: Vec<u8>,
+    pub pid_data_size: Box<[u8]>,
     /// System time associated with sample expressed in ms, can be used instead of time_offset. There will be a system_time value for each raw_data element. For multibyte pids the system_time is repeated.
-    pub system_time: Vec<u32>,
+    pub system_time: Box<[u32]>,
     /// Timestamp of first sample recorded in the message. Used with time_offset to generate time of each sample
     pub start_timestamp: typedef::DateTime,
     /// Units: ms; Fractional part of start_timestamp
@@ -43,15 +44,15 @@ impl ObdiiData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIME_OFFSET: u8 = 1;
     /// Value's type: `u8`; FitBaseType::BYTE; ProfileType::Byte
     pub const PID: u8 = 2;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const RAW_DATA: u8 = 3;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8
     pub const PID_DATA_SIZE: u8 = 4;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32
     pub const SYSTEM_TIME: u8 = 5;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIMESTAMP: u8 = 6;
@@ -59,15 +60,15 @@ impl ObdiiData {
     pub const START_TIMESTAMP_MS: u8 = 7;
 
     /// Create new ObdiiData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            time_offset: Vec::new(),
+            time_offset: Box::new([]),
             pid: u8::MAX,
-            raw_data: Vec::new(),
-            pid_data_size: Vec::new(),
-            system_time: Vec::new(),
+            raw_data: Box::new([]),
+            pid_data_size: Box::new([]),
+            system_time: Box::new([]),
             start_timestamp: typedef::DateTime(u32::MAX),
             start_timestamp_ms: u16::MAX,
             unknown_fields: Vec::new(),
@@ -111,11 +112,11 @@ impl From<&Message> for ObdiiData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.time_offset = field.value.to_vec_u16(),
+                1 => v.time_offset = field.value.to_array_u16(),
                 2 => v.pid = field.value.as_u8(),
-                3 => v.raw_data = field.value.to_vec_u8(),
-                4 => v.pid_data_size = field.value.to_vec_u8(),
-                5 => v.system_time = field.value.to_vec_u32(),
+                3 => v.raw_data = field.value.to_array_u8(),
+                4 => v.pid_data_size = field.value.to_array_u8(),
+                5 => v.system_time = field.value.to_array_u32(),
                 6 => v.start_timestamp = typedef::DateTime(field.value.as_u32()),
                 7 => v.start_timestamp_ms = field.value.as_u16(),
                 _ => v.unknown_fields.push(field.clone()),
@@ -151,7 +152,7 @@ impl From<ObdiiData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.time_offset),
+                value: Value::ArrayUint16(m.time_offset),
                 is_expanded: false,
             });
         };
@@ -167,7 +168,7 @@ impl From<ObdiiData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.raw_data),
+                value: Value::ArrayUint8(m.raw_data),
                 is_expanded: false,
             });
         };
@@ -175,7 +176,7 @@ impl From<ObdiiData> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.pid_data_size),
+                value: Value::ArrayUint8(m.pid_data_size),
                 is_expanded: false,
             });
         };
@@ -183,7 +184,7 @@ impl From<ObdiiData> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.system_time),
+                value: Value::ArrayUint32(m.system_time),
                 is_expanded: false,
             });
         };
@@ -265,11 +266,11 @@ impl Serialize for ObdiiData {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    time_offset: Vec<u16>,
+    time_offset: Box<[u16]>,
     pid: u8,
-    raw_data: Vec<u8>,
-    pid_data_size: Vec<u8>,
-    system_time: Vec<u32>,
+    raw_data: Box<[u8]>,
+    pid_data_size: Box<[u8]>,
+    system_time: Box<[u32]>,
     start_timestamp: Option<i64>,
     start_timestamp_ms: u16,
     unknown_fields: Vec<Field>,
@@ -307,11 +308,11 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            time_offset: Vec::new(),
+            time_offset: Box::new([]),
             pid: u8::MAX,
-            raw_data: Vec::new(),
-            pid_data_size: Vec::new(),
-            system_time: Vec::new(),
+            raw_data: Box::new([]),
+            pid_data_size: Box::new([]),
+            system_time: Box::new([]),
             start_timestamp: None,
             start_timestamp_ms: u16::MAX,
             unknown_fields: Vec::new(),

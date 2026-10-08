@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -51,7 +52,7 @@ impl ThreeDSensorCalibration {
     pub const ORIENTATION_MATRIX: u8 = 5;
 
     /// Create new ThreeDSensorCalibration with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             sensor_type: typedef::SensorType(u8::MAX),
@@ -132,26 +133,26 @@ impl From<&Message> for ThreeDSensorCalibration {
                 3 => v.level_shift = field.value.as_u32(),
                 4 => {
                     v.offset_cal = match &field.value {
-                        Value::VecInt32(v) => {
+                        Value::ArrayInt32(v) => {
                             let mut arr = [i32::MAX; 3];
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
                             arr
                         }
-                        _ => [i32::MAX; 3],
+                        _ => Default::default(),
                     }
                 }
                 5 => {
                     v.orientation_matrix = match &field.value {
-                        Value::VecInt32(v) => {
+                        Value::ArrayInt32(v) => {
                             let mut arr = [i32::MAX; 9];
                             for (i, x) in v.iter().take(9).enumerate() {
                                 arr[i] = *x;
                             }
                             arr
                         }
-                        _ => [i32::MAX; 9],
+                        _ => Default::default(),
                     }
                 }
                 _ => v.unknown_fields.push(field.clone()),
@@ -211,7 +212,7 @@ impl From<ThreeDSensorCalibration> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::SINT32,
-                value: Value::VecInt32(Vec::from(&m.offset_cal)),
+                value: Value::ArrayInt32(Box::from(m.offset_cal)),
                 is_expanded: false,
             });
         };
@@ -219,7 +220,7 @@ impl From<ThreeDSensorCalibration> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::SINT32,
-                value: Value::VecInt32(Vec::from(&m.orientation_matrix)),
+                value: Value::ArrayInt32(Box::from(m.orientation_matrix)),
                 is_expanded: false,
             });
         };

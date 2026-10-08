@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -17,7 +16,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct BikeProfile {
     pub message_index: typedef::MessageIndex,
-    pub name: String,
+    pub name: Box<str>,
     pub sport: typedef::Sport,
     pub sub_sport: typedef::SubSport,
     /// Scale: 100; Units: m
@@ -61,11 +60,11 @@ pub struct BikeProfile {
     /// Base: UINT8Z; Number of front gears
     pub front_gear_num: u8,
     /// Base: UINT8Z; Number of teeth on each gear 0 is innermost
-    pub front_gear: Vec<u8>,
+    pub front_gear: Box<[u8]>,
     /// Base: UINT8Z; Number of rear gears
     pub rear_gear_num: u8,
     /// Base: UINT8Z; Number of teeth on each gear 0 is innermost
-    pub rear_gear: Vec<u8>,
+    pub rear_gear: Box<[u8]>,
     pub shimano_di2_enabled: typedef::Bool,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -76,7 +75,7 @@ pub struct BikeProfile {
 impl BikeProfile {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 1;
@@ -130,20 +129,20 @@ impl BikeProfile {
     pub const ODOMETER_ROLLOVER: u8 = 37;
     /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const FRONT_GEAR_NUM: u8 = 38;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const FRONT_GEAR: u8 = 39;
     /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const REAR_GEAR_NUM: u8 = 40;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const REAR_GEAR: u8 = 41;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const SHIMANO_DI2_ENABLED: u8 = 44;
 
     /// Create new BikeProfile with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            name: String::new(),
+            name: Box::from(""),
             sport: typedef::Sport(u8::MAX),
             sub_sport: typedef::SubSport(u8::MAX),
             odometer: u32::MAX,
@@ -170,9 +169,9 @@ impl BikeProfile {
             bike_power_ant_id_trans_type: u8::MIN,
             odometer_rollover: u8::MAX,
             front_gear_num: u8::MIN,
-            front_gear: Vec::new(),
+            front_gear: Box::new([]),
             rear_gear_num: u8::MIN,
-            rear_gear: Vec::new(),
+            rear_gear: Box::new([]),
             shimano_di2_enabled: typedef::Bool(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -363,7 +362,7 @@ impl From<&Message> for BikeProfile {
         for field in &mesg.fields {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
-                0 => v.name = field.value.as_str().to_owned(),
+                0 => v.name = Box::from(field.value.as_str()),
                 1 => v.sport = typedef::Sport(field.value.as_u8()),
                 2 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
                 3 => v.odometer = field.value.as_u32(),
@@ -390,9 +389,9 @@ impl From<&Message> for BikeProfile {
                 24 => v.bike_power_ant_id_trans_type = field.value.as_u8z(),
                 37 => v.odometer_rollover = field.value.as_u8(),
                 38 => v.front_gear_num = field.value.as_u8z(),
-                39 => v.front_gear = field.value.to_vec_u8(),
+                39 => v.front_gear = field.value.to_array_u8(),
                 40 => v.rear_gear_num = field.value.as_u8z(),
-                41 => v.rear_gear = field.value.to_vec_u8(),
+                41 => v.rear_gear = field.value.to_array_u8(),
                 44 => v.shimano_di2_enabled = typedef::Bool(field.value.as_u8()),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -635,7 +634,7 @@ impl From<BikeProfile> for Message {
             fields.push(Field {
                 num: 39,
                 base_type: FitBaseType::UINT8Z,
-                value: Value::VecUint8(m.front_gear),
+                value: Value::ArrayUint8(m.front_gear),
                 is_expanded: false,
             });
         };
@@ -651,7 +650,7 @@ impl From<BikeProfile> for Message {
             fields.push(Field {
                 num: 41,
                 base_type: FitBaseType::UINT8Z,
-                value: Value::VecUint8(m.rear_gear),
+                value: Value::ArrayUint8(m.rear_gear),
                 is_expanded: false,
             });
         };
@@ -805,7 +804,7 @@ impl Serialize for BikeProfile {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     message_index: typedef::MessageIndex,
-    name: String,
+    name: Box<str>,
     sport: typedef::Sport,
     sub_sport: typedef::SubSport,
     odometer: f64,
@@ -832,9 +831,9 @@ struct De {
     bike_power_ant_id_trans_type: u8,
     odometer_rollover: u8,
     front_gear_num: u8,
-    front_gear: Vec<u8>,
+    front_gear: Box<[u8]>,
     rear_gear_num: u8,
-    rear_gear: Vec<u8>,
+    rear_gear: Box<[u8]>,
     shimano_di2_enabled: typedef::Bool,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -929,7 +928,7 @@ impl Default for De {
     fn default() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            name: String::new(),
+            name: Box::from(""),
             sport: typedef::Sport(u8::MAX),
             sub_sport: typedef::SubSport(u8::MAX),
             odometer: f64::from_bits(u64::MAX),
@@ -956,9 +955,9 @@ impl Default for De {
             bike_power_ant_id_trans_type: u8::MIN,
             odometer_rollover: u8::MAX,
             front_gear_num: u8::MIN,
-            front_gear: Vec::new(),
+            front_gear: Box::new([]),
             rear_gear_num: u8::MIN,
-            rear_gear: Vec::new(),
+            rear_gear: Box::new([]),
             shimano_di2_enabled: typedef::Bool(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,11 +19,11 @@ pub struct MonitoringInfo {
     pub timestamp: typedef::DateTime,
     /// Units: s; Use to convert activity timestamps to local time if device does not support time zone and daylight savings time correction.
     pub local_timestamp: typedef::LocalDateTime,
-    pub activity_type: Vec<typedef::ActivityType>,
+    pub activity_type: Box<[typedef::ActivityType]>,
     /// Scale: 5000; Units: m/cycle; Indexed by activity_type
-    pub cycles_to_distance: Vec<u16>,
+    pub cycles_to_distance: Box<[u16]>,
     /// Scale: 5000; Units: kcal/cycle; Indexed by activity_type
-    pub cycles_to_calories: Vec<u16>,
+    pub cycles_to_calories: Box<[u16]>,
     /// Units: kcal / day
     pub resting_metabolic_rate: u16,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -36,23 +37,23 @@ impl MonitoringInfo {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::LocalDateTime; Units: `s`
     pub const LOCAL_TIMESTAMP: u8 = 0;
-    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::ActivityType
+    /// Value's type: `Box<[u8]>`; FitBaseType::ENUM; ProfileType::ActivityType
     pub const ACTIVITY_TYPE: u8 = 1;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5000`; Units: `m/cycle`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5000`; Units: `m/cycle`
     pub const CYCLES_TO_DISTANCE: u8 = 3;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5000`; Units: `kcal/cycle`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5000`; Units: `kcal/cycle`
     pub const CYCLES_TO_CALORIES: u8 = 4;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `kcal / day`
     pub const RESTING_METABOLIC_RATE: u8 = 5;
 
     /// Create new MonitoringInfo with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             local_timestamp: typedef::LocalDateTime(u32::MAX),
-            activity_type: Vec::new(),
-            cycles_to_distance: Vec::new(),
-            cycles_to_calories: Vec::new(),
+            activity_type: Box::new([]),
+            cycles_to_distance: Box::new([]),
+            cycles_to_calories: Box::new([]),
             resting_metabolic_rate: u16::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -75,18 +76,20 @@ impl MonitoringInfo {
 
     /// Set `cycles_to_distance` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_cycles_to_distance_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.cycles_to_distance = Vec::with_capacity(v.len());
+        self.cycles_to_distance = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 5000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.cycles_to_distance.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.cycles_to_distance.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.cycles_to_distance = vals.into_boxed_slice();
         self
     }
 
@@ -106,18 +109,20 @@ impl MonitoringInfo {
 
     /// Set `cycles_to_calories` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_cycles_to_calories_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.cycles_to_calories = Vec::with_capacity(v.len());
+        self.cycles_to_calories = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 5000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.cycles_to_calories.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.cycles_to_calories.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.cycles_to_calories = vals.into_boxed_slice();
         self
     }
 
@@ -156,16 +161,16 @@ impl From<&Message> for MonitoringInfo {
                 0 => v.local_timestamp = typedef::LocalDateTime(field.value.as_u32()),
                 1 => {
                     v.activity_type = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::ActivityType(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
-                3 => v.cycles_to_distance = field.value.to_vec_u16(),
-                4 => v.cycles_to_calories = field.value.to_vec_u16(),
+                3 => v.cycles_to_distance = field.value.to_array_u16(),
+                4 => v.cycles_to_calories = field.value.to_array_u16(),
                 5 => v.resting_metabolic_rate = field.value.as_u16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -200,9 +205,10 @@ impl From<MonitoringInfo> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::ENUM,
-                value: Value::VecUint8({
-                    let (ptr, len, capacity) = m.activity_type.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
+                value: Value::ArrayUint8({
+                    let (ptr, len, capacity) = m.activity_type.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -211,7 +217,7 @@ impl From<MonitoringInfo> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.cycles_to_distance),
+                value: Value::ArrayUint16(m.cycles_to_distance),
                 is_expanded: false,
             });
         };
@@ -219,7 +225,7 @@ impl From<MonitoringInfo> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.cycles_to_calories),
+                value: Value::ArrayUint16(m.cycles_to_calories),
                 is_expanded: false,
             });
         };
@@ -284,9 +290,9 @@ impl Serialize for MonitoringInfo {
 struct De {
     timestamp: Option<i64>,
     local_timestamp: Option<i64>,
-    activity_type: Vec<typedef::ActivityType>,
-    cycles_to_distance: Vec<f64>,
-    cycles_to_calories: Vec<f64>,
+    activity_type: Box<[typedef::ActivityType]>,
+    cycles_to_distance: Box<[f64]>,
+    cycles_to_calories: Box<[f64]>,
     resting_metabolic_rate: u16,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -307,7 +313,7 @@ impl From<De> for MonitoringInfo {
             activity_type: m.activity_type,
             cycles_to_distance: {
                 if m.cycles_to_distance.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.cycles_to_distance.len());
                     for &x in m.cycles_to_distance.iter() {
@@ -319,12 +325,12 @@ impl From<De> for MonitoringInfo {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             cycles_to_calories: {
                 if m.cycles_to_calories.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.cycles_to_calories.len());
                     for &x in m.cycles_to_calories.iter() {
@@ -336,7 +342,7 @@ impl From<De> for MonitoringInfo {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             resting_metabolic_rate: m.resting_metabolic_rate,
@@ -352,9 +358,9 @@ impl Default for De {
         Self {
             timestamp: None,
             local_timestamp: None,
-            activity_type: Vec::new(),
-            cycles_to_distance: Vec::new(),
-            cycles_to_calories: Vec::new(),
+            activity_type: Box::new([]),
+            cycles_to_distance: Box::new([]),
+            cycles_to_calories: Box::new([]),
             resting_metabolic_rate: u16::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

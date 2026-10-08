@@ -62,7 +62,7 @@ impl Goal {
     pub const SOURCE: u8 = 11;
 
     /// Create new Goal with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             sport: typedef::Sport(u8::MAX),

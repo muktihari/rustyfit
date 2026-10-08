@@ -49,7 +49,7 @@ impl Activity {
     pub const EVENT_GROUP: u8 = 6;
 
     /// Create new Activity with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             total_timer_time: u32::MAX,

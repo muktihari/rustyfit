@@ -35,7 +35,7 @@ impl TankUpdate {
     pub const PRESSURE: u8 = 1;
 
     /// Create new TankUpdate with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             sensor: typedef::AntChannelId(u32::MIN),

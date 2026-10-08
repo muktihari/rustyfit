@@ -26,16 +26,16 @@ impl Bits {
             Value::Float64(v) => (bits.store[0], bits.size) = (*v as u64, 64),
             Value::Int64(v) => (bits.store[0], bits.size) = (*v as u64, 64),
             Value::Uint64(v) => (bits.store[0], bits.size) = (*v, 64),
-            Value::VecInt8(v) => bits_from_slice(&mut bits, v, 8),
-            Value::VecUint8(v) => bits_from_slice(&mut bits, v, 8),
-            Value::VecInt16(v) => bits_from_slice(&mut bits, v, 16),
-            Value::VecUint16(v) => bits_from_slice(&mut bits, v, 16),
-            Value::VecInt32(v) => bits_from_slice(&mut bits, v, 32),
-            Value::VecUint32(v) => bits_from_slice(&mut bits, v, 32),
-            Value::VecFloat32(v) => bits_from_slice(&mut bits, v, 32),
-            Value::VecFloat64(v) => bits_from_slice(&mut bits, v, 64),
-            Value::VecInt64(v) => bits_from_slice(&mut bits, v, 64),
-            Value::VecUint64(v) => bits_from_slice(&mut bits, v, 64),
+            Value::ArrayInt8(v) => bits_from_slice(&mut bits, v, 8),
+            Value::ArrayUint8(v) => bits_from_slice(&mut bits, v, 8),
+            Value::ArrayInt16(v) => bits_from_slice(&mut bits, v, 16),
+            Value::ArrayUint16(v) => bits_from_slice(&mut bits, v, 16),
+            Value::ArrayInt32(v) => bits_from_slice(&mut bits, v, 32),
+            Value::ArrayUint32(v) => bits_from_slice(&mut bits, v, 32),
+            Value::ArrayFloat32(v) => bits_from_slice(&mut bits, v, 32),
+            Value::ArrayFloat64(v) => bits_from_slice(&mut bits, v, 64),
+            Value::ArrayInt64(v) => bits_from_slice(&mut bits, v, 64),
+            Value::ArrayUint64(v) => bits_from_slice(&mut bits, v, 64),
             _ => {
                 return None;
             }
@@ -223,7 +223,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecInt8(vec![1, 2]),
+                value: Value::ArrayInt8(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -234,7 +234,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecUint8(vec![1, 2]),
+                value: Value::ArrayUint8(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -245,7 +245,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecInt16(vec![1, 2]),
+                value: Value::ArrayInt16(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -256,7 +256,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecUint16(vec![1, 2]),
+                value: Value::ArrayUint16(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -267,7 +267,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecInt32(vec![1, 2]),
+                value: Value::ArrayInt32(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -278,7 +278,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecUint32(vec![1, 2]),
+                value: Value::ArrayUint32(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -289,7 +289,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecFloat32(vec![1.0, 2.0]),
+                value: Value::ArrayFloat32(Box::new([1.0, 2.0])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -300,7 +300,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecFloat64(vec![1.0, 2.0]),
+                value: Value::ArrayFloat64(Box::new([1.0, 2.0])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -312,7 +312,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecInt64(vec![1, 2]),
+                value: Value::ArrayInt64(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -324,7 +324,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecUint64(vec![1, 2]),
+                value: Value::ArrayUint64(Box::new([1, 2])),
                 expected: Some(Bits {
                     store: {
                         let mut tmp = [0u64; N];
@@ -336,7 +336,7 @@ mod tests {
                 }),
             },
             TestCase {
-                value: Value::VecUint8(vec![0; 255]),
+                value: Value::ArrayUint8(Box::new([0; 255])),
                 expected: Some(Bits {
                     store: [0u64; N],
                     size: 64 * (N as u64),

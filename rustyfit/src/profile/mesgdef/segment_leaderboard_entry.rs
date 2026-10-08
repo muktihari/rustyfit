@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +17,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 pub struct SegmentLeaderboardEntry {
     pub message_index: typedef::MessageIndex,
     /// Friendly name assigned to leader
-    pub name: String,
+    pub name: Box<str>,
     /// Leader classification
     pub r#type: typedef::SegmentLeaderboardType,
     /// Primary user ID of this leader
@@ -28,7 +27,7 @@ pub struct SegmentLeaderboardEntry {
     /// Scale: 1000; Units: s; Segment Time (includes pauses)
     pub segment_time: u32,
     /// String version of the activity_id. 21 characters long, express in decimal
-    pub activity_id_string: String,
+    pub activity_id_string: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -38,7 +37,7 @@ pub struct SegmentLeaderboardEntry {
 impl SegmentLeaderboardEntry {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SegmentLeaderboardType
     pub const TYPE: u8 = 1;
@@ -48,19 +47,19 @@ impl SegmentLeaderboardEntry {
     pub const ACTIVITY_ID: u8 = 3;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const SEGMENT_TIME: u8 = 4;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const ACTIVITY_ID_STRING: u8 = 5;
 
     /// Create new SegmentLeaderboardEntry with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            name: String::new(),
+            name: Box::from(""),
             r#type: typedef::SegmentLeaderboardType(u8::MAX),
             group_primary_key: u32::MAX,
             activity_id: u32::MAX,
             segment_time: u32::MAX,
-            activity_id_string: String::new(),
+            activity_id_string: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -120,12 +119,12 @@ impl From<&Message> for SegmentLeaderboardEntry {
         for field in &mesg.fields {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
-                0 => v.name = field.value.as_str().to_owned(),
+                0 => v.name = Box::from(field.value.as_str()),
                 1 => v.r#type = typedef::SegmentLeaderboardType(field.value.as_u8()),
                 2 => v.group_primary_key = field.value.as_u32(),
                 3 => v.activity_id = field.value.as_u32(),
                 4 => v.segment_time = field.value.as_u32(),
-                5 => v.activity_id_string = field.value.as_str().to_owned(),
+                5 => v.activity_id_string = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -250,12 +249,12 @@ impl Serialize for SegmentLeaderboardEntry {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     message_index: typedef::MessageIndex,
-    name: String,
+    name: Box<str>,
     r#type: typedef::SegmentLeaderboardType,
     group_primary_key: u32,
     activity_id: u32,
     segment_time: f64,
-    activity_id_string: String,
+    activity_id_string: Box<str>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -289,12 +288,12 @@ impl Default for De {
     fn default() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            name: String::new(),
+            name: Box::from(""),
             r#type: typedef::SegmentLeaderboardType(u8::MAX),
             group_primary_key: u32::MAX,
             activity_id: u32::MAX,
             segment_time: f64::from_bits(u64::MAX),
-            activity_id_string: String::new(),
+            activity_id_string: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

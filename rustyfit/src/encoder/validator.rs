@@ -254,7 +254,7 @@ impl MessageValidator {
             Value::String(v) if core::str::from_utf8(v.as_bytes()).is_err() => {
                 return Err(FieldValidationError::StringValueInvalid);
             }
-            Value::VecString(v) => {
+            Value::ArrayString(v) => {
                 for x in v.iter() {
                     if core::str::from_utf8(x.as_bytes()).is_err() {
                         return Err(FieldValidationError::StringValueInvalid);

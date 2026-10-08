@@ -116,7 +116,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				}(),
 				ProfileType: fmt.Sprintf("ProfileType::%s", strutil.ToTitle(parserField.Type)),
 				MaxValue: func() string {
-					if rustType == "String" {
+					if rustType == "Box<str>" {
 						return ""
 					}
 					return fmt.Sprintf("%s::MAX", rustType)
@@ -134,8 +134,8 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				Units:          parserField.Units,
 			}
 
-			if field.BaseType == "STRING" {
-				imports["alloc::string::String"] = struct{}{}
+			if field.BaseType == "STRING" || field.Array {
+				imports["alloc::boxed::Box"] = struct{}{}
 			}
 			if strings.Contains(field.TypedValue, "to_owned") {
 				imports["alloc::borrow::ToOwned"] = struct{}{}
@@ -315,7 +315,7 @@ func (b *Builder) transformType(fieldType, fieldArray string, fixedArraySize byt
 		return fmt.Sprintf("[%s; %d]", typ, fixedArraySize)
 	}
 
-	return fmt.Sprintf("Vec<%s>", typ)
+	return fmt.Sprintf("Box<[%s]>", typ)
 }
 
 func (b *Builder) transformToProtoValue(fieldName, fieldType, array string, fixedArraySize uint8) string {
@@ -329,9 +329,23 @@ func (b *Builder) transformToProtoValue(fieldName, fieldType, array string, fixe
 	if baseType != fieldType {
 		if array != "" {
 			// SAFETY: From<T> for Message has move semantics.
-			return fmt.Sprintf(`Value::Vec%s({
-				let (ptr, len, capacity) = m.%s.into_raw_parts();
-				unsafe { Vec::from_raw_parts(ptr.cast::<%s>(), len, capacity) }
+			//
+			// TODO (muktihari):
+			//   When [https://releases.rs/docs/1.100.0] is released (expected on 12 Nov 2026),
+			//   we need to use these methods since memory allocation outside `Global` is possible:
+			//    - `into_raw_parts_with_allocator`
+			//    - `Vec::from_raw_parts_in`
+			//
+			//   We can use `cfg_version` for code branching:
+			//    - #[cfg(version("1.100"))]       // 1.100 and above
+			//    - #[cfg(not(version("1.100")))]  // 1.99 and below
+			//
+			//   We can consider using `Box::into_raw_with_allocator` and `Box::from_raw_in` as well,
+			//   but I still couldn't find any code examples in rust code base using this.
+			return fmt.Sprintf(`Value::Array%s({
+				let (ptr, len, capacity) = m.%s.into_vec().into_raw_parts();
+				let v = unsafe { Vec::from_raw_parts(ptr.cast::<%s>(), len, capacity) };
+				v.into_boxed_slice()
 			})`, valueEnum, fieldName, rustType)
 		}
 		return fmt.Sprintf("Value::%s(m.%s.0)", valueEnum, fieldName)
@@ -339,9 +353,9 @@ func (b *Builder) transformToProtoValue(fieldName, fieldType, array string, fixe
 
 	if array != "" {
 		if fixedArraySize > 0 {
-			return fmt.Sprintf("Value::Vec%s(Vec::from(&m.%s))", valueEnum, fieldName)
+			return fmt.Sprintf("Value::Array%s(Box::from(m.%s))", valueEnum, fieldName)
 		}
-		return fmt.Sprintf("Value::Vec%s(m.%s)", valueEnum, fieldName)
+		return fmt.Sprintf("Value::Array%s(m.%s)", valueEnum, fieldName)
 	}
 
 	return fmt.Sprintf("Value::%s(m.%s)", valueEnum, fieldName)
@@ -362,37 +376,38 @@ func (b *Builder) transformTypedValue(fieldType, array string, fixedArraySize ui
 	var value string
 	if array == "" {
 		if rustAsType == "string" {
-			value = "field.value.as_str().to_owned()"
+			value = "Box::from(field.value.as_str())"
 		} else {
 			value = fmt.Sprintf(`field.value.as_%s()`, rustAsType)
 		}
 	} else if fixedArraySize == 0 { // vector
-		value = fmt.Sprintf(`field.value.to_vec_%s()`, strings.TrimSuffix(rustAsType, "z"))
+		value = fmt.Sprintf(`field.value.to_array_%s()`, strings.TrimSuffix(rustAsType, "z"))
 	} else { // array
-		rustType := baseTypeToRustTypeReplacer.Replace(baseType)
-		arrayValue := fmt.Sprintf("[%s::MAX; %d]", rustType, fixedArraySize)
+		arrayType := ""
+		arrayValue := fmt.Sprintf("[%s; %d]", b.invalidValue(fieldType, "", 0, true), fixedArraySize)
 		rshValue := "*x"
 
 		if fieldType == "string" {
-			arrayValue = fmt.Sprintf("[const { String::new() }; %d]", fixedArraySize)
-			rshValue = "x.to_owned()"
+			arrayType = fmt.Sprintf(": [Box<str>; %d]", fixedArraySize)
+			arrayValue = "Default::default()"
+			rshValue = "x.clone()"
 		}
 
 		value = fmt.Sprintf(`match &field.value {
-			Value::Vec%s(v) => {
-				let mut arr = %s;
+			Value::Array%s(v) => {
+				let mut arr %s = %s;
 				for (i, x) in v.iter().take(%d).enumerate() {
 					arr[i] = %s;
 				}
 				arr
 			},
-			_ => %s,
+			_ => Default::default(),
 		}`,
 			valueEnumType,
+			arrayType,
 			arrayValue,
 			fixedArraySize,
 			rshValue,
-			arrayValue,
 		)
 	}
 
@@ -407,12 +422,12 @@ func (b *Builder) transformTypedValue(fieldType, array string, fixedArraySize ui
 	}
 
 	return fmt.Sprintf(`match &field.value {
-		Value::Vec%s(v) => {
+		Value::Array%s(v) => {
 			let mut vs = Vec::with_capacity(v.len());
 			vs.extend(v.iter().map(|&x|%s(x)));
-			vs
+			vs.into_boxed_slice()
 		},
-		_ => Vec::new(),
+		_ => Box::new([]),
 	}`, strings.TrimSuffix(valueEnumType, "z"), typdef)
 }
 
@@ -423,7 +438,7 @@ func (b *Builder) invalidValue(fieldType, array string, fixedArraySize byte, inn
 	var invalid string
 	switch baseType {
 	case "string":
-		invalid = "String::new()"
+		invalid = "Box::from(\"\")"
 	case "float32":
 		invalid = "f32::from_bits(u32::MAX)"
 	case "float64":
@@ -438,10 +453,10 @@ func (b *Builder) invalidValue(fieldType, array string, fixedArraySize byte, inn
 
 	if array != "" {
 		if fixedArraySize == 0 { // Slice
-			return "Vec::new()"
+			return "Box::new([])"
 		}
 		if baseType == "string" {
-			invalid = fmt.Sprintf("const { %s }", invalid)
+			return fmt.Sprintf("<[Box<str>; %d]>::default()", int(fixedArraySize))
 		}
 		return fmt.Sprintf("[%s; %d]", invalid, int(fixedArraySize))
 	}
@@ -482,7 +497,7 @@ var baseTypeToRustTypeReplacer = strings.NewReplacer(
 	"sint", "i",
 	"uint", "u",
 	"float", "f",
-	"string", "String",
+	"string", "Box<str>",
 	"z", "", // u8z -> u8
 )
 
@@ -491,5 +506,5 @@ var goTypeToRustTypeReplacer = strings.NewReplacer(
 	"int", "i",
 	"uint", "u",
 	"float", "f",
-	"string", "String",
+	"string", "Box<str>",
 )

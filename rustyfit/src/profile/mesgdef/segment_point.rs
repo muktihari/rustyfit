@@ -9,6 +9,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -34,7 +35,7 @@ pub struct SegmentPoint {
     /// Scale: 5; Offset: 500; Units: m; Accumulated altitude along the segment at the described point
     pub altitude: u16,
     /// Scale: 1000; Units: s; Accumualted time each leader board member required to reach the described point. This value is zero for all leader board members at the starting point of the segment.
-    pub leader_time: Vec<u32>,
+    pub leader_time: Box<[u32]>,
     /// Scale: 5; Offset: 500; Units: m; Accumulated altitude along the segment at the described point
     pub enhanced_altitude: u32,
     state: [u8; 1], // Used for tracking expanded fields.
@@ -55,20 +56,20 @@ impl SegmentPoint {
     pub const DISTANCE: u8 = 3;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `5`; Offset: `500`; Units: `m`
     pub const ALTITUDE: u8 = 4;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const LEADER_TIME: u8 = 5;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 6;
 
     /// Create new SegmentPoint with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             position_lat: i32::MAX,
             position_long: i32::MAX,
             distance: u32::MAX,
             altitude: u16::MAX,
-            leader_time: Vec::new(),
+            leader_time: Box::new([]),
             enhanced_altitude: u32::MAX,
             state: [0u8; 1],
             unknown_fields: Vec::new(),
@@ -156,18 +157,20 @@ impl SegmentPoint {
 
     /// Set `leader_time` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_leader_time_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.leader_time = Vec::with_capacity(v.len());
+        self.leader_time = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.leader_time.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.leader_time.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.leader_time = vals.into_boxed_slice();
         self
     }
 
@@ -249,7 +252,7 @@ impl From<&Message> for SegmentPoint {
                 2 => v.position_long = field.value.as_i32(),
                 3 => v.distance = field.value.as_u32(),
                 4 => v.altitude = field.value.as_u16(),
-                5 => v.leader_time = field.value.to_vec_u32(),
+                5 => v.leader_time = field.value.to_array_u32(),
                 6 => v.enhanced_altitude = field.value.as_u32(),
                 _ => {
                     v.unknown_fields.push(field.clone());
@@ -314,7 +317,7 @@ impl From<SegmentPoint> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.leader_time),
+                value: Value::ArrayUint32(m.leader_time),
                 is_expanded: false,
             });
         };
@@ -387,7 +390,7 @@ struct De {
     position_long: f64,
     distance: f64,
     altitude: f64,
-    leader_time: Vec<f64>,
+    leader_time: Box<[f64]>,
     enhanced_altitude: f64,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -418,7 +421,7 @@ impl From<De> for SegmentPoint {
             },
             leader_time: {
                 if m.leader_time.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.leader_time.len());
                     for &x in m.leader_time.iter() {
@@ -430,7 +433,7 @@ impl From<De> for SegmentPoint {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             enhanced_altitude: {
@@ -457,7 +460,7 @@ impl Default for De {
             position_long: f64::from_bits(u64::MAX),
             distance: f64::from_bits(u64::MAX),
             altitude: f64::from_bits(u64::MAX),
-            leader_time: Vec::new(),
+            leader_time: Box::new([]),
             enhanced_altitude: f64::from_bits(u64::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

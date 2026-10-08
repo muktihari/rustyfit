@@ -12,7 +12,7 @@ use crate::{
     },
     proto::*,
 };
-use alloc::{vec, vec::Vec};
+use alloc::{boxed::Box, vec::Vec};
 use embedded_io::{Read, ReadExactError};
 
 /// Decoder Error
@@ -661,44 +661,94 @@ fn convert_u64_to_value(val: u64, base_type: FitBaseType) -> Value {
 fn push_value_to_vec(vec_value: &mut Value, value: &Value) {
     match value {
         Value::Uint8(v) => match vec_value {
-            Value::VecUint8(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecUint8(vec![*v]),
+            Value::ArrayUint8(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayUint8(Box::new([*v])),
         },
         Value::Int8(v) => match vec_value {
-            Value::VecInt8(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecInt8(vec![*v]),
+            Value::ArrayInt8(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayInt8(Box::new([*v])),
         },
         Value::Uint16(v) => match vec_value {
-            Value::VecUint16(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecUint16(vec![*v]),
+            Value::ArrayUint16(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayUint16(Box::new([*v])),
         },
         Value::Int16(v) => match vec_value {
-            Value::VecInt16(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecInt16(vec![*v]),
+            Value::ArrayInt16(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayInt16(Box::new([*v])),
         },
         Value::Uint32(v) => match vec_value {
-            Value::VecUint32(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecUint32(vec![*v]),
+            Value::ArrayUint32(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayUint32(Box::new([*v])),
         },
         Value::Int32(v) => match vec_value {
-            Value::VecInt32(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecInt32(vec![*v]),
+            Value::ArrayInt32(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayInt32(Box::new([*v])),
         },
         Value::Float32(v) => match vec_value {
-            Value::VecFloat32(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecFloat32(vec![*v]),
+            Value::ArrayFloat32(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayFloat32(Box::new([*v])),
         },
         Value::Float64(v) => match vec_value {
-            Value::VecFloat64(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecFloat64(vec![*v]),
+            Value::ArrayFloat64(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayFloat64(Box::new([*v])),
         },
         Value::Int64(v) => match vec_value {
-            Value::VecInt64(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecInt64(vec![*v]),
+            Value::ArrayInt64(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayInt64(Box::new([*v])),
         },
         Value::Uint64(v) => match vec_value {
-            Value::VecUint64(vs) => vs.push(*v),
-            _ => *vec_value = Value::VecUint64(vec![*v]),
+            Value::ArrayUint64(vs) => {
+                let mut x = Vec::with_capacity(vs.len() + 1);
+                x.extend_from_slice(vs);
+                x.push(*v);
+                *vs = x.into_boxed_slice();
+            }
+            _ => *vec_value = Value::ArrayUint64(Box::new([*v])),
         },
         _ => {}
     }

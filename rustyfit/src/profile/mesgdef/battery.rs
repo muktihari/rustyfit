@@ -30,7 +30,7 @@ impl Battery {
     pub const CAPACITY: u8 = 2;
 
     /// Create new Battery with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             capacity: u8::MAX,

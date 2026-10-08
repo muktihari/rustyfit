@@ -35,7 +35,7 @@ impl VideoFrame {
     pub const FRAME_NUMBER: u8 = 1;
 
     /// Create new VideoFrame with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,

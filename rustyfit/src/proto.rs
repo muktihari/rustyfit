@@ -6,7 +6,7 @@ use crate::profile::{
     lookup,
     typedef::{FitBaseType, MesgNum},
 };
-use alloc::{string::String, vec::Vec};
+use alloc::{boxed::Box, string::String, vec::Vec};
 #[cfg(feature = "serde")]
 use serde::{
     Deserialize, Serialize, Serializer,
@@ -285,22 +285,22 @@ pub enum Value {
     Uint16(u16),
     Int32(i32),
     Uint32(u32),
-    String(String),
+    String(Box<str>),
     Float32(f32),
     Float64(f64),
     Int64(i64),
     Uint64(u64),
-    VecInt8(Vec<i8>),
-    VecUint8(Vec<u8>),
-    VecInt16(Vec<i16>),
-    VecUint16(Vec<u16>),
-    VecInt32(Vec<i32>),
-    VecUint32(Vec<u32>),
-    VecString(Vec<String>),
-    VecFloat32(Vec<f32>),
-    VecFloat64(Vec<f64>),
-    VecInt64(Vec<i64>),
-    VecUint64(Vec<u64>),
+    ArrayInt8(Box<[i8]>),
+    ArrayUint8(Box<[u8]>),
+    ArrayInt16(Box<[i16]>),
+    ArrayUint16(Box<[u16]>),
+    ArrayInt32(Box<[i32]>),
+    ArrayUint32(Box<[u32]>),
+    ArrayString(Box<[Box<str>]>),
+    ArrayFloat32(Box<[f32]>),
+    ArrayFloat64(Box<[f64]>),
+    ArrayInt64(Box<[i64]>),
+    ArrayUint64(Box<[u64]>),
 }
 
 /// Value that can hold FIT's value.
@@ -332,21 +332,21 @@ impl Value {
     pub(crate) fn from_parts(buf: &[u8], array: bool, base_type: FitBaseType, arch: u8) -> Value {
         match base_type {
             FitBaseType::SINT8 => match array {
-                true => Value::VecInt8({
+                true => Value::ArrayInt8({
                     let mut vals: Vec<i8> = Vec::with_capacity(buf.len());
                     vals.extend(buf.iter().map(|&x| x as i8));
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => Value::Int8(buf[0] as i8),
             },
             FitBaseType::ENUM | FitBaseType::BYTE | FitBaseType::UINT8 | FitBaseType::UINT8Z => {
                 match array {
-                    true => Value::VecUint8(buf.to_vec()),
+                    true => Value::ArrayUint8(Box::from(buf)),
                     false => Value::Uint8(buf[0]),
                 }
             }
             FitBaseType::SINT16 => match array {
-                true => Value::VecInt16({
+                true => Value::ArrayInt16({
                     let mut vals: Vec<i16> = Vec::with_capacity(buf.len() / 2);
                     match arch {
                         0 => vals.extend(
@@ -362,7 +362,7 @@ impl Value {
                                 .map(|&x| i16::from_be_bytes(x)),
                         ),
                     };
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Int16(i16::from_le_bytes(buf[..2].try_into().unwrap())),
@@ -370,7 +370,7 @@ impl Value {
                 },
             },
             FitBaseType::UINT16 | FitBaseType::UINT16Z => match array {
-                true => Value::VecUint16({
+                true => Value::ArrayUint16({
                     let mut vals: Vec<u16> = Vec::with_capacity(buf.len() / 2);
                     match arch {
                         0 => vals.extend(
@@ -386,7 +386,7 @@ impl Value {
                                 .map(|&x| u16::from_be_bytes(x)),
                         ),
                     };
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Uint16(u16::from_le_bytes(buf[..2].try_into().unwrap())),
@@ -394,7 +394,7 @@ impl Value {
                 },
             },
             FitBaseType::SINT32 => match array {
-                true => Value::VecInt32({
+                true => Value::ArrayInt32({
                     let mut vals: Vec<i32> = Vec::with_capacity(buf.len() / 4);
                     match arch {
                         0 => vals.extend(
@@ -410,7 +410,7 @@ impl Value {
                                 .map(|&x| i32::from_be_bytes(x)),
                         ),
                     };
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Int32(i32::from_le_bytes(buf[..4].try_into().unwrap())),
@@ -418,7 +418,7 @@ impl Value {
                 },
             },
             FitBaseType::UINT32 | FitBaseType::UINT32Z => match array {
-                true => Value::VecUint32({
+                true => Value::ArrayUint32({
                     let mut vals: Vec<u32> = Vec::with_capacity(buf.len() / 4);
                     match arch {
                         0 => vals.extend(
@@ -434,7 +434,7 @@ impl Value {
                                 .map(|&x| u32::from_be_bytes(x)),
                         ),
                     };
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Uint32(u32::from_le_bytes(buf[..4].try_into().unwrap())),
@@ -442,32 +442,41 @@ impl Value {
                 },
             },
             FitBaseType::STRING => match array {
-                true => Value::VecString({
+                true => Value::ArrayString({
                     let mut vals = Vec::with_capacity(Value::strcount(buf) as usize);
                     let mut last = 0usize;
                     for (i, &v) in buf.iter().enumerate() {
                         if v != 0 {
                             if i == buf.len() - 1 {
-                                vals.push(String::from_utf8_lossy(&buf[last..i + 1]).into_owned());
+                                vals.push(
+                                    String::from_utf8_lossy(&buf[last..i + 1])
+                                        .into_owned()
+                                        .into_boxed_str(),
+                                );
                             }
                         } else {
                             if last != i {
-                                vals.push(String::from_utf8_lossy(&buf[last..i]).into_owned());
+                                vals.push(
+                                    String::from_utf8_lossy(&buf[last..i])
+                                        .into_owned()
+                                        .into_boxed_str(),
+                                );
                             }
                             last = i + 1;
                         }
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => Value::String(
                     String::from_utf8_lossy(
                         &buf[0..buf.iter().position(|&v| v == 0).unwrap_or(buf.len())],
                     )
-                    .into_owned(),
+                    .into_owned()
+                    .into_boxed_str(),
                 ),
             },
             FitBaseType::FLOAT32 => match array {
-                true => Value::VecFloat32({
+                true => Value::ArrayFloat32({
                     let mut vals: Vec<f32> = Vec::with_capacity(buf.len() / 4);
                     match arch {
                         0 => vals.extend(
@@ -483,7 +492,7 @@ impl Value {
                                 .map(|&x| f32::from_be_bytes(x)),
                         ),
                     };
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Float32(f32::from_le_bytes(buf[..4].try_into().unwrap())),
@@ -491,7 +500,7 @@ impl Value {
                 },
             },
             FitBaseType::FLOAT64 => match array {
-                true => Value::VecFloat64({
+                true => Value::ArrayFloat64({
                     let mut vals: Vec<f64> = Vec::with_capacity(buf.len() / 8);
                     match arch {
                         0 => vals.extend(
@@ -507,7 +516,7 @@ impl Value {
                                 .map(|&x| f64::from_be_bytes(x)),
                         ),
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Float64(f64::from_le_bytes(buf[..8].try_into().unwrap())),
@@ -515,7 +524,7 @@ impl Value {
                 },
             },
             FitBaseType::SINT64 => match array {
-                true => Value::VecInt64({
+                true => Value::ArrayInt64({
                     let mut vals: Vec<i64> = Vec::with_capacity(buf.len() / 8);
                     match arch {
                         0 => vals.extend(
@@ -531,7 +540,7 @@ impl Value {
                                 .map(|&x| i64::from_be_bytes(x)),
                         ),
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Int64(i64::from_le_bytes(buf[..8].try_into().unwrap())),
@@ -539,7 +548,7 @@ impl Value {
                 },
             },
             FitBaseType::UINT64 | FitBaseType::UINT64Z => match array {
-                true => Value::VecUint64({
+                true => Value::ArrayUint64({
                     let mut vals: Vec<u64> = Vec::with_capacity(buf.len() / 8);
                     match arch {
                         0 => vals.extend(
@@ -555,7 +564,7 @@ impl Value {
                                 .map(|&x| u64::from_be_bytes(x)),
                         ),
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }),
                 false => match arch {
                     0 => Value::Uint64(u64::from_le_bytes(buf[..8].try_into().unwrap())),
@@ -707,96 +716,96 @@ impl Value {
         0
     }
 
-    /// Returns value as `Vec<i8>` by clone. Return empty vector if it's not a `Vec<i8>` value.
-    pub(crate) fn to_vec_i8(&self) -> Vec<i8> {
-        if let Value::VecInt8(v) = self {
+    /// Returns value as `Box<[i8]>` by clone. Return empty vector if it's not a `Box<[i8]>` value.
+    pub(crate) fn to_array_i8(&self) -> Box<[i8]> {
+        if let Value::ArrayInt8(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<u8>` by clone. Return empty vector if it's not a `Vec<u8>` value.
-    pub(crate) fn to_vec_u8(&self) -> Vec<u8> {
-        if let Value::VecUint8(v) = self {
+    /// Returns value as `Box<[u8]>` by clone. Return empty vector if it's not a `Box<[u8]>` value.
+    pub(crate) fn to_array_u8(&self) -> Box<[u8]> {
+        if let Value::ArrayUint8(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<i16>` by clone. Return empty vector if it's not a `Vec<i16>` value.
-    pub(crate) fn to_vec_i16(&self) -> Vec<i16> {
-        if let Value::VecInt16(v) = self {
+    /// Returns value as `Box<[i16]>` by clone. Return empty vector if it's not a `Box<[i16]>` value.
+    pub(crate) fn to_array_i16(&self) -> Box<[i16]> {
+        if let Value::ArrayInt16(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<u16>` by clone. Return empty vector if it's not a `Vec<u16>` value.
-    pub(crate) fn to_vec_u16(&self) -> Vec<u16> {
-        if let Value::VecUint16(v) = self {
+    /// Returns value as `Box<[u16]>` by clone. Return empty vector if it's not a `Box<[u16]>` value.
+    pub(crate) fn to_array_u16(&self) -> Box<[u16]> {
+        if let Value::ArrayUint16(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<i32>` by clone. Return empty vector if it's not a `Vec<i32>` value.
+    /// Returns value as `Box<[i32]>` by clone. Return empty vector if it's not a `Box<[i32]>` value.
     #[allow(unused)] // May be used on code generated files.
-    pub(crate) fn to_vec_i32(&self) -> Vec<i32> {
-        if let Value::VecInt32(v) = self {
+    pub(crate) fn to_array_i32(&self) -> Box<[i32]> {
+        if let Value::ArrayInt32(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<u32>` by clone. Return empty vector if it's not a `Vec<u32>` value.
-    pub(crate) fn to_vec_u32(&self) -> Vec<u32> {
-        if let Value::VecUint32(v) = self {
+    /// Returns value as `Box<[u32]>` by clone. Return empty vector if it's not a `Box<[u32]>` value.
+    pub(crate) fn to_array_u32(&self) -> Box<[u32]> {
+        if let Value::ArrayUint32(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<String>` by clone. Return empty vector if it's not a `Vec<String>` value.
-    pub(crate) fn to_vec_string(&self) -> Vec<String> {
-        if let Value::VecString(v) = self {
+    /// Returns value as `Box<[String]>` by clone. Return empty vector if it's not a `Box<[String]>` value.
+    pub(crate) fn to_array_string(&self) -> Box<[Box<str>]> {
+        if let Value::ArrayString(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<f32>` by clone. Return empty vector if it's not a `Vec<f32>` value.
-    pub(crate) fn to_vec_f32(&self) -> Vec<f32> {
-        if let Value::VecFloat32(v) = self {
+    /// Returns value as `Box<[f32]>` by clone. Return empty vector if it's not a `Box<[f32]>` value.
+    pub(crate) fn to_array_f32(&self) -> Box<[f32]> {
+        if let Value::ArrayFloat32(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<f64>` by clone. Return empty vector if it's not a `Vec<f64>` value.
+    /// Returns value as `Box<[f64]>` by clone. Return empty vector if it's not a `Box<[f64]>` value.
     #[allow(unused)] // May be used on code generated files.
-    pub(crate) fn to_vec_f64(&self) -> Vec<f64> {
-        if let Value::VecFloat64(v) = self {
+    pub(crate) fn to_array_f64(&self) -> Box<[f64]> {
+        if let Value::ArrayFloat64(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<i64>` by clone. Return empty vector if it's not a `Vec<i64>` value.
+    /// Returns value as `Box<[i64]>` by clone. Return empty vector if it's not a `Box<[i64]>` value.
     #[allow(unused)] // May be used on code generated files.
-    pub(crate) fn to_vec_i64(&self) -> Vec<i64> {
-        if let Value::VecInt64(v) = self {
+    pub(crate) fn to_array_i64(&self) -> Box<[i64]> {
+        if let Value::ArrayInt64(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
-    /// Returns value as `Vec<u64>` by clone. Return empty vector if it's not a `Vec<u64>` value.
+    /// Returns value as `Box<[u64]>` by clone. Return empty vector if it's not a `Box<[u64]>` value.
     #[allow(unused)] // May be used on code generated files.
-    pub(crate) fn to_vec_u64(&self) -> Vec<u64> {
-        if let Value::VecUint64(v) = self {
+    pub(crate) fn to_array_u64(&self) -> Box<[u64]> {
+        if let Value::ArrayUint64(v) = self {
             return v.clone();
         }
-        Vec::new()
+        Box::new([])
     }
 
     /// Checks whether Value holds any representation of invalid value based on base_type.
@@ -821,7 +830,7 @@ impl Value {
                 FitBaseType::UINT32Z => *v != 0,
                 _ => false,
             },
-            Value::String(v) => !v.is_empty() && v.as_str() != "\x00",
+            Value::String(v) => !v.is_empty() && **v != *"\x00",
             Value::Float32(v) => f32::to_bits(*v) != u32::MAX,
             Value::Float64(v) => f64::to_bits(*v) != u64::MAX,
             Value::Int64(v) => *v != i64::MAX,
@@ -830,29 +839,29 @@ impl Value {
                 FitBaseType::UINT64Z => *v != 0,
                 _ => false,
             },
-            Value::VecInt8(v) => v.iter().any(|&x| x != i8::MAX),
-            Value::VecUint8(v) => match base_type {
+            Value::ArrayInt8(v) => v.iter().any(|&x| x != i8::MAX),
+            Value::ArrayUint8(v) => match base_type {
                 FitBaseType::UINT8 => v.iter().any(|&x| x != u8::MAX),
                 FitBaseType::UINT8Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
-            Value::VecInt16(v) => v.iter().any(|&x| x != i16::MAX),
-            Value::VecUint16(v) => match base_type {
+            Value::ArrayInt16(v) => v.iter().any(|&x| x != i16::MAX),
+            Value::ArrayUint16(v) => match base_type {
                 FitBaseType::UINT16 => v.iter().any(|&x| x != u16::MAX),
                 FitBaseType::UINT16Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
-            Value::VecInt32(v) => v.iter().any(|&x| x != i32::MAX),
-            Value::VecUint32(v) => match base_type {
+            Value::ArrayInt32(v) => v.iter().any(|&x| x != i32::MAX),
+            Value::ArrayUint32(v) => match base_type {
                 FitBaseType::UINT32 => v.iter().any(|&x| x != u32::MAX),
                 FitBaseType::UINT32Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
-            Value::VecString(v) => v.iter().any(|x| !x.is_empty() && x.as_str() != "\x00"),
-            Value::VecFloat32(v) => v.iter().any(|&x| x.to_bits() != u32::MAX),
-            Value::VecFloat64(v) => v.iter().any(|&x| x.to_bits() != u64::MAX),
-            Value::VecInt64(v) => v.iter().any(|&x| x != i64::MAX),
-            Value::VecUint64(v) => match base_type {
+            Value::ArrayString(v) => v.iter().any(|x| !x.is_empty() && **x != *"\x00"),
+            Value::ArrayFloat32(v) => v.iter().any(|&x| x.to_bits() != u32::MAX),
+            Value::ArrayFloat64(v) => v.iter().any(|&x| x.to_bits() != u64::MAX),
+            Value::ArrayInt64(v) => v.iter().any(|&x| x != i64::MAX),
+            Value::ArrayUint64(v) => match base_type {
                 FitBaseType::UINT64 => v.iter().any(|&x| x != u64::MAX),
                 FitBaseType::UINT64Z => v.iter().any(|&x| x != 0),
                 _ => false,
@@ -886,26 +895,26 @@ impl Value {
             Value::Uint64(_) => {
                 base_type == FitBaseType::UINT64 || base_type == FitBaseType::UINT64Z
             }
-            Value::VecInt8(_) => base_type == FitBaseType::SINT8,
-            Value::VecUint8(_) => {
+            Value::ArrayInt8(_) => base_type == FitBaseType::SINT8,
+            Value::ArrayUint8(_) => {
                 base_type == FitBaseType::ENUM
                     || base_type == FitBaseType::UINT8
                     || base_type == FitBaseType::UINT8Z
                     || base_type == FitBaseType::BYTE
             }
-            Value::VecInt16(_) => base_type == FitBaseType::SINT16,
-            Value::VecUint16(_) => {
+            Value::ArrayInt16(_) => base_type == FitBaseType::SINT16,
+            Value::ArrayUint16(_) => {
                 base_type == FitBaseType::UINT16 || base_type == FitBaseType::UINT16Z
             }
-            Value::VecInt32(_) => base_type == FitBaseType::SINT32,
-            Value::VecUint32(_) => {
+            Value::ArrayInt32(_) => base_type == FitBaseType::SINT32,
+            Value::ArrayUint32(_) => {
                 base_type == FitBaseType::UINT32 || base_type == FitBaseType::UINT32Z
             }
-            Value::VecString(_) => base_type == FitBaseType::STRING,
-            Value::VecFloat32(_) => base_type == FitBaseType::FLOAT32,
-            Value::VecFloat64(_) => base_type == FitBaseType::FLOAT64,
-            Value::VecInt64(_) => base_type == FitBaseType::SINT64,
-            Value::VecUint64(_) => {
+            Value::ArrayString(_) => base_type == FitBaseType::STRING,
+            Value::ArrayFloat32(_) => base_type == FitBaseType::FLOAT32,
+            Value::ArrayFloat64(_) => base_type == FitBaseType::FLOAT64,
+            Value::ArrayInt64(_) => base_type == FitBaseType::SINT64,
+            Value::ArrayUint64(_) => {
                 base_type == FitBaseType::UINT64 || base_type == FitBaseType::UINT64Z
             }
             _ => false,
@@ -927,17 +936,17 @@ impl Value {
                 }
                 n
             }
-            Value::VecInt8(v) => v.len(),
-            Value::VecUint8(v) => v.len(),
-            Value::VecInt16(v) => v.len() * 2,
-            Value::VecUint16(v) => v.len() * 2,
-            Value::VecInt32(v) => v.len() * 4,
-            Value::VecUint32(v) => v.len() * 4,
-            Value::VecFloat32(v) => v.len() * 4,
-            Value::VecFloat64(v) => v.len() * 8,
-            Value::VecInt64(v) => v.len() * 8,
-            Value::VecUint64(v) => v.len() * 8,
-            Value::VecString(v) => {
+            Value::ArrayInt8(v) => v.len(),
+            Value::ArrayUint8(v) => v.len(),
+            Value::ArrayInt16(v) => v.len() * 2,
+            Value::ArrayUint16(v) => v.len() * 2,
+            Value::ArrayInt32(v) => v.len() * 4,
+            Value::ArrayUint32(v) => v.len() * 4,
+            Value::ArrayFloat32(v) => v.len() * 4,
+            Value::ArrayFloat64(v) => v.len() * 8,
+            Value::ArrayInt64(v) => v.len() * 8,
+            Value::ArrayUint64(v) => v.len() * 8,
+            Value::ArrayString(v) => {
                 let mut size = 0usize;
                 for x in v {
                     let n = x.len();
@@ -1009,7 +1018,7 @@ mod tests {
         profile::typedef::FitBaseType,
         proto::{ProtocolVersion, Value},
     };
-    use alloc::{borrow::ToOwned, string::String, vec, vec::Vec};
+    use alloc::{string::String, vec::Vec};
 
     #[test]
     fn test_value_strcount() {
@@ -1202,167 +1211,173 @@ mod tests {
                 is_valid: true,
             },
             Case {
-                value: Value::String("rustyfit".to_owned()),
+                value: Value::String(Box::from("rustyfit")),
                 base_type: FitBaseType::STRING,
                 is_valid: true,
             },
             Case {
-                value: Value::String("".to_owned()),
+                value: Value::String(Box::from("")),
                 base_type: FitBaseType::STRING,
                 is_valid: false,
             },
             Case {
-                value: Value::String("\x00".to_owned()),
+                value: Value::String(Box::from("\x00")),
                 base_type: FitBaseType::STRING,
                 is_valid: false,
             },
             Case {
-                value: Value::VecInt8(vec![0i8, 1i8]),
+                value: Value::ArrayInt8(Box::new([0i8, 1i8])),
                 base_type: FitBaseType::SINT8,
                 is_valid: true,
             },
             Case {
-                value: Value::VecInt8(vec![i8::MAX, i8::MAX]),
+                value: Value::ArrayInt8(Box::new([i8::MAX, i8::MAX])),
                 base_type: FitBaseType::SINT8,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint8(vec![0u8, 1u8]),
+                value: Value::ArrayUint8(Box::new([0u8, 1u8])),
                 base_type: FitBaseType::UINT8,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint8(vec![0u8, 1u8]),
+                value: Value::ArrayUint8(Box::new([0u8, 1u8])),
                 base_type: FitBaseType::UINT8Z,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint8(vec![u8::MAX, u8::MAX]),
+                value: Value::ArrayUint8(Box::new([u8::MAX, u8::MAX])),
                 base_type: FitBaseType::UINT8,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint8(vec![u8::MIN, u8::MIN]),
+                value: Value::ArrayUint8(Box::new([u8::MIN, u8::MIN])),
                 base_type: FitBaseType::UINT8Z,
                 is_valid: false,
             },
             Case {
-                value: Value::VecInt16(vec![0i16, 1i16]),
+                value: Value::ArrayInt16(Box::new([0i16, 1i16])),
                 base_type: FitBaseType::SINT16,
                 is_valid: true,
             },
             Case {
-                value: Value::VecInt16(vec![i16::MAX, i16::MAX]),
+                value: Value::ArrayInt16(Box::new([i16::MAX, i16::MAX])),
                 base_type: FitBaseType::SINT16,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint16(vec![0u16, 1u16]),
+                value: Value::ArrayUint16(Box::new([0u16, 1u16])),
                 base_type: FitBaseType::UINT16,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint16(vec![0u16, 1u16]),
+                value: Value::ArrayUint16(Box::new([0u16, 1u16])),
                 base_type: FitBaseType::UINT16Z,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint16(vec![u16::MAX, u16::MAX]),
+                value: Value::ArrayUint16(Box::new([u16::MAX, u16::MAX])),
                 base_type: FitBaseType::UINT16,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint16(vec![u16::MIN, u16::MIN]),
+                value: Value::ArrayUint16(Box::new([u16::MIN, u16::MIN])),
                 base_type: FitBaseType::UINT16Z,
                 is_valid: false,
             },
             Case {
-                value: Value::VecInt32(vec![0i32, 1i32]),
+                value: Value::ArrayInt32(Box::new([0i32, 1i32])),
                 base_type: FitBaseType::SINT32,
                 is_valid: true,
             },
             Case {
-                value: Value::VecInt32(vec![i32::MAX, i32::MAX]),
+                value: Value::ArrayInt32(Box::new([i32::MAX, i32::MAX])),
                 base_type: FitBaseType::SINT32,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint32(vec![0u32, 1u32]),
+                value: Value::ArrayUint32(Box::new([0u32, 1u32])),
                 base_type: FitBaseType::UINT32,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint32(vec![0u32, 1u32]),
+                value: Value::ArrayUint32(Box::new([0u32, 1u32])),
                 base_type: FitBaseType::UINT32Z,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint32(vec![u32::MAX, u32::MAX]),
+                value: Value::ArrayUint32(Box::new([u32::MAX, u32::MAX])),
                 base_type: FitBaseType::UINT32,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint32(vec![u32::MIN, u32::MIN]),
+                value: Value::ArrayUint32(Box::new([u32::MIN, u32::MIN])),
                 base_type: FitBaseType::UINT32Z,
                 is_valid: false,
             },
             Case {
-                value: Value::VecFloat32(vec![0f32, 1f32]),
+                value: Value::ArrayFloat32(Box::new([0f32, 1f32])),
                 base_type: FitBaseType::FLOAT32,
                 is_valid: true,
             },
             Case {
-                value: Value::VecFloat32(vec![f32::from_bits(u32::MAX), f32::from_bits(u32::MAX)]),
+                value: Value::ArrayFloat32(Box::new([
+                    f32::from_bits(u32::MAX),
+                    f32::from_bits(u32::MAX),
+                ])),
                 base_type: FitBaseType::FLOAT32,
                 is_valid: false,
             },
             Case {
-                value: Value::VecFloat64(vec![0f64, 1f64]),
+                value: Value::ArrayFloat64(Box::new([0f64, 1f64])),
                 base_type: FitBaseType::FLOAT64,
                 is_valid: true,
             },
             Case {
-                value: Value::VecFloat64(vec![f64::from_bits(u64::MAX), f64::from_bits(u64::MAX)]),
+                value: Value::ArrayFloat64(Box::new([
+                    f64::from_bits(u64::MAX),
+                    f64::from_bits(u64::MAX),
+                ])),
                 base_type: FitBaseType::FLOAT64,
                 is_valid: false,
             },
             Case {
-                value: Value::VecInt64(vec![0i64, 1i64]),
+                value: Value::ArrayInt64(Box::new([0i64, 1i64])),
                 base_type: FitBaseType::SINT64,
                 is_valid: true,
             },
             Case {
-                value: Value::VecInt64(vec![i64::MAX, i64::MAX]),
+                value: Value::ArrayInt64(Box::new([i64::MAX, i64::MAX])),
                 base_type: FitBaseType::SINT64,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint64(vec![0u64, 1u64]),
+                value: Value::ArrayUint64(Box::new([0u64, 1u64])),
                 base_type: FitBaseType::UINT64,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint64(vec![0u64, 1u64]),
+                value: Value::ArrayUint64(Box::new([0u64, 1u64])),
                 base_type: FitBaseType::UINT64Z,
                 is_valid: true,
             },
             Case {
-                value: Value::VecUint64(vec![u64::MAX, u64::MAX]),
+                value: Value::ArrayUint64(Box::new([u64::MAX, u64::MAX])),
                 base_type: FitBaseType::UINT64,
                 is_valid: false,
             },
             Case {
-                value: Value::VecUint64(vec![u64::MIN, u64::MIN]),
+                value: Value::ArrayUint64(Box::new([u64::MIN, u64::MIN])),
                 base_type: FitBaseType::UINT64Z,
                 is_valid: false,
             },
             Case {
-                value: Value::VecString(vec!["rustyfit".to_owned(), "rustyfit".to_owned()]),
+                value: Value::ArrayString(Box::new([Box::from("rustyfit"), Box::from("rustyfit")])),
                 base_type: FitBaseType::STRING,
                 is_valid: true,
             },
             Case {
-                value: Value::VecString(vec!["\x00".to_owned(), "\x00".to_owned()]),
+                value: Value::ArrayString(Box::new([Box::from("\x00"), Box::from("\x00")])),
                 base_type: FitBaseType::STRING,
                 is_valid: false,
             },
@@ -1436,14 +1451,14 @@ mod tests {
                 array: false,
                 base_type: FitBaseType::STRING,
                 arch: 0,
-                expected: Value::String(String::from("FIT")),
+                expected: Value::String(String::from("FIT").into_boxed_str()),
             },
             Case {
                 buf: "FIT".as_bytes().to_vec(), // without utf8 null-terminated string
                 array: false,
                 base_type: FitBaseType::STRING,
                 arch: 0,
-                expected: Value::String(String::from("FIT")),
+                expected: Value::String(String::from("FIT").into_boxed_str()),
             },
             Case {
                 buf: 10f32.to_le_bytes().to_vec(),
@@ -1478,42 +1493,42 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::SINT8,
                 arch: 0,
-                expected: Value::VecInt8(vec![1, 2]),
+                expected: Value::ArrayInt8(Box::new([1, 2])),
             },
             Case {
                 buf: [1u8, 2u8].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT8,
                 arch: 0,
-                expected: Value::VecUint8(vec![1, 2]),
+                expected: Value::ArrayUint8(Box::new([1, 2])),
             },
             Case {
                 buf: [1i16, 2i16].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::SINT16,
                 arch: 0,
-                expected: Value::VecInt16(vec![1, 2]),
+                expected: Value::ArrayInt16(Box::new([1, 2])),
             },
             Case {
                 buf: [1u16, 2u16].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT16,
                 arch: 0,
-                expected: Value::VecUint16(vec![1, 2]),
+                expected: Value::ArrayUint16(Box::new([1, 2])),
             },
             Case {
                 buf: [1i32, 2i32].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::SINT32,
                 arch: 0,
-                expected: Value::VecInt32(vec![1, 2]),
+                expected: Value::ArrayInt32(Box::new([1, 2])),
             },
             Case {
                 buf: [1u32, 2u32].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT32,
                 arch: 0,
-                expected: Value::VecUint32(vec![1, 2]),
+                expected: Value::ArrayUint32(Box::new([1, 2])),
             },
             Case {
                 buf: [String::from("1\x00"), String::from("2\x00")]
@@ -1523,7 +1538,7 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::STRING,
                 arch: 0,
-                expected: Value::VecString(vec![String::from("1"), String::from("2")]),
+                expected: Value::ArrayString(Box::new([Box::from("1"), Box::from("2")])),
             },
             Case {
                 buf: [String::from("1\x00"), String::from("2")]
@@ -1533,7 +1548,10 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::STRING,
                 arch: 0,
-                expected: Value::VecString(vec![String::from("1"), String::from("2")]),
+                expected: Value::ArrayString(Box::new([
+                    String::from("1").into_boxed_str(),
+                    String::from("2").into_boxed_str(),
+                ])),
             },
             Case {
                 buf: [1.0f32, 2.0f32]
@@ -1543,7 +1561,7 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::FLOAT32,
                 arch: 0,
-                expected: Value::VecFloat32(vec![1.0, 2.0]),
+                expected: Value::ArrayFloat32(Box::new([1.0, 2.0])),
             },
             Case {
                 buf: [1.0f64, 2.0f64]
@@ -1553,21 +1571,21 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::FLOAT64,
                 arch: 0,
-                expected: Value::VecFloat64(vec![1.0, 2.0]),
+                expected: Value::ArrayFloat64(Box::new([1.0, 2.0])),
             },
             Case {
                 buf: [1i64, 2i64].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::SINT64,
                 arch: 0,
-                expected: Value::VecInt64(vec![1, 2]),
+                expected: Value::ArrayInt64(Box::new([1, 2])),
             },
             Case {
                 buf: [1u64, 2u64].iter().flat_map(|v| v.to_le_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT64,
                 arch: 0,
-                expected: Value::VecUint64(vec![1, 2]),
+                expected: Value::ArrayUint64(Box::new([1, 2])),
             },
             Case {
                 buf: 10i8.to_be_bytes().to_vec(),
@@ -1644,42 +1662,42 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::SINT8,
                 arch: 1,
-                expected: Value::VecInt8(vec![1, 2]),
+                expected: Value::ArrayInt8(Box::new([1, 2])),
             },
             Case {
                 buf: [1u8, 2u8].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT8,
                 arch: 1,
-                expected: Value::VecUint8(vec![1, 2]),
+                expected: Value::ArrayUint8(Box::new([1, 2])),
             },
             Case {
                 buf: [1i16, 2i16].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::SINT16,
                 arch: 1,
-                expected: Value::VecInt16(vec![1, 2]),
+                expected: Value::ArrayInt16(Box::new([1, 2])),
             },
             Case {
                 buf: [1u16, 2u16].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT16,
                 arch: 1,
-                expected: Value::VecUint16(vec![1, 2]),
+                expected: Value::ArrayUint16(Box::new([1, 2])),
             },
             Case {
                 buf: [1i32, 2i32].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::SINT32,
                 arch: 1,
-                expected: Value::VecInt32(vec![1, 2]),
+                expected: Value::ArrayInt32(Box::new([1, 2])),
             },
             Case {
                 buf: [1u32, 2u32].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT32,
                 arch: 1,
-                expected: Value::VecUint32(vec![1, 2]),
+                expected: Value::ArrayUint32(Box::new([1, 2])),
             },
             Case {
                 buf: [1.0f32, 2.0f32]
@@ -1689,7 +1707,7 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::FLOAT32,
                 arch: 1,
-                expected: Value::VecFloat32(vec![1.0, 2.0]),
+                expected: Value::ArrayFloat32(Box::new([1.0, 2.0])),
             },
             Case {
                 buf: [1.0f64, 2.0f64]
@@ -1699,21 +1717,21 @@ mod tests {
                 array: true,
                 base_type: FitBaseType::FLOAT64,
                 arch: 1,
-                expected: Value::VecFloat64(vec![1.0, 2.0]),
+                expected: Value::ArrayFloat64(Box::new([1.0, 2.0])),
             },
             Case {
                 buf: [1i64, 2i64].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::SINT64,
                 arch: 1,
-                expected: Value::VecInt64(vec![1, 2]),
+                expected: Value::ArrayInt64(Box::new([1, 2])),
             },
             Case {
                 buf: [1u64, 2u64].iter().flat_map(|v| v.to_be_bytes()).collect(),
                 array: true,
                 base_type: FitBaseType::UINT64,
                 arch: 1,
-                expected: Value::VecUint64(vec![1, 2]),
+                expected: Value::ArrayUint64(Box::new([1, 2])),
             },
             Case {
                 buf: [1u64, 2u64].iter().flat_map(|v| v.to_be_bytes()).collect(),
@@ -1859,55 +1877,53 @@ mod tests {
             r#"{"t":"float64","c":6.0}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::String("fit".to_owned())).unwrap(),
+            serde_json::to_string(&Value::String("fit".into())).unwrap(),
             r#"{"t":"string","c":"fit"}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecInt8([1, 1].into())).unwrap(),
-            r#"{"t":"vec_int8","c":[1,1]}"#
+            serde_json::to_string(&Value::ArrayInt8([1, 1].into())).unwrap(),
+            r#"{"t":"array_int8","c":[1,1]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecUint8([1, 1].into())).unwrap(),
-            r#"{"t":"vec_uint8","c":[1,1]}"#
+            serde_json::to_string(&Value::ArrayUint8([1, 1].into())).unwrap(),
+            r#"{"t":"array_uint8","c":[1,1]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecInt16([2, 2].into())).unwrap(),
-            r#"{"t":"vec_int16","c":[2,2]}"#
+            serde_json::to_string(&Value::ArrayInt16([2, 2].into())).unwrap(),
+            r#"{"t":"array_int16","c":[2,2]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecUint16([2, 2].into())).unwrap(),
-            r#"{"t":"vec_uint16","c":[2,2]}"#
+            serde_json::to_string(&Value::ArrayUint16([2, 2].into())).unwrap(),
+            r#"{"t":"array_uint16","c":[2,2]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecInt32([3, 3].into())).unwrap(),
-            r#"{"t":"vec_int32","c":[3,3]}"#
+            serde_json::to_string(&Value::ArrayInt32([3, 3].into())).unwrap(),
+            r#"{"t":"array_int32","c":[3,3]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecUint32([3, 3].into())).unwrap(),
-            r#"{"t":"vec_uint32","c":[3,3]}"#
+            serde_json::to_string(&Value::ArrayUint32([3, 3].into())).unwrap(),
+            r#"{"t":"array_uint32","c":[3,3]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecInt64([4, 4].into())).unwrap(),
-            r#"{"t":"vec_int64","c":[4,4]}"#
+            serde_json::to_string(&Value::ArrayInt64([4, 4].into())).unwrap(),
+            r#"{"t":"array_int64","c":[4,4]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecUint64([4, 4].into())).unwrap(),
-            r#"{"t":"vec_uint64","c":[4,4]}"#
+            serde_json::to_string(&Value::ArrayUint64([4, 4].into())).unwrap(),
+            r#"{"t":"array_uint64","c":[4,4]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecFloat32([5.0, 5.0].into())).unwrap(),
-            r#"{"t":"vec_float32","c":[5.0,5.0]}"#
+            serde_json::to_string(&Value::ArrayFloat32([5.0, 5.0].into())).unwrap(),
+            r#"{"t":"array_float32","c":[5.0,5.0]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecFloat64([6.0, 6.0].into())).unwrap(),
-            r#"{"t":"vec_float64","c":[6.0,6.0]}"#
+            serde_json::to_string(&Value::ArrayFloat64([6.0, 6.0].into())).unwrap(),
+            r#"{"t":"array_float64","c":[6.0,6.0]}"#
         );
         assert_eq!(
-            serde_json::to_string(&Value::VecString(
-                ["rusty".to_owned(), "fit".to_owned()].into()
-            ))
-            .unwrap(),
-            r#"{"t":"vec_string","c":["rusty","fit"]}"#
+            serde_json::to_string(&Value::ArrayString(["rusty".into(), "fit".into()].into()))
+                .unwrap(),
+            r#"{"t":"array_string","c":["rusty","fit"]}"#
         );
     }
 }

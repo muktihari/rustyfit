@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,7 +18,7 @@ pub struct Software {
     pub message_index: typedef::MessageIndex,
     /// Scale: 100
     pub version: u16,
-    pub part_number: String,
+    pub part_number: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -31,15 +30,15 @@ impl Software {
     pub const MESSAGE_INDEX: u8 = 254;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`
     pub const VERSION: u8 = 3;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const PART_NUMBER: u8 = 5;
 
     /// Create new Software with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             version: u16::MAX,
-            part_number: String::new(),
+            part_number: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -94,7 +93,7 @@ impl From<&Message> for Software {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
                 3 => v.version = field.value.as_u16(),
-                5 => v.part_number = field.value.as_str().to_owned(),
+                5 => v.part_number = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -176,7 +175,7 @@ impl Serialize for Software {
 struct De {
     message_index: typedef::MessageIndex,
     version: f64,
-    part_number: String,
+    part_number: Box<str>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -207,7 +206,7 @@ impl Default for De {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             version: f64::from_bits(u64::MAX),
-            part_number: String::new(),
+            part_number: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
