@@ -41,6 +41,7 @@ type Builder struct {
 	names map[string]string
 
 	maxComponentBits    int
+	uint                byte
 	totalAccumulate     int
 	totalAccumulateList string
 }
@@ -137,6 +138,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Filename:     "lookup.rs",
 			Data: Data{
 				MaxComponentBits:    b.maxComponentBits,
+				Uint:                b.uint,
 				TotalAccumulate:     b.totalAccumulate,
 				TotalAccumulateList: b.totalAccumulateList,
 				Refs:                buf.String(),
@@ -175,6 +177,9 @@ func (b *Builder) makeFieldRefs(message parser.Message) string {
 		accumulate := accumulateOrDefault(field.Accumulate, 0)
 		if accumulate {
 			fmt.Fprintf(buf, "accumulate: %t, ", accumulate)
+			if x := b.lookup.BaseType(field.Type).Size() * 8; x > b.uint {
+				b.uint = x
+			}
 			b.totalAccumulate += 1
 			b.totalAccumulateList += fmt.Sprintf("/// - `%s`: %s\n", message.Name, field.Name)
 		}
@@ -240,6 +245,10 @@ func (b *Builder) makeComponents(compField parser.ComponentField, messageName st
 		bits := bitsOrDefault(compField.GetBits(), i)                                             // component index or default
 		fmt.Fprintf(buf, "bits: %d", bits)
 		buf.WriteString(" },")
+
+		if bits > b.uint {
+			b.uint = bits
+		}
 
 		totalBits += int(bits)
 	}

@@ -19,6 +19,11 @@ pub(crate) const MAX_COMPONENT_BITS: usize = 240;
 /// - `hr`: event_timestamp_12
 pub(crate) const TOTAL_ACCUMULATE: usize = 7;
 
+/// Type alias for an unsigned integer type that is big enough to hold an accumulable value or a component bits value.
+/// This will either be `u32` or `u64` depends on Profile.xlsx specifications, the smallest possible type will be picked
+/// so the memory usage is optimized when `Decoder` accumulates value or expands the components.
+pub(crate) type Uint = u32;
+
 /// FieldReference acts as a representation of a field as defined in the Global FIT Profile.
 #[derive(Debug, Clone, Copy)]
 pub struct FieldReference<'a> {

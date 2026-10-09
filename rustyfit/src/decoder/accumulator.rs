@@ -1,5 +1,8 @@
 use crate::{
-    profile::{lookup, typedef::MesgNum},
+    profile::{
+        lookup::{TOTAL_ACCUMULATE, Uint},
+        typedef::MesgNum,
+    },
     proto::Value,
 };
 
@@ -7,7 +10,7 @@ pub(super) struct Accumulator {
     /// Value's unique identifier is a combination of `mesg_num` and `field_num`.
     /// Only messages defined in the `Profile.xlsx` can be accumulated, so max capacity
     /// can be calculated. Since it's relatively small, Array is used to avoid allocation.
-    values: [AccuValue; lookup::TOTAL_ACCUMULATE],
+    values: [AccuValue; TOTAL_ACCUMULATE],
     len: usize,
 }
 
@@ -21,78 +24,78 @@ impl Accumulator {
                     value: 0,
                     last: 0,
                 }
-            }; lookup::TOTAL_ACCUMULATE],
+            }; TOTAL_ACCUMULATE],
             len: 0,
         }
     }
 
     pub(super) fn collect(&mut self, mesg_num: MesgNum, field_num: u8, value: &Value) {
         match value {
-            Value::Uint8(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Int8(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Uint16(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Int16(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Uint32(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Int32(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Float32(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Float64(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Int64(v) => self.collect_u64(mesg_num, field_num, *v as u64),
-            Value::Uint64(v) => self.collect_u64(mesg_num, field_num, *v),
+            Value::Uint8(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Int8(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Uint16(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Int16(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Uint32(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Int32(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Float32(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Float64(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Int64(v) => self.collect_value(mesg_num, field_num, *v as Uint),
+            Value::Uint64(v) => self.collect_value(mesg_num, field_num, *v as Uint),
             Value::ArrayInt8(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayUint8(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayInt16(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayUint16(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayInt32(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayUint32(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayFloat32(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayFloat64(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayInt64(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x as u64);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             Value::ArrayUint64(v) => {
                 if let Some(&x) = v.last() {
-                    self.collect_u64(mesg_num, field_num, x);
+                    self.collect_value(mesg_num, field_num, x as Uint);
                 }
             }
             _ => {}
         }
     }
 
-    fn collect_u64(&mut self, mesg_num: MesgNum, field_num: u8, value: u64) {
+    fn collect_value(&mut self, mesg_num: MesgNum, field_num: u8, value: Uint) {
         if let Some(v) = self
             .values
             .iter_mut()
@@ -116,16 +119,16 @@ impl Accumulator {
         &mut self,
         mesg_num: MesgNum,
         field_num: u8,
-        value: u64,
+        value: Uint,
         bits: u8,
-    ) -> u64 {
+    ) -> Uint {
         if let Some(v) = self
             .values
             .iter_mut()
             .take(self.len)
             .find(|v| v.mesg_num == mesg_num && v.field_num == field_num)
         {
-            let mask: u64 = (1 << bits) - 1;
+            let mask: Uint = (1 << bits) - 1;
             v.value += (value.wrapping_sub(v.last)) & mask;
             v.last = value;
             return v.value;
@@ -149,8 +152,8 @@ impl Accumulator {
 struct AccuValue {
     mesg_num: MesgNum,
     field_num: u8,
-    value: u64,
-    last: u64,
+    value: Uint,
+    last: Uint,
 }
 
 #[cfg(test)]
@@ -216,7 +219,7 @@ mod tests {
     fn test_collect_64() {
         let mut accumu = Accumulator::new();
 
-        accumu.collect_u64(MesgNum(0), 0, 10);
+        accumu.collect_value(MesgNum(0), 0, 10);
         assert_eq!(
             &[AccuValue {
                 mesg_num: MesgNum(0),
@@ -227,7 +230,7 @@ mod tests {
             &accumu.values[..accumu.len],
         );
 
-        accumu.collect_u64(MesgNum(0), 0, 11);
+        accumu.collect_value(MesgNum(0), 0, 11);
         assert_eq!(
             &[AccuValue {
                 mesg_num: MesgNum(0),
@@ -238,7 +241,7 @@ mod tests {
             &accumu.values[..accumu.len],
         );
 
-        accumu.collect_u64(MesgNum(0), 1, 11);
+        accumu.collect_value(MesgNum(0), 1, 11);
         assert_eq!(
             &[
                 AccuValue {
@@ -262,7 +265,7 @@ mod tests {
     fn test_accumulate() {
         let mut accumu = Accumulator::new();
 
-        accumu.collect_u64(MesgNum(1), 1, 1);
+        accumu.collect_value(MesgNum(1), 1, 1);
         let val = accumu.accumulate(MesgNum(2), 2, 2, 8);
         assert_eq!(2, val, "accumulate non-existing value");
 
@@ -291,7 +294,7 @@ mod tests {
     #[test]
     fn reset() {
         let mut accumu = Accumulator::new();
-        accumu.collect_u64(MesgNum(1), 1, 1);
+        accumu.collect_value(MesgNum(1), 1, 1);
         assert_eq!(1, accumu.len);
         accumu.reset();
         assert_eq!(0, accumu.len);
