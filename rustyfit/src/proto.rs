@@ -332,11 +332,7 @@ impl Value {
     pub(crate) fn from_parts(buf: &[u8], array: bool, base_type: FitBaseType, arch: u8) -> Value {
         match base_type {
             FitBaseType::SINT8 => match array {
-                true => Value::ArrayInt8({
-                    let mut vals: Vec<i8> = Vec::with_capacity(buf.len());
-                    vals.extend(buf.iter().map(|&x| x as i8));
-                    vals.into_boxed_slice()
-                }),
+                true => Value::ArrayInt8(buf.iter().map(|&x| x as i8).collect()),
                 false => Value::Int8(buf[0] as i8),
             },
             FitBaseType::ENUM | FitBaseType::BYTE | FitBaseType::UINT8 | FitBaseType::UINT8Z => {
@@ -346,23 +342,19 @@ impl Value {
                 }
             }
             FitBaseType::SINT16 => match array {
-                true => Value::ArrayInt16({
-                    let mut vals: Vec<i16> = Vec::with_capacity(buf.len() / 2);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<2>()
-                                .0
-                                .iter()
-                                .map(|&x| i16::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<2>()
-                                .0
-                                .iter()
-                                .map(|&x| i16::from_be_bytes(x)),
-                        ),
-                    };
-                    vals.into_boxed_slice()
+                true => Value::ArrayInt16(match arch {
+                    0 => buf
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .map(|&x| i16::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .map(|&x| i16::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Int16(i16::from_le_bytes(buf[..2].try_into().unwrap())),
@@ -370,23 +362,19 @@ impl Value {
                 },
             },
             FitBaseType::UINT16 | FitBaseType::UINT16Z => match array {
-                true => Value::ArrayUint16({
-                    let mut vals: Vec<u16> = Vec::with_capacity(buf.len() / 2);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<2>()
-                                .0
-                                .iter()
-                                .map(|&x| u16::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<2>()
-                                .0
-                                .iter()
-                                .map(|&x| u16::from_be_bytes(x)),
-                        ),
-                    };
-                    vals.into_boxed_slice()
+                true => Value::ArrayUint16(match arch {
+                    0 => buf
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .map(|&x| u16::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<2>()
+                        .0
+                        .iter()
+                        .map(|&x| u16::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Uint16(u16::from_le_bytes(buf[..2].try_into().unwrap())),
@@ -394,23 +382,19 @@ impl Value {
                 },
             },
             FitBaseType::SINT32 => match array {
-                true => Value::ArrayInt32({
-                    let mut vals: Vec<i32> = Vec::with_capacity(buf.len() / 4);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<4>()
-                                .0
-                                .iter()
-                                .map(|&x| i32::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<4>()
-                                .0
-                                .iter()
-                                .map(|&x| i32::from_be_bytes(x)),
-                        ),
-                    };
-                    vals.into_boxed_slice()
+                true => Value::ArrayInt32(match arch {
+                    0 => buf
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|&x| i32::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|&x| i32::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Int32(i32::from_le_bytes(buf[..4].try_into().unwrap())),
@@ -418,23 +402,19 @@ impl Value {
                 },
             },
             FitBaseType::UINT32 | FitBaseType::UINT32Z => match array {
-                true => Value::ArrayUint32({
-                    let mut vals: Vec<u32> = Vec::with_capacity(buf.len() / 4);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<4>()
-                                .0
-                                .iter()
-                                .map(|&x| u32::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<4>()
-                                .0
-                                .iter()
-                                .map(|&x| u32::from_be_bytes(x)),
-                        ),
-                    };
-                    vals.into_boxed_slice()
+                true => Value::ArrayUint32(match arch {
+                    0 => buf
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|&x| u32::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|&x| u32::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Uint32(u32::from_le_bytes(buf[..4].try_into().unwrap())),
@@ -448,19 +428,11 @@ impl Value {
                     for (i, &v) in buf.iter().enumerate() {
                         if v != 0 {
                             if i == buf.len() - 1 {
-                                vals.push(
-                                    String::from_utf8_lossy(&buf[last..i + 1])
-                                        .into_owned()
-                                        .into_boxed_str(),
-                                );
+                                vals.push(String::from_utf8_lossy(&buf[last..i + 1]).into());
                             }
                         } else {
                             if last != i {
-                                vals.push(
-                                    String::from_utf8_lossy(&buf[last..i])
-                                        .into_owned()
-                                        .into_boxed_str(),
-                                );
+                                vals.push(String::from_utf8_lossy(&buf[last..i]).into());
                             }
                             last = i + 1;
                         }
@@ -471,28 +443,23 @@ impl Value {
                     String::from_utf8_lossy(
                         &buf[0..buf.iter().position(|&v| v == 0).unwrap_or(buf.len())],
                     )
-                    .into_owned()
-                    .into_boxed_str(),
+                    .into(),
                 ),
             },
             FitBaseType::FLOAT32 => match array {
-                true => Value::ArrayFloat32({
-                    let mut vals: Vec<f32> = Vec::with_capacity(buf.len() / 4);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<4>()
-                                .0
-                                .iter()
-                                .map(|&x| f32::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<4>()
-                                .0
-                                .iter()
-                                .map(|&x| f32::from_be_bytes(x)),
-                        ),
-                    };
-                    vals.into_boxed_slice()
+                true => Value::ArrayFloat32(match arch {
+                    0 => buf
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|&x| f32::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<4>()
+                        .0
+                        .iter()
+                        .map(|&x| f32::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Float32(f32::from_le_bytes(buf[..4].try_into().unwrap())),
@@ -500,23 +467,19 @@ impl Value {
                 },
             },
             FitBaseType::FLOAT64 => match array {
-                true => Value::ArrayFloat64({
-                    let mut vals: Vec<f64> = Vec::with_capacity(buf.len() / 8);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<8>()
-                                .0
-                                .iter()
-                                .map(|&x| f64::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<8>()
-                                .0
-                                .iter()
-                                .map(|&x| f64::from_be_bytes(x)),
-                        ),
-                    }
-                    vals.into_boxed_slice()
+                true => Value::ArrayFloat64(match arch {
+                    0 => buf
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .map(|&x| f64::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .map(|&x| f64::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Float64(f64::from_le_bytes(buf[..8].try_into().unwrap())),
@@ -524,23 +487,19 @@ impl Value {
                 },
             },
             FitBaseType::SINT64 => match array {
-                true => Value::ArrayInt64({
-                    let mut vals: Vec<i64> = Vec::with_capacity(buf.len() / 8);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<8>()
-                                .0
-                                .iter()
-                                .map(|&x| i64::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<8>()
-                                .0
-                                .iter()
-                                .map(|&x| i64::from_be_bytes(x)),
-                        ),
-                    }
-                    vals.into_boxed_slice()
+                true => Value::ArrayInt64(match arch {
+                    0 => buf
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .map(|&x| i64::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .map(|&x| i64::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Int64(i64::from_le_bytes(buf[..8].try_into().unwrap())),
@@ -548,23 +507,19 @@ impl Value {
                 },
             },
             FitBaseType::UINT64 | FitBaseType::UINT64Z => match array {
-                true => Value::ArrayUint64({
-                    let mut vals: Vec<u64> = Vec::with_capacity(buf.len() / 8);
-                    match arch {
-                        0 => vals.extend(
-                            buf.as_chunks::<8>()
-                                .0
-                                .iter()
-                                .map(|&x| u64::from_le_bytes(x)),
-                        ),
-                        _ => vals.extend(
-                            buf.as_chunks::<8>()
-                                .0
-                                .iter()
-                                .map(|&x| u64::from_be_bytes(x)),
-                        ),
-                    }
-                    vals.into_boxed_slice()
+                true => Value::ArrayUint64(match arch {
+                    0 => buf
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .map(|&x| u64::from_le_bytes(x))
+                        .collect(),
+                    _ => buf
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .map(|&x| u64::from_be_bytes(x))
+                        .collect(),
                 }),
                 false => match arch {
                     0 => Value::Uint64(u64::from_le_bytes(buf[..8].try_into().unwrap())),
