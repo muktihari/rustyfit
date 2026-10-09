@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +19,7 @@ pub struct HsaStressData {
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
     /// Units: s; Stress Level: \[0,100\] Off wrist: -1 Excess motion: -2 Not enough data: -3 Recovering from exercise: -4 Unidentified: -5 Blank: -16
-    pub stress_level: Vec<i8>,
+    pub stress_level: Box<[i8]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -30,15 +31,15 @@ impl HsaStressData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i8>`; FitBaseType::SINT8; ProfileType::Sint8; Units: `s`
+    /// Value's type: `Box<[i8]>`; FitBaseType::SINT8; ProfileType::Sint8; Units: `s`
     pub const STRESS_LEVEL: u8 = 1;
 
     /// Create new HsaStressData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            stress_level: Vec::new(),
+            stress_level: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -74,7 +75,7 @@ impl From<&Message> for HsaStressData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
-                1 => v.stress_level = field.value.to_vec_i8(),
+                1 => v.stress_level = field.value.to_array_i8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -108,7 +109,7 @@ impl From<HsaStressData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::SINT8,
-                value: Value::VecInt8(m.stress_level),
+                value: Value::ArrayInt8(m.stress_level),
                 is_expanded: false,
             });
         };
@@ -156,7 +157,7 @@ impl Serialize for HsaStressData {
 struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
-    stress_level: Vec<i8>,
+    stress_level: Box<[i8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -183,7 +184,7 @@ impl Default for De {
         Self {
             timestamp: None,
             processing_interval: u16::MAX,
-            stress_level: Vec::new(),
+            stress_level: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

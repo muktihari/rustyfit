@@ -480,15 +480,15 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
             });
             n = 8;
         }
-        Value::VecInt8(v) => v.iter().for_each(|x| {
+        Value::ArrayInt8(v) => v.iter().for_each(|x| {
             buf[n] = *x as u8;
             n += 1;
         }),
-        Value::VecUint8(v) => v.iter().for_each(|x| {
+        Value::ArrayUint8(v) => v.iter().for_each(|x| {
             buf[n] = *x;
             n += 1;
         }),
-        Value::VecInt16(v) => match arch {
+        Value::ArrayInt16(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 2].copy_from_slice(&x.to_le_bytes());
                 n += 2;
@@ -498,7 +498,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 2;
             }),
         },
-        Value::VecUint16(v) => match arch {
+        Value::ArrayUint16(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 2].copy_from_slice(&x.to_le_bytes());
                 n += 2;
@@ -508,7 +508,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 2;
             }),
         },
-        Value::VecInt32(v) => match arch {
+        Value::ArrayInt32(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 4].copy_from_slice(&x.to_le_bytes());
                 n += 4;
@@ -518,7 +518,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 4;
             }),
         },
-        Value::VecUint32(v) => match arch {
+        Value::ArrayUint32(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 4].copy_from_slice(&x.to_le_bytes());
                 n += 4;
@@ -528,7 +528,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 4;
             }),
         },
-        Value::VecString(v) => v.iter().for_each(|x| {
+        Value::ArrayString(v) => v.iter().for_each(|x| {
             let b = x.as_bytes();
             buf[n..n + b.len()].copy_from_slice(b);
             n += b.len();
@@ -537,7 +537,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 1;
             }
         }),
-        Value::VecFloat32(v) => match arch {
+        Value::ArrayFloat32(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 4].copy_from_slice(&x.to_le_bytes());
                 n += 4;
@@ -547,7 +547,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 4;
             }),
         },
-        Value::VecFloat64(v) => match arch {
+        Value::ArrayFloat64(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 8].copy_from_slice(&x.to_le_bytes());
                 n += 8;
@@ -557,7 +557,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 8;
             }),
         },
-        Value::VecInt64(v) => match arch {
+        Value::ArrayInt64(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 8].copy_from_slice(&x.to_le_bytes());
                 n += 8;
@@ -567,7 +567,7 @@ fn write_value(buf: &mut [u8], value: &Value, arch: u8) -> usize {
                 n += 8;
             }),
         },
-        Value::VecUint64(v) => match arch {
+        Value::ArrayUint64(v) => match arch {
             0 => v.iter().for_each(|x| {
                 buf[n..n + 8].copy_from_slice(&x.to_le_bytes());
                 n += 8;
@@ -712,7 +712,7 @@ mod tests {
         profile::{self, mesgdef, typedef},
         proto::{DeveloperField, FIT, Field, FileHeader, Message, ProtocolVersion, Value},
     };
-    use alloc::{borrow::ToOwned, vec, vec::Vec};
+    use alloc::{vec, vec::Vec};
     use embedded_io_adapters::std::FromStd;
 
     #[test]
@@ -904,12 +904,12 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::String("FIT".to_owned()),
+                value: Value::String(Box::from("FIT")),
                 expected: "FIT\x00".as_bytes().to_vec(),
                 arch: 0,
             },
             Case {
-                value: Value::String("".to_owned()),
+                value: Value::String(Box::from("")),
                 expected: "\x00".as_bytes().to_vec(),
                 arch: 0,
             },
@@ -924,7 +924,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecInt8(vec![1, 1]),
+                value: Value::ArrayInt8(Box::new([1, 1])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(1u8.to_le_bytes());
@@ -934,7 +934,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecUint8(vec![2, 2]),
+                value: Value::ArrayUint8(Box::new([2, 2])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(2u8.to_le_bytes());
@@ -944,7 +944,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecInt16(vec![3, 3]),
+                value: Value::ArrayInt16(Box::new([3, 3])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(3i16.to_le_bytes());
@@ -954,7 +954,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecUint16(vec![4, 4]),
+                value: Value::ArrayUint16(Box::new([4, 4])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(4u16.to_le_bytes());
@@ -964,7 +964,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecInt32(vec![5, 5]),
+                value: Value::ArrayInt32(Box::new([5, 5])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(5i32.to_le_bytes());
@@ -974,7 +974,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecUint32(vec![6, 6]),
+                value: Value::ArrayUint32(Box::new([6, 6])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(6u32.to_le_bytes());
@@ -984,7 +984,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecInt64(vec![7, 7]),
+                value: Value::ArrayInt64(Box::new([7, 7])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(7i64.to_le_bytes());
@@ -994,7 +994,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecUint64(vec![8, 8]),
+                value: Value::ArrayUint64(Box::new([8, 8])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(8u64.to_le_bytes());
@@ -1004,7 +1004,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecString(vec!["FIT".to_owned(), "SDK".to_owned()]),
+                value: Value::ArrayString(Box::new([Box::from("FIT"), Box::from("SDK")])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend("FIT\x00".as_bytes());
@@ -1014,7 +1014,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecString(vec!["".to_owned(), "SDK\x00".to_owned()]),
+                value: Value::ArrayString(Box::new([Box::from(""), Box::from("SDK\x00")])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend("\x00".as_bytes());
@@ -1024,7 +1024,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecFloat32(vec![9.0, 9.0]),
+                value: Value::ArrayFloat32(Box::new([9.0, 9.0])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(9.0f32.to_le_bytes());
@@ -1034,7 +1034,7 @@ mod tests {
                 arch: 0,
             },
             Case {
-                value: Value::VecFloat64(vec![10.0, 10.0]),
+                value: Value::ArrayFloat64(Box::new([10.0, 10.0])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(10.0f64.to_le_bytes());
@@ -1094,7 +1094,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecInt8(vec![1, 1]),
+                value: Value::ArrayInt8(Box::new([1, 1])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(1u8.to_be_bytes());
@@ -1104,7 +1104,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecUint8(vec![2, 2]),
+                value: Value::ArrayUint8(Box::new([2, 2])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(2u8.to_be_bytes());
@@ -1114,7 +1114,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecInt16(vec![3, 3]),
+                value: Value::ArrayInt16(Box::new([3, 3])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(3i16.to_be_bytes());
@@ -1124,7 +1124,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecUint16(vec![4, 4]),
+                value: Value::ArrayUint16(Box::new([4, 4])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(4u16.to_be_bytes());
@@ -1134,7 +1134,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecInt32(vec![5, 5]),
+                value: Value::ArrayInt32(Box::new([5, 5])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(5i32.to_be_bytes());
@@ -1144,7 +1144,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecUint32(vec![6, 6]),
+                value: Value::ArrayUint32(Box::new([6, 6])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(6u32.to_be_bytes());
@@ -1154,7 +1154,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecInt64(vec![7, 7]),
+                value: Value::ArrayInt64(Box::new([7, 7])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(7i64.to_be_bytes());
@@ -1164,7 +1164,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecUint64(vec![8, 8]),
+                value: Value::ArrayUint64(Box::new([8, 8])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(8u64.to_be_bytes());
@@ -1174,7 +1174,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecFloat32(vec![9.0, 9.0]),
+                value: Value::ArrayFloat32(Box::new([9.0, 9.0])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(9.0f32.to_be_bytes());
@@ -1184,7 +1184,7 @@ mod tests {
                 arch: 1,
             },
             Case {
-                value: Value::VecFloat64(vec![10.0, 10.0]),
+                value: Value::ArrayFloat64(Box::new([10.0, 10.0])),
                 expected: {
                     let mut v: Vec<u8> = Vec::new();
                     v.extend(10.0f64.to_be_bytes());

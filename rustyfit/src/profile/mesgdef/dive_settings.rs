@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +17,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 pub struct DiveSettings {
     pub timestamp: typedef::DateTime,
     pub message_index: typedef::MessageIndex,
-    pub name: String,
+    pub name: Box<str>,
     pub model: typedef::TissueModelType,
     /// Units: percent
     pub gf_low: u8,
@@ -82,7 +81,7 @@ impl DiveSettings {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::TissueModelType
     pub const MODEL: u8 = 1;
@@ -150,11 +149,11 @@ impl DiveSettings {
     pub const NO_FLY_TIME_MODE: u8 = 37;
 
     /// Create new DiveSettings with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             message_index: typedef::MessageIndex(u16::MAX),
-            name: String::new(),
+            name: Box::from(""),
             model: typedef::TissueModelType(u8::MAX),
             gf_low: u8::MAX,
             gf_high: u8::MAX,
@@ -420,7 +419,7 @@ impl From<&Message> for DiveSettings {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
-                0 => v.name = field.value.as_str().to_owned(),
+                0 => v.name = Box::from(field.value.as_str()),
                 1 => v.model = typedef::TissueModelType(field.value.as_u8()),
                 2 => v.gf_low = field.value.as_u8(),
                 3 => v.gf_high = field.value.as_u8(),
@@ -900,7 +899,7 @@ impl Serialize for DiveSettings {
 struct De {
     timestamp: Option<i64>,
     message_index: typedef::MessageIndex,
-    name: String,
+    name: Box<str>,
     model: typedef::TissueModelType,
     gf_low: u8,
     gf_high: u8,
@@ -1047,7 +1046,7 @@ impl Default for De {
         Self {
             timestamp: None,
             message_index: typedef::MessageIndex(u16::MAX),
-            name: String::new(),
+            name: Box::from(""),
             model: typedef::TissueModelType(u8::MAX),
             gf_low: u8::MAX,
             gf_high: u8::MAX,

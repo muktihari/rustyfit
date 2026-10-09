@@ -30,7 +30,7 @@ impl SleepLevel {
     pub const SLEEP_LEVEL: u8 = 0;
 
     /// Create new SleepLevel with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             sleep_level: typedef::SleepLevel(u8::MAX),

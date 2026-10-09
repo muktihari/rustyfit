@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -25,9 +26,9 @@ pub struct Set {
     pub set_type: typedef::SetType,
     /// Start time of the set
     pub start_time: typedef::DateTime,
-    pub category: Vec<typedef::ExerciseCategory>,
+    pub category: Box<[typedef::ExerciseCategory]>,
     /// Based on the associated category, see \[category\]_exercise_names
-    pub category_subtype: Vec<u16>,
+    pub category_subtype: Box<[u16]>,
     pub weight_display_unit: typedef::FitBaseUnit,
     pub message_index: typedef::MessageIndex,
     pub wkt_step_index: typedef::MessageIndex,
@@ -50,9 +51,9 @@ impl Set {
     pub const SET_TYPE: u8 = 5;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const START_TIME: u8 = 6;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::ExerciseCategory
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::ExerciseCategory
     pub const CATEGORY: u8 = 7;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const CATEGORY_SUBTYPE: u8 = 8;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::FitBaseUnit
     pub const WEIGHT_DISPLAY_UNIT: u8 = 9;
@@ -62,7 +63,7 @@ impl Set {
     pub const WKT_STEP_INDEX: u8 = 11;
 
     /// Create new Set with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             duration: u32::MAX,
@@ -70,8 +71,8 @@ impl Set {
             weight: u16::MAX,
             set_type: typedef::SetType(u8::MAX),
             start_time: typedef::DateTime(u32::MAX),
-            category: Vec::new(),
-            category_subtype: Vec::new(),
+            category: Box::new([]),
+            category_subtype: Box::new([]),
             weight_display_unit: typedef::FitBaseUnit(u16::MAX),
             message_index: typedef::MessageIndex(u16::MAX),
             wkt_step_index: typedef::MessageIndex(u16::MAX),
@@ -166,15 +167,15 @@ impl From<&Message> for Set {
                 6 => v.start_time = typedef::DateTime(field.value.as_u32()),
                 7 => {
                     v.category = match &field.value {
-                        Value::VecUint16(v) => {
+                        Value::ArrayUint16(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::ExerciseCategory(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
-                8 => v.category_subtype = field.value.to_vec_u16(),
+                8 => v.category_subtype = field.value.to_array_u16(),
                 9 => v.weight_display_unit = typedef::FitBaseUnit(field.value.as_u16()),
                 10 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
                 11 => v.wkt_step_index = typedef::MessageIndex(field.value.as_u16()),
@@ -243,9 +244,10 @@ impl From<Set> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16({
-                    let (ptr, len, capacity) = m.category.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) }
+                value: Value::ArrayUint16({
+                    let (ptr, len, capacity) = m.category.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u16>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -254,7 +256,7 @@ impl From<Set> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.category_subtype),
+                value: Value::ArrayUint16(m.category_subtype),
                 is_expanded: false,
             });
         };
@@ -354,8 +356,8 @@ struct De {
     weight: f64,
     set_type: typedef::SetType,
     start_time: Option<i64>,
-    category: Vec<typedef::ExerciseCategory>,
-    category_subtype: Vec<u16>,
+    category: Box<[typedef::ExerciseCategory]>,
+    category_subtype: Box<[u16]>,
     weight_display_unit: typedef::FitBaseUnit,
     message_index: typedef::MessageIndex,
     wkt_step_index: typedef::MessageIndex,
@@ -414,8 +416,8 @@ impl Default for De {
             weight: f64::from_bits(u64::MAX),
             set_type: typedef::SetType(u8::MAX),
             start_time: None,
-            category: Vec::new(),
-            category_subtype: Vec::new(),
+            category: Box::new([]),
+            category_subtype: Box::new([]),
             weight_display_unit: typedef::FitBaseUnit(u16::MAX),
             message_index: typedef::MessageIndex(u16::MAX),
             wkt_step_index: typedef::MessageIndex(u16::MAX),

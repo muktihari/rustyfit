@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -20,7 +19,7 @@ pub struct FileCapabilities {
     pub r#type: typedef::File,
     /// Base: UINT8Z
     pub flags: typedef::FileFlags,
-    pub directory: String,
+    pub directory: Box<str>,
     pub max_count: u16,
     /// Units: bytes
     pub max_size: u32,
@@ -37,7 +36,7 @@ impl FileCapabilities {
     pub const TYPE: u8 = 0;
     /// Value's type: `u8`; FitBaseType::UINT8Z; ProfileType::FileFlags
     pub const FLAGS: u8 = 1;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const DIRECTORY: u8 = 2;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const MAX_COUNT: u8 = 3;
@@ -45,12 +44,12 @@ impl FileCapabilities {
     pub const MAX_SIZE: u8 = 4;
 
     /// Create new FileCapabilities with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             r#type: typedef::File(u8::MAX),
             flags: typedef::FileFlags(u8::MIN),
-            directory: String::new(),
+            directory: Box::from(""),
             max_count: u16::MAX,
             max_size: u32::MAX,
             unknown_fields: Vec::new(),
@@ -92,7 +91,7 @@ impl From<&Message> for FileCapabilities {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
                 0 => v.r#type = typedef::File(field.value.as_u8()),
                 1 => v.flags = typedef::FileFlags(field.value.as_u8z()),
-                2 => v.directory = field.value.as_str().to_owned(),
+                2 => v.directory = Box::from(field.value.as_str()),
                 3 => v.max_count = field.value.as_u16(),
                 4 => v.max_size = field.value.as_u32(),
                 _ => v.unknown_fields.push(field.clone()),
@@ -210,7 +209,7 @@ struct De {
     message_index: typedef::MessageIndex,
     r#type: typedef::File,
     flags: typedef::FileFlags,
-    directory: String,
+    directory: Box<str>,
     max_count: u16,
     max_size: u32,
     unknown_fields: Vec<Field>,
@@ -240,7 +239,7 @@ impl Default for De {
             message_index: typedef::MessageIndex(u16::MAX),
             r#type: typedef::File(u8::MAX),
             flags: typedef::FileFlags(u8::MIN),
-            directory: String::new(),
+            directory: Box::from(""),
             max_count: u16::MAX,
             max_size: u32::MAX,
             unknown_fields: Vec::new(),

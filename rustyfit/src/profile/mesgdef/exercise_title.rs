@@ -6,7 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +18,7 @@ pub struct ExerciseTitle {
     pub message_index: typedef::MessageIndex,
     pub exercise_category: typedef::ExerciseCategory,
     pub exercise_name: u16,
-    pub wkt_step_name: Vec<String>,
+    pub wkt_step_name: Box<[Box<str>]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -32,16 +32,16 @@ impl ExerciseTitle {
     pub const EXERCISE_CATEGORY: u8 = 0;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const EXERCISE_NAME: u8 = 1;
-    /// Value's type: `Vec<String>`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<[Box<str>]>`; FitBaseType::STRING; ProfileType::String
     pub const WKT_STEP_NAME: u8 = 2;
 
     /// Create new ExerciseTitle with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             exercise_category: typedef::ExerciseCategory(u16::MAX),
             exercise_name: u16::MAX,
-            wkt_step_name: Vec::new(),
+            wkt_step_name: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -79,7 +79,7 @@ impl From<&Message> for ExerciseTitle {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
                 0 => v.exercise_category = typedef::ExerciseCategory(field.value.as_u16()),
                 1 => v.exercise_name = field.value.as_u16(),
-                2 => v.wkt_step_name = field.value.to_vec_string(),
+                2 => v.wkt_step_name = field.value.to_array_string(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -121,7 +121,7 @@ impl From<ExerciseTitle> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::STRING,
-                value: Value::VecString(m.wkt_step_name),
+                value: Value::ArrayString(m.wkt_step_name),
                 is_expanded: false,
             });
         };
@@ -173,7 +173,7 @@ struct De {
     message_index: typedef::MessageIndex,
     exercise_category: typedef::ExerciseCategory,
     exercise_name: u16,
-    wkt_step_name: Vec<String>,
+    wkt_step_name: Box<[Box<str>]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -199,7 +199,7 @@ impl Default for De {
             message_index: typedef::MessageIndex(u16::MAX),
             exercise_category: typedef::ExerciseCategory(u16::MAX),
             exercise_name: u16::MAX,
-            wkt_step_name: Vec::new(),
+            wkt_step_name: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

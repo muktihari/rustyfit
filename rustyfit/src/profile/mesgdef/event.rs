@@ -105,7 +105,7 @@ impl Event {
     pub const RADAR_THREAT_MAX_APPROACH_SPEED: u8 = 24;
 
     /// Create new Event with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             event: typedef::Event(u8::MAX),

@@ -37,7 +37,7 @@ impl MetZone {
     pub const FAT_CALORIES: u8 = 3;
 
     /// Create new MetZone with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             high_bpm: u8::MAX,

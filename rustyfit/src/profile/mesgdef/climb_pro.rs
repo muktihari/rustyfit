@@ -49,7 +49,7 @@ impl ClimbPro {
     pub const CURRENT_DIST: u8 = 5;
 
     /// Create new ClimbPro with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             position_lat: i32::MAX,

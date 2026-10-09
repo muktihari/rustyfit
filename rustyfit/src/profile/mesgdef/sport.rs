@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +17,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 pub struct Sport {
     pub sport: typedef::Sport,
     pub sub_sport: typedef::SubSport,
-    pub name: String,
+    pub name: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -30,15 +29,15 @@ impl Sport {
     pub const SPORT: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SubSport
     pub const SUB_SPORT: u8 = 1;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 3;
 
     /// Create new Sport with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             sport: typedef::Sport(u8::MAX),
             sub_sport: typedef::SubSport(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -74,7 +73,7 @@ impl From<&Message> for Sport {
             match field.num {
                 0 => v.sport = typedef::Sport(field.value.as_u8()),
                 1 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
-                3 => v.name = field.value.as_str().to_owned(),
+                3 => v.name = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -156,7 +155,7 @@ impl Serialize for Sport {
 struct De {
     sport: typedef::Sport,
     sub_sport: typedef::SubSport,
-    name: String,
+    name: Box<str>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -180,7 +179,7 @@ impl Default for De {
         Self {
             sport: typedef::Sport(u8::MAX),
             sub_sport: typedef::SubSport(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

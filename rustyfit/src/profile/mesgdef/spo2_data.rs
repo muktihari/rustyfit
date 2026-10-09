@@ -38,7 +38,7 @@ impl Spo2Data {
     pub const MODE: u8 = 2;
 
     /// Create new Spo2Data with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             reading_spo2: u8::MAX,

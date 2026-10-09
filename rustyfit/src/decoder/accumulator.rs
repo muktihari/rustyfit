@@ -38,52 +38,52 @@ impl Accumulator {
             Value::Float64(v) => self.collect_u64(mesg_num, field_num, *v as u64),
             Value::Int64(v) => self.collect_u64(mesg_num, field_num, *v as u64),
             Value::Uint64(v) => self.collect_u64(mesg_num, field_num, *v),
-            Value::VecInt8(v) => {
+            Value::ArrayInt8(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecUint8(v) => {
+            Value::ArrayUint8(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecInt16(v) => {
+            Value::ArrayInt16(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecUint16(v) => {
+            Value::ArrayUint16(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecInt32(v) => {
+            Value::ArrayInt32(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecUint32(v) => {
+            Value::ArrayUint32(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecFloat32(v) => {
+            Value::ArrayFloat32(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecFloat64(v) => {
+            Value::ArrayFloat64(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecInt64(v) => {
+            Value::ArrayInt64(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x as u64);
                 }
             }
-            Value::VecUint64(v) => {
+            Value::ArrayUint64(v) => {
                 if let Some(&x) = v.last() {
                     self.collect_u64(mesg_num, field_num, x);
                 }
@@ -160,7 +160,6 @@ mod tests {
         profile::typedef::MesgNum,
         proto::Value,
     };
-    use alloc::{string::String, vec};
 
     #[test]
     fn test_collect() {
@@ -182,16 +181,16 @@ mod tests {
             Value::Float64(2.0),
             Value::Int64(2),
             Value::Uint64(2),
-            Value::VecInt8(vec![1, 2]),
-            Value::VecUint8(vec![1, 2]),
-            Value::VecInt16(vec![1, 2]),
-            Value::VecUint16(vec![1, 2]),
-            Value::VecInt32(vec![1, 2]),
-            Value::VecUint32(vec![1, 2]),
-            Value::VecFloat32(vec![1.0, 2.0]),
-            Value::VecFloat64(vec![1.0, 2.0]),
-            Value::VecInt64(vec![1, 2]),
-            Value::VecUint64(vec![1, 2]),
+            Value::ArrayInt8(Box::new([1, 2])),
+            Value::ArrayUint8(Box::new([1, 2])),
+            Value::ArrayInt16(Box::new([1, 2])),
+            Value::ArrayUint16(Box::new([1, 2])),
+            Value::ArrayInt32(Box::new([1, 2])),
+            Value::ArrayUint32(Box::new([1, 2])),
+            Value::ArrayFloat32(Box::new([1.0, 2.0])),
+            Value::ArrayFloat64(Box::new([1.0, 2.0])),
+            Value::ArrayInt64(Box::new([1, 2])),
+            Value::ArrayUint64(Box::new([1, 2])),
         ];
 
         for tc in tt {
@@ -202,8 +201,8 @@ mod tests {
 
         let tt = [
             Value::Invalid,
-            Value::String(String::new()),
-            Value::VecString(vec![]),
+            Value::String(Box::from("")),
+            Value::ArrayString(Box::new([])),
         ];
 
         for tc in tt {

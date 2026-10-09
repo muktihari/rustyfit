@@ -77,7 +77,7 @@ impl WeightScale {
     pub const BMI: u8 = 13;
 
     /// Create new WeightScale with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             weight: typedef::Weight(u16::MAX),

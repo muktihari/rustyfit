@@ -52,7 +52,7 @@ impl ChronoShotSession {
     pub const STANDARD_DEVIATION: u8 = 6;
 
     /// Create new ChronoShotSession with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             min_speed: u32::MAX,

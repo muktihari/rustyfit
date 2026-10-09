@@ -66,7 +66,7 @@ impl ExdDataConceptConfiguration {
     pub const IS_SIGNED: u8 = 11;
 
     /// Create new ExdDataConceptConfiguration with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             screen_index: u8::MAX,
             concept_field: u8::MAX,

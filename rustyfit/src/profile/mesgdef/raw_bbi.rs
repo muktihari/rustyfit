@@ -8,6 +8,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -27,13 +28,13 @@ pub struct RawBbi {
     /// Units: ms; Millisecond resolution of the timestamp
     pub timestamp_ms: u16,
     /// 1 bit for gap indicator, 1 bit for quality indicator, and 14 bits for Beat-to-Beat interval values in whole-integer millisecond resolution
-    pub data: Vec<u16>,
+    pub data: Box<[u16]>,
     /// Units: ms; Array of millisecond times between beats
-    pub time: Vec<u16>,
+    pub time: Box<[u16]>,
     /// 1 = high confidence. 0 = low confidence. N/A when gap = 1
-    pub quality: Vec<u8>,
+    pub quality: Box<[u8]>,
     /// 1 = gap (time represents ms gap length). 0 = BBI data
-    pub gap: Vec<u8>,
+    pub gap: Box<[u8]>,
     state: [u8; 1], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -46,24 +47,24 @@ impl RawBbi {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const DATA: u8 = 1;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIME: u8 = 2;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8
     pub const QUALITY: u8 = 3;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8
     pub const GAP: u8 = 4;
 
     /// Create new RawBbi with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            data: Vec::new(),
-            time: Vec::new(),
-            quality: Vec::new(),
-            gap: Vec::new(),
+            data: Box::new([]),
+            time: Box::new([]),
+            quality: Box::new([]),
+            gap: Box::new([]),
             state: [0u8; 1],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -123,10 +124,10 @@ impl From<&Message> for RawBbi {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.data = field.value.to_vec_u16(),
-                2 => v.time = field.value.to_vec_u16(),
-                3 => v.quality = field.value.to_vec_u8(),
-                4 => v.gap = field.value.to_vec_u8(),
+                1 => v.data = field.value.to_array_u16(),
+                2 => v.time = field.value.to_array_u16(),
+                3 => v.quality = field.value.to_array_u8(),
+                4 => v.gap = field.value.to_array_u8(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -166,7 +167,7 @@ impl From<RawBbi> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.data),
+                value: Value::ArrayUint16(m.data),
                 is_expanded: false,
             });
         };
@@ -174,7 +175,7 @@ impl From<RawBbi> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.time),
+                value: Value::ArrayUint16(m.time),
                 is_expanded: is_expanded(&m.state, 2),
             });
         };
@@ -182,7 +183,7 @@ impl From<RawBbi> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.quality),
+                value: Value::ArrayUint8(m.quality),
                 is_expanded: is_expanded(&m.state, 3),
             });
         };
@@ -190,7 +191,7 @@ impl From<RawBbi> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.gap),
+                value: Value::ArrayUint8(m.gap),
                 is_expanded: is_expanded(&m.state, 4),
             });
         };
@@ -247,10 +248,10 @@ impl Serialize for RawBbi {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    data: Vec<u16>,
-    time: Vec<u16>,
-    quality: Vec<u8>,
-    gap: Vec<u8>,
+    data: Box<[u16]>,
+    time: Box<[u16]>,
+    quality: Box<[u8]>,
+    gap: Box<[u8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -281,10 +282,10 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            data: Vec::new(),
-            time: Vec::new(),
-            quality: Vec::new(),
-            gap: Vec::new(),
+            data: Box::new([]),
+            time: Box::new([]),
+            quality: Box::new([]),
+            gap: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

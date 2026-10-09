@@ -29,7 +29,7 @@ impl SlaveDevice {
     pub const PRODUCT: u8 = 1;
 
     /// Create new SlaveDevice with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             manufacturer: typedef::Manufacturer(u16::MAX),
             product: u16::MAX,

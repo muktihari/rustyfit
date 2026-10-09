@@ -9,8 +9,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -82,7 +81,7 @@ pub struct SegmentLap {
     pub swc_lat: i32,
     /// Units: semicircles; South west corner latitude.
     pub swc_long: i32,
-    pub name: String,
+    pub name: Box<str>,
     /// Units: watts
     pub normalized_power: u16,
     pub left_right_balance: typedef::LeftRightBalance100,
@@ -120,13 +119,13 @@ pub struct SegmentLap {
     /// Scale: 1000; Units: m/s
     pub max_neg_vertical_speed: i16,
     /// Scale: 1000; Units: s
-    pub time_in_hr_zone: Vec<u32>,
+    pub time_in_hr_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_speed_zone: Vec<u32>,
+    pub time_in_speed_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_cadence_zone: Vec<u32>,
+    pub time_in_cadence_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_power_zone: Vec<u32>,
+    pub time_in_power_zone: Box<[u32]>,
     pub repetition_num: u16,
     /// Scale: 5; Offset: 500; Units: m
     pub min_altitude: u16,
@@ -147,7 +146,7 @@ pub struct SegmentLap {
     /// Scale: 2; Units: percent
     pub avg_combined_pedal_smoothness: u8,
     pub status: typedef::SegmentLapStatus,
-    pub uuid: String,
+    pub uuid: Box<str>,
     /// Scale: 128; Units: rpm; fractional part of the avg_cadence
     pub avg_fractional_cadence: u8,
     /// Scale: 128; Units: rpm; fractional part of the max_cadence
@@ -165,21 +164,21 @@ pub struct SegmentLap {
     /// Units: mm; Average right platform center offset
     pub avg_right_pco: i8,
     /// Scale: 0.7111111; Units: degrees; Average left power phase angles. Data value indexes defined by power_phase_type.
-    pub avg_left_power_phase: Vec<u8>,
+    pub avg_left_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average left power phase peak angles. Data value indexes defined by power_phase_type.
-    pub avg_left_power_phase_peak: Vec<u8>,
+    pub avg_left_power_phase_peak: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average right power phase angles. Data value indexes defined by power_phase_type.
-    pub avg_right_power_phase: Vec<u8>,
+    pub avg_right_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average right power phase peak angles. Data value indexes defined by power_phase_type.
-    pub avg_right_power_phase_peak: Vec<u8>,
+    pub avg_right_power_phase_peak: Box<[u8]>,
     /// Units: watts; Average power by position. Data value indexes defined by rider_position_type.
-    pub avg_power_position: Vec<u16>,
+    pub avg_power_position: Box<[u16]>,
     /// Units: watts; Maximum power by position. Data value indexes defined by rider_position_type.
-    pub max_power_position: Vec<u16>,
+    pub max_power_position: Box<[u16]>,
     /// Units: rpm; Average cadence by position. Data value indexes defined by rider_position_type.
-    pub avg_cadence_position: Vec<u8>,
+    pub avg_cadence_position: Box<[u8]>,
     /// Units: rpm; Maximum cadence by position. Data value indexes defined by rider_position_type.
-    pub max_cadence_position: Vec<u8>,
+    pub max_cadence_position: Box<[u8]>,
     /// Manufacturer that produced the segment
     pub manufacturer: typedef::Manufacturer,
     /// Units: kGrit; The grit score estimates how challenging a route could be for a cyclist in terms of time spent going over sharp turns or large grade slopes.
@@ -272,7 +271,7 @@ impl SegmentLap {
     pub const SWC_LAT: u8 = 27;
     /// Value's type: `i32`; FitBaseType::SINT32; ProfileType::Sint32; Units: `semicircles`
     pub const SWC_LONG: u8 = 28;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 29;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const NORMALIZED_POWER: u8 = 30;
@@ -312,13 +311,13 @@ impl SegmentLap {
     pub const MAX_POS_VERTICAL_SPEED: u8 = 47;
     /// Value's type: `i16`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `1000`; Units: `m/s`
     pub const MAX_NEG_VERTICAL_SPEED: u8 = 48;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 49;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 50;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 51;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 52;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const REPETITION_NUM: u8 = 53;
@@ -344,7 +343,7 @@ impl SegmentLap {
     pub const AVG_COMBINED_PEDAL_SMOOTHNESS: u8 = 63;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::SegmentLapStatus
     pub const STATUS: u8 = 64;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const UUID: u8 = 65;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `128`; Units: `rpm`
     pub const AVG_FRACTIONAL_CADENCE: u8 = 66;
@@ -364,21 +363,21 @@ impl SegmentLap {
     pub const AVG_LEFT_PCO: u8 = 73;
     /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
     pub const AVG_RIGHT_PCO: u8 = 74;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE: u8 = 75;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 76;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 77;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 78;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const AVG_POWER_POSITION: u8 = 79;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const MAX_POWER_POSITION: u8 = 80;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const AVG_CADENCE_POSITION: u8 = 81;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const MAX_CADENCE_POSITION: u8 = 82;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Manufacturer
     pub const MANUFACTURER: u8 = 83;
@@ -404,7 +403,7 @@ impl SegmentLap {
     pub const ENHANCED_MIN_ALTITUDE: u8 = 93;
 
     /// Create new SegmentLap with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             timestamp: typedef::DateTime(u32::MAX),
@@ -437,7 +436,7 @@ impl SegmentLap {
             nec_long: i32::MAX,
             swc_lat: i32::MAX,
             swc_long: i32::MAX,
-            name: String::new(),
+            name: Box::from(""),
             normalized_power: u16::MAX,
             left_right_balance: typedef::LeftRightBalance100(u16::MAX),
             sub_sport: typedef::SubSport(u8::MAX),
@@ -457,10 +456,10 @@ impl SegmentLap {
             avg_neg_vertical_speed: i16::MAX,
             max_pos_vertical_speed: i16::MAX,
             max_neg_vertical_speed: i16::MAX,
-            time_in_hr_zone: Vec::new(),
-            time_in_speed_zone: Vec::new(),
-            time_in_cadence_zone: Vec::new(),
-            time_in_power_zone: Vec::new(),
+            time_in_hr_zone: Box::new([]),
+            time_in_speed_zone: Box::new([]),
+            time_in_cadence_zone: Box::new([]),
+            time_in_power_zone: Box::new([]),
             repetition_num: u16::MAX,
             min_altitude: u16::MAX,
             min_heart_rate: u8::MAX,
@@ -473,7 +472,7 @@ impl SegmentLap {
             avg_right_pedal_smoothness: u8::MAX,
             avg_combined_pedal_smoothness: u8::MAX,
             status: typedef::SegmentLapStatus(u8::MAX),
-            uuid: String::new(),
+            uuid: Box::from(""),
             avg_fractional_cadence: u8::MAX,
             max_fractional_cadence: u8::MAX,
             total_fractional_cycles: u8::MAX,
@@ -483,14 +482,14 @@ impl SegmentLap {
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::new(),
-            avg_left_power_phase_peak: Vec::new(),
-            avg_right_power_phase: Vec::new(),
-            avg_right_power_phase_peak: Vec::new(),
-            avg_power_position: Vec::new(),
-            max_power_position: Vec::new(),
-            avg_cadence_position: Vec::new(),
-            max_cadence_position: Vec::new(),
+            avg_left_power_phase: Box::new([]),
+            avg_left_power_phase_peak: Box::new([]),
+            avg_right_power_phase: Box::new([]),
+            avg_right_power_phase_peak: Box::new([]),
+            avg_power_position: Box::new([]),
+            max_power_position: Box::new([]),
+            avg_cadence_position: Box::new([]),
+            max_cadence_position: Box::new([]),
             manufacturer: typedef::Manufacturer(u16::MAX),
             total_grit: f32::from_bits(u32::MAX),
             total_flow: f32::from_bits(u32::MAX),
@@ -969,18 +968,20 @@ impl SegmentLap {
 
     /// Set `time_in_hr_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_hr_zone = Vec::with_capacity(v.len());
+        self.time_in_hr_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_hr_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_hr_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_hr_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1000,18 +1001,20 @@ impl SegmentLap {
 
     /// Set `time_in_speed_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_speed_zone = Vec::with_capacity(v.len());
+        self.time_in_speed_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_speed_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_speed_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_speed_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1031,18 +1034,20 @@ impl SegmentLap {
 
     /// Set `time_in_cadence_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_cadence_zone = Vec::with_capacity(v.len());
+        self.time_in_cadence_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_cadence_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_cadence_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_cadence_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1062,18 +1067,20 @@ impl SegmentLap {
 
     /// Set `time_in_power_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_power_zone = Vec::with_capacity(v.len());
+        self.time_in_power_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_power_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_power_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_power_zone = vals.into_boxed_slice();
         self
     }
 
@@ -1324,18 +1331,20 @@ impl SegmentLap {
 
     /// Set `avg_left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_left_power_phase = Vec::with_capacity(v.len());
+        self.avg_left_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_left_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_left_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_left_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -1355,18 +1364,20 @@ impl SegmentLap {
 
     /// Set `avg_left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_left_power_phase_peak = Vec::with_capacity(v.len());
+        self.avg_left_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_left_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_left_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_left_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -1386,18 +1397,20 @@ impl SegmentLap {
 
     /// Set `avg_right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_right_power_phase = Vec::with_capacity(v.len());
+        self.avg_right_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_right_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_right_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_right_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -1417,18 +1430,20 @@ impl SegmentLap {
 
     /// Set `avg_right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_right_power_phase_peak = Vec::with_capacity(v.len());
+        self.avg_right_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_right_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_right_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_right_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -1709,7 +1724,7 @@ impl From<&Message> for SegmentLap {
                 26 => v.nec_long = field.value.as_i32(),
                 27 => v.swc_lat = field.value.as_i32(),
                 28 => v.swc_long = field.value.as_i32(),
-                29 => v.name = field.value.as_str().to_owned(),
+                29 => v.name = Box::from(field.value.as_str()),
                 30 => v.normalized_power = field.value.as_u16(),
                 31 => v.left_right_balance = typedef::LeftRightBalance100(field.value.as_u16()),
                 32 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
@@ -1729,10 +1744,10 @@ impl From<&Message> for SegmentLap {
                 46 => v.avg_neg_vertical_speed = field.value.as_i16(),
                 47 => v.max_pos_vertical_speed = field.value.as_i16(),
                 48 => v.max_neg_vertical_speed = field.value.as_i16(),
-                49 => v.time_in_hr_zone = field.value.to_vec_u32(),
-                50 => v.time_in_speed_zone = field.value.to_vec_u32(),
-                51 => v.time_in_cadence_zone = field.value.to_vec_u32(),
-                52 => v.time_in_power_zone = field.value.to_vec_u32(),
+                49 => v.time_in_hr_zone = field.value.to_array_u32(),
+                50 => v.time_in_speed_zone = field.value.to_array_u32(),
+                51 => v.time_in_cadence_zone = field.value.to_array_u32(),
+                52 => v.time_in_power_zone = field.value.to_array_u32(),
                 53 => v.repetition_num = field.value.as_u16(),
                 54 => v.min_altitude = field.value.as_u16(),
                 55 => v.min_heart_rate = field.value.as_u8(),
@@ -1745,7 +1760,7 @@ impl From<&Message> for SegmentLap {
                 62 => v.avg_right_pedal_smoothness = field.value.as_u8(),
                 63 => v.avg_combined_pedal_smoothness = field.value.as_u8(),
                 64 => v.status = typedef::SegmentLapStatus(field.value.as_u8()),
-                65 => v.uuid = field.value.as_str().to_owned(),
+                65 => v.uuid = Box::from(field.value.as_str()),
                 66 => v.avg_fractional_cadence = field.value.as_u8(),
                 67 => v.max_fractional_cadence = field.value.as_u8(),
                 68 => v.total_fractional_cycles = field.value.as_u8(),
@@ -1755,14 +1770,14 @@ impl From<&Message> for SegmentLap {
                 72 => v.stand_count = field.value.as_u16(),
                 73 => v.avg_left_pco = field.value.as_i8(),
                 74 => v.avg_right_pco = field.value.as_i8(),
-                75 => v.avg_left_power_phase = field.value.to_vec_u8(),
-                76 => v.avg_left_power_phase_peak = field.value.to_vec_u8(),
-                77 => v.avg_right_power_phase = field.value.to_vec_u8(),
-                78 => v.avg_right_power_phase_peak = field.value.to_vec_u8(),
-                79 => v.avg_power_position = field.value.to_vec_u16(),
-                80 => v.max_power_position = field.value.to_vec_u16(),
-                81 => v.avg_cadence_position = field.value.to_vec_u8(),
-                82 => v.max_cadence_position = field.value.to_vec_u8(),
+                75 => v.avg_left_power_phase = field.value.to_array_u8(),
+                76 => v.avg_left_power_phase_peak = field.value.to_array_u8(),
+                77 => v.avg_right_power_phase = field.value.to_array_u8(),
+                78 => v.avg_right_power_phase_peak = field.value.to_array_u8(),
+                79 => v.avg_power_position = field.value.to_array_u16(),
+                80 => v.max_power_position = field.value.to_array_u16(),
+                81 => v.avg_cadence_position = field.value.to_array_u8(),
+                82 => v.max_cadence_position = field.value.to_array_u8(),
                 83 => v.manufacturer = typedef::Manufacturer(field.value.as_u16()),
                 84 => v.total_grit = field.value.as_f32(),
                 85 => v.total_flow = field.value.as_f32(),
@@ -2205,7 +2220,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 49,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_hr_zone),
+                value: Value::ArrayUint32(m.time_in_hr_zone),
                 is_expanded: false,
             });
         };
@@ -2213,7 +2228,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 50,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_speed_zone),
+                value: Value::ArrayUint32(m.time_in_speed_zone),
                 is_expanded: false,
             });
         };
@@ -2221,7 +2236,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 51,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_cadence_zone),
+                value: Value::ArrayUint32(m.time_in_cadence_zone),
                 is_expanded: false,
             });
         };
@@ -2229,7 +2244,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 52,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_power_zone),
+                value: Value::ArrayUint32(m.time_in_power_zone),
                 is_expanded: false,
             });
         };
@@ -2413,7 +2428,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 75,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_left_power_phase),
+                value: Value::ArrayUint8(m.avg_left_power_phase),
                 is_expanded: false,
             });
         };
@@ -2421,7 +2436,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 76,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_left_power_phase_peak),
+                value: Value::ArrayUint8(m.avg_left_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -2429,7 +2444,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 77,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_right_power_phase),
+                value: Value::ArrayUint8(m.avg_right_power_phase),
                 is_expanded: false,
             });
         };
@@ -2437,7 +2452,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 78,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_right_power_phase_peak),
+                value: Value::ArrayUint8(m.avg_right_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -2445,7 +2460,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 79,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.avg_power_position),
+                value: Value::ArrayUint16(m.avg_power_position),
                 is_expanded: false,
             });
         };
@@ -2453,7 +2468,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 80,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.max_power_position),
+                value: Value::ArrayUint16(m.max_power_position),
                 is_expanded: false,
             });
         };
@@ -2461,7 +2476,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 81,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_cadence_position),
+                value: Value::ArrayUint8(m.avg_cadence_position),
                 is_expanded: false,
             });
         };
@@ -2469,7 +2484,7 @@ impl From<SegmentLap> for Message {
             fields.push(Field {
                 num: 82,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.max_cadence_position),
+                value: Value::ArrayUint8(m.max_cadence_position),
                 is_expanded: false,
             });
         };
@@ -2921,7 +2936,7 @@ struct De {
     swc_lat: f64,
     /// Degrees.
     swc_long: f64,
-    name: String,
+    name: Box<str>,
     normalized_power: u16,
     left_right_balance: typedef::LeftRightBalance100,
     sub_sport: typedef::SubSport,
@@ -2941,10 +2956,10 @@ struct De {
     avg_neg_vertical_speed: f64,
     max_pos_vertical_speed: f64,
     max_neg_vertical_speed: f64,
-    time_in_hr_zone: Vec<f64>,
-    time_in_speed_zone: Vec<f64>,
-    time_in_cadence_zone: Vec<f64>,
-    time_in_power_zone: Vec<f64>,
+    time_in_hr_zone: Box<[f64]>,
+    time_in_speed_zone: Box<[f64]>,
+    time_in_cadence_zone: Box<[f64]>,
+    time_in_power_zone: Box<[f64]>,
     repetition_num: u16,
     min_altitude: f64,
     min_heart_rate: u8,
@@ -2957,7 +2972,7 @@ struct De {
     avg_right_pedal_smoothness: f64,
     avg_combined_pedal_smoothness: f64,
     status: typedef::SegmentLapStatus,
-    uuid: String,
+    uuid: Box<str>,
     avg_fractional_cadence: f64,
     max_fractional_cadence: f64,
     total_fractional_cycles: f64,
@@ -2967,14 +2982,14 @@ struct De {
     stand_count: u16,
     avg_left_pco: i8,
     avg_right_pco: i8,
-    avg_left_power_phase: Vec<f64>,
-    avg_left_power_phase_peak: Vec<f64>,
-    avg_right_power_phase: Vec<f64>,
-    avg_right_power_phase_peak: Vec<f64>,
-    avg_power_position: Vec<u16>,
-    max_power_position: Vec<u16>,
-    avg_cadence_position: Vec<u8>,
-    max_cadence_position: Vec<u8>,
+    avg_left_power_phase: Box<[f64]>,
+    avg_left_power_phase_peak: Box<[f64]>,
+    avg_right_power_phase: Box<[f64]>,
+    avg_right_power_phase_peak: Box<[f64]>,
+    avg_power_position: Box<[u16]>,
+    max_power_position: Box<[u16]>,
+    avg_cadence_position: Box<[u8]>,
+    max_cadence_position: Box<[u8]>,
     manufacturer: typedef::Manufacturer,
     total_grit: f32,
     total_flow: f32,
@@ -3172,7 +3187,7 @@ impl From<De> for SegmentLap {
             },
             time_in_hr_zone: {
                 if m.time_in_hr_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_hr_zone.len());
                     for &x in m.time_in_hr_zone.iter() {
@@ -3184,12 +3199,12 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_speed_zone: {
                 if m.time_in_speed_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_speed_zone.len());
                     for &x in m.time_in_speed_zone.iter() {
@@ -3201,12 +3216,12 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_cadence_zone: {
                 if m.time_in_cadence_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_cadence_zone.len());
                     for &x in m.time_in_cadence_zone.iter() {
@@ -3218,12 +3233,12 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_power_zone: {
                 if m.time_in_power_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_power_zone.len());
                     for &x in m.time_in_power_zone.iter() {
@@ -3235,7 +3250,7 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             repetition_num: m.repetition_num,
@@ -3339,7 +3354,7 @@ impl From<De> for SegmentLap {
             avg_right_pco: m.avg_right_pco,
             avg_left_power_phase: {
                 if m.avg_left_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_left_power_phase.len());
                     for &x in m.avg_left_power_phase.iter() {
@@ -3351,12 +3366,12 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_left_power_phase_peak: {
                 if m.avg_left_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_left_power_phase_peak.len());
                     for &x in m.avg_left_power_phase_peak.iter() {
@@ -3368,12 +3383,12 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_right_power_phase: {
                 if m.avg_right_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_right_power_phase.len());
                     for &x in m.avg_right_power_phase.iter() {
@@ -3385,12 +3400,12 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_right_power_phase_peak: {
                 if m.avg_right_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_right_power_phase_peak.len());
                     for &x in m.avg_right_power_phase_peak.iter() {
@@ -3402,7 +3417,7 @@ impl From<De> for SegmentLap {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_power_position: m.avg_power_position,
@@ -3497,7 +3512,7 @@ impl Default for De {
             nec_long: f64::from_bits(u64::MAX),
             swc_lat: f64::from_bits(u64::MAX),
             swc_long: f64::from_bits(u64::MAX),
-            name: String::new(),
+            name: Box::from(""),
             normalized_power: u16::MAX,
             left_right_balance: typedef::LeftRightBalance100(u16::MAX),
             sub_sport: typedef::SubSport(u8::MAX),
@@ -3517,10 +3532,10 @@ impl Default for De {
             avg_neg_vertical_speed: f64::from_bits(u64::MAX),
             max_pos_vertical_speed: f64::from_bits(u64::MAX),
             max_neg_vertical_speed: f64::from_bits(u64::MAX),
-            time_in_hr_zone: Vec::new(),
-            time_in_speed_zone: Vec::new(),
-            time_in_cadence_zone: Vec::new(),
-            time_in_power_zone: Vec::new(),
+            time_in_hr_zone: Box::new([]),
+            time_in_speed_zone: Box::new([]),
+            time_in_cadence_zone: Box::new([]),
+            time_in_power_zone: Box::new([]),
             repetition_num: u16::MAX,
             min_altitude: f64::from_bits(u64::MAX),
             min_heart_rate: u8::MAX,
@@ -3533,7 +3548,7 @@ impl Default for De {
             avg_right_pedal_smoothness: f64::from_bits(u64::MAX),
             avg_combined_pedal_smoothness: f64::from_bits(u64::MAX),
             status: typedef::SegmentLapStatus(u8::MAX),
-            uuid: String::new(),
+            uuid: Box::from(""),
             avg_fractional_cadence: f64::from_bits(u64::MAX),
             max_fractional_cadence: f64::from_bits(u64::MAX),
             total_fractional_cycles: f64::from_bits(u64::MAX),
@@ -3543,14 +3558,14 @@ impl Default for De {
             stand_count: u16::MAX,
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::new(),
-            avg_left_power_phase_peak: Vec::new(),
-            avg_right_power_phase: Vec::new(),
-            avg_right_power_phase_peak: Vec::new(),
-            avg_power_position: Vec::new(),
-            max_power_position: Vec::new(),
-            avg_cadence_position: Vec::new(),
-            max_cadence_position: Vec::new(),
+            avg_left_power_phase: Box::new([]),
+            avg_left_power_phase_peak: Box::new([]),
+            avg_right_power_phase: Box::new([]),
+            avg_right_power_phase_peak: Box::new([]),
+            avg_power_position: Box::new([]),
+            max_power_position: Box::new([]),
+            avg_cadence_position: Box::new([]),
+            max_cadence_position: Box::new([]),
             manufacturer: typedef::Manufacturer(u16::MAX),
             total_grit: f32::from_bits(u32::MAX),
             total_flow: f32::from_bits(u32::MAX),

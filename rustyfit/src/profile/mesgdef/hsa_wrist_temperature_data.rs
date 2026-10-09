@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,7 +20,7 @@ pub struct HsaWristTemperatureData {
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
     /// Scale: 1000; Units: C; Wrist temperature reading
-    pub value: Vec<u16>,
+    pub value: Box<[u16]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -31,15 +32,15 @@ impl HsaWristTemperatureData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `C`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `C`
     pub const VALUE: u8 = 1;
 
     /// Create new HsaWristTemperatureData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            value: Vec::new(),
+            value: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -61,18 +62,20 @@ impl HsaWristTemperatureData {
 
     /// Set `value` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_value_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.value = Vec::with_capacity(v.len());
+        self.value = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.value.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.value.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.value = vals.into_boxed_slice();
         self
     }
 
@@ -106,7 +109,7 @@ impl From<&Message> for HsaWristTemperatureData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
-                1 => v.value = field.value.to_vec_u16(),
+                1 => v.value = field.value.to_array_u16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -140,7 +143,7 @@ impl From<HsaWristTemperatureData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.value),
+                value: Value::ArrayUint16(m.value),
                 is_expanded: false,
             });
         };
@@ -188,7 +191,7 @@ impl Serialize for HsaWristTemperatureData {
 struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
-    value: Vec<f64>,
+    value: Box<[f64]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -204,7 +207,7 @@ impl From<De> for HsaWristTemperatureData {
             processing_interval: m.processing_interval,
             value: {
                 if m.value.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.value.len());
                     for &x in m.value.iter() {
@@ -216,7 +219,7 @@ impl From<De> for HsaWristTemperatureData {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             unknown_fields: m.unknown_fields,
@@ -231,7 +234,7 @@ impl Default for De {
         Self {
             timestamp: None,
             processing_interval: u16::MAX,
-            value: Vec::new(),
+            value: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

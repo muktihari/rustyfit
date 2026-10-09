@@ -32,7 +32,7 @@ impl SleepDisruptionSeverityPeriod {
     pub const SEVERITY: u8 = 0;
 
     /// Create new SleepDisruptionSeverityPeriod with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             timestamp: typedef::DateTime(u32::MAX),

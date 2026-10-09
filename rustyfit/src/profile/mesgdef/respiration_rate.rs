@@ -30,7 +30,7 @@ impl RespirationRate {
     pub const RESPIRATION_RATE: u8 = 0;
 
     /// Create new RespirationRate with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             respiration_rate: i16::MAX,

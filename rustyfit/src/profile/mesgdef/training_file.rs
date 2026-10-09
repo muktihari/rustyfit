@@ -42,7 +42,7 @@ impl TrainingFile {
     pub const TIME_CREATED: u8 = 4;
 
     /// Create new TrainingFile with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             r#type: typedef::File(u8::MAX),

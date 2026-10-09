@@ -8,6 +8,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -29,11 +30,11 @@ pub struct Hr {
     /// Scale: 256; Units: s
     pub time256: u8,
     /// Units: bpm
-    pub filtered_bpm: Vec<u8>,
+    pub filtered_bpm: Box<[u8]>,
     /// Scale: 1024; Units: s
-    pub event_timestamp: Vec<u32>,
+    pub event_timestamp: Box<[u32]>,
     /// Units: s
-    pub event_timestamp_12: Vec<u8>,
+    pub event_timestamp_12: Box<[u8]>,
     state: [u8; 2], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -48,22 +49,22 @@ impl Hr {
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `256`; Units: `s`
     pub const TIME256: u8 = 1;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const FILTERED_BPM: u8 = 6;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1024`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1024`; Units: `s`
     pub const EVENT_TIMESTAMP: u8 = 9;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte; Units: `s`
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte; Units: `s`
     pub const EVENT_TIMESTAMP_12: u8 = 10;
 
     /// Create new Hr with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             fractional_timestamp: u16::MAX,
             time256: u8::MAX,
-            filtered_bpm: Vec::new(),
-            event_timestamp: Vec::new(),
-            event_timestamp_12: Vec::new(),
+            filtered_bpm: Box::new([]),
+            event_timestamp: Box::new([]),
+            event_timestamp_12: Box::new([]),
             state: [0u8; 2],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -128,18 +129,20 @@ impl Hr {
 
     /// Set `event_timestamp` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_event_timestamp_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.event_timestamp = Vec::with_capacity(v.len());
+        self.event_timestamp = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1024.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.event_timestamp.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.event_timestamp.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.event_timestamp = vals.into_boxed_slice();
         self
     }
 
@@ -197,9 +200,9 @@ impl From<&Message> for Hr {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.fractional_timestamp = field.value.as_u16(),
                 1 => v.time256 = field.value.as_u8(),
-                6 => v.filtered_bpm = field.value.to_vec_u8(),
-                9 => v.event_timestamp = field.value.to_vec_u32(),
-                10 => v.event_timestamp_12 = field.value.to_vec_u8(),
+                6 => v.filtered_bpm = field.value.to_array_u8(),
+                9 => v.event_timestamp = field.value.to_array_u32(),
+                10 => v.event_timestamp_12 = field.value.to_array_u8(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -247,7 +250,7 @@ impl From<Hr> for Message {
             fields.push(Field {
                 num: 6,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.filtered_bpm),
+                value: Value::ArrayUint8(m.filtered_bpm),
                 is_expanded: false,
             });
         };
@@ -255,7 +258,7 @@ impl From<Hr> for Message {
             fields.push(Field {
                 num: 9,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.event_timestamp),
+                value: Value::ArrayUint32(m.event_timestamp),
                 is_expanded: is_expanded(&m.state, 9),
             });
         };
@@ -263,7 +266,7 @@ impl From<Hr> for Message {
             fields.push(Field {
                 num: 10,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.event_timestamp_12),
+                value: Value::ArrayUint8(m.event_timestamp_12),
                 is_expanded: false,
             });
         };
@@ -321,9 +324,9 @@ struct De {
     timestamp: Option<i64>,
     fractional_timestamp: f64,
     time256: f64,
-    filtered_bpm: Vec<u8>,
-    event_timestamp: Vec<f64>,
-    event_timestamp_12: Vec<u8>,
+    filtered_bpm: Box<[u8]>,
+    event_timestamp: Box<[f64]>,
+    event_timestamp_12: Box<[u8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -355,7 +358,7 @@ impl From<De> for Hr {
             filtered_bpm: m.filtered_bpm,
             event_timestamp: {
                 if m.event_timestamp.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.event_timestamp.len());
                     for &x in m.event_timestamp.iter() {
@@ -367,7 +370,7 @@ impl From<De> for Hr {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             event_timestamp_12: m.event_timestamp_12,
@@ -385,9 +388,9 @@ impl Default for De {
             timestamp: None,
             fractional_timestamp: f64::from_bits(u64::MAX),
             time256: f64::from_bits(u64::MAX),
-            filtered_bpm: Vec::new(),
-            event_timestamp: Vec::new(),
-            event_timestamp_12: Vec::new(),
+            filtered_bpm: Box::new([]),
+            event_timestamp: Box::new([]),
+            event_timestamp_12: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

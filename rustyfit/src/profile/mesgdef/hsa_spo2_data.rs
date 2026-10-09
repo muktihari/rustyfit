@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,9 +20,9 @@ pub struct HsaSpo2Data {
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
     /// Units: percent; SpO2 Reading: \[70,100\] Blank: 240
-    pub reading_spo2: Vec<u8>,
+    pub reading_spo2: Box<[u8]>,
     /// SpO2 Confidence: \[0,254\]
-    pub confidence: Vec<u8>,
+    pub confidence: Box<[u8]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -33,18 +34,18 @@ impl HsaSpo2Data {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `percent`
     pub const READING_SPO2: u8 = 1;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CONFIDENCE: u8 = 2;
 
     /// Create new HsaSpo2Data with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            reading_spo2: Vec::new(),
-            confidence: Vec::new(),
+            reading_spo2: Box::new([]),
+            confidence: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -81,8 +82,8 @@ impl From<&Message> for HsaSpo2Data {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
-                1 => v.reading_spo2 = field.value.to_vec_u8(),
-                2 => v.confidence = field.value.to_vec_u8(),
+                1 => v.reading_spo2 = field.value.to_array_u8(),
+                2 => v.confidence = field.value.to_array_u8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -116,7 +117,7 @@ impl From<HsaSpo2Data> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.reading_spo2),
+                value: Value::ArrayUint8(m.reading_spo2),
                 is_expanded: false,
             });
         };
@@ -124,7 +125,7 @@ impl From<HsaSpo2Data> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.confidence),
+                value: Value::ArrayUint8(m.confidence),
                 is_expanded: false,
             });
         };
@@ -175,8 +176,8 @@ impl Serialize for HsaSpo2Data {
 struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
-    reading_spo2: Vec<u8>,
-    confidence: Vec<u8>,
+    reading_spo2: Box<[u8]>,
+    confidence: Box<[u8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -204,8 +205,8 @@ impl Default for De {
         Self {
             timestamp: None,
             processing_interval: u16::MAX,
-            reading_spo2: Vec::new(),
-            confidence: Vec::new(),
+            reading_spo2: Box::new([]),
+            confidence: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

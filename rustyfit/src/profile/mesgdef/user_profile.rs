@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +17,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 pub struct UserProfile {
     pub message_index: typedef::MessageIndex,
     /// Used for Morning Report greeting
-    pub friendly_name: String,
+    pub friendly_name: Box<str>,
     pub gender: typedef::Gender,
     /// Units: years
     pub age: u8,
@@ -67,7 +66,7 @@ pub struct UserProfile {
 impl UserProfile {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const FRIENDLY_NAME: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Gender
     pub const GENDER: u8 = 1;
@@ -125,10 +124,10 @@ impl UserProfile {
     pub const DIVE_COUNT: u8 = 49;
 
     /// Create new UserProfile with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            friendly_name: String::new(),
+            friendly_name: Box::from(""),
             gender: typedef::Gender(u8::MAX),
             age: u8::MAX,
             height: u8::MAX,
@@ -300,7 +299,7 @@ impl From<&Message> for UserProfile {
         for field in &mesg.fields {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
-                0 => v.friendly_name = field.value.as_str().to_owned(),
+                0 => v.friendly_name = Box::from(field.value.as_str()),
                 1 => v.gender = typedef::Gender(field.value.as_u8()),
                 2 => v.age = field.value.as_u8(),
                 3 => v.height = field.value.as_u8(),
@@ -322,14 +321,14 @@ impl From<&Message> for UserProfile {
                 22 => v.local_id = typedef::UserLocalId(field.value.as_u16()),
                 23 => {
                     v.global_id = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut arr = [u8::MAX; 6];
                             for (i, x) in v.iter().take(6).enumerate() {
                                 arr[i] = *x;
                             }
                             arr
                         }
-                        _ => [u8::MAX; 6],
+                        _ => Default::default(),
                     }
                 }
                 28 => v.wake_time = typedef::LocaltimeIntoDay(field.value.as_u32()),
@@ -524,7 +523,7 @@ impl From<UserProfile> for Message {
             fields.push(Field {
                 num: 23,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(Vec::from(&m.global_id)),
+                value: Value::ArrayUint8(Box::from(m.global_id)),
                 is_expanded: false,
             });
         };
@@ -711,7 +710,7 @@ impl Serialize for UserProfile {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     message_index: typedef::MessageIndex,
-    friendly_name: String,
+    friendly_name: Box<str>,
     gender: typedef::Gender,
     age: u8,
     height: f64,
@@ -815,7 +814,7 @@ impl Default for De {
     fn default() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            friendly_name: String::new(),
+            friendly_name: Box::from(""),
             gender: typedef::Gender(u8::MAX),
             age: u8::MAX,
             height: f64::from_bits(u64::MAX),

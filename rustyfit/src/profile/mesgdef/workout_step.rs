@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -17,7 +16,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct WorkoutStep {
     pub message_index: typedef::MessageIndex,
-    pub wkt_step_name: String,
+    pub wkt_step_name: Box<str>,
     pub duration_type: typedef::WktStepDuration,
     pub duration_value: u32,
     pub target_type: typedef::WktStepTarget,
@@ -25,7 +24,7 @@ pub struct WorkoutStep {
     pub custom_target_value_low: u32,
     pub custom_target_value_high: u32,
     pub intensity: typedef::Intensity,
-    pub notes: String,
+    pub notes: Box<str>,
     pub equipment: typedef::WorkoutEquipment,
     pub exercise_category: typedef::ExerciseCategory,
     pub exercise_name: u16,
@@ -45,7 +44,7 @@ pub struct WorkoutStep {
 impl WorkoutStep {
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const MESSAGE_INDEX: u8 = 254;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const WKT_STEP_NAME: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WktStepDuration
     pub const DURATION_TYPE: u8 = 1;
@@ -61,7 +60,7 @@ impl WorkoutStep {
     pub const CUSTOM_TARGET_VALUE_HIGH: u8 = 6;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Intensity
     pub const INTENSITY: u8 = 7;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NOTES: u8 = 8;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::WorkoutEquipment
     pub const EQUIPMENT: u8 = 9;
@@ -83,10 +82,10 @@ impl WorkoutStep {
     pub const SECONDARY_CUSTOM_TARGET_VALUE_HIGH: u8 = 22;
 
     /// Create new WorkoutStep with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            wkt_step_name: String::new(),
+            wkt_step_name: Box::from(""),
             duration_type: typedef::WktStepDuration(u8::MAX),
             duration_value: u32::MAX,
             target_type: typedef::WktStepTarget(u8::MAX),
@@ -94,7 +93,7 @@ impl WorkoutStep {
             custom_target_value_low: u32::MAX,
             custom_target_value_high: u32::MAX,
             intensity: typedef::Intensity(u8::MAX),
-            notes: String::new(),
+            notes: Box::from(""),
             equipment: typedef::WorkoutEquipment(u8::MAX),
             exercise_category: typedef::ExerciseCategory(u16::MAX),
             exercise_name: u16::MAX,
@@ -175,7 +174,7 @@ impl From<&Message> for WorkoutStep {
         for field in &mesg.fields {
             match field.num {
                 254 => v.message_index = typedef::MessageIndex(field.value.as_u16()),
-                0 => v.wkt_step_name = field.value.as_str().to_owned(),
+                0 => v.wkt_step_name = Box::from(field.value.as_str()),
                 1 => v.duration_type = typedef::WktStepDuration(field.value.as_u8()),
                 2 => v.duration_value = field.value.as_u32(),
                 3 => v.target_type = typedef::WktStepTarget(field.value.as_u8()),
@@ -183,7 +182,7 @@ impl From<&Message> for WorkoutStep {
                 5 => v.custom_target_value_low = field.value.as_u32(),
                 6 => v.custom_target_value_high = field.value.as_u32(),
                 7 => v.intensity = typedef::Intensity(field.value.as_u8()),
-                8 => v.notes = field.value.as_str().to_owned(),
+                8 => v.notes = Box::from(field.value.as_str()),
                 9 => v.equipment = typedef::WorkoutEquipment(field.value.as_u8()),
                 10 => v.exercise_category = typedef::ExerciseCategory(field.value.as_u16()),
                 11 => v.exercise_name = field.value.as_u16(),
@@ -455,7 +454,7 @@ impl Serialize for WorkoutStep {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     message_index: typedef::MessageIndex,
-    wkt_step_name: String,
+    wkt_step_name: Box<str>,
     duration_type: typedef::WktStepDuration,
     duration_value: u32,
     target_type: typedef::WktStepTarget,
@@ -463,7 +462,7 @@ struct De {
     custom_target_value_low: u32,
     custom_target_value_high: u32,
     intensity: typedef::Intensity,
-    notes: String,
+    notes: Box<str>,
     equipment: typedef::WorkoutEquipment,
     exercise_category: typedef::ExerciseCategory,
     exercise_name: u16,
@@ -518,7 +517,7 @@ impl Default for De {
     fn default() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
-            wkt_step_name: String::new(),
+            wkt_step_name: Box::from(""),
             duration_type: typedef::WktStepDuration(u8::MAX),
             duration_value: u32::MAX,
             target_type: typedef::WktStepTarget(u8::MAX),
@@ -526,7 +525,7 @@ impl Default for De {
             custom_target_value_low: u32::MAX,
             custom_target_value_high: u32::MAX,
             intensity: typedef::Intensity(u8::MAX),
-            notes: String::new(),
+            notes: Box::from(""),
             equipment: typedef::WorkoutEquipment(u8::MAX),
             exercise_category: typedef::ExerciseCategory(u16::MAX),
             exercise_name: u16::MAX,

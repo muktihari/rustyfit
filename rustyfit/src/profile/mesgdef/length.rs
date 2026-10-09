@@ -8,6 +8,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -47,9 +48,9 @@ pub struct Length {
     pub player_score: u16,
     pub opponent_score: u16,
     /// Units: counts; stroke_type enum used as the index
-    pub stroke_count: Vec<u16>,
+    pub stroke_count: Box<[u16]>,
     /// Units: counts; zone number used as the index
-    pub zone_count: Vec<u16>,
+    pub zone_count: Box<[u16]>,
     /// Scale: 100; Units: Breaths/min
     pub enhanced_avg_respiration_rate: u16,
     /// Scale: 100; Units: Breaths/min
@@ -98,9 +99,9 @@ impl Length {
     pub const PLAYER_SCORE: u8 = 18;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16
     pub const OPPONENT_SCORE: u8 = 19;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const STROKE_COUNT: u8 = 20;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `counts`
     pub const ZONE_COUNT: u8 = 21;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `100`; Units: `Breaths/min`
     pub const ENHANCED_AVG_RESPIRATION_RATE: u8 = 22;
@@ -114,7 +115,7 @@ impl Length {
     pub const METABOLIC_CALORIES: u8 = 26;
 
     /// Create new Length with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             timestamp: typedef::DateTime(u32::MAX),
@@ -132,8 +133,8 @@ impl Length {
             length_type: typedef::LengthType(u8::MAX),
             player_score: u16::MAX,
             opponent_score: u16::MAX,
-            stroke_count: Vec::new(),
-            zone_count: Vec::new(),
+            stroke_count: Box::new([]),
+            zone_count: Box::new([]),
             enhanced_avg_respiration_rate: u16::MAX,
             enhanced_max_respiration_rate: u16::MAX,
             avg_respiration_rate: u8::MAX,
@@ -334,8 +335,8 @@ impl From<&Message> for Length {
                 12 => v.length_type = typedef::LengthType(field.value.as_u8()),
                 18 => v.player_score = field.value.as_u16(),
                 19 => v.opponent_score = field.value.as_u16(),
-                20 => v.stroke_count = field.value.to_vec_u16(),
-                21 => v.zone_count = field.value.to_vec_u16(),
+                20 => v.stroke_count = field.value.to_array_u16(),
+                21 => v.zone_count = field.value.to_array_u16(),
                 22 => v.enhanced_avg_respiration_rate = field.value.as_u16(),
                 23 => v.enhanced_max_respiration_rate = field.value.as_u16(),
                 24 => v.avg_respiration_rate = field.value.as_u8(),
@@ -492,7 +493,7 @@ impl From<Length> for Message {
             fields.push(Field {
                 num: 20,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.stroke_count),
+                value: Value::ArrayUint16(m.stroke_count),
                 is_expanded: false,
             });
         };
@@ -500,7 +501,7 @@ impl From<Length> for Message {
             fields.push(Field {
                 num: 21,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.zone_count),
+                value: Value::ArrayUint16(m.zone_count),
                 is_expanded: false,
             });
         };
@@ -662,8 +663,8 @@ struct De {
     length_type: typedef::LengthType,
     player_score: u16,
     opponent_score: u16,
-    stroke_count: Vec<u16>,
-    zone_count: Vec<u16>,
+    stroke_count: Box<[u16]>,
+    zone_count: Box<[u16]>,
     enhanced_avg_respiration_rate: f64,
     enhanced_max_respiration_rate: f64,
     avg_respiration_rate: u8,
@@ -768,8 +769,8 @@ impl Default for De {
             length_type: typedef::LengthType(u8::MAX),
             player_score: u16::MAX,
             opponent_score: u16::MAX,
-            stroke_count: Vec::new(),
-            zone_count: Vec::new(),
+            stroke_count: Box::new([]),
+            zone_count: Box::new([]),
             enhanced_avg_respiration_rate: f64::from_bits(u64::MAX),
             enhanced_max_respiration_rate: f64::from_bits(u64::MAX),
             avg_respiration_rate: u8::MAX,

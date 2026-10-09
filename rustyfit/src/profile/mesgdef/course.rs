@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -17,7 +16,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct Course {
     pub sport: typedef::Sport,
-    pub name: String,
+    pub name: Box<str>,
     /// Base: UINT32Z
     pub capabilities: typedef::CourseCapabilities,
     pub sub_sport: typedef::SubSport,
@@ -30,7 +29,7 @@ pub struct Course {
 impl Course {
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 4;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 5;
     /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::CourseCapabilities
     pub const CAPABILITIES: u8 = 6;
@@ -38,10 +37,10 @@ impl Course {
     pub const SUB_SPORT: u8 = 7;
 
     /// Create new Course with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             sport: typedef::Sport(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             capabilities: typedef::CourseCapabilities(u32::MIN),
             sub_sport: typedef::SubSport(u8::MAX),
             unknown_fields: Vec::new(),
@@ -79,7 +78,7 @@ impl From<&Message> for Course {
         for field in &mesg.fields {
             match field.num {
                 4 => v.sport = typedef::Sport(field.value.as_u8()),
-                5 => v.name = field.value.as_str().to_owned(),
+                5 => v.name = Box::from(field.value.as_str()),
                 6 => v.capabilities = typedef::CourseCapabilities(field.value.as_u32z()),
                 7 => v.sub_sport = typedef::SubSport(field.value.as_u8()),
                 _ => v.unknown_fields.push(field.clone()),
@@ -173,7 +172,7 @@ impl Serialize for Course {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     sport: typedef::Sport,
-    name: String,
+    name: Box<str>,
     capabilities: typedef::CourseCapabilities,
     sub_sport: typedef::SubSport,
     unknown_fields: Vec<Field>,
@@ -199,7 +198,7 @@ impl Default for De {
     fn default() -> Self {
         Self {
             sport: typedef::Sport(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             capabilities: typedef::CourseCapabilities(u32::MIN),
             sub_sport: typedef::SubSport(u8::MAX),
             unknown_fields: Vec::new(),

@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,11 +20,11 @@ pub struct BarometerData {
     /// Units: ms; Millisecond part of the timestamp.
     pub timestamp_ms: u16,
     /// Units: ms; Each time in the array describes the time at which the barometer sample with the corresponding index was taken. The samples may span across seconds. Array size must match the number of samples in baro_cal
-    pub sample_time_offset: Vec<u16>,
+    pub sample_time_offset: Box<[u16]>,
     /// Units: Pa; These are the raw ADC reading. The samples may span across seconds. A conversion will need to be done on this data once read.
-    pub baro_pres: Vec<u32>,
+    pub baro_pres: Box<[u32]>,
     /// Scale: 5; Offset: 500; Units: m
-    pub enhanced_altitude: Vec<u32>,
+    pub enhanced_altitude: Box<[u32]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -35,21 +36,21 @@ impl BarometerData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const SAMPLE_TIME_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `Pa`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `Pa`
     pub const BARO_PRES: u8 = 2;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `5`; Offset: `500`; Units: `m`
     pub const ENHANCED_ALTITUDE: u8 = 3;
 
     /// Create new BarometerData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::new(),
-            baro_pres: Vec::new(),
-            enhanced_altitude: Vec::new(),
+            sample_time_offset: Box::new([]),
+            baro_pres: Box::new([]),
+            enhanced_altitude: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -71,18 +72,20 @@ impl BarometerData {
 
     /// Set `enhanced_altitude` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_enhanced_altitude_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.enhanced_altitude = Vec::with_capacity(v.len());
+        self.enhanced_altitude = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 500.0) * 5.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.enhanced_altitude.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.enhanced_altitude.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.enhanced_altitude = vals.into_boxed_slice();
         self
     }
 
@@ -118,9 +121,9 @@ impl From<&Message> for BarometerData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.sample_time_offset = field.value.to_vec_u16(),
-                2 => v.baro_pres = field.value.to_vec_u32(),
-                3 => v.enhanced_altitude = field.value.to_vec_u32(),
+                1 => v.sample_time_offset = field.value.to_array_u16(),
+                2 => v.baro_pres = field.value.to_array_u32(),
+                3 => v.enhanced_altitude = field.value.to_array_u32(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -154,7 +157,7 @@ impl From<BarometerData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.sample_time_offset),
+                value: Value::ArrayUint16(m.sample_time_offset),
                 is_expanded: false,
             });
         };
@@ -162,7 +165,7 @@ impl From<BarometerData> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.baro_pres),
+                value: Value::ArrayUint32(m.baro_pres),
                 is_expanded: false,
             });
         };
@@ -170,7 +173,7 @@ impl From<BarometerData> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.enhanced_altitude),
+                value: Value::ArrayUint32(m.enhanced_altitude),
                 is_expanded: false,
             });
         };
@@ -224,9 +227,9 @@ impl Serialize for BarometerData {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    sample_time_offset: Vec<u16>,
-    baro_pres: Vec<u32>,
-    enhanced_altitude: Vec<f64>,
+    sample_time_offset: Box<[u16]>,
+    baro_pres: Box<[u32]>,
+    enhanced_altitude: Box<[f64]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -244,7 +247,7 @@ impl From<De> for BarometerData {
             baro_pres: m.baro_pres,
             enhanced_altitude: {
                 if m.enhanced_altitude.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.enhanced_altitude.len());
                     for &x in m.enhanced_altitude.iter() {
@@ -256,7 +259,7 @@ impl From<De> for BarometerData {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             unknown_fields: m.unknown_fields,
@@ -271,9 +274,9 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            sample_time_offset: Vec::new(),
-            baro_pres: Vec::new(),
-            enhanced_altitude: Vec::new(),
+            sample_time_offset: Box::new([]),
+            baro_pres: Box::new([]),
+            enhanced_altitude: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

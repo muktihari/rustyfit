@@ -45,7 +45,7 @@ impl WorkoutSession {
     pub const POOL_LENGTH_UNIT: u8 = 5;
 
     /// Create new WorkoutSession with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             sport: typedef::Sport(u8::MAX),

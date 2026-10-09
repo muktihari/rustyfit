@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,11 +20,11 @@ pub struct DeviceSettings {
     /// Offset from system time. Required to convert timestamp from system time to UTC.
     pub utc_offset: u32,
     /// Units: s; Offset from system time.
-    pub time_offset: Vec<u32>,
+    pub time_offset: Box<[u32]>,
     /// Display mode for the time
-    pub time_mode: Vec<typedef::TimeMode>,
+    pub time_mode: Box<[typedef::TimeMode]>,
     /// Scale: 4; Units: hr; timezone offset in 1/4 hour increments
-    pub time_zone_offset: Vec<i8>,
+    pub time_zone_offset: Box<[i8]>,
     /// Mode for backlight
     pub backlight_mode: typedef::BacklightMode,
     /// Enabled state of the activity tracker functionality
@@ -31,7 +32,7 @@ pub struct DeviceSettings {
     /// UTC timestamp used to set the devices clock and date
     pub clock_time: typedef::DateTime,
     /// Bitfield to configure enabled screens for each supported loop
-    pub pages_enabled: Vec<u16>,
+    pub pages_enabled: Box<[u16]>,
     /// Enabled state of the move alert
     pub move_alert_enabled: typedef::Bool,
     /// Display mode for the date
@@ -39,7 +40,7 @@ pub struct DeviceSettings {
     pub display_orientation: typedef::DisplayOrientation,
     pub mounting_side: typedef::Side,
     /// Bitfield to indicate one page as default for each supported loop
-    pub default_page: Vec<u16>,
+    pub default_page: Box<[u16]>,
     /// Units: steps; Minimum steps before an autosync can occur
     pub autosync_min_steps: u16,
     /// Units: minutes; Minimum minutes before an autosync can occur
@@ -70,11 +71,11 @@ impl DeviceSettings {
     pub const ACTIVE_TIME_ZONE: u8 = 0;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32
     pub const UTC_OFFSET: u8 = 1;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Units: `s`
     pub const TIME_OFFSET: u8 = 2;
-    /// Value's type: `Vec<u8>`; FitBaseType::ENUM; ProfileType::TimeMode
+    /// Value's type: `Box<[u8]>`; FitBaseType::ENUM; ProfileType::TimeMode
     pub const TIME_MODE: u8 = 4;
-    /// Value's type: `Vec<i8>`; FitBaseType::SINT8; ProfileType::Sint8; Scale: `4`; Units: `hr`
+    /// Value's type: `Box<[i8]>`; FitBaseType::SINT8; ProfileType::Sint8; Scale: `4`; Units: `hr`
     pub const TIME_ZONE_OFFSET: u8 = 5;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::BacklightMode
     pub const BACKLIGHT_MODE: u8 = 12;
@@ -82,7 +83,7 @@ impl DeviceSettings {
     pub const ACTIVITY_TRACKER_ENABLED: u8 = 36;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const CLOCK_TIME: u8 = 39;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const PAGES_ENABLED: u8 = 40;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const MOVE_ALERT_ENABLED: u8 = 46;
@@ -92,7 +93,7 @@ impl DeviceSettings {
     pub const DISPLAY_ORIENTATION: u8 = 55;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Side
     pub const MOUNTING_SIDE: u8 = 56;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16
     pub const DEFAULT_PAGE: u8 = 57;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `steps`
     pub const AUTOSYNC_MIN_STEPS: u8 = 58;
@@ -116,22 +117,22 @@ impl DeviceSettings {
     pub const TAP_SENSITIVITY: u8 = 174;
 
     /// Create new DeviceSettings with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             active_time_zone: u8::MAX,
             utc_offset: u32::MAX,
-            time_offset: Vec::new(),
-            time_mode: Vec::new(),
-            time_zone_offset: Vec::new(),
+            time_offset: Box::new([]),
+            time_mode: Box::new([]),
+            time_zone_offset: Box::new([]),
             backlight_mode: typedef::BacklightMode(u8::MAX),
             activity_tracker_enabled: typedef::Bool(u8::MAX),
             clock_time: typedef::DateTime(u32::MAX),
-            pages_enabled: Vec::new(),
+            pages_enabled: Box::new([]),
             move_alert_enabled: typedef::Bool(u8::MAX),
             date_mode: typedef::DateMode(u8::MAX),
             display_orientation: typedef::DisplayOrientation(u8::MAX),
             mounting_side: typedef::Side(u8::MAX),
-            default_page: Vec::new(),
+            default_page: Box::new([]),
             autosync_min_steps: u16::MAX,
             autosync_min_time: u16::MAX,
             lactate_threshold_autodetect_enabled: typedef::Bool(u8::MAX),
@@ -163,18 +164,20 @@ impl DeviceSettings {
 
     /// Set `time_zone_offset` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_zone_offset_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_zone_offset = Vec::with_capacity(v.len());
+        self.time_zone_offset = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 4.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i8::MAX as f64 {
-                self.time_zone_offset.push(i8::MAX);
+                vals.push(i8::MAX);
                 continue;
             }
-            self.time_zone_offset.push(unscaled as i8);
+            vals.push(unscaled as i8);
         }
+        self.time_zone_offset = vals.into_boxed_slice();
         self
     }
 
@@ -229,27 +232,27 @@ impl From<&Message> for DeviceSettings {
             match field.num {
                 0 => v.active_time_zone = field.value.as_u8(),
                 1 => v.utc_offset = field.value.as_u32(),
-                2 => v.time_offset = field.value.to_vec_u32(),
+                2 => v.time_offset = field.value.to_array_u32(),
                 4 => {
                     v.time_mode = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::TimeMode(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
-                5 => v.time_zone_offset = field.value.to_vec_i8(),
+                5 => v.time_zone_offset = field.value.to_array_i8(),
                 12 => v.backlight_mode = typedef::BacklightMode(field.value.as_u8()),
                 36 => v.activity_tracker_enabled = typedef::Bool(field.value.as_u8()),
                 39 => v.clock_time = typedef::DateTime(field.value.as_u32()),
-                40 => v.pages_enabled = field.value.to_vec_u16(),
+                40 => v.pages_enabled = field.value.to_array_u16(),
                 46 => v.move_alert_enabled = typedef::Bool(field.value.as_u8()),
                 47 => v.date_mode = typedef::DateMode(field.value.as_u8()),
                 55 => v.display_orientation = typedef::DisplayOrientation(field.value.as_u8()),
                 56 => v.mounting_side = typedef::Side(field.value.as_u8()),
-                57 => v.default_page = field.value.to_vec_u16(),
+                57 => v.default_page = field.value.to_array_u16(),
                 58 => v.autosync_min_steps = field.value.as_u16(),
                 59 => v.autosync_min_time = field.value.as_u16(),
                 80 => v.lactate_threshold_autodetect_enabled = typedef::Bool(field.value.as_u8()),
@@ -296,7 +299,7 @@ impl From<DeviceSettings> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_offset),
+                value: Value::ArrayUint32(m.time_offset),
                 is_expanded: false,
             });
         };
@@ -304,9 +307,10 @@ impl From<DeviceSettings> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::ENUM,
-                value: Value::VecUint8({
-                    let (ptr, len, capacity) = m.time_mode.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
+                value: Value::ArrayUint8({
+                    let (ptr, len, capacity) = m.time_mode.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -315,7 +319,7 @@ impl From<DeviceSettings> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::SINT8,
-                value: Value::VecInt8(m.time_zone_offset),
+                value: Value::ArrayInt8(m.time_zone_offset),
                 is_expanded: false,
             });
         };
@@ -347,7 +351,7 @@ impl From<DeviceSettings> for Message {
             fields.push(Field {
                 num: 40,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.pages_enabled),
+                value: Value::ArrayUint16(m.pages_enabled),
                 is_expanded: false,
             });
         };
@@ -387,7 +391,7 @@ impl From<DeviceSettings> for Message {
             fields.push(Field {
                 num: 57,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.default_page),
+                value: Value::ArrayUint16(m.default_page),
                 is_expanded: false,
             });
         };
@@ -584,18 +588,18 @@ impl Serialize for DeviceSettings {
 struct De {
     active_time_zone: u8,
     utc_offset: u32,
-    time_offset: Vec<u32>,
-    time_mode: Vec<typedef::TimeMode>,
-    time_zone_offset: Vec<f64>,
+    time_offset: Box<[u32]>,
+    time_mode: Box<[typedef::TimeMode]>,
+    time_zone_offset: Box<[f64]>,
     backlight_mode: typedef::BacklightMode,
     activity_tracker_enabled: typedef::Bool,
     clock_time: Option<i64>,
-    pages_enabled: Vec<u16>,
+    pages_enabled: Box<[u16]>,
     move_alert_enabled: typedef::Bool,
     date_mode: typedef::DateMode,
     display_orientation: typedef::DisplayOrientation,
     mounting_side: typedef::Side,
-    default_page: Vec<u16>,
+    default_page: Box<[u16]>,
     autosync_min_steps: u16,
     autosync_min_time: u16,
     lactate_threshold_autodetect_enabled: typedef::Bool,
@@ -620,7 +624,7 @@ impl From<De> for DeviceSettings {
             time_mode: m.time_mode,
             time_zone_offset: {
                 if m.time_zone_offset.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_zone_offset.len());
                     for &x in m.time_zone_offset.iter() {
@@ -632,7 +636,7 @@ impl From<De> for DeviceSettings {
                         }
                         vals.push(unscaled as i8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             backlight_mode: m.backlight_mode,
@@ -669,18 +673,18 @@ impl Default for De {
         Self {
             active_time_zone: u8::MAX,
             utc_offset: u32::MAX,
-            time_offset: Vec::new(),
-            time_mode: Vec::new(),
-            time_zone_offset: Vec::new(),
+            time_offset: Box::new([]),
+            time_mode: Box::new([]),
+            time_zone_offset: Box::new([]),
             backlight_mode: typedef::BacklightMode(u8::MAX),
             activity_tracker_enabled: typedef::Bool(u8::MAX),
             clock_time: None,
-            pages_enabled: Vec::new(),
+            pages_enabled: Box::new([]),
             move_alert_enabled: typedef::Bool(u8::MAX),
             date_mode: typedef::DateMode(u8::MAX),
             display_orientation: typedef::DisplayOrientation(u8::MAX),
             mounting_side: typedef::Side(u8::MAX),
-            default_page: Vec::new(),
+            default_page: Box::new([]),
             autosync_min_steps: u16::MAX,
             autosync_min_time: u16::MAX,
             lactate_threshold_autodetect_enabled: typedef::Bool(u8::MAX),

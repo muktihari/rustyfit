@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,7 +20,7 @@ pub struct HsaRespirationData {
     /// Units: s; Processing interval length in seconds
     pub processing_interval: u16,
     /// Scale: 100; Units: breaths/min; Breaths / min: \[1,100\] Invalid: 255 Excess motion: 254 Off wrist: 253 Not available: 252 Blank: 2.4
-    pub respiration_rate: Vec<i16>,
+    pub respiration_rate: Box<[i16]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -31,15 +32,15 @@ impl HsaRespirationData {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `s`
     pub const PROCESSING_INTERVAL: u8 = 0;
-    /// Value's type: `Vec<i16>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `breaths/min`
+    /// Value's type: `Box<[i16]>`; FitBaseType::SINT16; ProfileType::Sint16; Scale: `100`; Units: `breaths/min`
     pub const RESPIRATION_RATE: u8 = 1;
 
     /// Create new HsaRespirationData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             processing_interval: u16::MAX,
-            respiration_rate: Vec::new(),
+            respiration_rate: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -61,18 +62,20 @@ impl HsaRespirationData {
 
     /// Set `respiration_rate` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_respiration_rate_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.respiration_rate = Vec::with_capacity(v.len());
+        self.respiration_rate = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 100.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > i16::MAX as f64 {
-                self.respiration_rate.push(i16::MAX);
+                vals.push(i16::MAX);
                 continue;
             }
-            self.respiration_rate.push(unscaled as i16);
+            vals.push(unscaled as i16);
         }
+        self.respiration_rate = vals.into_boxed_slice();
         self
     }
 
@@ -106,7 +109,7 @@ impl From<&Message> for HsaRespirationData {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.processing_interval = field.value.as_u16(),
-                1 => v.respiration_rate = field.value.to_vec_i16(),
+                1 => v.respiration_rate = field.value.to_array_i16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -140,7 +143,7 @@ impl From<HsaRespirationData> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::SINT16,
-                value: Value::VecInt16(m.respiration_rate),
+                value: Value::ArrayInt16(m.respiration_rate),
                 is_expanded: false,
             });
         };
@@ -188,7 +191,7 @@ impl Serialize for HsaRespirationData {
 struct De {
     timestamp: Option<i64>,
     processing_interval: u16,
-    respiration_rate: Vec<f64>,
+    respiration_rate: Box<[f64]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -204,7 +207,7 @@ impl From<De> for HsaRespirationData {
             processing_interval: m.processing_interval,
             respiration_rate: {
                 if m.respiration_rate.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.respiration_rate.len());
                     for &x in m.respiration_rate.iter() {
@@ -216,7 +219,7 @@ impl From<De> for HsaRespirationData {
                         }
                         vals.push(unscaled as i16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             unknown_fields: m.unknown_fields,
@@ -231,7 +234,7 @@ impl Default for De {
         Self {
             timestamp: None,
             processing_interval: u16::MAX,
-            respiration_rate: Vec::new(),
+            respiration_rate: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

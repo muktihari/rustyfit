@@ -7,8 +7,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -26,7 +25,7 @@ pub struct CoursePoint {
     /// Scale: 100; Units: m
     pub distance: u32,
     pub r#type: typedef::CoursePoint,
-    pub name: String,
+    pub name: Box<str>,
     pub favorite: typedef::Bool,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -47,13 +46,13 @@ impl CoursePoint {
     pub const DISTANCE: u8 = 4;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CoursePoint
     pub const TYPE: u8 = 5;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 6;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const FAVORITE: u8 = 8;
 
     /// Create new CoursePoint with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             timestamp: typedef::DateTime(u32::MAX),
@@ -61,7 +60,7 @@ impl CoursePoint {
             position_long: i32::MAX,
             distance: u32::MAX,
             r#type: typedef::CoursePoint(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             favorite: typedef::Bool(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -150,7 +149,7 @@ impl From<&Message> for CoursePoint {
                 3 => v.position_long = field.value.as_i32(),
                 4 => v.distance = field.value.as_u32(),
                 5 => v.r#type = typedef::CoursePoint(field.value.as_u8()),
-                6 => v.name = field.value.as_str().to_owned(),
+                6 => v.name = Box::from(field.value.as_str()),
                 8 => v.favorite = typedef::Bool(field.value.as_u8()),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -294,7 +293,7 @@ struct De {
     position_long: f64,
     distance: f64,
     r#type: typedef::CoursePoint,
-    name: String,
+    name: Box<str>,
     favorite: typedef::Bool,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -338,7 +337,7 @@ impl Default for De {
             position_long: f64::from_bits(u64::MAX),
             distance: f64::from_bits(u64::MAX),
             r#type: typedef::CoursePoint(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             favorite: typedef::Bool(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

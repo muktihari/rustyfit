@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -17,9 +16,9 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct SegmentId {
     /// Friendly name assigned to segment
-    pub name: String,
+    pub name: Box<str>,
     /// UUID of the segment
-    pub uuid: String,
+    pub uuid: Box<str>,
     /// Sport associated with the segment
     pub sport: typedef::Sport,
     /// Segment enabled for evaluation
@@ -41,9 +40,9 @@ pub struct SegmentId {
 }
 
 impl SegmentId {
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 0;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const UUID: u8 = 1;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Sport
     pub const SPORT: u8 = 2;
@@ -61,10 +60,10 @@ impl SegmentId {
     pub const SELECTION_TYPE: u8 = 8;
 
     /// Create new SegmentId with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            name: String::new(),
-            uuid: String::new(),
+            name: Box::from(""),
+            uuid: Box::from(""),
             sport: typedef::Sport(u8::MAX),
             enabled: typedef::Bool(u8::MAX),
             user_profile_primary_key: u32::MAX,
@@ -111,8 +110,8 @@ impl From<&Message> for SegmentId {
 
         for field in &mesg.fields {
             match field.num {
-                0 => v.name = field.value.as_str().to_owned(),
-                1 => v.uuid = field.value.as_str().to_owned(),
+                0 => v.name = Box::from(field.value.as_str()),
+                1 => v.uuid = Box::from(field.value.as_str()),
                 2 => v.sport = typedef::Sport(field.value.as_u8()),
                 3 => v.enabled = typedef::Bool(field.value.as_u8()),
                 4 => v.user_profile_primary_key = field.value.as_u32(),
@@ -265,8 +264,8 @@ impl Serialize for SegmentId {
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
-    name: String,
-    uuid: String,
+    name: Box<str>,
+    uuid: Box<str>,
     sport: typedef::Sport,
     enabled: typedef::Bool,
     user_profile_primary_key: u32,
@@ -301,8 +300,8 @@ impl From<De> for SegmentId {
 impl Default for De {
     fn default() -> Self {
         Self {
-            name: String::new(),
-            uuid: String::new(),
+            name: Box::from(""),
+            uuid: Box::from(""),
             sport: typedef::Sport(u8::MAX),
             enabled: typedef::Bool(u8::MAX),
             user_profile_primary_key: u32::MAX,

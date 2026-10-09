@@ -8,6 +8,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -28,9 +29,9 @@ pub struct AntTx {
     /// Scale: 32768; Units: s
     pub fractional_timestamp: u16,
     pub mesg_id: u8,
-    pub mesg_data: Vec<u8>,
+    pub mesg_data: Box<[u8]>,
     pub channel_number: u8,
-    pub data: Vec<u8>,
+    pub data: Box<[u8]>,
     state: [u8; 1], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -45,22 +46,22 @@ impl AntTx {
     pub const FRACTIONAL_TIMESTAMP: u8 = 0;
     /// Value's type: `u8`; FitBaseType::BYTE; ProfileType::Byte
     pub const MESG_ID: u8 = 1;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const MESG_DATA: u8 = 2;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const CHANNEL_NUMBER: u8 = 3;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const DATA: u8 = 4;
 
     /// Create new AntTx with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             fractional_timestamp: u16::MAX,
             mesg_id: u8::MAX,
-            mesg_data: Vec::new(),
+            mesg_data: Box::new([]),
             channel_number: u8::MAX,
-            data: Vec::new(),
+            data: Box::new([]),
             state: [0u8; 1],
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -142,9 +143,9 @@ impl From<&Message> for AntTx {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.fractional_timestamp = field.value.as_u16(),
                 1 => v.mesg_id = field.value.as_u8(),
-                2 => v.mesg_data = field.value.to_vec_u8(),
+                2 => v.mesg_data = field.value.to_array_u8(),
                 3 => v.channel_number = field.value.as_u8(),
-                4 => v.data = field.value.to_vec_u8(),
+                4 => v.data = field.value.to_array_u8(),
                 _ => {
                     v.unknown_fields.push(field.clone());
                     continue;
@@ -192,7 +193,7 @@ impl From<AntTx> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.mesg_data),
+                value: Value::ArrayUint8(m.mesg_data),
                 is_expanded: false,
             });
         };
@@ -208,7 +209,7 @@ impl From<AntTx> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.data),
+                value: Value::ArrayUint8(m.data),
                 is_expanded: is_expanded(&m.state, 4),
             });
         };
@@ -266,9 +267,9 @@ struct De {
     timestamp: Option<i64>,
     fractional_timestamp: f64,
     mesg_id: u8,
-    mesg_data: Vec<u8>,
+    mesg_data: Box<[u8]>,
     channel_number: u8,
-    data: Vec<u8>,
+    data: Box<[u8]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -307,9 +308,9 @@ impl Default for De {
             timestamp: None,
             fractional_timestamp: f64::from_bits(u64::MAX),
             mesg_id: u8::MAX,
-            mesg_data: Vec::new(),
+            mesg_data: Box::new([]),
             channel_number: u8::MAX,
-            data: Vec::new(),
+            data: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -22,7 +21,7 @@ pub struct Connectivity {
     pub bluetooth_le_enabled: typedef::Bool,
     /// Use ANT for connectivity features
     pub ant_enabled: typedef::Bool,
-    pub name: String,
+    pub name: Box<str>,
     pub live_tracking_enabled: typedef::Bool,
     pub weather_conditions_enabled: typedef::Bool,
     pub weather_alerts_enabled: typedef::Bool,
@@ -45,7 +44,7 @@ impl Connectivity {
     pub const BLUETOOTH_LE_ENABLED: u8 = 1;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const ANT_ENABLED: u8 = 2;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const NAME: u8 = 3;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::Bool
     pub const LIVE_TRACKING_ENABLED: u8 = 4;
@@ -67,12 +66,12 @@ impl Connectivity {
     pub const GROUPTRACK_ENABLED: u8 = 12;
 
     /// Create new Connectivity with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             bluetooth_enabled: typedef::Bool(u8::MAX),
             bluetooth_le_enabled: typedef::Bool(u8::MAX),
             ant_enabled: typedef::Bool(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             live_tracking_enabled: typedef::Bool(u8::MAX),
             weather_conditions_enabled: typedef::Bool(u8::MAX),
             weather_alerts_enabled: typedef::Bool(u8::MAX),
@@ -128,7 +127,7 @@ impl From<&Message> for Connectivity {
                 0 => v.bluetooth_enabled = typedef::Bool(field.value.as_u8()),
                 1 => v.bluetooth_le_enabled = typedef::Bool(field.value.as_u8()),
                 2 => v.ant_enabled = typedef::Bool(field.value.as_u8()),
-                3 => v.name = field.value.as_str().to_owned(),
+                3 => v.name = Box::from(field.value.as_str()),
                 4 => v.live_tracking_enabled = typedef::Bool(field.value.as_u8()),
                 5 => v.weather_conditions_enabled = typedef::Bool(field.value.as_u8()),
                 6 => v.weather_alerts_enabled = typedef::Bool(field.value.as_u8()),
@@ -342,7 +341,7 @@ struct De {
     bluetooth_enabled: typedef::Bool,
     bluetooth_le_enabled: typedef::Bool,
     ant_enabled: typedef::Bool,
-    name: String,
+    name: Box<str>,
     live_tracking_enabled: typedef::Bool,
     weather_conditions_enabled: typedef::Bool,
     weather_alerts_enabled: typedef::Bool,
@@ -386,7 +385,7 @@ impl Default for De {
             bluetooth_enabled: typedef::Bool(u8::MAX),
             bluetooth_le_enabled: typedef::Bool(u8::MAX),
             ant_enabled: typedef::Bool(u8::MAX),
-            name: String::new(),
+            name: Box::from(""),
             live_tracking_enabled: typedef::Bool(u8::MAX),
             weather_conditions_enabled: typedef::Bool(u8::MAX),
             weather_alerts_enabled: typedef::Bool(u8::MAX),

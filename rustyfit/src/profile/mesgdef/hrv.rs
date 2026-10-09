@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -15,7 +16,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct Hrv {
     /// Scale: 1000; Units: s; Time between beats
-    pub time: Vec<u16>,
+    pub time: Box<[u16]>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -23,13 +24,13 @@ pub struct Hrv {
 }
 
 impl Hrv {
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `s`
     pub const TIME: u8 = 0;
 
     /// Create new Hrv with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            time: Vec::new(),
+            time: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -51,18 +52,20 @@ impl Hrv {
 
     /// Set `time` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time = Vec::with_capacity(v.len());
+        self.time = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.time.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.time.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.time = vals.into_boxed_slice();
         self
     }
 
@@ -92,7 +95,7 @@ impl From<&Message> for Hrv {
 
         for field in &mesg.fields {
             match field.num {
-                0 => v.time = field.value.to_vec_u16(),
+                0 => v.time = field.value.to_array_u16(),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -110,7 +113,7 @@ impl From<Hrv> for Message {
             fields.push(Field {
                 num: 0,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.time),
+                value: Value::ArrayUint16(m.time),
                 is_expanded: false,
             });
         };
@@ -150,7 +153,7 @@ impl Serialize for Hrv {
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
-    time: Vec<f64>,
+    time: Box<[f64]>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -161,7 +164,7 @@ impl From<De> for Hrv {
         Self {
             time: {
                 if m.time.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time.len());
                     for &x in m.time.iter() {
@@ -173,7 +176,7 @@ impl From<De> for Hrv {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             unknown_fields: m.unknown_fields,
@@ -187,7 +190,7 @@ impl From<De> for Hrv {
 impl Default for De {
     fn default() -> Self {
         Self {
-            time: Vec::new(),
+            time: Box::new([]),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

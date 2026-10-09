@@ -9,6 +9,7 @@
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
 use crate::semconv;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -55,7 +56,7 @@ pub struct Record {
     /// Units: C
     pub temperature: i8,
     /// Scale: 16; Units: m/s; Speed at 1s intervals. Timestamp field indicates time of last array element.
-    pub speed_1s: Vec<u8>,
+    pub speed_1s: Box<[u8]>,
     /// Units: cycles
     pub cycles: u8,
     /// Units: cycles
@@ -116,13 +117,13 @@ pub struct Record {
     /// Units: mm; Right platform center offset
     pub right_pco: i8,
     /// Scale: 0.7111111; Units: degrees; Left power phase angles. Data value indexes defined by power_phase_type.
-    pub left_power_phase: Vec<u8>,
+    pub left_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Left power phase peak angles. Data value indexes defined by power_phase_type.
-    pub left_power_phase_peak: Vec<u8>,
+    pub left_power_phase_peak: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Right power phase angles. Data value indexes defined by power_phase_type.
-    pub right_power_phase: Vec<u8>,
+    pub right_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Right power phase peak angles. Data value indexes defined by power_phase_type.
-    pub right_power_phase_peak: Vec<u8>,
+    pub right_power_phase_peak: Box<[u8]>,
     /// Scale: 1000; Units: m/s
     pub enhanced_speed: u32,
     /// Scale: 5; Offset: 500; Units: m
@@ -225,7 +226,7 @@ impl Record {
     pub const CYCLE_LENGTH: u8 = 12;
     /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `C`
     pub const TEMPERATURE: u8 = 13;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `16`; Units: `m/s`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `16`; Units: `m/s`
     pub const SPEED_1S: u8 = 17;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Units: `cycles`
     pub const CYCLES: u8 = 18;
@@ -291,13 +292,13 @@ impl Record {
     pub const LEFT_PCO: u8 = 67;
     /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
     pub const RIGHT_PCO: u8 = 68;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const LEFT_POWER_PHASE: u8 = 69;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const LEFT_POWER_PHASE_PEAK: u8 = 70;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const RIGHT_POWER_PHASE: u8 = 71;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const RIGHT_POWER_PHASE_PEAK: u8 = 72;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `m/s`
     pub const ENHANCED_SPEED: u8 = 73;
@@ -365,7 +366,7 @@ impl Record {
     pub const CORE_TEMPERATURE: u8 = 139;
 
     /// Create new Record with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             position_lat: i32::MAX,
@@ -382,7 +383,7 @@ impl Record {
             time_from_course: i32::MAX,
             cycle_length: u8::MAX,
             temperature: i8::MAX,
-            speed_1s: Vec::new(),
+            speed_1s: Box::new([]),
             cycles: u8::MAX,
             total_cycles: u32::MAX,
             compressed_accumulated_power: u16::MAX,
@@ -415,10 +416,10 @@ impl Record {
             device_index: typedef::DeviceIndex(u8::MAX),
             left_pco: i8::MAX,
             right_pco: i8::MAX,
-            left_power_phase: Vec::new(),
-            left_power_phase_peak: Vec::new(),
-            right_power_phase: Vec::new(),
-            right_power_phase_peak: Vec::new(),
+            left_power_phase: Box::new([]),
+            left_power_phase_peak: Box::new([]),
+            right_power_phase: Box::new([]),
+            right_power_phase_peak: Box::new([]),
             enhanced_speed: u32::MAX,
             enhanced_altitude: u32::MAX,
             battery_soc: u8::MAX,
@@ -621,18 +622,20 @@ impl Record {
 
     /// Set `speed_1s` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_speed_1s_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.speed_1s = Vec::with_capacity(v.len());
+        self.speed_1s = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 16.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.speed_1s.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.speed_1s.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.speed_1s = vals.into_boxed_slice();
         self
     }
 
@@ -1051,18 +1054,20 @@ impl Record {
 
     /// Set `left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.left_power_phase = Vec::with_capacity(v.len());
+        self.left_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.left_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.left_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.left_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -1082,18 +1087,20 @@ impl Record {
 
     /// Set `left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.left_power_phase_peak = Vec::with_capacity(v.len());
+        self.left_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.left_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.left_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.left_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -1113,18 +1120,20 @@ impl Record {
 
     /// Set `right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.right_power_phase = Vec::with_capacity(v.len());
+        self.right_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.right_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.right_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.right_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -1144,18 +1153,20 @@ impl Record {
 
     /// Set `right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.right_power_phase_peak = Vec::with_capacity(v.len());
+        self.right_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.right_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.right_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.right_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -1659,14 +1670,14 @@ impl From<&Message> for Record {
                 7 => v.power = field.value.as_u16(),
                 8 => {
                     v.compressed_speed_distance = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut arr = [u8::MAX; 3];
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
                             arr
                         }
-                        _ => [u8::MAX; 3],
+                        _ => Default::default(),
                     }
                 }
                 9 => v.grade = field.value.as_i16(),
@@ -1674,7 +1685,7 @@ impl From<&Message> for Record {
                 11 => v.time_from_course = field.value.as_i32(),
                 12 => v.cycle_length = field.value.as_u8(),
                 13 => v.temperature = field.value.as_i8(),
-                17 => v.speed_1s = field.value.to_vec_u8(),
+                17 => v.speed_1s = field.value.to_array_u8(),
                 18 => v.cycles = field.value.as_u8(),
                 19 => v.total_cycles = field.value.as_u32(),
                 28 => v.compressed_accumulated_power = field.value.as_u16(),
@@ -1707,10 +1718,10 @@ impl From<&Message> for Record {
                 62 => v.device_index = typedef::DeviceIndex(field.value.as_u8()),
                 67 => v.left_pco = field.value.as_i8(),
                 68 => v.right_pco = field.value.as_i8(),
-                69 => v.left_power_phase = field.value.to_vec_u8(),
-                70 => v.left_power_phase_peak = field.value.to_vec_u8(),
-                71 => v.right_power_phase = field.value.to_vec_u8(),
-                72 => v.right_power_phase_peak = field.value.to_vec_u8(),
+                69 => v.left_power_phase = field.value.to_array_u8(),
+                70 => v.left_power_phase_peak = field.value.to_array_u8(),
+                71 => v.right_power_phase = field.value.to_array_u8(),
+                72 => v.right_power_phase_peak = field.value.to_array_u8(),
                 73 => v.enhanced_speed = field.value.as_u32(),
                 78 => v.enhanced_altitude = field.value.as_u32(),
                 81 => v.battery_soc = field.value.as_u8(),
@@ -1838,7 +1849,7 @@ impl From<Record> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(Vec::from(&m.compressed_speed_distance)),
+                value: Value::ArrayUint8(Box::from(m.compressed_speed_distance)),
                 is_expanded: false,
             });
         };
@@ -1886,7 +1897,7 @@ impl From<Record> for Message {
             fields.push(Field {
                 num: 17,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.speed_1s),
+                value: Value::ArrayUint8(m.speed_1s),
                 is_expanded: false,
             });
         };
@@ -2150,7 +2161,7 @@ impl From<Record> for Message {
             fields.push(Field {
                 num: 69,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.left_power_phase),
+                value: Value::ArrayUint8(m.left_power_phase),
                 is_expanded: false,
             });
         };
@@ -2158,7 +2169,7 @@ impl From<Record> for Message {
             fields.push(Field {
                 num: 70,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.left_power_phase_peak),
+                value: Value::ArrayUint8(m.left_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -2166,7 +2177,7 @@ impl From<Record> for Message {
             fields.push(Field {
                 num: 71,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.right_power_phase),
+                value: Value::ArrayUint8(m.right_power_phase),
                 is_expanded: false,
             });
         };
@@ -2174,7 +2185,7 @@ impl From<Record> for Message {
             fields.push(Field {
                 num: 72,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.right_power_phase_peak),
+                value: Value::ArrayUint8(m.right_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -2742,7 +2753,7 @@ struct De {
     time_from_course: f64,
     cycle_length: f64,
     temperature: i8,
-    speed_1s: Vec<f64>,
+    speed_1s: Box<[f64]>,
     cycles: u8,
     total_cycles: u32,
     compressed_accumulated_power: u16,
@@ -2775,10 +2786,10 @@ struct De {
     device_index: typedef::DeviceIndex,
     left_pco: i8,
     right_pco: i8,
-    left_power_phase: Vec<f64>,
-    left_power_phase_peak: Vec<f64>,
-    right_power_phase: Vec<f64>,
-    right_power_phase_peak: Vec<f64>,
+    left_power_phase: Box<[f64]>,
+    left_power_phase_peak: Box<[f64]>,
+    right_power_phase: Box<[f64]>,
+    right_power_phase_peak: Box<[f64]>,
     enhanced_speed: f64,
     enhanced_altitude: f64,
     battery_soc: f64,
@@ -2881,7 +2892,7 @@ impl From<De> for Record {
             temperature: m.temperature,
             speed_1s: {
                 if m.speed_1s.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.speed_1s.len());
                     for &x in m.speed_1s.iter() {
@@ -2893,7 +2904,7 @@ impl From<De> for Record {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             cycles: m.cycles,
@@ -3063,7 +3074,7 @@ impl From<De> for Record {
             right_pco: m.right_pco,
             left_power_phase: {
                 if m.left_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.left_power_phase.len());
                     for &x in m.left_power_phase.iter() {
@@ -3075,12 +3086,12 @@ impl From<De> for Record {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             left_power_phase_peak: {
                 if m.left_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.left_power_phase_peak.len());
                     for &x in m.left_power_phase_peak.iter() {
@@ -3092,12 +3103,12 @@ impl From<De> for Record {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             right_power_phase: {
                 if m.right_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.right_power_phase.len());
                     for &x in m.right_power_phase.iter() {
@@ -3109,12 +3120,12 @@ impl From<De> for Record {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             right_power_phase_peak: {
                 if m.right_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.right_power_phase_peak.len());
                     for &x in m.right_power_phase_peak.iter() {
@@ -3126,7 +3137,7 @@ impl From<De> for Record {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             enhanced_speed: {
@@ -3306,7 +3317,7 @@ impl Default for De {
             time_from_course: f64::from_bits(u64::MAX),
             cycle_length: f64::from_bits(u64::MAX),
             temperature: i8::MAX,
-            speed_1s: Vec::new(),
+            speed_1s: Box::new([]),
             cycles: u8::MAX,
             total_cycles: u32::MAX,
             compressed_accumulated_power: u16::MAX,
@@ -3339,10 +3350,10 @@ impl Default for De {
             device_index: typedef::DeviceIndex(u8::MAX),
             left_pco: i8::MAX,
             right_pco: i8::MAX,
-            left_power_phase: Vec::new(),
-            left_power_phase_peak: Vec::new(),
-            right_power_phase: Vec::new(),
-            right_power_phase_peak: Vec::new(),
+            left_power_phase: Box::new([]),
+            left_power_phase_peak: Box::new([]),
+            right_power_phase: Box::new([]),
+            right_power_phase_peak: Box::new([]),
             enhanced_speed: f64::from_bits(u64::MAX),
             enhanced_altitude: f64::from_bits(u64::MAX),
             battery_soc: f64::from_bits(u64::MAX),

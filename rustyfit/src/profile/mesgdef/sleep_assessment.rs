@@ -79,7 +79,7 @@ impl SleepAssessment {
     pub const AVERAGE_STRESS_DURING_SLEEP: u8 = 15;
 
     /// Create new SleepAssessment with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             combined_awake_score: u8::MAX,
             awake_time_score: u8::MAX,

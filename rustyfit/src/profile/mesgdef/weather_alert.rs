@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -18,7 +17,7 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 pub struct WeatherAlert {
     pub timestamp: typedef::DateTime,
     /// Unique identifier from GCS report ID string, length is 12
-    pub report_id: String,
+    pub report_id: Box<str>,
     /// Time alert was issued
     pub issue_time: typedef::DateTime,
     /// Time alert expires
@@ -36,7 +35,7 @@ pub struct WeatherAlert {
 impl WeatherAlert {
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const REPORT_ID: u8 = 0;
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime
     pub const ISSUE_TIME: u8 = 1;
@@ -48,10 +47,10 @@ impl WeatherAlert {
     pub const TYPE: u8 = 4;
 
     /// Create new WeatherAlert with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
-            report_id: String::new(),
+            report_id: Box::from(""),
             issue_time: typedef::DateTime(u32::MAX),
             expire_time: typedef::DateTime(u32::MAX),
             severity: typedef::WeatherSeverity(u8::MAX),
@@ -93,7 +92,7 @@ impl From<&Message> for WeatherAlert {
         for field in &mesg.fields {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
-                0 => v.report_id = field.value.as_str().to_owned(),
+                0 => v.report_id = Box::from(field.value.as_str()),
                 1 => v.issue_time = typedef::DateTime(field.value.as_u32()),
                 2 => v.expire_time = typedef::DateTime(field.value.as_u32()),
                 3 => v.severity = typedef::WeatherSeverity(field.value.as_u8()),
@@ -211,7 +210,7 @@ impl Serialize for WeatherAlert {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     timestamp: Option<i64>,
-    report_id: String,
+    report_id: Box<str>,
     issue_time: Option<i64>,
     expire_time: Option<i64>,
     severity: typedef::WeatherSeverity,
@@ -250,7 +249,7 @@ impl Default for De {
     fn default() -> Self {
         Self {
             timestamp: None,
-            report_id: String::new(),
+            report_id: Box::from(""),
             issue_time: None,
             expire_time: None,
             severity: typedef::WeatherSeverity(u8::MAX),

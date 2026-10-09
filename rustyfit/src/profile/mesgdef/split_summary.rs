@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -78,17 +79,17 @@ pub struct SplitSummary {
     /// Units: mm; Average left power phase angles. Data value indexes defined by power_phase_type.
     pub avg_right_pco: i8,
     /// Scale: 0.7111111; Units: degrees; Average left power phase peak angles. Data value indexes defined by power_phase_type.
-    pub avg_left_power_phase: Vec<u8>,
+    pub avg_left_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average right power phase angles. Data value indexes defined by power_phase_type.
-    pub avg_left_power_phase_peak: Vec<u8>,
+    pub avg_left_power_phase_peak: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average right power phase peak angles. Data value indexes defined by power_phase_type.
-    pub avg_right_power_phase: Vec<u8>,
+    pub avg_right_power_phase: Box<[u8]>,
     /// Scale: 0.7111111; Units: degrees; Average power by position. Data value indexes defined by rider_position_type.
-    pub avg_right_power_phase_peak: Vec<u8>,
+    pub avg_right_power_phase_peak: Box<[u8]>,
     /// Units: watts; Maximum power by position. Data value indexes defined by rider_position_type.
-    pub avg_power_position: Vec<u16>,
+    pub avg_power_position: Box<[u16]>,
     /// Units: watts
-    pub max_power_position: Vec<u16>,
+    pub max_power_position: Box<[u16]>,
     /// Scale: 2; Units: percent
     pub avg_left_torque_effectiveness: u8,
     /// Scale: 2; Units: percent
@@ -222,17 +223,17 @@ impl SplitSummary {
     pub const AVG_LEFT_PCO: u8 = 30;
     /// Value's type: `i8`; FitBaseType::SINT8; ProfileType::Sint8; Units: `mm`
     pub const AVG_RIGHT_PCO: u8 = 31;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE: u8 = 32;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_LEFT_POWER_PHASE_PEAK: u8 = 33;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE: u8 = 34;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `0.7111111`; Units: `degrees`
     pub const AVG_RIGHT_POWER_PHASE_PEAK: u8 = 35;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const AVG_POWER_POSITION: u8 = 36;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const MAX_POWER_POSITION: u8 = 37;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8; Scale: `2`; Units: `percent`
     pub const AVG_LEFT_TORQUE_EFFECTIVENESS: u8 = 38;
@@ -302,7 +303,7 @@ impl SplitSummary {
     pub const MAX_TOTAL_TIMER_TIME: u8 = 101;
 
     /// Create new SplitSummary with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             timestamp: typedef::DateTime(u32::MAX),
@@ -338,12 +339,12 @@ impl SplitSummary {
             time_standing: u32::MAX,
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::new(),
-            avg_left_power_phase_peak: Vec::new(),
-            avg_right_power_phase: Vec::new(),
-            avg_right_power_phase_peak: Vec::new(),
-            avg_power_position: Vec::new(),
-            max_power_position: Vec::new(),
+            avg_left_power_phase: Box::new([]),
+            avg_left_power_phase_peak: Box::new([]),
+            avg_right_power_phase: Box::new([]),
+            avg_right_power_phase_peak: Box::new([]),
+            avg_power_position: Box::new([]),
+            max_power_position: Box::new([]),
             avg_left_torque_effectiveness: u8::MAX,
             avg_right_torque_effectiveness: u8::MAX,
             avg_left_pedal_smoothness: u8::MAX,
@@ -671,18 +672,20 @@ impl SplitSummary {
 
     /// Set `avg_left_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_left_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_left_power_phase = Vec::with_capacity(v.len());
+        self.avg_left_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_left_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_left_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_left_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -702,18 +705,20 @@ impl SplitSummary {
 
     /// Set `avg_left_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_left_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_left_power_phase_peak = Vec::with_capacity(v.len());
+        self.avg_left_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_left_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_left_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_left_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -733,18 +738,20 @@ impl SplitSummary {
 
     /// Set `avg_right_power_phase` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_right_power_phase_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_right_power_phase = Vec::with_capacity(v.len());
+        self.avg_right_power_phase = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_right_power_phase.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_right_power_phase.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_right_power_phase = vals.into_boxed_slice();
         self
     }
 
@@ -764,18 +771,20 @@ impl SplitSummary {
 
     /// Set `avg_right_power_phase_peak` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_avg_right_power_phase_peak_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.avg_right_power_phase_peak = Vec::with_capacity(v.len());
+        self.avg_right_power_phase_peak = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 0.7111111;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u8::MAX as f64 {
-                self.avg_right_power_phase_peak.push(u8::MAX);
+                vals.push(u8::MAX);
                 continue;
             }
-            self.avg_right_power_phase_peak.push(unscaled as u8);
+            vals.push(unscaled as u8);
         }
+        self.avg_right_power_phase_peak = vals.into_boxed_slice();
         self
     }
 
@@ -1268,12 +1277,12 @@ impl From<&Message> for SplitSummary {
                 29 => v.time_standing = field.value.as_u32(),
                 30 => v.avg_left_pco = field.value.as_i8(),
                 31 => v.avg_right_pco = field.value.as_i8(),
-                32 => v.avg_left_power_phase = field.value.to_vec_u8(),
-                33 => v.avg_left_power_phase_peak = field.value.to_vec_u8(),
-                34 => v.avg_right_power_phase = field.value.to_vec_u8(),
-                35 => v.avg_right_power_phase_peak = field.value.to_vec_u8(),
-                36 => v.avg_power_position = field.value.to_vec_u16(),
-                37 => v.max_power_position = field.value.to_vec_u16(),
+                32 => v.avg_left_power_phase = field.value.to_array_u8(),
+                33 => v.avg_left_power_phase_peak = field.value.to_array_u8(),
+                34 => v.avg_right_power_phase = field.value.to_array_u8(),
+                35 => v.avg_right_power_phase_peak = field.value.to_array_u8(),
+                36 => v.avg_power_position = field.value.to_array_u16(),
+                37 => v.max_power_position = field.value.to_array_u16(),
                 38 => v.avg_left_torque_effectiveness = field.value.as_u8(),
                 39 => v.avg_right_torque_effectiveness = field.value.as_u8(),
                 40 => v.avg_left_pedal_smoothness = field.value.as_u8(),
@@ -1596,7 +1605,7 @@ impl From<SplitSummary> for Message {
             fields.push(Field {
                 num: 32,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_left_power_phase),
+                value: Value::ArrayUint8(m.avg_left_power_phase),
                 is_expanded: false,
             });
         };
@@ -1604,7 +1613,7 @@ impl From<SplitSummary> for Message {
             fields.push(Field {
                 num: 33,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_left_power_phase_peak),
+                value: Value::ArrayUint8(m.avg_left_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -1612,7 +1621,7 @@ impl From<SplitSummary> for Message {
             fields.push(Field {
                 num: 34,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_right_power_phase),
+                value: Value::ArrayUint8(m.avg_right_power_phase),
                 is_expanded: false,
             });
         };
@@ -1620,7 +1629,7 @@ impl From<SplitSummary> for Message {
             fields.push(Field {
                 num: 35,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.avg_right_power_phase_peak),
+                value: Value::ArrayUint8(m.avg_right_power_phase_peak),
                 is_expanded: false,
             });
         };
@@ -1628,7 +1637,7 @@ impl From<SplitSummary> for Message {
             fields.push(Field {
                 num: 36,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.avg_power_position),
+                value: Value::ArrayUint16(m.avg_power_position),
                 is_expanded: false,
             });
         };
@@ -1636,7 +1645,7 @@ impl From<SplitSummary> for Message {
             fields.push(Field {
                 num: 37,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.max_power_position),
+                value: Value::ArrayUint16(m.max_power_position),
                 is_expanded: false,
             });
         };
@@ -2190,12 +2199,12 @@ struct De {
     time_standing: f64,
     avg_left_pco: i8,
     avg_right_pco: i8,
-    avg_left_power_phase: Vec<f64>,
-    avg_left_power_phase_peak: Vec<f64>,
-    avg_right_power_phase: Vec<f64>,
-    avg_right_power_phase_peak: Vec<f64>,
-    avg_power_position: Vec<u16>,
-    max_power_position: Vec<u16>,
+    avg_left_power_phase: Box<[f64]>,
+    avg_left_power_phase_peak: Box<[f64]>,
+    avg_right_power_phase: Box<[f64]>,
+    avg_right_power_phase_peak: Box<[f64]>,
+    avg_power_position: Box<[u16]>,
+    max_power_position: Box<[u16]>,
     avg_left_torque_effectiveness: f64,
     avg_right_torque_effectiveness: f64,
     avg_left_pedal_smoothness: f64,
@@ -2367,7 +2376,7 @@ impl From<De> for SplitSummary {
             avg_right_pco: m.avg_right_pco,
             avg_left_power_phase: {
                 if m.avg_left_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_left_power_phase.len());
                     for &x in m.avg_left_power_phase.iter() {
@@ -2379,12 +2388,12 @@ impl From<De> for SplitSummary {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_left_power_phase_peak: {
                 if m.avg_left_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_left_power_phase_peak.len());
                     for &x in m.avg_left_power_phase_peak.iter() {
@@ -2396,12 +2405,12 @@ impl From<De> for SplitSummary {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_right_power_phase: {
                 if m.avg_right_power_phase.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_right_power_phase.len());
                     for &x in m.avg_right_power_phase.iter() {
@@ -2413,12 +2422,12 @@ impl From<De> for SplitSummary {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_right_power_phase_peak: {
                 if m.avg_right_power_phase_peak.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.avg_right_power_phase_peak.len());
                     for &x in m.avg_right_power_phase_peak.iter() {
@@ -2430,7 +2439,7 @@ impl From<De> for SplitSummary {
                         }
                         vals.push(unscaled as u8);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             avg_power_position: m.avg_power_position,
@@ -2634,12 +2643,12 @@ impl Default for De {
             time_standing: f64::from_bits(u64::MAX),
             avg_left_pco: i8::MAX,
             avg_right_pco: i8::MAX,
-            avg_left_power_phase: Vec::new(),
-            avg_left_power_phase_peak: Vec::new(),
-            avg_right_power_phase: Vec::new(),
-            avg_right_power_phase_peak: Vec::new(),
-            avg_power_position: Vec::new(),
-            max_power_position: Vec::new(),
+            avg_left_power_phase: Box::new([]),
+            avg_left_power_phase_peak: Box::new([]),
+            avg_right_power_phase: Box::new([]),
+            avg_right_power_phase_peak: Box::new([]),
+            avg_power_position: Box::new([]),
+            max_power_position: Box::new([]),
             avg_left_torque_effectiveness: f64::from_bits(u64::MAX),
             avg_right_torque_effectiveness: f64::from_bits(u64::MAX),
             avg_left_pedal_smoothness: f64::from_bits(u64::MAX),

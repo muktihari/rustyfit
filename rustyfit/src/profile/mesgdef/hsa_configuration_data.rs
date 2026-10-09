@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -17,7 +18,7 @@ pub struct HsaConfigurationData {
     /// Units: s; Encoded configuration data
     pub timestamp: typedef::DateTime,
     /// Encoded configuration data. Health SDK use only
-    pub data: Vec<u8>,
+    pub data: Box<[u8]>,
     /// Size in bytes of data field
     pub data_size: u8,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -29,16 +30,16 @@ pub struct HsaConfigurationData {
 impl HsaConfigurationData {
     /// Value's type: `u32`; FitBaseType::UINT32; ProfileType::DateTime; Units: `s`
     pub const TIMESTAMP: u8 = 253;
-    /// Value's type: `Vec<u8>`; FitBaseType::BYTE; ProfileType::Byte
+    /// Value's type: `Box<[u8]>`; FitBaseType::BYTE; ProfileType::Byte
     pub const DATA: u8 = 0;
     /// Value's type: `u8`; FitBaseType::UINT8; ProfileType::Uint8
     pub const DATA_SIZE: u8 = 1;
 
     /// Create new HsaConfigurationData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
-            data: Vec::new(),
+            data: Box::new([]),
             data_size: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -74,7 +75,7 @@ impl From<&Message> for HsaConfigurationData {
         for field in &mesg.fields {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
-                0 => v.data = field.value.to_vec_u8(),
+                0 => v.data = field.value.to_array_u8(),
                 1 => v.data_size = field.value.as_u8(),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -101,7 +102,7 @@ impl From<HsaConfigurationData> for Message {
             fields.push(Field {
                 num: 0,
                 base_type: FitBaseType::BYTE,
-                value: Value::VecUint8(m.data),
+                value: Value::ArrayUint8(m.data),
                 is_expanded: false,
             });
         };
@@ -156,7 +157,7 @@ impl Serialize for HsaConfigurationData {
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
     timestamp: Option<i64>,
-    data: Vec<u8>,
+    data: Box<[u8]>,
     data_size: u8,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -183,7 +184,7 @@ impl Default for De {
     fn default() -> Self {
         Self {
             timestamp: None,
-            data: Vec::new(),
+            data: Box::new([]),
             data_size: u8::MAX,
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

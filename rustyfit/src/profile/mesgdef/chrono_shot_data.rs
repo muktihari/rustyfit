@@ -33,7 +33,7 @@ impl ChronoShotData {
     pub const SHOT_NUM: u8 = 1;
 
     /// Create new ChronoShotData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             shot_speed: u32::MAX,

@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -21,7 +20,7 @@ pub struct CameraEvent {
     /// Units: ms; Millisecond part of the timestamp.
     pub timestamp_ms: u16,
     pub camera_event_type: typedef::CameraEventType,
-    pub camera_file_uuid: String,
+    pub camera_file_uuid: Box<str>,
     pub camera_orientation: typedef::CameraOrientationType,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -36,18 +35,18 @@ impl CameraEvent {
     pub const TIMESTAMP_MS: u8 = 0;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CameraEventType
     pub const CAMERA_EVENT_TYPE: u8 = 1;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const CAMERA_FILE_UUID: u8 = 2;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::CameraOrientationType
     pub const CAMERA_ORIENTATION: u8 = 3;
 
     /// Create new CameraEvent with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
             camera_event_type: typedef::CameraEventType(u8::MAX),
-            camera_file_uuid: String::new(),
+            camera_file_uuid: Box::from(""),
             camera_orientation: typedef::CameraOrientationType(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
@@ -87,7 +86,7 @@ impl From<&Message> for CameraEvent {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
                 1 => v.camera_event_type = typedef::CameraEventType(field.value.as_u8()),
-                2 => v.camera_file_uuid = field.value.as_str().to_owned(),
+                2 => v.camera_file_uuid = Box::from(field.value.as_str()),
                 3 => v.camera_orientation = typedef::CameraOrientationType(field.value.as_u8()),
                 _ => v.unknown_fields.push(field.clone()),
             };
@@ -193,7 +192,7 @@ struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
     camera_event_type: typedef::CameraEventType,
-    camera_file_uuid: String,
+    camera_file_uuid: Box<str>,
     camera_orientation: typedef::CameraOrientationType,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
@@ -224,7 +223,7 @@ impl Default for De {
             timestamp: None,
             timestamp_ms: u16::MAX,
             camera_event_type: typedef::CameraEventType(u8::MAX),
-            camera_file_uuid: String::new(),
+            camera_file_uuid: Box::from(""),
             camera_orientation: typedef::CameraOrientationType(u8::MAX),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),

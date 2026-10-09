@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -19,21 +20,21 @@ pub struct TimeInZone {
     pub reference_mesg: typedef::MesgNum,
     pub reference_index: typedef::MessageIndex,
     /// Scale: 1000; Units: s
-    pub time_in_hr_zone: Vec<u32>,
+    pub time_in_hr_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_speed_zone: Vec<u32>,
+    pub time_in_speed_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_cadence_zone: Vec<u32>,
+    pub time_in_cadence_zone: Box<[u32]>,
     /// Scale: 1000; Units: s
-    pub time_in_power_zone: Vec<u32>,
+    pub time_in_power_zone: Box<[u32]>,
     /// Units: bpm
-    pub hr_zone_high_boundary: Vec<u8>,
+    pub hr_zone_high_boundary: Box<[u8]>,
     /// Scale: 1000; Units: m/s
-    pub speed_zone_high_boundary: Vec<u16>,
+    pub speed_zone_high_boundary: Box<[u16]>,
     /// Units: rpm
-    pub cadence_zone_high_boundary: Vec<u8>,
+    pub cadence_zone_high_boundary: Box<[u8]>,
     /// Units: watts
-    pub power_zone_high_boundary: Vec<u16>,
+    pub power_zone_high_boundary: Box<[u16]>,
     pub hr_calc_type: typedef::HrZoneCalc,
     pub max_heart_rate: u8,
     pub resting_heart_rate: u8,
@@ -53,21 +54,21 @@ impl TimeInZone {
     pub const REFERENCE_MESG: u8 = 0;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::MessageIndex
     pub const REFERENCE_INDEX: u8 = 1;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_HR_ZONE: u8 = 2;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_SPEED_ZONE: u8 = 3;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_CADENCE_ZONE: u8 = 4;
-    /// Value's type: `Vec<u32>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
+    /// Value's type: `Box<[u32]>`; FitBaseType::UINT32; ProfileType::Uint32; Scale: `1000`; Units: `s`
     pub const TIME_IN_POWER_ZONE: u8 = 5;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `bpm`
     pub const HR_ZONE_HIGH_BOUNDARY: u8 = 6;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Scale: `1000`; Units: `m/s`
     pub const SPEED_ZONE_HIGH_BOUNDARY: u8 = 7;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8; ProfileType::Uint8; Units: `rpm`
     pub const CADENCE_ZONE_HIGH_BOUNDARY: u8 = 8;
-    /// Value's type: `Vec<u16>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
+    /// Value's type: `Box<[u16]>`; FitBaseType::UINT16; ProfileType::Uint16; Units: `watts`
     pub const POWER_ZONE_HIGH_BOUNDARY: u8 = 9;
     /// Value's type: `u8`; FitBaseType::ENUM; ProfileType::HrZoneCalc
     pub const HR_CALC_TYPE: u8 = 10;
@@ -83,19 +84,19 @@ impl TimeInZone {
     pub const FUNCTIONAL_THRESHOLD_POWER: u8 = 15;
 
     /// Create new TimeInZone with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             reference_mesg: typedef::MesgNum(u16::MAX),
             reference_index: typedef::MessageIndex(u16::MAX),
-            time_in_hr_zone: Vec::new(),
-            time_in_speed_zone: Vec::new(),
-            time_in_cadence_zone: Vec::new(),
-            time_in_power_zone: Vec::new(),
-            hr_zone_high_boundary: Vec::new(),
-            speed_zone_high_boundary: Vec::new(),
-            cadence_zone_high_boundary: Vec::new(),
-            power_zone_high_boundary: Vec::new(),
+            time_in_hr_zone: Box::new([]),
+            time_in_speed_zone: Box::new([]),
+            time_in_cadence_zone: Box::new([]),
+            time_in_power_zone: Box::new([]),
+            hr_zone_high_boundary: Box::new([]),
+            speed_zone_high_boundary: Box::new([]),
+            cadence_zone_high_boundary: Box::new([]),
+            power_zone_high_boundary: Box::new([]),
             hr_calc_type: typedef::HrZoneCalc(u8::MAX),
             max_heart_rate: u8::MAX,
             resting_heart_rate: u8::MAX,
@@ -123,18 +124,20 @@ impl TimeInZone {
 
     /// Set `time_in_hr_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_hr_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_hr_zone = Vec::with_capacity(v.len());
+        self.time_in_hr_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_hr_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_hr_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_hr_zone = vals.into_boxed_slice();
         self
     }
 
@@ -154,18 +157,20 @@ impl TimeInZone {
 
     /// Set `time_in_speed_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_speed_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_speed_zone = Vec::with_capacity(v.len());
+        self.time_in_speed_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_speed_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_speed_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_speed_zone = vals.into_boxed_slice();
         self
     }
 
@@ -185,18 +190,20 @@ impl TimeInZone {
 
     /// Set `time_in_cadence_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_cadence_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_cadence_zone = Vec::with_capacity(v.len());
+        self.time_in_cadence_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_cadence_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_cadence_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_cadence_zone = vals.into_boxed_slice();
         self
     }
 
@@ -216,18 +223,20 @@ impl TimeInZone {
 
     /// Set `time_in_power_zone` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_time_in_power_zone_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.time_in_power_zone = Vec::with_capacity(v.len());
+        self.time_in_power_zone = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u32::MAX as f64 {
-                self.time_in_power_zone.push(u32::MAX);
+                vals.push(u32::MAX);
                 continue;
             }
-            self.time_in_power_zone.push(unscaled as u32);
+            vals.push(unscaled as u32);
         }
+        self.time_in_power_zone = vals.into_boxed_slice();
         self
     }
 
@@ -247,18 +256,20 @@ impl TimeInZone {
 
     /// Set `speed_zone_high_boundary` with scaled value, it will automatically be converted to its corresponding integer value.
     pub fn set_speed_zone_high_boundary_scaled(&mut self, v: &[f64]) -> &mut Self {
-        self.speed_zone_high_boundary = Vec::with_capacity(v.len());
+        self.speed_zone_high_boundary = Box::new([]);
         if v.is_empty() {
             return self;
         }
+        let mut vals = Vec::with_capacity(v.len());
         for &x in v {
             let unscaled = (x + 0.0) * 1000.0;
             if unscaled.is_nan() || unscaled.is_infinite() || unscaled > u16::MAX as f64 {
-                self.speed_zone_high_boundary.push(u16::MAX);
+                vals.push(u16::MAX);
                 continue;
             }
-            self.speed_zone_high_boundary.push(unscaled as u16);
+            vals.push(unscaled as u16);
         }
+        self.speed_zone_high_boundary = vals.into_boxed_slice();
         self
     }
 
@@ -307,14 +318,14 @@ impl From<&Message> for TimeInZone {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.reference_mesg = typedef::MesgNum(field.value.as_u16()),
                 1 => v.reference_index = typedef::MessageIndex(field.value.as_u16()),
-                2 => v.time_in_hr_zone = field.value.to_vec_u32(),
-                3 => v.time_in_speed_zone = field.value.to_vec_u32(),
-                4 => v.time_in_cadence_zone = field.value.to_vec_u32(),
-                5 => v.time_in_power_zone = field.value.to_vec_u32(),
-                6 => v.hr_zone_high_boundary = field.value.to_vec_u8(),
-                7 => v.speed_zone_high_boundary = field.value.to_vec_u16(),
-                8 => v.cadence_zone_high_boundary = field.value.to_vec_u8(),
-                9 => v.power_zone_high_boundary = field.value.to_vec_u16(),
+                2 => v.time_in_hr_zone = field.value.to_array_u32(),
+                3 => v.time_in_speed_zone = field.value.to_array_u32(),
+                4 => v.time_in_cadence_zone = field.value.to_array_u32(),
+                5 => v.time_in_power_zone = field.value.to_array_u32(),
+                6 => v.hr_zone_high_boundary = field.value.to_array_u8(),
+                7 => v.speed_zone_high_boundary = field.value.to_array_u16(),
+                8 => v.cadence_zone_high_boundary = field.value.to_array_u8(),
+                9 => v.power_zone_high_boundary = field.value.to_array_u16(),
                 10 => v.hr_calc_type = typedef::HrZoneCalc(field.value.as_u8()),
                 11 => v.max_heart_rate = field.value.as_u8(),
                 12 => v.resting_heart_rate = field.value.as_u8(),
@@ -362,7 +373,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 2,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_hr_zone),
+                value: Value::ArrayUint32(m.time_in_hr_zone),
                 is_expanded: false,
             });
         };
@@ -370,7 +381,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 3,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_speed_zone),
+                value: Value::ArrayUint32(m.time_in_speed_zone),
                 is_expanded: false,
             });
         };
@@ -378,7 +389,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 4,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_cadence_zone),
+                value: Value::ArrayUint32(m.time_in_cadence_zone),
                 is_expanded: false,
             });
         };
@@ -386,7 +397,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 5,
                 base_type: FitBaseType::UINT32,
-                value: Value::VecUint32(m.time_in_power_zone),
+                value: Value::ArrayUint32(m.time_in_power_zone),
                 is_expanded: false,
             });
         };
@@ -394,7 +405,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 6,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.hr_zone_high_boundary),
+                value: Value::ArrayUint8(m.hr_zone_high_boundary),
                 is_expanded: false,
             });
         };
@@ -402,7 +413,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 7,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.speed_zone_high_boundary),
+                value: Value::ArrayUint16(m.speed_zone_high_boundary),
                 is_expanded: false,
             });
         };
@@ -410,7 +421,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 8,
                 base_type: FitBaseType::UINT8,
-                value: Value::VecUint8(m.cadence_zone_high_boundary),
+                value: Value::ArrayUint8(m.cadence_zone_high_boundary),
                 is_expanded: false,
             });
         };
@@ -418,7 +429,7 @@ impl From<TimeInZone> for Message {
             fields.push(Field {
                 num: 9,
                 base_type: FitBaseType::UINT16,
-                value: Value::VecUint16(m.power_zone_high_boundary),
+                value: Value::ArrayUint16(m.power_zone_high_boundary),
                 is_expanded: false,
             });
         };
@@ -563,14 +574,14 @@ struct De {
     timestamp: Option<i64>,
     reference_mesg: typedef::MesgNum,
     reference_index: typedef::MessageIndex,
-    time_in_hr_zone: Vec<f64>,
-    time_in_speed_zone: Vec<f64>,
-    time_in_cadence_zone: Vec<f64>,
-    time_in_power_zone: Vec<f64>,
-    hr_zone_high_boundary: Vec<u8>,
-    speed_zone_high_boundary: Vec<f64>,
-    cadence_zone_high_boundary: Vec<u8>,
-    power_zone_high_boundary: Vec<u16>,
+    time_in_hr_zone: Box<[f64]>,
+    time_in_speed_zone: Box<[f64]>,
+    time_in_cadence_zone: Box<[f64]>,
+    time_in_power_zone: Box<[f64]>,
+    hr_zone_high_boundary: Box<[u8]>,
+    speed_zone_high_boundary: Box<[f64]>,
+    cadence_zone_high_boundary: Box<[u8]>,
+    power_zone_high_boundary: Box<[u16]>,
     hr_calc_type: typedef::HrZoneCalc,
     max_heart_rate: u8,
     resting_heart_rate: u8,
@@ -593,7 +604,7 @@ impl From<De> for TimeInZone {
             reference_index: m.reference_index,
             time_in_hr_zone: {
                 if m.time_in_hr_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_hr_zone.len());
                     for &x in m.time_in_hr_zone.iter() {
@@ -605,12 +616,12 @@ impl From<De> for TimeInZone {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_speed_zone: {
                 if m.time_in_speed_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_speed_zone.len());
                     for &x in m.time_in_speed_zone.iter() {
@@ -622,12 +633,12 @@ impl From<De> for TimeInZone {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_cadence_zone: {
                 if m.time_in_cadence_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_cadence_zone.len());
                     for &x in m.time_in_cadence_zone.iter() {
@@ -639,12 +650,12 @@ impl From<De> for TimeInZone {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             time_in_power_zone: {
                 if m.time_in_power_zone.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.time_in_power_zone.len());
                     for &x in m.time_in_power_zone.iter() {
@@ -656,13 +667,13 @@ impl From<De> for TimeInZone {
                         }
                         vals.push(unscaled as u32);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             hr_zone_high_boundary: m.hr_zone_high_boundary,
             speed_zone_high_boundary: {
                 if m.speed_zone_high_boundary.is_empty() {
-                    Vec::new()
+                    Box::new([])
                 } else {
                     let mut vals = Vec::with_capacity(m.speed_zone_high_boundary.len());
                     for &x in m.speed_zone_high_boundary.iter() {
@@ -674,7 +685,7 @@ impl From<De> for TimeInZone {
                         }
                         vals.push(unscaled as u16);
                     }
-                    vals
+                    vals.into_boxed_slice()
                 }
             },
             cadence_zone_high_boundary: m.cadence_zone_high_boundary,
@@ -698,14 +709,14 @@ impl Default for De {
             timestamp: None,
             reference_mesg: typedef::MesgNum(u16::MAX),
             reference_index: typedef::MessageIndex(u16::MAX),
-            time_in_hr_zone: Vec::new(),
-            time_in_speed_zone: Vec::new(),
-            time_in_cadence_zone: Vec::new(),
-            time_in_power_zone: Vec::new(),
-            hr_zone_high_boundary: Vec::new(),
-            speed_zone_high_boundary: Vec::new(),
-            cadence_zone_high_boundary: Vec::new(),
-            power_zone_high_boundary: Vec::new(),
+            time_in_hr_zone: Box::new([]),
+            time_in_speed_zone: Box::new([]),
+            time_in_cadence_zone: Box::new([]),
+            time_in_power_zone: Box::new([]),
+            hr_zone_high_boundary: Box::new([]),
+            speed_zone_high_boundary: Box::new([]),
+            cadence_zone_high_boundary: Box::new([]),
+            power_zone_high_boundary: Box::new([]),
             hr_calc_type: typedef::HrZoneCalc(u8::MAX),
             max_heart_rate: u8::MAX,
             resting_heart_rate: u8::MAX,

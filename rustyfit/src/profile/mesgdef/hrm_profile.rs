@@ -40,7 +40,7 @@ impl HrmProfile {
     pub const HRM_ANT_ID_TRANS_TYPE: u8 = 3;
 
     /// Create new HrmProfile with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             message_index: typedef::MessageIndex(u16::MAX),
             enabled: typedef::Bool(u8::MAX),

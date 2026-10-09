@@ -36,7 +36,7 @@ impl ExdScreenConfiguration {
     pub const SCREEN_ENABLED: u8 = 3;
 
     /// Create new ExdScreenConfiguration with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             screen_index: u8::MAX,
             field_count: u8::MAX,

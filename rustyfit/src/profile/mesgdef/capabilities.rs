@@ -6,6 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -15,9 +16,9 @@ use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
 #[derive(Debug, Clone)]
 pub struct Capabilities {
     /// Base: UINT8Z; Use language_bits_x types where x is index of array.
-    pub languages: Vec<u8>,
+    pub languages: Box<[u8]>,
     /// Base: UINT8Z; Use sport_bits_x types where x is index of array.
-    pub sports: Vec<typedef::SportBits0>,
+    pub sports: Box<[typedef::SportBits0]>,
     /// Base: UINT32Z
     pub workouts_supported: typedef::WorkoutCapabilities,
     /// Base: UINT32Z
@@ -29,9 +30,9 @@ pub struct Capabilities {
 }
 
 impl Capabilities {
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::Uint8z
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8Z; ProfileType::Uint8z
     pub const LANGUAGES: u8 = 0;
-    /// Value's type: `Vec<u8>`; FitBaseType::UINT8Z; ProfileType::SportBits0
+    /// Value's type: `Box<[u8]>`; FitBaseType::UINT8Z; ProfileType::SportBits0
     pub const SPORTS: u8 = 1;
     /// Value's type: `u32`; FitBaseType::UINT32Z; ProfileType::WorkoutCapabilities
     pub const WORKOUTS_SUPPORTED: u8 = 21;
@@ -39,10 +40,10 @@ impl Capabilities {
     pub const CONNECTIVITY_SUPPORTED: u8 = 23;
 
     /// Create new Capabilities with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
-            languages: Vec::new(),
-            sports: Vec::new(),
+            languages: Box::new([]),
+            sports: Box::new([]),
             workouts_supported: typedef::WorkoutCapabilities(u32::MIN),
             connectivity_supported: typedef::ConnectivityCapabilities(u32::MIN),
             unknown_fields: Vec::new(),
@@ -79,15 +80,15 @@ impl From<&Message> for Capabilities {
 
         for field in &mesg.fields {
             match field.num {
-                0 => v.languages = field.value.to_vec_u8(),
+                0 => v.languages = field.value.to_array_u8(),
                 1 => {
                     v.sports = match &field.value {
-                        Value::VecUint8(v) => {
+                        Value::ArrayUint8(v) => {
                             let mut vs = Vec::with_capacity(v.len());
                             vs.extend(v.iter().map(|&x| typedef::SportBits0(x)));
-                            vs
+                            vs.into_boxed_slice()
                         }
-                        _ => Vec::new(),
+                        _ => Box::new([]),
                     }
                 }
                 21 => v.workouts_supported = typedef::WorkoutCapabilities(field.value.as_u32z()),
@@ -112,7 +113,7 @@ impl From<Capabilities> for Message {
             fields.push(Field {
                 num: 0,
                 base_type: FitBaseType::UINT8Z,
-                value: Value::VecUint8(m.languages),
+                value: Value::ArrayUint8(m.languages),
                 is_expanded: false,
             });
         };
@@ -120,9 +121,10 @@ impl From<Capabilities> for Message {
             fields.push(Field {
                 num: 1,
                 base_type: FitBaseType::UINT8Z,
-                value: Value::VecUint8({
-                    let (ptr, len, capacity) = m.sports.into_raw_parts();
-                    unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) }
+                value: Value::ArrayUint8({
+                    let (ptr, len, capacity) = m.sports.into_vec().into_raw_parts();
+                    let v = unsafe { Vec::from_raw_parts(ptr.cast::<u8>(), len, capacity) };
+                    v.into_boxed_slice()
                 }),
                 is_expanded: false,
             });
@@ -188,8 +190,8 @@ impl Serialize for Capabilities {
 #[cfg(feature = "serde")]
 #[cfg_attr(feature = "serde", derive(Deserialize), serde(default))]
 struct De {
-    languages: Vec<u8>,
-    sports: Vec<typedef::SportBits0>,
+    languages: Box<[u8]>,
+    sports: Box<[typedef::SportBits0]>,
     workouts_supported: typedef::WorkoutCapabilities,
     connectivity_supported: typedef::ConnectivityCapabilities,
     unknown_fields: Vec<Field>,
@@ -214,8 +216,8 @@ impl From<De> for Capabilities {
 impl Default for De {
     fn default() -> Self {
         Self {
-            languages: Vec::new(),
-            sports: Vec::new(),
+            languages: Box::new([]),
+            sports: Box::new([]),
             workouts_supported: typedef::WorkoutCapabilities(u32::MIN),
             connectivity_supported: typedef::ConnectivityCapabilities(u32::MIN),
             unknown_fields: Vec::new(),

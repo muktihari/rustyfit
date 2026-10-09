@@ -6,8 +6,7 @@
 
 use crate::profile::typedef::{self, FitBaseType};
 use crate::proto::*;
-use alloc::borrow::ToOwned;
-use alloc::string::String;
+use alloc::boxed::Box;
 use alloc::vec::Vec;
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize, Serializer, ser::SerializeStruct};
@@ -21,7 +20,7 @@ pub struct NmeaSentence {
     /// Units: ms; Fractional part of timestamp, added to timestamp
     pub timestamp_ms: u16,
     /// NMEA sentence
-    pub sentence: String,
+    pub sentence: Box<str>,
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
     /// developer_fields are custom data fields (Added since protocol version 2.0)
@@ -33,15 +32,15 @@ impl NmeaSentence {
     pub const TIMESTAMP: u8 = 253;
     /// Value's type: `u16`; FitBaseType::UINT16; ProfileType::Uint16; Units: `ms`
     pub const TIMESTAMP_MS: u8 = 0;
-    /// Value's type: `String`; FitBaseType::STRING; ProfileType::String
+    /// Value's type: `Box<str>`; FitBaseType::STRING; ProfileType::String
     pub const SENTENCE: u8 = 1;
 
     /// Create new NmeaSentence with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             timestamp_ms: u16::MAX,
-            sentence: String::new(),
+            sentence: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }
@@ -77,7 +76,7 @@ impl From<&Message> for NmeaSentence {
             match field.num {
                 253 => v.timestamp = typedef::DateTime(field.value.as_u32()),
                 0 => v.timestamp_ms = field.value.as_u16(),
-                1 => v.sentence = field.value.as_str().to_owned(),
+                1 => v.sentence = Box::from(field.value.as_str()),
                 _ => v.unknown_fields.push(field.clone()),
             };
         }
@@ -159,7 +158,7 @@ impl Serialize for NmeaSentence {
 struct De {
     timestamp: Option<i64>,
     timestamp_ms: u16,
-    sentence: String,
+    sentence: Box<str>,
     unknown_fields: Vec<Field>,
     developer_fields: Vec<DeveloperField>,
 }
@@ -186,7 +185,7 @@ impl Default for De {
         Self {
             timestamp: None,
             timestamp_ms: u16::MAX,
-            sentence: String::new(),
+            sentence: Box::from(""),
             unknown_fields: Vec::new(),
             developer_fields: Vec::new(),
         }

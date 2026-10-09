@@ -35,7 +35,7 @@ impl MonitoringHrData {
     pub const CURRENT_DAY_RESTING_HEART_RATE: u8 = 1;
 
     /// Create new MonitoringHrData with all fields being set to its corresponding invalid value.
-    pub const fn new() -> Self {
+    pub fn new() -> Self {
         Self {
             timestamp: typedef::DateTime(u32::MAX),
             resting_heart_rate: u8::MAX,
