@@ -1,6 +1,9 @@
-use crate::{profile::lookup, proto::Value};
+use crate::{
+    profile::lookup::{MAX_COMPONENT_BITS, Uint},
+    proto::Value,
+};
 
-const N: usize = lookup::MAX_COMPONENT_BITS.div_ceil(64);
+const N: usize = MAX_COMPONENT_BITS.div_ceil(64);
 
 #[cfg_attr(test, derive(Debug, PartialEq))]
 pub(super) struct Bits {
@@ -43,7 +46,7 @@ impl Bits {
         Some(bits)
     }
 
-    pub(super) fn pull(&mut self, bits: u8) -> Option<u64> {
+    pub(super) fn pull(&mut self, bits: u8) -> Option<Uint> {
         if self.size == 0 {
             return None;
         }
@@ -64,7 +67,7 @@ impl Bits {
             self.store[i] >>= bits;
         }
 
-        Some(val)
+        Some(val as Uint)
     }
 }
 
@@ -100,6 +103,7 @@ fn bits_from_slice<T: AsU64>(bits: &mut Bits, v: &[T], bitsize: usize) {
 mod tests {
     use crate::{
         decoder::{Bits, bits::N},
+        profile::lookup::Uint,
         proto::Value,
     };
     use alloc::{vec, vec::Vec};
@@ -354,7 +358,7 @@ mod tests {
     fn pull() {
         struct Pull {
             bits: u8,
-            value: Option<u64>,
+            value: Option<Uint>,
             vbits: Bits,
         }
 

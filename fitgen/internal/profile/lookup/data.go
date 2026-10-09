@@ -7,6 +7,7 @@ package lookup
 // Data represent factory.tmpl
 type Data struct {
 	MaxComponentBits    int
+	Uint                byte
 	TotalAccumulate     int
 	TotalAccumulateList string
 	Refs                string

@@ -7,7 +7,7 @@ use crate::{
     crc16::Crc16,
     decoder::{accumulator::Accumulator, bits::Bits},
     profile::{
-        lookup::{self, Component},
+        lookup::{self, Component, Uint},
         typedef::{FitBaseType, MesgNum},
     },
     proto::*,
@@ -430,7 +430,7 @@ impl Decoder {
                 self.timestamp = v;
             }
 
-            if accumulate {
+            if accumulate && self.options.expand_components {
                 self.accumulator.collect(mesg.num, num, &value);
             }
 
@@ -539,8 +539,8 @@ impl Decoder {
             };
 
             let scaled_val = val as f64 / component.scale - component.offset;
-            val = ((scaled_val + field_ref.offset) * field_ref.scale) as u64;
-            let value = convert_u64_to_value(val, field_ref.base_type);
+            val = ((scaled_val + field_ref.offset) * field_ref.scale) as Uint;
+            let value = convert_into_value(val, field_ref.base_type);
 
             match mesg.fields.iter_mut().find(|v| v.num == field_num) {
                 Some(v) => {
@@ -575,7 +575,7 @@ impl Decoder {
                 continue;
             }
 
-            let value = convert_u64_to_value(val, field_ref.base_type);
+            let value = convert_into_value(val, field_ref.base_type);
             if !value.is_valid(field_ref.base_type) {
                 continue;
             }
@@ -640,7 +640,8 @@ fn reslice_buffer(buf: &mut [u8], arch: u8, len: usize, new_len: usize) -> &mut 
     &mut buf[..new_len]
 }
 
-fn convert_u64_to_value(val: u64, base_type: FitBaseType) -> Value {
+#[allow(clippy::unnecessary_cast)] // false positive since Uint is a type alias for u32 or u64
+fn convert_into_value(val: Uint, base_type: FitBaseType) -> Value {
     match base_type {
         FitBaseType::SINT8 => Value::Int8(val as i8),
         FitBaseType::ENUM | FitBaseType::BYTE | FitBaseType::UINT8 | FitBaseType::UINT8Z => {
@@ -653,7 +654,7 @@ fn convert_u64_to_value(val: u64, base_type: FitBaseType) -> Value {
         FitBaseType::FLOAT32 => Value::Float32(val as f32),
         FitBaseType::FLOAT64 => Value::Float64(val as f64),
         FitBaseType::SINT64 => Value::Int64(val as i64),
-        FitBaseType::UINT64 | FitBaseType::UINT64Z => Value::Uint64(val),
+        FitBaseType::UINT64 | FitBaseType::UINT64Z => Value::Uint64(val as u64),
         _ => Value::Invalid,
     }
 }
@@ -979,7 +980,8 @@ mod tests {
 
     use crate::{
         Decoder, StreamingIterator,
-        decoder::convert_u64_to_value,
+        decoder::convert_into_value,
+        profile::lookup::Uint,
         profile::{PROFILE_VERSION, typedef::FitBaseType},
         proto::{FileHeader, Message, ProtocolVersion, Value},
     };
@@ -1036,8 +1038,8 @@ mod tests {
     }
 
     #[test]
-    fn test_convert_u64_to_value() {
-        let input = 1u64;
+    fn test_convert_into_value() {
+        let input: Uint = 1;
 
         let tt = [
             (FitBaseType::SINT8, Value::Int8(1)),
@@ -1059,7 +1061,7 @@ mod tests {
         ];
 
         for tc in tt {
-            let val = convert_u64_to_value(input, tc.0);
+            let val = convert_into_value(input, tc.0);
             assert_eq!(tc.1, val, "input: {:?}", tc);
         }
     }
