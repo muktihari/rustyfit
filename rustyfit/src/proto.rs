@@ -272,7 +272,7 @@ pub struct DeveloperField {
 /// FIT values that share the same Rust type system are grouped together to prevent breaking
 /// exhaustive enum checks when a new profile introduces a new type, as it requires a new variant.
 /// Historically, `byte` was added when a new profile introduced the Protocol V2 update,
-/// we antisipate the same pattern.
+/// we anticipate the same pattern.
 ///
 /// Values are grouped as follows (same rule applies for `Array` variants):
 /// - `Uint8`: byte, enum, uint8, and uint8z value.

@@ -395,7 +395,7 @@ var varunits = []string{
 	"BreathsPerMinute", "breaths/min",
 	"Bytes", "bytes",
 	"Calorie", "calories",
-	"Celcius", "C",
+	"Celsius", "C",
 	"Count", "counts",
 	"Cycle", "cycles",
 	"Degree", "degrees",
