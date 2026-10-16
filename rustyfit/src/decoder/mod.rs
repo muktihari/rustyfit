@@ -398,9 +398,9 @@ impl Decoder {
 
             match lookup::field_reference(mesg_def.mesg_num, num) {
                 Some(field_ref) => {
-                    base_type = field_ref.base_type;
-                    accumulate = field_ref.accumulate;
-                    array = field_ref.array;
+                    base_type = field_ref.base_type();
+                    accumulate = field_ref.accumulate();
+                    array = field_ref.array();
                 }
                 None => {
                     base_type = field_def.base_type;
@@ -503,9 +503,9 @@ impl Decoder {
             let Some(field_ref) = lookup::field_reference(mesg.num, field.num) else {
                 continue;
             };
-            let components = match mesg.sub_field_substitution(field_ref.sub_fields) {
-                Some(sub_field) => sub_field.components,
-                None => field_ref.components,
+            let components = match mesg.sub_field_substitution(field_ref.sub_fields()) {
+                Some(sub_field) => sub_field.components(),
+                None => field_ref.components(),
             };
             if components.is_empty() {
                 continue;
@@ -525,26 +525,26 @@ impl Decoder {
         components: &[Component],
     ) {
         for component in components {
-            let Some(mut val) = bits.pull(component.bits) else {
+            let Some(mut val) = bits.pull(component.bits()) else {
                 break;
             };
 
-            let field_num = component.field_num;
-            if component.accumulate {
-                val = accumulator.accumulate(mesg.num, field_num, val, component.bits);
+            let field_num = component.field_num();
+            if component.accumulate() {
+                val = accumulator.accumulate(mesg.num, field_num, val, component.bits());
             }
 
             let Some(field_ref) = lookup::field_reference(mesg.num, field_num) else {
                 continue;
             };
 
-            let scaled_val = val as f64 / component.scale - component.offset;
-            val = ((scaled_val + field_ref.offset) * field_ref.scale) as Uint;
-            let value = convert_into_value(val, field_ref.base_type);
+            let scaled_val = val as f64 / component.scale() - component.offset();
+            val = ((scaled_val + field_ref.offset()) * field_ref.scale()) as Uint;
+            let value = convert_into_value(val, field_ref.base_type());
 
             match mesg.fields.iter_mut().find(|v| v.num == field_num) {
                 Some(v) => {
-                    if field_ref.array {
+                    if field_ref.array() {
                         push_value_to_vec(&mut v.value, &value);
                     } else {
                         v.value = value;
@@ -553,9 +553,9 @@ impl Decoder {
                 None => {
                     mesg.fields.push(Field {
                         num: field_num,
-                        base_type: field_ref.base_type,
+                        base_type: field_ref.base_type(),
                         is_expanded: true,
-                        value: if field_ref.array {
+                        value: if field_ref.array() {
                             let mut vec_value = Value::Invalid;
                             push_value_to_vec(&mut vec_value, &value);
                             vec_value
@@ -566,17 +566,17 @@ impl Decoder {
                 }
             };
 
-            let components = match mesg.sub_field_substitution(field_ref.sub_fields) {
-                Some(sub_field) => sub_field.components,
-                None => field_ref.components,
+            let components = match mesg.sub_field_substitution(field_ref.sub_fields()) {
+                Some(sub_field) => sub_field.components(),
+                None => field_ref.components(),
             };
 
             if components.is_empty() {
                 continue;
             }
 
-            let value = convert_into_value(val, field_ref.base_type);
-            if !value.is_valid(field_ref.base_type) {
+            let value = convert_into_value(val, field_ref.base_type());
+            if !value.is_valid(field_ref.base_type()) {
                 continue;
             }
 

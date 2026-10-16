@@ -26,67 +26,145 @@ pub(crate) type Uint = u32;
 
 /// FieldReference acts as a representation of a field as defined in the Global FIT Profile.
 #[derive(Debug, Clone, Copy)]
-pub struct FieldReference<'a> {
+pub struct FieldReference {
+    name: Name,
+    base_type: FitBaseType,
+    profile_type: ProfileType,
+    array: bool,
+    accumulate: bool,
+    scale: f32,
+    offset: f32,
+    units: Unit,
+    components: &'static [Component],
+    sub_fields: &'static [SubField],
+}
+
+impl FieldReference {
     /// Defined in the Global FIT profile for the specified FIT message, otherwise
     /// its a manufaturer specific name (defined by manufacturer).
-    pub name: Name,
-    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
-    pub base_type: FitBaseType,
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+    /// The base of the Value's type. Value of `u32` and `array of u32` have the same base type `FitBaseType::Uint32`.
+    pub fn base_type(&self) -> FitBaseType {
+        self.base_type
+    }
     /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
-    pub profile_type: ProfileType,
+    pub fn profile_type(&self) -> ProfileType {
+        self.profile_type
+    }
     /// Flag whether the value of this field is an array
-    pub array: bool,
+    pub fn array(&self) -> bool {
+        self.array
+    }
     /// Flag to indicate if the value of the field is accumulable.
-    pub accumulate: bool,
+    pub fn accumulate(&self) -> bool {
+        self.accumulate
+    }
     /// A scale or offset specified in the FIT profile for binary fields (sint/uint etc.) only.
-    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default: 1)
-    pub scale: f64,
+    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default:1)
+    pub fn scale(&self) -> f64 {
+        self.scale as f64
+    }
     /// A scale or offset specified in the FIT profile for binary fields (sint/uint etc.) only.
-    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default: 0)
-    pub offset: f64,
+    /// The binary quantity is divided by the scale factor and then the offset is subtracted. (default:0)
+    pub fn offset(&self) -> f64 {
+        self.offset as f64
+    }
     /// Units of the value, such as m (meter), m/s (meter per second), s (second), etc.
-    pub units: Unit,
+    pub fn units(&self) -> &str {
+        self.units.as_str()
+    }
     /// List of component
-    pub components: &'a [Component],
+    pub fn components(&self) -> &[Component] {
+        self.components
+    }
     /// List of sub-field
-    pub sub_fields: &'a [SubField<'a>],
+    pub fn sub_fields(&self) -> &[SubField] {
+        self.sub_fields
+    }
 }
 
 /// Component is a way of compressing one or more fields into a bit field expressed in a single containing field.
 /// The component can be expanded as a main Field in a Message or to update the value of the destination main Field.
 #[derive(Debug)]
 pub struct Component {
+    field_num: u8,
+    accumulate: bool,
+    bits: u8,
+    scale: f32,
+    offset: f32,
+}
+
+impl Component {
     /// Refer to Field's Number.
-    pub field_num: u8,
+    pub fn field_num(&self) -> u8 {
+        self.field_num
+    }
     /// A flag whether this component should be accumulated.
-    pub accumulate: bool,
+    pub fn accumulate(&self) -> bool {
+        self.accumulate
+    }
     /// The size of data of this component in bits  
-    pub bits: u8,
+    pub fn bits(&self) -> u8 {
+        self.bits
+    }
     /// Similar to FieldReference's scale, but for this component.
-    pub scale: f64,
+    pub fn scale(&self) -> f64 {
+        self.scale as f64
+    }
     /// Similar to FieldReference's offset, but for this component.
-    pub offset: f64,
+    pub fn offset(&self) -> f64 {
+        self.offset as f64
+    }
 }
 
 /// SubField is a dynamic interpretation of the main Field in a Message when the SubFieldMap mapping match. See SubFieldMap's docs.
 #[derive(Debug)]
-pub struct SubField<'a> {
+pub struct SubField {
+    name: Name,
+    base_type: FitBaseType,
+    profile_type: ProfileType,
+    scale: f32,
+    offset: f32,
+    units: Unit,
+    maps: &'static [SubFieldMap],
+    components: &'static [Component],
+}
+
+impl SubField {
     /// Name
-    pub name: Name,
-    /// The base of the Value's type. Value of `u32` and `Vec<u32>` have the same base type `FitBaseType::Uint32`.
-    pub base_type: FitBaseType,
+    pub fn name(&self) -> &str {
+        self.name.as_str()
+    }
+    /// The base of the Value's type. Value of `u32` and `array of u32` have the same base type `FitBaseType::Uint32`.
+    pub fn base_type(&self) -> FitBaseType {
+        self.base_type
+    }
     /// Serves as an abstraction layer above base type, e.g. DateTime is a time representation in uint32.
-    pub profile_type: ProfileType,
+    pub fn profile_type(&self) -> ProfileType {
+        self.profile_type
+    }
     /// Scale
-    pub scale: f64,
+    pub fn scale(&self) -> f64 {
+        self.scale as f64
+    }
     /// Offset
-    pub offset: f64,
+    pub fn offset(&self) -> f64 {
+        self.offset as f64
+    }
     /// Units
-    pub units: Unit,
+    pub fn units(&self) -> &str {
+        self.units.as_str()
+    }
     /// List of SubFieldMap
-    pub maps: &'a [SubFieldMap],
+    pub fn maps(&self) -> &[SubFieldMap] {
+        self.maps
+    }
     /// List of Component
-    pub components: &'a [Component],
+    pub fn components(&self) -> &[Component] {
+        self.components
+    }
 }
 
 /// SubFieldMap is the mapping between SubField and the corresponding main Field in a Message.
@@ -94,10 +172,19 @@ pub struct SubField<'a> {
 /// this mapping can be interpreted as the main Field's properties (name, scale, type etc.)
 #[derive(Debug)]
 pub struct SubFieldMap {
+    ref_field_num: u8,
+    ref_field_value: i64,
+}
+
+impl SubFieldMap {
     /// Mapping reference to targeted Field's Number.
-    pub ref_field_num: u8,
+    pub fn ref_field_num(&self) -> u8 {
+        self.ref_field_num
+    }
     /// Mapping reference to targeted Field's Value.
-    pub ref_field_value: i64,
+    pub fn ref_field_value(&self) -> i64 {
+        self.ref_field_value
+    }
 }
 
 // Skip default formatting, fitgen formats the code for fewer LoC while keeping it readable.
@@ -110,7 +197,7 @@ const SF_DEF: SubField = SubField { name: Name::Empty, base_type: FitBaseType(u8
 
 /// Find FieldReference defined in the Global Profile (Profile.xlsx).
 #[rustfmt::skip]
-pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<FieldReference<'a>> {
+pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldReference> {
     match mesg_num {
         MesgNum::FILE_ID => { match field_num {
             0 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
@@ -2809,8 +2896,9 @@ pub const fn field_reference<'a>(mesg_num: MesgNum, field_num: u8) -> Option<Fie
     }
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Name {
+enum Name {
     /// "absolute_pressure"
     AbsolutePressure,
     /// "accel_cal_factor"
@@ -4632,7 +4720,7 @@ pub enum Name {
 }
 
 impl Name {
-    pub fn as_str(self) -> &'static str {
+    fn as_str(self) -> &'static str {
         match self {
             Self::AbsolutePressure => "absolute_pressure",
             Self::AccelCalFactor => "accel_cal_factor",
@@ -5547,8 +5635,9 @@ impl Name {
     }
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, Copy, PartialEq)]
-pub enum Unit {
+enum Unit {
     /// "bar"
     Bar,
     /// "bar/min"
@@ -5698,7 +5787,7 @@ pub enum Unit {
 }
 
 impl Unit {
-    pub fn as_str(self) -> &'static str {
+    fn as_str(self) -> &'static str {
         match self {
             Self::Bar => "bar",
             Self::BarPerMinute => "bar/min",

@@ -134,14 +134,14 @@ impl Message {
     /// Returns any sub_field that can substitute the properties interpretation of any Field in the Message (Dynamic Field).
     pub fn sub_field_substitution<'a>(
         &self,
-        sub_fields: &'a [lookup::SubField<'a>],
-    ) -> Option<&'a lookup::SubField<'a>> {
+        sub_fields: &'a [lookup::SubField],
+    ) -> Option<&'a lookup::SubField> {
         for sub_field in sub_fields {
-            for map in sub_field.maps {
-                let Some(field) = self.fields.iter().find(|f| f.num == map.ref_field_num) else {
+            for map in sub_field.maps() {
+                let Some(field) = self.fields.iter().find(|f| f.num == map.ref_field_num()) else {
                     continue;
                 };
-                if field.value.cast_i64() == map.ref_field_value {
+                if field.value.cast_i64() == map.ref_field_value() {
                     return Some(sub_field);
                 }
             }
@@ -166,8 +166,8 @@ impl Serialize for Message {
                 #[derive(Serialize)]
                 struct Element<'a> {
                     num: u8,
-                    #[serde(skip_serializing_if = "Option::is_none")]
-                    name: Option<&'a str>,
+                    #[serde(skip_serializing_if = "str::is_empty")]
+                    name: &'a str,
                     base_type: FitBaseType,
                     #[serde(skip_serializing_if = "Option::is_none")]
                     profile_type: Option<ProfileType>,
@@ -176,38 +176,38 @@ impl Serialize for Message {
                     scale: Option<f64>,
                     #[serde(skip_serializing_if = "Option::is_none")]
                     offset: Option<f64>,
-                    #[serde(skip_serializing_if = "Option::is_none")]
-                    units: Option<&'a str>,
+                    #[serde(skip_serializing_if = "str::is_empty")]
+                    units: &'a str,
                     is_expanded: bool,
                 }
 
                 let mut seq = serializer.serialize_seq(Some(self.1.len()))?;
                 for field in self.1 {
-                    let mut element = Element {
-                        num: field.num,
-                        name: None,
-                        base_type: field.base_type,
-                        profile_type: None,
-                        value: &field.value,
-                        scale: None,
-                        offset: None,
-                        units: None,
-                        is_expanded: field.is_expanded,
-                    };
-
                     if let Some(field_ref) = lookup::field_reference(self.0, field.num) {
-                        element.name = Some(field_ref.name.as_str());
-                        element.profile_type = Some(field_ref.profile_type);
-                        element.scale = Some(field_ref.scale);
-                        element.offset = Some(field_ref.offset);
-                        if let units = field_ref.units.as_str()
-                            && !units.is_empty()
-                        {
-                            element.units = Some(units);
-                        }
+                        seq.serialize_element(&Element {
+                            num: field.num,
+                            name: field_ref.name(),
+                            base_type: field.base_type,
+                            profile_type: Some(field_ref.profile_type()),
+                            value: &field.value,
+                            scale: Some(field_ref.scale()),
+                            offset: Some(field_ref.offset()),
+                            units: field_ref.units(),
+                            is_expanded: field.is_expanded,
+                        })?;
+                    } else {
+                        seq.serialize_element(&Element {
+                            num: field.num,
+                            base_type: field.base_type,
+                            value: &field.value,
+                            is_expanded: field.is_expanded,
+                            name: "",
+                            profile_type: None,
+                            scale: None,
+                            offset: None,
+                            units: "",
+                        })?;
                     }
-
-                    seq.serialize_element(&element)?;
                 }
                 seq.end()
             }

@@ -42,6 +42,7 @@ type Builder struct {
 
 	maxComponentBits    int
 	uint                byte
+	float               byte
 	totalAccumulate     int
 	totalAccumulateList string
 }
@@ -139,6 +140,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 			Data: Data{
 				MaxComponentBits:    b.maxComponentBits,
 				Uint:                b.uint,
+				Float:               b.float,
 				TotalAccumulate:     b.totalAccumulate,
 				TotalAccumulateList: b.totalAccumulateList,
 				Refs:                buf.String(),
@@ -185,10 +187,12 @@ func (b *Builder) makeFieldRefs(message parser.Message) string {
 		}
 
 		if scale != 1 {
+			b.float = max(b.float, floatSize(scale))
 			fmt.Fprintf(buf, "scale: %s, ", formatFloat(scale))
 		}
 
 		if offset != 0 {
+			b.float = max(b.float, floatSize(offset))
 			fmt.Fprintf(buf, "offset: %s,", formatFloat(offset))
 		}
 
@@ -236,13 +240,18 @@ func (b *Builder) makeComponents(compField parser.ComponentField, messageName st
 	buf.WriteString("&[")
 	var totalBits int
 	for i, fieldNameRef := range compField.GetComponents() {
+		scale := scaleOrDefault(compField.GetScales(), i)
+		offset := offsetOrDefault(compField.GetOffsets(), i)
+		b.float = max(b.float, floatSize(scale))
+		b.float = max(b.float, floatSize(offset))
+
 		fieldRef := b.lookup.FieldByName(messageName, fieldNameRef)
 		fmt.Fprintf(buf, "\n%19s%s Component { ", "", extraPadding)
 		fmt.Fprintf(buf, "field_num: %d /* %s */, ", fieldRef.Num, fieldRef.Name)
-		fmt.Fprintf(buf, "scale: %s, ", formatFloat(scaleOrDefault(compField.GetScales(), i)))    // component index or default
-		fmt.Fprintf(buf, "offset: %s, ", formatFloat(offsetOrDefault(compField.GetOffsets(), i))) // component index or default
-		fmt.Fprintf(buf, "accumulate: %t, ", accumulateOrDefault(compField.GetAccumulate(), i))   // component index or default
-		bits := bitsOrDefault(compField.GetBits(), i)                                             // component index or default
+		fmt.Fprintf(buf, "scale: %s, ", formatFloat(scale))                                     // component index or default
+		fmt.Fprintf(buf, "offset: %s, ", formatFloat(offset))                                   // component index or default
+		fmt.Fprintf(buf, "accumulate: %t, ", accumulateOrDefault(compField.GetAccumulate(), i)) // component index or default
+		bits := bitsOrDefault(compField.GetBits(), i)                                           // component index or default
 		fmt.Fprintf(buf, "bits: %d", bits)
 		buf.WriteString(" },")
 
@@ -280,11 +289,13 @@ func (b *Builder) makeSubFields(field parser.Field, messageName string) string {
 
 		scale := scaleOrDefault(subField.Scales, 0) // first index or default
 		if scale != 1 {
+			b.float = max(b.float, floatSize(scale))
 			fmt.Fprintf(buf, "scale: %s, ", formatFloat(scale))
 		}
 
 		offset := offsetOrDefault(subField.Offsets, 0) // first index or default
 		if offset != 0 {
+			b.float = max(b.float, floatSize(offset))
 			fmt.Fprintf(buf, "offset: %s, ", formatFloat(offset))
 		}
 
@@ -385,6 +396,14 @@ func formatFloat(v float64) string {
 		return fmt.Sprintf("%.1f", v)
 	}
 	return strconv.FormatFloat(v, 'g', -1, 64)
+}
+
+func floatSize(v float64) byte {
+	if strconv.FormatFloat(v, 'f', -1, 64) ==
+		strconv.FormatFloat(float64(float32(v)), 'f', -1, 32) {
+		return 32
+	}
+	return 64
 }
 
 var varunits = []string{
