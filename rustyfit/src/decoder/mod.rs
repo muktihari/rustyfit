@@ -308,7 +308,9 @@ impl Decoder {
                 self.crc16.write(buf);
             }
 
-            mesg_def.developer_field_definitions.reserve_exact(255);
+            mesg_def
+                .developer_field_definitions
+                .reserve_exact(if buf[0] <= 32 { 32 } else { 255 });
 
             let mut n = buf[0] as usize * 3;
             while n > 0 {
