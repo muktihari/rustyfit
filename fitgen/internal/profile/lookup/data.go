@@ -8,6 +8,7 @@ package lookup
 type Data struct {
 	MaxComponentBits    int
 	Uint                byte
+	Float               byte
 	TotalAccumulate     int
 	TotalAccumulateList string
 	Refs                string
