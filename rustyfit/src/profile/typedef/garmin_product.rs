@@ -521,6 +521,8 @@ impl GarminProduct {
     pub const FR170_MUSIC: GarminProduct = GarminProduct(4814);
     pub const FR170: GarminProduct = GarminProduct(4815);
     pub const APPROACH_J1: GarminProduct = GarminProduct(4825);
+    pub const APPROACH_S72_43MM: GarminProduct = GarminProduct(4874);
+    pub const APPROACH_S72_47MM: GarminProduct = GarminProduct(4875);
     pub const D2_MACH2: GarminProduct = GarminProduct(4879);
     pub const FR70_2026: GarminProduct = GarminProduct(4916);
     pub const FENIX9_PRO_43MM: GarminProduct = GarminProduct(4952);
@@ -535,6 +537,7 @@ impl GarminProduct {
     pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
     pub const CIRQA_SMART_BAND: GarminProduct = GarminProduct(5019);
     pub const D2_MACH2_PRO: GarminProduct = GarminProduct(5056);
+    pub const ENDURO4: GarminProduct = GarminProduct(5169);
     /// SDM4 footpod
     pub const SDM4: GarminProduct = GarminProduct(10007);
     pub const EDGE_REMOTE: GarminProduct = GarminProduct(10014);
@@ -1023,6 +1026,8 @@ impl GarminProduct {
             4814 => Some("fr170_music"),
             4815 => Some("fr170"),
             4825 => Some("approach_j1"),
+            4874 => Some("approach_s72_43mm"),
+            4875 => Some("approach_s72_47mm"),
             4879 => Some("d2_mach2"),
             4916 => Some("fr70_2026"),
             4952 => Some("fenix9_pro_43mm"),
@@ -1036,6 +1041,7 @@ impl GarminProduct {
             4944 => Some("d2_air_x15"),
             5019 => Some("cirqa_smart_band"),
             5056 => Some("d2_mach2_pro"),
+            5169 => Some("enduro4"),
             10007 => Some("sdm4"),
             10014 => Some("edge_remote"),
             20533 => Some("tacx_training_app_win"),
