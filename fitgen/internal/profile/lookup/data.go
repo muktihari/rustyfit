@@ -9,6 +9,7 @@ type Data struct {
 	MaxComponentBits    int
 	Uint                byte
 	Float               byte
+	SubFieldMapSize     byte
 	TotalAccumulate     int
 	TotalAccumulateList string
 	Refs                string
