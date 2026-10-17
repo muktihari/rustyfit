@@ -123,7 +123,7 @@ impl Component {
 /// SubField is a dynamic interpretation of the main Field in a Message when the SubFieldMap mapping match. See SubFieldMap's docs.
 #[derive(Debug)]
 pub struct SubField {
-    name: Name,
+    name: SubName,
     base_type: FitBaseType,
     profile_type: ProfileType,
     scale: f{{ .Float }},
@@ -194,7 +194,7 @@ impl SubFieldMap {
 #[rustfmt::skip]
 const FR_DEF: FieldReference = FieldReference { name: Name::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, array: false, accumulate: false, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], sub_fields: &[] };
 #[rustfmt::skip]
-const SF_DEF: SubField = SubField { name: Name::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], maps: &[] };
+const SF_DEF: SubField = SubField { name: SubName::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], maps: &[] };
 
 /// Find FieldReference defined in the Global Profile (Profile.xlsx).
 #[rustfmt::skip]
@@ -206,10 +206,9 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 enum Name {
     {{ range .Names -}}
-        {{ if .String }}/// "{{ .String }}" {{ end }}
         {{ .Variant }},
     {{ end -}}
 }
@@ -225,10 +224,27 @@ impl Name {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
+enum SubName {
+    {{ range .SubNames -}}
+        {{ .Variant }},
+    {{ end -}}
+}
+
+impl SubName {
+    fn as_str(self) -> &'static str {
+        match self {
+        {{ range .SubNames -}}
+            Self::{{ .Variant }} => "{{ .String }}",
+        {{ end -}}
+        }
+    }
+}
+
+#[allow(clippy::enum_variant_names)]
+#[derive(Debug, Clone, Copy)]
 enum Unit {
     {{ range .Units -}}
-        {{ if .String }}/// "{{ .String }}" {{ end }}
         {{ .Variant }},
     {{ end }}
 }

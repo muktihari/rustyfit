@@ -122,7 +122,7 @@ impl Component {
 /// SubField is a dynamic interpretation of the main Field in a Message when the SubFieldMap mapping match. See SubFieldMap's docs.
 #[derive(Debug)]
 pub struct SubField {
-    name: Name,
+    name: SubName,
     base_type: FitBaseType,
     profile_type: ProfileType,
     scale: f32,
@@ -193,7 +193,7 @@ impl SubFieldMap {
 #[rustfmt::skip]
 const FR_DEF: FieldReference = FieldReference { name: Name::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, array: false, accumulate: false, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], sub_fields: &[] };
 #[rustfmt::skip]
-const SF_DEF: SubField = SubField { name: Name::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], maps: &[] };
+const SF_DEF: SubField = SubField { name: SubName::Empty, base_type: FitBaseType(u8::MAX), profile_type: ProfileType::Invalid, scale: 1.0, offset: 0.0, units: Unit::Empty, components: &[], maps: &[] };
 
 /// Find FieldReference defined in the Global Profile (Profile.xlsx).
 #[rustfmt::skip]
@@ -203,10 +203,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             0 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+                    SubField { name: SubName::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: SubName::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
@@ -243,10 +243,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
         MesgNum::SLAVE_DEVICE => { match field_num {
             0 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+                    SubField { name: SubName::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: SubName::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
@@ -277,13 +277,13 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             1 => Some(FieldReference { name: Name::MesgNum, base_type: FitBaseType::UINT16, profile_type: ProfileType::MesgNum, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::CountType, base_type: FitBaseType::ENUM, profile_type: ProfileType::MesgCount, ..FR_DEF }),
             3 => Some(FieldReference { name: Name::Count, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: Name::NumPerFile, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
+                    SubField { name: SubName::NumPerFile, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
                         SubFieldMap { ref_field_num: 2 /* count_type */, ref_field_value: 0 /* num_per_file */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPerFile, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
+                    SubField { name: SubName::MaxPerFile, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
                         SubFieldMap { ref_field_num: 2 /* count_type */, ref_field_value: 1 /* max_per_file */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPerFileType, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
+                    SubField { name: SubName::MaxPerFileType, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, maps: &[
                         SubFieldMap { ref_field_num: 2 /* count_type */, ref_field_value: 2 /* max_per_file_type */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -430,10 +430,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             254 => Some(FieldReference { name: Name::MessageIndex, base_type: FitBaseType::UINT16, profile_type: ProfileType::MessageIndex, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::Mode, base_type: FitBaseType::ENUM, profile_type: ProfileType::WatchfaceMode, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::Layout, base_type: FitBaseType::BYTE, profile_type: ProfileType::Byte, sub_fields: &[
-                    SubField { name: Name::DigitalLayout, base_type: FitBaseType::BYTE, profile_type: ProfileType::DigitalWatchfaceLayout, maps: &[
+                    SubField { name: SubName::DigitalLayout, base_type: FitBaseType::BYTE, profile_type: ProfileType::DigitalWatchfaceLayout, maps: &[
                         SubFieldMap { ref_field_num: 0 /* mode */, ref_field_value: 0 /* digital */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AnalogLayout, base_type: FitBaseType::BYTE, profile_type: ProfileType::AnalogWatchfaceLayout, maps: &[
+                    SubField { name: SubName::AnalogLayout, base_type: FitBaseType::BYTE, profile_type: ProfileType::AnalogWatchfaceLayout, maps: &[
                         SubFieldMap { ref_field_num: 0 /* mode */, ref_field_value: 1 /* analog */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -540,10 +540,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             18 => Some(FieldReference { name: Name::SafetyStopTime, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Second, ..FR_DEF }),
             19 => Some(FieldReference { name: Name::HeartRateSourceType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SourceType, ..FR_DEF }),
             20 => Some(FieldReference { name: Name::HeartRateSource, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, sub_fields: &[
-                    SubField { name: Name::HeartRateAntplusDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
+                    SubField { name: SubName::HeartRateAntplusDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 19 /* heart_rate_source_type */, ref_field_value: 1 /* antplus */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::HeartRateLocalDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
+                    SubField { name: SubName::HeartRateLocalDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 19 /* heart_rate_source_type */, ref_field_value: 5 /* local */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -642,21 +642,21 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
-                    SubField { name: Name::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
+                    SubField { name: SubName::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
                         SubFieldMap { ref_field_num: 6 /* sub_sport */, ref_field_value: 20 /* strength_training */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 62 /* hiit */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
+                    SubField { name: SubName::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 11 /* walking */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                    SubField { name: SubName::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                    SubField { name: SubName::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -672,33 +672,33 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             16 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
             17 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
             18 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::AvgPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             19 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::MaxPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 5 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -874,17 +874,17 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
-                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
+                    SubField { name: SubName::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 11 /* walking */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                    SubField { name: SubName::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                    SubField { name: SubName::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -900,33 +900,33 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             15 => Some(FieldReference { name: Name::AvgHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
             16 => Some(FieldReference { name: Name::MaxHeartRate, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, ..FR_DEF }),
             17 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::AvgRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::AvgPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             18 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::MaxRunningCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxSwimmingCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxPaddlesportCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::MaxPushCadence, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 25 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -1194,61 +1194,61 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
                     Component { field_num: 3 /* data */, scale: 1.0, offset: 0.0, accumulate: false, bits: 16 }
                 ], ..FR_DEF }),
             3 => Some(FieldReference { name: Name::Data, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::TimerTrigger, base_type: FitBaseType::UINT32, profile_type: ProfileType::TimerTrigger, maps: &[
+                    SubField { name: SubName::TimerTrigger, base_type: FitBaseType::UINT32, profile_type: ProfileType::TimerTrigger, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 0 /* timer */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CoursePointIndex, base_type: FitBaseType::UINT32, profile_type: ProfileType::MessageIndex, maps: &[
+                    SubField { name: SubName::CoursePointIndex, base_type: FitBaseType::UINT32, profile_type: ProfileType::MessageIndex, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 10 /* course_point */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::BatteryLevel, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Voltage, maps: &[
+                    SubField { name: SubName::BatteryLevel, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::Voltage, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 11 /* battery */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::VirtualPartnerSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::VirtualPartnerSpeed, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 12 /* virtual_partner_pace */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::HrHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, maps: &[
+                    SubField { name: SubName::HrHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 13 /* hr_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::HrLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, maps: &[
+                    SubField { name: SubName::HrLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint8, units: Unit::BeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 14 /* hr_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SpeedHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::SpeedHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 15 /* speed_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SpeedLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::SpeedLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 16 /* speed_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CadHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::RevolutionPerMinute, maps: &[
+                    SubField { name: SubName::CadHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 17 /* cad_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CadLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::RevolutionPerMinute, maps: &[
+                    SubField { name: SubName::CadLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 18 /* cad_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::PowerHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Watt, maps: &[
+                    SubField { name: SubName::PowerHighAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Watt, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 19 /* power_high_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::PowerLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Watt, maps: &[
+                    SubField { name: SubName::PowerLowAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Watt, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 20 /* power_low_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TimeDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
+                    SubField { name: SubName::TimeDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 23 /* time_duration_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DistanceDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
+                    SubField { name: SubName::DistanceDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 24 /* distance_duration_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CalorieDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
+                    SubField { name: SubName::CalorieDurationAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 25 /* calorie_duration_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::FitnessEquipmentState, base_type: FitBaseType::UINT32, profile_type: ProfileType::FitnessEquipmentState, maps: &[
+                    SubField { name: SubName::FitnessEquipmentState, base_type: FitBaseType::UINT32, profile_type: ProfileType::FitnessEquipmentState, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 27 /* fitness_equipment */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SportPoint, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
+                    SubField { name: SubName::SportPoint, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
                         Component { field_num: 7 /* score */, scale: 1.0, offset: 0.0, accumulate: false, bits: 16 },
                         Component { field_num: 8 /* opponent_score */, scale: 1.0, offset: 0.0, accumulate: false, bits: 16 }
                     ], maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 33 /* sport_point */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GearChangeData, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
+                    SubField { name: SubName::GearChangeData, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
                         Component { field_num: 11 /* rear_gear_num */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 12 /* rear_gear */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 9 /* front_gear_num */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
@@ -1257,19 +1257,19 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 42 /* front_gear_change */ },
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 43 /* rear_gear_change */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RiderPosition, base_type: FitBaseType::UINT32, profile_type: ProfileType::RiderPositionType, maps: &[
+                    SubField { name: SubName::RiderPosition, base_type: FitBaseType::UINT32, profile_type: ProfileType::RiderPositionType, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 44 /* rider_position_change */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CommTimeout, base_type: FitBaseType::UINT32, profile_type: ProfileType::CommTimeoutType, maps: &[
+                    SubField { name: SubName::CommTimeout, base_type: FitBaseType::UINT32, profile_type: ProfileType::CommTimeoutType, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 47 /* comm_timeout */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DiveAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::DiveAlert, maps: &[
+                    SubField { name: SubName::DiveAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::DiveAlert, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 56 /* dive_alert */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AutoActivityDetectDuration, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Minute, maps: &[
+                    SubField { name: SubName::AutoActivityDetectDuration, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint16, units: Unit::Minute, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 54 /* auto_activity_detect */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RadarThreatAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
+                    SubField { name: SubName::RadarThreatAlert, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, components: &[
                         Component { field_num: 21 /* radar_threat_level_max */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 22 /* radar_threat_count */, scale: 1.0, offset: 0.0, accumulate: false, bits: 8 },
                         Component { field_num: 23 /* radar_threat_avg_approach_speed */, scale: 10.0, offset: 0.0, accumulate: false, bits: 8 },
@@ -1288,7 +1288,7 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             13 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
             14 => Some(FieldReference { name: Name::ActivityType, base_type: FitBaseType::ENUM, profile_type: ProfileType::ActivityType, ..FR_DEF }),
             15 => Some(FieldReference { name: Name::StartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, sub_fields: &[
-                    SubField { name: Name::AutoActivityDetectStartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, maps: &[
+                    SubField { name: SubName::AutoActivityDetectStartTimestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 0 /* event */, ref_field_value: 54 /* auto_activity_detect */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -1302,26 +1302,26 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::DeviceIndex, base_type: FitBaseType::UINT8, profile_type: ProfileType::DeviceIndex, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::DeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, sub_fields: &[
-                    SubField { name: Name::BleDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::BleDeviceType, maps: &[
+                    SubField { name: SubName::BleDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::BleDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 3 /* bluetooth_low_energy */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AntplusDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
+                    SubField { name: SubName::AntplusDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::AntplusDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 1 /* antplus */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AntDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, maps: &[
+                    SubField { name: SubName::AntDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::Uint8, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 0 /* ant */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::LocalDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
+                    SubField { name: SubName::LocalDeviceType, base_type: FitBaseType::UINT8, profile_type: ProfileType::LocalDeviceType, maps: &[
                         SubFieldMap { ref_field_num: 25 /* source_type */, ref_field_value: 5 /* local */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             2 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
             3 => Some(FieldReference { name: Name::SerialNumber, base_type: FitBaseType::UINT32Z, profile_type: ProfileType::Uint32z, ..FR_DEF }),
             4 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+                    SubField { name: SubName::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: SubName::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 2 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
@@ -1356,10 +1356,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             0 => Some(FieldReference { name: Name::Type, base_type: FitBaseType::ENUM, profile_type: ProfileType::File, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+                    SubField { name: SubName::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: SubName::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 1 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
@@ -1474,10 +1474,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::SensorType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SensorType, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::CalibrationFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::AccelCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Gee, maps: &[
+                    SubField { name: SubName::AccelCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Gee, maps: &[
                         SubFieldMap { ref_field_num: 0 /* sensor_type */, ref_field_value: 0 /* accelerometer */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GyroCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::DegreesPerSecond, maps: &[
+                    SubField { name: SubName::GyroCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::DegreesPerSecond, maps: &[
                         SubFieldMap { ref_field_num: 0 /* sensor_type */, ref_field_value: 1 /* gyroscope */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -1491,7 +1491,7 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             253 => Some(FieldReference { name: Name::Timestamp, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, units: Unit::Second, ..FR_DEF }),
             0 => Some(FieldReference { name: Name::SensorType, base_type: FitBaseType::ENUM, profile_type: ProfileType::SensorType, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::CalibrationFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::BaroCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Pascal, maps: &[
+                    SubField { name: SubName::BaroCalFactor, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Pascal, maps: &[
                         SubFieldMap { ref_field_num: 0 /* sensor_type */, ref_field_value: 3 /* barometer */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -1624,52 +1624,52 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             27 => Some(FieldReference { name: Name::EndTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::DateTime, ..FR_DEF }),
             28 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
             29 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::AvgRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::AvgPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             30 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::MaxRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::MaxPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             31 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
-                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
+                    SubField { name: SubName::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 11 /* walking */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                    SubField { name: SubName::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
+                    SubField { name: SubName::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 62 /* hiit */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                    SubField { name: SubName::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -1711,37 +1711,37 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             68 => Some(FieldReference { name: Name::NumLaps, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, ..FR_DEF }),
             69 => Some(FieldReference { name: Name::ClimbGradingScale, base_type: FitBaseType::ENUM, profile_type: ProfileType::ClimbGradingScale, ..FR_DEF }),
             70 => Some(FieldReference { name: Name::ClimbGradeValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::ClimbGradeYds, base_type: FitBaseType::UINT32, profile_type: ProfileType::YdsGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeYds, base_type: FitBaseType::UINT32, profile_type: ProfileType::YdsGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 0 /* yds */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeUiaa, base_type: FitBaseType::UINT32, profile_type: ProfileType::UiaaGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeUiaa, base_type: FitBaseType::UINT32, profile_type: ProfileType::UiaaGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 1 /* uiaa */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeFrench, base_type: FitBaseType::UINT32, profile_type: ProfileType::FrenchGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeFrench, base_type: FitBaseType::UINT32, profile_type: ProfileType::FrenchGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 2 /* french */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeBritishAdjectival, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishAdjectivalGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeBritishAdjectival, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishAdjectivalGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 3 /* british_adjectival */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeBritishTechnical, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishTechnicalGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeBritishTechnical, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishTechnicalGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 4 /* british_technical */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeEwbank, base_type: FitBaseType::UINT32, profile_type: ProfileType::EwbankGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeEwbank, base_type: FitBaseType::UINT32, profile_type: ProfileType::EwbankGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 5 /* ewbank */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeBrazilian, base_type: FitBaseType::UINT32, profile_type: ProfileType::BrazilianGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeBrazilian, base_type: FitBaseType::UINT32, profile_type: ProfileType::BrazilianGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 6 /* brazilian */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeSaxon, base_type: FitBaseType::UINT32, profile_type: ProfileType::SaxonGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeSaxon, base_type: FitBaseType::UINT32, profile_type: ProfileType::SaxonGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 7 /* saxon */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeVermin, base_type: FitBaseType::UINT32, profile_type: ProfileType::VerminGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeVermin, base_type: FitBaseType::UINT32, profile_type: ProfileType::VerminGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 8 /* vermin */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeFont, base_type: FitBaseType::UINT32, profile_type: ProfileType::FontGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeFont, base_type: FitBaseType::UINT32, profile_type: ProfileType::FontGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 9 /* font */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbGradeDankyu, base_type: FitBaseType::UINT32, profile_type: ProfileType::DankyuGradingScale, maps: &[
+                    SubField { name: SubName::ClimbGradeDankyu, base_type: FitBaseType::UINT32, profile_type: ProfileType::DankyuGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 69 /* climb_grading_scale */, ref_field_value: 10 /* dankyu */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -1756,17 +1756,17 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             88 => Some(FieldReference { name: Name::AvgGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
             89 => Some(FieldReference { name: Name::MaxGrade, base_type: FitBaseType::SINT16, profile_type: ProfileType::Sint16, scale: 100.0, units: Unit::Percent, ..FR_DEF }),
             90 => Some(FieldReference { name: Name::MinCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::MinRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::MinRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MinSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MinSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MinPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MinPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MinPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::MinPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 11 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -1814,52 +1814,52 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             12 => Some(FieldReference { name: Name::AvgVertSpeed, base_type: FitBaseType::SINT32, profile_type: ProfileType::Sint32, scale: 1000.0, units: Unit::MetersPerSeconds, ..FR_DEF }),
             13 => Some(FieldReference { name: Name::TotalCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Kilocalorie, ..FR_DEF }),
             14 => Some(FieldReference { name: Name::AvgCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::AvgRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::AvgRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::AvgPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::AvgPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::AvgPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             15 => Some(FieldReference { name: Name::MaxCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::RevolutionPerMinute, sub_fields: &[
-                    SubField { name: Name::MaxRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
+                    SubField { name: SubName::MaxRunningCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StridesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxSwimmingCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
+                    SubField { name: SubName::MaxPaddlesportCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, scale: 128.0, units: Unit::StrokesPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::MaxPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
+                    SubField { name: SubName::MaxPushCadence, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::PushesPerMin, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             16 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
-                    SubField { name: Name::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
+                    SubField { name: SubName::TotalStrides, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stride, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 1 /* running */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 11 /* walking */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                    SubField { name: SubName::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 5 /* swimming */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 15 /* rowing */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 37 /* stand_up_paddleboarding */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
+                    SubField { name: SubName::TotalReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Repetition, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 62 /* hiit */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
+                    SubField { name: SubName::TotalPushes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Push, maps: &[
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 66 /* wheelchair_push_run */ },
                         SubFieldMap { ref_field_num: 1 /* sport */, ref_field_value: 65 /* wheelchair_push_walk */ },
                     ], ..SF_DEF }
@@ -1901,37 +1901,37 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             53 => Some(FieldReference { name: Name::MaxAscent, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Meter, ..FR_DEF }),
             54 => Some(FieldReference { name: Name::ClimbGradingScale, base_type: FitBaseType::ENUM, profile_type: ProfileType::ClimbGradingScale, ..FR_DEF }),
             55 => Some(FieldReference { name: Name::ClimbMaxGradeValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::ClimbMaxGradeYds, base_type: FitBaseType::UINT32, profile_type: ProfileType::YdsGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeYds, base_type: FitBaseType::UINT32, profile_type: ProfileType::YdsGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 0 /* yds */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeUiaa, base_type: FitBaseType::UINT32, profile_type: ProfileType::UiaaGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeUiaa, base_type: FitBaseType::UINT32, profile_type: ProfileType::UiaaGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 1 /* uiaa */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeFrench, base_type: FitBaseType::UINT32, profile_type: ProfileType::FrenchGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeFrench, base_type: FitBaseType::UINT32, profile_type: ProfileType::FrenchGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 2 /* french */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeBritishAdjectival, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishAdjectivalGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeBritishAdjectival, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishAdjectivalGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 3 /* british_adjectival */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeBritishTechnical, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishTechnicalGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeBritishTechnical, base_type: FitBaseType::UINT32, profile_type: ProfileType::BritishTechnicalGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 4 /* british_technical */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeEwbank, base_type: FitBaseType::UINT32, profile_type: ProfileType::EwbankGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeEwbank, base_type: FitBaseType::UINT32, profile_type: ProfileType::EwbankGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 5 /* ewbank */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeBrazilian, base_type: FitBaseType::UINT32, profile_type: ProfileType::BrazilianGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeBrazilian, base_type: FitBaseType::UINT32, profile_type: ProfileType::BrazilianGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 6 /* brazilian */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeSaxon, base_type: FitBaseType::UINT32, profile_type: ProfileType::SaxonGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeSaxon, base_type: FitBaseType::UINT32, profile_type: ProfileType::SaxonGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 7 /* saxon */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeVermin, base_type: FitBaseType::UINT32, profile_type: ProfileType::VerminGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeVermin, base_type: FitBaseType::UINT32, profile_type: ProfileType::VerminGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 8 /* vermin */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeFont, base_type: FitBaseType::UINT32, profile_type: ProfileType::FontGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeFont, base_type: FitBaseType::UINT32, profile_type: ProfileType::FontGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 9 /* font */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::ClimbMaxGradeDankyu, base_type: FitBaseType::UINT32, profile_type: ProfileType::DankyuGradingScale, maps: &[
+                    SubField { name: SubName::ClimbMaxGradeDankyu, base_type: FitBaseType::UINT32, profile_type: ProfileType::DankyuGradingScale, maps: &[
                         SubFieldMap { ref_field_num: 54 /* climb_grading_scale */, ref_field_value: 10 /* dankyu */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -2055,7 +2055,7 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             8 => Some(FieldReference { name: Name::TotalTimerTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, ..FR_DEF }),
             9 => Some(FieldReference { name: Name::TotalDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             10 => Some(FieldReference { name: Name::TotalCycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Cycle, sub_fields: &[
-                    SubField { name: Name::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
+                    SubField { name: SubName::TotalStrokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 23 /* sport */, ref_field_value: 2 /* cycling */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -2189,21 +2189,21 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             0 => Some(FieldReference { name: Name::WktStepName, base_type: FitBaseType::STRING, profile_type: ProfileType::String, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::DurationType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepDuration, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::DurationValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::DurationTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
+                    SubField { name: SubName::DurationTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 0 /* time */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 28 /* repetition_time */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DurationDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
+                    SubField { name: SubName::DurationDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 1 /* distance */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DurationHr, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
+                    SubField { name: SubName::DurationHr, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 2 /* hr_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 3 /* hr_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DurationCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
+                    SubField { name: SubName::DurationCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 4 /* calories */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DurationStep, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::DurationStep, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 6 /* repeat_until_steps_cmplt */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 7 /* repeat_until_time */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 8 /* repeat_until_distance */ },
@@ -2213,77 +2213,77 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 12 /* repeat_until_power_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 13 /* repeat_until_power_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DurationPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
+                    SubField { name: SubName::DurationPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 14 /* power_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 15 /* power_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::DurationReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::DurationReps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 29 /* reps */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             3 => Some(FieldReference { name: Name::TargetType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepTarget, ..FR_DEF }),
             4 => Some(FieldReference { name: Name::TargetValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::TargetSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::TargetSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TargetHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::TargetHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TargetCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::TargetCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TargetPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::TargetPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RepeatSteps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::RepeatSteps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 6 /* repeat_until_steps_cmplt */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RepeatTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
+                    SubField { name: SubName::RepeatTime, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::Second, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 7 /* repeat_until_time */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RepeatDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
+                    SubField { name: SubName::RepeatDistance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 8 /* repeat_until_distance */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RepeatCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
+                    SubField { name: SubName::RepeatCalories, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Calorie, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 9 /* repeat_until_calories */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RepeatHr, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
+                    SubField { name: SubName::RepeatHr, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 10 /* repeat_until_hr_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 11 /* repeat_until_hr_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::RepeatPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
+                    SubField { name: SubName::RepeatPower, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 12 /* repeat_until_power_less_than */ },
                         SubFieldMap { ref_field_num: 1 /* duration_type */, ref_field_value: 13 /* repeat_until_power_greater_than */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::TargetStrokeType, base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
+                    SubField { name: SubName::TargetStrokeType, base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 11 /* swim_stroke */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             5 => Some(FieldReference { name: Name::CustomTargetValueLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::CustomTargetSpeedLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::CustomTargetSpeedLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CustomTargetHeartRateLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
+                    SubField { name: SubName::CustomTargetHeartRateLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CustomTargetCadenceLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
+                    SubField { name: SubName::CustomTargetCadenceLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CustomTargetPowerLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
+                    SubField { name: SubName::CustomTargetPowerLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             6 => Some(FieldReference { name: Name::CustomTargetValueHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::CustomTargetSpeedHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::CustomTargetSpeedHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CustomTargetHeartRateHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
+                    SubField { name: SubName::CustomTargetHeartRateHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CustomTargetCadenceHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
+                    SubField { name: SubName::CustomTargetCadenceHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::CustomTargetPowerHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
+                    SubField { name: SubName::CustomTargetPowerHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 3 /* target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -2296,47 +2296,47 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             13 => Some(FieldReference { name: Name::WeightDisplayUnit, base_type: FitBaseType::UINT16, profile_type: ProfileType::FitBaseUnit, ..FR_DEF }),
             19 => Some(FieldReference { name: Name::SecondaryTargetType, base_type: FitBaseType::ENUM, profile_type: ProfileType::WktStepTarget, ..FR_DEF }),
             20 => Some(FieldReference { name: Name::SecondaryTargetValue, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::SecondaryTargetSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::SecondaryTargetSpeedZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryTargetHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::SecondaryTargetHrZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryTargetCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::SecondaryTargetCadenceZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryTargetPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
+                    SubField { name: SubName::SecondaryTargetPowerZone, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryTargetStrokeType, base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
+                    SubField { name: SubName::SecondaryTargetStrokeType, base_type: FitBaseType::UINT32, profile_type: ProfileType::SwimStroke, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 11 /* swim_stroke */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             21 => Some(FieldReference { name: Name::SecondaryCustomTargetValueLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::SecondaryCustomTargetSpeedLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetSpeedLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryCustomTargetHeartRateLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetHeartRateLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryCustomTargetCadenceLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetCadenceLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryCustomTargetPowerLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetPowerLow, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
             22 => Some(FieldReference { name: Name::SecondaryCustomTargetValueHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, sub_fields: &[
-                    SubField { name: Name::SecondaryCustomTargetSpeedHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetSpeedHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 1000.0, units: Unit::MetersPerSeconds, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 0 /* speed */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryCustomTargetHeartRateHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetHeartRateHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutHr, units: Unit::PercentOrBeatsPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 1 /* heart_rate */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryCustomTargetCadenceHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetCadenceHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::RevolutionPerMinute, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 3 /* cadence */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::SecondaryCustomTargetPowerHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
+                    SubField { name: SubName::SecondaryCustomTargetPowerHigh, base_type: FitBaseType::UINT32, profile_type: ProfileType::WorkoutPower, units: Unit::PercentOrWatts, maps: &[
                         SubFieldMap { ref_field_num: 19 /* secondary_target_type */, ref_field_value: 4 /* power */ },
                     ], ..SF_DEF }
                 ], ..FR_DEF }),
@@ -2352,10 +2352,10 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
         MesgNum::SCHEDULE => { match field_num {
             0 => Some(FieldReference { name: Name::Manufacturer, base_type: FitBaseType::UINT16, profile_type: ProfileType::Manufacturer, ..FR_DEF }),
             1 => Some(FieldReference { name: Name::Product, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, sub_fields: &[
-                    SubField { name: Name::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
+                    SubField { name: SubName::FaveroProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::FaveroProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 263 /* favero_electronics */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
+                    SubField { name: SubName::GarminProduct, base_type: FitBaseType::UINT16, profile_type: ProfileType::GarminProduct, maps: &[
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 1 /* garmin */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 15 /* dynastream */ },
                         SubFieldMap { ref_field_num: 0 /* manufacturer */, ref_field_value: 13 /* dynastream_oem */ },
@@ -2428,11 +2428,11 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
             1 => Some(FieldReference { name: Name::Calories, base_type: FitBaseType::UINT16, profile_type: ProfileType::Uint16, units: Unit::Kilocalorie, ..FR_DEF }),
             2 => Some(FieldReference { name: Name::Distance, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 100.0, units: Unit::Meter, ..FR_DEF }),
             3 => Some(FieldReference { name: Name::Cycles, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: Unit::Cycle, sub_fields: &[
-                    SubField { name: Name::Steps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Step, maps: &[
+                    SubField { name: SubName::Steps, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, units: Unit::Step, maps: &[
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 6 /* walking */ },
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 1 /* running */ },
                     ], ..SF_DEF },
-                    SubField { name: Name::Strokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: Unit::Stroke, maps: &[
+                    SubField { name: SubName::Strokes, base_type: FitBaseType::UINT32, profile_type: ProfileType::Uint32, scale: 2.0, units: Unit::Stroke, maps: &[
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 2 /* cycling */ },
                         SubFieldMap { ref_field_num: 5 /* activity_type */, ref_field_value: 5 /* swimming */ },
                     ], ..SF_DEF }
@@ -2897,1825 +2897,801 @@ pub const fn field_reference(mesg_num: MesgNum, field_num: u8) -> Option<FieldRe
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Debug, Clone, Copy, PartialEq)]
+#[derive(Debug, Clone, Copy)]
 enum Name {
-    /// "absolute_pressure"
     AbsolutePressure,
-    /// "accel_cal_factor"
-    AccelCalFactor,
-    /// "accel_lateral"
     AccelLateral,
-    /// "accel_normal"
     AccelNormal,
-    /// "accel_x"
     AccelX,
-    /// "accel_y"
     AccelY,
-    /// "accel_z"
     AccelZ,
-    /// "accumulate"
     Accumulate,
-    /// "accumulated_power"
     AccumulatedPower,
-    /// "active_calories"
     ActiveCalories,
-    /// "active_met"
     ActiveMet,
-    /// "active_time"
     ActiveTime,
-    /// "active_time_16"
     ActiveTime16,
-    /// "active_time_zone"
     ActiveTimeZone,
-    /// "activity_class"
     ActivityClass,
-    /// "activity_id"
     ActivityId,
-    /// "activity_id_string"
     ActivityIdString,
-    /// "activity_level"
     ActivityLevel,
-    /// "activity_subtype"
     ActivitySubtype,
-    /// "activity_time"
     ActivityTime,
-    /// "activity_tracker_enabled"
     ActivityTrackerEnabled,
-    /// "activity_type"
     ActivityType,
-    /// "age"
     Age,
-    /// "air_time_remaining"
     AirTimeRemaining,
-    /// "alarm_type"
     AlarmType,
-    /// "altitude"
     Altitude,
-    /// "analog_layout"
-    AnalogLayout,
-    /// "ant_device_number"
     AntDeviceNumber,
-    /// "ant_device_type"
-    AntDeviceType,
-    /// "ant_enabled"
     AntEnabled,
-    /// "ant_network"
     AntNetwork,
-    /// "ant_transmission_type"
     AntTransmissionType,
-    /// "antplus_device_type"
-    AntplusDeviceType,
-    /// "apnea_countdown_enabled"
     ApneaCountdownEnabled,
-    /// "apnea_countdown_time"
     ApneaCountdownTime,
-    /// "apnea_discipline"
     ApneaDiscipline,
-    /// "application_id"
     ApplicationId,
-    /// "application_version"
     ApplicationVersion,
-    /// "array"
     Array,
-    /// "ascent"
     Ascent,
-    /// "ascent_rate"
     AscentRate,
-    /// "ascent_time"
     AscentTime,
-    /// "attitude_stage_complete"
     AttitudeStageComplete,
-    /// "auto_activity_detect"
     AutoActivityDetect,
-    /// "auto_activity_detect_duration"
-    AutoActivityDetectDuration,
-    /// "auto_activity_detect_start_timestamp"
-    AutoActivityDetectStartTimestamp,
-    /// "auto_activity_upload_enabled"
     AutoActivityUploadEnabled,
-    /// "auto_power_zero"
     AutoPowerZero,
-    /// "auto_sync_frequency"
     AutoSyncFrequency,
-    /// "auto_wheel_cal"
     AutoWheelCal,
-    /// "auto_wheelsize"
     AutoWheelsize,
-    /// "autosync_min_steps"
     AutosyncMinSteps,
-    /// "autosync_min_time"
     AutosyncMinTime,
-    /// "average_7_day_deviation"
     Average7DayDeviation,
-    /// "average_deviation"
     AverageDeviation,
-    /// "average_stress_during_sleep"
     AverageStressDuringSleep,
-    /// "avg_altitude"
     AvgAltitude,
-    /// "avg_ascent"
     AvgAscent,
-    /// "avg_ascent_rate"
     AvgAscentRate,
-    /// "avg_ball_speed"
     AvgBallSpeed,
-    /// "avg_cadence"
     AvgCadence,
-    /// "avg_cadence_position"
     AvgCadencePosition,
-    /// "avg_combined_pedal_smoothness"
     AvgCombinedPedalSmoothness,
-    /// "avg_core_temperature"
     AvgCoreTemperature,
-    /// "avg_depth"
     AvgDepth,
-    /// "avg_descent_rate"
     AvgDescentRate,
-    /// "avg_flow"
     AvgFlow,
-    /// "avg_fractional_ascent"
     AvgFractionalAscent,
-    /// "avg_fractional_cadence"
     AvgFractionalCadence,
-    /// "avg_grade"
     AvgGrade,
-    /// "avg_grade_adjusted_speed"
     AvgGradeAdjustedSpeed,
-    /// "avg_grit"
     AvgGrit,
-    /// "avg_heart_rate"
     AvgHeartRate,
-    /// "avg_lap_time"
     AvgLapTime,
-    /// "avg_left_pco"
     AvgLeftPco,
-    /// "avg_left_pedal_smoothness"
     AvgLeftPedalSmoothness,
-    /// "avg_left_power_phase"
     AvgLeftPowerPhase,
-    /// "avg_left_power_phase_peak"
     AvgLeftPowerPhasePeak,
-    /// "avg_left_torque_effectiveness"
     AvgLeftTorqueEffectiveness,
-    /// "avg_lev_motor_power"
     AvgLevMotorPower,
-    /// "avg_neg_grade"
     AvgNegGrade,
-    /// "avg_neg_vertical_speed"
     AvgNegVerticalSpeed,
-    /// "avg_paddlesport_cadence"
-    AvgPaddlesportCadence,
-    /// "avg_pos_grade"
     AvgPosGrade,
-    /// "avg_pos_vertical_speed"
     AvgPosVerticalSpeed,
-    /// "avg_power"
     AvgPower,
-    /// "avg_power_position"
     AvgPowerPosition,
-    /// "avg_pressure_sac"
     AvgPressureSac,
-    /// "avg_push_cadence"
-    AvgPushCadence,
-    /// "avg_respiration_rate"
     AvgRespirationRate,
-    /// "avg_right_pco"
     AvgRightPco,
-    /// "avg_right_pedal_smoothness"
     AvgRightPedalSmoothness,
-    /// "avg_right_power_phase"
     AvgRightPowerPhase,
-    /// "avg_right_power_phase_peak"
     AvgRightPowerPhasePeak,
-    /// "avg_right_torque_effectiveness"
     AvgRightTorqueEffectiveness,
-    /// "avg_rmv"
     AvgRmv,
-    /// "avg_running_cadence"
-    AvgRunningCadence,
-    /// "avg_saturated_hemoglobin_percent"
     AvgSaturatedHemoglobinPercent,
-    /// "avg_speed"
     AvgSpeed,
-    /// "avg_spo2"
     AvgSpo2,
-    /// "avg_stance_time"
     AvgStanceTime,
-    /// "avg_stance_time_balance"
     AvgStanceTimeBalance,
-    /// "avg_stance_time_percent"
     AvgStanceTimePercent,
-    /// "avg_step_length"
     AvgStepLength,
-    /// "avg_stress"
     AvgStress,
-    /// "avg_stroke_count"
     AvgStrokeCount,
-    /// "avg_stroke_distance"
     AvgStrokeDistance,
-    /// "avg_strokes_per_length"
     AvgStrokesPerLength,
-    /// "avg_swimming_cadence"
     AvgSwimmingCadence,
-    /// "avg_swolf"
     AvgSwolf,
-    /// "avg_temperature"
     AvgTemperature,
-    /// "avg_total_hemoglobin_conc"
     AvgTotalHemoglobinConc,
-    /// "avg_vam"
     AvgVam,
-    /// "avg_vert_speed"
     AvgVertSpeed,
-    /// "avg_vertical_oscillation"
     AvgVerticalOscillation,
-    /// "avg_vertical_ratio"
     AvgVerticalRatio,
-    /// "avg_volume_sac"
     AvgVolumeSac,
-    /// "awake_time_score"
     AwakeTimeScore,
-    /// "awakenings_count"
     AwakeningsCount,
-    /// "awakenings_count_score"
     AwakeningsCountScore,
-    /// "backlight_brightness"
     BacklightBrightness,
-    /// "backlight_mode"
     BacklightMode,
-    /// "backlight_timeout"
     BacklightTimeout,
-    /// "ball_speed"
     BallSpeed,
-    /// "baro_cal_factor"
-    BaroCalFactor,
-    /// "baro_pres"
     BaroPres,
-    /// "basal_met"
     BasalMet,
-    /// "baseline_balanced_lower"
     BaselineBalancedLower,
-    /// "baseline_balanced_upper"
     BaselineBalancedUpper,
-    /// "baseline_low_upper"
     BaselineLowUpper,
-    /// "battery_identifier"
     BatteryIdentifier,
-    /// "battery_level"
     BatteryLevel,
-    /// "battery_soc"
     BatterySoc,
-    /// "battery_status"
     BatteryStatus,
-    /// "battery_voltage"
     BatteryVoltage,
-    /// "best_lap_index"
     BestLapIndex,
-    /// "bike_cad_ant_id"
     BikeCadAntId,
-    /// "bike_cad_ant_id_trans_type"
     BikeCadAntIdTransType,
-    /// "bike_power_ant_id"
     BikePowerAntId,
-    /// "bike_power_ant_id_trans_type"
     BikePowerAntIdTransType,
-    /// "bike_spd_ant_id"
     BikeSpdAntId,
-    /// "bike_spd_ant_id_trans_type"
     BikeSpdAntIdTransType,
-    /// "bike_spdcad_ant_id"
     BikeSpdcadAntId,
-    /// "bike_spdcad_ant_id_trans_type"
     BikeSpdcadAntIdTransType,
-    /// "bike_weight"
     BikeWeight,
-    /// "bits"
     Bits,
-    /// "ble_auto_upload_enabled"
     BleAutoUploadEnabled,
-    /// "ble_device_type"
-    BleDeviceType,
-    /// "bluetooth_enabled"
     BluetoothEnabled,
-    /// "bluetooth_le_enabled"
     BluetoothLeEnabled,
-    /// "bmi"
     Bmi,
-    /// "bone_mass"
     BoneMass,
-    /// "bottom_depth"
     BottomDepth,
-    /// "bottom_time"
     BottomTime,
-    /// "cad_enabled"
     CadEnabled,
-    /// "cad_high_alert"
-    CadHighAlert,
-    /// "cad_low_alert"
-    CadLowAlert,
-    /// "cadence"
     Cadence,
-    /// "cadence256"
     Cadence256,
-    /// "cadence_zone_high_boundary"
     CadenceZoneHighBoundary,
-    /// "calibrated_accel_x"
     CalibratedAccelX,
-    /// "calibrated_accel_y"
     CalibratedAccelY,
-    /// "calibrated_accel_z"
     CalibratedAccelZ,
-    /// "calibrated_data"
     CalibratedData,
-    /// "calibrated_gyro_x"
     CalibratedGyroX,
-    /// "calibrated_gyro_y"
     CalibratedGyroY,
-    /// "calibrated_gyro_z"
     CalibratedGyroZ,
-    /// "calibrated_mag_x"
     CalibratedMagX,
-    /// "calibrated_mag_y"
     CalibratedMagY,
-    /// "calibrated_mag_z"
     CalibratedMagZ,
-    /// "calibration_divisor"
     CalibrationDivisor,
-    /// "calibration_factor"
     CalibrationFactor,
-    /// "calorie_duration_alert"
-    CalorieDurationAlert,
-    /// "calories"
     Calories,
-    /// "camera_event_type"
     CameraEventType,
-    /// "camera_file_uuid"
     CameraFileUuid,
-    /// "camera_orientation"
     CameraOrientation,
-    /// "capabilities"
     Capabilities,
-    /// "capacity"
     Capacity,
-    /// "category"
     Category,
-    /// "category_subtype"
     CategorySubtype,
-    /// "ccr_high_setpoint"
     CcrHighSetpoint,
-    /// "ccr_high_setpoint_depth"
     CcrHighSetpointDepth,
-    /// "ccr_high_setpoint_switch_mode"
     CcrHighSetpointSwitchMode,
-    /// "ccr_low_setpoint"
     CcrLowSetpoint,
-    /// "ccr_low_setpoint_depth"
     CcrLowSetpointDepth,
-    /// "ccr_low_setpoint_switch_mode"
     CcrLowSetpointSwitchMode,
-    /// "channel_number"
     ChannelNumber,
-    /// "charged"
     Charged,
-    /// "climb_category"
     ClimbCategory,
-    /// "climb_grade_brazilian"
-    ClimbGradeBrazilian,
-    /// "climb_grade_british_adjectival"
-    ClimbGradeBritishAdjectival,
-    /// "climb_grade_british_technical"
-    ClimbGradeBritishTechnical,
-    /// "climb_grade_dankyu"
-    ClimbGradeDankyu,
-    /// "climb_grade_ewbank"
-    ClimbGradeEwbank,
-    /// "climb_grade_font"
-    ClimbGradeFont,
-    /// "climb_grade_french"
-    ClimbGradeFrench,
-    /// "climb_grade_saxon"
-    ClimbGradeSaxon,
-    /// "climb_grade_uiaa"
-    ClimbGradeUiaa,
-    /// "climb_grade_value"
     ClimbGradeValue,
-    /// "climb_grade_vermin"
-    ClimbGradeVermin,
-    /// "climb_grade_yds"
-    ClimbGradeYds,
-    /// "climb_grading_scale"
     ClimbGradingScale,
-    /// "climb_max_grade_brazilian"
-    ClimbMaxGradeBrazilian,
-    /// "climb_max_grade_british_adjectival"
-    ClimbMaxGradeBritishAdjectival,
-    /// "climb_max_grade_british_technical"
-    ClimbMaxGradeBritishTechnical,
-    /// "climb_max_grade_dankyu"
-    ClimbMaxGradeDankyu,
-    /// "climb_max_grade_ewbank"
-    ClimbMaxGradeEwbank,
-    /// "climb_max_grade_font"
-    ClimbMaxGradeFont,
-    /// "climb_max_grade_french"
-    ClimbMaxGradeFrench,
-    /// "climb_max_grade_saxon"
-    ClimbMaxGradeSaxon,
-    /// "climb_max_grade_uiaa"
-    ClimbMaxGradeUiaa,
-    /// "climb_max_grade_value"
     ClimbMaxGradeValue,
-    /// "climb_max_grade_vermin"
-    ClimbMaxGradeVermin,
-    /// "climb_max_grade_yds"
-    ClimbMaxGradeYds,
-    /// "climb_number"
     ClimbNumber,
-    /// "climb_pro_event"
     ClimbProEvent,
-    /// "climb_send"
     ClimbSend,
-    /// "clip_end"
     ClipEnd,
-    /// "clip_number"
     ClipNumber,
-    /// "clip_start"
     ClipStart,
-    /// "clock_time"
     ClockTime,
-    /// "cns_load"
     CnsLoad,
-    /// "combined_awake_score"
     CombinedAwakeScore,
-    /// "combined_pedal_smoothness"
     CombinedPedalSmoothness,
-    /// "comm_timeout"
-    CommTimeout,
-    /// "completed"
     Completed,
-    /// "components"
     Components,
-    /// "compressed_accumulated_power"
     CompressedAccumulatedPower,
-    /// "compressed_calibrated_accel_x"
     CompressedCalibratedAccelX,
-    /// "compressed_calibrated_accel_y"
     CompressedCalibratedAccelY,
-    /// "compressed_calibrated_accel_z"
     CompressedCalibratedAccelZ,
-    /// "compressed_speed_distance"
     CompressedSpeedDistance,
-    /// "concept_count"
     ConceptCount,
-    /// "concept_field"
     ConceptField,
-    /// "concept_index"
     ConceptIndex,
-    /// "concept_key"
     ConceptKey,
-    /// "condition"
     Condition,
-    /// "confidence"
     Confidence,
-    /// "connectivity_supported"
     ConnectivitySupported,
-    /// "core_temperature"
     CoreTemperature,
-    /// "count"
     Count,
-    /// "count_type"
     CountType,
-    /// "course_download_enabled"
     CourseDownloadEnabled,
-    /// "course_point_index"
-    CoursePointIndex,
-    /// "crank_length"
     CrankLength,
-    /// "cum_operating_time"
     CumOperatingTime,
-    /// "current_activity_type_intensity"
     CurrentActivityTypeIntensity,
-    /// "current_day_resting_heart_rate"
     CurrentDayRestingHeartRate,
-    /// "current_dist"
     CurrentDist,
-    /// "current_stress"
     CurrentStress,
-    /// "custom_target_cadence_high"
-    CustomTargetCadenceHigh,
-    /// "custom_target_cadence_low"
-    CustomTargetCadenceLow,
-    /// "custom_target_heart_rate_high"
-    CustomTargetHeartRateHigh,
-    /// "custom_target_heart_rate_low"
-    CustomTargetHeartRateLow,
-    /// "custom_target_power_high"
-    CustomTargetPowerHigh,
-    /// "custom_target_power_low"
-    CustomTargetPowerLow,
-    /// "custom_target_speed_high"
-    CustomTargetSpeedHigh,
-    /// "custom_target_speed_low"
-    CustomTargetSpeedLow,
-    /// "custom_target_value_high"
     CustomTargetValueHigh,
-    /// "custom_target_value_low"
     CustomTargetValueLow,
-    /// "custom_wheelsize"
     CustomWheelsize,
-    /// "cycle_length"
     CycleLength,
-    /// "cycle_length16"
     CycleLength16,
-    /// "cycles"
     Cycles,
-    /// "cycles_16"
     Cycles16,
-    /// "cycles_to_calories"
     CyclesToCalories,
-    /// "cycles_to_distance"
     CyclesToDistance,
-    /// "data"
     Data,
-    /// "data16"
     Data16,
-    /// "data_page"
     DataPage,
-    /// "data_size"
     DataSize,
-    /// "data_units"
     DataUnits,
-    /// "date_mode"
     DateMode,
-    /// "day_of_week"
     DayOfWeek,
-    /// "deep_sleep_score"
     DeepSleepScore,
-    /// "default_max_biking_heart_rate"
     DefaultMaxBikingHeartRate,
-    /// "default_max_heart_rate"
     DefaultMaxHeartRate,
-    /// "default_max_running_heart_rate"
     DefaultMaxRunningHeartRate,
-    /// "default_page"
     DefaultPage,
-    /// "default_race_leader"
     DefaultRaceLeader,
-    /// "delete_status"
     DeleteStatus,
-    /// "depth"
     Depth,
-    /// "depth_setting"
     DepthSetting,
-    /// "descent"
     Descent,
-    /// "descent_time"
     DescentTime,
-    /// "descriptor"
     Descriptor,
-    /// "developer_data_index"
     DeveloperDataIndex,
-    /// "developer_id"
     DeveloperId,
-    /// "device_id"
     DeviceId,
-    /// "device_index"
     DeviceIndex,
-    /// "device_number"
     DeviceNumber,
-    /// "device_type"
     DeviceType,
-    /// "diastolic_pressure"
     DiastolicPressure,
-    /// "digital_layout"
-    DigitalLayout,
-    /// "directory"
     Directory,
-    /// "display_orientation"
     DisplayOrientation,
-    /// "display_type"
     DisplayType,
-    /// "dist_setting"
     DistSetting,
-    /// "distance"
     Distance,
-    /// "distance_16"
     Distance16,
-    /// "distance_duration_alert"
-    DistanceDurationAlert,
-    /// "dive_alert"
-    DiveAlert,
-    /// "dive_count"
     DiveCount,
-    /// "dive_number"
     DiveNumber,
-    /// "dive_section_type"
     DiveSectionType,
-    /// "dive_sounds"
     DiveSounds,
-    /// "dive_types"
     DiveTypes,
-    /// "duration"
     Duration,
-    /// "duration_calories"
-    DurationCalories,
-    /// "duration_distance"
-    DurationDistance,
-    /// "duration_hr"
-    DurationHr,
-    /// "duration_min"
     DurationMin,
-    /// "duration_power"
-    DurationPower,
-    /// "duration_reps"
-    DurationReps,
-    /// "duration_step"
-    DurationStep,
-    /// "duration_time"
-    DurationTime,
-    /// "duration_type"
     DurationType,
-    /// "duration_value"
     DurationValue,
-    /// "ebike_assist_level_percent"
     EbikeAssistLevelPercent,
-    /// "ebike_assist_mode"
     EbikeAssistMode,
-    /// "ebike_battery_level"
     EbikeBatteryLevel,
-    /// "ebike_travel_range"
     EbikeTravelRange,
-    /// "elapsed_time"
     ElapsedTime,
-    /// "elev_setting"
     ElevSetting,
-
     Empty,
-    /// "enabled"
     Enabled,
-    /// "end_cns"
     EndCns,
-    /// "end_date"
     EndDate,
-    /// "end_n2"
     EndN2,
-    /// "end_position_lat"
     EndPositionLat,
-    /// "end_position_long"
     EndPositionLong,
-    /// "end_pressure"
     EndPressure,
-    /// "end_time"
     EndTime,
-    /// "end_timestamp"
     EndTimestamp,
-    /// "end_timestamp_ms"
     EndTimestampMs,
-    /// "end_timezone_offset"
     EndTimezoneOffset,
-    /// "energy_total"
     EnergyTotal,
-    /// "enhanced_altitude"
     EnhancedAltitude,
-    /// "enhanced_avg_altitude"
     EnhancedAvgAltitude,
-    /// "enhanced_avg_respiration_rate"
     EnhancedAvgRespirationRate,
-    /// "enhanced_avg_speed"
     EnhancedAvgSpeed,
-    /// "enhanced_max_altitude"
     EnhancedMaxAltitude,
-    /// "enhanced_max_respiration_rate"
     EnhancedMaxRespirationRate,
-    /// "enhanced_max_speed"
     EnhancedMaxSpeed,
-    /// "enhanced_min_altitude"
     EnhancedMinAltitude,
-    /// "enhanced_min_respiration_rate"
     EnhancedMinRespirationRate,
-    /// "enhanced_respiration_rate"
     EnhancedRespirationRate,
-    /// "enhanced_speed"
     EnhancedSpeed,
-    /// "equipment"
     Equipment,
-    /// "event"
     Event,
-    /// "event_group"
     EventGroup,
-    /// "event_id"
     EventId,
-    /// "event_timestamp"
     EventTimestamp,
-    /// "event_timestamp_12"
     EventTimestamp12,
-    /// "event_type"
     EventType,
-    /// "exercise_category"
     ExerciseCategory,
-    /// "exercise_name"
     ExerciseName,
-    /// "exercise_weight"
     ExerciseWeight,
-    /// "expire_time"
     ExpireTime,
-    /// "fat_calories"
     FatCalories,
-    /// "favero_product"
-    FaveroProduct,
-    /// "favorite"
     Favorite,
-    /// "feedback"
     Feedback,
-    /// "field_count"
     FieldCount,
-    /// "field_definition_number"
     FieldDefinitionNumber,
-    /// "field_id"
     FieldId,
-    /// "field_name"
     FieldName,
-    /// "field_num"
     FieldNum,
-    /// "file"
     File,
-    /// "file_uuid"
     FileUuid,
-    /// "filtered_bpm"
     FilteredBpm,
-    /// "first_lap_index"
     FirstLapIndex,
-    /// "first_length_index"
     FirstLengthIndex,
-    /// "first_step_index"
     FirstStepIndex,
-    /// "fit_base_type_id"
     FitBaseTypeId,
-    /// "fit_base_unit_id"
     FitBaseUnitId,
-    /// "fitness_equipment_state"
-    FitnessEquipmentState,
-    /// "flags"
     Flags,
-    /// "flow"
     Flow,
-    /// "fractional_cadence"
     FractionalCadence,
-    /// "fractional_system_timestamp"
     FractionalSystemTimestamp,
-    /// "fractional_timestamp"
     FractionalTimestamp,
-    /// "frame_number"
     FrameNumber,
-    /// "friendly_name"
     FriendlyName,
-    /// "front_gear"
     FrontGear,
-    /// "front_gear_num"
     FrontGearNum,
-    /// "front_gear_shift_count"
     FrontGearShiftCount,
-    /// "functional_threshold_power"
     FunctionalThresholdPower,
-    /// "gap"
     Gap,
-    /// "garmin_product"
-    GarminProduct,
-    /// "gas_consumption_display"
     GasConsumptionDisplay,
-    /// "gear_change_data"
-    GearChangeData,
-    /// "gender"
     Gender,
-    /// "gf_high"
     GfHigh,
-    /// "gf_low"
     GfLow,
-    /// "global_id"
     GlobalId,
-    /// "gps_accuracy"
     GpsAccuracy,
-    /// "gps_ephemeris_download_enabled"
     GpsEphemerisDownloadEnabled,
-    /// "grade"
     Grade,
-    /// "grain_weight"
     GrainWeight,
-    /// "grit"
     Grit,
-    /// "group_primary_key"
     GroupPrimaryKey,
-    /// "grouptrack_enabled"
     GrouptrackEnabled,
-    /// "gyro_cal_factor"
-    GyroCalFactor,
-    /// "gyro_x"
     GyroX,
-    /// "gyro_y"
     GyroY,
-    /// "gyro_z"
     GyroZ,
-    /// "hang_time"
     HangTime,
-    /// "hardware_version"
     HardwareVersion,
-    /// "heading"
     Heading,
-    /// "heart_rate"
     HeartRate,
-    /// "heart_rate_antplus_device_type"
-    HeartRateAntplusDeviceType,
-    /// "heart_rate_local_device_type"
-    HeartRateLocalDeviceType,
-    /// "heart_rate_source"
     HeartRateSource,
-    /// "heart_rate_source_type"
     HeartRateSourceType,
-    /// "heart_rate_type"
     HeartRateType,
-    /// "height"
     Height,
-    /// "height_setting"
     HeightSetting,
-    /// "helium_content"
     HeliumContent,
-    /// "high_bpm"
     HighBpm,
-    /// "high_temperature"
     HighTemperature,
-    /// "high_value"
     HighValue,
-    /// "hosting_provider"
     HostingProvider,
-    /// "hr_calc_type"
     HrCalcType,
-    /// "hr_high_alert"
-    HrHighAlert,
-    /// "hr_low_alert"
-    HrLowAlert,
-    /// "hr_setting"
     HrSetting,
-    /// "hr_source"
     HrSource,
-    /// "hr_zone_high_boundary"
     HrZoneHighBoundary,
-    /// "hrm_ant_id"
     HrmAntId,
-    /// "hrm_ant_id_trans_type"
     HrmAntIdTransType,
-    /// "id"
     Id,
-    /// "incident_detection_enabled"
     IncidentDetectionEnabled,
-    /// "instance"
     Instance,
-    /// "intensity"
     Intensity,
-    /// "intensity_factor"
     IntensityFactor,
-    /// "interruptions_score"
     InterruptionsScore,
-    /// "is_deleted"
     IsDeleted,
-    /// "is_signed"
     IsSigned,
-    /// "issue_time"
     IssueTime,
-    /// "jump_count"
     JumpCount,
-    /// "lactate_threshold_autodetect_enabled"
     LactateThresholdAutodetectEnabled,
-    /// "language"
     Language,
-    /// "languages"
     Languages,
-    /// "lap_trigger"
     LapTrigger,
-    /// "last_night_5_min_high"
     LastNight5MinHigh,
-    /// "last_night_average"
     LastNightAverage,
-    /// "last_stop_multiple"
     LastStopMultiple,
-    /// "layout"
     Layout,
-    /// "leader_activity_id"
     LeaderActivityId,
-    /// "leader_activity_id_string"
     LeaderActivityIdString,
-    /// "leader_group_primary_key"
     LeaderGroupPrimaryKey,
-    /// "leader_time"
     LeaderTime,
-    /// "leader_type"
     LeaderType,
-    /// "left_pco"
     LeftPco,
-    /// "left_pedal_smoothness"
     LeftPedalSmoothness,
-    /// "left_power_phase"
     LeftPowerPhase,
-    /// "left_power_phase_peak"
     LeftPowerPhasePeak,
-    /// "left_right_balance"
     LeftRightBalance,
-    /// "left_torque_effectiveness"
     LeftTorqueEffectiveness,
-    /// "length_type"
     LengthType,
-    /// "lev_battery_consumption"
     LevBatteryConsumption,
-    /// "level"
     Level,
-    /// "level_shift"
     LevelShift,
-    /// "light_sleep_score"
     LightSleepScore,
-    /// "live_tracking_enabled"
     LiveTrackingEnabled,
-    /// "local_device_type"
-    LocalDeviceType,
-    /// "local_id"
     LocalId,
-    /// "local_timestamp"
     LocalTimestamp,
-    /// "location"
     Location,
-    /// "log_hrv"
     LogHrv,
-    /// "low_temperature"
     LowTemperature,
-    /// "mag_x"
     MagX,
-    /// "mag_y"
     MagY,
-    /// "mag_z"
     MagZ,
-    /// "manufacturer"
     Manufacturer,
-    /// "manufacturer_id"
     ManufacturerId,
-    /// "map_3_sample_mean"
     Map3SampleMean,
-    /// "map_evening_values"
     MapEveningValues,
-    /// "map_morning_values"
     MapMorningValues,
-    /// "max_altitude"
     MaxAltitude,
-    /// "max_ascent"
     MaxAscent,
-    /// "max_ascent_rate"
     MaxAscentRate,
-    /// "max_ball_speed"
     MaxBallSpeed,
-    /// "max_cadence"
     MaxCadence,
-    /// "max_cadence_position"
     MaxCadencePosition,
-    /// "max_core_temperature"
     MaxCoreTemperature,
-    /// "max_count"
     MaxCount,
-    /// "max_depth"
     MaxDepth,
-    /// "max_descent_rate"
     MaxDescentRate,
-    /// "max_distance"
     MaxDistance,
-    /// "max_fractional_ascent"
     MaxFractionalAscent,
-    /// "max_fractional_cadence"
     MaxFractionalCadence,
-    /// "max_grade"
     MaxGrade,
-    /// "max_heart_rate"
     MaxHeartRate,
-    /// "max_lev_motor_power"
     MaxLevMotorPower,
-    /// "max_met_category"
     MaxMetCategory,
-    /// "max_neg_grade"
     MaxNegGrade,
-    /// "max_neg_vertical_speed"
     MaxNegVerticalSpeed,
-    /// "max_paddlesport_cadence"
-    MaxPaddlesportCadence,
-    /// "max_per_file"
-    MaxPerFile,
-    /// "max_per_file_type"
-    MaxPerFileType,
-    /// "max_pos_grade"
     MaxPosGrade,
-    /// "max_pos_vertical_speed"
     MaxPosVerticalSpeed,
-    /// "max_power"
     MaxPower,
-    /// "max_power_position"
     MaxPowerPosition,
-    /// "max_push_cadence"
-    MaxPushCadence,
-    /// "max_respiration_rate"
     MaxRespirationRate,
-    /// "max_running_cadence"
-    MaxRunningCadence,
-    /// "max_saturated_hemoglobin_percent"
     MaxSaturatedHemoglobinPercent,
-    /// "max_size"
     MaxSize,
-    /// "max_speed"
     MaxSpeed,
-    /// "max_swimming_cadence"
-    MaxSwimmingCadence,
-    /// "max_temperature"
     MaxTemperature,
-    /// "max_total_hemoglobin_conc"
     MaxTotalHemoglobinConc,
-    /// "max_total_timer_time"
     MaxTotalTimerTime,
-    /// "mean_arterial_pressure"
     MeanArterialPressure,
-    /// "memo"
     Memo,
-    /// "mesg_data"
     MesgData,
-    /// "mesg_id"
     MesgId,
-    /// "mesg_num"
     MesgNum,
-    /// "message_count"
     MessageCount,
-    /// "message_index"
     MessageIndex,
-    /// "metabolic_age"
     MetabolicAge,
-    /// "metabolic_calories"
     MetabolicCalories,
-    /// "min_altitude"
     MinAltitude,
-    /// "min_cadence"
     MinCadence,
-    /// "min_core_temperature"
     MinCoreTemperature,
-    /// "min_heart_rate"
     MinHeartRate,
-    /// "min_paddlesport_cadence"
-    MinPaddlesportCadence,
-    /// "min_push_cadence"
-    MinPushCadence,
-    /// "min_respiration_rate"
     MinRespirationRate,
-    /// "min_running_cadence"
-    MinRunningCadence,
-    /// "min_saturated_hemoglobin_percent"
     MinSaturatedHemoglobinPercent,
-    /// "min_speed"
     MinSpeed,
-    /// "min_swimming_cadence"
-    MinSwimmingCadence,
-    /// "min_temperature"
     MinTemperature,
-    /// "min_total_hemoglobin_conc"
     MinTotalHemoglobinConc,
-    /// "mode"
     Mode,
-    /// "model"
     Model,
-    /// "moderate_activity_minutes"
     ModerateActivityMinutes,
-    /// "motor_power"
     MotorPower,
-    /// "mounting_side"
     MountingSide,
-    /// "move_alert_enabled"
     MoveAlertEnabled,
-    /// "muscle_mass"
     MuscleMass,
-    /// "n2_load"
     N2Load,
-    /// "name"
     Name,
-    /// "native_field_num"
     NativeFieldNum,
-    /// "native_mesg_num"
     NativeMesgNum,
-    /// "ndl_time"
     NdlTime,
-    /// "nec_lat"
     NecLat,
-    /// "nec_long"
     NecLong,
-    /// "next_stop_depth"
     NextStopDepth,
-    /// "next_stop_time"
     NextStopTime,
-    /// "nightly_value"
     NightlyValue,
-    /// "no_fly_time_mode"
     NoFlyTimeMode,
-    /// "normalized_power"
     NormalizedPower,
-    /// "notes"
     Notes,
-    /// "num_active_lengths"
     NumActiveLengths,
-    /// "num_climbs_attempted"
     NumClimbsAttempted,
-    /// "num_climbs_completed"
     NumClimbsCompleted,
-    /// "num_falls"
     NumFalls,
-    /// "num_laps"
     NumLaps,
-    /// "num_lengths"
     NumLengths,
-    /// "num_per_file"
-    NumPerFile,
-    /// "num_segment_laps"
     NumSegmentLaps,
-    /// "num_sessions"
     NumSessions,
-    /// "num_splits"
     NumSplits,
-    /// "num_valid_steps"
     NumValidSteps,
-    /// "number"
     Number,
-    /// "number_of_screens"
     NumberOfScreens,
-    /// "o2_toxicity"
     O2Toxicity,
-    /// "observed_at_time"
     ObservedAtTime,
-    /// "observed_location_lat"
     ObservedLocationLat,
-    /// "observed_location_long"
     ObservedLocationLong,
-    /// "odometer"
     Odometer,
-    /// "odometer_rollover"
     OdometerRollover,
-    /// "offset"
     Offset,
-    /// "offset_cal"
     OffsetCal,
-    /// "opponent_name"
     OpponentName,
-    /// "opponent_score"
     OpponentScore,
-    /// "orientation_matrix"
     OrientationMatrix,
-    /// "overall_sleep_score"
     OverallSleepScore,
-    /// "oxygen_content"
     OxygenContent,
-    /// "pages_enabled"
     PagesEnabled,
-    /// "parent_index"
     ParentIndex,
-    /// "part_index"
     PartIndex,
-    /// "part_number"
     PartNumber,
-    /// "percent_fat"
     PercentFat,
-    /// "percent_hydration"
     PercentHydration,
-    /// "physique_rating"
     PhysiqueRating,
-    /// "pid"
     Pid,
-    /// "pid_data_size"
     PidDataSize,
-    /// "pitch"
     Pitch,
-    /// "player_score"
     PlayerScore,
-    /// "po2"
     Po2,
-    /// "po2_critical"
     Po2Critical,
-    /// "po2_deco"
     Po2Deco,
-    /// "po2_warn"
     Po2Warn,
-    /// "pool_length"
     PoolLength,
-    /// "pool_length_unit"
     PoolLengthUnit,
-    /// "popup_enabled"
     PopupEnabled,
-    /// "position_lat"
     PositionLat,
-    /// "position_long"
     PositionLong,
-    /// "position_setting"
     PositionSetting,
-    /// "power"
     Power,
-    /// "power_cal_factor"
     PowerCalFactor,
-    /// "power_enabled"
     PowerEnabled,
-    /// "power_high_alert"
-    PowerHighAlert,
-    /// "power_low_alert"
-    PowerLowAlert,
-    /// "power_setting"
     PowerSetting,
-    /// "power_zone_high_boundary"
     PowerZoneHighBoundary,
-    /// "precipitation_probability"
     PrecipitationProbability,
-    /// "precise_target_speed"
     PreciseTargetSpeed,
-    /// "pressure"
     Pressure,
-    /// "pressure_sac"
     PressureSac,
-    /// "processing_interval"
     ProcessingInterval,
-    /// "product"
     Product,
-    /// "product_name"
     ProductName,
-    /// "projectile_type"
     ProjectileType,
-    /// "pushes"
     Pushes,
-    /// "pwr_calc_type"
     PwrCalcType,
-    /// "qualifier"
     Qualifier,
-    /// "quality"
     Quality,
-    /// "radar_threat_alert"
-    RadarThreatAlert,
-    /// "radar_threat_avg_approach_speed"
     RadarThreatAvgApproachSpeed,
-    /// "radar_threat_count"
     RadarThreatCount,
-    /// "radar_threat_level_max"
     RadarThreatLevelMax,
-    /// "radar_threat_max_approach_speed"
     RadarThreatMaxApproachSpeed,
-    /// "raw_data"
     RawData,
-    /// "reading_confidence"
     ReadingConfidence,
-    /// "reading_spo2"
     ReadingSpo2,
-    /// "rear_gear"
     RearGear,
-    /// "rear_gear_num"
     RearGearNum,
-    /// "rear_gear_shift_count"
     RearGearShiftCount,
-    /// "recurrence"
     Recurrence,
-    /// "recurrence_value"
     RecurrenceValue,
-    /// "reference_index"
     ReferenceIndex,
-    /// "reference_mesg"
     ReferenceMesg,
-    /// "relative_humidity"
     RelativeHumidity,
-    /// "rem_sleep_score"
     RemSleepScore,
-    /// "repeat"
     Repeat,
-    /// "repeat_calories"
-    RepeatCalories,
-    /// "repeat_distance"
-    RepeatDistance,
-    /// "repeat_dive_interval"
     RepeatDiveInterval,
-    /// "repeat_hr"
-    RepeatHr,
-    /// "repeat_power"
-    RepeatPower,
-    /// "repeat_steps"
-    RepeatSteps,
-    /// "repeat_time"
-    RepeatTime,
-    /// "repeating"
     Repeating,
-    /// "repetition_num"
     RepetitionNum,
-    /// "repetitions"
     Repetitions,
-    /// "report_id"
     ReportId,
-    /// "resistance"
     Resistance,
-    /// "respiration_rate"
     RespirationRate,
-    /// "resting_heart_rate"
     RestingHeartRate,
-    /// "resting_metabolic_rate"
     RestingMetabolicRate,
-    /// "rider_position"
-    RiderPosition,
-    /// "right_pco"
     RightPco,
-    /// "right_pedal_smoothness"
     RightPedalSmoothness,
-    /// "right_power_phase"
     RightPowerPhase,
-    /// "right_power_phase_peak"
     RightPowerPhasePeak,
-    /// "right_torque_effectiveness"
     RightTorqueEffectiveness,
-    /// "rmssd_hrv"
     RmssdHrv,
-    /// "rmv"
     Rmv,
-    /// "roll"
     Roll,
-    /// "rotations"
     Rotations,
-    /// "safety_stop_enabled"
     SafetyStopEnabled,
-    /// "safety_stop_time"
     SafetyStopTime,
-    /// "sample_time_offset"
     SampleTimeOffset,
-    /// "sampling_interval"
     SamplingInterval,
-    /// "saturated_hemoglobin_percent"
     SaturatedHemoglobinPercent,
-    /// "saturated_hemoglobin_percent_max"
     SaturatedHemoglobinPercentMax,
-    /// "saturated_hemoglobin_percent_min"
     SaturatedHemoglobinPercentMin,
-    /// "scale"
     Scale,
-    /// "scaling"
     Scaling,
-    /// "scheduled_time"
     ScheduledTime,
-    /// "score"
     Score,
-    /// "screen_enabled"
     ScreenEnabled,
-    /// "screen_index"
     ScreenIndex,
-    /// "sdm_ant_id"
     SdmAntId,
-    /// "sdm_ant_id_trans_type"
     SdmAntIdTransType,
-    /// "sdm_cal_factor"
     SdmCalFactor,
-    /// "sdrr_hrv"
     SdrrHrv,
-    /// "secondary_custom_target_cadence_high"
-    SecondaryCustomTargetCadenceHigh,
-    /// "secondary_custom_target_cadence_low"
-    SecondaryCustomTargetCadenceLow,
-    /// "secondary_custom_target_heart_rate_high"
-    SecondaryCustomTargetHeartRateHigh,
-    /// "secondary_custom_target_heart_rate_low"
-    SecondaryCustomTargetHeartRateLow,
-    /// "secondary_custom_target_power_high"
-    SecondaryCustomTargetPowerHigh,
-    /// "secondary_custom_target_power_low"
-    SecondaryCustomTargetPowerLow,
-    /// "secondary_custom_target_speed_high"
-    SecondaryCustomTargetSpeedHigh,
-    /// "secondary_custom_target_speed_low"
-    SecondaryCustomTargetSpeedLow,
-    /// "secondary_custom_target_value_high"
     SecondaryCustomTargetValueHigh,
-    /// "secondary_custom_target_value_low"
     SecondaryCustomTargetValueLow,
-    /// "secondary_target_cadence_zone"
-    SecondaryTargetCadenceZone,
-    /// "secondary_target_hr_zone"
-    SecondaryTargetHrZone,
-    /// "secondary_target_power_zone"
-    SecondaryTargetPowerZone,
-    /// "secondary_target_speed_zone"
-    SecondaryTargetSpeedZone,
-    /// "secondary_target_stroke_type"
-    SecondaryTargetStrokeType,
-    /// "secondary_target_type"
     SecondaryTargetType,
-    /// "secondary_target_value"
     SecondaryTargetValue,
-    /// "segment_time"
     SegmentTime,
-    /// "selection_type"
     SelectionType,
-    /// "sensor"
     Sensor,
-    /// "sensor_position"
     SensorPosition,
-    /// "sensor_type"
     SensorType,
-    /// "sentence"
     Sentence,
-    /// "serial_number"
     SerialNumber,
-    /// "sessions"
     Sessions,
-    /// "set_type"
     SetType,
-    /// "severity"
     Severity,
-    /// "shimano_di2_enabled"
     ShimanoDi2Enabled,
-    /// "shot_count"
     ShotCount,
-    /// "shot_num"
     ShotNum,
-    /// "shot_speed"
     ShotSpeed,
-    /// "sleep_duration_score"
     SleepDurationScore,
-    /// "sleep_level"
     SleepLevel,
-    /// "sleep_quality_score"
     SleepQualityScore,
-    /// "sleep_recovery_score"
     SleepRecoveryScore,
-    /// "sleep_restlessness_score"
     SleepRestlessnessScore,
-    /// "sleep_time"
     SleepTime,
-    /// "smart_notification_display_orientation"
     SmartNotificationDisplayOrientation,
-    /// "software_version"
     SoftwareVersion,
-    /// "sound"
     Sound,
-    /// "source"
     Source,
-    /// "source_type"
     SourceType,
-    /// "spd_enabled"
     SpdEnabled,
-    /// "spdcad_enabled"
     SpdcadEnabled,
-    /// "speed"
     Speed,
-    /// "speed_1s"
     Speed1S,
-    /// "speed_high_alert"
-    SpeedHighAlert,
-    /// "speed_low_alert"
-    SpeedLowAlert,
-    /// "speed_setting"
     SpeedSetting,
-    /// "speed_source"
     SpeedSource,
-    /// "speed_zone_high_boundary"
     SpeedZoneHighBoundary,
-    /// "split_type"
     SplitType,
-    /// "sport"
     Sport,
-    /// "sport_event"
     SportEvent,
-    /// "sport_index"
     SportIndex,
-    /// "sport_point"
-    SportPoint,
-    /// "sport_profile_name"
     SportProfileName,
-    /// "sports"
     Sports,
-    /// "stage"
     Stage,
-    /// "stance_time"
     StanceTime,
-    /// "stance_time_balance"
     StanceTimeBalance,
-    /// "stance_time_percent"
     StanceTimePercent,
-    /// "stand_count"
     StandCount,
-    /// "standard_deviation"
     StandardDeviation,
-    /// "start_cns"
     StartCns,
-    /// "start_date"
     StartDate,
-    /// "start_elevation"
     StartElevation,
-    /// "start_n2"
     StartN2,
-    /// "start_position_lat"
     StartPositionLat,
-    /// "start_position_long"
     StartPositionLong,
-    /// "start_pressure"
     StartPressure,
-    /// "start_time"
     StartTime,
-    /// "start_timestamp"
     StartTimestamp,
-    /// "start_timestamp_ms"
     StartTimestampMs,
-    /// "start_timezone_offset"
     StartTimezoneOffset,
-    /// "status"
     Status,
-    /// "step_length"
     StepLength,
-    /// "steps"
     Steps,
-    /// "stress_level"
     StressLevel,
-    /// "stress_level_time"
     StressLevelTime,
-    /// "stress_level_value"
     StressLevelValue,
-    /// "stroke_count"
     StrokeCount,
-    /// "stroke_type"
     StrokeType,
-    /// "strokes"
-    Strokes,
-    /// "sub_sport"
     SubSport,
-    /// "surface_interval"
     SurfaceInterval,
-    /// "swc_lat"
     SwcLat,
-    /// "swc_long"
     SwcLong,
-    /// "swim_stroke"
     SwimStroke,
-    /// "system_time"
     SystemTime,
-    /// "system_timestamp"
     SystemTimestamp,
-    /// "system_timestamp_ms"
     SystemTimestampMs,
-    /// "systolic_pressure"
     SystolicPressure,
-    /// "tap_interface"
     TapInterface,
-    /// "tap_sensitivity"
     TapSensitivity,
-    /// "target_cadence_zone"
-    TargetCadenceZone,
-    /// "target_distance"
     TargetDistance,
-    /// "target_hr_zone"
-    TargetHrZone,
-    /// "target_power_zone"
-    TargetPowerZone,
-    /// "target_speed"
     TargetSpeed,
-    /// "target_speed_zone"
-    TargetSpeedZone,
-    /// "target_stroke_type"
-    TargetStrokeType,
-    /// "target_time"
     TargetTime,
-    /// "target_type"
     TargetType,
-    /// "target_value"
     TargetValue,
-    /// "temperature"
     Temperature,
-    /// "temperature_feels_like"
     TemperatureFeelsLike,
-    /// "temperature_max"
     TemperatureMax,
-    /// "temperature_min"
     TemperatureMin,
-    /// "temperature_setting"
     TemperatureSetting,
-    /// "text"
     Text,
-    /// "threshold_heart_rate"
     ThresholdHeartRate,
-    /// "threshold_power"
     ThresholdPower,
-    /// "time"
     Time,
-    /// "time128"
     Time128,
-    /// "time256"
     Time256,
-    /// "time_above_threshold"
     TimeAboveThreshold,
-    /// "time_created"
     TimeCreated,
-    /// "time_duration_alert"
-    TimeDurationAlert,
-    /// "time_from_course"
     TimeFromCourse,
-    /// "time_in_cadence_zone"
     TimeInCadenceZone,
-    /// "time_in_hr_zone"
     TimeInHrZone,
-    /// "time_in_power_zone"
     TimeInPowerZone,
-    /// "time_in_speed_zone"
     TimeInSpeedZone,
-    /// "time_mode"
     TimeMode,
-    /// "time_offset"
     TimeOffset,
-    /// "time_standing"
     TimeStanding,
-    /// "time_to_surface"
     TimeToSurface,
-    /// "time_zone_offset"
     TimeZoneOffset,
-    /// "timer_time"
     TimerTime,
-    /// "timer_trigger"
-    TimerTrigger,
-    /// "timestamp"
     Timestamp,
-    /// "timestamp_16"
     Timestamp16,
-    /// "timestamp_32k"
     Timestamp32K,
-    /// "timestamp_min_8"
     TimestampMin8,
-    /// "timestamp_ms"
     TimestampMs,
-    /// "title"
     Title,
-    /// "total_anaerobic_training_effect"
     TotalAnaerobicTrainingEffect,
-    /// "total_ascent"
     TotalAscent,
-    /// "total_ascent_time"
     TotalAscentTime,
-    /// "total_calories"
     TotalCalories,
-    /// "total_cycles"
     TotalCycles,
-    /// "total_descent"
     TotalDescent,
-    /// "total_descent_time"
     TotalDescentTime,
-    /// "total_distance"
     TotalDistance,
-    /// "total_elapsed_time"
     TotalElapsedTime,
-    /// "total_fat_calories"
     TotalFatCalories,
-    /// "total_flow"
     TotalFlow,
-    /// "total_fractional_ascent"
     TotalFractionalAscent,
-    /// "total_fractional_cycles"
     TotalFractionalCycles,
-    /// "total_fractional_descent"
     TotalFractionalDescent,
-    /// "total_grit"
     TotalGrit,
-    /// "total_hang_time"
     TotalHangTime,
-    /// "total_hemoglobin_conc"
     TotalHemoglobinConc,
-    /// "total_hemoglobin_conc_max"
     TotalHemoglobinConcMax,
-    /// "total_hemoglobin_conc_min"
     TotalHemoglobinConcMin,
-    /// "total_moving_time"
     TotalMovingTime,
-    /// "total_pushes"
-    TotalPushes,
-    /// "total_reps"
-    TotalReps,
-    /// "total_strides"
-    TotalStrides,
-    /// "total_strokes"
     TotalStrokes,
-    /// "total_timer_time"
     TotalTimerTime,
-    /// "total_training_effect"
     TotalTrainingEffect,
-    /// "total_work"
     TotalWork,
-    /// "track"
     Track,
-    /// "training_load_peak"
     TrainingLoadPeak,
-    /// "training_stress_score"
     TrainingStressScore,
-    /// "transmission_type"
     TransmissionType,
-    /// "travel_gas"
     TravelGas,
-    /// "trigger"
     Trigger,
-    /// "trigger_on_ascent"
     TriggerOnAscent,
-    /// "trigger_on_descent"
     TriggerOnDescent,
-    /// "turn_rate"
     TurnRate,
-    /// "type"
     Type,
-    /// "uncharged"
     Uncharged,
-    /// "units"
     Units,
-    /// "up_key_enabled"
     UpKeyEnabled,
-    /// "update_time"
     UpdateTime,
-    /// "update_timestamp"
     UpdateTimestamp,
-    /// "url"
     Url,
-    /// "user_profile_index"
     UserProfileIndex,
-    /// "user_profile_primary_key"
     UserProfilePrimaryKey,
-    /// "user_running_step_length"
     UserRunningStepLength,
-    /// "user_walking_step_length"
     UserWalkingStepLength,
-    /// "utc_offset"
     UtcOffset,
-    /// "utc_timestamp"
     UtcTimestamp,
-    /// "uuid"
     Uuid,
-    /// "validity"
     Validity,
-    /// "value"
     Value,
-    /// "velocity"
     Velocity,
-    /// "version"
     Version,
-    /// "vertical_oscillation"
     VerticalOscillation,
-    /// "vertical_ratio"
     VerticalRatio,
-    /// "vertical_speed"
     VerticalSpeed,
-    /// "vigorous_activity_minutes"
     VigorousActivityMinutes,
-    /// "virtual_partner_speed"
-    VirtualPartnerSpeed,
-    /// "visceral_fat_mass"
     VisceralFatMass,
-    /// "visceral_fat_rating"
     VisceralFatRating,
-    /// "vo2_max"
     Vo2Max,
-    /// "volume_sac"
     VolumeSac,
-    /// "volume_used"
     VolumeUsed,
-    /// "wake_time"
     WakeTime,
-    /// "water_density"
     WaterDensity,
-    /// "water_type"
     WaterType,
-    /// "weather_alerts_enabled"
     WeatherAlertsEnabled,
-    /// "weather_conditions_enabled"
     WeatherConditionsEnabled,
-    /// "weather_report"
     WeatherReport,
-    /// "weekly_average"
     WeeklyAverage,
-    /// "weight"
     Weight,
-    /// "weight_display_unit"
     WeightDisplayUnit,
-    /// "weight_setting"
     WeightSetting,
-    /// "wind_direction"
     WindDirection,
-    /// "wind_speed"
     WindSpeed,
-    /// "wkt_description"
     WktDescription,
-    /// "wkt_name"
     WktName,
-    /// "wkt_step_index"
     WktStepIndex,
-    /// "wkt_step_name"
     WktStepName,
-    /// "workout_download_enabled"
     WorkoutDownloadEnabled,
-    /// "workout_feel"
     WorkoutFeel,
-    /// "workout_rpe"
     WorkoutRpe,
-    /// "workouts_supported"
     WorkoutsSupported,
-    /// "zero_cross_cnt"
     ZeroCrossCnt,
-    /// "zone"
     Zone,
-    /// "zone_count"
     ZoneCount,
 }
 
@@ -4723,7 +3699,6 @@ impl Name {
     fn as_str(self) -> &'static str {
         match self {
             Self::AbsolutePressure => "absolute_pressure",
-            Self::AccelCalFactor => "accel_cal_factor",
             Self::AccelLateral => "accel_lateral",
             Self::AccelNormal => "accel_normal",
             Self::AccelX => "accel_x",
@@ -4748,13 +3723,10 @@ impl Name {
             Self::AirTimeRemaining => "air_time_remaining",
             Self::AlarmType => "alarm_type",
             Self::Altitude => "altitude",
-            Self::AnalogLayout => "analog_layout",
             Self::AntDeviceNumber => "ant_device_number",
-            Self::AntDeviceType => "ant_device_type",
             Self::AntEnabled => "ant_enabled",
             Self::AntNetwork => "ant_network",
             Self::AntTransmissionType => "ant_transmission_type",
-            Self::AntplusDeviceType => "antplus_device_type",
             Self::ApneaCountdownEnabled => "apnea_countdown_enabled",
             Self::ApneaCountdownTime => "apnea_countdown_time",
             Self::ApneaDiscipline => "apnea_discipline",
@@ -4766,8 +3738,6 @@ impl Name {
             Self::AscentTime => "ascent_time",
             Self::AttitudeStageComplete => "attitude_stage_complete",
             Self::AutoActivityDetect => "auto_activity_detect",
-            Self::AutoActivityDetectDuration => "auto_activity_detect_duration",
-            Self::AutoActivityDetectStartTimestamp => "auto_activity_detect_start_timestamp",
             Self::AutoActivityUploadEnabled => "auto_activity_upload_enabled",
             Self::AutoPowerZero => "auto_power_zero",
             Self::AutoSyncFrequency => "auto_sync_frequency",
@@ -4804,13 +3774,11 @@ impl Name {
             Self::AvgLevMotorPower => "avg_lev_motor_power",
             Self::AvgNegGrade => "avg_neg_grade",
             Self::AvgNegVerticalSpeed => "avg_neg_vertical_speed",
-            Self::AvgPaddlesportCadence => "avg_paddlesport_cadence",
             Self::AvgPosGrade => "avg_pos_grade",
             Self::AvgPosVerticalSpeed => "avg_pos_vertical_speed",
             Self::AvgPower => "avg_power",
             Self::AvgPowerPosition => "avg_power_position",
             Self::AvgPressureSac => "avg_pressure_sac",
-            Self::AvgPushCadence => "avg_push_cadence",
             Self::AvgRespirationRate => "avg_respiration_rate",
             Self::AvgRightPco => "avg_right_pco",
             Self::AvgRightPedalSmoothness => "avg_right_pedal_smoothness",
@@ -4818,7 +3786,6 @@ impl Name {
             Self::AvgRightPowerPhasePeak => "avg_right_power_phase_peak",
             Self::AvgRightTorqueEffectiveness => "avg_right_torque_effectiveness",
             Self::AvgRmv => "avg_rmv",
-            Self::AvgRunningCadence => "avg_running_cadence",
             Self::AvgSaturatedHemoglobinPercent => "avg_saturated_hemoglobin_percent",
             Self::AvgSpeed => "avg_speed",
             Self::AvgSpo2 => "avg_spo2",
@@ -4846,7 +3813,6 @@ impl Name {
             Self::BacklightMode => "backlight_mode",
             Self::BacklightTimeout => "backlight_timeout",
             Self::BallSpeed => "ball_speed",
-            Self::BaroCalFactor => "baro_cal_factor",
             Self::BaroPres => "baro_pres",
             Self::BasalMet => "basal_met",
             Self::BaselineBalancedLower => "baseline_balanced_lower",
@@ -4869,7 +3835,6 @@ impl Name {
             Self::BikeWeight => "bike_weight",
             Self::Bits => "bits",
             Self::BleAutoUploadEnabled => "ble_auto_upload_enabled",
-            Self::BleDeviceType => "ble_device_type",
             Self::BluetoothEnabled => "bluetooth_enabled",
             Self::BluetoothLeEnabled => "bluetooth_le_enabled",
             Self::Bmi => "bmi",
@@ -4877,8 +3842,6 @@ impl Name {
             Self::BottomDepth => "bottom_depth",
             Self::BottomTime => "bottom_time",
             Self::CadEnabled => "cad_enabled",
-            Self::CadHighAlert => "cad_high_alert",
-            Self::CadLowAlert => "cad_low_alert",
             Self::Cadence => "cadence",
             Self::Cadence256 => "cadence256",
             Self::CadenceZoneHighBoundary => "cadence_zone_high_boundary",
@@ -4894,7 +3857,6 @@ impl Name {
             Self::CalibratedMagZ => "calibrated_mag_z",
             Self::CalibrationDivisor => "calibration_divisor",
             Self::CalibrationFactor => "calibration_factor",
-            Self::CalorieDurationAlert => "calorie_duration_alert",
             Self::Calories => "calories",
             Self::CameraEventType => "camera_event_type",
             Self::CameraFileUuid => "camera_file_uuid",
@@ -4912,31 +3874,9 @@ impl Name {
             Self::ChannelNumber => "channel_number",
             Self::Charged => "charged",
             Self::ClimbCategory => "climb_category",
-            Self::ClimbGradeBrazilian => "climb_grade_brazilian",
-            Self::ClimbGradeBritishAdjectival => "climb_grade_british_adjectival",
-            Self::ClimbGradeBritishTechnical => "climb_grade_british_technical",
-            Self::ClimbGradeDankyu => "climb_grade_dankyu",
-            Self::ClimbGradeEwbank => "climb_grade_ewbank",
-            Self::ClimbGradeFont => "climb_grade_font",
-            Self::ClimbGradeFrench => "climb_grade_french",
-            Self::ClimbGradeSaxon => "climb_grade_saxon",
-            Self::ClimbGradeUiaa => "climb_grade_uiaa",
             Self::ClimbGradeValue => "climb_grade_value",
-            Self::ClimbGradeVermin => "climb_grade_vermin",
-            Self::ClimbGradeYds => "climb_grade_yds",
             Self::ClimbGradingScale => "climb_grading_scale",
-            Self::ClimbMaxGradeBrazilian => "climb_max_grade_brazilian",
-            Self::ClimbMaxGradeBritishAdjectival => "climb_max_grade_british_adjectival",
-            Self::ClimbMaxGradeBritishTechnical => "climb_max_grade_british_technical",
-            Self::ClimbMaxGradeDankyu => "climb_max_grade_dankyu",
-            Self::ClimbMaxGradeEwbank => "climb_max_grade_ewbank",
-            Self::ClimbMaxGradeFont => "climb_max_grade_font",
-            Self::ClimbMaxGradeFrench => "climb_max_grade_french",
-            Self::ClimbMaxGradeSaxon => "climb_max_grade_saxon",
-            Self::ClimbMaxGradeUiaa => "climb_max_grade_uiaa",
             Self::ClimbMaxGradeValue => "climb_max_grade_value",
-            Self::ClimbMaxGradeVermin => "climb_max_grade_vermin",
-            Self::ClimbMaxGradeYds => "climb_max_grade_yds",
             Self::ClimbNumber => "climb_number",
             Self::ClimbProEvent => "climb_pro_event",
             Self::ClimbSend => "climb_send",
@@ -4947,7 +3887,6 @@ impl Name {
             Self::CnsLoad => "cns_load",
             Self::CombinedAwakeScore => "combined_awake_score",
             Self::CombinedPedalSmoothness => "combined_pedal_smoothness",
-            Self::CommTimeout => "comm_timeout",
             Self::Completed => "completed",
             Self::Components => "components",
             Self::CompressedAccumulatedPower => "compressed_accumulated_power",
@@ -4966,21 +3905,12 @@ impl Name {
             Self::Count => "count",
             Self::CountType => "count_type",
             Self::CourseDownloadEnabled => "course_download_enabled",
-            Self::CoursePointIndex => "course_point_index",
             Self::CrankLength => "crank_length",
             Self::CumOperatingTime => "cum_operating_time",
             Self::CurrentActivityTypeIntensity => "current_activity_type_intensity",
             Self::CurrentDayRestingHeartRate => "current_day_resting_heart_rate",
             Self::CurrentDist => "current_dist",
             Self::CurrentStress => "current_stress",
-            Self::CustomTargetCadenceHigh => "custom_target_cadence_high",
-            Self::CustomTargetCadenceLow => "custom_target_cadence_low",
-            Self::CustomTargetHeartRateHigh => "custom_target_heart_rate_high",
-            Self::CustomTargetHeartRateLow => "custom_target_heart_rate_low",
-            Self::CustomTargetPowerHigh => "custom_target_power_high",
-            Self::CustomTargetPowerLow => "custom_target_power_low",
-            Self::CustomTargetSpeedHigh => "custom_target_speed_high",
-            Self::CustomTargetSpeedLow => "custom_target_speed_low",
             Self::CustomTargetValueHigh => "custom_target_value_high",
             Self::CustomTargetValueLow => "custom_target_value_low",
             Self::CustomWheelsize => "custom_wheelsize",
@@ -5016,29 +3946,19 @@ impl Name {
             Self::DeviceNumber => "device_number",
             Self::DeviceType => "device_type",
             Self::DiastolicPressure => "diastolic_pressure",
-            Self::DigitalLayout => "digital_layout",
             Self::Directory => "directory",
             Self::DisplayOrientation => "display_orientation",
             Self::DisplayType => "display_type",
             Self::DistSetting => "dist_setting",
             Self::Distance => "distance",
             Self::Distance16 => "distance_16",
-            Self::DistanceDurationAlert => "distance_duration_alert",
-            Self::DiveAlert => "dive_alert",
             Self::DiveCount => "dive_count",
             Self::DiveNumber => "dive_number",
             Self::DiveSectionType => "dive_section_type",
             Self::DiveSounds => "dive_sounds",
             Self::DiveTypes => "dive_types",
             Self::Duration => "duration",
-            Self::DurationCalories => "duration_calories",
-            Self::DurationDistance => "duration_distance",
-            Self::DurationHr => "duration_hr",
             Self::DurationMin => "duration_min",
-            Self::DurationPower => "duration_power",
-            Self::DurationReps => "duration_reps",
-            Self::DurationStep => "duration_step",
-            Self::DurationTime => "duration_time",
             Self::DurationType => "duration_type",
             Self::DurationValue => "duration_value",
             Self::EbikeAssistLevelPercent => "ebike_assist_level_percent",
@@ -5083,7 +4003,6 @@ impl Name {
             Self::ExerciseWeight => "exercise_weight",
             Self::ExpireTime => "expire_time",
             Self::FatCalories => "fat_calories",
-            Self::FaveroProduct => "favero_product",
             Self::Favorite => "favorite",
             Self::Feedback => "feedback",
             Self::FieldCount => "field_count",
@@ -5099,7 +4018,6 @@ impl Name {
             Self::FirstStepIndex => "first_step_index",
             Self::FitBaseTypeId => "fit_base_type_id",
             Self::FitBaseUnitId => "fit_base_unit_id",
-            Self::FitnessEquipmentState => "fitness_equipment_state",
             Self::Flags => "flags",
             Self::Flow => "flow",
             Self::FractionalCadence => "fractional_cadence",
@@ -5112,9 +4030,7 @@ impl Name {
             Self::FrontGearShiftCount => "front_gear_shift_count",
             Self::FunctionalThresholdPower => "functional_threshold_power",
             Self::Gap => "gap",
-            Self::GarminProduct => "garmin_product",
             Self::GasConsumptionDisplay => "gas_consumption_display",
-            Self::GearChangeData => "gear_change_data",
             Self::Gender => "gender",
             Self::GfHigh => "gf_high",
             Self::GfLow => "gf_low",
@@ -5126,7 +4042,6 @@ impl Name {
             Self::Grit => "grit",
             Self::GroupPrimaryKey => "group_primary_key",
             Self::GrouptrackEnabled => "grouptrack_enabled",
-            Self::GyroCalFactor => "gyro_cal_factor",
             Self::GyroX => "gyro_x",
             Self::GyroY => "gyro_y",
             Self::GyroZ => "gyro_z",
@@ -5134,8 +4049,6 @@ impl Name {
             Self::HardwareVersion => "hardware_version",
             Self::Heading => "heading",
             Self::HeartRate => "heart_rate",
-            Self::HeartRateAntplusDeviceType => "heart_rate_antplus_device_type",
-            Self::HeartRateLocalDeviceType => "heart_rate_local_device_type",
             Self::HeartRateSource => "heart_rate_source",
             Self::HeartRateSourceType => "heart_rate_source_type",
             Self::HeartRateType => "heart_rate_type",
@@ -5147,8 +4060,6 @@ impl Name {
             Self::HighValue => "high_value",
             Self::HostingProvider => "hosting_provider",
             Self::HrCalcType => "hr_calc_type",
-            Self::HrHighAlert => "hr_high_alert",
-            Self::HrLowAlert => "hr_low_alert",
             Self::HrSetting => "hr_setting",
             Self::HrSource => "hr_source",
             Self::HrZoneHighBoundary => "hr_zone_high_boundary",
@@ -5189,7 +4100,6 @@ impl Name {
             Self::LevelShift => "level_shift",
             Self::LightSleepScore => "light_sleep_score",
             Self::LiveTrackingEnabled => "live_tracking_enabled",
-            Self::LocalDeviceType => "local_device_type",
             Self::LocalId => "local_id",
             Self::LocalTimestamp => "local_timestamp",
             Self::Location => "location",
@@ -5222,20 +4132,14 @@ impl Name {
             Self::MaxMetCategory => "max_met_category",
             Self::MaxNegGrade => "max_neg_grade",
             Self::MaxNegVerticalSpeed => "max_neg_vertical_speed",
-            Self::MaxPaddlesportCadence => "max_paddlesport_cadence",
-            Self::MaxPerFile => "max_per_file",
-            Self::MaxPerFileType => "max_per_file_type",
             Self::MaxPosGrade => "max_pos_grade",
             Self::MaxPosVerticalSpeed => "max_pos_vertical_speed",
             Self::MaxPower => "max_power",
             Self::MaxPowerPosition => "max_power_position",
-            Self::MaxPushCadence => "max_push_cadence",
             Self::MaxRespirationRate => "max_respiration_rate",
-            Self::MaxRunningCadence => "max_running_cadence",
             Self::MaxSaturatedHemoglobinPercent => "max_saturated_hemoglobin_percent",
             Self::MaxSize => "max_size",
             Self::MaxSpeed => "max_speed",
-            Self::MaxSwimmingCadence => "max_swimming_cadence",
             Self::MaxTemperature => "max_temperature",
             Self::MaxTotalHemoglobinConc => "max_total_hemoglobin_conc",
             Self::MaxTotalTimerTime => "max_total_timer_time",
@@ -5252,13 +4156,9 @@ impl Name {
             Self::MinCadence => "min_cadence",
             Self::MinCoreTemperature => "min_core_temperature",
             Self::MinHeartRate => "min_heart_rate",
-            Self::MinPaddlesportCadence => "min_paddlesport_cadence",
-            Self::MinPushCadence => "min_push_cadence",
             Self::MinRespirationRate => "min_respiration_rate",
-            Self::MinRunningCadence => "min_running_cadence",
             Self::MinSaturatedHemoglobinPercent => "min_saturated_hemoglobin_percent",
             Self::MinSpeed => "min_speed",
-            Self::MinSwimmingCadence => "min_swimming_cadence",
             Self::MinTemperature => "min_temperature",
             Self::MinTotalHemoglobinConc => "min_total_hemoglobin_conc",
             Self::Mode => "mode",
@@ -5287,7 +4187,6 @@ impl Name {
             Self::NumFalls => "num_falls",
             Self::NumLaps => "num_laps",
             Self::NumLengths => "num_lengths",
-            Self::NumPerFile => "num_per_file",
             Self::NumSegmentLaps => "num_segment_laps",
             Self::NumSessions => "num_sessions",
             Self::NumSplits => "num_splits",
@@ -5331,8 +4230,6 @@ impl Name {
             Self::Power => "power",
             Self::PowerCalFactor => "power_cal_factor",
             Self::PowerEnabled => "power_enabled",
-            Self::PowerHighAlert => "power_high_alert",
-            Self::PowerLowAlert => "power_low_alert",
             Self::PowerSetting => "power_setting",
             Self::PowerZoneHighBoundary => "power_zone_high_boundary",
             Self::PrecipitationProbability => "precipitation_probability",
@@ -5347,7 +4244,6 @@ impl Name {
             Self::PwrCalcType => "pwr_calc_type",
             Self::Qualifier => "qualifier",
             Self::Quality => "quality",
-            Self::RadarThreatAlert => "radar_threat_alert",
             Self::RadarThreatAvgApproachSpeed => "radar_threat_avg_approach_speed",
             Self::RadarThreatCount => "radar_threat_count",
             Self::RadarThreatLevelMax => "radar_threat_level_max",
@@ -5365,13 +4261,7 @@ impl Name {
             Self::RelativeHumidity => "relative_humidity",
             Self::RemSleepScore => "rem_sleep_score",
             Self::Repeat => "repeat",
-            Self::RepeatCalories => "repeat_calories",
-            Self::RepeatDistance => "repeat_distance",
             Self::RepeatDiveInterval => "repeat_dive_interval",
-            Self::RepeatHr => "repeat_hr",
-            Self::RepeatPower => "repeat_power",
-            Self::RepeatSteps => "repeat_steps",
-            Self::RepeatTime => "repeat_time",
             Self::Repeating => "repeating",
             Self::RepetitionNum => "repetition_num",
             Self::Repetitions => "repetitions",
@@ -5380,7 +4270,6 @@ impl Name {
             Self::RespirationRate => "respiration_rate",
             Self::RestingHeartRate => "resting_heart_rate",
             Self::RestingMetabolicRate => "resting_metabolic_rate",
-            Self::RiderPosition => "rider_position",
             Self::RightPco => "right_pco",
             Self::RightPedalSmoothness => "right_pedal_smoothness",
             Self::RightPowerPhase => "right_power_phase",
@@ -5407,21 +4296,8 @@ impl Name {
             Self::SdmAntIdTransType => "sdm_ant_id_trans_type",
             Self::SdmCalFactor => "sdm_cal_factor",
             Self::SdrrHrv => "sdrr_hrv",
-            Self::SecondaryCustomTargetCadenceHigh => "secondary_custom_target_cadence_high",
-            Self::SecondaryCustomTargetCadenceLow => "secondary_custom_target_cadence_low",
-            Self::SecondaryCustomTargetHeartRateHigh => "secondary_custom_target_heart_rate_high",
-            Self::SecondaryCustomTargetHeartRateLow => "secondary_custom_target_heart_rate_low",
-            Self::SecondaryCustomTargetPowerHigh => "secondary_custom_target_power_high",
-            Self::SecondaryCustomTargetPowerLow => "secondary_custom_target_power_low",
-            Self::SecondaryCustomTargetSpeedHigh => "secondary_custom_target_speed_high",
-            Self::SecondaryCustomTargetSpeedLow => "secondary_custom_target_speed_low",
             Self::SecondaryCustomTargetValueHigh => "secondary_custom_target_value_high",
             Self::SecondaryCustomTargetValueLow => "secondary_custom_target_value_low",
-            Self::SecondaryTargetCadenceZone => "secondary_target_cadence_zone",
-            Self::SecondaryTargetHrZone => "secondary_target_hr_zone",
-            Self::SecondaryTargetPowerZone => "secondary_target_power_zone",
-            Self::SecondaryTargetSpeedZone => "secondary_target_speed_zone",
-            Self::SecondaryTargetStrokeType => "secondary_target_stroke_type",
             Self::SecondaryTargetType => "secondary_target_type",
             Self::SecondaryTargetValue => "secondary_target_value",
             Self::SegmentTime => "segment_time",
@@ -5453,8 +4329,6 @@ impl Name {
             Self::SpdcadEnabled => "spdcad_enabled",
             Self::Speed => "speed",
             Self::Speed1S => "speed_1s",
-            Self::SpeedHighAlert => "speed_high_alert",
-            Self::SpeedLowAlert => "speed_low_alert",
             Self::SpeedSetting => "speed_setting",
             Self::SpeedSource => "speed_source",
             Self::SpeedZoneHighBoundary => "speed_zone_high_boundary",
@@ -5462,7 +4336,6 @@ impl Name {
             Self::Sport => "sport",
             Self::SportEvent => "sport_event",
             Self::SportIndex => "sport_index",
-            Self::SportPoint => "sport_point",
             Self::SportProfileName => "sport_profile_name",
             Self::Sports => "sports",
             Self::Stage => "stage",
@@ -5490,7 +4363,6 @@ impl Name {
             Self::StressLevelValue => "stress_level_value",
             Self::StrokeCount => "stroke_count",
             Self::StrokeType => "stroke_type",
-            Self::Strokes => "strokes",
             Self::SubSport => "sub_sport",
             Self::SurfaceInterval => "surface_interval",
             Self::SwcLat => "swc_lat",
@@ -5502,13 +4374,8 @@ impl Name {
             Self::SystolicPressure => "systolic_pressure",
             Self::TapInterface => "tap_interface",
             Self::TapSensitivity => "tap_sensitivity",
-            Self::TargetCadenceZone => "target_cadence_zone",
             Self::TargetDistance => "target_distance",
-            Self::TargetHrZone => "target_hr_zone",
-            Self::TargetPowerZone => "target_power_zone",
             Self::TargetSpeed => "target_speed",
-            Self::TargetSpeedZone => "target_speed_zone",
-            Self::TargetStrokeType => "target_stroke_type",
             Self::TargetTime => "target_time",
             Self::TargetType => "target_type",
             Self::TargetValue => "target_value",
@@ -5525,7 +4392,6 @@ impl Name {
             Self::Time256 => "time256",
             Self::TimeAboveThreshold => "time_above_threshold",
             Self::TimeCreated => "time_created",
-            Self::TimeDurationAlert => "time_duration_alert",
             Self::TimeFromCourse => "time_from_course",
             Self::TimeInCadenceZone => "time_in_cadence_zone",
             Self::TimeInHrZone => "time_in_hr_zone",
@@ -5537,7 +4403,6 @@ impl Name {
             Self::TimeToSurface => "time_to_surface",
             Self::TimeZoneOffset => "time_zone_offset",
             Self::TimerTime => "timer_time",
-            Self::TimerTrigger => "timer_trigger",
             Self::Timestamp => "timestamp",
             Self::Timestamp16 => "timestamp_16",
             Self::Timestamp32K => "timestamp_32k",
@@ -5564,9 +4429,6 @@ impl Name {
             Self::TotalHemoglobinConcMax => "total_hemoglobin_conc_max",
             Self::TotalHemoglobinConcMin => "total_hemoglobin_conc_min",
             Self::TotalMovingTime => "total_moving_time",
-            Self::TotalPushes => "total_pushes",
-            Self::TotalReps => "total_reps",
-            Self::TotalStrides => "total_strides",
             Self::TotalStrokes => "total_strokes",
             Self::TotalTimerTime => "total_timer_time",
             Self::TotalTrainingEffect => "total_training_effect",
@@ -5602,7 +4464,6 @@ impl Name {
             Self::VerticalRatio => "vertical_ratio",
             Self::VerticalSpeed => "vertical_speed",
             Self::VigorousActivityMinutes => "vigorous_activity_minutes",
-            Self::VirtualPartnerSpeed => "virtual_partner_speed",
             Self::VisceralFatMass => "visceral_fat_mass",
             Self::VisceralFatRating => "visceral_fat_rating",
             Self::Vo2Max => "vo2_max",
@@ -5636,153 +4497,332 @@ impl Name {
 }
 
 #[allow(clippy::enum_variant_names)]
-#[derive(Debug, Clone, Copy, PartialEq)]
-enum Unit {
-    /// "bar"
-    Bar,
-    /// "bar/min"
-    BarPerMinute,
-    /// "bpm"
-    BeatsPerMinute,
-    /// "Breaths/min"
-    BreathsPerMinute,
-    /// "bytes"
-    Bytes,
-    /// "calories"
-    Calorie,
-    /// "C"
-    Celsius,
-    /// "counts"
-    Count,
-    /// "cycles"
-    Cycle,
-    /// "degrees"
-    Degree,
-    /// "deg/s"
-    DegreesPerSecond,
-    /// "depends on sensor"
-    DependsOnSensor,
-
+#[derive(Debug, Clone, Copy)]
+enum SubName {
+    AccelCalFactor,
+    AnalogLayout,
+    AntDeviceType,
+    AntplusDeviceType,
+    AutoActivityDetectDuration,
+    AutoActivityDetectStartTimestamp,
+    AvgPaddlesportCadence,
+    AvgPushCadence,
+    AvgRunningCadence,
+    AvgSwimmingCadence,
+    BaroCalFactor,
+    BatteryLevel,
+    BleDeviceType,
+    CadHighAlert,
+    CadLowAlert,
+    CalorieDurationAlert,
+    ClimbGradeBrazilian,
+    ClimbGradeBritishAdjectival,
+    ClimbGradeBritishTechnical,
+    ClimbGradeDankyu,
+    ClimbGradeEwbank,
+    ClimbGradeFont,
+    ClimbGradeFrench,
+    ClimbGradeSaxon,
+    ClimbGradeUiaa,
+    ClimbGradeVermin,
+    ClimbGradeYds,
+    ClimbMaxGradeBrazilian,
+    ClimbMaxGradeBritishAdjectival,
+    ClimbMaxGradeBritishTechnical,
+    ClimbMaxGradeDankyu,
+    ClimbMaxGradeEwbank,
+    ClimbMaxGradeFont,
+    ClimbMaxGradeFrench,
+    ClimbMaxGradeSaxon,
+    ClimbMaxGradeUiaa,
+    ClimbMaxGradeVermin,
+    ClimbMaxGradeYds,
+    CommTimeout,
+    CoursePointIndex,
+    CustomTargetCadenceHigh,
+    CustomTargetCadenceLow,
+    CustomTargetHeartRateHigh,
+    CustomTargetHeartRateLow,
+    CustomTargetPowerHigh,
+    CustomTargetPowerLow,
+    CustomTargetSpeedHigh,
+    CustomTargetSpeedLow,
+    DigitalLayout,
+    DistanceDurationAlert,
+    DiveAlert,
+    DurationCalories,
+    DurationDistance,
+    DurationHr,
+    DurationPower,
+    DurationReps,
+    DurationStep,
+    DurationTime,
     Empty,
-    /// "Flow"
+    FaveroProduct,
+    FitnessEquipmentState,
+    GarminProduct,
+    GearChangeData,
+    GyroCalFactor,
+    HeartRateAntplusDeviceType,
+    HeartRateLocalDeviceType,
+    HrHighAlert,
+    HrLowAlert,
+    LocalDeviceType,
+    MaxPaddlesportCadence,
+    MaxPerFile,
+    MaxPerFileType,
+    MaxPushCadence,
+    MaxRunningCadence,
+    MaxSwimmingCadence,
+    MinPaddlesportCadence,
+    MinPushCadence,
+    MinRunningCadence,
+    MinSwimmingCadence,
+    NumPerFile,
+    PowerHighAlert,
+    PowerLowAlert,
+    RadarThreatAlert,
+    RepeatCalories,
+    RepeatDistance,
+    RepeatHr,
+    RepeatPower,
+    RepeatSteps,
+    RepeatTime,
+    RiderPosition,
+    SecondaryCustomTargetCadenceHigh,
+    SecondaryCustomTargetCadenceLow,
+    SecondaryCustomTargetHeartRateHigh,
+    SecondaryCustomTargetHeartRateLow,
+    SecondaryCustomTargetPowerHigh,
+    SecondaryCustomTargetPowerLow,
+    SecondaryCustomTargetSpeedHigh,
+    SecondaryCustomTargetSpeedLow,
+    SecondaryTargetCadenceZone,
+    SecondaryTargetHrZone,
+    SecondaryTargetPowerZone,
+    SecondaryTargetSpeedZone,
+    SecondaryTargetStrokeType,
+    SpeedHighAlert,
+    SpeedLowAlert,
+    SportPoint,
+    Steps,
+    Strokes,
+    TargetCadenceZone,
+    TargetHrZone,
+    TargetPowerZone,
+    TargetSpeedZone,
+    TargetStrokeType,
+    TimeDurationAlert,
+    TimerTrigger,
+    TotalPushes,
+    TotalReps,
+    TotalStrides,
+    TotalStrokes,
+    VirtualPartnerSpeed,
+}
+
+impl SubName {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::AccelCalFactor => "accel_cal_factor",
+            Self::AnalogLayout => "analog_layout",
+            Self::AntDeviceType => "ant_device_type",
+            Self::AntplusDeviceType => "antplus_device_type",
+            Self::AutoActivityDetectDuration => "auto_activity_detect_duration",
+            Self::AutoActivityDetectStartTimestamp => "auto_activity_detect_start_timestamp",
+            Self::AvgPaddlesportCadence => "avg_paddlesport_cadence",
+            Self::AvgPushCadence => "avg_push_cadence",
+            Self::AvgRunningCadence => "avg_running_cadence",
+            Self::AvgSwimmingCadence => "avg_swimming_cadence",
+            Self::BaroCalFactor => "baro_cal_factor",
+            Self::BatteryLevel => "battery_level",
+            Self::BleDeviceType => "ble_device_type",
+            Self::CadHighAlert => "cad_high_alert",
+            Self::CadLowAlert => "cad_low_alert",
+            Self::CalorieDurationAlert => "calorie_duration_alert",
+            Self::ClimbGradeBrazilian => "climb_grade_brazilian",
+            Self::ClimbGradeBritishAdjectival => "climb_grade_british_adjectival",
+            Self::ClimbGradeBritishTechnical => "climb_grade_british_technical",
+            Self::ClimbGradeDankyu => "climb_grade_dankyu",
+            Self::ClimbGradeEwbank => "climb_grade_ewbank",
+            Self::ClimbGradeFont => "climb_grade_font",
+            Self::ClimbGradeFrench => "climb_grade_french",
+            Self::ClimbGradeSaxon => "climb_grade_saxon",
+            Self::ClimbGradeUiaa => "climb_grade_uiaa",
+            Self::ClimbGradeVermin => "climb_grade_vermin",
+            Self::ClimbGradeYds => "climb_grade_yds",
+            Self::ClimbMaxGradeBrazilian => "climb_max_grade_brazilian",
+            Self::ClimbMaxGradeBritishAdjectival => "climb_max_grade_british_adjectival",
+            Self::ClimbMaxGradeBritishTechnical => "climb_max_grade_british_technical",
+            Self::ClimbMaxGradeDankyu => "climb_max_grade_dankyu",
+            Self::ClimbMaxGradeEwbank => "climb_max_grade_ewbank",
+            Self::ClimbMaxGradeFont => "climb_max_grade_font",
+            Self::ClimbMaxGradeFrench => "climb_max_grade_french",
+            Self::ClimbMaxGradeSaxon => "climb_max_grade_saxon",
+            Self::ClimbMaxGradeUiaa => "climb_max_grade_uiaa",
+            Self::ClimbMaxGradeVermin => "climb_max_grade_vermin",
+            Self::ClimbMaxGradeYds => "climb_max_grade_yds",
+            Self::CommTimeout => "comm_timeout",
+            Self::CoursePointIndex => "course_point_index",
+            Self::CustomTargetCadenceHigh => "custom_target_cadence_high",
+            Self::CustomTargetCadenceLow => "custom_target_cadence_low",
+            Self::CustomTargetHeartRateHigh => "custom_target_heart_rate_high",
+            Self::CustomTargetHeartRateLow => "custom_target_heart_rate_low",
+            Self::CustomTargetPowerHigh => "custom_target_power_high",
+            Self::CustomTargetPowerLow => "custom_target_power_low",
+            Self::CustomTargetSpeedHigh => "custom_target_speed_high",
+            Self::CustomTargetSpeedLow => "custom_target_speed_low",
+            Self::DigitalLayout => "digital_layout",
+            Self::DistanceDurationAlert => "distance_duration_alert",
+            Self::DiveAlert => "dive_alert",
+            Self::DurationCalories => "duration_calories",
+            Self::DurationDistance => "duration_distance",
+            Self::DurationHr => "duration_hr",
+            Self::DurationPower => "duration_power",
+            Self::DurationReps => "duration_reps",
+            Self::DurationStep => "duration_step",
+            Self::DurationTime => "duration_time",
+            Self::Empty => "",
+            Self::FaveroProduct => "favero_product",
+            Self::FitnessEquipmentState => "fitness_equipment_state",
+            Self::GarminProduct => "garmin_product",
+            Self::GearChangeData => "gear_change_data",
+            Self::GyroCalFactor => "gyro_cal_factor",
+            Self::HeartRateAntplusDeviceType => "heart_rate_antplus_device_type",
+            Self::HeartRateLocalDeviceType => "heart_rate_local_device_type",
+            Self::HrHighAlert => "hr_high_alert",
+            Self::HrLowAlert => "hr_low_alert",
+            Self::LocalDeviceType => "local_device_type",
+            Self::MaxPaddlesportCadence => "max_paddlesport_cadence",
+            Self::MaxPerFile => "max_per_file",
+            Self::MaxPerFileType => "max_per_file_type",
+            Self::MaxPushCadence => "max_push_cadence",
+            Self::MaxRunningCadence => "max_running_cadence",
+            Self::MaxSwimmingCadence => "max_swimming_cadence",
+            Self::MinPaddlesportCadence => "min_paddlesport_cadence",
+            Self::MinPushCadence => "min_push_cadence",
+            Self::MinRunningCadence => "min_running_cadence",
+            Self::MinSwimmingCadence => "min_swimming_cadence",
+            Self::NumPerFile => "num_per_file",
+            Self::PowerHighAlert => "power_high_alert",
+            Self::PowerLowAlert => "power_low_alert",
+            Self::RadarThreatAlert => "radar_threat_alert",
+            Self::RepeatCalories => "repeat_calories",
+            Self::RepeatDistance => "repeat_distance",
+            Self::RepeatHr => "repeat_hr",
+            Self::RepeatPower => "repeat_power",
+            Self::RepeatSteps => "repeat_steps",
+            Self::RepeatTime => "repeat_time",
+            Self::RiderPosition => "rider_position",
+            Self::SecondaryCustomTargetCadenceHigh => "secondary_custom_target_cadence_high",
+            Self::SecondaryCustomTargetCadenceLow => "secondary_custom_target_cadence_low",
+            Self::SecondaryCustomTargetHeartRateHigh => "secondary_custom_target_heart_rate_high",
+            Self::SecondaryCustomTargetHeartRateLow => "secondary_custom_target_heart_rate_low",
+            Self::SecondaryCustomTargetPowerHigh => "secondary_custom_target_power_high",
+            Self::SecondaryCustomTargetPowerLow => "secondary_custom_target_power_low",
+            Self::SecondaryCustomTargetSpeedHigh => "secondary_custom_target_speed_high",
+            Self::SecondaryCustomTargetSpeedLow => "secondary_custom_target_speed_low",
+            Self::SecondaryTargetCadenceZone => "secondary_target_cadence_zone",
+            Self::SecondaryTargetHrZone => "secondary_target_hr_zone",
+            Self::SecondaryTargetPowerZone => "secondary_target_power_zone",
+            Self::SecondaryTargetSpeedZone => "secondary_target_speed_zone",
+            Self::SecondaryTargetStrokeType => "secondary_target_stroke_type",
+            Self::SpeedHighAlert => "speed_high_alert",
+            Self::SpeedLowAlert => "speed_low_alert",
+            Self::SportPoint => "sport_point",
+            Self::Steps => "steps",
+            Self::Strokes => "strokes",
+            Self::TargetCadenceZone => "target_cadence_zone",
+            Self::TargetHrZone => "target_hr_zone",
+            Self::TargetPowerZone => "target_power_zone",
+            Self::TargetSpeedZone => "target_speed_zone",
+            Self::TargetStrokeType => "target_stroke_type",
+            Self::TimeDurationAlert => "time_duration_alert",
+            Self::TimerTrigger => "timer_trigger",
+            Self::TotalPushes => "total_pushes",
+            Self::TotalReps => "total_reps",
+            Self::TotalStrides => "total_strides",
+            Self::TotalStrokes => "total_strokes",
+            Self::VirtualPartnerSpeed => "virtual_partner_speed",
+        }
+    }
+}
+
+#[allow(clippy::enum_variant_names)]
+#[derive(Debug, Clone, Copy)]
+enum Unit {
+    Bar,
+    BarPerMinute,
+    BeatsPerMinute,
+    BreathsPerMinute,
+    Bytes,
+    Calorie,
+    Celsius,
+    Count,
+    Cycle,
+    Degree,
+    DegreesPerSecond,
+    DependsOnSensor,
+    Empty,
     Flow,
-    /// "G"
     Gauss,
-    /// "g"
     Gee,
-    /// "gr"
     Gram,
-    /// "g/dL"
     GramPerDeciliter,
-    /// "100 * m"
     Hectometer,
-    /// "hr"
     Hour,
-    /// "if"
     IntensityFactor,
-    /// "J"
     Joule,
-    /// "kGrit"
     KGrit,
-    /// "kcal"
     Kilocalorie,
-    /// "kcal/cycle"
     KilocaloriesPerCycle,
-    /// "kcal/day"
     KilocaloriesPerDay,
-    /// "kcal/min"
     KilocaloriesPerMinute,
-    /// "kg"
     Kilogram,
-    /// "kg/m^3"
     KilogramsPerCubicMeter,
-    /// "kg/m^2"
     KilogramsPerSquareMeter,
-    /// "km"
     Kilometer,
-    /// "lengths"
     Length,
-    /// "L"
     Liter,
-    /// "L/min"
     LiterPerMinute,
-    /// "m"
     Meter,
-    /// "m/cycle"
     MetersPerCycle,
-    /// "mps"
     MetersPerSecond,
-    /// "m/s,m"
     MetersPerSecondAndMeter,
-    /// "m/s^2"
     MetersPerSecondSquared,
-    /// "m/s"
     MetersPerSeconds,
-    /// "mG"
     Milligee,
-    /// "mL/kg/min"
     MillilitersPerKilogramPerMinute,
-    /// "mm"
     Millimeter,
-    /// "mmHg"
     MillimetersOfMercury,
-    /// "ms"
     Millisecond,
-    /// "minutes"
     Minute,
-    /// "1/32768 s"
     OnePer32768Seconds,
-    /// "OTUs"
     OxygenToxicityUnit,
-    /// "Pa"
     Pascal,
-    /// "%"
     Percent,
-    /// "% or bpm"
     PercentOrBeatsPerMinute,
-    /// "% or watts"
     PercentOrWatts,
-    /// "pushes"
     Push,
-    /// "pushes/min"
     PushesPerMin,
-    /// "radians"
     Radian,
-    /// "radians/second"
     RadiansPerSecond,
-    /// "reps"
     Repetition,
-    /// "rpm"
     RevolutionPerMinute,
-    /// "s"
     Second,
-    /// "semicircles"
     Semicircle,
-    /// "steps"
     Step,
-    /// "strides"
     Stride,
-    /// "strides/min"
     StridesPerMinute,
-    /// "strokes"
     Stroke,
-    /// "strokes/lap"
     StrokePerLap,
-    /// "strokes/length"
     StrokesPerLength,
-    /// "strokes/min"
     StrokesPerMinute,
-    /// "swim_stroke"
     SwimStroke,
-    /// "tss"
     TrainingStressScore,
-    /// "2 * cycles (steps)"
     TwoCyclesSteps,
-    /// "V"
     Voltage,
-    /// "watts"
     Watt,
-    /// "years"
     Year,
 }
 

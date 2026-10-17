@@ -38,7 +38,8 @@ type Builder struct {
 	messages []parser.Message // messages parsed from profile.xlsx
 	types    []parser.Type
 
-	names map[string]string
+	names    map[string]string
+	subNames map[string]string
 
 	maxComponentBits    int
 	uint                byte
@@ -61,6 +62,7 @@ func NewBuilder(path string, lookup *lookup.Lookup, types []parser.Type, message
 		messages:           messages,
 		lookup:             lookup,
 		names:              make(map[string]string),
+		subNames:           make(map[string]string),
 	}
 	f.preproccessMessageField()
 	return f
@@ -122,6 +124,17 @@ func (b *Builder) Build() ([]generator.Data, error) {
 		return cmp.Compare(a.Variant, b.Variant)
 	})
 
+	subNames := make([]Name, 0, len(b.subNames))
+	for variant, str := range b.subNames {
+		subNames = append(subNames, Name{Variant: variant, String: str})
+	}
+
+	subNames = append(subNames, Name{Variant: "Empty", String: ""})
+
+	slices.SortStableFunc(subNames, func(a, b Name) int {
+		return cmp.Compare(a.Variant, b.Variant)
+	})
+
 	units := make([]Unit, 0, len(unitVariantToStringMapping))
 	for variant, str := range unitVariantToStringMapping {
 		units = append(units, Unit{Variant: variant, String: str})
@@ -145,6 +158,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				TotalAccumulateList: b.totalAccumulateList,
 				Refs:                buf.String(),
 				Names:               names,
+				SubNames:            subNames,
 				Units:               units,
 			},
 		},
@@ -280,10 +294,10 @@ func (b *Builder) makeSubFields(field parser.Field, messageName string) string {
 	buf.WriteString("&[")
 	for _, subField := range field.SubFields {
 		nameVariant := strutil.ToTitle(subField.Name)
-		b.names[nameVariant] = subField.Name
+		b.subNames[nameVariant] = subField.Name
 
 		fmt.Fprintf(buf, "\n%19s SubField { ", "")
-		fmt.Fprintf(buf, "name: Name::%s, ", nameVariant)
+		fmt.Fprintf(buf, "name: SubName::%s, ", nameVariant)
 		fmt.Fprintf(buf, "base_type: FitBaseType::%s, ", strings.ToUpper(b.lookup.BaseType(field.Type).String()))
 		fmt.Fprintf(buf, "profile_type: ProfileType::%s, ", strutil.ToTitle(subField.Type))
 
