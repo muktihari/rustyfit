@@ -13,6 +13,7 @@ type Data struct {
 	TotalAccumulateList string
 	Refs                string
 	Names               []Name
+	SubNames            []Name
 	Units               []Unit
 }
 
