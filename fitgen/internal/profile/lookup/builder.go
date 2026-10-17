@@ -44,6 +44,7 @@ type Builder struct {
 	maxComponentBits    int
 	uint                byte
 	float               byte
+	subFieldMapSize     byte
 	totalAccumulate     int
 	totalAccumulateList string
 }
@@ -154,6 +155,7 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				MaxComponentBits:    b.maxComponentBits,
 				Uint:                b.uint,
 				Float:               b.float,
+				SubFieldMapSize:     b.subFieldMapSize,
 				TotalAccumulate:     b.totalAccumulate,
 				TotalAccumulateList: b.totalAccumulateList,
 				Refs:                buf.String(),
@@ -357,6 +359,7 @@ func (b *Builder) makeSubFieldMaps(subfield parser.SubField, messageName string)
 	buf.WriteString("&[")
 	for i, refValueName := range subfield.RefFieldNames {
 		fieldRef := b.lookup.FieldByName(messageName, refValueName)
+		b.subFieldMapSize = max(b.subFieldMapSize, b.lookup.BaseType(fieldRef.Type).Size()*8)
 		fmt.Fprintf(buf, "\n%23s SubFieldMap { ", "")
 		fmt.Fprintf(buf, "ref_field_num: %d /* %s */, ", fieldRef.Num, fieldRef.Name)
 

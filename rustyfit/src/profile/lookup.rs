@@ -173,7 +173,7 @@ impl SubField {
 #[derive(Debug)]
 pub struct SubFieldMap {
     ref_field_num: u8,
-    ref_field_value: i64,
+    ref_field_value: u16,
 }
 
 impl SubFieldMap {
@@ -183,7 +183,7 @@ impl SubFieldMap {
     }
     /// Mapping reference to targeted Field's Value.
     pub fn ref_field_value(&self) -> i64 {
-        self.ref_field_value
+        self.ref_field_value as i64
     }
 }
 
