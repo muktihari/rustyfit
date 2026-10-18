@@ -494,8 +494,16 @@ impl Decoder {
 
         // Developer Data Lookup, currently we allow missing developer_data_id
         if mesg.num == MesgNum::FIELD_DESCRIPTION {
-            self.field_descriptions
-                .push(LocalFieldDescription::from(&*mesg));
+            // Ensure no duplicate lookup data.
+            let field_desc = LocalFieldDescription::from(&*mesg);
+            if let Some(v) = self.field_descriptions.iter_mut().find(|f| {
+                f.developer_data_index == field_desc.developer_data_index
+                    && f.field_definition_number == field_desc.field_definition_number
+            }) {
+                *v = field_desc;
+            } else {
+                self.field_descriptions.push(field_desc);
+            }
         }
 
         if !self.options.expand_components {
