@@ -409,7 +409,10 @@ impl Decoder {
                     accumulate = false;
                     array = match base_type {
                         FitBaseType::STRING => Value::strcount(buf) > 1,
-                        _ => size > base_type.size() && size % base_type.size() == 0,
+                        _ => {
+                            let n = base_type.size();
+                            size > n && n > 0 && size % n == 0
+                        }
                     }
                 }
             };
