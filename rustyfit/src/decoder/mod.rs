@@ -477,7 +477,10 @@ impl Decoder {
 
             let array = match base_type {
                 FitBaseType::STRING => Value::strcount(buf) > 1,
-                _ => size > base_type.size() && size % base_type.size() == 0,
+                _ => {
+                    let n = base_type.size();
+                    size > n && n > 0 && size % n == 0
+                }
             };
 
             let value = Value::from_parts(buf, array, base_type, mesg_def.arch);
