@@ -191,9 +191,18 @@ impl MessageValidator {
                     self.developer_data_index_seen[(v as usize) >> 6] |= 1 << (v & 63)
                 }
             }
-            MesgNum::FIELD_DESCRIPTION => self
-                .field_descriptions
-                .push(LocalFieldDescription::from(&*mesg)),
+            MesgNum::FIELD_DESCRIPTION => {
+                // Ensure no duplicate lookup data.
+                let field_desc = LocalFieldDescription::from(&*mesg);
+                if let Some(v) = self.field_descriptions.iter_mut().find(|f| {
+                    f.developer_data_index == field_desc.developer_data_index
+                        && f.field_definition_number == field_desc.field_definition_number
+                }) {
+                    *v = field_desc;
+                } else {
+                    self.field_descriptions.push(field_desc);
+                }
+            }
             _ => {}
         };
 
