@@ -448,6 +448,12 @@ impl Decoder {
         }
 
         // Decode developer fields
+        let n = mesg_def.developer_field_definitions.len();
+        if n > 0 {
+            mesg.developer_fields
+                .reserve_exact(if n <= 32 { 32 } else { 255 });
+        }
+
         for dev_field_def in &mesg_def.developer_field_definitions {
             let size = dev_field_def.size;
             let mut buf = &mut self.buf[..size as usize];
@@ -635,7 +641,6 @@ impl Decoder {
         self.mesg.fields.reserve_exact(255);
 
         self.mesg.developer_fields.clear();
-        self.mesg.developer_fields.reserve_exact(255);
     }
 }
 

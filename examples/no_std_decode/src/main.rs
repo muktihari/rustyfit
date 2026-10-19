@@ -14,7 +14,7 @@ use talc::{DefaultBinning, source::Claim, sync::TalcLock};
 #[global_allocator]
 static A: TalcLock<spinning_top::RawSpinlock, Claim, DefaultBinning> = TalcLock::new(unsafe {
     const KB: usize = 1024;
-    const SIZE: usize = 32 * KB;
+    const SIZE: usize = 25 * KB;
     static mut HEAP: [u8; SIZE] = [0; SIZE];
     Claim::array(&raw mut HEAP)
 });
