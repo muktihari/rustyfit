@@ -561,7 +561,7 @@ impl Decoder {
             };
 
             let scaled_val = val as f64 / component.scale() - component.offset();
-            val = ((scaled_val + field_ref.offset()) * field_ref.scale()) as Uint;
+            val = ((scaled_val + field_ref.offset()) * field_ref.scale()).round() as Uint;
             let value = convert_into_value(val, field_ref.base_type());
 
             match mesg.fields.iter_mut().find(|v| v.num == field_num) {
@@ -1001,10 +1001,13 @@ mod tests {
 
     use crate::{
         Decoder, StreamingIterator,
-        decoder::convert_into_value,
-        profile::lookup::Uint,
-        profile::{PROFILE_VERSION, typedef::FitBaseType},
-        proto::{FileHeader, Message, ProtocolVersion, Value},
+        decoder::{accumulator::Accumulator, bits::Bits, convert_into_value},
+        profile::lookup::{self, Uint},
+        profile::{
+            PROFILE_VERSION,
+            typedef::{FitBaseType, MesgNum},
+        },
+        proto::{Field, FileHeader, Message, ProtocolVersion, Value},
     };
     use embedded_io_adapters::std::FromStd;
 
@@ -1084,6 +1087,48 @@ mod tests {
         for tc in tt {
             let val = convert_into_value(input, tc.0);
             assert_eq!(tc.1, val, "input: {:?}", tc);
+        }
+    }
+
+    #[test]
+    fn test_expand_components_rounds_rescaled_value() {
+        // The rescaling goes through f64, so a raw value can come back a hair below
+        // the integer it should land on (record.speed 1001 gives 1000.9999999999999).
+        let tt = [
+            (2, 78), // record.altitude -> record.enhanced_altitude
+            (6, 73), // record.speed -> record.enhanced_speed
+        ];
+
+        for (field_num, expanded_num) in tt {
+            let field_ref = lookup::field_reference(MesgNum::RECORD, field_num).unwrap();
+            let components = field_ref.components();
+            for raw in 0..u16::MAX {
+                let value = Value::Uint16(raw);
+                let mut mesg = Message {
+                    num: MesgNum::RECORD,
+                    fields: vec![Field {
+                        num: field_num,
+                        base_type: FitBaseType::UINT16,
+                        value: value.clone(),
+                        is_expanded: false,
+                    }],
+                    ..Default::default()
+                };
+                let mut bits = Bits::new(&value).unwrap();
+                Decoder::expand_components(
+                    &mut Accumulator::new(),
+                    &mut mesg,
+                    &mut bits,
+                    components,
+                );
+
+                let expanded = mesg.fields.iter().find(|f| f.num == expanded_num).unwrap();
+                assert_eq!(
+                    expanded.value,
+                    Value::Uint32(raw as u32),
+                    "field {field_num}, raw {raw}"
+                );
+            }
         }
     }
 
