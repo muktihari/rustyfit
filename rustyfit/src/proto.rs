@@ -807,7 +807,9 @@ impl Value {
             },
             Value::ArrayInt8(v) => v.iter().any(|&x| x != i8::MAX),
             Value::ArrayUint8(v) => match base_type {
-                FitBaseType::UINT8 => v.iter().any(|&x| x != u8::MAX),
+                FitBaseType::UINT8 | FitBaseType::ENUM | FitBaseType::BYTE => {
+                    v.iter().any(|&x| x != u8::MAX)
+                }
                 FitBaseType::UINT8Z => v.iter().any(|&x| x != 0),
                 _ => false,
             },
@@ -1219,6 +1221,26 @@ mod tests {
             Case {
                 value: Value::ArrayUint8(Box::new([u8::MIN, u8::MIN])),
                 base_type: FitBaseType::UINT8Z,
+                is_valid: false,
+            },
+            Case {
+                value: Value::ArrayUint8(Box::new([0u8, 1u8])),
+                base_type: FitBaseType::ENUM,
+                is_valid: true,
+            },
+            Case {
+                value: Value::ArrayUint8(Box::new([u8::MAX, u8::MAX])),
+                base_type: FitBaseType::ENUM,
+                is_valid: false,
+            },
+            Case {
+                value: Value::ArrayUint8(Box::new([0u8, 1u8])),
+                base_type: FitBaseType::BYTE,
+                is_valid: true,
+            },
+            Case {
+                value: Value::ArrayUint8(Box::new([u8::MAX, u8::MAX])),
+                base_type: FitBaseType::BYTE,
                 is_valid: false,
             },
             Case {
