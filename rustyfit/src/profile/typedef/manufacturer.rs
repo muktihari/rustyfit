@@ -270,6 +270,10 @@ impl Manufacturer {
     pub const TYMEWEAR: Manufacturer = Manufacturer(352);
     pub const EXPOSURE_LIGHTS: Manufacturer = Manufacturer(353);
     pub const FORTO_CYCLING: Manufacturer = Manufacturer(354);
+    pub const FAIR_WEATHER_ATHLETICS: Manufacturer = Manufacturer(356);
+    pub const HATCH_FACTORY: Manufacturer = Manufacturer(357);
+    pub const TORQANO: Manufacturer = Manufacturer(358);
+    pub const ROCKBROS: Manufacturer = Manufacturer(359);
     pub const ACTIGRAPHCORP: Manufacturer = Manufacturer(5759);
 
     fn as_str(self) -> Option<&'static str> {
@@ -520,6 +524,10 @@ impl Manufacturer {
             352 => Some("tymewear"),
             353 => Some("exposure_lights"),
             354 => Some("forto_cycling"),
+            356 => Some("fair_weather_athletics"),
+            357 => Some("hatch_factory"),
+            358 => Some("torqano"),
+            359 => Some("rockbros"),
             5759 => Some("actigraphcorp"),
             _ => None,
         }

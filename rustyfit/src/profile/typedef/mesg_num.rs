@@ -125,6 +125,12 @@ impl MesgNum {
     pub const TANK_UPDATE: MesgNum = MesgNum(319);
     pub const TANK_SUMMARY: MesgNum = MesgNum(323);
     pub const SLEEP_ASSESSMENT: MesgNum = MesgNum(346);
+    /// Message type for individual sonar event
+    pub const TSB_SONAR_MESSAGE_EVENT: MesgNum = MesgNum(364);
+    /// Message type for storing Top-Side-Bouy (TSB) Settings
+    pub const TSB_SETTINGS: MesgNum = MesgNum(365);
+    /// Message type for storing saved Top-Side-Bouy (TSB) Diver Configuration
+    pub const TSB_DIVER_CONFIG: MesgNum = MesgNum(366);
     pub const HRV_STATUS_SUMMARY: MesgNum = MesgNum(370);
     pub const HRV_VALUE: MesgNum = MesgNum(371);
     pub const RAW_BBI: MesgNum = MesgNum(372);
@@ -258,6 +264,9 @@ impl MesgNum {
             319 => Some("tank_update"),
             323 => Some("tank_summary"),
             346 => Some("sleep_assessment"),
+            364 => Some("tsb_sonar_message_event"),
+            365 => Some("tsb_settings"),
+            366 => Some("tsb_diver_config"),
             370 => Some("hrv_status_summary"),
             371 => Some("hrv_value"),
             372 => Some("raw_bbi"),

@@ -49,6 +49,10 @@ impl File {
     pub const SEGMENT_LIST: File = File(35);
     /// Read/write/erase. Single File. Directory=Settings
     pub const EXD_CONFIGURATION: File = File(40);
+    /// Read/write/erase, multiple files. Directory=Events. Top-Side-Bouy (TSB).
+    pub const TSB_SONAR_EVENTS: File = File(66);
+    /// Read/write/erase, single file. Top-Side-Bouy (TSB).
+    pub const TSB_DIVER_CONFIG: File = File(67);
     /// 0xF7 - 0xFE reserved for manufacturer specific file types
     pub const MFG_RANGE_MIN: File = File(0xF7);
     /// 0xF7 - 0xFE reserved for manufacturer specific file types
@@ -74,6 +78,8 @@ impl File {
             34 => Some("segment"),
             35 => Some("segment_list"),
             40 => Some("exd_configuration"),
+            66 => Some("tsb_sonar_events"),
+            67 => Some("tsb_diver_config"),
             0xF7 => Some("mfg_range_min"),
             0xFE => Some("mfg_range_max"),
             _ => None,

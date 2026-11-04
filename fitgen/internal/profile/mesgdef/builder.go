@@ -157,6 +157,12 @@ func (b *Builder) Build() ([]generator.Data, error) {
 				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
 				field.IfNotEqualInvalid = fmt.Sprintf("m.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
 				field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.to_bits() != u%s::MAX", field.Name0, field.BaseType0[1:])
+				if field.Array && fixedArraySize > 0 {
+					field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.map(|x| x.to_bits()) == [u%s::MAX; %d]", field.Name0, field.BaseType0[1:], fixedArraySize)
+					field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.map(|x| x.to_bits()) != [u%s::MAX; %d]", field.Name0, field.BaseType0[1:], fixedArraySize)
+					field.IfNotEqualInvalid = fmt.Sprintf("m.%s.map(|x| x.to_bits()) != [u%s::MAX; %d]", field.Name0, field.BaseType0[1:], fixedArraySize)
+					field.IfSelfNotEqualInvalid = fmt.Sprintf("self.%s.map(|x| x.to_bits()) != [u%s::MAX; %d]", field.Name0, field.BaseType0[1:], fixedArraySize)
+				}
 			}
 			if parserField.Array == "[N]" || (field.BaseType == "STRING" && parserField.Array == "") {
 				field.IfSelfEqualInvalid = fmt.Sprintf("self.%s.is_empty()", field.Name)
