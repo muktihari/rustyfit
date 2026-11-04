@@ -561,7 +561,7 @@ impl Decoder {
             };
 
             let scaled_val = val as f64 / component.scale() - component.offset();
-            val = ((scaled_val + field_ref.offset()) * field_ref.scale()).round() as Uint;
+            val = ((scaled_val + field_ref.offset()) * field_ref.scale() + 0.5) as Uint;
             let value = convert_into_value(val, field_ref.base_type());
 
             match mesg.fields.iter_mut().find(|v| v.num == field_num) {
