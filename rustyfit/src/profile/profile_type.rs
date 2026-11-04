@@ -8,7 +8,7 @@
 use serde::{Serialize, Serializer};
 
 /// Current profile version.
-pub const PROFILE_VERSION: u16 = 21218;
+pub const PROFILE_VERSION: u16 = 21221;
 
 /// ProfileType is an abstraction layer over primitive-types such as sint, uint, etc.
 /// For example, if a Field has u32 value having ProfileType::DATE_TIME, that u32 value
@@ -242,6 +242,10 @@ pub enum ProfileType {
     SleepDisruptionSeverity,
     NapPeriodFeedback,
     NapSource,
+    SonarPacketId,
+    SonarHeading,
+    SonarMessageType,
+    SonarMessageSource,
     MaxMetSpeedSource,
     MaxMetHeartRateSource,
     HrvStatus,
@@ -485,6 +489,10 @@ impl Serialize for ProfileType {
             Self::SleepDisruptionSeverity => "sleep_disruption_severity",
             Self::NapPeriodFeedback => "nap_period_feedback",
             Self::NapSource => "nap_source",
+            Self::SonarPacketId => "sonar_packet_id",
+            Self::SonarHeading => "sonar_heading",
+            Self::SonarMessageType => "sonar_message_type",
+            Self::SonarMessageSource => "sonar_message_source",
             Self::MaxMetSpeedSource => "max_met_speed_source",
             Self::MaxMetHeartRateSource => "max_met_heart_rate_source",
             Self::HrvStatus => "hrv_status",

@@ -533,9 +533,14 @@ impl GarminProduct {
     pub const FENIX9_43MM: GarminProduct = GarminProduct(5133);
     /// 47mm & 57mm
     pub const FENIX9: GarminProduct = GarminProduct(5134);
+    pub const EDGE_1060: GarminProduct = GarminProduct(4962);
     pub const INSTINCT_CROSSOVER_AMOLED: GarminProduct = GarminProduct(4678);
+    pub const EDGE_EXPLORE3: GarminProduct = GarminProduct(4970);
+    pub const EDGE_EXPLORE3_PLUS: GarminProduct = GarminProduct(4972);
     pub const D2_AIR_X15: GarminProduct = GarminProduct(4944);
+    pub const MARQ3: GarminProduct = GarminProduct(5000);
     pub const CIRQA_SMART_BAND: GarminProduct = GarminProduct(5019);
+    pub const DESCENT_X10: GarminProduct = GarminProduct(5026);
     pub const D2_MACH2_PRO: GarminProduct = GarminProduct(5056);
     pub const ENDURO4: GarminProduct = GarminProduct(5169);
     /// SDM4 footpod
@@ -1037,9 +1042,14 @@ impl GarminProduct {
             4956 => Some("fenix9_pro_solar_51mm"),
             5133 => Some("fenix9_43mm"),
             5134 => Some("fenix9"),
+            4962 => Some("edge_1060"),
             4678 => Some("instinct_crossover_amoled"),
+            4970 => Some("edge_explore3"),
+            4972 => Some("edge_explore3_plus"),
             4944 => Some("d2_air_x15"),
+            5000 => Some("marq3"),
             5019 => Some("cirqa_smart_band"),
+            5026 => Some("descent_x10"),
             5056 => Some("d2_mach2_pro"),
             5169 => Some("enduro4"),
             10007 => Some("sdm4"),
