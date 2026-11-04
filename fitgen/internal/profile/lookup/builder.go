@@ -434,6 +434,7 @@ var varunits = []string{
 	"Celsius", "C",
 	"Count", "counts",
 	"Cycle", "cycles",
+	"Decibel", "dB",
 	"Degree", "degrees",
 	"DegreesPerSecond", "deg/s",
 	"DependsOnSensor", "depends on sensor",
