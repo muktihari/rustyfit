@@ -44,7 +44,6 @@ pub struct UserProfile {
     pub position_setting: typedef::DisplayPosition,
     pub temperature_setting: typedef::DisplayMeasure,
     pub local_id: typedef::UserLocalId,
-    /// Array: \[6\]
     pub global_id: [u8; 6],
     /// Typical wake time
     pub wake_time: typedef::LocaltimeIntoDay,
@@ -320,15 +319,14 @@ impl From<&Message> for UserProfile {
                 21 => v.temperature_setting = typedef::DisplayMeasure(field.value.as_u8()),
                 22 => v.local_id = typedef::UserLocalId(field.value.as_u16()),
                 23 => {
-                    v.global_id = match &field.value {
-                        Value::ArrayUint8(v) => {
-                            let mut arr = [u8::MAX; 6];
+                    v.global_id = {
+                        let mut arr = [u8::MAX; 6];
+                        if let Value::ArrayUint8(v) = &field.value {
                             for (i, x) in v.iter().take(6).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 28 => v.wake_time = typedef::LocaltimeIntoDay(field.value.as_u32()),

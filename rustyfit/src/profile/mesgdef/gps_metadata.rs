@@ -32,7 +32,7 @@ pub struct GpsMetadata {
     pub heading: u16,
     /// Units: s; Used to correlate UTC to system time if the timestamp of the message is in system time. This UTC time is derived from the GPS data.
     pub utc_timestamp: typedef::DateTime,
-    /// Array: \[3\]; Scale: 100; Units: m/s; velocity\[0\] is lon velocity. Velocity\[1\] is lat velocity. Velocity\[2\] is altitude velocity.
+    /// Scale: 100; Units: m/s; velocity\[0\] is lon velocity. Velocity\[1\] is lat velocity. Velocity\[2\] is altitude velocity.
     pub velocity: [i16; 3],
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -235,15 +235,14 @@ impl From<&Message> for GpsMetadata {
                 5 => v.heading = field.value.as_u16(),
                 6 => v.utc_timestamp = typedef::DateTime(field.value.as_u32()),
                 7 => {
-                    v.velocity = match &field.value {
-                        Value::ArrayInt16(v) => {
-                            let mut arr = [i16::MAX; 3];
+                    v.velocity = {
+                        let mut arr = [i16::MAX; 3];
+                        if let Value::ArrayInt16(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 _ => v.unknown_fields.push(field.clone()),

@@ -29,7 +29,6 @@ pub struct ExdDataFieldConfiguration {
     pub field_id: u8,
     pub concept_count: u8,
     pub display_type: typedef::ExdDisplayType,
-    /// Array: \[32\]
     pub title: [Box<str>; 32],
     state: [u8; 1], // Used for tracking expanded fields.
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
@@ -124,15 +123,14 @@ impl From<&Message> for ExdDataFieldConfiguration {
                 3 => v.concept_count = field.value.as_u8(),
                 4 => v.display_type = typedef::ExdDisplayType(field.value.as_u8()),
                 5 => {
-                    v.title = match &field.value {
-                        Value::ArrayString(v) => {
-                            let mut arr: [Box<str>; 32] = Default::default();
+                    v.title = {
+                        let mut arr: [Box<str>; 32] = Default::default();
+                        if let Value::ArrayString(v) = &field.value {
                             for (i, x) in v.iter().take(32).enumerate() {
                                 arr[i] = x.clone();
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 _ => {

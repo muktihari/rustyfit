@@ -25,9 +25,9 @@ pub struct ThreeDSensorCalibration {
     pub calibration_divisor: u32,
     /// Level shift value used to shift the ADC value back into range
     pub level_shift: u32,
-    /// Array: \[3\]; Internal calibration factors, one for each: xy, yx, zx
+    /// Internal calibration factors, one for each: xy, yx, zx
     pub offset_cal: [i32; 3],
-    /// Array: \[9\]; Scale: 65535; 3 x 3 rotation matrix (row major)
+    /// Scale: 65535; 3 x 3 rotation matrix (row major)
     pub orientation_matrix: [i32; 9],
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,
@@ -132,27 +132,25 @@ impl From<&Message> for ThreeDSensorCalibration {
                 2 => v.calibration_divisor = field.value.as_u32(),
                 3 => v.level_shift = field.value.as_u32(),
                 4 => {
-                    v.offset_cal = match &field.value {
-                        Value::ArrayInt32(v) => {
-                            let mut arr = [i32::MAX; 3];
+                    v.offset_cal = {
+                        let mut arr = [i32::MAX; 3];
+                        if let Value::ArrayInt32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 5 => {
-                    v.orientation_matrix = match &field.value {
-                        Value::ArrayInt32(v) => {
-                            let mut arr = [i32::MAX; 9];
+                    v.orientation_matrix = {
+                        let mut arr = [i32::MAX; 9];
+                        if let Value::ArrayInt32(v) = &field.value {
                             for (i, x) in v.iter().take(9).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 _ => v.unknown_fields.push(field.clone()),
