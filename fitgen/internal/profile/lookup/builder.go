@@ -189,7 +189,7 @@ func (b *Builder) makeFieldRefs(message parser.Message) string {
 		)
 
 		if field.Array != "" {
-			fmt.Fprintf(buf, "array: %t %s, ", field.Array != "", makeArrayComment(field.Array))
+			fmt.Fprintf(buf, "array: %t%s, ", field.Array != "", makeArrayComment(field.Array))
 		}
 
 		accumulate := accumulateOrDefault(field.Accumulate, 0)
@@ -402,10 +402,10 @@ func accumulateOrDefault(accumulates []bool, index int) bool {
 }
 
 func makeArrayComment(arr string) string {
-	if arr == "" {
+	if arr == "" || arr == "[N]" {
 		return ""
 	}
-	return fmt.Sprintf("/* %s */", arr)
+	return fmt.Sprintf(" /* %s */", arr)
 }
 
 func formatFloat(v float64) string {
