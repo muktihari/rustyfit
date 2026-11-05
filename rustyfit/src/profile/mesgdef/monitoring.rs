@@ -468,15 +468,14 @@ impl From<&Message> for Monitoring {
                 14 => v.temperature_min = field.value.as_i16(),
                 15 => v.temperature_max = field.value.as_i16(),
                 16 => {
-                    v.activity_time = match &field.value {
-                        Value::ArrayUint16(v) => {
-                            let mut arr = [u16::MAX; 8];
+                    v.activity_time = {
+                        let mut arr = [u16::MAX; 8];
+                        if let Value::ArrayUint16(v) = &field.value {
                             for (i, x) in v.iter().take(8).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 19 => v.active_calories = field.value.as_u16(),

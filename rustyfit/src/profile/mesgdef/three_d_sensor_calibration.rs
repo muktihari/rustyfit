@@ -132,27 +132,25 @@ impl From<&Message> for ThreeDSensorCalibration {
                 2 => v.calibration_divisor = field.value.as_u32(),
                 3 => v.level_shift = field.value.as_u32(),
                 4 => {
-                    v.offset_cal = match &field.value {
-                        Value::ArrayInt32(v) => {
-                            let mut arr = [i32::MAX; 3];
+                    v.offset_cal = {
+                        let mut arr = [i32::MAX; 3];
+                        if let Value::ArrayInt32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 5 => {
-                    v.orientation_matrix = match &field.value {
-                        Value::ArrayInt32(v) => {
-                            let mut arr = [i32::MAX; 9];
+                    v.orientation_matrix = {
+                        let mut arr = [i32::MAX; 9];
+                        if let Value::ArrayInt32(v) = &field.value {
                             for (i, x) in v.iter().take(9).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 _ => v.unknown_fields.push(field.clone()),

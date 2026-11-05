@@ -399,22 +399,22 @@ func (b *Builder) transformTypedValue(fieldType, array string, fixedArraySize ui
 			rshValue = "x.clone()"
 		}
 
-		value = fmt.Sprintf(`match &field.value {
-			Value::Array%s(v) => {
-				let mut arr %s = %s;
+		value = fmt.Sprintf(`{
+			let mut arr %s = %s;
+			if let Value::Array%s(v) = &field.value {
 				for (i, x) in v.iter().take(%d).enumerate() {
 					arr[i] = %s;
 				}
-				arr
-			},
-			_ => Default::default(),
+			}
+			arr
 		}`,
-			valueEnumType,
 			arrayType,
 			arrayValue,
+			valueEnumType,
 			fixedArraySize,
 			rshValue,
 		)
+
 	}
 
 	if baseType == fieldType { // primitive-types

@@ -161,75 +161,69 @@ impl From<&Message> for TsbSettings {
                 6 => v.plt_thresh = field.value.as_u32(),
                 7 => v.transducer_spacing = field.value.as_f32(),
                 8 => {
-                    v.calib_accel = match &field.value {
-                        Value::ArrayFloat32(v) => {
-                            let mut arr = [f32::from_bits(u32::MAX); 3];
+                    v.calib_accel = {
+                        let mut arr = [f32::from_bits(u32::MAX); 3];
+                        if let Value::ArrayFloat32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 9 => {
-                    v.calib_gyro = match &field.value {
-                        Value::ArrayFloat32(v) => {
-                            let mut arr = [f32::from_bits(u32::MAX); 3];
+                    v.calib_gyro = {
+                        let mut arr = [f32::from_bits(u32::MAX); 3];
+                        if let Value::ArrayFloat32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 10 => {
-                    v.calib_mag = match &field.value {
-                        Value::ArrayFloat32(v) => {
-                            let mut arr = [f32::from_bits(u32::MAX); 3];
+                    v.calib_mag = {
+                        let mut arr = [f32::from_bits(u32::MAX); 3];
+                        if let Value::ArrayFloat32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 11 => {
-                    v.calib_mag_soft_x = match &field.value {
-                        Value::ArrayFloat32(v) => {
-                            let mut arr = [f32::from_bits(u32::MAX); 3];
+                    v.calib_mag_soft_x = {
+                        let mut arr = [f32::from_bits(u32::MAX); 3];
+                        if let Value::ArrayFloat32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 12 => {
-                    v.calib_mag_soft_y = match &field.value {
-                        Value::ArrayFloat32(v) => {
-                            let mut arr = [f32::from_bits(u32::MAX); 3];
+                    v.calib_mag_soft_y = {
+                        let mut arr = [f32::from_bits(u32::MAX); 3];
+                        if let Value::ArrayFloat32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 13 => {
-                    v.calib_mag_soft_z = match &field.value {
-                        Value::ArrayFloat32(v) => {
-                            let mut arr = [f32::from_bits(u32::MAX); 3];
+                    v.calib_mag_soft_z = {
+                        let mut arr = [f32::from_bits(u32::MAX); 3];
+                        if let Value::ArrayFloat32(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 14 => v.max_tx_duty_cycle = field.value.as_u8(),

@@ -124,15 +124,14 @@ impl From<&Message> for ExdDataFieldConfiguration {
                 3 => v.concept_count = field.value.as_u8(),
                 4 => v.display_type = typedef::ExdDisplayType(field.value.as_u8()),
                 5 => {
-                    v.title = match &field.value {
-                        Value::ArrayString(v) => {
-                            let mut arr: [Box<str>; 32] = Default::default();
+                    v.title = {
+                        let mut arr: [Box<str>; 32] = Default::default();
+                        if let Value::ArrayString(v) = &field.value {
                             for (i, x) in v.iter().take(32).enumerate() {
                                 arr[i] = x.clone();
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 _ => {

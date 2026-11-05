@@ -1669,15 +1669,14 @@ impl From<&Message> for Record {
                 6 => v.speed = field.value.as_u16(),
                 7 => v.power = field.value.as_u16(),
                 8 => {
-                    v.compressed_speed_distance = match &field.value {
-                        Value::ArrayUint8(v) => {
-                            let mut arr = [u8::MAX; 3];
+                    v.compressed_speed_distance = {
+                        let mut arr = [u8::MAX; 3];
+                        if let Value::ArrayUint8(v) = &field.value {
                             for (i, x) in v.iter().take(3).enumerate() {
                                 arr[i] = *x;
                             }
-                            arr
                         }
-                        _ => Default::default(),
+                        arr
                     }
                 }
                 9 => v.grade = field.value.as_i16(),
