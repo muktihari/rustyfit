@@ -27,17 +27,11 @@ pub struct TsbSettings {
     pub plt_thresh: u32,
     /// Units: m
     pub transducer_spacing: f32,
-    /// Array: \[3\]
     pub calib_accel: [f32; 3],
-    /// Array: \[3\]
     pub calib_gyro: [f32; 3],
-    /// Array: \[3\]
     pub calib_mag: [f32; 3],
-    /// Array: \[3\]
     pub calib_mag_soft_x: [f32; 3],
-    /// Array: \[3\]
     pub calib_mag_soft_y: [f32; 3],
-    /// Array: \[3\]
     pub calib_mag_soft_z: [f32; 3],
     pub max_tx_duty_cycle: u8,
     pub tx_chan: u8,

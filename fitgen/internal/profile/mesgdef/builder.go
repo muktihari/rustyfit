@@ -274,12 +274,6 @@ func createComment(field *Field, array string) string {
 		buf.WriteString("; ")
 	}
 
-	if strings.HasPrefix(field.Type, "[") {
-		buf.WriteString("Array: ")
-		buf.WriteString(array)
-		buf.WriteString("; ")
-	}
-
 	if field.Scale != 1 {
 		buf.WriteString("Scale: ")
 		buf.WriteString(strconv.FormatFloat(field.Scale, 'g', -1, 64))

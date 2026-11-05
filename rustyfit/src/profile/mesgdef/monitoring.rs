@@ -53,7 +53,7 @@ pub struct Monitoring {
     pub temperature_min: i16,
     /// Scale: 100; Units: C; Max temperature during the logging interval ended at timestamp
     pub temperature_max: i16,
-    /// Array: \[8\]; Units: minutes; Indexed using minute_activity_level enum
+    /// Units: minutes; Indexed using minute_activity_level enum
     pub activity_time: [u16; 8],
     /// Units: kcal
     pub active_calories: u16,

@@ -44,7 +44,6 @@ pub struct UserProfile {
     pub position_setting: typedef::DisplayPosition,
     pub temperature_setting: typedef::DisplayMeasure,
     pub local_id: typedef::UserLocalId,
-    /// Array: \[6\]
     pub global_id: [u8; 6],
     /// Typical wake time
     pub wake_time: typedef::LocaltimeIntoDay,

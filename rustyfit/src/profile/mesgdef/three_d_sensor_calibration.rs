@@ -25,9 +25,9 @@ pub struct ThreeDSensorCalibration {
     pub calibration_divisor: u32,
     /// Level shift value used to shift the ADC value back into range
     pub level_shift: u32,
-    /// Array: \[3\]; Internal calibration factors, one for each: xy, yx, zx
+    /// Internal calibration factors, one for each: xy, yx, zx
     pub offset_cal: [i32; 3],
-    /// Array: \[9\]; Scale: 65535; 3 x 3 rotation matrix (row major)
+    /// Scale: 65535; 3 x 3 rotation matrix (row major)
     pub orientation_matrix: [i32; 9],
     /// unknown_fields are fields that are exist but they are not defined in Profile.xlsx
     pub unknown_fields: Vec<Field>,

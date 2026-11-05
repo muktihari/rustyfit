@@ -43,7 +43,7 @@ pub struct Record {
     pub speed: u16,
     /// Units: watts
     pub power: u16,
-    /// Array: \[3\]; Units: m/s,m
+    /// Units: m/s,m
     pub compressed_speed_distance: [u8; 3],
     /// Scale: 100; Units: %
     pub grade: i16,
