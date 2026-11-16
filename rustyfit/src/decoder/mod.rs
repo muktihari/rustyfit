@@ -224,16 +224,14 @@ impl Decoder {
         let crc = u16::from_le_bytes([self.buf[12], self.buf[13]]);
 
         if self.options.checksum {
-            // If size is 12, checksum both file header and data together.
-            // If size is 14, checksum file header and data separately.
             self.crc16.write(&self.buf[..12]);
             if size == 14 {
                 let found = crc;
                 let calculated = self.crc16.sum16();
-                self.crc16.reset();
                 if found != 0 && found != calculated {
                     return Err(Error::ChecksumMismatch { found, calculated });
                 }
+                self.crc16.write(&self.buf[12..14]);
             }
         }
 
@@ -1000,14 +998,15 @@ mod tests {
     };
 
     use crate::{
-        Decoder, StreamingIterator,
-        decoder::{accumulator::Accumulator, bits::Bits, convert_into_value},
+        Decoder, EncoderBuilder, StreamingIterator,
+        crc16::Crc16,
+        decoder::{Error, accumulator::Accumulator, bits::Bits, convert_into_value},
         profile::lookup::{self, Uint},
         profile::{
-            PROFILE_VERSION,
-            typedef::{FitBaseType, MesgNum},
+            PROFILE_VERSION, mesgdef,
+            typedef::{self, FitBaseType, MesgNum},
         },
-        proto::{Field, FileHeader, Message, ProtocolVersion, Value},
+        proto::{FIT, Field, FileHeader, Message, ProtocolVersion, Value},
     };
     use embedded_io_adapters::std::FromStd;
 
@@ -1035,6 +1034,43 @@ mod tests {
         let file_header = dec.decode_file_header(&mut reader).unwrap().unwrap();
 
         assert_eq!(file_header, expected)
+    }
+
+    #[test]
+    fn test_decode_file_header_crc_zero() {
+        let mut file_id = mesgdef::FileId::new();
+        file_id.r#type = typedef::File::ACTIVITY;
+        let mut fit = FIT {
+            messages: vec![Message::from(file_id)],
+            ..Default::default()
+        };
+        let mut writer = FromStd::new(Cursor::new(Vec::<u8>::new()));
+        EncoderBuilder::new()
+            .build()
+            .encode(&mut writer, &mut fit)
+            .unwrap();
+        let mut buf = writer.into_inner().into_inner();
+        assert_eq!(buf[0], 14);
+
+        // Header CRC 0x0000 means "not computed".
+        buf[12..14].fill(0);
+        let n = buf.len();
+
+        // The file CRC covers the whole file before it, header included.
+        let mut crc16 = Crc16::new();
+        crc16.write(&buf[..n - 2]);
+        buf[n - 2..].copy_from_slice(&crc16.sum16().to_le_bytes());
+        let fit = Decoder::new().decode(buf.as_slice()).unwrap().unwrap();
+        assert_eq!(fit.messages.len(), 1);
+
+        // A file CRC over the data only must be rejected.
+        let mut crc16 = Crc16::new();
+        crc16.write(&buf[14..n - 2]);
+        buf[n - 2..].copy_from_slice(&crc16.sum16().to_le_bytes());
+        assert!(matches!(
+            Decoder::new().decode(buf.as_slice()),
+            Err(Error::ChecksumMismatch { .. })
+        ));
     }
 
     #[test]
