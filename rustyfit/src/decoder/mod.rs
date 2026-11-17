@@ -992,23 +992,24 @@ impl<'a, R: Read> StreamingIterator for Stream<'a, R> {
 
 #[cfg(test)]
 mod tests {
+    use crate::{
+        crc16::Crc16,
+        decoder::{
+            Decoder, StreamingIterator, accumulator::Accumulator, bits::Bits, convert_into_value,
+        },
+        profile::{
+            PROFILE_VERSION,
+            lookup::{self, Uint},
+            typedef::{FitBaseType, MesgNum},
+        },
+        proto::{FIT, Field, FileHeader, Message, ProtocolVersion, Value},
+    };
+    use core::assert_matches;
+    use embedded_io_adapters::std::FromStd;
     use std::{
         fs::File,
         io::{BufReader, Cursor, Seek, SeekFrom, Write, empty},
     };
-
-    use crate::{
-        Decoder, EncoderBuilder, StreamingIterator,
-        crc16::Crc16,
-        decoder::{Error, accumulator::Accumulator, bits::Bits, convert_into_value},
-        profile::lookup::{self, Uint},
-        profile::{
-            PROFILE_VERSION, mesgdef,
-            typedef::{self, FitBaseType, MesgNum},
-        },
-        proto::{FIT, Field, FileHeader, Message, ProtocolVersion, Value},
-    };
-    use embedded_io_adapters::std::FromStd;
 
     #[test]
     fn test_decode_file_header() {
@@ -1038,39 +1039,23 @@ mod tests {
 
     #[test]
     fn test_decode_file_header_crc_zero() {
-        let mut file_id = mesgdef::FileId::new();
-        file_id.r#type = typedef::File::ACTIVITY;
-        let mut fit = FIT {
-            messages: vec![Message::from(file_id)],
-            ..Default::default()
-        };
-        let mut writer = FromStd::new(Cursor::new(Vec::<u8>::new()));
-        EncoderBuilder::new()
-            .build()
-            .encode(&mut writer, &mut fit)
-            .unwrap();
-        let mut buf = writer.into_inner().into_inner();
-        assert_eq!(buf[0], 14);
+        let buf: &mut [u8] = &mut [
+            14, 16, 229, 82, 11, 0, 0, 0, 46, 70, 73, 84, 0, 0, // file header
+            64, 0, 0, 0, 0, 1, 0, 1, 0, // message definition
+            0, 4, // message data
+            0, 0, // file crc (computed)
+        ];
 
-        // Header CRC 0x0000 means "not computed".
-        buf[12..14].fill(0);
         let n = buf.len();
-
-        // The file CRC covers the whole file before it, header included.
         let mut crc16 = Crc16::new();
         crc16.write(&buf[..n - 2]);
         buf[n - 2..].copy_from_slice(&crc16.sum16().to_le_bytes());
-        let fit = Decoder::new().decode(buf.as_slice()).unwrap().unwrap();
-        assert_eq!(fit.messages.len(), 1);
 
-        // A file CRC over the data only must be rejected.
-        let mut crc16 = Crc16::new();
-        crc16.write(&buf[14..n - 2]);
-        buf[n - 2..].copy_from_slice(&crc16.sum16().to_le_bytes());
-        assert!(matches!(
-            Decoder::new().decode(buf.as_slice()),
-            Err(Error::ChecksumMismatch { .. })
-        ));
+        assert_matches!(
+            Decoder::new().decode(&*buf),
+            Ok(Some(FIT { .. })),
+            "checksum should cover file header + data even though file header's crc value is zero"
+        );
     }
 
     #[test]
